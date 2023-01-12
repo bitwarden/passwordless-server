@@ -12,3 +12,7 @@ To join the free beta and use the api, please [sign up for api keys](https://www
 # Help
 
 If you want to talk to the passwordless team, please shoot us a message at team@passwordless.dev.
+
+# Bitwarden
+
+You can find Bitwardens other code repositories at https://github.com/bitwarden and more information on https://bitwarden.com/
