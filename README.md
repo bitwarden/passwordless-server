@@ -11,7 +11,7 @@ To join the free beta and use the api, please [sign up for api keys](https://www
 
 # Help
 
-If you want to talk to the passwordless team, please shoot us a message at team@passwordless.dev.
+If you want to talk to the passwordless team, please shoot us a message at support@passwordless.dev.
 
 # Bitwarden
 
