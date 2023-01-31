@@ -21,6 +21,7 @@ async Task GetAllTenants()
     Console.WriteLine($"Count: {tables.Count()}");
 
     var summary = new ConcurrentDictionary<string, int>();
+    var summaryDetails = new ConcurrentDictionary<string, Details>();
 
     // use tab separator
     var separator = ",";
@@ -105,6 +106,16 @@ async Task GetAllTenants()
             
             var line = string.Join(separator, row);
             csv.AppendLine(line);
+
+            if(entity.PartitionKey == "M-ACCOUNTINFO")
+            {
+                summaryDetails.TryAdd(table.Name, new Details()
+                {
+                    TenantName = table.Name,
+                    Email = entity.Properties["AdminEmailsSerialized"].StringValue,
+                    Count = entities.Count
+                });
+            }
         }
 
         // save csv to local file
@@ -114,12 +125,6 @@ async Task GetAllTenants()
         
         File.WriteAllText(fileName, csv.ToString());
     });
-
-    Console.WriteLine("Summary:");
-    foreach (var item in summary)
-    {
-        Console.WriteLine($"{item.Key}: {item.Value}");
-    }
 
     // write summary to csv
     var summaryCsv = new StringBuilder();
@@ -131,9 +136,25 @@ async Task GetAllTenants()
     }
 
     var safedate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-    var filename = $"summary{safedate}.csv";
+    var filename = $"{timestamp}/summary{safedate}.csv";
 
     File.WriteAllText(filename, summaryCsv.ToString());
+
+
+    // write summaryDetails to csv
+    var summaryDetailsCsv = new StringBuilder();
+    summaryDetailsCsv.AppendLine("Tenant,Count,Email");
+    ;
+    foreach (var item in summaryDetails.OrderByDescending(x => x.Value.Count))
+    {
+        var email = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(item.Value.Email);
+        summaryDetailsCsv.AppendLine($"{item.Key},{item.Value.Count},{email?.FirstOrDefault()}");
+    }
+
+    
+    filename = $"{timestamp}/summaryDetails{safedate}.csv";
+
+    File.WriteAllText(filename, summaryDetailsCsv.ToString());
 
 
     Console.WriteLine($"Count: {tables.Count()}");
@@ -143,3 +164,10 @@ async Task GetAllTenants()
 
 
 await GetAllTenants();
+
+class Details
+{
+    public string TenantName { get; set; }
+    public string Email { get; set; }
+    public int Count { get; set; }
+}
