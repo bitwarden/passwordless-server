@@ -7,7 +7,7 @@ Website: https://passwordless.dev
 
 # Join the beta
 
-To join the free beta and use the api, please [sign up for api keys](https://www.passwordless.dev/create-account/).
+To join the free beta and use the api, please [sign up for api keys](https://www.passwordless.dev/create-tenant/).
 
 # Help
 
