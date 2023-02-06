@@ -20,27 +20,31 @@ namespace Service
     {
         private ILogger log;
         private readonly IConfiguration config;
+        private readonly IStorage storage;
 
-        public AccountService(ILogger log, IConfiguration config)
+        private readonly IDbTenantContextFactory tenantFactory;
+
+        public AccountService(ILogger log, IConfiguration config, IStorage storage, IDbTenantContextFactory tenantFactory)
         {
             this.log = log;
             this.config = config;
+            this.storage = storage;
+            this.tenantFactory = tenantFactory;
         }
 
         public async Task<string> ValidatePublicApiKey(string apiKey)
         {
             var tenant = GetAccountName(apiKey);
 
-            var s = new TableStorage(tenant, config);
 
-            var res = await s.GetApiKeyAsync(apiKey);
+            var res = await storage.GetApiKeyAsync(apiKey);
             if (res != null && res.ApiKey == apiKey)
             {
                 res.CheckLocked();
                 return tenant;
             }
 
-            log.LogInformation("Apikey was not valid. tenant={tenant} apikey={apikey}",tenant, apiKey);
+            log.LogInformation("Apikey was not valid. tenant={tenant} apikey={apikey}", tenant, apiKey);
             throw new ApiException("Apikey was not valid", 401);
         }
 
@@ -48,9 +52,8 @@ namespace Service
         {
             var tenant = GetAccountName(apiKey);
 
-            var s = new TableStorage(tenant, config);
 
-            var res = await s.GetApiKeyAsync(apiKey);
+            var res = await storage.GetApiKeyAsync(apiKey);
             if (res != null)
             {
                 res.CheckLocked();
@@ -60,11 +63,11 @@ namespace Service
                     return tenant;
                 }
             }
-            log.LogInformation("ApiSecret was not valid. tenant={tenant} apikey={apikey}", tenant, apiKey?.Substring(0,20));
+            log.LogInformation("ApiSecret was not valid. tenant={tenant} apikey={apikey}", tenant, apiKey?.Substring(0, 20));
             throw new ApiException("ApiSecret was not valid", 401);
         }
 
-        
+
 
         public async Task<AccountKeysCreation> GenerateAccount(string accountName, string adminEmail)
         {
@@ -81,19 +84,22 @@ namespace Service
                 throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
             }
 
-            var s = new TableStorage(accountName, config);
-
-            // check if tenant already exists
-            if (await s.TenantExists())
+            IStorage newstorage = null;
+            try
+            {
+                // This also checks if tenant already exists
+                newstorage = await tenantFactory.CreateNewTenant(accountName);
+            }
+            catch (ArgumentException e)
             {
                 throw new ApiException($"accountName '{accountName}' is not available", 409);
             }
 
-            string ApiKey1 = await SetupApiKey(accountName, s);
-            string ApiKey2 = await SetupApiKey(accountName, s);
+            string ApiKey1 = await SetupApiKey(accountName, newstorage);
+            string ApiKey2 = await SetupApiKey(accountName, newstorage);
 
-            (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, s);
-            (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, s);
+            (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, newstorage);
+            (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, newstorage);
 
             var account = new AccountMetaInformation()
             {
@@ -102,7 +108,7 @@ namespace Service
                 CreatedAt = DateTime.UtcNow,
                 SubscriptionTier = "Free"
             };
-            await s.SaveAccountInformation(account);
+            await newstorage.SaveAccountInformation(account);
 
             return new AccountKeysCreation
             {
@@ -111,32 +117,31 @@ namespace Service
                 ApiSecret1 = apiSecret1.original,
                 ApiSecret2 = apiSecret2.original,
                 Message = "Store keys safely. They will only be shown to you once."
-            };          
+            };
         }
 
-        private static async Task<(string original, string hashed)> SetupApiSecret(string accountName, IStorage s)
+        private static async Task<(string original, string hashed)> SetupApiSecret(string accountName, IStorage storage)
         {
             var secretKey = GenerateSecretKey(accountName, "secret");
             // last 4 chars
             var pk2 = secretKey.original.Substring(secretKey.original.Length - 4);
-            await s.StoreApiKey(pk2, secretKey.hashed, new string[] { "token_register", "token_verify" });
+            await storage.StoreApiKey(pk2, secretKey.hashed, new string[] { "token_register", "token_verify" });
             return secretKey;
         }
 
-        private static async Task<string> SetupApiKey(string accountName, IStorage s)
+        private static async Task<string> SetupApiKey(string accountName, IStorage storage)
         {
             // create tenant and store apikey
             var publicKey = GeneratePublicKey(accountName, "public");
             // last 4 chars
             var pk = publicKey.Substring(publicKey.Length - 4);
-            await s.StoreApiKey(pk, publicKey, new string[] { "register", "login" });
+            await storage.StoreApiKey(pk, publicKey, new string[] { "register", "login" });
             return publicKey;
         }
 
         public async Task<AccountMetaInformation> GetAccountInformation(string accountName)
         {
-            var s = new TableStorage(accountName, config);
-            return await s.GetAccountInformation();
+            return await storage.GetAccountInformation();
         }
 
         public async Task FreezeAccount(string accountName)
@@ -144,8 +149,7 @@ namespace Service
             // lock API keys?
             // send email to admin
             // queue deletion
-            var s = new TableStorage(accountName, config);
-            await s.LockAllApiKeys(true);
+            await storage.LockAllApiKeys(true);
         }
 
         public async Task UnFreezeAccount(string accountName)
@@ -153,8 +157,7 @@ namespace Service
             // lock API keys?
             // send email to admin
             // queue deletion
-            var s = new TableStorage(accountName, config);
-            await s.LockAllApiKeys(false);
+            await storage.LockAllApiKeys(false);
         }
 
         public async Task SendAbortEmail(ILogger log, IConfiguration config, EmailAboutAccountDeletion input)
@@ -192,8 +195,7 @@ namespace Service
 
         public async Task DeleteAccount(string accountName)
         {
-            var s = new TableStorage(accountName, config);
-            await s.DeleteAccount();
+            await storage.DeleteAccount();
         }
 
         public bool CheckApiKeyMatch(string hash, string input)
@@ -239,7 +241,7 @@ namespace Service
 
             var bytes = KeyDerivation.Pbkdf2(input, salt, KeyDerivationPrf.HMACSHA512, 10000, 16);
 
-            return $"{ Convert.ToBase64String(salt) }:{ Convert.ToBase64String(bytes) }";
+            return $"{Convert.ToBase64String(salt)}:{Convert.ToBase64String(bytes)}";
         }
 
         private static byte[] GenerateSalt(int length)
@@ -256,7 +258,6 @@ namespace Service
 
         public string GetAccountName(string apiKey)
         {
-
             try
             {
                 return ParseAccountName(apiKey);
@@ -277,9 +278,8 @@ namespace Service
 
         public async Task<Boolean> IsAvailable(string accountName)
         {
-            var s = new TableStorage(accountName, config);
             // check if tenant already exists
-            return !await s.TenantExists();
+            return !await storage.TenantExists();
         }
     }
 }

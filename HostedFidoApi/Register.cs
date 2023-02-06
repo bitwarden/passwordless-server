@@ -2,6 +2,7 @@
 using Service;
 using Service.Helpers;
 using Service.Models;
+using Service.Storage;
 using System.Diagnostics;
 
 public static class RegisterEndpoints
@@ -10,15 +11,15 @@ public static class RegisterEndpoints
     {
 
 
-        app.MapPost("/register/token", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/register/token", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
                 var sw = Stopwatch.StartNew();
                 app.Logger.LogInformation("/register/token called");
                 var payload = await req.ReadFromJsonAsync<RegisterTokenDTO>(Json.Options);
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidateSecretApiKey(req.GetApiSecret());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidateSecretApiKey(req.GetApiSecret());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
                 var result = await service.CreateToken(payload);
                 sw.Stop();
                 app.Logger.LogInformation("event=register/token account={account} duration={duration}", accountname, sw.ElapsedMilliseconds);
@@ -32,7 +33,7 @@ public static class RegisterEndpoints
             }
         }).RequireCors("default");
 
-        app.MapPost("/register/begin", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/register/begin", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -41,8 +42,8 @@ public static class RegisterEndpoints
                 var payload = await req.ReadFromJsonAsync<FidoRegistrationBeginDTO>(Json.Options);
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidatePublicApiKey(req.GetPublicApiKey());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidatePublicApiKey(req.GetPublicApiKey());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
                 var result = await service.RegisterBegin(payload);
                 sw.Stop();
                 app.Logger.LogInformation("event=register/begin account={account} duration={duration}", accountname, sw.ElapsedMilliseconds);
@@ -57,7 +58,7 @@ public static class RegisterEndpoints
             }
         }).RequireCors("default").WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/register/complete", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -66,8 +67,8 @@ public static class RegisterEndpoints
                 var payload = await req.ReadFromJsonAsync<RegistrationCompleteDTO>(Json.Options);
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidatePublicApiKey(req.GetPublicApiKey());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidatePublicApiKey(req.GetPublicApiKey());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
 
                 var (deviceInfo, country) = Helpers.GetDeviceInfo(req);
                 var result = await service.RegisterComplete(payload, deviceInfo, country);

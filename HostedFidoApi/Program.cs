@@ -1,4 +1,7 @@
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using Service;
+using Service.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,9 +10,27 @@ builder.Services.AddCors(options
 
 // load user secrets
 
-if(builder.Environment.IsDevelopment()) { 
+if (builder.Environment.IsDevelopment())
+{
     builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), optional: false);
 }
+
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+builder.Services.AddSingleton<IDbTenantContextFactory, SqliteDbTenantContextFactory>();
+builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<TestService>();
+builder.Services.AddScoped<IStorage>((sp) => {
+    var factory = sp.GetRequiredService<IDbTenantContextFactory>();
+    var tenantProvider = sp.GetRequiredService<ITenantProvider>();
+    return factory.GetExistingTenant(tenantProvider.Tenant);
+});
+builder.Services.AddSingleton<ILogger>((sp) => {
+   // TODO: Remove this and use proper Ilogger<YourType>
+    return sp.GetService<ILogger<NonTyped>>();
+});
+
+//builder.Services.AddDbContextFactory<MyDataContext>(), ServiceLifetime.Transient);
+builder.Services.AddDbContextFactory<MyDataContext>((ops) => { }, ServiceLifetime.Scoped);
 
 var app = builder.Build();
 
@@ -21,7 +42,10 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCors();
 
+app.UseMiddleware<TenantProviderMiddelware>();
+
 app.MapGet("/", () => "Hey, this place is for computers. Check out our docs for humans instead: https://docs.passwordless.dev");
+
 
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();

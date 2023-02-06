@@ -1,12 +1,13 @@
 ﻿using ApiHelpers;
 using Service;
 using Service.Helpers;
+using Service.Storage;
 
 public static class CredentialsEndpoints
 {
     public static void MapCredentialsEndpoints(this WebApplication app)
     {
-        app.MapPost("/credentials/delete", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/credentials/delete", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -20,8 +21,8 @@ public static class CredentialsEndpoints
                 }
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidateSecretApiKey(req.GetApiSecret());
-                var service = new UserCredentialsService(accountname, app.Configuration);
+                var accountname = await accountService.ValidateSecretApiKey(req.GetApiSecret());
+                var service = new UserCredentialsService(accountname, app.Configuration, storage);
                 await service.DeleteCredential(payload.CredentialId);
 
                 app.Logger.LogInformation("event=credentials/delete account={0}", accountname);
@@ -36,7 +37,7 @@ public static class CredentialsEndpoints
         }).RequireCors("default");
 
 
-        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpContext ctx, HttpRequest req) =>
+        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -67,8 +68,8 @@ public static class CredentialsEndpoints
                 }
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidateSecretApiKey(req.GetApiSecret());
-                var service = new UserCredentialsService(accountname, app.Configuration);
+                var accountname = await accountService.ValidateSecretApiKey(req.GetApiSecret());
+                var service = new UserCredentialsService(accountname, app.Configuration, storage);
                 var result = await service.GetAllCredentials(userId);
 
                 app.Logger.LogInformation("event=credentials/list account={0}", accountname);

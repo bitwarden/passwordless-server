@@ -6,12 +6,12 @@ public static class HealthEndpoints
 {
     public static void MapHealthEndpoints(this WebApplication app)
     {
-        app.MapGet("health/storage", async (HttpContext ctx, HttpRequest req) =>
+        app.MapGet("health/storage", async (HttpContext ctx, HttpRequest req, IStorage storage) =>
         {
             var sw = Stopwatch.StartNew();
-            var s = new TableStorage("health", app.Configuration);
+            // var s = new EFStorage("health", app.Configuration, storage);
 
-            await s.GetAccountInformation();
+            await storage.GetAccountInformation();
 
             sw.Stop();
             app.Logger.LogInformation("event=health_storage latency={latency}",sw.ElapsedMilliseconds);

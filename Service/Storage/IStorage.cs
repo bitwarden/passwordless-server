@@ -14,8 +14,8 @@ namespace Service.Storage
         Task DeleteCredential(byte[] id);
         Task<bool> ExistsAsync(byte[] credentialId);
         Task<AccountMetaInformation> GetAccountInformation();
-        Task<TableStorage.AliasesRecord> GetAliasesByUserId(byte[] userid);
-        Task<TableStorage.ApiKeyDesc> GetApiKeyAsync(string apiKey);
+        Task<HashSet<string>> GetAliasesByUserId(byte[] userid);
+        Task<ApiKeyDesc> GetApiKeyAsync(string apiKey);
         Task<StoredCredential> GetCredential(byte[] credentialId);
         Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByAliasAsync(string alias);
         Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByUserIdAsync(string userId, bool encodeBase64 = true);

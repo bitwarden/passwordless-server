@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Service;
 using Service.Helpers;
 using Service.Models;
+using Service.Storage;
 
 public static class AccountEndpoints
 {
     public static void MapAccountEndpoints(this WebApplication app)
     {
-        app.MapPost("/account/available", async (HttpContext ctx, HttpRequest req) => {
+        app.MapPost("/account/available", async (HttpContext ctx, HttpRequest req, AccountService accountService) => {
             try
             {
                 app.Logger.LogInformation("/account/available called");
@@ -25,7 +26,7 @@ public static class AccountEndpoints
                     return Results.Json(false, statusCode: 409);
                 }
 
-                var result = await new AccountService(app.Logger, app.Configuration).IsAvailable(payload.AccountName);
+                var result = await accountService.IsAvailable(payload.AccountName);
 
                 app.Logger.LogInformation("event=account/available account={account} available={available}", payload.AccountName, result);
 
@@ -44,7 +45,7 @@ public static class AccountEndpoints
         }).RequireCors("default");
         
 
-        app.MapPost("/account/create", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/account/create", async (HttpContext ctx, HttpRequest req, AccountService service) =>
         {
             try
             {
@@ -57,7 +58,7 @@ public static class AccountEndpoints
                     throw new ApiException("Payload is empty. Must contain Accountname and AdminEmail", 400);
                 }
 
-                var result = await new AccountService(app.Logger, app.Configuration).GenerateAccount(payload.AccountName, payload.AdminEmail);
+                var result = await service.GenerateAccount(payload.AccountName, payload.AdminEmail);
 
                 app.Logger.LogInformation("event=account/create account={account} adminemail={adminemail}", payload.AccountName, payload.AdminEmail);
 
@@ -70,13 +71,12 @@ public static class AccountEndpoints
             }
         }).RequireCors("default");
 
-        app.MapPost("/account/delete", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/account/delete", async (HttpContext ctx, HttpRequest req,  AccountService service) =>
         {
             try
             {
                 app.Logger.LogInformation("/account/delete called");
-
-                var service = new AccountService(app.Logger, app.Configuration);
+                
                 var accountname = await service.ValidateSecretApiKey(req.GetApiSecret());
                 var accountInfo = await service.GetAccountInformation(accountname);
 
@@ -108,14 +108,13 @@ public static class AccountEndpoints
             }
         }).RequireCors("default");
 
-        app.MapGet("/account/delete/cancel/{accountname}", async (string accountname, HttpContext ctx, HttpRequest req) =>
+        app.MapGet("/account/delete/cancel/{accountname}", async (string accountname, HttpContext ctx, HttpRequest req, AccountService service) =>
         {
             try
             {
                 app.Logger.LogInformation("event=account/delete/cancel account={account}", accountname);
 
-                var s = new AccountService(app.Logger, app.Configuration);
-                await s.UnFreezeAccount(accountname);
+                await service.UnFreezeAccount(accountname);
 
                 return Results.Json("Your account will not be deleted since the process was aborted with the cancellation link");
             }

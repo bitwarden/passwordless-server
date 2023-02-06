@@ -8,11 +8,11 @@ namespace Service.Helpers
 {
     public class UserCredentialsService
     {
-        private readonly TableStorage _storage;
+        private readonly IStorage _storage;
 
-        public UserCredentialsService(string tenant, IConfiguration config)
+        public UserCredentialsService(string tenant, IConfiguration config, IStorage storage)
         {
-            _storage = new TableStorage(tenant, config);
+            _storage = storage;
         }
 
         public async Task<StoredCredential[]> GetAllCredentials(string userId)

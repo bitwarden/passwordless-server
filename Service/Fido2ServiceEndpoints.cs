@@ -29,9 +29,9 @@ namespace Service
         private readonly IConfiguration config;
         private TokenService _tokenService;
 
-        private Fido2ServiceEndpoints(string tenant, ILogger log, IConfiguration config)
+        private Fido2ServiceEndpoints(string tenant, ILogger log, IConfiguration config, IStorage storage)
         {
-            _storage = new TableStorage(tenant, config);
+            _storage = storage;
             _tenant = tenant;
             this.log = log;
             this.config = config;
@@ -43,9 +43,9 @@ namespace Service
             await _tokenService.Init();
         }
 
-        public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config)
+        public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, IStorage storage)
         {
-            var instance = new Fido2ServiceEndpoints(tenant, log, config);
+            var instance = new Fido2ServiceEndpoints(tenant, log, config, storage);
             await instance.Init();
             return instance;
         }

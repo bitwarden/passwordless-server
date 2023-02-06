@@ -41,6 +41,10 @@ namespace Service.Storage
             _tentant = tentant;
         }
 
+        public TableStorage()
+        {
+        }
+
         public CloudTableClient GetTableClient()
         {
             return _tableClient;
@@ -102,7 +106,7 @@ namespace Service.Storage
             return realresult;
         }
 
-        public async Task<AliasesRecord> GetAliasesByUserId(byte[] userid)
+        public async Task<HashSet<string>> GetAliasesByUserId(byte[] userid)
         {
             var table = GetTenantTable();
 
@@ -117,7 +121,7 @@ namespace Service.Storage
             if (result.Result == null) { return null; }
             var data = (result.Result as AliasesRecord);
 
-            return data;
+            return data?.Aliases;
         }
 
         public class AliasesRecord : TableEntity
@@ -264,20 +268,6 @@ namespace Service.Storage
             return (result.Result as TableEntityAdapter<ApiKeyDesc>).OriginalEntity;
         }
 
-        public class ApiKeyDesc
-        {
-            public string AccountName { get; set; }
-            public string ApiKey { get; set; }
-            public string[] Scopes { get; set; }
-            public bool IsLocked { get; set; }
-
-            public void CheckLocked()
-            {
-                if (IsLocked) throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
-            }
-        }
-
-
         public async Task StoreApiKey(string pkpart, string apikey, string[] scopes)
         {
             // PK: PK-{apikey}
@@ -392,7 +382,7 @@ namespace Service.Storage
             }
 
             // Update for current user
-            var storedOnUser = (await GetAliasesByUserId(userid))?.Aliases;
+            var storedOnUser = await GetAliasesByUserId(userid);
             if (storedOnUser != null)
             {
                 // delete all a>u stored

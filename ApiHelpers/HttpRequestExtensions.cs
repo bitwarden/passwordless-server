@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Linq;
 using UAParser;
 
@@ -16,6 +17,26 @@ namespace ApiHelpers
         {
             req.Headers.TryGetValue("ApiKey", out var value);
             return value.SingleOrDefault();
+        }
+
+        public static string GetTenantName(this HttpRequest req)
+        {
+            var key = req.GetPublicApiKey();
+            if(key == null) {
+                key = req.GetApiSecret();
+            }
+
+            if(key == null) {
+                key = req.Query["key"];
+            }
+
+            if(key == null) {
+                return null;
+            }
+
+            var span = key.AsSpan();
+            var i = span.IndexOf(':');
+            return span.Slice(0, i).ToString();            
         }
     }
 

@@ -2,12 +2,13 @@
 using Service;
 using Service.Helpers;
 using Service.Models;
+using Service.Storage;
 
 public static class AliasEndpoints
 {
     public static void MapAliasEndpoints(this WebApplication app)
     {
-        app.MapPost("/alias", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/alias", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -20,8 +21,8 @@ public static class AliasEndpoints
                     throw new ApiException("Payload is empty", 400);
                 }
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidateSecretApiKey(req.GetApiSecret());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidateSecretApiKey(req.GetApiSecret());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
                 await service.SetAlias(payload.UserId, payload.Aliases);
 
                 app.Logger.LogInformation("event=alias account={0}", accountname);

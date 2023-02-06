@@ -6,7 +6,7 @@ namespace Service.Models
 {
     public class StoredCredential
     {
-        public PublicKeyCredentialDescriptor Descriptor { get; set; }
+        public PublicKeyCredentialDescriptor Descriptor { get; set; }       
         public byte[] PublicKey { get; set; }
         public byte[] UserHandle { get; set; }
         public uint SignatureCounter { get; set; }
@@ -27,5 +27,5 @@ namespace Service.Models
             }
             private set { }
         }
-    }
+    }       
 }

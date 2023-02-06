@@ -2,6 +2,7 @@
 using Service;
 using Service.Helpers;
 using Service.Models;
+using Service.Storage;
 using System.Diagnostics;
 
 public static class SigninEndpoints
@@ -9,7 +10,7 @@ public static class SigninEndpoints
     public static void MapSigninEndpoints(this WebApplication app)
     {
 
-        app.MapPost("/signin/begin", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/signin/begin", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -18,8 +19,8 @@ public static class SigninEndpoints
                 var payload = await req.ReadFromJsonAsync<SignInBeginDTO>(Json.Options);
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidatePublicApiKey(req.GetPublicApiKey());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidatePublicApiKey(req.GetPublicApiKey());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
 
                 var result = await service.SignInBegin(payload);
                 sw.Stop();
@@ -33,7 +34,7 @@ public static class SigninEndpoints
             }
         }).RequireCors("default").WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
 
-        app.MapPost("/signin/complete", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/signin/complete", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -42,8 +43,8 @@ public static class SigninEndpoints
                 var payload = await req.ReadFromJsonAsync<SignInCompleteDTO>(Json.Options);
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidatePublicApiKey(req.GetPublicApiKey());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidatePublicApiKey(req.GetPublicApiKey());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
 
                 var (deviceInfo, country) = Helpers.GetDeviceInfo(req);
                 var result = await service.SignInComplete(payload, deviceInfo, country);
@@ -58,7 +59,7 @@ public static class SigninEndpoints
             }
         }).RequireCors("default").WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
 
-        app.MapPost("/signin/verify", async (HttpContext ctx, HttpRequest req) =>
+        app.MapPost("/signin/verify", async (HttpContext ctx, HttpRequest req, IStorage storage, AccountService accountService) =>
         {
             try
             {
@@ -67,8 +68,8 @@ public static class SigninEndpoints
                 var payload = await req.ReadFromJsonAsync<SignInVerifyDTO>(Json.Options);
 
 
-                var accountname = await new AccountService(app.Logger, app.Configuration).ValidateSecretApiKey(req.GetApiSecret());
-                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration);
+                var accountname = await accountService.ValidateSecretApiKey(req.GetApiSecret());
+                var service = await Fido2ServiceEndpoints.Create(accountname, app.Logger, app.Configuration, storage);
 
                 var result = await service.SignInVerify(payload);
                 sw.Stop();
