@@ -15,20 +15,23 @@ public class AccountTests : IClassFixture<TestWebApplicationFactory<Program>>
         _client = factory.CreateClient();
     }
 
-    [Fact]
-    public async void CreateAccountWithInvalidName()
+    [Theory]
+    [InlineData("")]
+    [InlineData("a")]
+    [InlineData("1")]
+    public async void CreateAccountWithInvalidName(string name)
     {
-        var item = """
+        var item = $$"""
                         {
-                "AccountName": "",
+                "AccountName": "{{name}}",
                 "AdminEmail": "anders@passwordless.dev" 
             }
             """;
         var header = new MediaTypeHeaderValue("application/json");
-        
-        
-        var res = await _client.PostAsync("/account/create", new StringContent(item, header ));
+
+
+        var res = await _client.PostAsync("/account/create", new StringContent(item, header));
 
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
-    }
+    } 
 }
