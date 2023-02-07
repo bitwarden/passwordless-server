@@ -9,7 +9,6 @@
   },
   "profiles": {
     "HostedFidoApi": {
-      "hotReloadProfile": "aspnetcore",
       "commandName": "Project",
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7057;http://localhost:5057",
