@@ -9,26 +9,30 @@ public interface IDbTenantContextFactory
 {
     Task<IStorage> CreateNewTenant(string accountName);
     IStorage GetExistingTenant(string accountName);
+    DbTenantContext GetDbContext(string accountname);
 }
 
 public class SqliteDbTenantContextFactory : IDbTenantContextFactory
 {
+    private IOptions<SqliteTenantOptions> _options;
+
     public SqliteDbTenantContextFactory(IOptions<SqliteTenantOptions> options)
     {
-        
+        _options = options;
     }
 
     private string GetDbPath(string tenant) {
+
+        if (_options.Value.InMemory){
+            return $"file:{tenant}?mode=memory&cache=shared";
+        }
+
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
-
-        // tenant
-
         // Create folder
         System.IO.Directory.CreateDirectory(System.IO.Path.Join(path, "passwordless"));
 
         return System.IO.Path.Join(path, "passwordless", $"{tenant}.db");
-
     }
 
     public async Task<IStorage> CreateNewTenant(string accountName)
@@ -36,13 +40,13 @@ public class SqliteDbTenantContextFactory : IDbTenantContextFactory
        
         var dbpath = GetDbPath(accountName);
         var options = new DbContextOptionsBuilder<DbTenantContext>()
-            .UseSqlite($"DataSource={dbpath}")
+            .UseSqlite($"Data Source={dbpath}")
             .Options;
 
         var dbContext = new DbTenantContext(options, new ManualTenantProvider(accountName));
 
         var exists = await dbContext.Database.CanConnectAsync();
-        if(exists) {
+        if(!_options.Value.InMemory && exists) {
             throw new ArgumentException("Exists");
         }
 
@@ -62,18 +66,32 @@ public class SqliteDbTenantContextFactory : IDbTenantContextFactory
         var dbpath = GetDbPath(accountName);
 
         var options = new DbContextOptionsBuilder<DbTenantContext>()
-            .UseSqlite($"Datasource={dbpath}")
+            .UseSqlite($"Data Source={dbpath}")
             .Options;
 
         
         var dbContext = new DbTenantContext(options, new ManualTenantProvider(accountName));
 
         // While dev
-        if(accountName != null) {
-            dbContext.Database.Migrate();
-        }
+        // if(accountName != null) {
+        //     dbContext.Database.Migrate();
+        // }
 
         return new EFStorage(dbContext);
+    }
+
+    public DbTenantContext GetDbContext(string accountName)
+    {
+        // TODO: Check if it exists
+        var dbpath = GetDbPath(accountName);
+
+        var options = new DbContextOptionsBuilder<DbTenantContext>()
+            .UseSqlite($"Data Source={dbpath}")
+            .Options;
+
+        
+        var dbContext = new DbTenantContext(options, new ManualTenantProvider(accountName));
+        return dbContext; 
     }
 
     
@@ -81,4 +99,5 @@ public class SqliteDbTenantContextFactory : IDbTenantContextFactory
 
 public class SqliteTenantOptions {
     public string Path { get; set; }
+    public bool InMemory { get; set; }
 }

@@ -11,11 +11,6 @@ using Service.Storage;
 
 public class EFStorage : IStorage
 {
-
-    // public EFStorage(string tenant, IConfiguration config)
-    // {
-
-    // }
     private readonly DbTenantContext db;
 
     public EFStorage(DbTenantContext db)

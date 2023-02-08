@@ -8,19 +8,8 @@ using static Service.Storage.TableStorage;
 
 public class DbTenantContext : DbContext
 {
-    public string DbPath { get; }
-
     public DbTenantContext(string tenant) : base()
     {
-        var folder = Environment.SpecialFolder.LocalApplicationData;
-        var path = Environment.GetFolderPath(folder);
-
-        // tenant
-
-        // Create folder
-        System.IO.Directory.CreateDirectory(System.IO.Path.Join(path, "passwordless"));
-
-        DbPath = System.IO.Path.Join(path, "passwordless", $"{tenant}.db");
     }
 
     public DbTenantContext(
@@ -28,16 +17,6 @@ public class DbTenantContext : DbContext
         ITenantProvider tenantProvider
         ) : base(options)
     {
-        var folder = Environment.SpecialFolder.LocalApplicationData;
-        var path = Environment.GetFolderPath(folder);
-
-        // tenant
-        var tenant = tenantProvider.Tenant;
-
-        // Create folder
-        System.IO.Directory.CreateDirectory(System.IO.Path.Join(path, "passwordless"));
-
-        DbPath = System.IO.Path.Join(path, "passwordless", $"{tenant}.db");
     }
 
     public DbSet<EFStoredCredential> Credentials => Set<EFStoredCredential>();
