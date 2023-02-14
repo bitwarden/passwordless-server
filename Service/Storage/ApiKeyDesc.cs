@@ -2,7 +2,7 @@ using Service.Helpers;
 
 namespace Service.Storage
 {
-    public class ApiKeyDesc
+    public class ApiKeyDesc : PerTenant
     {
         public string Id { get; set; }
         public string AccountName { get; set; }

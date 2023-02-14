@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Service.Models
 {
-    public class AccountMetaInformation
+    public class AccountMetaInformation : PerTenant
     {
         public string SubscriptionTier { get; set; }
         public string[] AdminEmails { get; set; }

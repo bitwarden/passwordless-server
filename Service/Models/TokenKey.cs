@@ -2,7 +2,7 @@
 
 namespace Service.Models
 {
-    public class TokenKey
+    public class TokenKey : PerTenant
     {
         public string KeyMaterial { get; set; }
         public int KeyId { get; set; }

@@ -12,6 +12,23 @@ public interface IDbTenantContextFactory
     DbTenantContext GetDbContext(string accountname);
 }
 
+public class MultiTenantSqliteDbTenantContextFactory : SqliteDbTenantContextFactory
+{
+    public MultiTenantSqliteDbTenantContextFactory(IOptions<SqliteTenantOptions> options) : base(options)
+    {
+    }
+
+    protected override string GetDbPath(string tenant)
+    {
+        var folder = Environment.SpecialFolder.LocalApplicationData;
+        var path = Environment.GetFolderPath(folder);
+        // Create folder
+        System.IO.Directory.CreateDirectory(System.IO.Path.Join(path, "passwordless"));
+
+        return System.IO.Path.Join(path, "passwordless", $"multitenant.db");
+    }
+}
+
 public class SqliteDbTenantContextFactory : IDbTenantContextFactory
 {
     private IOptions<SqliteTenantOptions> _options;
@@ -21,7 +38,7 @@ public class SqliteDbTenantContextFactory : IDbTenantContextFactory
         _options = options;
     }
 
-    private string GetDbPath(string tenant) {
+    protected virtual string GetDbPath(string tenant) {
 
         if (_options.Value.InMemory){
             return $"file:{tenant}?mode=memory&cache=shared";
@@ -72,10 +89,11 @@ public class SqliteDbTenantContextFactory : IDbTenantContextFactory
         
         var dbContext = new DbTenantContext(options, new ManualTenantProvider(accountName));
 
-        // While dev
-        // if(accountName != null) {
-        //     dbContext.Database.Migrate();
-        // }
+        //// While dev
+        //if (accountName != null)
+        //{
+        //    dbContext.Database.Migrate();
+        //}
 
         return new EFStorage(dbContext);
     }

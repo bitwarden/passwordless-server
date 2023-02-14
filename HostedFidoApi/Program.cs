@@ -16,7 +16,7 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
-builder.Services.AddSingleton<IDbTenantContextFactory, SqliteDbTenantContextFactory>();
+builder.Services.AddSingleton<IDbTenantContextFactory, MultiTenantSqliteDbTenantContextFactory>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<TestService>();
 builder.Services.AddScoped<IStorage>((sp) => {
