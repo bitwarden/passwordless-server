@@ -12,7 +12,6 @@ using SendGrid.Helpers.Mail;
 
 namespace Passwordless.Service;
 
-
 public record AppDeletionResult(string Message, bool IsDeleted, DateTime? DeleteAt);
 
 public interface ISharedManagementService
@@ -33,7 +32,8 @@ public class SharedManagementService : ISharedManagementService
     private readonly IConfiguration config;
     private readonly ITenantStorageFactory tenantFactory;
 
-    public SharedManagementService(ILogger<SharedManagementService> logger, IConfiguration config, ITenantStorageFactory tenantFactory)
+    public SharedManagementService(ILogger<SharedManagementService> logger, IConfiguration config,
+        ITenantStorageFactory tenantFactory)
     {
         _logger = logger;
         this.config = config;
@@ -44,8 +44,8 @@ public class SharedManagementService : ISharedManagementService
     public async Task<bool> IsAvailable(string accountName)
     {
         // check if tenant already exists
-        var tmpstorage = tenantFactory.Create(accountName);
-        return !await tmpstorage.TenantExists();
+        var storage = tenantFactory.Create(accountName);
+        return !await storage.TenantExists();
     }
 
     public async Task<AccountKeysCreation> GenerateAccount(string accountName, string adminEmail)
@@ -63,36 +63,31 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
         }
 
-        ITenantStorage newstorage = null;
-        try
-        {
-            // This also checks if tenant already exists
-            // todo: Improve this to work better with multi tenant db
-            newstorage = tenantFactory.Create(accountName);
-        }
-        catch (ArgumentException e)
+        ITenantStorage storage = tenantFactory.Create(accountName);
+
+        if (await storage.TenantExists())
         {
             throw new ApiException($"accountName '{accountName}' is not available", 409);
         }
 
-        string ApiKey1 = await SetupApiKey(accountName, newstorage);
-        string ApiKey2 = await SetupApiKey(accountName, newstorage);
+        string apiKey1 = await SetupApiKey(accountName, storage);
+        string apiKey2 = await SetupApiKey(accountName, storage);
 
-        (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, newstorage);
-        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, newstorage);
+        (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, storage);
+        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage);
 
         var account = new AccountMetaInformation()
         {
             AcountName = accountName,
-            AdminEmails = new string[] { adminEmail },
+            AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
             SubscriptionTier = "Free"
         };
-        await newstorage.SaveAccountInformation(account);
+        await storage.SaveAccountInformation(account);
         return new AccountKeysCreation
         {
-            ApiKey1 = ApiKey1,
-            ApiKey2 = ApiKey2,
+            ApiKey1 = apiKey1,
+            ApiKey2 = apiKey2,
             ApiSecret1 = apiSecret1.original,
             ApiSecret2 = apiSecret2.original,
             Message = "Store keys safely. They will only be shown to you once."
@@ -115,8 +110,7 @@ public class SharedManagementService : ISharedManagementService
             }
         }
 
-        _logger.LogInformation("ApiSecret was not valid. {AppId} {ApiKey}", appId,
-            secretKey?[..20]);
+        _logger.LogInformation("ApiSecret was not valid. {AppId} {ApiKey}", appId, secretKey?[..20]);
         throw new ApiException("ApiSecret was not valid", 401);
     }
 
@@ -217,12 +211,16 @@ public class SharedManagementService : ISharedManagementService
                 CancelLink = cancelLink,
                 Emails = app.AdminEmails,
                 AccountName = app.AcountName,
-                Message = $"Your Passwordless.dev app '{app.AcountName}' has been frozen because the account/delete endpoint was called. Your data will be deleted after 30 days. To stop this, please visit the URL: " + cancelLink
+                Message =
+                    $"Your Passwordless.dev app '{app.AcountName}' has been frozen because the account/delete endpoint was called. Your data will be deleted after 30 days. To stop this, please visit the URL: " +
+                    cancelLink
             };
 
             // Send warning email with url to abort
             await SendAbortEmail(sendConfirmationEmailInput);
-            return new AppDeletionResult($"All API keys have now been frozen. It will be deleted in 30 days. Please visit this link to cancel: {cancelLink}", false, null);
+            return new AppDeletionResult(
+                $"All API keys have now been frozen. It will be deleted in 30 days. Please visit this link to cancel: {cancelLink}",
+                false, null);
         }
 
         // Check MarkedForDeletionAt is set, otherwise set it to 14 days in the future
@@ -236,13 +234,15 @@ public class SharedManagementService : ISharedManagementService
                 CancelLink = cancelLink,
                 Emails = app.AdminEmails,
                 AccountName = app.AcountName,
-                Message = $"Your Passwordless.dev app '{app.AcountName}' has now been frozen for 14 days and will be permanently deleted at: {deletionAt}. To stop this, please visit the URL: " + cancelLink
+                Message =
+                    $"Your Passwordless.dev app '{app.AcountName}' has now been frozen for 14 days and will be permanently deleted at: {deletionAt}. To stop this, please visit the URL: " +
+                    cancelLink
             };
 
             // Send warning email with url to abort
             await SendAbortEmail(sendConfirmationEmailInput);
-            return new AppDeletionResult("The App was marked for deletion. It will be deleted in 14 days.", false, deletionAt);
-
+            return new AppDeletionResult("The App was marked for deletion. It will be deleted in 14 days.", false,
+                deletionAt);
         }
         else if (app.DeleteAt < now)
         {
@@ -257,10 +257,12 @@ public class SharedManagementService : ISharedManagementService
 
             // Send warning email with url to abort
             await SendAbortEmail(sendConfirmationEmailInput);
-            return new AppDeletionResult("The app was deleted because it had been marked for deletion.", true, app.DeleteAt);
+            return new AppDeletionResult("The app was deleted because it had been marked for deletion.", true,
+                app.DeleteAt);
         }
 
-        return new AppDeletionResult("The app is marked for deletion. It will be deleted in 14 days.", false, app.DeleteAt);
+        return new AppDeletionResult("The app is marked for deletion. It will be deleted in 14 days.", false,
+            app.DeleteAt);
     }
 
     public async Task SendAbortEmail(EmailAboutAccountDeletion input)
@@ -285,20 +287,23 @@ public class SharedManagementService : ISharedManagementService
         try
         {
             var res = await client.SendEmailAsync(message);
-            if (res.StatusCode != System.Net.HttpStatusCode.Accepted) throw new Exception("Sendgrid failure. Status:" + res.StatusCode);
-
+            if (res.StatusCode != System.Net.HttpStatusCode.Accepted)
+                throw new Exception("Sendgrid failure. Status:" + res.StatusCode);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send DeletionEmail to {Emails} for {Account} with CancelLink {CancelLink}", emails, input.AccountName, input.CancelLink);
+            _logger.LogError(ex, "Failed to send DeletionEmail to {Emails} for {Account} with CancelLink {CancelLink}",
+                emails, input.AccountName, input.CancelLink);
             throw;
         }
-        _logger.LogWarning("Email sent to {Emails} for {Account} with CancelLink {CancelLink}", emails, input.AccountName, input.CancelLink);
+
+        _logger.LogWarning("Email sent to {Emails} for {Account} with CancelLink {CancelLink}", emails,
+            input.AccountName, input.CancelLink);
     }
 
 
-
-    private static async Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage)
+    private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
+        ITenantStorage storage)
     {
         var secretKey = GenerateSecretKey(accountName, "secret");
         // last 4 chars
