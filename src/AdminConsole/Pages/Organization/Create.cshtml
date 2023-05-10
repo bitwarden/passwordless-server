@@ -1,0 +1,107 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Create
+@attribute [AllowAnonymous]
+@{
+    ViewData["Title"] = "Create an organization";
+}
+
+
+<div class="sm:w-full sm:max-w-xl">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <p>Create an organization to start integration Passwordless.dev with your apps, inviting admins and using the API.</p>
+        <br/>
+        <form class="space-y-6" action="" method="POST">
+            <div>
+                <label for="orgName" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
+                <div class="mt-2">
+                    <input placeholder="Panucci's Pizza Inc" asp-for="Form.OrgName" class="text-input">
+                    <span asp-validation-for="Form.OrgName"></span>
+                </div>
+            </div>
+            
+            
+            <div>
+                <label asp-for="Form.AdminName" class="block text-sm font-medium leading-6 text-gray-900">Admin name</label>
+                <div class="mt-2">
+                    <input placeholder="Philip J. Fry" type="text" asp-for="Form.AdminName" class="text-input">
+                    <span asp-validation-for="Form.AdminName"></span>
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="Form.AdminEmail" class="block text-sm font-medium leading-6 text-gray-900">Admin email</label>
+                <div class="mt-2">
+                    <input placeholder="pjfry@@example.org" type="text" asp-for="Form.AdminEmail" class="text-input">
+                    <span asp-validation-for="Form.AdminEmail"></span>
+                </div>
+            </div>
+
+
+            <div>
+                <label class="text-sm font-medium text-gray-900">I’m building applications for:</label>
+
+                <fieldset class="mt-4">
+                    <legend class="sr-only">I’m building applications for:</legend>
+                    <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                        <div class="flex items-center">
+                            <input asp-for="Form.OrgType" id="OrgTypePersonal" value="personal" type="radio" checked class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
+                            <label for="OrgTypePersonal" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Myself</label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input asp-for="Form.OrgType" id="OrgTypeCompany" value="company" type="radio" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
+                            <label for="OrgTypeCompany" class="ml-3 block text-sm font-medium leading-6 text-gray-900">My company</label>
+                        </div>
+                    </div>
+
+                    <span asp-validation-for="Form.OrgType"></span>
+                </fieldset>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-gray-900">I'm building passwordless authentication for:</label>
+
+                <fieldset class="mt-4">
+                    <legend class="sr-only">How will you use passwordless.dev?</legend>
+                    <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                        <div class="flex items-center">
+                            <input asp-for="Form.UseCase" id="UseCaseCustomers" value="customers" type="radio" checked class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
+                            <label asp-for="Form.UseCase" for="UseCaseCustomers" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Users</label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input asp-for="Form.UseCase" id="UseCaseEmployees" value="employees" type="radio" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
+                            <label asp-for="Form.UseCase" for="UseCaseEmployees" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Employees</label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input asp-for="Form.UseCase" id="UseCaseBoth" value="both" type="radio" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
+                            <label asp-for="Form.UseCase" for="UseCaseBoth" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Both</label>
+                        </div>
+                        <span asp-validation-for="Form.UseCase"></span>
+
+                    </div>
+                </fieldset>
+            </div>
+
+
+            <div class="relative flex items-start">
+                <div class="flex h-6 items-center">
+                    <input aria-describedby="tos-description" asp-for="Form.AcceptsTermsAndPrivacy" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                </div>
+                <div class="ml-3 text-sm leading-6">
+                    <label asp-for="Form.AcceptsTermsAndPrivacy" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
+                </div>
+            </div>
+
+            <div asp-validation-summary="ModelOnly"></div>
+
+            <p>After creating your account, we will send an email with a magic link that will sign you in.</p>
+            <div>
+                <button type="submit" class="btn-form">Create</button>
+            </div>
+        </form>
+    </div>
+</div>

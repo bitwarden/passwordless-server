@@ -1,0 +1,7 @@
+@model (string Text, string Route, string Icon)
+<a asp-page="@Model.Route" data-route-inactive="text-white hover:bg-black hover:bg-opacity-40"
+    data-route-active="bg-black bg-opacity-50 text-white"
+    class="text-white hover:bg-opacity-75 group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+    <span class="mr-3 flex-shrink-0 text-blue-300">@Html.Partial(Model.Icon)</span>
+    @Model.Text
+</a>

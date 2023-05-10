@@ -2,40 +2,52 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build-api",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/HostedFidoApi/HostedFidoApi.csproj",
+                "${workspaceFolder}/src/Api/Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish",
+            "label": "publish-api",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/HostedFidoApi/HostedFidoApi.csproj",
+                "${workspaceFolder}/src/Api/Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "watch",
+            "label": "watch-api",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/HostedFidoApi/HostedFidoApi.csproj"
+                "${workspaceFolder}/src/Api/Api.csproj"
             ],
             "problemMatcher": "$msCompile"
-        }
+        },
+        {
+            "label": "build-adminconsole",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/AdminConsole/AdminConsole.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
     ]
 }

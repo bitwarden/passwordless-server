@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace Condition="$(RootNamespace) == ''">Passwordless.$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName Condition="$(AssemblyName) == ''">Passwordless.$(MSBuildProjectName)</AssemblyName>
+    <ImplicitUsings>true</ImplicitUsings>
+  </PropertyGroup>
+</Project>

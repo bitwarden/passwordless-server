@@ -3,37 +3,61 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Api & AdminConsole",
+            "configurations": [
+                "Api",
+                "AdminConsole"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "AA_compounds",
+                "order": 1
+            },
+            "stopAll": true
+        }
+    ],
     "configurations": [
         {
-            "name": "TableExporter",
+            "name": "Api",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/TableExporter/bin/Debug/net7.0/TableExporter.dll",
+            "preLaunchTask": "build-api",
+            "program": "${workspaceFolder}/src/Api/bin/Debug/net7.0/Passwordless.Api.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
-            "console": "internalConsole"
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
         },
-    {
-        "name": ".NET Core Launch (web)",
-        "type": "coreclr",
-        "request": "launch",
-        "preLaunchTask": "build",
-        "program": "${workspaceFolder}/HostedFidoApi/bin/Debug/net7.0/HostedFidoApi.dll",
-        "args": [],
-        "cwd": "${workspaceFolder}",
-        "stopAtEntry": false,
-        "serverReadyAction": {
-            "action": "openExternally",
-            "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-        },
-        "env": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "sourceFileMap": {
-            "/Views": "${workspaceFolder}/Views"
+        {
+            "name": "AdminConsole",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-adminconsole",
+            "program": "${workspaceFolder}/src/AdminConsole/bin/Debug/net7.0/Passwordless.AdminConsole.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/AdminConsole",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
         }
-    }
     ]
 }

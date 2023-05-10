@@ -1,0 +1,150 @@
+@page "/playground/new-account"
+@model NewAccountModel
+@inject ICurrentContext provider
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    ViewData["Title"] = "Playground";
+    var requestToken = Antiforgery.GetAndStoreTokens(Model.HttpContext).RequestToken;
+}
+
+
+<div id="xapp">
+    <div class="flex flex-1 flex-col justify-center lg:flex-non bg-gray-200 rounded-md p-6 max-w-fit">
+        <div class="w-full max-w-sm lg:w-96">
+            <div>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Register new user</h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Please use the form below to create your new account.
+                </p>
+            </div>
+
+            <div class="mt-8">
+                <div class="mt-6">
+                    <form v-on:submit.prevent="createNewAccount" class="space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name (Visible in Browser UI)</label>
+                            <div class="mt-2">
+                                <input type="text" name="name" id="name" required class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                            </div>
+                        </div>    
+                        <div>
+                            <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address / Username (Visible in Browser UI)</label>
+                            <div class="mt-2">
+                                <input id="email" name="email" type="text" required class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Nickname for this device (optional)</label>
+                            <div class="mt-2">
+                                <input type="text" name="nickname" id="nickname" class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" btn-primary>Register</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .signin-item {
+        padding: 10px;
+        display: flex;
+        background-color: #eee;
+        border-radius: 5px;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .item-pair {
+        padding: 5px;
+        background: #c2d5dd;
+        border-radius: 3px;
+    }
+</style>
+
+
+<script src="https://cdn.passwordless.dev/dist/0.6.4/umd/passwordless.umd.js"></script>
+
+@section Scripts {
+    <script type="module">
+    import { createApp, ref } from 'vue';
+    createApp({
+        setup() {
+
+            const p = new Passwordless.Client({
+                apiUrl: "@provider.Options.ApiUrl",
+                apiKey: "@provider.Options.ApiKey"
+            });
+
+            const createNewAccount = async (e) => {
+                
+                const data = new FormData(e.target);
+                
+                var req = await fetch("?handler=token", {
+                    method: "post",
+                    body: data,
+                    headers: {
+                        RequestVerificationToken: "@requestToken"
+                    }
+                });
+
+                if (req.ok) {
+                    const { token } = await req.json();
+
+                    const nicknameForDevice = data.get("nickname");
+                    
+                    const { error } = await p.register(token , nicknameForDevice);
+                    if (error) {
+                        console.error(error);
+                        alert(error.title);
+                    }
+                    window.location.href = "../playground";
+                }
+            }
+
+            const signins = ref([]);
+            const loginSubmit = async (e) => {
+                console.log("Login", e, e.target.alias.value);
+                const {token} = await p.signinWithAlias()
+
+                var result = await verifyWithBackend(token);
+                signins.value.push(result);
+
+                console.log(signins.value);
+            }
+
+            return {
+                loginSubmit,
+                createNewAccount,
+                signins
+            }
+        }
+    }).mount('#xapp');
+
+    async function verifyWithBackend(token) {
+        console.warn("TOKEN", token);
+
+        var res = await fetch("", {
+            method: "POST",
+            body: new URLSearchParams({ token }),
+            headers: {
+                RequestVerificationToken: "@requestToken"
+            }
+        });
+        console.log("Result from post", res)
+
+        if (res.ok) {
+            return await res.json();
+        }
+        return res;
+    }
+    </script>
+}

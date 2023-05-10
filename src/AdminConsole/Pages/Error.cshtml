@@ -1,0 +1,19 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@model ErrorModel
+@attribute [AllowAnonymous]
+@{
+    ViewData["Title"] = "Something definitely did not work out as expected...";
+}
+
+<p class="mt-3 text-danger">@Model.Message</p>
+<a class="mt-3 underline" href="@Url.Page("/Index")">Restart from scratch</a>
+
+
+@if (Model.ShowRequestId)
+{
+    <p class="mt-3 text-xs">
+        <code>Request ID: @Model.RequestId</code>
+    </p>
+}
+

@@ -1,0 +1,3 @@
+Hey Human! We hope you have a great day.
+Passwordless.dev was founded by Anders Åberg and is maintained by the Passwordless team at Bitwarden.
+Hiring: https://bitwarden.com/careers/#open-positions

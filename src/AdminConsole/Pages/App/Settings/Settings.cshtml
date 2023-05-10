@@ -1,0 +1,33 @@
+﻿@page "/settings"
+@model AdminConsole.Pages.Settings.SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+
+<h2 class="h2">Plan</h2>
+<p class="">The plan you select for this app changes the pricing and features available.</p>
+
+<form method="post" asp-page-handler="billing">
+    <div id="planpicker"></div>
+    @* <button class="btn-primary mt-3">Save billing</button> *@
+</form>
+
+@section Scripts
+{
+    <script type="module">
+    import { createApp } from 'vue';
+    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")'
+    createApp(RadioBoxes, {
+        items: [{
+            title: 'Users Pro',
+            desc: 'Passkeys for your users or customers'
+        },
+        {
+            title: 'Team members',
+            desc: 'Currently not available. Please contact us for more information',
+            disabled: true
+        }]  
+    } ).mount('#planpicker');
+    </script>
+}

@@ -1,0 +1,4 @@
+# Hey security researchers. Information related to reporting security vulnerabilities of this site. 
+Contact: https://bitwarden.com/contact/
+Preferred-Languages: en
+Hiring: https://bitwarden.com/careers/#open-positions
