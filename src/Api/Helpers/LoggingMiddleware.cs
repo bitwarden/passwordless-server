@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Claims;
@@ -23,7 +22,7 @@ public class LoggingMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         
-        var activityFeature = context.Features.Get<IHttpActivityFeature>();
+        
         if (!TryGetAppId(context.User, out var appId))
         {
             await _next(context);
@@ -34,6 +33,7 @@ public class LoggingMiddleware
         
         // setup spanTags
         Tracer.Instance.ActiveScope?.Span.SetTag("appid", appId);
+        var activityFeature = context.Features.Get<IHttpActivityFeature>();
         activityFeature?.Activity.AddTag("appid", appId);
         activityFeature?.Activity.AddBaggage("appid", appId);
         
