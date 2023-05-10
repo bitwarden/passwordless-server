@@ -5,9 +5,9 @@ The server project is written in C# using .NET 7 with ASP.NET Core.
 
 Website: https://passwordless.dev
 
-# Join the beta
+# Signup
 
-To join the free beta and use the api, please [sign up for api keys](https://www.passwordless.dev/create-tenant/).
+To use the API, please [sign up for a free account](https://admin.passwordless.dev/signup/).
 
 # Help
 
