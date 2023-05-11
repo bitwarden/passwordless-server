@@ -9,7 +9,8 @@ public class SqliteContextFactory : IDesignTimeDbContextFactory<SqliteContext>
     public SqliteContext CreateDbContext(string[] args)
     {
         var options = new DbContextOptionsBuilder<SqliteContext>();
-        options.UseSqlite(args.Length == 1 ? args[0] : null);
+        const string devDefault = "Data Source=Data/passwordless_dev.db";
+        options.UseSqlite(args.Length == 1 ? args[0] : devDefault);
         return new SqliteContext(options.Options, new ManualTenantProvider(null!));
     }
 }
