@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Claims;
@@ -9,6 +8,9 @@ using Passwordless.Api.Authorization;
 
 namespace Passwordless.Api.Helpers;
 
+/// <summary>
+/// Adds helpful information to logging/tracing
+/// </summary>
 public class LoggingMiddleware
 {
     private readonly RequestDelegate _next;
@@ -22,21 +24,20 @@ public class LoggingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        
-        var activityFeature = context.Features.Get<IHttpActivityFeature>();
         if (!TryGetAppId(context.User, out var appId))
         {
             await _next(context);
             return;
         }
 
+        // Add a logging scope
         using var scope = _logger.BeginScope(new AppIdLogScope(appId));
         
-        // setup spanTags
+        // Add Activity/Span Tags
         Tracer.Instance.ActiveScope?.Span.SetTag("appid", appId);
+        var activityFeature = context.Features.Get<IHttpActivityFeature>();
         activityFeature?.Activity.AddTag("appid", appId);
         activityFeature?.Activity.AddBaggage("appid", appId);
-        
         
         await _next(context);
     }
