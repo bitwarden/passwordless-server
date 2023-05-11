@@ -16,7 +16,6 @@ public static class AddDatabaseExtensionMethod
         // Database information
         var sqlite = configuration.GetConnectionString("sqlite");
         var mssql = configuration.GetConnectionString("mssql");
-        // services.AddDbContext<DbTenantContext>(); // TODO: Can I get rid of this?
         if (!string.IsNullOrEmpty(sqlite))
         {
             services.AddDbContext<DbTenantContext, SqliteContext>((sp, builder) =>
