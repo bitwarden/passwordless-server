@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +59,28 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
                     $"Expected route: '{endpoint.RoutePattern.RawText}' to response with 401 Unauthorized but it responsed with {response.StatusCode}");
             }
         }
+    }
+    
+    [Fact]
+    public async Task ValidateThatMissingApiSecretThrows()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        
+        var httpResponse = await _client.SendAsync(request);
+        var body = await httpResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+        Assert.NotEmpty(body);
+    }
+
+    [Fact]
+    public async Task ValidateThatInvalidApiSecretThrows()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        request.Headers.Add("ApiSecret", _factory.ApiSecret+"invalid");
+        var httpResponse = await _client.SendAsync(request);
+        var body = await httpResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+        Assert.NotEmpty(body);
     }
 
     private static string? CreateRoute(RoutePattern pattern)
