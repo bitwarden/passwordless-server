@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
+using Passwordless.IntegrationTests.Helpers;
 
 namespace Passwordless.Api.IntegrationTests;
 
@@ -65,22 +66,43 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ValidateThatMissingApiSecretThrows()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        request.Headers.Add("Accept", "application/json");
         
         var httpResponse = await _client.SendAsync(request);
-        var body = await httpResponse.Content.ReadAsStringAsync();
+        var body = await httpResponse.Content.ReadFromJsonAsync<JsonDocument>();
         Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
-        Assert.NotEmpty(body);
+        
+        var expected = JsonDocument.Parse("""
+{
+    "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
+    "title": "A valid 'ApiSecret' header is required.",
+    "status": 401,
+    "detail": "A valid 'ApiSecret' header is required."
+}
+""");
+        
+        AssertHelper.AssertEqualJson(expected.RootElement, body!.RootElement);
     }
 
     [Fact]
     public async Task ValidateThatInvalidApiSecretThrows()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        request.Headers.Add("Accept", "application/json");
         request.Headers.Add("ApiSecret", _factory.ApiSecret+"invalid");
         var httpResponse = await _client.SendAsync(request);
-        var body = await httpResponse.Content.ReadAsStringAsync();
+        var body = await httpResponse.Content.ReadFromJsonAsync<JsonDocument>();
         Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
-        Assert.NotEmpty(body);
+        
+        
+        var expected = JsonDocument.Parse("""
+{
+    "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
+    "title": "A valid 'ApiSecret' header is required.",
+    "status": 401
+}
+""");
+        AssertHelper.AssertEqualJson(expected.RootElement, body!.RootElement);
     }
 
     private static string? CreateRoute(RoutePattern pattern)
