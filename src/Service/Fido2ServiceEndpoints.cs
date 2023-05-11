@@ -94,7 +94,7 @@ public class Fido2ServiceEndpoints
 
             // Attestation
             if (string.IsNullOrEmpty(token.Attestation)) token.Attestation = "none";
-            if (token.Attestation != "none")
+            if (token.Attestation.ToLower() != "none")
             {
                 throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
             }
