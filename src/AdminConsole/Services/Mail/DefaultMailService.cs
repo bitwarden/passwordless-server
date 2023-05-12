@@ -32,21 +32,21 @@ public class DefaultMailService : IMailService
                 $"Please click the link below to verify your account: {uriBuilder}",
             HtmlBody =
                 $"""
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Verify your Passwordless.dev account</title>
-  </head>
-  <body>
-    <p>Please click the link below to verify your account: <a href="{uriBuilder}">Verify</a></p>
-    <br />
-    <br />
-    <p>In case the link above doesn't work, please copy and paste the link below into your browser's address bar:</p>
-    <p>{uriBuilder}</p>
-  </body>
-</html>
-""",
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <title>Verify your Passwordless.dev account</title>
+                  </head>
+                  <body>
+                    <p>Please click the link below to verify your account: <a href="{uriBuilder}">Verify</a></p>
+                    <br />
+                    <br />
+                    <p>In case the link above doesn't work, please copy and paste the link below into your browser's address bar:</p>
+                    <p>{uriBuilder}</p>
+                  </body>
+                </html>
+                """,
             Tag = "verify-account"
         };
 

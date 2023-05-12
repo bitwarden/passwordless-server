@@ -31,11 +31,14 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
-        config.WriteTo.DatadogLogs(
-            ddConfig.GetValue<string>("ApiKey"),
-            tags: new[] { "version:" + version },
-            service: "pass-api",
-            configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+        var apiKey = ddConfig.GetValue<string>("ApiKey");
+        if(!string.IsNullOrEmpty(apiKey)) {
+            config.WriteTo.DatadogLogs(
+                ddConfig.GetValue<string>("ApiKey"),
+                tags: new[] { "version:" + version },
+                service: "pass-api",
+                configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+        }
     }
 });
 
