@@ -129,6 +129,13 @@ public class Fido2ServiceEndpoints
 
         ValidateAliases(tokenProps.Aliases);
         ValidateUserId(tokenProps.UserId);
+        
+        // Attestation
+        if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
+        if (tokenProps.Attestation.ToLower() != "none")
+        {
+            throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
+        }
 
         // cast to RegisterToken to remove Aliases from token
         var token = _tokenService.EncodeToken(tokenProps as RegisterToken, "register_");
