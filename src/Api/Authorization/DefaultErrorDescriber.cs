@@ -31,7 +31,7 @@ public class DefaultProblemDetailWriter : IProblemDetailWriter
             {
                 yield return $"Your ApiKey header contained a ApiSecret instead of your 'ApiKey'.";
             }
-            else if((headerName == "ApiSecret" && !headerValue.Contains("secret")) || headerName == "ApiKey" && !headerValue.Contains("public"))
+            else if ((headerName == "ApiSecret" && !headerValue.Contains("secret")) || headerName == "ApiKey" && !headerValue.Contains("public"))
             {
                 // get first 10 characters
                 var first10 = headerValue.Substring(0, Math.Min(headerValue.Length, 10));

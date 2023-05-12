@@ -1,6 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
@@ -101,11 +99,11 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
         }
         """, body);
     }
-    
+
     [Theory]
     [InlineData("test:public:123", "Your ApiSecret header contained a public ApiKey instead of your 'ApiSecret'.")]
     [InlineData("verify_123", "A verify token was supplied instead of your 'ApiSecret'.")]
-    [InlineData("register_13", "A register token was supplied instead of your 'ApiSecret'." )]
+    [InlineData("register_13", "A register token was supplied instead of your 'ApiSecret'.")]
     [InlineData("somethingrandom", "We don't recognize the value you supplied for your 'ApiSecret'. It started with: 'somethingr'.")]
     [InlineData("", "A valid 'ApiSecret' header is required.")]
     [InlineData("missing", "A valid 'ApiSecret' header is required.")]
@@ -119,10 +117,11 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
         {
             request.Headers.Add("ApiKey", "something");
         }
-        else if (input != "missing") {
+        else if (input != "missing")
+        {
             request.Headers.Add("ApiSecret", input);
         }
-        
+
         var httpResponse = await _client.SendAsync(request);
         var body = await httpResponse.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
@@ -136,11 +135,11 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
         }
         """, body);
     }
-    
+
     [Theory]
     [InlineData("test:secret:123", "Your ApiKey header contained a ApiSecret instead of your 'ApiKey'.")]
     [InlineData("verify_123", "A verify token was supplied instead of your 'ApiKey'.")]
-    [InlineData("register_123", "A register token was supplied instead of your 'ApiKey'." )]
+    [InlineData("register_123", "A register token was supplied instead of your 'ApiKey'.")]
     [InlineData("somethingrandom", "We don't recognize the value you supplied for your 'ApiKey'. It started with: 'somethingr'.")]
     [InlineData("", "A valid 'ApiKey' header is required.")]
     [InlineData("missing", "A valid 'ApiKey' header is required.")]
@@ -148,13 +147,15 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ApiPublicGivesHelpfulAdvice(string input, string details)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");
-        
+
         request.Headers.Add("Accept", "application/json");
-        
+
         if (input == "secret-header-instead")
         {
             request.Headers.Add("ApiSecret", "something");
-        } else if(input != "missing") {
+        }
+        else if (input != "missing")
+        {
             request.Headers.Add("ApiKey", input);
         }
         var httpResponse = await _client.SendAsync(request);

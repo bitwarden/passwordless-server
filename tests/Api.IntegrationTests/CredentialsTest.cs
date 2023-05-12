@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.IntegrationTests;

@@ -11,7 +11,7 @@ public class BasicTests : IClassFixture<TestWebApplicationFactory<Program>>
     {
         _factory = factory;
         _client = factory.CreateClient();
-            
+
         _client.DefaultRequestHeaders.Add("Accept", "application/json");
         _client.DefaultRequestHeaders.Add("ApiSecret", _factory.ApiSecret);
     }

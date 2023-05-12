@@ -5,8 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Xunit;
 using Xunit.Sdk;
 
 namespace Passwordless.IntegrationTests.Helpers;
@@ -34,7 +32,7 @@ public static class AssertHelper
             if (actualPropInfo == null)
             {
                 throw new Exception(string.Concat($"Expected actual object to contain a property named {expectedPropInfo.Name}, but it does not\n",
-                $"Expected:\n{JsonSerializer.Serialize(expected,new JsonSerializerOptions
+                $"Expected:\n{JsonSerializer.Serialize(expected, new JsonSerializerOptions
                 {
                     WriteIndented = true,
                 })}\n",
@@ -121,7 +119,7 @@ public static class AssertHelper
         return subElement;
     }
 
-    public static void AssertEqualJson([StringSyntax(StringSyntaxAttribute.Json)]string a, [StringSyntax(StringSyntaxAttribute.Json)]string b)
+    public static void AssertEqualJson([StringSyntax(StringSyntaxAttribute.Json)] string a, [StringSyntax(StringSyntaxAttribute.Json)] string b)
     {
         AssertEqualJson(JsonDocument.Parse(a).RootElement, JsonDocument.Parse(b).RootElement);
     }

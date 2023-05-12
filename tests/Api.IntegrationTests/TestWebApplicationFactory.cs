@@ -35,11 +35,11 @@ public class TestWebApplicationFactory<TProgram>
             var context = CreateDbContext(scope, "test");
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
-            
+
             // seed with test keys
             // hash of secret
             context.ApiKeys.Add(new ApiKeyDesc() { Tenant = "test", Id = "9795", ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795" });
-            context.ApiKeys.Add(new ApiKeyDesc() { Tenant = "test", Id = "6d02", ApiKey = "4RtmMr0hVknaQAIhaRtPHw==:xR7bg3NVsC80a8GDDhH39g==",Scopes = new[] { "token_register", "token_verify" }, });
+            context.ApiKeys.Add(new ApiKeyDesc() { Tenant = "test", Id = "6d02", ApiKey = "4RtmMr0hVknaQAIhaRtPHw==:xR7bg3NVsC80a8GDDhH39g==", Scopes = new[] { "token_register", "token_verify" }, });
             context.AccountInfo.Add(new AccountMetaInformation() { Tenant = "test", AcountName = "test" });
             context.SaveChanges();
         });
