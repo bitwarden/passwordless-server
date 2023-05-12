@@ -18,6 +18,6 @@ public class BasicTests : IClassFixture<TestWebApplicationFactory<Program>>
 
     public Task<HttpResponseMessage> PostAsync(string url, object payload)
     {
-        return await _client.PostAsJsonAsync(url, payload);
+        return _client.PostAsJsonAsync(url, payload);
     }
 }
