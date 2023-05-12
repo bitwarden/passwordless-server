@@ -82,7 +82,7 @@ public class TokenService
 
     public T DecodeToken<T>(string token, string prefix, bool contractless = false)
     {
-        if (token == null) throw new ApiException("missing_token", $"This operation requires a token that starts with '{prefix}' to be passed.",400);
+        if (token == null) throw new ApiException("missing_token", $"This operation requires a token that starts with '{prefix}' to be passed.", 400);
 
         if (prefix != null)
         {
@@ -106,7 +106,7 @@ public class TokenService
         catch (Exception)
         {
             _log.LogError("Could not decode token={token}", token);
-            throw new ApiException("invalid_token_format","The token you supplied was not formatted correctly. It should be valid base64url.", 400);
+            throw new ApiException("invalid_token_format", "The token you supplied was not formatted correctly. It should be valid base64url.", 400);
         }
         var envelope = MessagePackSerializer.Deserialize<MacEnvelope>(envelopeBytes);
 
