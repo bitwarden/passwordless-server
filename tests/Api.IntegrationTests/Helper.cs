@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
@@ -118,6 +119,11 @@ public static class AssertHelper
 
         Assert.Equal(jsonValueKind, subElement.ValueKind);
         return subElement;
+    }
+
+    public static void AssertEqualJson([StringSyntax(StringSyntaxAttribute.Json)]string a, [StringSyntax(StringSyntaxAttribute.Json)]string b)
+    {
+        AssertEqualJson(JsonDocument.Parse(a).RootElement, JsonDocument.Parse(b).RootElement);
     }
 
     public static void AssertEqualJson(JsonElement a, JsonElement b)
