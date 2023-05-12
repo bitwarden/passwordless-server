@@ -1,9 +1,6 @@
-using System.Text;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
-using Microsoft.Azure.Documents;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -221,18 +218,20 @@ public class EfTenantStorage : ITenantStorage
             .OrderBy(c => c.CreatedAt)
             .GroupBy(c => c.UserId)
             .Select((g) =>
-            new {
+            new
+            {
                 UserId = g.Key,
                 LastUsedAt = g.Max(c => c.LastUsedAt),
                 Count = g.Count()
             })
             .Take(1000)
             .ToListAsync();
-        
+
         var aliasesPerUser = db.Aliases
             .GroupBy(a => a.UserId)
             .Select((g) =>
-            new {
+            new
+            {
                 UserId = g.Key,
                 Count = g.Count(),
                 Aliases = g.Select(a => a.Plaintext)
@@ -245,25 +244,25 @@ public class EfTenantStorage : ITenantStorage
         var userSummaries = new Dictionary<string, UserSummary>();
         foreach (var cred in await credentialsPerUser)
         {
-            if(!userSummaries.TryGetValue(cred.UserId, out var summary))
+            if (!userSummaries.TryGetValue(cred.UserId, out var summary))
             {
                 summary = new UserSummary();
                 userSummaries.Add(cred.UserId, summary);
             }
-            
+
             summary.UserId = cred.UserId;
             summary.CredentialsCount = cred.Count;
             summary.LastUsedAt = cred.LastUsedAt;
         }
-        
+
         foreach (var alias in await aliasesPerUser)
         {
-            if(!userSummaries.TryGetValue(alias.UserId, out var summary))
+            if (!userSummaries.TryGetValue(alias.UserId, out var summary))
             {
                 summary = new UserSummary();
                 userSummaries.Add(alias.UserId, summary);
             }
-            
+
             summary.UserId = alias.UserId;
             summary.AliasCount = alias.Count;
             summary.Aliases = alias.Aliases.ToList();

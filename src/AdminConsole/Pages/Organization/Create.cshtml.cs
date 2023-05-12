@@ -47,7 +47,7 @@ public class Create : PageModel
         {
             ModelState.AddModelError("AcceptsTermsAndPrivacy", "You must accept the terms and privacy policy to continue.");
         }
-        
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -111,7 +111,7 @@ public record CreateModel
     [Required]
     [MaxLength(50)]
     public string AdminName { get; set; }
-    
+
     [Required]
     public bool AcceptsTermsAndPrivacy { get; set; }
 }
