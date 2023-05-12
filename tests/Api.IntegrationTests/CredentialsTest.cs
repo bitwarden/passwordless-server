@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.IntegrationTests;
@@ -24,17 +23,7 @@ public class CredentialsTests : IClassFixture<TestWebApplicationFactory<Program>
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var factory = scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>();
         var context = _factory.CreateDbContext(scope, "test");
-
-        context.ApiKeys.Add(new ApiKeyDesc()
-        {
-            Id = "cdb5",
-            ApiKey = "Ojo30xHbjABSZ65iQfpecA==:jmqnuC9B/tSTAr+B9Ow+fA==",
-            Scopes = new[] { "token_register", "token_verify" },
-            IsLocked = false,
-            Tenant = "test",
-        });
 
         context.Credentials.Add(new EFStoredCredential()
         {
@@ -48,7 +37,7 @@ public class CredentialsTests : IClassFixture<TestWebApplicationFactory<Program>
 
         // Act
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
-        request.Headers.Add("ApiSecret", "test:secret:d1a64120edda4006ba8558b02d43cdb5");
+        request.Headers.Add("ApiSecret", _factory.ApiSecret);
         var httpResponse = await _client.SendAsync(request);
         using var credentialsResponse = await httpResponse.Content.ReadFromJsonAsync<JsonDocument>();
         // Assert

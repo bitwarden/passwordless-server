@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
+using Passwordless.IntegrationTests.Helpers;
 
 namespace Passwordless.Api.IntegrationTests;
 
@@ -29,6 +30,7 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     {
         _factory = factory;
         _client = factory.CreateClient();
+        _client.DefaultRequestHeaders.Add("Accept", "application/json");
     }
 
     [Fact]
@@ -57,6 +59,114 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
                     $"Expected route: '{endpoint.RoutePattern.RawText}' to response with 401 Unauthorized but it responsed with {response.StatusCode}");
             }
         }
+    }
+
+    [Fact]
+    public async Task ValidateThatMissingApiSecretThrows()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+
+        var httpResponse = await _client.SendAsync(request);
+        var body = await httpResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+
+        AssertHelper.AssertEqualJson("""
+        {
+            "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
+            "title": "A valid 'ApiSecret' header is required.",
+            "status": 401,
+            "detail": "A valid 'ApiSecret' header is required."
+        }
+        """, body);
+    }
+
+    [Fact]
+    public async Task ValidateThatInvalidApiSecretThrows()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        request.Headers.Add("ApiSecret", _factory.ApiSecret + "invalid");
+
+        var httpResponse = await _client.SendAsync(request);
+        var body = await httpResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+
+        AssertHelper.AssertEqualJson("""
+        {
+            "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
+            "title": "A valid 'ApiSecret' header is required.",
+            "status": 401,
+            "detail": "The value of your 'ApiSecret' is not valid."
+        }
+        """, body);
+    }
+
+    [Theory]
+    [InlineData("test:public:123", "Your ApiSecret header contained a public ApiKey instead of your 'ApiSecret'.")]
+    [InlineData("verify_123", "A verify token was supplied instead of your 'ApiSecret'.")]
+    [InlineData("register_13", "A register token was supplied instead of your 'ApiSecret'.")]
+    [InlineData("somethingrandom", "We don't recognize the value you supplied for your 'ApiSecret'. It started with: 'somethingr'.")]
+    [InlineData("", "A valid 'ApiSecret' header is required.")]
+    [InlineData("missing", "A valid 'ApiSecret' header is required.")]
+    [InlineData("public-header-instead", "A 'ApiKey' header was supplied when a 'ApiSecret' header should have been supplied.")]
+    public async Task ApiSecretGivesHelpfulAdvice(string input, string details)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        
+        if (input == "public-header-instead")
+        {
+            request.Headers.Add("ApiKey", "something");
+        }
+        else if (input != "missing")
+        {
+            request.Headers.Add("ApiSecret", input);
+        }
+
+        var httpResponse = await _client.SendAsync(request);
+        var body = await httpResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+
+        AssertHelper.AssertEqualJson($$"""
+        {
+            "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
+            "title": "A valid 'ApiSecret' header is required.",
+            "status": 401,
+            "detail": "{{details}}"
+        }
+        """, body);
+    }
+
+    [Theory]
+    [InlineData("test:secret:123", "Your ApiKey header contained a ApiSecret instead of your 'ApiKey'.")]
+    [InlineData("verify_123", "A verify token was supplied instead of your 'ApiKey'.")]
+    [InlineData("register_123", "A register token was supplied instead of your 'ApiKey'.")]
+    [InlineData("somethingrandom", "We don't recognize the value you supplied for your 'ApiKey'. It started with: 'somethingr'.")]
+    [InlineData("", "A valid 'ApiKey' header is required.")]
+    [InlineData("missing", "A valid 'ApiKey' header is required.")]
+    [InlineData("secret-header-instead", "A 'ApiSecret' header was supplied when a 'ApiKey' header should have been supplied.")]
+    public async Task ApiPublicGivesHelpfulAdvice(string input, string details)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");
+
+        if (input == "secret-header-instead")
+        {
+            request.Headers.Add("ApiSecret", "something");
+        }
+        else if (input != "missing")
+        {
+            request.Headers.Add("ApiKey", input);
+        }
+        var httpResponse = await _client.SendAsync(request);
+        var body = await httpResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+
+        AssertHelper.AssertEqualJson($$"""
+        {
+            "type": "https://docs.passwordless.dev/guide/errors.html#ApiKey",
+            "title": "A valid 'ApiKey' header is required.",
+            "status": 401,
+            "detail": "{{details}}"
+        }
+        """, body);
     }
 
     private static string? CreateRoute(RoutePattern pattern)

@@ -32,7 +32,8 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     if (ddConfig.Exists())
     {
         var apiKey = ddConfig.GetValue<string>("ApiKey");
-        if(!string.IsNullOrEmpty(apiKey)) {
+        if (!string.IsNullOrEmpty(apiKey))
+        {
             config.WriteTo.DatadogLogs(
                 ddConfig.GetValue<string>("ApiKey"),
                 tags: new[] { "version:" + version },

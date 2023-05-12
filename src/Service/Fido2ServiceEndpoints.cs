@@ -129,6 +129,14 @@ public class Fido2ServiceEndpoints
 
         ValidateAliases(tokenProps.Aliases);
         ValidateUserId(tokenProps.UserId);
+        ValidateUsername(tokenProps.Username);
+
+        // Attestation
+        if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
+        if (tokenProps.Attestation.ToLower() != "none")
+        {
+            throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
+        }
 
         // cast to RegisterToken to remove Aliases from token
         var token = _tokenService.EncodeToken(tokenProps as RegisterToken, "register_");
@@ -402,7 +410,15 @@ public class Fido2ServiceEndpoints
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            throw new ApiException("userId must not be null or empty", 400);
+            throw new ApiException("Invalid UserId: UserId cannot be null or empty", 400);
+        }
+    }
+
+    private void ValidateUsername(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ApiException("Invalid Username: Username cannot be null or empty", 400);
         }
     }
 
