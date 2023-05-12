@@ -30,6 +30,7 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     {
         _factory = factory;
         _client = factory.CreateClient();
+        _client.DefaultRequestHeaders.Add("Accept", "application/json");
     }
 
     [Fact]
@@ -64,7 +65,6 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ValidateThatMissingApiSecretThrows()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
-        request.Headers.Add("Accept", "application/json");
 
         var httpResponse = await _client.SendAsync(request);
         var body = await httpResponse.Content.ReadAsStringAsync();
@@ -84,8 +84,8 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ValidateThatInvalidApiSecretThrows()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
-        request.Headers.Add("Accept", "application/json");
         request.Headers.Add("ApiSecret", _factory.ApiSecret + "invalid");
+
         var httpResponse = await _client.SendAsync(request);
         var body = await httpResponse.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
@@ -111,8 +111,7 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ApiSecretGivesHelpfulAdvice(string input, string details)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
-        request.Headers.Add("Accept", "application/json");
-
+        
         if (input == "public-header-instead")
         {
             request.Headers.Add("ApiKey", "something");
@@ -147,8 +146,6 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ApiPublicGivesHelpfulAdvice(string input, string details)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");
-
-        request.Headers.Add("Accept", "application/json");
 
         if (input == "secret-header-instead")
         {
