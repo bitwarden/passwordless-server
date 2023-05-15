@@ -214,7 +214,7 @@ public class EfTenantStorage : ITenantStorage
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {
 
-        var credentialsPerUser = db.Credentials
+        var credentialsPerUser = await db.Credentials
             .OrderBy(c => c.CreatedAt)
             .GroupBy(c => c.UserId)
             .Select((g) =>
@@ -227,7 +227,7 @@ public class EfTenantStorage : ITenantStorage
             .Take(1000)
             .ToListAsync();
 
-        var aliasesPerUser = db.Aliases
+        var aliasesPerUser = await db.Aliases
             .GroupBy(a => a.UserId)
             .Select((g) =>
             new
@@ -239,10 +239,8 @@ public class EfTenantStorage : ITenantStorage
             .Take(1000)
             .ToListAsync();
 
-        await Task.WhenAll(credentialsPerUser, aliasesPerUser);
-
         var userSummaries = new Dictionary<string, UserSummary>();
-        foreach (var cred in await credentialsPerUser)
+        foreach (var cred in credentialsPerUser)
         {
             if (!userSummaries.TryGetValue(cred.UserId, out var summary))
             {
@@ -255,7 +253,7 @@ public class EfTenantStorage : ITenantStorage
             summary.LastUsedAt = cred.LastUsedAt;
         }
 
-        foreach (var alias in await aliasesPerUser)
+        foreach (var alias in aliasesPerUser)
         {
             if (!userSummaries.TryGetValue(alias.UserId, out var summary))
             {
