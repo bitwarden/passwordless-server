@@ -150,11 +150,10 @@ void RunTheApp()
     services.AddBilling(builder);
 
     // Work around to get LinkGeneration to work with /{app}/-links.
-    IServiceProvider provider = services.BuildServiceProvider();
-    var generator = provider.GetRequiredService<LinkGenerator>();
-    services.Remove(services.First(descriptor => descriptor.ServiceType == typeof(LinkGenerator)));
-    builder.Services.AddSingleton<LinkGenerator>(new LinkGeneratorDecorator(generator));
-
+    var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
+    services.Remove(defaultLinkGeneratorDescriptor);
+    services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
+    
     WebApplication app = builder.Build();
 
 
