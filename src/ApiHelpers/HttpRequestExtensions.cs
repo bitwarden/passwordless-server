@@ -39,12 +39,12 @@ namespace ApiHelpers
 
             var span = key.AsSpan();
             var i = span.IndexOf(':');
-            
+
             if (i == -1)
             {
                 return null;
             }
-            
+
             return span.Slice(0, i).ToString();
         }
     }

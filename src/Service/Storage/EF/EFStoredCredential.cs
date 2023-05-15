@@ -1,6 +1,5 @@
 using System.Text;
 using Fido2NetLib.Objects;
-using Microsoft.Azure.Documents;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
