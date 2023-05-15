@@ -27,7 +27,7 @@ public class NewAccountModel : PageModel
         var token = await api.CreateRegisterToken(new RegisterOptions()
         {
             UserId = userId,
-            Username = email,
+            Username = "Playground: " + email,
             DisplayName = name,
             Aliases = new HashSet<string>(1) { email },
             AliasHashing = false

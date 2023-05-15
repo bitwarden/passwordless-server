@@ -65,6 +65,7 @@ public class Join : PageModel
         {
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
+
         
         if (!form.AcceptsTermsAndPrivacy)
         {

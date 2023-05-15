@@ -1,4 +1,3 @@
-using System.Text;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
@@ -214,37 +213,61 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {
-        // TODO: Support mor information by counting credentials etc.
-        var res = await db
-            .Credentials
+
+        var credentialsPerUser = db.Credentials
             .OrderBy(c => c.CreatedAt)
-            .GroupJoin(db.Aliases,
-                a => a.UserId,
-                b => b.UserId,
-                (a, aliasCollection) => new
-                {
-                    UserId = a.UserId,
-                    DescriptorId = a.DescriptorId,
-                    LastUsedAt = (DateTime?)a.LastUsedAt ?? default(DateTime),
-                    Aliases = aliasCollection.DefaultIfEmpty().Select(x => x),
-                })
-            .DefaultIfEmpty()
-            .Take(100)
-            .GroupBy(x => x.UserId)
+            .GroupBy(c => c.UserId)
+            .Select((g) =>
+            new
+            {
+                UserId = g.Key,
+                LastUsedAt = g.Max(c => c.LastUsedAt),
+                Count = g.Count()
+            })
+            .Take(1000)
             .ToListAsync();
 
+        var aliasesPerUser = db.Aliases
+            .GroupBy(a => a.UserId)
+            .Select((g) =>
+            new
+            {
+                UserId = g.Key,
+                Count = g.Count(),
+                Aliases = g.Select(a => a.Plaintext)
+            })
+            .Take(1000)
+            .ToListAsync();
 
+        await Task.WhenAll(credentialsPerUser, aliasesPerUser);
 
-        var m = res.Where(c => c.Key != null).Select(c => new UserSummary
+        var userSummaries = new Dictionary<string, UserSummary>();
+        foreach (var cred in await credentialsPerUser)
         {
-            UserId = c.Key,
-            Aliases = c.SelectMany(x => x.Aliases.Select(a => a.Plaintext)).ToList(),
-            AliasCount = c.SelectMany(x => x.Aliases).DistinctBy<AliasPointer, string>(o => o.Alias).Count(),
-            CredentialsCount = c.Where(x => x.DescriptorId != null).Select(x => Encoding.UTF8.GetString(x.DescriptorId)).Distinct().Count(),
-            LastUsedAt = c.Max(c => c.LastUsedAt)
-        });
+            if (!userSummaries.TryGetValue(cred.UserId, out var summary))
+            {
+                summary = new UserSummary();
+                userSummaries.Add(cred.UserId, summary);
+            }
 
-        return m.ToList();
+            summary.UserId = cred.UserId;
+            summary.CredentialsCount = cred.Count;
+            summary.LastUsedAt = cred.LastUsedAt;
+        }
 
+        foreach (var alias in await aliasesPerUser)
+        {
+            if (!userSummaries.TryGetValue(alias.UserId, out var summary))
+            {
+                summary = new UserSummary();
+                userSummaries.Add(alias.UserId, summary);
+            }
+
+            summary.UserId = alias.UserId;
+            summary.AliasCount = alias.Count;
+            summary.Aliases = alias.Aliases.ToList();
+        }
+
+        return userSummaries.Values.ToList();
     }
 }
