@@ -153,7 +153,7 @@ void RunTheApp()
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
-    
+
     WebApplication app = builder.Build();
 
 
