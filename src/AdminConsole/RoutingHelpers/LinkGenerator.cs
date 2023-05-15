@@ -4,8 +4,10 @@
 public class LinkGeneratorDecorator : LinkGenerator
 {
     private readonly LinkGenerator _innerLinkGenerator;
-    public LinkGeneratorDecorator(LinkGenerator inner) =>
-      _innerLinkGenerator = inner ?? throw new ArgumentNullException(nameof(inner));
+    public LinkGeneratorDecorator(IServiceProvider serviceProvider, Type linkGeneratorType)
+    {
+        _innerLinkGenerator = (LinkGenerator)ActivatorUtilities.CreateInstance(serviceProvider, linkGeneratorType);
+    }
 
     public override string GetPathByAddress<TAddress>(
       HttpContext httpContext,
