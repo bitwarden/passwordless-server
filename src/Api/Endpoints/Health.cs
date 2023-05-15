@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.Endpoints;
@@ -25,6 +24,6 @@ public static class HealthEndpoints
         app.MapGet("health/throw/api", (ctx) => throw new ApiException("test_error", "Testing error response", 400));
         app.MapGet("health/throw/exception", (ctx) => throw new Exception("Testing error response", new Exception("Inner exception")));
 
-        app.MapGet("health/version",  (HttpContext ctx, HttpRequest req) => Results.Json(Assembly.GetExecutingAssembly().GetName().Version));
+        app.MapGet("health/version", (HttpContext ctx, HttpRequest req) => Results.Json(Assembly.GetExecutingAssembly().GetName().Version));
     }
 }

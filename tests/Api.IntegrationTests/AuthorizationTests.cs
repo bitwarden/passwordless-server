@@ -111,7 +111,7 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     public async Task ApiSecretGivesHelpfulAdvice(string input, string details)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
-        
+
         if (input == "public-header-instead")
         {
             request.Headers.Add("ApiKey", "something");

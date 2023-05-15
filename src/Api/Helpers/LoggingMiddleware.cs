@@ -32,13 +32,13 @@ public class LoggingMiddleware
 
         // Add a logging scope
         using var scope = _logger.BeginScope(new AppIdLogScope(appId));
-        
+
         // Add Activity/Span Tags
         Tracer.Instance.ActiveScope?.Span.SetTag("appid", appId);
         var activityFeature = context.Features.Get<IHttpActivityFeature>();
         activityFeature?.Activity.AddTag("appid", appId);
         activityFeature?.Activity.AddBaggage("appid", appId);
-        
+
         await _next(context);
     }
 
