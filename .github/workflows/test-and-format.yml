@@ -20,10 +20,10 @@ jobs:
     #     dotnet-version: [ '3.1.x', '6.0.x' ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        # with:
+        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a #v3.0.3
+         # with:
         #   dotnet-version: ${{ matrix.dotnet-version }}
       # You can test your matrix by printing the current dotnet version
       - name: Display dotnet version
