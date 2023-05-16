@@ -101,6 +101,11 @@ public class NoOpStorage : ITenantStorage
         throw new NotImplementedException();
     }
 
+    public Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<List<UserSummary>> GetUsers(string lastUserId)
     {
         throw new NotImplementedException();

@@ -38,4 +38,5 @@ public interface ITenantStorage
     Task DeleteUser(string userId);
     Task<List<ApiKeyDesc>> GetAllApiKeys();
     Task SetAppDeletionDate(DateTime? deletionAt);
+    Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId);
 }

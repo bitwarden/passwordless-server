@@ -3,14 +3,6 @@ using Passwordless.Service.Helpers;
 
 namespace Passwordless.Service.Models;
 
-public class RegisterTokenDTO : RegisterToken
-{
-    [Key(17)]
-    public HashSet<string> Aliases { get; set; }
-
-    [Key(18)] public bool AliasHashing { get; set; } = true;
-
-}
 [MessagePackObject]
 public class RegisterToken : Token
 {
@@ -29,6 +21,10 @@ public class RegisterToken : Token
     public bool Discoverable { get; set; } = true;
     [Key(16)]
     public string UserVerification { get; set; } = "Preferred";
+    [Key(17)]
+    public HashSet<string> Aliases { get; set; }
+
+    [Key(18)] public bool AliasHashing { get; set; } = true;
 }
 
 [MessagePackObject]
