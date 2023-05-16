@@ -44,10 +44,10 @@ public class PublicSignInTests : PublicTests
                 type = "public-key"
             }
         };
-        
+
         var result = await PostAsync("/signin/complete", payload);
         var body = await result.Content.ReadAsStringAsync();
-        
+
         Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         AssertHelper.AssertEqualJson("""
         {
@@ -58,7 +58,7 @@ public class PublicSignInTests : PublicTests
           "errorCode": "unknown_credential"
         }
         """, body);
-        
+
     }
 
     [Fact]

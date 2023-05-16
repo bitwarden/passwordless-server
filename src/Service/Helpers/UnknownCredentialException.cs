@@ -1,6 +1,7 @@
 namespace Passwordless.Service.Helpers;
 
-public class UnknownCredentialException : ApiException {
+public class UnknownCredentialException : ApiException
+{
     public UnknownCredentialException(string message) : base(message)
     {
     }
