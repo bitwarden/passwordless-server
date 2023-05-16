@@ -19,7 +19,7 @@ public class ListModel : PageModel
 
     public async Task OnGet()
     {
-        Users = await api.ListUsers();
+        Users = await api.ListUsers() ?? new List<PasswordlessUserSummary>();
     }
 
     public async Task<IActionResult> OnPost(string token)
