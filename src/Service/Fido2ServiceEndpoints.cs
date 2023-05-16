@@ -105,6 +105,7 @@ public class Fido2ServiceEndpoints
 
             var session = _tokenService.EncodeToken(new RegisterSession { Options = options }, "session_", true);
 
+
             // return options to client
             return new SessionResponse<CredentialCreateOptions>() { Data = options, Session = session };
         }
@@ -120,7 +121,7 @@ public class Fido2ServiceEndpoints
         return Task.FromResult(token);
     }
 
-    public async Task<string> CreateToken(RegisterTokenDTO tokenProps)
+    public async Task<string> CreateToken(RegisterToken tokenProps)
     {
         if (tokenProps.ExpiresAt == default)
         {
@@ -138,13 +139,22 @@ public class Fido2ServiceEndpoints
             throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
         }
 
-        // cast to RegisterToken to remove Aliases from token
-        var token = _tokenService.EncodeToken(tokenProps as RegisterToken, "register_");
+        // check if aliases is available
         if (tokenProps.Aliases != null)
         {
-            var aliasPayload = new AliasPayload() { Aliases = tokenProps.Aliases, UserId = tokenProps.UserId, Hashing = tokenProps.AliasHashing };
-            await SetAlias(aliasPayload);
+            ValidateAliases(tokenProps.Aliases);
+
+            var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenant));
+
+            // todo: check if alias exists and belongs to different user.
+            var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenProps.UserId);
+            if (!isAvailable)
+            {
+                throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
+            }
         }
+
+        var token = _tokenService.EncodeToken(tokenProps, "register_");
 
         return token;
     }
@@ -169,8 +179,18 @@ public class Fido2ServiceEndpoints
 
         var success = await _fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
 
-        var now = DateTime.UtcNow;
+        // add aliases
+        try
+        {
+            await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
+        }
+        catch (Exception e)
+        {
+            log.LogError(e, "Error while saving alias during /register/complete");
+            throw;
+        }
 
+        var now = DateTime.UtcNow;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.CredentialId);
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
@@ -401,7 +421,7 @@ public class Fido2ServiceEndpoints
         {
             if (ex.InnerException is SqlException { Number: 2627 })
             {
-                throw new ApiException("alias_conflict", "Alias is already in use", 409);
+                throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
             }
         }
     }

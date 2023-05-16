@@ -13,13 +13,13 @@ public static class RegisterEndpoints
 
     public static void MapRegisterEndpoints(this WebApplication app)
     {
-        app.MapPost("/register/token", async (ClaimsPrincipal user, RegisterTokenDTO registerToken, ITenantStorage storage) =>
+        app.MapPost("/register/token", async (ClaimsPrincipal user, RegisterToken registerToken, ITenantStorage storage) =>
         {
             var accountName = user.GetAccountName();
             var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
             var result = await service.CreateToken(registerToken);
 
-            return Ok(new RegisterToken(result));
+            return Ok(new RegisterTokenResponse(result));
         })
             .RequireSecretKey()
             .RequireCors("default");
@@ -51,5 +51,5 @@ public static class RegisterEndpoints
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
     }
 
-    public record RegisterToken(string Token);
+    public record RegisterTokenResponse(string Token);
 }

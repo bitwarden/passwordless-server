@@ -146,6 +146,11 @@ public class EfTenantStorage : ITenantStorage
         await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));
     }
 
+    public async Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId)
+    {
+        return !await db.Aliases.AnyAsync(a => aliases.Contains(a.Alias) && a.UserId != userId);
+    }
+
     public async Task SetAppDeletionDate(DateTime deletionAt)
     {
         await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));

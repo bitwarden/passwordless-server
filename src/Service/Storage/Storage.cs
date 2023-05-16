@@ -117,6 +117,11 @@ public class TableStorage : ITenantStorage
         throw new NotImplementedException();
     }
 
+    public Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByAliasAsync(string alias)
     {
         var userid = await GetUserIdByAliasAsync(alias);
