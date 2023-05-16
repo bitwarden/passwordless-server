@@ -103,7 +103,7 @@ public class Fido2ServiceEndpoints
 
             var options = _fido2.RequestNewCredential(user, keyIds, authenticatorSelection, attestation);
 
-            var session = _tokenService.EncodeToken(new RegisterSession { Options = options }, "session_", true);
+            var session = _tokenService.EncodeToken(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing}, "session_", true);
 
 
             // return options to client
@@ -182,7 +182,9 @@ public class Fido2ServiceEndpoints
         // add aliases
         try
         {
-            await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
+            if(session.Aliases != null && session.Aliases.Any()) {
+                await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
+            }
         }
         catch (Exception e)
         {
