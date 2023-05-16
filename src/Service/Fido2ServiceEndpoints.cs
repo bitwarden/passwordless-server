@@ -138,24 +138,24 @@ public class Fido2ServiceEndpoints
         {
             throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
         }
-        
+
         // check if aliases is available
         if (tokenProps.Aliases != null)
         {
             ValidateAliases(tokenProps.Aliases);
 
             var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenant));
-            
+
             // todo: check if alias exists and belongs to different user.
             var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenProps.UserId);
-            if(!isAvailable)
+            if (!isAvailable)
             {
                 throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
             }
         }
 
         var token = _tokenService.EncodeToken(tokenProps, "register_");
-        
+
         return token;
     }
 
@@ -178,7 +178,7 @@ public class Fido2ServiceEndpoints
         };
 
         var success = await _fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
-    
+
         var now = DateTime.UtcNow;
 
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.CredentialId);
@@ -198,20 +198,20 @@ public class Fido2ServiceEndpoints
             Origin = request.Origin,
             Nickname = request.Nickname
         });
-        
+
         // add aliases
         try
         {
-            await SetAlias(new AliasPayload() {Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
+            await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
         }
         catch (Exception e)
         {
             log.LogError(e, "Error adding aliases in /register/complete");
             // Todo: While this should not happen often, we should try to feedback to the user that the alias was not added.
         }
-        
-        
-        
+
+
+
         var tokenData = new VerifySignInToken()
         {
             UserId = Encoding.UTF8.GetString(success.Result.User.Id),

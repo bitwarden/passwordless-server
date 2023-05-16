@@ -1,5 +1,4 @@
 ﻿using Fido2NetLib;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Passwordless.Service.Models;
 
