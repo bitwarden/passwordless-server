@@ -179,8 +179,18 @@ public class Fido2ServiceEndpoints
 
         var success = await _fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
 
-        var now = DateTime.UtcNow;
+        // add aliases
+        try
+        {
+            await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
+        }
+        catch (Exception e)
+        {
+            log.LogError(e, "Error while saving alias during /register/complete");
+            throw;
+        }
 
+        var now = DateTime.UtcNow;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.CredentialId);
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
@@ -198,19 +208,6 @@ public class Fido2ServiceEndpoints
             Origin = request.Origin,
             Nickname = request.Nickname
         });
-
-        // add aliases
-        try
-        {
-            await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
-        }
-        catch (Exception e)
-        {
-            log.LogError(e, "Error adding aliases in /register/complete");
-            // Todo: While this should not happen often, we should try to feedback to the user that the alias was not added.
-        }
-
-
 
         var tokenData = new VerifySignInToken()
         {
