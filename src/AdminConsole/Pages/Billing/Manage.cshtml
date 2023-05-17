@@ -21,7 +21,7 @@
              <p>To enable more features, please upgrade to a paid organization</p>
                 <form action="" method="post">
                     <button class="btn-primary my-3 textbase" type="submit">Upgrade to a Paid Organization</button>
-                    <p class="text-xs">Note: Please see our <a href="#" class="text-blue-600 underline">pricing page</a> for details. Your spend varies on usage, but is estimated at $@( Math.Round(Model.Applications.Select(a => a.CurrentUserCount).Sum() * 0.05,2))/month</p>
+                    <p class="text-xs">Note: Please see our <a href="https://bitwarden.com/products/passwordless/#pricing" class="text-blue-600 underline">pricing page</a> for details. Your spend varies on usage, but is estimated at $@( Math.Round(Model.Applications.Select(a => a.CurrentUserCount).Sum() * 0.05,2))/month</p>
                 </form>
         </div>
     </div>
