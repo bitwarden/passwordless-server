@@ -13,12 +13,10 @@ public static class SigninEndpoints
     public static void MapSigninEndpoints(this WebApplication app)
     {
 
-        app.MapPost("/signin/begin", async (SignInBeginDTO payload, ClaimsPrincipal user, ITenantStorage storage) =>
+        app.MapPost("/signin/begin", async (SignInBeginDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-
-            var result = await service.SignInBegin(payload);
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
+            var result = await fido2Service.SignInBegin(payload);
 
             return Ok(result);
         })
@@ -26,13 +24,11 @@ public static class SigninEndpoints
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
 
-        app.MapPost("/signin/complete", async (SignInCompleteDTO payload, ClaimsPrincipal user, HttpRequest request, ITenantStorage storage) =>
+        app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
             var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
-            var result = await service.SignInComplete(payload, deviceInfo, country);
+            var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
 
             return Ok(result);
         })
@@ -40,12 +36,10 @@ public static class SigninEndpoints
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
 
-        app.MapPost("/signin/verify", async (SignInVerifyDTO payload, ClaimsPrincipal user, ITenantStorage storage) =>
+        app.MapPost("/signin/verify", async (SignInVerifyDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-
-            var result = await service.SignInVerify(payload);
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
+            var result = await fido2Service.SignInVerify(payload);
 
             return Ok(result);
         })

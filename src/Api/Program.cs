@@ -52,17 +52,6 @@ builder.Services.AddAuthorization(options => options.AddPasswordlessPolicies());
 builder.Services.AddOptions<MangementOptions>()
     .BindConfiguration("PasswordlessManagement");
 
-
-builder.Services.AddScoped(sp =>
-{
-    // TODO: Justify null assurance
-    var user = sp.GetRequiredService<IHttpContextAccessor>().HttpContext!.User;
-    return new UserCredentialsService(
-        user.GetAccountName(),
-        sp.GetRequiredService<IConfiguration>(),
-        sp.GetRequiredService<ITenantStorage>());
-});
-
 builder.Services.AddCors(options
     => options.AddPolicy("default", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
@@ -80,6 +69,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddTransient<ISharedManagementService, SharedManagementService>();
 builder.Services.AddScoped<UserCredentialsService>();
+builder.Services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));

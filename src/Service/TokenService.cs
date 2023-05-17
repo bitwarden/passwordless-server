@@ -12,7 +12,7 @@ using Passwordless.Service.Storage;
 
 namespace Passwordless.Service;
 
-public class TokenService
+public class TokenService : ITokenService
 {
     private readonly string _tenant;
     private readonly ILogger _log;
@@ -20,15 +20,15 @@ public class TokenService
     private readonly ITenantStorage _storage;
     private Dictionary<int, string> alternatives;
 
-    public TokenService(string tenant, ILogger log, IConfiguration config, ITenantStorage storage)
+    public TokenService(ILogger log, IConfiguration config, ITenantStorage storage)
     {
-        _tenant = tenant;
+        _tenant = storage.Tenant;
         _log = log;
         _config = config;
         _storage = storage;
     }
 
-    public async Task Init()
+    public async Task InitAsync()
     {
         var keys = await _storage.GetTokenKeys();
 

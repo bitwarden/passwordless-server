@@ -6,6 +6,7 @@ namespace Passwordless.Service.Storage.Ef;
 
 public class NoOpStorage : ITenantStorage
 {
+    public string Tenant => null!;
     public Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
         throw new NotImplementedException();

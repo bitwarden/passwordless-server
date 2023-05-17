@@ -15,14 +15,14 @@ namespace Service.Storage;
 public class TableStorage : ITenantStorage
 {
     private readonly CloudTableClient _tableClient;
-    private readonly string _tentant;
-
     private const string TABLE_PREFIX = "xxx";
 
     public static string GetEnvironmentVariable(string name)
     {
         return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
     }
+
+    public string Tenant { get; }
 
     public TableStorage(string tentant, IConfiguration config)
     {
@@ -37,7 +37,7 @@ public class TableStorage : ITenantStorage
 
         // Create a table client for interacting with the table service
         _tableClient = storageAccount.CreateCloudTableClient();
-        _tentant = tentant;
+        Tenant = tentant;
     }
 
     public TableStorage()
@@ -308,7 +308,7 @@ public class TableStorage : ITenantStorage
 
         var pk = "KEY-" + pkpart;
 
-        var key = new ApiKeyDesc() { AccountName = _tentant, ApiKey = apikey, Scopes = scopes };
+        var key = new ApiKeyDesc() { AccountName = Tenant, ApiKey = apikey, Scopes = scopes };
         var tea = new TableEntityAdapter<ApiKeyDesc>(key, pk, "");
 
         var op = TableOperation.Insert(tea);
@@ -331,7 +331,7 @@ public class TableStorage : ITenantStorage
 
     private CloudTable GetTenantTable()
     {
-        return _tableClient.GetTableReference(TABLE_PREFIX + _tentant);
+        return _tableClient.GetTableReference(TABLE_PREFIX + Tenant);
     }
 
     public async Task<bool> ExistsAsync(byte[] credentialId)

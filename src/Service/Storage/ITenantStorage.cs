@@ -7,6 +7,7 @@ namespace Passwordless.Service.Storage;
 
 public interface ITenantStorage
 {
+    string Tenant { get; }
     Task AddCredentialToUser(Fido2User user, StoredCredential cred);
     Task AddTokenKey(TokenKey tokenKey);
     Task DeleteAccount();
