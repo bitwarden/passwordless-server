@@ -7,6 +7,7 @@
 
 <h2 class="h2">Plan</h2>
 <p class="">The plan you select for this app changes the pricing and features available.</p>
+<p>Please see our <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">Pricing pages</a> or visit our <a class="link-blue" href="@Url.Page("/Billing/Manage")">Billing page</a> to upgrade to Pro.</p>
 
 <form method="post" asp-page-handler="billing">
     <div id="planpicker"></div>
@@ -17,17 +18,28 @@
 {
     <script type="module">
     import { createApp } from 'vue';
-    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")'
+    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")'   
+        
+    const items = [
+    {
+        title: 'Free',
+        desc: 'Passkeys for your users and customers. Up to 10,000 users.',
+        disabled: @Model.Organization.HasSubscription.ToString().ToLower()
+    },
+    {
+        title: 'Pro',
+        desc: 'Passkeys for your users and customers. Less limits, more power.',
+        disabled: @((!Model.Organization.HasSubscription).ToString().ToLower())
+    },
+    {
+        title: 'Enterprise',
+        desc: 'Passkeys for your workforce. Please contact us for more information.',
+        disabled: true
+    }];   
+    
+    
     createApp(RadioBoxes, {
-        items: [{
-            title: 'Users Pro',
-            desc: 'Passkeys for your users or customers'
-        },
-        {
-            title: 'Team members',
-            desc: 'Currently not available. Please contact us for more information',
-            disabled: true
-        }]  
+        items: items  
     } ).mount('#planpicker');
     </script>
 }
