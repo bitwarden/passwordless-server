@@ -3,7 +3,7 @@ using Passwordless.IntegrationTests.Helpers;
 
 namespace Passwordless.Api.IntegrationTests;
 
-public class RegisterTokenTests : BasicTests
+public class RegisterTokenTests : BackendTests
 {
     public RegisterTokenTests(TestWebApplicationFactory<Program> factory) : base(factory)
     {

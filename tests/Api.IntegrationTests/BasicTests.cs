@@ -13,11 +13,27 @@ public class BasicTests : IClassFixture<TestWebApplicationFactory<Program>>
         _client = factory.CreateClient();
 
         _client.DefaultRequestHeaders.Add("Accept", "application/json");
-        _client.DefaultRequestHeaders.Add("ApiSecret", _factory.ApiSecret);
+        _client.DefaultRequestHeaders.Add("User-Agent", "nunit");
     }
 
     public Task<HttpResponseMessage> PostAsync(string url, object payload)
     {
         return _client.PostAsJsonAsync(url, payload);
+    }
+}
+
+public class BackendTests : BasicTests
+{
+    public BackendTests(TestWebApplicationFactory<Program> factory) : base(factory)
+    {
+        _client.DefaultRequestHeaders.Add("ApiSecret", _factory.ApiSecret);
+    }
+}
+
+public class PublicTests : BasicTests
+{
+    public PublicTests(TestWebApplicationFactory<Program> factory) : base(factory)
+    {
+        _client.DefaultRequestHeaders.Add("ApiKey", _factory.ApiKey);
     }
 }

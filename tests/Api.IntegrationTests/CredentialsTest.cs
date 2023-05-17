@@ -7,15 +7,11 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Api.IntegrationTests;
 
 [Collection("Credentials")]
-public class CredentialsTests : IClassFixture<TestWebApplicationFactory<Program>>
+public class CredentialsTests : BackendTests
 {
-    private readonly TestWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
 
-    public CredentialsTests(TestWebApplicationFactory<Program> factory)
+    public CredentialsTests(TestWebApplicationFactory<Program> factory) : base(factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
     }
 
     [Fact]
