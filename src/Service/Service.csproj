@@ -31,4 +31,8 @@
   <ItemGroup>
     <Folder Include="Migrations" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Passwordless.Service.Tests" />
+  </ItemGroup>
 </Project>

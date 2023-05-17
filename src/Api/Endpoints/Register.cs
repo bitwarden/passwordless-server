@@ -1,9 +1,7 @@
-﻿using System.Security.Claims;
-using ApiHelpers;
+﻿using ApiHelpers;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Server.Endpoints;
@@ -13,35 +11,31 @@ public static class RegisterEndpoints
 
     public static void MapRegisterEndpoints(this WebApplication app)
     {
-        app.MapPost("/register/token", async (ClaimsPrincipal user, RegisterToken registerToken, ITenantStorage storage) =>
+        app.MapPost("/register/token", async (RegisterToken registerToken, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-            var result = await service.CreateToken(registerToken);
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
+            var result = await fido2Service.CreateToken(registerToken);
 
             return Ok(new RegisterTokenResponse(result));
         })
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapPost("/register/begin", async (ClaimsPrincipal user, FidoRegistrationBeginDTO payload, ITenantStorage storage) =>
+        app.MapPost("/register/begin", async (FidoRegistrationBeginDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-            var result = await service.RegisterBegin(payload);
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
+            var result = await fido2Service.RegisterBegin(payload);
             return Ok(result);
         })
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, HttpRequest request, ClaimsPrincipal user, ITenantStorage storage) =>
+        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
             var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
-            var result = await service.RegisterComplete(payload, deviceInfo, country);
+            var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
 
             // Avoid serializing the certificate
             return Ok(result);

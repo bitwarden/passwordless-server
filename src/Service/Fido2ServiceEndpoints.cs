@@ -17,32 +17,40 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service;
 
 using Aliases = HashSet<string>;
-public class Fido2ServiceEndpoints
+
+
+public class Fido2ServiceEndpoints : IFido2Service
 {
     private readonly ITenantStorage _storage;
     private Fido2 _fido2;
     private readonly string _tenant;
     private readonly ILogger log;
     private readonly IConfiguration config;
-    private readonly TokenService _tokenService;
+    private readonly ITokenService _tokenService;
 
-    private Fido2ServiceEndpoints(string tenant, ILogger log, IConfiguration config, ITenantStorage storage)
+    // Internal for testing
+    internal Fido2ServiceEndpoints(
+        string tenant,
+        ILogger log,
+        IConfiguration config,
+        ITenantStorage storage,
+        ITokenService tokenService)
     {
         _storage = storage;
         _tenant = tenant;
         this.log = log;
         this.config = config;
-        _tokenService = new TokenService(tenant, log, config, _storage);
+        _tokenService = tokenService;
     }
 
     private async Task Init()
     {
-        await _tokenService.Init();
+        await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage);
+        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService);
         await instance.Init();
         return instance;
     }
@@ -352,7 +360,7 @@ public class Fido2ServiceEndpoints
         return new TokenResponse(token);
     }
 
-    public void ValidateAliases(Aliases aliases, bool throwIfNull = false)
+    private static void ValidateAliases(Aliases aliases, bool throwIfNull = false)
     {
         try
         {

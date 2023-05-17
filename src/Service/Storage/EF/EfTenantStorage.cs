@@ -8,23 +8,24 @@ namespace Passwordless.Service.Storage.Ef;
 public class EfTenantStorage : ITenantStorage
 {
     private readonly DbTenantContext db;
-    private readonly string _tenant;
+
+    public string Tenant { get; }
 
     public EfTenantStorage(DbTenantContext db)
     {
         this.db = db;
-        _tenant = db.Tenant;
+        Tenant = db.Tenant;
     }
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
-        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, _tenant));
+        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, Tenant));
         await db.SaveChangesAsync();
     }
 
     public async Task AddTokenKey(TokenKey tokenKey)
     {
-        tokenKey.Tenant = _tenant;
+        tokenKey.Tenant = Tenant;
         db.TokenKeys.Add(tokenKey);
         await db.SaveChangesAsync();
     }
@@ -177,7 +178,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task StoreAlias(string userid, Dictionary<string, string> aliases)
     {
-        var pointers = aliases.Select(a => new AliasPointer() { Tenant = _tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
+        var pointers = aliases.Select(a => new AliasPointer() { Tenant = Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
         db.Aliases.RemoveRange(db.Aliases.Where(ap => ap.UserId == userid));
         db.Aliases.AddRange(pointers);
         await db.SaveChangesAsync();
@@ -187,7 +188,7 @@ public class EfTenantStorage : ITenantStorage
     {
         var ak = new ApiKeyDesc
         {
-            Tenant = _tenant,
+            Tenant = Tenant,
             Id = pkpart,
             ApiKey = apikey,
             Scopes = scopes,

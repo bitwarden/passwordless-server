@@ -1,10 +1,8 @@
-﻿using System.Security.Claims;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 
 namespace Passwordless.Server.Endpoints;
 
@@ -12,18 +10,17 @@ public static class AliasEndpoints
 {
     public static void MapAliasEndpoints(this WebApplication app)
     {
-        app.MapPost("/alias", async (AliasPayload payload, ClaimsPrincipal user, ITenantStorage storage) =>
+        app.MapPost("/alias", async (AliasPayload payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-            await service.SetAlias(payload);
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
+            await fido2Service.SetAlias(payload);
 
             return Results.Ok();
         })
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapGet("/alias/list", async (string userId, ClaimsPrincipal user, ITenantStorage storage) =>
+        app.MapGet("/alias/list", async (string userId, IFido2ServiceFactory fido2ServiceFactory) =>
         {
             // if payload is empty, throw exception
             if (string.IsNullOrEmpty(userId))
@@ -31,9 +28,8 @@ public static class AliasEndpoints
                 throw new ApiException("UserId is empty", 400);
             }
 
-            var accountName = user.GetAccountName();
-            var service = await Fido2ServiceEndpoints.Create(accountName, app.Logger, app.Configuration, storage);
-            var aliases = await service.GetAliases(userId);
+            var fido2Service = await fido2ServiceFactory.CreateAsync();
+            var aliases = await fido2Service.GetAliases(userId);
 
             var res = ListResponse.Create(aliases);
             return Results.Ok(res);
