@@ -46,17 +46,12 @@ export default {
                 id: index,
                 title: item.title,
                 desc: item.desc,
-                disabled: item.disabled
+                disabled: !!item.disabled
             }
         });
-
-        // const items = [
-        //     {id: 1, title: 'Newsletter', description: 'Last message sent an hour ago', users: '621 users'},
-        //     {id: 2, title: 'Existing Customers', description: 'Last message sent 2 weeks ago', users: '1200 users'},
-        //     {id: 3, title: 'Trial Users', description: 'Last message sent 4 days ago', users: '2740 users'},
-        // ];
-
-        const selected = ref(items[0]);
+        
+        const selected = ref(items.find(e => !e.disabled));
+        
         const clicker = (item) => {
             if(!item.disabled) {
                 selected.value = item
