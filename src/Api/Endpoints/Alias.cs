@@ -1,10 +1,8 @@
-﻿using System.Security.Claims;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 
 namespace Passwordless.Server.Endpoints;
 

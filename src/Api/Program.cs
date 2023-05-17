@@ -5,7 +5,6 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
-using Passwordless.Service.Storage;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 

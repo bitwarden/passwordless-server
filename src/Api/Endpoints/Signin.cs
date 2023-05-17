@@ -1,9 +1,7 @@
-﻿using System.Security.Claims;
-using ApiHelpers;
+﻿using ApiHelpers;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Server.Endpoints;
