@@ -292,8 +292,7 @@ public class Fido2ServiceEndpoints
         var creds = await _storage.GetCredential(request.Response.Id);
         if (creds == null)
         {
-            throw new UnknownCredentialException("unknown_credential", "We don't recognize the passkey you sent us.", 400,
-                new() { { "credentialId", Base64Url.Encode(request.Response.Id) } });
+            throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
         }
 
         // Get credential counter from database
