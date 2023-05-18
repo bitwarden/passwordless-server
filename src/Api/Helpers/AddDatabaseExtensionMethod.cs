@@ -44,9 +44,10 @@ public static class AddDatabaseExtensionMethod
             var context = sp.GetService<IHttpContextAccessor>()?.HttpContext;
             var accountName = context?.User
                 .FindFirstValue(CustomClaimTypes.AccountName);
-            
-            
-            if(environment.IsDevelopment() && (context?.Request.Path == "/health/storage"|| context?.Request.Path == "/ApplyDatabaseMigrations")) {
+
+
+            if (environment.IsDevelopment() && (context?.Request.Path == "/health/storage" || context?.Request.Path == "/ApplyDatabaseMigrations"))
+            {
                 return new ManualTenantProvider(accountName);
             }
 
