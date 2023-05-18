@@ -370,3 +370,8 @@ deploy*.sh
 AdminConsole/settings.sh
 
 DevData/
+
+mail.txt
+
+*.db-shm
+*.db-wal
