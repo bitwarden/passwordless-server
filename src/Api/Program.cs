@@ -80,8 +80,6 @@ WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    //    app.Urls.Add("http://localhost:7001");
-    //    app.Urls.Add("https://localhost:7002");
 }
 else
 {
