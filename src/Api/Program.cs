@@ -1,10 +1,14 @@
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Models;
+using Passwordless.Service.Storage;
+using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
@@ -65,7 +69,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new AutoNumberToStringConverter());
 });
 
-builder.Services.AddDatabase(builder.Configuration, builder.Environment);
+builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddTransient<ISharedManagementService, SharedManagementService>();
 builder.Services.AddScoped<UserCredentialsService>();
 builder.Services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
@@ -99,9 +103,34 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/",
-    () =>
-        "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
+if (app.Environment.IsDevelopment())
+{
+    app.Map("/", async (DbTenantContext dbTenantContext ) =>
+    {
+        // TODO: If people complain, put this behind ?do=migrate and just return a link here.
+        await dbTenantContext.Database.MigrateAsync();
+        
+        // seed with a development api key
+        if (!await dbTenantContext.ApiKeys.AnyAsync())
+        {
+            dbTenantContext.ApiKeys.Add(new ApiKeyDesc() { Tenant = "test", Id = "9795", ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795" });
+            dbTenantContext.ApiKeys.Add(new ApiKeyDesc() { Tenant = "test", Id = "6d02", ApiKey = "4RtmMr0hVknaQAIhaRtPHw==:xR7bg3NVsC80a8GDDhH39g==", Scopes = new[] { "token_register", "token_verify" }, });
+            dbTenantContext.AccountInfo.Add(new AccountMetaInformation() { Tenant = "test", AcountName = "test" });
+            await dbTenantContext.SaveChangesAsync();
+
+            return "Database created and seeded.";
+        }
+        
+        return "All OK. Happy Developing!";
+    });
+}
+else
+{
+    app.MapGet("/",
+        () =>
+            "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");    
+}
+
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
