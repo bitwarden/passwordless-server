@@ -11,7 +11,7 @@ namespace Passwordless.Api.Helpers;
 
 public static class AddDatabaseExtensionMethod
 {
-    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         // Database information
         var sqlite = configuration.GetConnectionString("sqlite");
@@ -45,10 +45,11 @@ public static class AddDatabaseExtensionMethod
             var accountName = context?.User
                 .FindFirstValue(CustomClaimTypes.AccountName);
 
+            var environment = sp.GetRequiredService<IWebHostEnvironment>();
 
-            if (environment.IsDevelopment() && (context?.Request.Path == "/health/storage" || context?.Request.Path == "/ApplyDatabaseMigrations"))
+            if (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations"))
             {
-                return new ManualTenantProvider(accountName);
+                return new ManualTenantProvider("test");
             }
 
             var environment = sp.GetRequiredService<IWebHostEnvironment>();
