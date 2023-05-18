@@ -372,6 +372,7 @@ AdminConsole/settings.sh
 DevData/
 
 mail.txt
+mail.md
 
 *.db-shm
 *.db-wal
