@@ -65,7 +65,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new AutoNumberToStringConverter());
 });
 
-builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddDatabase(builder.Configuration, builder.Environment);
 builder.Services.AddTransient<ISharedManagementService, SharedManagementService>();
 builder.Services.AddScoped<UserCredentialsService>();
 builder.Services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
@@ -75,11 +75,17 @@ builder.Services.AddSingleton(sp =>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+}
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseMigrationsEndPoint();
 }
 else
 {
