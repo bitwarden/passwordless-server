@@ -35,6 +35,8 @@ jobs:
 
       - name: Setup environment
         run: |
+          apt-install xp
+
           xq --version
           xpath
 
