@@ -34,8 +34,7 @@ jobs:
       - name: Test artifact
         run: |
           ls -atlh
-          unzip ${{ inputs.project-name }}.zip
-          ls -atlh
+          ls -atlh ${{ inputs.project-name }}.zip
 
       - name: Login to Azure
         if: ${{ ! inputs.is-dry-run }}
@@ -55,4 +54,4 @@ jobs:
         run: |
           az webapp deployment source config-zip \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
-            --name ${{ secrets.AZURE_APP_NAME }} --slot staging --src ./publish.zip
+            --name ${{ secrets.AZURE_APP_NAME }} --slot staging --src ./${{ inputs.project-name }}.zip
