@@ -6,6 +6,15 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Passwordless.Net</RootNamespace>
     <AssemblyName>Passwordless.Net</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <VersionMajor>0</VersionMajor>
+    <VersionMinor>0</VersionMinor>
+    <VersionPatch>1</VersionPatch>
+    <VersionSuffix>alpha</VersionSuffix>
+    <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</Version>
+    <Company>Bitwarden</Company>
+    <PackageDescription>Quickly add interact with Passwordless in .NET</PackageDescription>
+    <RepositoryUrl>https://github.com/passwordless/passwordless-server</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

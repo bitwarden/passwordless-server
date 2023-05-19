@@ -183,7 +183,7 @@ void RunTheApp()
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseAuthorization();
-    app.UsePasswordless();
+    app.MapPasswordless<ConsoleAdmin>();
     app.MapRazorPages();
     app.Run();
 }

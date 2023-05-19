@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Passwordless.AspNetCore;
 using Passwordless.Net;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -9,21 +8,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 public class PasswordlessAspNetCoreOptions
 {
     public PasswordlessOptions Api { get; set; } = new PasswordlessOptions();
-    public Func<ConvertUserContext, Task> ConvertUser { get; set; } = DefaultConvertUser;
-
-
-    private static Task DefaultConvertUser(ConvertUserContext convertUserContext)
-    {
-        return Task.CompletedTask;
-    }
 }
 
 public static class IdentityBuilderExtensions
 {
     public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, Action<PasswordlessAspNetCoreOptions>? configureOptions = null)
     {
-        builder.Services.AddProblemDetails();
-
         builder.Services.AddOptions<PasswordlessAspNetCoreOptions>()
             .Configure(o => configureOptions?.Invoke(o))
             .PostConfigure<IConfiguration>((options, config) =>
@@ -66,11 +56,6 @@ public static class IdentityBuilderExtensions
                 options.ApiKey = aspNetCoreOptions.Api.ApiKey;
                 options.ApiUrl = aspNetCoreOptions.Api.ApiUrl;
             });
-
-        builder.Services.AddScoped(
-            typeof(IPasswordlessIdentityService),
-            typeof(PasswordlessIdentityService<>).MakeGenericType(builder.UserType)
-        );
 
         return builder;
     }
