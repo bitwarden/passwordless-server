@@ -33,7 +33,7 @@ jobs:
 
       - name: Test artifact
         run: |
-          unzip publish-${{ inputs.project-name }}.zip
+          unzip ${{ inputs.project-name }}.zip
           ls -atlh
 
       - name: Login to Azure
