@@ -28,10 +28,14 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.value }}
     steps:
+      - name: Get pinned .NET version
+        id: dotnet-version
+        run: echo "value=$(cat global.json | jq -r '.sdk.version')" >> $GITHUB_OUTPUT
+
       - name: Set up dotnet
         uses: actions/setup-dotnet@9211491ffb35dd6a6657ca4f45d43dfe6e97c829 # v2.0.0
         with:
-          dotnet-version: "7.0.202"
+          dotnet-version: ${{ steps.dotnet-version.outputs.value }}
 
       - name: Checkout Repo
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
@@ -45,7 +49,7 @@ jobs:
           if [[ "${{ inputs.is-release }}" == "true" ]]; then
             version_suffix=$(date "+%Y%m%d-%H%M")
           else
-            version_suffix=${GITHUB_SHA:0:7}
+            version_suffix=$(date "+%Y%m%d")-${GITHUB_SHA:0:7}
           fi
 
           echo "  version: $base_version.$version_suffix"
