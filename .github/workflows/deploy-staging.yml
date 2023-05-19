@@ -12,6 +12,9 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/_build.yml
+    with:
+      project-name: AdminConsole
+      project-path: ./src/AdminConsole
 
   staging-deploy:
     if: false
@@ -22,8 +25,6 @@ jobs:
     with:
       environment: staging
       version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server
-      project-name: AdminConsole
-      project-path: ./src/AdminConsole
 
   #production-deploy:
   #  needs:
