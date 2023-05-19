@@ -15,6 +15,7 @@ jobs:
   test:
     uses: ./.github/workflows/_test.yml
 
+
   build:
     needs:
       - test
@@ -22,11 +23,17 @@ jobs:
     with:
       is-release: true
 
-  production-deploy:
+
+  production-deploy-admin:
+    strategy:
+      matrix:
+        project-name:
+          - AdminConsole
+          - Api
     needs:
       - build
     uses: ./.github/workflows/_deploy.yml
     secrets: inherit
     with:
       environment: production
-      version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server
+      project-name: ${{ matrix.project-name }}

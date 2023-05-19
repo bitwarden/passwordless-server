@@ -13,10 +13,6 @@ on:
         type: string
         required: true
         description: "Name of the project to deploy"
-      version:
-        type: string
-        required: true
-        description: "version deploying"
       is-dry-run:
         type: boolean
         default: true
@@ -25,17 +21,13 @@ jobs:
   deploy:
     name: Deploy ${{ inputs.project-name }} to ${{ inputs.environment }}
     runs-on: ubuntu-22.04
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}-${{ inputs.project-name }}
     concurrency: ${{ inputs.environment }}-${{ inputs.project-name }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: ${{ inputs.project-name }}.zip
-
-      - name: Test artifact
-        run: |
-          ls -atlh
 
       - name: Login to Azure
         if: ${{ ! inputs.is-dry-run }}

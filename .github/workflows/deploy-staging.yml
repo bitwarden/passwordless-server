@@ -17,6 +17,7 @@ jobs:
   test:
     uses: ./.github/workflows/_test.yml
 
+
   build:
     needs:
       - test
@@ -29,6 +30,7 @@ jobs:
     with:
       project-name: ${{ matrix.project-name }}
       project-path: ./src/${{ matrix.project-name }}
+
 
   staging-deploy:
     strategy:
@@ -43,4 +45,3 @@ jobs:
     with:
       environment: staging
       project-name: ${{ matrix.project-name }}
-      version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server
