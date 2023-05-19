@@ -1,0 +1,116 @@
+---
+name: Build ${{ inputs.project-name }}
+
+on: 
+  workflow_call:
+    inputs:
+      project-name:
+        type: string
+        required: true
+      project-path:
+        type: string
+        required: true
+      is-release:
+        type: boolean
+        default: false
+    outputs:
+      version:
+        description: "version built"
+        value: ${{ jobs.build.outputs.version }}
+
+jobs:
+  build:
+    name: Test & Build ${{ inputs.project-name }}
+    runs-on: ubuntu-22.04
+    env:
+      _BOT_EMAIL: 106330231+bitwarden-devops-bot@users.noreply.github.com
+      _BOT_NAME: bitwarden-devops-bot
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - name: Set up dotnet
+        uses: actions/setup-dotnet@9211491ffb35dd6a6657ca4f45d43dfe6e97c829 # v2.0.0
+        with:
+          dotnet-version: "7.0.x"
+
+      - name: Setup environment
+        run: |
+          xq --version
+          xpath
+
+      - name: Checkout Repo
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Generate Version
+        run: |
+          echo "Calculating next version..."
+          base_version=$(cat Directory.Build.props | xpath -q -e "/Project/PropertyGroup/BaseVersion/text()")
+
+          if [[ "${{ inputs.is-release }}" == "true" ]]; then
+            version_suffix=$(date "+%Y%m%d-%H%M")
+          else
+            version_suffix=${GITHUB_SHA:0:7}
+          fi
+
+          #echo "  version: $base_version.$version_suffix"
+          #jq --arg version "$base_version.$version_suffix" '.version = $version' version.json > version.json.tmp
+          #mv version.json.tmp version.json
+          echo "Done"
+
+      - name: Get Version
+        id: version
+        run: |
+          #version=$(cat version.json | jq -r .version)
+          version="1.0.0"
+          echo "Version: $version"
+          echo "value=$version" >> $GITHUB_OUTPUT
+
+      - name: Run Tests
+        run: |
+          echo "Running tests..."
+          echo "Done"
+
+      - name: .NET Clean & Restore
+        run: |
+          echo "Clean"
+          dotnet clean
+          echo "Restore"
+          dotnet restore --runtime win-x86
+
+      - name: .NET Publish ${{ inputs.project-name }}
+        run: |
+          echo "Publish"
+          dotnet publish ${{ inputs.project-path }}/${{ inputs.project-name }}.csproj \
+            -c Release --no-restore --runtime win-x86 --no-self-contained \
+            -o ./tmp/publish-${{ inputs.project-name }} -p:Version=${{ steps.version.outputs.value }}
+
+      - name: Zip ${{ inputs.project-name }} Artifact
+        run: |
+          cd ./tmp/publish-${{ inputs.project-name }}
+          zip -r ${{ inputs.project-name }}.zip .
+          mv ${{ inputs.project-name }}.zip ../../
+
+          pwd
+          ls -atlh ../../
+
+      - name: Upload project artifact
+        uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535 # v3.0.0
+        with:
+          name: ${{ inputs.project-name }}.zip
+          path: ${{ inputs.project-path }}/${{ inputs.project-name }}.zip
+          if-no-files-found: error
+
+      - name: Tag & push release commit
+        if: inputs.is-release
+        env:
+          TAG_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          git config --local user.email "${{ env._BOT_EMAIL }}"
+          git config --local user.name "${{ env._BOT_NAME }}"
+
+          echo "Creating GitHub tag..."
+          git add version.json
+          git commit -m "Bump Version to $TAG_VERSION"
+          git tag -a $TAG_VERSION -m "Release version $TAG_VERSION" $(git rev-parse HEAD)
+          git push --tags
+          echo "Done"

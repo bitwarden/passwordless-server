@@ -1,0 +1,31 @@
+---
+name: CI/CD - Staging
+
+on:
+  workflow_dispatch: 
+    inputs: {}
+  push:
+    branches:
+      - main
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+
+  staging-deploy:
+    needs:
+      - build
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: staging
+      version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server
+
+  #production-deploy:
+  #  needs:
+  #    - build
+  #  uses: ./.github/workflows/_deploy.yml
+  #  secrets: inherit
+  #  with:
+  #    environment: staging

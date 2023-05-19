@@ -1,0 +1,25 @@
+---
+name: CI/CD - Production
+
+on:
+  workflow_dispatch: 
+    inputs: {}
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      is-release: true
+
+  production-deploy:
+    needs:
+      - build
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: production
+      version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server

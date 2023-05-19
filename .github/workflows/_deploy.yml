@@ -1,0 +1,28 @@
+---
+name: Deploy
+run-name: Deploy to ${{ inputs.environment }}
+
+on: 
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: "Environment to deploy to"
+      version:
+        type: string
+        required: true
+        description: "version deploying"
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-22.04
+    environment: ${{ inputs.environment }}
+    concurrency: ${{ inputs.environment }}
+    steps:
+      - name: "Deploy to: ${{ inputs.environment }}"
+        run: |
+          echo "Deploying to ${{ inputs.environment }}..."
+          echo $(curl -sS ${{ secrets.HOSTING_URL }}/ping?version=${{ inputs.version }} | jq .message)
+          echo "Done"
