@@ -48,6 +48,8 @@ jobs:
         run: |
           echo "Calculating next version..."
           base_version=$(cat Directory.Build.props | grep -o "<BaseVersion>.*</BaseVersion>" | grep -Eo "[0-9]+\.[0-9]+")
+          echo "  tags:"
+          git tag
           latest_tag_version=$(git tag --sort=committerdate --list | tail -1)
           echo "  latest_tag_version: $latest_tag_version"
           version_suffix=$((${latest_tag_version##*.} + 1))-${GITHUB_SHA:0:7}
