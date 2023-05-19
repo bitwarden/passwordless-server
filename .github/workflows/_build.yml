@@ -43,6 +43,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check format
+        run: dotnet format --verify-no-changes
+
+      - name: Install dependencies
+        run: dotnet restore --locked-mode
+      
+      - name: Build
+        run: dotnet build --verbosity minimal
+      
+      - name: Test with the dotnet CLI
+        run: dotnet test --no-build --logger "trx;LogFileName=pw-test-results.trx"
+      
+      - name: Report test results
+        uses: dorny/test-reporter@c9b3d0e2bd2a4e96aaf424dbaa31c46b42318226 # v1.6.0
+        if: always()
+        with:
+          name: Test Results
+          path: "**/*-test-results.trx"
+          reporter: dotnet-trx
+          fail-on-error: true
+
       - name: Generate Version
         id: version
         run: |
@@ -58,17 +79,12 @@ jobs:
           echo "value=$base_version.$version_suffix" >> $GITHUB_OUTPUT
           echo "Done"
 
-      - name: Run Tests
-        run: |
-          echo "Running tests..."
-          echo "Done"
-
       - name: .NET Clean & Restore
         run: |
           echo "Clean"
           dotnet clean
           echo "Restore"
-          dotnet restore --runtime win-x86
+          dotnet restore --runtime win-x86  # Does this need to run in --locked-mode too?
 
       - name: .NET Publish ${{ inputs.project-name }}
         run: |

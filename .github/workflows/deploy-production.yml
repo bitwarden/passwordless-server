@@ -1,5 +1,5 @@
 ---
-name: CI/CD - Production
+name: CD - Production
 
 on:
   workflow_dispatch: 
@@ -10,7 +10,12 @@ permissions:
   deployments: write
 
 jobs:
+  test:
+    uses: ./.github/workflows/_test.yml
+
   build:
+    needs:
+      - test
     uses: ./.github/workflows/_build.yml
     with:
       is-release: true

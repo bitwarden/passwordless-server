@@ -43,16 +43,13 @@ jobs:
         with:
           creds: ${{ secrets.KEY_VAULT_SP }}  # From the environment.secrets
 
-      - name: Configure App
+      - name: Configure & Deploy App
         if: ${{ ! inputs.is-dry-run }}
         run: |
           az webapp config appsettings set -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
             -n ${{ secrets.AZURE_APP_NAME }} --slot staging \
             --settings DD_VERSION=${{ inputs.version }}
 
-      - name: Deploy App
-        if: ${{ ! inputs.is-dry-run }}
-        run: |
           az webapp deployment source config-zip \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
             --name ${{ secrets.AZURE_APP_NAME }} --slot staging --src ./${{ inputs.project-name }}.zip

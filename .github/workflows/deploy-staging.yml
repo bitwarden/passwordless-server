@@ -1,5 +1,5 @@
 ---
-name: CI/CD - Staging
+name: CD - Staging
 
 on:
   workflow_dispatch: 
@@ -8,9 +8,13 @@ on:
     branches:
       - main
 
-
 jobs:
+  test:
+    uses: ./.github/workflows/_test.yml
+
   build:
+    needs:
+      - test
     uses: ./.github/workflows/_build.yml
     with:
       project-name: AdminConsole

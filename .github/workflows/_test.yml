@@ -2,9 +2,11 @@ name: Test & Format
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 permissions:
   id-token: write
@@ -13,21 +15,26 @@ permissions:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     dotnet-version: [ '3.1.x', '6.0.x' ]
-
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - name: Get pinned .NET version
+        id: dotnet-version
+        run: echo "value=$(cat global.json | jq -r '.sdk.version')" >> $GITHUB_OUTPUT
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a #v3.0.3
-         # with:
-        #   dotnet-version: ${{ matrix.dotnet-version }}
-      # You can test your matrix by printing the current dotnet version
+        with:
+          dotnet-version: ${{ steps.dotnet-version.outputs.value }}
+
       - name: Display dotnet version
         run: dotnet --version
+
+      - name: Checkout Repo
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: Check format
+        run: dotnet format --verify-no-changes
+
       - name: Install dependencies
         run: dotnet restore --locked-mode
       
@@ -45,6 +52,3 @@ jobs:
           path: "**/*-test-results.trx"
           reporter: dotnet-trx
           fail-on-error: true
-      
-      - name: Check format
-        run: dotnet format --verify-no-changes
