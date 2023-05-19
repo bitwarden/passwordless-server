@@ -54,4 +54,4 @@ jobs:
         run: |
           az webapp deployment source config-zip \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
-            --name ${{ secerts.AZURE_APP_NAME }} --slot staging --src ./publish.zip
+            --name ${{ secrets.AZURE_APP_NAME }} --slot staging --src ./publish.zip
