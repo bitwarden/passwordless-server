@@ -6,6 +6,10 @@ on:
     inputs: {}
   push: {}
 
+permissions:
+  id-token: write
+  contents: read
+  checks: write
 
 jobs:
   test:

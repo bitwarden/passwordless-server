@@ -1,12 +1,8 @@
+---
 name: Test & Format
 
 on: 
   workflow_call: {}
-
-permissions:
-  id-token: write
-  contents: read
-  checks: write
 
 jobs:
   build:
