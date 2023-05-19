@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;

@@ -3,6 +3,8 @@ using Passwordless.Service.Models;
 using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
 
+namespace Passwordless.Api;
+
 public static class DevelopmentEndpoints
 {
     public static void UseDevelopmentEndpoints(this WebApplication app)
