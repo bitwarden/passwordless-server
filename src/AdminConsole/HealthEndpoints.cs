@@ -20,7 +20,7 @@ public static class HealthEndpoints
             app.Logger.LogInformation("health_storage took {Latency}", sw.ElapsedMilliseconds);
             return Results.Text("Took: " + sw.ElapsedMilliseconds);
         });
-        
+
         app.MapGet("health/api", async (HttpContext ctx, HttpRequest req, IPasswordlessClient client) =>
         {
             var sw = Stopwatch.StartNew();
