@@ -18,7 +18,8 @@ To get started using Passwordless.dev:
 4. Start building registration and signin flows for your application. Refer to the [Passwordless.dev documentation](https://docs.passwordless.dev/) for help. Here are some basic examples to get you started:
 
 **Registration**:
-```
+
+```js
 // Node.js - Code written for this step should run on your backend.
 
 const payload = {
@@ -40,7 +41,8 @@ const {token} = await fetch(apiUrl + "/register/token", {
 ```
 
 **Signin**:
-```
+
+```js
 // Code written for this step should run on your backend.
 
 // Fetch the verification token from your frontend.
@@ -71,9 +73,11 @@ if (body.success) {
 
 We welcome code contributions! Please commit any pull requests against the `main` branch. All changes require tests that prove the intended behavior. Please note that large code changes and units of work are less likely to be merged because of the review burden. 
 
-Security audits and feedback are welcome. Please open an issue or email us privately if the report is sensitive in nature. You can read our security policy in the SECURITY.md file. We also run a program on HackerOne.
+Security audits and feedback are welcome. Please open an issue or email us privately if the report is sensitive in nature. You can read our security policy in the [SECURITY.md](SECURITY.md) file. We also run a program on HackerOne.
 
 No grant of any rights in the trademarks, service marks, or logos of Bitwarden is made (except as may be necessary to comply with the notice requirements as applicable), and use of any Bitwarden trademarks must comply with Bitwarden Trademark Guidelines.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Need support?
 
