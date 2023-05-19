@@ -37,20 +37,20 @@ jobs:
           ls -atlh
 
       - name: Login to Azure
-        if: ! ${{ inputs.is-dry-run }}
+        if: ${{ ! inputs.is-dry-run }}
         uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf # v1.4.3
         with:
           creds: ${{ secrets.KEY_VAULT_SP }}  # From the environment.secrets
 
       - name: Configure App
-        if: ! ${{ inputs.is-dry-run }}
+        if: ${{ ! inputs.is-dry-run }}
         run: |
           az webapp config appsettings set -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
             -n ${{ secrets.AZURE_APP_NAME }} --slot staging \
             --settings DD_VERSION=${{ inputs.version }}
 
       - name: Deploy App
-        if: ! ${{ inputs.is-dry-run }}
+        if: ${{ ! inputs.is-dry-run }}
         run: |
           az webapp deployment source config-zip \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
