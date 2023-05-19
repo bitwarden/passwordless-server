@@ -33,17 +33,11 @@ jobs:
         with:
           dotnet-version: "7.0.x"
 
-      - name: Setup environment
-        run: |
-          go install github.com/sibprogrammer/xq@8aed2a2eaf2816d81bbd0b3a29d11de67d6b26ef # v1.1.4
-
-          xq --version
-          xpath
-
       - name: Checkout Repo
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Generate Version
+        id: version
         run: |
           echo "Calculating next version..."
           base_version=$(cat Directory.Build.props | xpath -q -e "/Project/PropertyGroup/BaseVersion/text()")
@@ -54,18 +48,9 @@ jobs:
             version_suffix=${GITHUB_SHA:0:7}
           fi
 
-          #echo "  version: $base_version.$version_suffix"
-          #jq --arg version "$base_version.$version_suffix" '.version = $version' version.json > version.json.tmp
-          #mv version.json.tmp version.json
+          echo "  version: $base_version.$version_suffix"
+          echo "value=$base_version.$version_suffix" >> $GITHUB_OUTPUT
           echo "Done"
-
-      - name: Get Version
-        id: version
-        run: |
-          #version=$(cat version.json | jq -r .version)
-          version="1.0.0"
-          echo "Version: $version"
-          echo "value=$version" >> $GITHUB_OUTPUT
 
       - name: Run Tests
         run: |
