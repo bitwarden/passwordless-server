@@ -31,7 +31,7 @@ jobs:
       - name: Set up dotnet
         uses: actions/setup-dotnet@9211491ffb35dd6a6657ca4f45d43dfe6e97c829 # v2.0.0
         with:
-          dotnet-version: "7.0.x"
+          dotnet-version: "7.0.202"
 
       - name: Checkout Repo
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
