@@ -1,5 +1,6 @@
 ---
 name: Build
+name: Build - ${{ inputs.project-name }}
 
 on: 
   workflow_call:
@@ -45,7 +46,8 @@ jobs:
         run: |
           echo "Calculating next version..."
           base_version=$(cat Directory.Build.props | grep -o "<BaseVersion>.*</BaseVersion>" | grep -Eo "[0-9]+\.[0-9]+")
-          version_suffix=$(date "+%y%m")-${GITHUB_SHA:0:7}
+          latest_tag_version=$(git tag --sort=committerdate --list | tail -1)}
+          version_suffix=$((${{latest_tag_version##*.} + 1))-${GITHUB_SHA:0:7}
           #version_suffix="46.0"
 
           echo "  version: $base_version.$version_suffix"
@@ -84,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535 # v3.0.0
         with:
           name: ${{ inputs.project-name }}.zip
-          path: ${{ inputs.project-path }}/${{ inputs.project-name }}.zip
+          path: ./${{ inputs.project-name }}.zip
           if-no-files-found: error
 
       - name: Tag & push release commit
