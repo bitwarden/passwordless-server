@@ -33,6 +33,7 @@ jobs:
 
       - name: Test artifact
         run: |
+          ls -atlh
           unzip ${{ inputs.project-name }}.zip
           ls -atlh
 
