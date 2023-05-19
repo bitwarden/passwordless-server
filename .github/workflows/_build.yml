@@ -45,7 +45,7 @@ jobs:
         run: |
           echo "Calculating next version..."
           base_version=$(cat Directory.Build.props | grep -o "<BaseVersion>.*</BaseVersion>" | grep -Eo "[0-9]+\.[0-9]+")
-          version_suffix=$(date "+%y%m")-${GITHUB_REF:0:7}
+          version_suffix=$(date "+%y%m")-${GITHUB_SHA:0:7}
           #version_suffix="46.0"
 
           echo "  version: $base_version.$version_suffix"
