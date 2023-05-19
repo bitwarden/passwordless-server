@@ -30,11 +30,12 @@ jobs:
     steps:
       - name: Download artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: ${{ inputs.project-name }}.zip
 
       - name: Test artifact
         run: |
           ls -atlh
-          ls -atlh ${{ inputs.project-name }}.zip
 
       - name: Login to Azure
         if: ${{ ! inputs.is-dry-run }}
