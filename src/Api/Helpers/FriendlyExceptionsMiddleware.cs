@@ -1,4 +1,5 @@
 using Datadog.Trace;
+using Microsoft.Data.Sqlite;
 using Passwordless.Service.Helpers;
 
 namespace Passwordless.Api.Helpers;
@@ -21,9 +22,16 @@ public class FriendlyExceptionsMiddleware
 
     private async Task SafeNext(HttpContext context)
     {
+        var env = context.RequestServices.GetService<IWebHostEnvironment>();
+
         try
         {
             await _next(context);
+        }
+        catch (SqliteException e) when (env.IsDevelopment())
+        {
+            // this is done to allow migrations to be applied in development mode
+            throw;
         }
         catch (ApiException apiException)
         {
