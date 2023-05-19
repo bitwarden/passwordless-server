@@ -35,8 +35,7 @@ jobs:
 
       - name: Setup environment
         run: |
-          sudo apt update
-          sudo apt-get install -y xq
+          go install github.com/sibprogrammer/xq@8aed2a2eaf2816d81bbd0b3a29d11de67d6b26ef # v1.1.4
 
           xq --version
           xpath
