@@ -52,13 +52,6 @@ public static class AddDatabaseExtensionMethod
                 return new ManualTenantProvider("test");
             }
 
-            var environment = sp.GetRequiredService<IWebHostEnvironment>();
-
-            if (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations"))
-            {
-                return new ManualTenantProvider("test");
-            }
-
             return !string.IsNullOrEmpty(accountName)
                 ? new ManualTenantProvider(accountName)
                 : throw new InvalidOperationException("You should only request ITenantProvider from within an authenticated context");
