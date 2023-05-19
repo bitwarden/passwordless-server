@@ -20,17 +20,27 @@ jobs:
   build:
     needs:
       - test
+    strategy:
+      matrix:
+        project-name: 
+          - AdminConsole
+          - Api
     uses: ./.github/workflows/_build.yml
     with:
-      project-name: AdminConsole
-      project-path: ./src/AdminConsole
+      project-name: ${{ matrix.project-name }}
+      project-path: ./src/${{ matrix.project-name }}
 
   staging-deploy:
+    strategy:
+      matrix:
+        project-name: 
+          - AdminConsole
+          - Api
     needs:
       - build
     uses: ./.github/workflows/_deploy.yml
     secrets: inherit
     with:
       environment: staging
-      project-name: AdminConsole
+      project-name: ${{ matrix.project-name }}
       version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server

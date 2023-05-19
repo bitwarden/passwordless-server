@@ -23,10 +23,10 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to ${{ inputs.environment }}
+    name: Deploy ${{ inputs.project-name }} to ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     environment: ${{ inputs.environment }}
-    concurrency: ${{ inputs.environment }}
+    concurrency: ${{ inputs.environment }}-${{ inputs.project-name }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
