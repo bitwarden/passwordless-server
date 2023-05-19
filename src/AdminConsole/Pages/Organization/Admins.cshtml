@@ -82,7 +82,7 @@
                     {
                         <tr>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@inv.ToEmail</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@inv.CreatedAt.ToLocalTime()</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><local-time datetime="@inv.CreatedAt.ToLocalTime()"></local-time></td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Sent</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@inv.FromName</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
