@@ -26,7 +26,7 @@
             "preLaunchTask": "build-api",
             "program": "${workspaceFolder}/src/Api/bin/Debug/net7.0/Passwordless.Api.dll",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/src/Api",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",

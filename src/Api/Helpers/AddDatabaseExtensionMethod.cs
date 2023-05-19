@@ -41,8 +41,16 @@ public static class AddDatabaseExtensionMethod
 
         services.AddScoped<ITenantProvider>(sp =>
         {
-            var accountName = sp.GetService<IHttpContextAccessor>()?.HttpContext?.User
+            var context = sp.GetService<IHttpContextAccessor>()?.HttpContext;
+            var accountName = context?.User
                 .FindFirstValue(CustomClaimTypes.AccountName);
+
+            var environment = sp.GetRequiredService<IWebHostEnvironment>();
+
+            if (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations"))
+            {
+                return new ManualTenantProvider("test");
+            }
 
             return !string.IsNullOrEmpty(accountName)
                 ? new ManualTenantProvider(accountName)

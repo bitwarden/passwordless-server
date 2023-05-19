@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
@@ -42,22 +43,24 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     }
 });
 
-builder.Services.AddProblemDetails();
+var services = builder.Services;
 
-builder.Services.AddAuthentication(Constants.Scheme)
+services.AddProblemDetails();
+services
+    .AddAuthentication(Constants.Scheme)
     .AddCustomSchemes();
 
-builder.Services.AddAuthorization(options => options.AddPasswordlessPolicies());
-builder.Services.AddOptions<MangementOptions>()
+services.AddAuthorization(options => options.AddPasswordlessPolicies());
+services.AddOptions<MangementOptions>()
     .BindConfiguration("PasswordlessManagement");
 
-builder.Services.AddCors(options
+services.AddCors(options
     => options.AddPolicy("default", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+services.AddHttpContextAccessor();
+services.AddScoped<ITenantProvider, TenantProvider>();
 
-builder.Services.ConfigureHttpJsonOptions(options =>
+services.ConfigureHttpJsonOptions(options =>
 {
     // Already has the built in web defaults
     options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
@@ -65,39 +68,42 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new AutoNumberToStringConverter());
 });
 
-builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddTransient<ISharedManagementService, SharedManagementService>();
-builder.Services.AddScoped<UserCredentialsService>();
-builder.Services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddSingleton(sp =>
+services.AddDatabase(builder.Configuration);
+services.AddTransient<ISharedManagementService, SharedManagementService>();
+services.AddScoped<UserCredentialsService>();
+services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
+services.AddScoped<ITokenService, TokenService>();
+services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
+
+if (builder.Environment.IsDevelopment())
+{
+    services.AddDatabaseDeveloperPageExceptionFilter();
+}
 
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    //    app.Urls.Add("http://localhost:7001");
-    //    app.Urls.Add("https://localhost:7002");
+    app.UseMigrationsEndPoint();
+    app.UseDevelopmentEndpoints();
 }
 else
 {
     app.UseHsts();
+    app.MapGet("/",
+        () =>
+            "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
 app.UseCors("default");
 app.UseSecurityHeaders();
 app.UseStaticFiles();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapGet("/",
-    () =>
-        "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
@@ -108,7 +114,6 @@ app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
 app.MapHealthEndpoints();
-
 
 app.Run();
 
