@@ -46,15 +46,13 @@ jobs:
       - name: Generate Version
         id: version
         run: |
+          git fetch --prune --tags
+
           echo "Calculating next version..."
           base_version=$(cat Directory.Build.props | grep -o "<BaseVersion>.*</BaseVersion>" | grep -Eo "[0-9]+\.[0-9]+")
-          echo "  tags:"
-          git fetch --prune --tags
-          git tag
           latest_tag_version=$(git tag --sort=committerdate --list | tail -1)
           echo "  latest_tag_version: $latest_tag_version"
           version_suffix=$((${latest_tag_version##*.} + 1))-${GITHUB_SHA:0:7}
-          #version_suffix="46.0"
 
           echo "  version: $base_version.$version_suffix"
           echo "value=$base_version.$version_suffix" >> $GITHUB_OUTPUT

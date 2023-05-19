@@ -17,19 +17,11 @@ jobs:
       project-path: ./src/AdminConsole
 
   staging-deploy:
-    if: false
     needs:
       - build
     uses: ./.github/workflows/_deploy.yml
     secrets: inherit
     with:
       environment: staging
+      project-name: AdminConsole
       version: ${{ needs.build.outputs.version }}  # Solely used to see version hit web server
-
-  #production-deploy:
-  #  needs:
-  #    - build
-  #  uses: ./.github/workflows/_deploy.yml
-  #  secrets: inherit
-  #  with:
-  #    environment: staging

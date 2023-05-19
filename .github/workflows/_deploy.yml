@@ -9,10 +9,17 @@ on:
         type: string
         required: true
         description: "Environment to deploy to"
+      project-name:
+        type: string
+        required: true
+        description: "Name of the project to deploy"
       version:
         type: string
         required: true
         description: "version deploying"
+      is-dry-run:
+        type: boolean
+        default: true
 
 jobs:
   deploy:
@@ -21,8 +28,30 @@ jobs:
     environment: ${{ inputs.environment }}
     concurrency: ${{ inputs.environment }}
     steps:
-      - name: "Deploy to: ${{ inputs.environment }}"
+      - name: Download artifact
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+
+      - name: Test artifact
         run: |
-          echo "Deploying to ${{ inputs.environment }}..."
-          echo $(curl -sS ${{ secrets.HOSTING_URL }}/ping?version=${{ inputs.version }} | jq .message)
-          echo "Done"
+          unzip publish-${{ inputs.project-name }}.zip
+          ls -atlh
+
+      - name: Login to Azure
+        if: ! ${{ inputs.is-dry-run }}
+        uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf # v1.4.3
+        with:
+          creds: ${{ secrets.KEY_VAULT_SP }}  # From the environment.secrets
+
+      - name: Configure App
+        if: ! ${{ inputs.is-dry-run }}
+        run: |
+          az webapp config appsettings set -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
+            -n ${{ secrets.AZURE_APP_NAME }} --slot staging \
+            --settings DD_VERSION=${{ inputs.version }}
+
+      - name: Deploy App
+        if: ! ${{ inputs.is-dry-run }}
+        run: |
+          az webapp deployment source config-zip \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
+            --name ${{ secerts.AZURE_APP_NAME }} --slot staging --src ./publish.zip
