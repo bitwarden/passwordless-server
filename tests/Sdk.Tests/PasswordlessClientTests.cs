@@ -5,8 +5,8 @@ namespace Passwordless.Net.Tests;
 public class PasswordlessClientTests
 {
 
-    // private const string SkipReason = "Manual test, you must be running the Api project.";
-    private const string SkipReason = null;
+    private const string SkipReason = "Manual test, you must be running the Api project.";
+    // private const string SkipReason = null;
 
     private readonly PasswordlessClient _sut;
 
