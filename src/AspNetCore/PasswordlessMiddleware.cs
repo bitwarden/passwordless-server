@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Passwordless.Net;
 
@@ -68,7 +67,7 @@ public class PasswordlessMiddleware
                 await _problemDetailsService.WriteAsync(new ProblemDetailsContext
                 {
                     HttpContext = context,
-                    ProblemDetails = new ProblemDetails
+                    ProblemDetails = new Microsoft.AspNetCore.Mvc.ProblemDetails
                     {
                         // TODO: Add relevant docs
                         Detail =
@@ -87,7 +86,7 @@ public class PasswordlessMiddleware
             await _problemDetailsService.WriteAsync(new ProblemDetailsContext
             {
                 HttpContext = context,
-                ProblemDetails = new ProblemDetails { Detail = ex.Message }
+                ProblemDetails = new Microsoft.AspNetCore.Mvc.ProblemDetails { Detail = ex.Message },
             });
         }
 

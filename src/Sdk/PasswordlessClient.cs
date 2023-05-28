@@ -43,19 +43,26 @@ public class PasswordlessClient : IPasswordlessClient
     {
         var res = await _client.PostAsJsonAsync("register/token", registerOptions);
         res.EnsureSuccessStatusCode();
-        return (await res.Content.ReadFromJsonAsync<RegisterTokenResponse>());
+        return (await res.Content.ReadFromJsonAsync<RegisterTokenResponse>())!;
     }
 
     public async Task<VerifiedUser?> VerifyToken(string verifyToken)
     {
-        var req = await _client.PostAsJsonAsync("signin/verify", new { token = verifyToken });
-
-        // todo: replace with better error handling
-        req.EnsureSuccessStatusCode();
-
-        if (req.IsSuccessStatusCode)
+        var request = new HttpRequestMessage(HttpMethod.Post, "signin/verify")
         {
-            var res = await req.Content.ReadFromJsonAsync<VerifiedUser>();
+            Content = JsonContent.Create(new
+            {
+                token = verifyToken,
+            }),
+        };
+
+        // We just want to return null if there is a problem.
+        request.SkipErrorHandling();
+        var response = await _client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var res = await response.Content.ReadFromJsonAsync<VerifiedUser>();
             return res;
         }
 
@@ -64,72 +71,47 @@ public class PasswordlessClient : IPasswordlessClient
 
     public async Task DeleteUserAsync(string userId)
     {
-        var req = await _client.PostAsJsonAsync("users/delete", new { UserId = userId });
-
-        // todo: replace with better error handling
-        req.EnsureSuccessStatusCode();
+        await _client.PostAsJsonAsync("users/delete", new { UserId = userId });
     }
 
     public async Task<List<PasswordlessUserSummary>?> ListUsers()
     {
-        var req = await _client.GetAsync("users/list");
-
-        // todo: replace with better error handling
-        req.EnsureSuccessStatusCode();
-
-        if (req.IsSuccessStatusCode)
-        {
-            var res = await req.Content.ReadFromJsonAsync<ListResponse<PasswordlessUserSummary>>();
-            return res.Values;
-        }
-
-        return null;
+        var response = await _client.GetFromJsonAsync<ListResponse<PasswordlessUserSummary>>("users/list");
+        return response!.Values;
     }
 
     public async Task<List<AliasPointer>> ListAliases(string userId)
     {
-        var req = await _client.GetAsync($"alias/list?userid={userId}");
-        req.EnsureSuccessStatusCode();
-
-        var res = await req.Content.ReadFromJsonAsync<ListResponse<AliasPointer>>();
-
-
-        return res.Values;
+        var response = await _client.GetFromJsonAsync<ListResponse<AliasPointer>>($"alias/list?userid={userId}");
+        return response!.Values;
     }
 
 
     public async Task<List<Credential>> ListCredentials(string userId)
     {
-        var req = await _client.GetAsync($"credentials/list?userid={userId}");
-
-        req.EnsureSuccessStatusCode();
-
-        var res = await req.Content.ReadFromJsonAsync<ListResponse<Credential>>();
-
-        return res.Values;
+        var response = await _client.GetFromJsonAsync<ListResponse<Credential>>($"credentials/list?userid={userId}");
+        return response!.Values;
     }
 
     public async Task DeleteCredential(string id)
     {
-        var req = await _client.PostAsJsonAsync("credentials/delete", new { CredentialId = id });
-
-        req.EnsureSuccessStatusCode();
+        await _client.PostAsJsonAsync("credentials/delete", new { CredentialId = id });
     }
 
     public async Task DeleteCredential(byte[] id)
     {
+        await DeleteCredential(Base64Url.Encode(id));
+    }
 
-        var req = await _client.PostAsJsonAsync("credentials/delete", new { CredentialId = Base64Url.Encode(id) });
-        req.EnsureSuccessStatusCode();
-
+    public async Task<UsersCount> GetUsersCount()
+    {
+        return (await _client.GetFromJsonAsync<UsersCount>("users/count"))!;
     }
 
     public class ListResponse<T>
     {
-        public List<T> Values { get; set; }
+        public List<T> Values { get; set; } = null!;
     }
-
-
 
     public sealed class Base64UrlConverter : JsonConverter<byte[]>
     {
@@ -266,14 +248,5 @@ public class PasswordlessClient : IPasswordlessClient
             ArrayPool<byte>.Shared.Return(array, clearArray: true);
             return result;
         }
-    }
-
-    public async Task<UsersCount> GetUsersCount()
-    {
-        var req = await _client.GetAsync("users/count");
-
-        req.EnsureSuccessStatusCode();
-
-        return await req.Content.ReadFromJsonAsync<UsersCount>();
     }
 }

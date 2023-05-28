@@ -11,20 +11,27 @@ public static class ServiceCollectionExtensions
         services.AddOptions<PasswordlessOptions>()
             .Configure(configureOptions)
             .PostConfigure(options => options.ApiUrl ??= PasswordlessOptions.CloudApiUrl)
-            .Validate(options => !string.IsNullOrEmpty(options.ApiKey) && !string.IsNullOrEmpty(options.ApiSecret), "Missing ApiKey and/or ApiSecret");
+            .Validate(options => !string.IsNullOrEmpty(options.ApiSecret), "Passwordless: Missing ApiSecret");
 
-        // TODO: Use AddHttpMessageHandler for error handling
+        services.AddPasswordlessHttpClient();
+
+        // TODO: Get rid of this service, all consumers should use the interface
+        services.AddTransient(sp => (PasswordlessClient)sp.GetRequiredService<IPasswordlessClient>());
+
+        return services;
+    }
+
+    private static void AddPasswordlessHttpClient(this IServiceCollection services)
+    {
+        services.AddSingleton<PasswordlessDelegatingHandler>();
+
         services.AddHttpClient<IPasswordlessClient, PasswordlessClient>((sp, client) =>
         {
             var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;
 
             client.BaseAddress = new Uri(options.ApiUrl);
             client.DefaultRequestHeaders.Add("ApiSecret", options.ApiSecret);
-        });
-
-        // TODO: Get rid of this service, all consumers should use the interface
-        services.AddTransient(sp => (PasswordlessClient)sp.GetRequiredService<IPasswordlessClient>());
-
-        return services;
+        })
+            .AddHttpMessageHandler<PasswordlessDelegatingHandler>();
     }
 }
