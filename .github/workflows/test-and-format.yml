@@ -50,8 +50,13 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: true
 
+      - name: Clean Branch Name
+        run: echo "CLEAN_BRANCH_NAME=${BRANCH_NAME/\//-}" >> $GITHUB_ENV
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
       - name: Pack NuGet Packages
-        run: dotnet pack --no-build --include-symbols --include-source --configuration Release --version-suffix "ci-${{ github.ref_name}}-${{ github.run_id }}"
+        run: dotnet pack --no-build --include-symbols --include-source --configuration Release --version-suffix "ci-${{ env.CLEAN_BRANCH_NAME }}-${{ github.run_id }}"
       
       - name: Publish NuGet Packages
         run: dotnet nuget push **/*.nupkg --source https://nuget.pkg.github.com/passwordless/index.json --api-key ${GITHUB_TOKEN}
