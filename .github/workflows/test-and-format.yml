@@ -19,6 +19,10 @@ jobs:
     #   matrix:
     #     dotnet-version: [ '3.1.x', '6.0.x' ]
 
+    permissions:
+      packages: write
+      checks: write
+
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       - name: Setup dotnet
@@ -28,15 +32,19 @@ jobs:
       # You can test your matrix by printing the current dotnet version
       - name: Display dotnet version
         run: dotnet --version
+
       - name: Install dependencies
         run: dotnet restore --locked-mode
-      
+
       - name: Build
-        run: dotnet build --verbosity minimal
-      
+        run: dotnet build --verbosity minimal --no-restore
+
+      - name: Check Format
+        run: dotnet format --verify-no-changes --no-restore
+
       - name: Test with the dotnet CLI
-        run: dotnet test --no-build --logger "trx;LogFileName=pw-test-results.trx"
-      
+        run: dotnet test --no-build --no-restore --logger "trx;LogFileName=pw-test-results.trx"
+
       - name: Report test results
         uses: dorny/test-reporter@c9b3d0e2bd2a4e96aaf424dbaa31c46b42318226 # v1.6.0
         if: always()
@@ -45,6 +53,16 @@ jobs:
           path: "**/*-test-results.trx"
           reporter: dotnet-trx
           fail-on-error: true
+
+      - name: Clean Branch Name
+        run: echo "CLEAN_BRANCH_NAME=${BRANCH_NAME/\//-}" >> $GITHUB_ENV
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+      - name: Pack NuGet Packages
+        run: dotnet pack --no-build --version-suffix "ci-${{ env.CLEAN_BRANCH_NAME }}-${{ github.run_id }}"
       
-      - name: Check format
-        run: dotnet format --verify-no-changes
+      - name: Publish NuGet Packages
+        run: dotnet nuget push **/*.nupkg --source https://nuget.pkg.github.com/passwordless/index.json --api-key ${GITHUB_TOKEN}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

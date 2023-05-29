@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Passwordless.Net</RootNamespace>
     <AssemblyName>Passwordless.Net</AssemblyName>
+    <VersionPrefix>0.0.10</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
