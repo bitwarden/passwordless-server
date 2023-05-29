@@ -44,14 +44,14 @@ jobs:
       - name: Test with the dotnet CLI
         run: dotnet test --no-build --no-restore --logger "trx;LogFileName=pw-test-results.trx"
 
-      - name: Report test results
-        uses: dorny/test-reporter@c9b3d0e2bd2a4e96aaf424dbaa31c46b42318226 # v1.6.0
-        if: always()
-        with:
-          name: Test Results
-          path: "**/*-test-results.trx"
-          reporter: dotnet-trx
-          fail-on-error: true
+      # - name: Report test results
+      #   uses: dorny/test-reporter@c9b3d0e2bd2a4e96aaf424dbaa31c46b42318226 # v1.6.0
+      #   if: always()
+      #   with:
+      #     name: Test Results
+      #     path: "**/*-test-results.trx"
+      #     reporter: dotnet-trx
+      #     fail-on-error: true
 
       - name: Clean Branch Name
         run: echo "CLEAN_BRANCH_NAME=${BRANCH_NAME/\//-}" >> $GITHUB_ENV
