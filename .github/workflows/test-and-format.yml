@@ -31,7 +31,9 @@ jobs:
         #   dotnet-version: ${{ matrix.dotnet-version }}
       # You can test your matrix by printing the current dotnet version
       - name: Display dotnet version
-        run: dotnet --version
+        run: |
+          dotnet --version
+          dotnet --info
 
       - name: Install dependencies
         run: dotnet restore --locked-mode
@@ -40,7 +42,9 @@ jobs:
         run: dotnet build --verbosity minimal --no-restore
 
       - name: Check Format
-        run: dotnet format --verify-no-changes --no-restore
+        run: |
+          dotnet format --version
+          dotnet format --verify-no-changes --no-restore
 
       - name: Test with the dotnet CLI
         run: dotnet test --no-build --no-restore --logger "trx;LogFileName=pw-test-results.trx"
