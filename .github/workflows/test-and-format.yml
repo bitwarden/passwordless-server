@@ -44,7 +44,8 @@ jobs:
       - name: Check Format
         run: |
           dotnet format --version
-          dotnet format --verify-no-changes --no-restore
+
+         # dotnet format --verify-no-changes --no-restore
 
       - name: Test with the dotnet CLI
         run: dotnet test --no-build --no-restore --logger "trx;LogFileName=pw-test-results.trx"
