@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public class PasswordlessAspNetCoreOptions : PasswordlessOptions
 {
-    
+
 }
 
 public static class IdentityBuilderExtensions
