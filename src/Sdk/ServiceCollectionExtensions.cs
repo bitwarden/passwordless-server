@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
     private static void AddPasswordlessHttpClient(this IServiceCollection services)
     {
-        services.AddSingleton<PasswordlessDelegatingHandler>();
+        services.AddTransient<PasswordlessDelegatingHandler>();
 
         services.AddHttpClient<IPasswordlessClient, PasswordlessClient>((sp, client) =>
         {
