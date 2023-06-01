@@ -17,21 +17,22 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
     {
         var routeGroup = endpoints.MapGroup("");
 
-        routeGroup.Map("/passwordless-register", async Task<Results<Ok<RegisterTokenResponse>, ValidationProblem>>
-            (IServiceProvider services, PasswordlessRegisterRequest registerRequest, IPasswordlessClient passwordlessClient) =>
+        static async Task<Results<Ok<RegisterTokenResponse>, ValidationProblem>> PasswordlessRegister(
+            PasswordlessRegisterRequest registerRequest,
+            IPasswordlessClient passwordlessClient,
+            IUserStore<TUser> userStore,
+            CancellationToken cancellationToken)
         {
-            var userManager = services.GetRequiredService<UserManager<TUser>>();
-
             var user = new TUser();
-            await userManager.SetUserNameAsync(user, registerRequest.Username);
-            var result = await userManager.CreateAsync(user);
+            await userStore.SetUserNameAsync(user, registerRequest.Username, cancellationToken);
+            var result = await userStore.CreateAsync(user, cancellationToken);
 
             if (!result.Succeeded)
             {
                 return TypedResults.ValidationProblem(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
             }
 
-            var userId = await userManager.GetUserIdAsync(user);
+            var userId = await userStore.GetUserIdAsync(user, cancellationToken);
 
             // Call passwordless
             var registerTokenResponse = await passwordlessClient.CreateRegisterToken(new RegisterOptions
@@ -42,10 +43,16 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             });
 
             return TypedResults.Ok(registerTokenResponse);
-        });
+        }
 
-        routeGroup.MapPost("/passwordless-login", async Task<Results<UnauthorizedHttpResult, Ok, SignInHttpResult>>
-            (IServiceProvider services, PasswordlessLoginRequest loginRequest, IPasswordlessClient passwordlessClient, IOptions<AuthenticationOptions> authenticationOptionsAccessor) =>
+        routeGroup.Map("/passwordless-register", PasswordlessRegister);
+
+        static async Task<Results<SignInHttpResult, UnauthorizedHttpResult>> PasswordlessLogin(
+            PasswordlessLoginRequest loginRequest,
+            IPasswordlessClient passwordlessClient,
+            IUserStore<TUser> userStore,
+            IUserClaimsPrincipalFactory<TUser> userClaimsPrincipalFactory,
+            HttpContext httpContext)
         {
             // Get token
             var verifiedUser = await passwordlessClient.VerifyToken(loginRequest.Token);
@@ -55,23 +62,21 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
                 return TypedResults.Unauthorized();
             }
 
-            var userManager = services.GetRequiredService<UserManager<TUser>>();
-
-            var user = await userManager.FindByIdAsync(verifiedUser.UserId);
+            var user = await userStore.FindByIdAsync(verifiedUser.UserId, httpContext.RequestAborted);
 
             if (user is null)
             {
                 return TypedResults.Unauthorized();
             }
-
-            var claimsFactory = services.GetRequiredService<IUserClaimsPrincipalFactory<TUser>>();
-            var claimsPrincipal = await claimsFactory.CreateAsync(user);
+            var claimsPrincipal = await userClaimsPrincipalFactory.CreateAsync(user);
 
             // TODO: Not totally sure what the best scheme is
-            var authenticationOptions = authenticationOptionsAccessor.Value;
+            var authenticationOptions = httpContext.RequestServices.GetService<IOptions<AuthenticationOptions>>()?.Value;
 
-            return TypedResults.SignIn(claimsPrincipal, authenticationScheme: authenticationOptions.DefaultSignInScheme);
-        });
+            return TypedResults.SignIn(claimsPrincipal, authenticationScheme: authenticationOptions?.DefaultSignInScheme ?? "Passwordless");
+        }
+
+        routeGroup.MapPost("/passwordless-login", PasswordlessLogin);
 
         return routeGroup;
     }
