@@ -1,77 +1,39 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Passwordless.AspNetCore;
 using Passwordless.Net;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public class PasswordlessAspNetCoreOptions
+public class PasswordlessAspNetCoreOptions : PasswordlessOptions
 {
-    public PasswordlessOptions Api { get; set; } = new PasswordlessOptions();
-    public Func<ConvertUserContext, Task> ConvertUser { get; set; } = DefaultConvertUser;
-
-
-    private static Task DefaultConvertUser(ConvertUserContext convertUserContext)
-    {
-        return Task.CompletedTask;
-    }
+    
 }
 
 public static class IdentityBuilderExtensions
 {
-    public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, Action<PasswordlessAspNetCoreOptions>? configureOptions = null)
+    public static IServiceCollection AddPasswordless(this IServiceCollection services, IConfiguration configuration)
     {
-        builder.Services.AddProblemDetails();
+        return services.AddPasswordless(options =>
+        {
+            configuration.Bind(options);
+        });
+    }
 
-        builder.Services.AddOptions<PasswordlessAspNetCoreOptions>()
-            .Configure(o => configureOptions?.Invoke(o))
-            .PostConfigure<IConfiguration>((options, config) =>
-            {
-                var passwordlessSection = config.GetSection("Passwordless");
+    public static IServiceCollection AddPasswordless(this IServiceCollection services, Action<PasswordlessAspNetCoreOptions> configureOptions)
+    {
+        services.Configure(configureOptions);
 
-                if (passwordlessSection == null)
-                {
-                    return;
-                }
+        services.AddPasswordlessSdk(passwordlessOptions => { });
 
-                if (options.Api.ApiSecret == null)
-                {
-                    options.Api.ApiSecret = passwordlessSection.GetValue<string>("Api:ApiSecret")
-                        ?? passwordlessSection.GetValue<string>("ApiSecret")!;
-                }
-
-                if (options.Api.ApiKey == null)
-                {
-                    options.Api.ApiKey = passwordlessSection.GetValue<string>("Api:ApiKey")
-                        ?? passwordlessSection.GetValue<string>("ApiKey")!;
-                }
-
-                var configApiUrl = passwordlessSection.GetValue<string>("Api:ApiUrl")
-                        ?? passwordlessSection.GetValue<string>("ApiUrl");
-
-                if (configApiUrl != null)
-                {
-                    options.Api.ApiUrl = configApiUrl;
-                }
-            });
-
-        builder.Services.AddPasswordlessSdk(passwordlessOptions => { });
-
-        builder.Services.AddOptions<PasswordlessOptions>()
+        services.AddOptions<PasswordlessOptions>()
             .Configure<IOptions<PasswordlessAspNetCoreOptions>>((options, aspNetCoreOptionsAccessor) =>
             {
                 var aspNetCoreOptions = aspNetCoreOptionsAccessor.Value;
-                options.ApiSecret = aspNetCoreOptions.Api.ApiSecret;
-                options.ApiKey = aspNetCoreOptions.Api.ApiKey;
-                options.ApiUrl = aspNetCoreOptions.Api.ApiUrl;
+                options.ApiSecret = aspNetCoreOptions.ApiSecret;
+                options.ApiKey = aspNetCoreOptions.ApiKey;
+                options.ApiUrl = aspNetCoreOptions.ApiUrl;
             });
 
-        builder.Services.AddScoped(
-            typeof(IPasswordlessIdentityService),
-            typeof(PasswordlessIdentityService<>).MakeGenericType(builder.UserType)
-        );
-
-        return builder;
+        return services;
     }
 }
