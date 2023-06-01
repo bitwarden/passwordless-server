@@ -103,8 +103,9 @@ void RunTheApp()
         .AddIdentity<ConsoleAdmin, IdentityRole>()
         .AddEntityFrameworkStores<ConsoleDbContext>()
         .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
-        .AddDefaultTokenProviders()
-        .AddPasswordless();
+        .AddDefaultTokenProviders();
+
+    services.AddPasswordless(builder.Configuration.GetSection("Passwordless"));
 
     services.ConfigureApplicationCookie(o =>
     {
