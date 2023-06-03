@@ -13,10 +13,7 @@ public static class IdentityBuilderExtensions
 {
     public static IServiceCollection AddPasswordless(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddPasswordless(options =>
-        {
-            configuration.Bind(options);
-        });
+        return services.AddPasswordless(configuration.Bind);
     }
 
     public static IServiceCollection AddPasswordless(this IServiceCollection services, Action<PasswordlessAspNetCoreOptions> configureOptions)
@@ -30,7 +27,6 @@ public static class IdentityBuilderExtensions
             {
                 var aspNetCoreOptions = aspNetCoreOptionsAccessor.Value;
                 options.ApiSecret = aspNetCoreOptions.ApiSecret;
-                options.ApiKey = aspNetCoreOptions.ApiKey;
                 options.ApiUrl = aspNetCoreOptions.ApiUrl;
             });
 
