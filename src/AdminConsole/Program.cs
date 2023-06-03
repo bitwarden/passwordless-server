@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Passwordless.AdminConsole;
 using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -181,6 +182,7 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
+    app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseAuthorization();
