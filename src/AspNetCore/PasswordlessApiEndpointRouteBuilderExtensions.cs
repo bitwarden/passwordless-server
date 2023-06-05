@@ -35,7 +35,6 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             .MapGroup(endpointOptions.GroupPrefix)
             .WithGroupName("Passwordless");
 
-
         static async Task<Results<Ok<RegisterTokenResponse>, ValidationProblem>> PasswordlessRegister(
             TRegisterBody registerRequest,
             IRegisterService<TRegisterBody> registerService,
