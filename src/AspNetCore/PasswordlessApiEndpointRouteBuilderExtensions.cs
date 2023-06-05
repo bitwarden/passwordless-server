@@ -31,7 +31,11 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     public static IEndpointConventionBuilder MapPasswordless<TRegisterBody, TLoginBody, TAddCredentialBody>(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
     {
-        var routeGroup = endpoints.MapGroup(endpointOptions.GroupPrefix);
+        var routeGroup = endpoints
+            .MapGroup(endpointOptions.GroupPrefix)
+            .WithName("Passwordless")
+            .WithGroupName("Passwordless Group Name")
+            .WithDisplayName("Passwordless Display Name");
 
         static async Task<Results<Ok<RegisterTokenResponse>, ValidationProblem>> PasswordlessRegister(
             TRegisterBody registerRequest,
