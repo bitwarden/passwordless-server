@@ -1,7 +1,9 @@
+using System.ComponentModel;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Passwordless.AspNetCore;
 using Passwordless.AspNetCore.Services;
 using Passwordless.Net;
 
@@ -11,12 +13,25 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
 {
     public static IEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints)
     {
-        return endpoints.MapPasswordless<PasswordlessRegisterRequest, PasswordlessLoginRequest, PasswordlessAddCredentialRequest>();
+        return endpoints.MapPasswordless(new PasswordlessEndpointOptions());
     }
 
+    public static IEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
+    {
+        return endpoints.MapPasswordless<PasswordlessRegisterRequest, PasswordlessLoginRequest, PasswordlessAddCredentialRequest>(endpointOptions);
+    }
+
+    // TODO: Add documentation about how customization of the bodies means you must also customize that service
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
     public static IEndpointConventionBuilder MapPasswordless<TRegisterBody, TLoginBody, TAddCredentialBody>(this IEndpointRouteBuilder endpoints)
     {
-        var routeGroup = endpoints.MapGroup("");
+        return endpoints.MapPasswordless<PasswordlessRegisterRequest, PasswordlessLoginRequest, PasswordlessAddCredentialRequest>(new PasswordlessEndpointOptions());
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
+    public static IEndpointConventionBuilder MapPasswordless<TRegisterBody, TLoginBody, TAddCredentialBody>(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
+    {
+        var routeGroup = endpoints.MapGroup(endpointOptions.GroupPrefix);
 
         static async Task<Results<Ok<RegisterTokenResponse>, ValidationProblem>> PasswordlessRegister(
             TRegisterBody registerRequest,
@@ -26,7 +41,10 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             return await registerService.RegisterAsync(registerRequest, cancellationToken);
         }
 
-        routeGroup.Map("/passwordless-register", PasswordlessRegister);
+        if (endpointOptions.RegisterPath is not null)
+        {
+            routeGroup.Map(endpointOptions.RegisterPath, PasswordlessRegister);
+        }
 
         static async Task<Results<SignInHttpResult, UnauthorizedHttpResult>> PasswordlessLogin(
             TLoginBody loginRequest,
@@ -36,7 +54,10 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             return await loginService.LoginAsync(loginRequest, cancellationToken);
         }
 
-        routeGroup.MapPost("/passwordless-login", PasswordlessLogin);
+        if (endpointOptions.LoginPath is not null)
+        {
+            routeGroup.MapPost(endpointOptions.LoginPath, PasswordlessLogin);
+        }
 
         static async Task<Results<Ok<RegisterTokenResponse>, UnauthorizedHttpResult>> PasswordlessAddCredential(
             TAddCredentialBody addCredentialRequest,
@@ -47,8 +68,11 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             return await addCredentialService.AddCredentialAsync(addCredentialRequest, claimsPrincipal, cancellationToken);
         }
 
-        routeGroup.MapPost("/passwordless-add-credential", PasswordlessAddCredential);
-        // Should we require authorization?
+        if (endpointOptions.AddCredentialPath is not null)
+        {
+            routeGroup.MapPost(endpointOptions.AddCredentialPath, PasswordlessAddCredential);
+            // Should we require authorization?
+        }
 
         return routeGroup;
     }

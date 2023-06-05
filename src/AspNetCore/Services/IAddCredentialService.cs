@@ -21,12 +21,18 @@ public class AddCredentialService<TUser> : IAddCredentialService<PasswordlessAdd
 {
     private readonly IUserStore<TUser> _userStore;
     private readonly IPasswordlessClient _passwordlessClient;
+    private readonly PasswordlessAspNetCoreOptions _passwordlessAspNetCoreOptions;
     private readonly IOptions<IdentityOptions>? _identityOptions;
 
-    public AddCredentialService(IUserStore<TUser> userStore, IPasswordlessClient passwordlessClient, IServiceProvider serviceProvider)
+    public AddCredentialService(
+        IUserStore<TUser> userStore,
+        IPasswordlessClient passwordlessClient,
+        IOptions<PasswordlessAspNetCoreOptions> passwordlessAspNetCoreOptions,
+        IServiceProvider serviceProvider)
     {
         _userStore = userStore;
         _passwordlessClient = passwordlessClient;
+        _passwordlessAspNetCoreOptions = passwordlessAspNetCoreOptions.Value;
         _identityOptions = serviceProvider.GetService<IOptions<IdentityOptions>>();
     }
 
@@ -40,8 +46,10 @@ public class AddCredentialService<TUser> : IAddCredentialService<PasswordlessAdd
             return TypedResults.Unauthorized();
         }
 
-        // TODO: Could allow this to be customized but our own options
-        var userIdClaim = _identityOptions?.Value.ClaimsIdentity.UserIdClaimType
+        // First try our own options, fallback to built in Identity options
+        // and then fallback to ClaimsIdentity default
+        var userIdClaim = _passwordlessAspNetCoreOptions.UserIdClaimType
+            ?? _identityOptions?.Value.ClaimsIdentity.UserIdClaimType
             ?? ClaimTypes.NameIdentifier;
 
         var userId = claimsPrincipal.FindFirstValue(userIdClaim);

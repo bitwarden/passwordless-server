@@ -22,6 +22,7 @@ public class LoginService<TUser> : ILoginService<PasswordlessLoginRequest>
     private readonly IPasswordlessClient _passwordlessClient;
     private readonly IUserStore<TUser> _userStore;
     private readonly IUserClaimsPrincipalFactory<TUser> _userClaimsPrincipalFactory;
+    private readonly PasswordlessAspNetCoreOptions _passwordlessAspNetCoreOptions;
     private readonly ILogger<LoginService<TUser>> _logger;
 
     public LoginService(
@@ -29,12 +30,14 @@ public class LoginService<TUser> : ILoginService<PasswordlessLoginRequest>
         IPasswordlessClient passwordlessClient,
         IUserStore<TUser> userStore,
         IUserClaimsPrincipalFactory<TUser> userClaimsPrincipalFactory,
+        IOptions<PasswordlessAspNetCoreOptions> passwordlessAspNetCoreOptions,
         ILogger<LoginService<TUser>> logger)
     {
         _authenticationOptions = serviceProvider.GetService<IOptions<AuthenticationOptions>>();
         _passwordlessClient = passwordlessClient;
         _userStore = userStore;
         _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
+        _passwordlessAspNetCoreOptions = passwordlessAspNetCoreOptions.Value;
         _logger = logger;
     }
 
@@ -60,8 +63,10 @@ public class LoginService<TUser> : ILoginService<PasswordlessLoginRequest>
 
         var claimsPrincipal = await _userClaimsPrincipalFactory.CreateAsync(user);
 
-        // TODO: Not totally sure what the best scheme is
-        var scheme = _authenticationOptions?.Value?.DefaultSignInScheme;
+        // First try our own scheme, then optionally try built in options but null is still allowed because it
+        // will then fallback to the default scheme.
+        var scheme = _passwordlessAspNetCoreOptions.SignInScheme
+            ?? _authenticationOptions?.Value?.DefaultSignInScheme;
 
         _logger.LogInformation("Signing in user with scheme {Scheme} and {NumberOfClaims} claims",
             scheme, claimsPrincipal.Claims.Count());

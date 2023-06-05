@@ -2,15 +2,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Passwordless.AspNetCore;
 using Passwordless.AspNetCore.Services;
 using Passwordless.Net;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public class PasswordlessAspNetCoreOptions : PasswordlessOptions
-{
 
-}
 
 // TODO: Add documentation
 public static class IdentityBuilderExtensions
