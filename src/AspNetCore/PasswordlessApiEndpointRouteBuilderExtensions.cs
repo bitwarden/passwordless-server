@@ -46,8 +46,7 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
 
         if (endpointOptions.RegisterPath is not null)
         {
-            routeGroup.Map(endpointOptions.RegisterPath, PasswordlessRegister)
-                .WithName("Register");
+            routeGroup.Map(endpointOptions.RegisterPath, PasswordlessRegister);
         }
 
         static async Task<Results<SignInHttpResult, UnauthorizedHttpResult>> PasswordlessLogin(
@@ -60,8 +59,7 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
 
         if (endpointOptions.LoginPath is not null)
         {
-            routeGroup.MapPost(endpointOptions.LoginPath, PasswordlessLogin)
-                .WithName("Login");
+            routeGroup.MapPost(endpointOptions.LoginPath, PasswordlessLogin);
         }
 
         static async Task<Results<Ok<RegisterTokenResponse>, UnauthorizedHttpResult>> PasswordlessAddCredential(
@@ -75,8 +73,7 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
 
         if (endpointOptions.AddCredentialPath is not null)
         {
-            routeGroup.MapPost(endpointOptions.AddCredentialPath, PasswordlessAddCredential)
-                .WithName("AddCredential");
+            routeGroup.MapPost(endpointOptions.AddCredentialPath, PasswordlessAddCredential);
             // Should we require authorization?
         }
 
