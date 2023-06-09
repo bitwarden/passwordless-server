@@ -1,14 +1,16 @@
 using System.ComponentModel;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Passwordless.AspNetCore;
 using Passwordless.AspNetCore.Services;
-using Passwordless.Net;
 
 namespace Microsoft.AspNetCore.Routing;
 
+/// <summary>
+/// Provides extension methods for <see cref="IEndpointRouteBuilder" /> to map Passwordless endpoints.
+/// </summary>
 public static class PasswordlessApiEndpointRouteBuilderExtensions
 {
     public static IEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints)
@@ -35,12 +37,12 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             .MapGroup(endpointOptions.GroupPrefix)
             .WithGroupName("Passwordless");
 
-        static async Task<Results<Ok<RegisterTokenResponse>, ValidationProblem>> PasswordlessRegister(
+        static async Task<IResult> PasswordlessRegister(
             TRegisterBody registerRequest,
-            IRegisterService<TRegisterBody> registerService,
+            IPasswordlessService<TRegisterBody, TLoginBody, TAddCredentialBody> passwordlessService,
             CancellationToken cancellationToken)
         {
-            return await registerService.RegisterAsync(registerRequest, cancellationToken);
+            return await passwordlessService.RegisterUserAsync(registerRequest, cancellationToken);
         }
 
         if (endpointOptions.RegisterPath is not null)
@@ -48,12 +50,12 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             routeGroup.Map(endpointOptions.RegisterPath, PasswordlessRegister);
         }
 
-        static async Task<Results<SignInHttpResult, UnauthorizedHttpResult>> PasswordlessLogin(
+        static async Task<IResult> PasswordlessLogin(
             TLoginBody loginRequest,
-            ILoginService<TLoginBody> loginService,
+            IPasswordlessService<TRegisterBody, TLoginBody, TAddCredentialBody> passwordlessService,
             CancellationToken cancellationToken)
         {
-            return await loginService.LoginAsync(loginRequest, cancellationToken);
+            return await passwordlessService.LoginUserAsync(loginRequest, cancellationToken);
         }
 
         if (endpointOptions.LoginPath is not null)
@@ -61,13 +63,19 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
             routeGroup.MapPost(endpointOptions.LoginPath, PasswordlessLogin);
         }
 
-        static async Task<Results<Ok<RegisterTokenResponse>, UnauthorizedHttpResult>> PasswordlessAddCredential(
+        static async Task<IResult> PasswordlessAddCredential(
             TAddCredentialBody addCredentialRequest,
-            IAddCredentialService<TAddCredentialBody> addCredentialService,
+            IPasswordlessService<TRegisterBody, TLoginBody, TAddCredentialBody> passwordlessService,
             ClaimsPrincipal claimsPrincipal,
             CancellationToken cancellationToken)
         {
-            return await addCredentialService.AddCredentialAsync(addCredentialRequest, claimsPrincipal, cancellationToken);
+            var userId = await passwordlessService.GetUserIdAsync(claimsPrincipal, cancellationToken);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return TypedResults.Unauthorized();
+            }
+
+            return await passwordlessService.AddCredentialAsync(userId, addCredentialRequest, cancellationToken);
         }
 
         if (endpointOptions.AddCredentialPath is not null)
