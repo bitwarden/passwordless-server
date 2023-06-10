@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Passwordless.Net;
+using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.AspNetCore.Services;
 
@@ -106,6 +107,7 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
 
     public virtual ValueTask<string?> GetUserIdAsync(ClaimsPrincipal claimsPrincipal, CancellationToken cancellationToken)
     {
+        // Do we want to check if the Identity is authenticated? They could have multiple identities and the first one isn't authenticated
         if (claimsPrincipal.Identity?.IsAuthenticated is not true)
         {
             return ValueTask.FromResult<string?>(null);
@@ -130,7 +132,7 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
 
         if (!result.Succeeded)
         {
-            return TypedResults.ValidationProblem(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description })); ;
+            return ValidationProblem(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description })); ;
         }
 
         return await AddCredentialAsync(user, request, cancellationToken);
@@ -143,7 +145,7 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
         if (verifiedUser is null)
         {
             _logger.LogDebug("User could not be verified with token {Token}", loginRequest.Token);
-            return TypedResults.Unauthorized();
+            return Unauthorized();
         }
 
         _logger.LogDebug("Attempting to find user in store by id {UserId}.", verifiedUser.UserId);
@@ -152,7 +154,7 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
         if (user is null)
         {
             _logger.LogDebug("Could not find user.");
-            return TypedResults.Unauthorized();
+            return Unauthorized();
         }
 
         var claimsPrincipal = await UserClaimsPrincipalFactory.CreateAsync(user);
@@ -165,7 +167,7 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
         _logger.LogInformation("Signing in user with scheme {Scheme} and {NumberOfClaims} claims",
             scheme, claimsPrincipal.Claims.Count());
 
-        return TypedResults.SignIn(claimsPrincipal, authenticationScheme: scheme);
+        return SignIn(claimsPrincipal, authenticationScheme: scheme);
     }
 
     protected virtual async Task BindToUserAsync(TUser user, TRegisterRequest request, CancellationToken cancellationToken)
@@ -185,12 +187,12 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
             DisplayName = displayName,
             Username = username,
             Aliases = aliases,
-            Discoverable = Options.Discoverable,
-            UserVerification = Options.UserVerification,
-            Attestation = Options.Attestation,
+            Discoverable = Options.Register.Discoverable,
+            UserVerification = Options.Register.UserVerification,
+            Attestation = Options.Register.Attestation,
             // TODO: Is this used?
             // ExpiresAt = Options.Expiration.HasValue ? DateTime.UtcNow.Add(Options.Expiration.Value) : null,
-            AuthenticatorType = Options.AuthenticationType!, // TODO: Does register options have the best annotations?
+            AuthenticatorType = Options.Register.AuthenticationType!, // TODO: Does register options have the best annotations?
         };
     }
 }
