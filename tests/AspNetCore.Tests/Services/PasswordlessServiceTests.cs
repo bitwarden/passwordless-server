@@ -78,10 +78,8 @@ public class PasswordlessServiceTests
 
         mockUserStore
             .Setup(s => s.SetUserNameAsync(It.IsAny<TestUser>(), "test_username", CancellationToken.None))
-            .Callback<TestUser, string, CancellationToken>((user, username, token) =>
-            {
-                user.Username = username;
-            });
+            .Callback<TestUser, string, CancellationToken>(
+                (user, username, token) => user.Username = username);
 
         mockUserStore
             .Setup(s => s.CreateAsync(It.IsAny<TestUser>(), CancellationToken.None))

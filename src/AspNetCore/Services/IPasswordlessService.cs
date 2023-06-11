@@ -191,7 +191,7 @@ public class PasswordlessService<TUser, TRegisterRequest, TLoginRequest, TAddCre
             UserVerification = Options.Register.UserVerification,
             Attestation = Options.Register.Attestation,
             // TODO: Is this used?
-            // ExpiresAt = Options.Expiration.HasValue ? DateTime.UtcNow.Add(Options.Expiration.Value) : null,
+            ExpiresAt = DateTime.UtcNow.Add(Options.Register.Expiration),
             AuthenticatorType = Options.Register.AuthenticationType!, // TODO: Does register options have the best annotations?
         };
     }

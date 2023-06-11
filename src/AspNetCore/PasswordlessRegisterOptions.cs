@@ -29,8 +29,8 @@ public class PasswordlessRegisterOptions
     /// <summary>
     /// TODO: Fill in
     /// </summary>
-    // TODO: Should we have some sort of default lifetime? and is this used?
-    public TimeSpan? Expiration { get; set; }
+    // TODO: What should the default expiration time be
+    public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// TODO: Fill in

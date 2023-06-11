@@ -30,7 +30,7 @@ public class PasswordlessAspNetCoreOptions : PasswordlessOptions
     public string? UserIdClaimType { get; set; }
 
     /// <summary>
-    /// 
+    /// Gets or sets the <see cref="PasswordlessRegisterOptions"/> for the Passwordless system.
     /// </summary>
     public PasswordlessRegisterOptions Register { get; set; } = new PasswordlessRegisterOptions();
 }
