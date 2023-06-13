@@ -181,7 +181,7 @@ void RunTheApp()
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider
             .GetRequiredService<ConsoleDbContext>();
-        
+
         dbContext.Database.Migrate();
     }
 
