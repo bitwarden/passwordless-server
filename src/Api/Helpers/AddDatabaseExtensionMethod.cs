@@ -51,6 +51,7 @@ public static class AddDatabaseExtensionMethod
 
             var environment = sp.GetRequiredService<IWebHostEnvironment>();
 
+            // need to add exception here to allow self hosted migrations or another way to initiate context
             if (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations"))
             {
                 return new ManualTenantProvider("test");

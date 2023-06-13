@@ -107,8 +107,6 @@ if (builder.Configuration.GetValue<bool>("SelfHosted"))
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider
         .GetRequiredService<DbTenantContext>();
-
-    // Here is the migration executed
     dbContext.Database.Migrate();
 }
 
