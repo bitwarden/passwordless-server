@@ -16,10 +16,10 @@ public static class AddDatabaseExtensionMethod
         // Database information
         var sqlite = configuration.GetConnectionString("sqlite");
         var mssql = configuration.GetConnectionString("mssql");
-        
+
         sqlite = configuration.GetValue<string>("ConnectionStrings.Sqlite.Api", sqlite);
         mssql = configuration.GetValue<string>("ConnectionStrings.Mssql.Api", mssql);
-        
+
         if (!string.IsNullOrEmpty(sqlite))
         {
             services.AddDbContext<DbTenantContext, SqliteContext>((sp, builder) =>

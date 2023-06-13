@@ -101,13 +101,13 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-if(builder.Configuration.GetValue<bool>("SelfHosted"))
+if (builder.Configuration.GetValue<bool>("SelfHosted"))
 {
     // Migrate latest database changes during startup
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider
         .GetRequiredService<DbTenantContext>();
-    
+
     // Here is the migration executed
     dbContext.Database.Migrate();
 }
