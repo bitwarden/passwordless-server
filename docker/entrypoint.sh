@@ -21,17 +21,18 @@ SQLITE_CONNECTION_STRING_ADMIN="Data Source=$BWP_DB_FILE_ADMIN;"
 
 export DatabaseProvider=$BWP_DB_PROVIDER
 
-export ConnectionStrings__mysql=${ConnectionStrings__mysql:-$MYSQL_CONNECTION_STRING_ADMIN}
-export ConnectionStrings__postgresql=${ConnectionStrings__postgresql:-$POSTGRESQL_CONNECTION_STRING_ADMIN}
-export ConnectionStrings__mssql=${ConnectionStrings__mssql:-$MSSQL_CONNECTION_STRING_ADMIN}
-export ConnectionStrings__sqlite=${ConnectionStrings__sqlite:-$SQLITE_CONNECTION_STRING_ADMIN}
-
-# TODO: How to split connection strings for admin/api?
-
-if [ "$BWP_ENABLE_SSL" = "true" ]; then
-  export Passwordless_ApiUrl=https://$BWP_DOMAIN:${BWP_PORT_HTTPS:-8443}/api/
+if [ "$BWP_DB_PROVIDER" = "mysql" -o "$BWP_DB_PROVIDER" = "mariadb" ]; then
+  export ConnectionStrings__mysql__api=${ConnectionStrings__mysql__api:-$MYSQL_CONNECTION_STRING_API}
+  export ConnectionStrings__mysql__admin=${ConnectionStrings__mysql__admin:-$MYSQL_CONNECTION_STRING_ADMIN}
+elif [ "$BWP_DB_PROVIDER" = "postgresql" -o "$BWP_DB_PROVIDER" = "postgres" ]; then
+  export ConnectionStrings__postgresql__api=${ConnectionStrings__postgresql__api:-$POSTGRESQL_CONNECTION_STRING_API}
+  export ConnectionStrings__postgresql__admin=${ConnectionStrings__postgresql__admin:-$POSTGRESQL_CONNECTION_STRING_ADMIN}
+elif [ "$BWP_DB_PROVIDER" = "mssql" -o "$BWP_DB_PROVIDER" = "sqlserver" ]; then
+  export ConnectionStrings__mssql__api=${ConnectionStrings__mssql__api:-$MSSQL_CONNECTION_STRING_API}
+  export ConnectionStrings__mssql__admin=${ConnectionStrings__mssql__admin:-$MSSQL_CONNECTION_STRING_ADMIN}
 else
-  export Passwordless_ApiUrl=http://$BWP_DOMAIN:${BWP_PORT_HTTP:-8080}/api/
+  export ConnectionStrings__sqlite__api=${ConnectionStrings__sqlite__api:-$SQLITE_CONNECTION_STRING_API}
+  export ConnectionStrings__sqlite__admin=${ConnectionStrings__sqlite__admin:-$SQLITE_CONNECTION_STRING_ADMIN}
 fi
 
 # Generate SSL certificates
