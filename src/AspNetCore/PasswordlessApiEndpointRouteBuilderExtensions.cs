@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -13,25 +12,37 @@ namespace Microsoft.AspNetCore.Routing;
 /// </summary>
 public static class PasswordlessApiEndpointRouteBuilderExtensions
 {
-    public static IEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints)
+    /// <summary>
+    /// 
+    /// </summary>
+    public static PasswordlessEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints)
     {
-        return endpoints.MapPasswordless(new PasswordlessEndpointOptions());
+        // TODO: When a custom register body isn't passed in, we can make a reasonable assumption
+        // about what each endpoint produces and we can build on those.
+        var builder = endpoints.MapPasswordless(new PasswordlessEndpointOptions());
+        return builder;
     }
 
-    public static IEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
+    /// <summary>
+    /// 
+    /// </summary>
+    public static PasswordlessEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
     {
-        return endpoints.MapPasswordless<PasswordlessRegisterRequest, PasswordlessLoginRequest, PasswordlessAddCredentialRequest>(endpointOptions);
+        return endpoints.MapPasswordless<PasswordlessRegisterRequest>(endpointOptions);
     }
 
-    // TODO: Add documentation about how customization of the bodies means you must also customize that service
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public static IEndpointConventionBuilder MapPasswordless<TRegisterBody, TLoginBody, TAddCredentialBody>(this IEndpointRouteBuilder endpoints)
+    /// <summary>
+    /// 
+    /// </summary>
+    public static PasswordlessEndpointConventionBuilder MapPasswordless<TRegisterBody>(this IEndpointRouteBuilder endpoints)
     {
-        return endpoints.MapPasswordless<PasswordlessRegisterRequest, PasswordlessLoginRequest, PasswordlessAddCredentialRequest>(new PasswordlessEndpointOptions());
+        return endpoints.MapPasswordless<PasswordlessRegisterRequest>(new PasswordlessEndpointOptions());
     }
 
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public static IEndpointConventionBuilder MapPasswordless<TRegisterBody, TLoginBody, TAddCredentialBody>(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
+    /// <summary>
+    /// 
+    /// </summary>
+    public static PasswordlessEndpointConventionBuilder MapPasswordless<TRegisterBody>(this IEndpointRouteBuilder endpoints, PasswordlessEndpointOptions endpointOptions)
     {
         var routeGroup = endpoints
             .MapGroup(endpointOptions.GroupPrefix)
@@ -39,51 +50,76 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
 
         static async Task<IResult> PasswordlessRegister(
             TRegisterBody registerRequest,
-            IPasswordlessService<TRegisterBody, TLoginBody, TAddCredentialBody> passwordlessService,
+            IPasswordlessService<TRegisterBody> passwordlessService,
             CancellationToken cancellationToken)
         {
             return await passwordlessService.RegisterUserAsync(registerRequest, cancellationToken);
         }
 
+        RouteHandlerBuilder? registerRouteHandler = null;
         if (endpointOptions.RegisterPath is not null)
         {
-            routeGroup.Map(endpointOptions.RegisterPath, PasswordlessRegister);
+            registerRouteHandler = routeGroup.Map(endpointOptions.RegisterPath, PasswordlessRegister);
         }
 
         static async Task<IResult> PasswordlessLogin(
-            TLoginBody loginRequest,
-            IPasswordlessService<TRegisterBody, TLoginBody, TAddCredentialBody> passwordlessService,
+            PasswordlessLoginRequest loginRequest,
+            IPasswordlessService<TRegisterBody> passwordlessService,
             CancellationToken cancellationToken)
         {
             return await passwordlessService.LoginUserAsync(loginRequest, cancellationToken);
         }
 
+        RouteHandlerBuilder? loginRouteHandler = null;
         if (endpointOptions.LoginPath is not null)
         {
-            routeGroup.MapPost(endpointOptions.LoginPath, PasswordlessLogin);
+            loginRouteHandler = routeGroup.MapPost(endpointOptions.LoginPath, PasswordlessLogin);
         }
 
         static async Task<IResult> PasswordlessAddCredential(
-            TAddCredentialBody addCredentialRequest,
-            IPasswordlessService<TRegisterBody, TLoginBody, TAddCredentialBody> passwordlessService,
+            IPasswordlessService<TRegisterBody> passwordlessService,
+            PasswordlessAddCredentialRequest request,
             ClaimsPrincipal claimsPrincipal,
             CancellationToken cancellationToken)
         {
-            var userId = await passwordlessService.GetUserIdAsync(claimsPrincipal, cancellationToken);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return TypedResults.Unauthorized();
-            }
-
-            return await passwordlessService.AddCredentialAsync(userId, addCredentialRequest, cancellationToken);
+            return await passwordlessService.AddCredentialAsync(request, claimsPrincipal, cancellationToken);
         }
 
+        RouteHandlerBuilder? addCredentialRouteHandler = null;
         if (endpointOptions.AddCredentialPath is not null)
         {
-            routeGroup.MapPost(endpointOptions.AddCredentialPath, PasswordlessAddCredential);
+            addCredentialRouteHandler = routeGroup.MapPost(endpointOptions.AddCredentialPath, PasswordlessAddCredential);
             // Should we require authorization?
         }
 
-        return routeGroup;
+        return new PasswordlessEndpointConventionBuilder(routeGroup,
+            loginRouteHandler,
+            registerRouteHandler,
+            addCredentialRouteHandler);
+    }
+}
+
+public sealed class PasswordlessEndpointConventionBuilder : IEndpointConventionBuilder
+{
+    private readonly RouteGroupBuilder _groupBuilder;
+    public RouteHandlerBuilder? LoginRoute { get; }
+    public RouteHandlerBuilder? RegisterRoute { get; }
+    public RouteHandlerBuilder? AddCredentialRoute { get; }
+
+    public PasswordlessEndpointConventionBuilder(
+        RouteGroupBuilder groupBuilder,
+        RouteHandlerBuilder? loginRoute,
+        RouteHandlerBuilder? registerRoute,
+        RouteHandlerBuilder? addCredentialRoute)
+    {
+        _groupBuilder = groupBuilder;
+        LoginRoute = loginRoute;
+        RegisterRoute = registerRoute;
+        AddCredentialRoute = addCredentialRoute;
+    }
+
+    public void Add(Action<EndpointBuilder> convention)
+    {
+        ((IEndpointConventionBuilder)_groupBuilder).Add(convention);
     }
 }

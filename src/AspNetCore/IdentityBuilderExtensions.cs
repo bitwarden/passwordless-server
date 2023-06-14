@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AspNetCore;
 using Passwordless.AspNetCore.Services;
+using Passwordless.AspNetCore.Services.Implementations;
 using Passwordless.Net;
 
 // Trick to make it show up where it's more likely to be useful
@@ -75,8 +76,10 @@ public static class IdentityBuilderExtensions
         services.AddPasswordlessSdk(passwordlessOptions => { });
 
         services.TryAddScoped(
-            typeof(IPasswordlessService<PasswordlessRegisterRequest, PasswordlessLoginRequest, PasswordlessAddCredentialRequest>),
+            typeof(IPasswordlessService<PasswordlessRegisterRequest>),
             typeof(PasswordlessService<>).MakeGenericType(userType));
+
+        services.TryAddScoped<ICustomizeRegisterOptions, NoopCustomizeRegisterOptions>();
 
         // Override SDK options to come from ASP.NET Core options
         services.AddOptions<PasswordlessOptions>()

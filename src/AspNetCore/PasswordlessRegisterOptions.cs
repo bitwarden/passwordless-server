@@ -1,5 +1,8 @@
 namespace Passwordless.AspNetCore;
 
+/// <summary>
+/// 
+/// </summary>
 public class PasswordlessRegisterOptions
 {
     /// <summary>
@@ -29,14 +32,19 @@ public class PasswordlessRegisterOptions
     /// <summary>
     /// TODO: Fill in
     /// </summary>
-    // TODO: What should the default expiration time be
-    public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(5);
+    // TODO: Maybe we make this nullable
+    public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(2);
 
     /// <summary>
     /// TODO: Fill in
     /// </summary>
     /// <remarks>
-    /// Defaults to <see cref="null" />
+    /// Defaults to <c>any</c>
     /// </remarks>
-    public string? AuthenticationType { get; set; }
+    public string AuthenticationType { get; set; } = "any";
+
+    /// <summary>
+    /// Gets or sets whether to hash given aliases.
+    /// </summary>
+    public bool AliasHashing { get; set; } = true;
 }

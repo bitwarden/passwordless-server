@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using Passwordless.AspNetCore.Services;
+using Passwordless.AspNetCore.Services.Implementations;
 using Passwordless.Net;
 
 namespace Passwordless.AspNetCore.Tests.Services;
@@ -17,6 +18,7 @@ public class PasswordlessServiceTests
     private readonly TestUserStore _testUserStore;
     private readonly PasswordlessAspNetCoreOptions _options;
     private readonly Mock<IUserClaimsPrincipalFactory<TestUser>> _mockUserClaimsPrincipalFactory;
+    private readonly Mock<ICustomizeRegisterOptions> _mockCustomizeRegisterOptions;
     private readonly Mock<IServiceProvider> _mockServiceProvider;
 
     public PasswordlessServiceTests()
@@ -25,6 +27,7 @@ public class PasswordlessServiceTests
         _testUserStore = new TestUserStore();
         _options = new PasswordlessAspNetCoreOptions();
         _mockUserClaimsPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<TestUser>>();
+        _mockCustomizeRegisterOptions = new Mock<ICustomizeRegisterOptions>();
         _mockServiceProvider = new Mock<IServiceProvider>();
     }
 
@@ -40,6 +43,7 @@ public class PasswordlessServiceTests
             NullLogger<PasswordlessService<TestUser>>.Instance,
             mockOptions.Object,
             _mockUserClaimsPrincipalFactory.Object,
+            _mockCustomizeRegisterOptions.Object,
             _mockServiceProvider.Object);
     }
 
@@ -96,6 +100,7 @@ public class PasswordlessServiceTests
             NullLogger<PasswordlessService<TestUser>>.Instance,
             Options.Create(_options),
             _mockUserClaimsPrincipalFactory.Object,
+            _mockCustomizeRegisterOptions.Object,
             _mockServiceProvider.Object);
 
         var result = await sut.RegisterUserAsync(
@@ -109,82 +114,14 @@ public class PasswordlessServiceTests
         Assert.Equal("Failed to create user", failedError);
     }
 
-    [Fact]
-    public async Task GetUserIdAsync_PrioritizesOwnedOptions_Works()
+    private static ClaimsPrincipal CreateClaimsPrincipal(Guid? userId, string? authenticationType = "test")
     {
-        _options.UserIdClaimType = "custom_identifier_claim";
-
-        var sut = CreateSut();
-
-        var userId = await sut.GetUserIdAsync(CreateClaimsPrincipal(), CancellationToken.None);
-
-        Assert.Equal("custom_identifier", userId);
-    }
-
-    [Fact]
-    public async Task GetUserIdAsync_FallsbackToIdentityOptions_Works()
-    {
-        _options.UserIdClaimType = null;
-        _mockServiceProvider
-            .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
-            .Returns(Options.Create(new IdentityOptions
-            {
-                ClaimsIdentity = new ClaimsIdentityOptions
-                {
-                    UserIdClaimType = "identity_options_claim",
-                },
-            }));
-
-        var sut = CreateSut();
-
-        var userId = await sut.GetUserIdAsync(CreateClaimsPrincipal(), CancellationToken.None);
-
-        Assert.Equal("identity_options_identifier", userId);
-    }
-
-    [Fact]
-    public async Task GetUserIdAsync_FallsbackToNameIdentifier_Works()
-    {
-        _options.UserIdClaimType = null;
-        _mockServiceProvider
-            .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
-            .Returns(null);
-
-        var sut = CreateSut();
-
-        var userId = await sut.GetUserIdAsync(CreateClaimsPrincipal(), CancellationToken.None);
-
-        Assert.Equal("name_identitifier", userId);
-    }
-
-    [Fact]
-    public async Task GetUserIdAsync_WhenUnauthenticated_ReturnsNull()
-    {
-        var sut = CreateSut();
-
-        var userId = await sut.GetUserIdAsync(CreateClaimsPrincipal(authenticationType: null), CancellationToken.None);
-
-        Assert.Null(userId);
-    }
-
-    [Fact]
-    public async Task GetUserIdAsync_HasNoIdentity_ReturnsNull()
-    {
-        var sut = CreateSut();
-
-        var userId = await sut.GetUserIdAsync(new ClaimsPrincipal(), CancellationToken.None);
-
-        Assert.Null(userId);
-    }
-
-    private static ClaimsPrincipal CreateClaimsPrincipal(string? authenticationType = "test")
-    {
-        return new ClaimsPrincipal(new ClaimsIdentity(new[]
+        var claims = new List<Claim>();
+        if (userId.HasValue)
         {
-            new Claim(ClaimTypes.NameIdentifier, "name_identitifier"),
-            new Claim("custom_identifier_claim", "custom_identifier"),
-            new Claim("identity_options_claim", "identity_options_identifier"),
-        }, authenticationType));
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()));
+        }
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, authenticationType));
     }
 
     [Fact]
@@ -207,7 +144,7 @@ public class PasswordlessServiceTests
 
         _mockUserClaimsPrincipalFactory
             .Setup(s => s.CreateAsync(user))
-            .ReturnsAsync(CreateClaimsPrincipal());
+            .ReturnsAsync(CreateClaimsPrincipal(user.Id));
 
         var sut = CreateSut();
 
@@ -239,7 +176,7 @@ public class PasswordlessServiceTests
 
         _mockUserClaimsPrincipalFactory
             .Setup(s => s.CreateAsync(user))
-            .ReturnsAsync(CreateClaimsPrincipal());
+            .ReturnsAsync(CreateClaimsPrincipal(user.Id));
 
         var sut = CreateSut();
 
@@ -278,7 +215,7 @@ public class PasswordlessServiceTests
 
         _mockUserClaimsPrincipalFactory
             .Setup(s => s.CreateAsync(user))
-            .ReturnsAsync(CreateClaimsPrincipal());
+            .ReturnsAsync(CreateClaimsPrincipal(user.Id));
 
         var sut = CreateSut();
 
@@ -333,9 +270,7 @@ public class PasswordlessServiceTests
         _mockPasswordlessClient
             .Setup(s => s.CreateRegisterToken(
                 It.Is<RegisterOptions>(o => o.UserId == user.Id.ToString()
-                    && o.Username == "add_credential_test_1"
-                    && o.Aliases != null
-                    && o.Aliases.Contains("alias_1"))))
+                    && o.Username == "add_credential_test_1")))
             .ReturnsAsync(new RegisterTokenResponse
             {
                 Token = "test_register_token",
@@ -344,8 +279,8 @@ public class PasswordlessServiceTests
         var sut = CreateSut();
 
         var result = await sut.AddCredentialAsync(
-            user.Id.ToString(),
-            new PasswordlessAddCredentialRequest(new HashSet<string> { "alias_1" }),
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(user.Id),
             CancellationToken.None);
 
         var okResult = Assert.IsAssignableFrom<Ok<RegisterTokenResponse>>(result);
@@ -359,15 +294,28 @@ public class PasswordlessServiceTests
         var sut = CreateSut();
 
         var result = await sut.AddCredentialAsync(
-            Guid.NewGuid().ToString(),
-            new PasswordlessAddCredentialRequest(new HashSet<string> { "alias_1" }),
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(Guid.NewGuid()),
+            CancellationToken.None);
+
+        Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
+    }
+
+    [Fact]
+    public async Task AddCredentialAsync_UserIdCanNotBeFound_ReturnsUnauthorized()
+    {
+        var sut = CreateSut();
+
+        var result = await sut.AddCredentialAsync(
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(null),
             CancellationToken.None);
 
         Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
     }
 }
 
-public sealed class TestUserStore : IUserStore<TestUser>
+public sealed class TestUserStore : IUserEmailStore<TestUser>
 {
     public Dictionary<Guid, TestUser> InnerStore { get; } = new Dictionary<Guid, TestUser>();
 
@@ -398,6 +346,12 @@ public sealed class TestUserStore : IUserStore<TestUser>
         throw new NotImplementedException();
     }
 
+    public Task<TestUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+    {
+        var user = InnerStore.Values.FirstOrDefault(u => u.Email.Equals(normalizedEmail, StringComparison.InvariantCultureIgnoreCase));
+        return Task.FromResult(user);
+    }
+
     public Task<TestUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         if (!InnerStore.TryGetValue(Guid.Parse(userId), out var user))
@@ -409,6 +363,21 @@ public sealed class TestUserStore : IUserStore<TestUser>
     }
 
     public Task<TestUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<string?> GetEmailAsync(TestUser user, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<string?>(user.Email);
+    }
+
+    public Task<bool> GetEmailConfirmedAsync(TestUser user, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<string?> GetNormalizedEmailAsync(TestUser user, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -426,6 +395,22 @@ public sealed class TestUserStore : IUserStore<TestUser>
     public Task<string?> GetUserNameAsync(TestUser user, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<string?>(user.Username);
+    }
+
+    public Task SetEmailAsync(TestUser user, string? email, CancellationToken cancellationToken)
+    {
+        user.Email = email!;
+        return Task.CompletedTask;
+    }
+
+    public Task SetEmailConfirmedAsync(TestUser user, bool confirmed, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task SetNormalizedEmailAsync(TestUser user, string? normalizedEmail, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 
     public Task SetNormalizedUserNameAsync(TestUser user, string? normalizedName, CancellationToken cancellationToken)
@@ -450,4 +435,5 @@ public class TestUser
 {
     public Guid Id { get; set; }
     public string Username { get; set; } = null!;
+    public string Email { get; set; } = null!;
 }

@@ -29,8 +29,24 @@ public class PasswordlessAspNetCoreOptions : PasswordlessOptions
     /// </remarks>
     public string? UserIdClaimType { get; set; }
 
+    public Func<CustomizeRegisterOptionsContext, Task>? CustomizeRegisterOptions { get; set; }
+
     /// <summary>
     /// Gets or sets the <see cref="PasswordlessRegisterOptions"/> for the Passwordless system.
     /// </summary>
     public PasswordlessRegisterOptions Register { get; set; } = new PasswordlessRegisterOptions();
+}
+
+public class CustomizeRegisterOptionsContext
+{
+    public string UserId { get; }
+    public bool NewUser { get; }
+    public RegisterOptions? Options { get; set; }
+
+    public CustomizeRegisterOptionsContext(string userId, bool newUser, RegisterOptions startingOptions)
+    {
+        UserId = userId;
+        NewUser = newUser;
+        Options = startingOptions;
+    }
 }
