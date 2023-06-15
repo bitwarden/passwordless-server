@@ -76,6 +76,23 @@ public class PasswordlessServiceTests
     }
 
     [Fact]
+    public async Task RegisterUserAsync_CustomizeOptionsReturnsNull_ReturnsUnauthorized()
+    {
+        _mockCustomizeRegisterOptions
+            .Setup(s => s.CustomizeAsync(It.IsAny<CustomizeRegisterOptionsContext>(), CancellationToken.None))
+            .Callback<CustomizeRegisterOptionsContext, CancellationToken>((context, _) => context.Options = null);
+
+        var sut = CreateSut();
+
+        var result = await sut.RegisterUserAsync(new PasswordlessRegisterRequest(
+            "test_username",
+            "Test User",
+            new HashSet<string> { "test" }), CancellationToken.None);
+
+        Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
+    }
+
+    [Fact]
     public async Task RegisterUserAsync_CanNotCreateUser_ReturnsValidationProblems()
     {
         var mockUserStore = new Mock<IUserStore<TestUser>>();
@@ -112,6 +129,51 @@ public class PasswordlessServiceTests
         Assert.True(validationProblems.Errors.TryGetValue("failed", out var failedErrors));
         var failedError = Assert.Single(failedErrors);
         Assert.Equal("Failed to create user", failedError);
+    }
+
+    [Fact]
+    public async Task RegisterUserAsync_AppSetupForEmail_Works()
+    {
+        var identityOptions = new IdentityOptions();
+        identityOptions.User.RequireUniqueEmail = true;
+
+        _mockServiceProvider
+            .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
+            .Returns(Options.Create(identityOptions));
+
+        var sut = CreateSut();
+
+        var result = await sut.RegisterUserAsync(new PasswordlessRegisterRequest("my_email_username", "My Email Key", null)
+        {
+            Email = "my_email@email.com",
+        }, CancellationToken.None);
+
+        var createdUser = await _testUserStore.FindByNameAsync("my_email_username", CancellationToken.None);
+        Assert.NotNull(createdUser);
+        Assert.Equal("my_email@email.com", createdUser.Email);
+    }
+
+    [Fact]
+    public async Task RegisterUserAsync_AppSetupForEmail_NullEmailProvided_ReturnsValidationProblem()
+    {
+        var identityOptions = new IdentityOptions();
+        identityOptions.User.RequireUniqueEmail = true;
+
+        _mockServiceProvider
+            .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
+            .Returns(Options.Create(identityOptions));
+
+        var sut = CreateSut();
+
+        var result = await sut.RegisterUserAsync(new PasswordlessRegisterRequest("my_email_username", "My Email Key", null)
+        {
+            Email = null!,
+        }, CancellationToken.None);
+
+        var problemResult = Assert.IsAssignableFrom<ProblemHttpResult>(result);
+        var validationProblem = Assert.IsAssignableFrom<HttpValidationProblemDetails>(problemResult.ProblemDetails);
+        Assert.True(validationProblem.Errors.TryGetValue("invalid_email", out var errors));
+        Assert.Single(errors);
     }
 
     private static ClaimsPrincipal CreateClaimsPrincipal(Guid? userId, string? authenticationType = "test")
@@ -289,6 +351,146 @@ public class PasswordlessServiceTests
     }
 
     [Fact]
+    public async Task AddCredentialAsync_NullUsername_ReturnsUnauthorized()
+    {
+        var user = new TestUser
+        {
+            Id = Guid.NewGuid(),
+            Username = null!,
+        };
+
+        await _testUserStore.CreateAsync(user);
+
+        var sut = CreateSut();
+
+        var result = await sut.AddCredentialAsync(
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(user.Id),
+            CancellationToken.None);
+
+        Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
+    }
+
+    [Fact]
+    public async Task AddCredentialAsync_AppRequiresEmail_CreatesOptionsWithEmailAlias()
+    {
+        var user = new TestUser
+        {
+            Id = Guid.NewGuid(),
+            Username = "username_with_email",
+            Email = "test@email.com",
+        };
+
+        await _testUserStore.CreateAsync(user);
+
+        var identityOptions = new IdentityOptions();
+        identityOptions.User.RequireUniqueEmail = true;
+
+        _mockServiceProvider
+            .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
+            .Returns(Options.Create(identityOptions));
+
+        _mockPasswordlessClient.Setup(s => s.CreateRegisterToken(It.Is<RegisterOptions>(o
+            => o.UserId == user.Id.ToString() && o.Username == "username_with_email" && o.Aliases != null && o.Aliases.Contains("test@email.com"))))
+            .ReturnsAsync(new RegisterTokenResponse
+            {
+                Token = "test_email_token",
+            });
+
+        var sut = CreateSut();
+
+        var result = await sut.AddCredentialAsync(
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(user.Id),
+            CancellationToken.None);
+
+        var okResult = Assert.IsAssignableFrom<Ok<RegisterTokenResponse>>(result);
+        Assert.NotNull(okResult.Value);
+        Assert.Equal("test_email_token", okResult.Value.Token);
+    }
+
+    [Fact]
+    public async Task AddCredentialAsync_CustomizeReturnsNullOptions_ReturnsUnauthorized()
+    {
+        var user = new TestUser
+        {
+            Id = Guid.NewGuid(),
+            Username = "add_credential_test_1",
+        };
+
+        await _testUserStore.CreateAsync(user);
+
+        _mockCustomizeRegisterOptions
+            .Setup(s => s.CustomizeAsync(It.IsAny<CustomizeRegisterOptionsContext>(), CancellationToken.None))
+            .Callback<CustomizeRegisterOptionsContext, CancellationToken>((context, _) => context.Options = null);
+
+        var sut = CreateSut();
+
+        var result = await sut.AddCredentialAsync(
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(user.Id),
+            CancellationToken.None);
+
+        Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
+    }
+
+    [Fact]
+    public async Task AddCredentialAsync_AppRequiresEmail_EmailIsNull_ReturnsUnauthorized()
+    {
+        var user = new TestUser
+        {
+            Id = Guid.NewGuid(),
+            Username = "username_with_email",
+            Email = null!,
+        };
+
+        await _testUserStore.CreateAsync(user);
+
+        var identityOptions = new IdentityOptions();
+        identityOptions.User.RequireUniqueEmail = true;
+
+        _mockServiceProvider
+            .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
+            .Returns(Options.Create(identityOptions));
+
+        _mockPasswordlessClient.Setup(s => s.CreateRegisterToken(It.Is<RegisterOptions>(o
+            => o.UserId == user.Id.ToString() && o.Username == "username_with_email" && o.Aliases != null && o.Aliases.Contains("test@email.com"))))
+            .ReturnsAsync(new RegisterTokenResponse
+            {
+                Token = "test_email_token",
+            });
+
+        var sut = CreateSut();
+
+        var result = await sut.AddCredentialAsync(
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            CreateClaimsPrincipal(user.Id),
+            CancellationToken.None);
+
+        Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
+    }
+
+    public static IEnumerable<object[]> UnauthenticatedClaimsPrincipals()
+    {
+        yield return new[] { new ClaimsPrincipal() }; // Empty claims principal with no identity
+        yield return new[] { CreateClaimsPrincipal(null, authenticationType: null) }; // Claims principal with one identity that is not authenticated
+    }
+
+    [Theory]
+    [MemberData(nameof(UnauthenticatedClaimsPrincipals))]
+    public async Task AddCredentialAsync_UserNotAuthenticated_ReturnsUnauthorized(ClaimsPrincipal claimsPrincipal)
+    {
+        var sut = CreateSut();
+
+        var result = await sut.AddCredentialAsync(
+            new PasswordlessAddCredentialRequest("My Test Key"),
+            claimsPrincipal,
+            CancellationToken.None);
+
+        Assert.IsAssignableFrom<UnauthorizedHttpResult>(result);
+    }
+
+    [Fact]
     public async Task AddCredentialAsync_UserCanNotBeFound_ReturnsUnauthorized()
     {
         var sut = CreateSut();
@@ -333,10 +535,10 @@ public sealed class TestUserStore : IUserEmailStore<TestUser>
     {
         var didRemove = InnerStore.Remove(user.Id);
         var result = didRemove ? IdentityResult.Success : IdentityResult.Failed(new IdentityError
-            {
-                Code = "error",
-                Description = "Could not delete",
-            });
+        {
+            Code = "error",
+            Description = "Could not delete",
+        });
 
         return Task.FromResult(result);
     }
@@ -364,7 +566,8 @@ public sealed class TestUserStore : IUserEmailStore<TestUser>
 
     public Task<TestUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var user = InnerStore.Values.FirstOrDefault(u => string.Equals(u.Username, normalizedUserName, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(user);
     }
 
     public Task<string?> GetEmailAsync(TestUser user, CancellationToken cancellationToken)

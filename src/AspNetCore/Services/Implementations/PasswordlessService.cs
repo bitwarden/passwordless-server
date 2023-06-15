@@ -55,7 +55,7 @@ public class PasswordlessService<TUser, TRegisterRequest>
     protected IPasswordlessClient PasswordlessClient { get; }
     protected IUserStore<TUser> UserStore { get; }
     protected IUserClaimsPrincipalFactory<TUser> UserClaimsPrincipalFactory { get; }
-    public ICustomizeRegisterOptions CustomizeRegisterOptions { get; }
+    protected ICustomizeRegisterOptions CustomizeRegisterOptions { get; }
     protected PasswordlessAspNetCoreOptions Options { get; }
     protected IdentityOptions? IdentityOptions { get; }
     protected AuthenticationOptions? AuthenticationOptions { get; }
@@ -105,7 +105,7 @@ public class PasswordlessService<TUser, TRegisterRequest>
         // I could check if the customize service is the noop one and not allocate this context class
         // which would make this a bit more pay-for-play.
         var customizeContext = new CustomizeRegisterOptionsContext(false, registerOptions);
-        await CustomizeRegisterOptions.CustomizeAsync(customizeContext);
+        await CustomizeRegisterOptions.CustomizeAsync(customizeContext, cancellationToken);
 
         if (customizeContext.Options is null)
         {
@@ -169,7 +169,7 @@ public class PasswordlessService<TUser, TRegisterRequest>
 
         // Customize register options
         var customizeContext = new CustomizeRegisterOptionsContext(true, registerOptions);
-        await CustomizeRegisterOptions.CustomizeAsync(customizeContext);
+        await CustomizeRegisterOptions.CustomizeAsync(customizeContext, cancellationToken);
 
         if (customizeContext.Options is null)
         {
