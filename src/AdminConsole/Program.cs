@@ -178,10 +178,10 @@ void RunTheApp()
 
     if (builder.Configuration.GetValue<bool>("SelfHosted"))
     {
+        // When self-hosting. Migrate latest database changes during startup
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider
             .GetRequiredService<ConsoleDbContext>();
-
         dbContext.Database.Migrate();
     }
 
