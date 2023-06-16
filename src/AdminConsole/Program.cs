@@ -148,6 +148,10 @@ void RunTheApp()
     {
         services.AddSingleton<IMailProvider, PostmarkMailProvider>();
     }
+    else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
+    {
+        services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
+    }
 
     services.AddScoped<UsageService>();
     services.AddScoped<DataService>();
