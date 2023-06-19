@@ -17,8 +17,8 @@ public static class AddDatabaseExtensionMethod
         var sqlite = configuration.GetConnectionString("sqlite");
         var mssql = configuration.GetConnectionString("mssql");
 
-        sqlite = configuration.GetValue<string>("ConnectionStrings.Sqlite.Api", sqlite);
-        mssql = configuration.GetValue<string>("ConnectionStrings.Mssql.Api", mssql);
+        sqlite = configuration.GetValue<string>("ConnectionStrings:Sqlite:Api", sqlite);
+        mssql = configuration.GetValue<string>("ConnectionStrings:Mssql:Api", mssql);
 
         if (!string.IsNullOrEmpty(sqlite))
         {

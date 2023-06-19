@@ -10,8 +10,8 @@ public static class AddDatabaseExtensionMethod
         var sqlite = builder.Configuration.GetConnectionString("sqlite");
         var mssql = builder.Configuration.GetConnectionString("mssql");
 
-        sqlite = builder.Configuration.GetValue<string>("ConnectionStrings.Sqlite.Admin", sqlite);
-        mssql = builder.Configuration.GetValue<string>("ConnectionStrings.Mssql.Admin", mssql);
+        sqlite = builder.Configuration.GetValue<string>("ConnectionStrings:Sqlite:Admin", sqlite);
+        mssql = builder.Configuration.GetValue<string>("ConnectionStrings:Mssql:Admin", mssql);
 
         // read "migrate_db" from env
         var migrating = builder.Configuration.GetValue<string>("ef_migrate");
