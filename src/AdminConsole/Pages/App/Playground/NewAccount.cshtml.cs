@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages;
@@ -7,12 +8,12 @@ namespace AdminConsole.Pages;
 public class NewAccountModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly PasswordlessClient api;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
-    public NewAccountModel(ILogger<IndexModel> logger, PasswordlessClient api)
+    public NewAccountModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
     {
         _logger = logger;
-        this.api = api;
+        this._passwordlessClient = passwordlessClient;
     }
 
     public void OnGet()
@@ -24,7 +25,7 @@ public class NewAccountModel : PageModel
     {
         // Create new account
         var userId = Guid.NewGuid().ToString();
-        var token = await api.CreateRegisterToken(new RegisterOptions()
+        var token = await _passwordlessClient.CreateRegisterToken(new RegisterOptions()
         {
             UserId = userId,
             Username = "Playground: " + email,
@@ -38,7 +39,7 @@ public class NewAccountModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await api.VerifyToken(token);
+        var res = await _passwordlessClient.VerifyToken(token);
         return new JsonResult(res);
     }
 }
