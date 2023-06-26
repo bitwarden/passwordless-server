@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
@@ -149,6 +150,10 @@ void RunTheApp()
     {
         services.AddSingleton<IMailProvider, PostmarkMailProvider>();
     }
+    else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
+    {
+        services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
+    }
 
     services.AddScoped<UsageService>();
     services.AddScoped<DataService>();
@@ -174,6 +179,15 @@ void RunTheApp()
         app.UseExceptionHandler("/Error");
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
+    }
+
+    if (builder.Configuration.GetValue<bool>("SelfHosted"))
+    {
+        // When self-hosting. Migrate latest database changes during startup
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<ConsoleDbContext>();
+        dbContext.Database.Migrate();
     }
 
     app.UseCSP();

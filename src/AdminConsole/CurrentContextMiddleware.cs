@@ -23,10 +23,10 @@ public class CurrentContext : ICurrentContext
 
     public void SetApp(Application application)
     {
-        #if DEBUG
+#if DEBUG
         Debug.Assert(!_contextSet, "Context should only be set one time per lifetime.");
         _contextSet = true;
-        #endif
+#endif
         InAppContext = true;
         AppId = application.Id;
         ApiSecret = application.ApiSecret;
@@ -81,9 +81,9 @@ public class CurrentContextMiddleware
             return;
         }
 
-        #pragma warning disable CS0618 // I am the one valid caller of this method
-            currentContext.SetApp(appConfig);
-        #pragma warning restore CS0618
+#pragma warning disable CS0618 // I am the one valid caller of this method
+        currentContext.SetApp(appConfig);
+#pragma warning restore CS0618
 
         await _next(httpContext);
     }

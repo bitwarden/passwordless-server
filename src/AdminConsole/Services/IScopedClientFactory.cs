@@ -6,7 +6,7 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface IScopedPasswordlessClient : IPasswordlessClient
 {
-    
+
 }
 
 public class ScopedPasswordlessClient : IScopedPasswordlessClient
@@ -29,7 +29,7 @@ public class ScopedPasswordlessClient : IScopedPasswordlessClient
 
     public async Task DeleteCredential(string id)
     {
-       await PostAsync("credentials/delete", new { CredentialId = id });
+        await PostAsync("credentials/delete", new { CredentialId = id });
     }
 
     public async Task DeleteCredential(byte[] id)

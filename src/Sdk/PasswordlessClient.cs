@@ -262,6 +262,6 @@ public class PasswordlessClient : IPasswordlessClient
             return result;
         }
 
-        
+
     }
 }
