@@ -1,0 +1,67 @@
+---
+name: _build
+run-name: Build - ${{ inputs.project-name }}
+
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        type: string
+        required: true
+      project-path:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+
+jobs:
+  build:
+    name: Build ${{ inputs.project-name }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Get pinned .NET version
+        id: dotnet-version
+        run: echo "value=$(cat global.json | jq -r '.sdk.version')" >> $GITHUB_OUTPUT
+
+      - name: Set up dotnet
+        uses: actions/setup-dotnet@9211491ffb35dd6a6657ca4f45d43dfe6e97c829  # v2.0.0
+        with:
+          dotnet-version: ${{ steps.dotnet-version.outputs.value }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: dotnet restore --locked-mode
+
+      - name: Build
+        run: dotnet build --verbosity minimal
+
+      - name: .NET Clean & Restore
+        run: |
+          echo "Clean"
+          dotnet clean
+          echo "Restore"
+          dotnet restore --runtime win-x86  # Does this need to run in --locked-mode too?
+      - name: .NET Publish ${{ inputs.project-name }}
+        run: |
+          echo "Publish"
+          dotnet publish ${{ inputs.project-path }}/${{ inputs.project-name }}.csproj \
+            -c Release --no-restore --runtime win-x86 --no-self-contained \
+            -o ./tmp/publish-${{ inputs.project-name }} -p:Version=${{ inputs.version }}
+      - name: Zip ${{ inputs.project-name }} Artifact
+        run: |
+          cd ./tmp/publish-${{ inputs.project-name }}
+          zip -r ${{ inputs.project-name }}.zip .
+          mv ${{ inputs.project-name }}.zip ../../
+          pwd
+          ls -atlh ../../
+      - name: Upload project artifact
+        uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535  # v3.0.0
+        with:
+          name: ${{ inputs.project-name }}.zip
+          path: ./${{ inputs.project-name }}.zip
+          if-no-files-found: error
