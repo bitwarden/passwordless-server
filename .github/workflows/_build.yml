@@ -46,12 +46,14 @@ jobs:
           dotnet clean
           echo "Restore"
           dotnet restore --runtime win-x86  # Does this need to run in --locked-mode too?
+
       - name: .NET Publish ${{ inputs.project-name }}
         run: |
           echo "Publish"
           dotnet publish ${{ inputs.project-path }}/${{ inputs.project-name }}.csproj \
             -c Release --no-restore --runtime win-x86 --no-self-contained \
             -o ./tmp/publish-${{ inputs.project-name }} -p:Version=${{ inputs.version }}
+
       - name: Zip ${{ inputs.project-name }} Artifact
         run: |
           cd ./tmp/publish-${{ inputs.project-name }}
@@ -59,6 +61,7 @@ jobs:
           mv ${{ inputs.project-name }}.zip ../../
           pwd
           ls -atlh ../../
+
       - name: Upload project artifact
         uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535  # v3.0.0
         with:
