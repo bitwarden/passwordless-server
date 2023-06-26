@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Buffers.Text;
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -23,6 +24,7 @@ public class RegisterTokenResponse
     public string Token { get; set; }
 }
 
+[DebuggerDisplay("{DebuggerToString()}")]
 public class PasswordlessClient : IPasswordlessClient
 {
     private readonly HttpClient _client;
@@ -39,6 +41,7 @@ public class PasswordlessClient : IPasswordlessClient
     {
         _client = client;
     }
+
     public async Task<RegisterTokenResponse> CreateRegisterToken(RegisterOptions registerOptions)
     {
         var res = await _client.PostAsJsonAsync("register/token", registerOptions);
@@ -106,6 +109,16 @@ public class PasswordlessClient : IPasswordlessClient
     public async Task<UsersCount> GetUsersCount()
     {
         return (await _client.GetFromJsonAsync<UsersCount>("users/count"))!;
+    }
+
+    private string DebuggerToString()
+    {
+        if (_client.DefaultRequestHeaders.TryGetValues("ApiSecret", out var values))
+        {
+            return $"ApiUrl = {_client.BaseAddress} ApiSecret = {values.First()}";
+        }
+
+        return $"ApiUrl = {_client.BaseAddress} ApiSecret = (null)";
     }
 
     public class ListResponse<T>
@@ -248,5 +261,7 @@ public class PasswordlessClient : IPasswordlessClient
             ArrayPool<byte>.Shared.Return(array, clearArray: true);
             return result;
         }
+
+        
     }
 }

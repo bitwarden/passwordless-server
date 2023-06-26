@@ -41,12 +41,6 @@ public static class IdentityBuilderExtensions
                         ?? passwordlessSection.GetValue<string>("ApiSecret")!;
                 }
 
-                if (options.Api.ApiKey == null)
-                {
-                    options.Api.ApiKey = passwordlessSection.GetValue<string>("Api:ApiKey")
-                        ?? passwordlessSection.GetValue<string>("ApiKey")!;
-                }
-
                 var configApiUrl = passwordlessSection.GetValue<string>("Api:ApiUrl")
                         ?? passwordlessSection.GetValue<string>("ApiUrl");
 
@@ -63,7 +57,6 @@ public static class IdentityBuilderExtensions
             {
                 var aspNetCoreOptions = aspNetCoreOptionsAccessor.Value;
                 options.ApiSecret = aspNetCoreOptions.Api.ApiSecret;
-                options.ApiKey = aspNetCoreOptions.Api.ApiKey;
                 options.ApiUrl = aspNetCoreOptions.Api.ApiUrl;
             });
 
