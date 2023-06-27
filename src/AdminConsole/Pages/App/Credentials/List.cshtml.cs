@@ -8,7 +8,7 @@ namespace AdminConsole.Pages;
 public class ListModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IPasswordlessClient _api;
+    private readonly IScopedPasswordlessClient _api;
 
     public List<PasswordlessUserSummary> Users { get; set; }
 

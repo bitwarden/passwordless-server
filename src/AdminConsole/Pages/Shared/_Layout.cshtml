@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ConsoleAdmin> signinManager
 @inject UserManager<ConsoleAdmin> UserManager
-@inject IOptions<PasswordlessClientOptions> PasswordlessClientOptions
+@inject IOptions<PasswordlessClientOptions> Options
 @inject ICurrentContext CurrentContext
 @{
     var signedIn = signinManager.IsSignedIn(User);
@@ -123,7 +123,7 @@
         <environment include="Development">
             <footer class="flex gap-4 p-4 m-4 text-sm bg-black rounded-md bg-opacity-10 flex-wrap max-w-fit">
                 <div>
-                    <span class="font-semibold">ApiUrl: </span>@PasswordlessClientOptions.Value.ApiUrl
+                    <span class="font-semibold">ApiUrl: </span>@Options.Value.ApiUrl
                 </div>
                 <div>
                     @if (CurrentContext.InAppContext)
@@ -132,7 +132,7 @@
                     }
                     else
                     {
-                        <span class="font-semibold">ApiKey: </span>@PasswordlessClientOptions.Value.ApiKey
+                        <span class="font-semibold">ApiKey: </span>@Options.Value.ApiKey
                     }
                 </div>
             </footer>

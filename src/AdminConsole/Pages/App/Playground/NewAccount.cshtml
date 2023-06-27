@@ -1,7 +1,7 @@
 @page "/playground/new-account"
 @model NewAccountModel
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessClientOptions> PasswordlessClientOptions
+@inject IOptions<PasswordlessClientOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
@@ -81,7 +81,7 @@
         setup() {
 
             const p = new Passwordless.Client({
-                apiUrl: "@PasswordlessClientOptions.Value.ApiUrl",
+                apiUrl: "@Options.Value.ApiUrl",
                 apiKey: "@CurrentContext.ApiKey"
             });
 

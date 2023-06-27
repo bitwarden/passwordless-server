@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Antiforgery
 @model ClientModel
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessOptions> PasswordlessOptions
+@inject IOptions<PasswordlessClientOptions> Options
 @inject IAntiforgery Antiforgery
 
 @{
@@ -93,7 +93,7 @@
                 const signins = ref([]);
                 
                 const p = new Passwordless.Client({
-                    apiUrl: "@PasswordlessOptions.Value.ApiUrl",
+                    apiUrl: "@Options.Value.ApiUrl",
                     apiKey: "@CurrentContext.ApiKey"
                 });
               
