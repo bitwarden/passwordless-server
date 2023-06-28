@@ -16,6 +16,10 @@ public static class AddDatabaseExtensionMethod
         // Database information
         var sqlite = configuration.GetConnectionString("sqlite");
         var mssql = configuration.GetConnectionString("mssql");
+
+        sqlite = configuration.GetValue<string>("ConnectionStrings:Sqlite:Api", sqlite);
+        mssql = configuration.GetValue<string>("ConnectionStrings:Mssql:Api", mssql);
+
         if (!string.IsNullOrEmpty(sqlite))
         {
             services.AddDbContext<DbTenantContext, SqliteContext>((sp, builder) =>
@@ -47,9 +51,10 @@ public static class AddDatabaseExtensionMethod
 
             var environment = sp.GetRequiredService<IWebHostEnvironment>();
 
-            if (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations"))
+            // This exception allows running migrations either when developing or when self hosting
+            if (context == null || (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations")))
             {
-                return new ManualTenantProvider("test");
+                return new ManualTenantProvider("_efmigrations");
             }
 
             return !string.IsNullOrEmpty(accountName)
