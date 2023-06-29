@@ -7,11 +7,8 @@ public static class AddDatabaseExtensionMethod
     public static IServiceCollection AddDatabase(this IServiceCollection services, WebApplicationBuilder builder)
     {
         // if not present, try use sqlite
-        var sqlite = builder.Configuration.GetConnectionString("sqlite");
-        var mssql = builder.Configuration.GetConnectionString("mssql");
-
-        sqlite = builder.Configuration.GetValue<string>("ConnectionStrings:Sqlite:Admin", sqlite);
-        mssql = builder.Configuration.GetValue<string>("ConnectionStrings:Mssql:Admin", mssql);
+        var sqlite = builder.Configuration.GetConnectionString("sqlite:admin");
+        var mssql = builder.Configuration.GetConnectionString("mssql:admin");
 
         // read "migrate_db" from env
         var migrating = builder.Configuration.GetValue<string>("ef_migrate");
