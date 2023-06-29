@@ -21,7 +21,7 @@ public static class AddDatabaseExtensionMethod
         {
             services.AddDbContext<DbTenantContext, SqliteContext>((sp, builder) =>
             {
-                
+
                 builder.UseSqlite(configuration.GetConnectionString("sqlite:api"));
             });
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<SqliteContext>>();
