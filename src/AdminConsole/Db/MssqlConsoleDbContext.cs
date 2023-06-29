@@ -13,7 +13,7 @@ public class MssqlConsoleDbContext : ConsoleDbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlServer(_config.GetConnectionString("mssql"));
+        => options.UseSqlServer(_config.GetConnectionString("mssql:admin"));
 }
 
 // public class MssqlContextFactory : IDesignTimeDbContextFactory<MssqlConsoleDbContext>
