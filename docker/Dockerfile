@@ -92,6 +92,7 @@ RUN mkdir -p /etc/bitwarden_passwordless/logs
 RUN mkdir -p /etc/supervisor
 RUN mkdir -p /etc/supervisor.d
 RUN mkdir -p /var/log/bitwarden
+RUN mkdir -p /var/log/bitwarden_passwordless
 RUN mkdir -p /var/log/nginx/logs
 RUN mkdir -p /etc/nginx/http.d
 RUN mkdir -p /var/run/nginx
