@@ -265,29 +265,6 @@ public class Fido2ServiceEndpoints : IFido2Service
 
             existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
             log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
-
-
-            if (existingCredentials.Count == 0)
-            {
-                // If we couldn't find any aliases, try to find them using legacy hashing
-                var legacyHashed = LegacyHashAlias(request.Alias, _tenant);
-
-                existingCredentials = await _storage.GetCredentialsByAliasAsync(legacyHashed);
-                log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
-
-                if (existingCredentials.Count > 0)
-                {
-                    // If we found credentials using legacy hashing, Migrate to new hashing scheme
-                    string aliasUserIdBase64 = await _storage.GetUserIdByAliasAsync(legacyHashed);
-                    var useridbytes = Convert.FromBase64String(aliasUserIdBase64);
-                    var str = Encoding.UTF8.GetString(useridbytes);
-                    await _storage.StoreAlias(str,
-                        new Dictionary<string, string>()
-                        {
-                            {hashedAlias,null}
-                        });
-                }
-            }
         }
         else
         {
@@ -460,25 +437,5 @@ public class Fido2ServiceEndpoints : IFido2Service
         log.LogInformation("SHA256 Hashing username took {duration}ms", sw.ElapsedMilliseconds);
 
         return hashedUsername;
-    }
-
-    private string LegacyHashAlias(string username, string tenant)
-    {
-        var sw = Stopwatch.StartNew();
-        string environmentSalt = config["SALT_ALIAS"];
-        if (string.IsNullOrEmpty(environmentSalt)) throw new Exception("SALT_ALIAS environment variable is missing");
-
-        var salt = SHA256.HashData(Encoding.UTF8.GetBytes(tenant + environmentSalt));
-
-        string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-            password: username,
-            salt: salt,
-            prf: KeyDerivationPrf.HMACSHA256,
-            iterationCount: 10000,
-            numBytesRequested: 256 / 8));
-
-        sw.Stop();
-        log.LogInformation("Hashing username took {duration}ms", sw.ElapsedMilliseconds);
-        return hashed;
     }
 }
