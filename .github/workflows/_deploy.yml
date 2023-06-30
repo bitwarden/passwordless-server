@@ -19,6 +19,14 @@ on:
       version:
         type: string
         required: true
+    secrets:
+      APP_SERVICE_SP:
+        required: true
+      AZURE_RESOURCE_GROUP_NAME:
+        required: true
+      AZURE_APP_NAME:
+        required: true
+
 
 jobs:
   deploy:
