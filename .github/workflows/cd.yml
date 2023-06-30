@@ -52,5 +52,6 @@ jobs:
     secrets: inherit
     with:
       environment: devtest
+      is-dry-run: false
       project-name: ${{ matrix.project-name }}
       version: ${{ needs.version.outputs.version }}
