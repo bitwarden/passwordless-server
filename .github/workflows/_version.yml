@@ -1,0 +1,48 @@
+---
+name: _version
+run-name: Calculate Version
+
+on:
+  workflow_call:
+    inputs:
+      is-release:
+        type: boolean
+        default: false
+    outputs:
+      version:
+        description: "version to be built"
+        value: ${{ jobs.version.outputs.version }}
+
+jobs:
+  version:
+    name: Calculate Version
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          fetch-depth: 0
+
+      - name: Generate Version
+        id: version
+        run: |
+          git fetch --prune --tags
+
+          echo "Calculating next version..."
+          base_version=$(cat Directory.Build.props |
+            grep -o "<BaseVersion>.*</BaseVersion>" |
+            grep -Eo "[0-9]+\.[0-9]+"
+          )
+          latest_tag_version=$(git tag --sort=committerdate --list | tail -1)
+          echo "  latest_tag_version: $latest_tag_version"
+          version_suffix=$((${latest_tag_version##*.} + 1))
+
+          if [[ "${{ inputs.is-release }}" == "false" ]]; then
+            version_suffix=$version_suffix-${GITHUB_SHA:0:7}
+          fi
+
+          echo "  version: $base_version.$version_suffix"
+          echo "value=$base_version.$version_suffix" >> $GITHUB_OUTPUT
+          echo "Done"
