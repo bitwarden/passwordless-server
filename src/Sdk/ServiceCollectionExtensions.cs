@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.Extensions.Options;
 using Passwordless.Net;
 
@@ -14,7 +13,7 @@ public static class ServiceCollectionExtensions
             .PostConfigure(options => options.ApiUrl ??= PasswordlessOptions.CloudApiUrl)
             .Validate(options => !string.IsNullOrEmpty(options.ApiSecret), "Passwordless: Missing ApiSecret");
 
-        services.AddPasswordlessClient<IPasswordlessClient, PasswordlessClient>((sp, client) =>
+        services.AddPasswordlessClientCore<IPasswordlessClient, PasswordlessClient>((sp, client) =>
         {
             var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;
 
@@ -36,8 +35,7 @@ public static class ServiceCollectionExtensions
     /// <remarks>
     /// This method signature is subject to change without major version bump/announcement.
     /// </remarks>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static IServiceCollection AddPasswordlessClient<TClient, TImplementation>(this IServiceCollection services, Action<IServiceProvider, HttpClient> configureClient)
+    internal static IServiceCollection AddPasswordlessClientCore<TClient, TImplementation>(this IServiceCollection services, Action<IServiceProvider, HttpClient> configureClient)
         where TClient : class
         where TImplementation : class, TClient
     {

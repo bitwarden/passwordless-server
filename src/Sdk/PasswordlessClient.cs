@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -113,12 +114,27 @@ public class PasswordlessClient : IPasswordlessClient
 
     private string DebuggerToString()
     {
+        var sb = new StringBuilder();
+        sb.Append("ApiUrl = ");
+        sb.Append(_client.BaseAddress);
         if (_client.DefaultRequestHeaders.TryGetValues("ApiSecret", out var values))
         {
-            return $"ApiUrl = {_client.BaseAddress} ApiSecret = {values.First()}";
+            var apiSecret = values.First();
+            if (apiSecret.Length > 5)
+            {
+                sb.Append(' ');
+                sb.Append("ApiSecret = ");
+                sb.Append("***");
+                sb.Append(apiSecret.AsSpan(apiSecret.Length - 4));
+            }
+        }
+        else
+        {
+            sb.Append(' ');
+            sb.Append("ApiSecret = (null)");
         }
 
-        return $"ApiUrl = {_client.BaseAddress} ApiSecret = (null)";
+        return sb.ToString();
     }
 
     public class ListResponse<T>

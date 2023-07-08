@@ -131,7 +131,7 @@ void RunTheApp()
     services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
 
     // Create a special IPasswordlessClient style service for App scoped uses
-    services.AddPasswordlessClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((sp, client) =>
+    services.AddPasswordlessClientCore<IScopedPasswordlessClient, ScopedPasswordlessClient>((sp, client) =>
     {
         // The App scoped client still uses the configuration based ApiUrl
         var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;

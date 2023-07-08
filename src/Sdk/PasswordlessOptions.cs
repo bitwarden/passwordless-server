@@ -22,4 +22,12 @@ public class PasswordlessOptions
     /// Gets or sets the secret API key used to authenticate with the Passwordless API.
     /// </summary>
     public string ApiSecret { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the public API key used to interact with the Passwordless API.
+    /// </summary>
+    /// <remarks>
+    /// Optional: Only used for frontend operations by the JS Client. E.g: Useful if you're using MVC/Razor pages
+    /// </remarks>
+    public string? ApiKey { get; set; }
 }
