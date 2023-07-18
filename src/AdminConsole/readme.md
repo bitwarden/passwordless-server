@@ -1,6 +1,17 @@
 # Admin Console
 The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for creating and configuring applications, monitoring application usage, and managing billing.
 
+# Requirements
+- [.NET 7 SDK](https://dotnet.microsoft.com/en-us/download).
+   - https://learn.microsoft.com/en-us/dotnet/core/install/
+- Database (one of the following):
+   - Sqlite:
+      - (do nothing)
+   - Microsoft SQL Server
+      - [Docker image](https://hub.docker.com/_/microsoft-mssql-server)
+         - [Rosetta](https://support.apple.com/en-us/HT211861) is required for Apple M1 or newer.
+      - https://www.microsoft.com/en-us/sql-server/sql-server-downloads
+
 # Getting started
 1. Clone the repository.
 2. Open the project in your favorite IDE.

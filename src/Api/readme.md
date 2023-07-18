@@ -4,14 +4,14 @@ This is the API server that controls FIDO2 authentication and stores credentials
 
 # Requirements
 - [.NET 7 SDK](https://dotnet.microsoft.com/en-us/download).
-- Database:
+  - https://learn.microsoft.com/en-us/dotnet/core/install/
+- Database (one of the following):
   - Sqlite:
-    - (nothing)
+    - (do nothing)
   - Microsoft SQL Server
     - [Docker image](https://hub.docker.com/_/microsoft-mssql-server)
       - [Rosetta](https://support.apple.com/en-us/HT211861) is required for Apple M1 or newer.
     - https://www.microsoft.com/en-us/sql-server/sql-server-downloads
-
 
 # Getting started
 1. Clone the repository.
