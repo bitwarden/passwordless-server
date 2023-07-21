@@ -1,6 +1,8 @@
 using System.Buffers;
 using System.Buffers.Text;
+using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -23,6 +25,7 @@ public class RegisterTokenResponse
     public string Token { get; set; }
 }
 
+[DebuggerDisplay("{DebuggerToString()}")]
 public class PasswordlessClient : IPasswordlessClient
 {
     private readonly HttpClient _client;
@@ -39,6 +42,7 @@ public class PasswordlessClient : IPasswordlessClient
     {
         _client = client;
     }
+
     public async Task<RegisterTokenResponse> CreateRegisterToken(RegisterOptions registerOptions)
     {
         var res = await _client.PostAsJsonAsync("register/token", registerOptions);
@@ -106,6 +110,31 @@ public class PasswordlessClient : IPasswordlessClient
     public async Task<UsersCount> GetUsersCount()
     {
         return (await _client.GetFromJsonAsync<UsersCount>("users/count"))!;
+    }
+
+    private string DebuggerToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append("ApiUrl = ");
+        sb.Append(_client.BaseAddress);
+        if (_client.DefaultRequestHeaders.TryGetValues("ApiSecret", out var values))
+        {
+            var apiSecret = values.First();
+            if (apiSecret.Length > 5)
+            {
+                sb.Append(' ');
+                sb.Append("ApiSecret = ");
+                sb.Append("***");
+                sb.Append(apiSecret.AsSpan(apiSecret.Length - 4));
+            }
+        }
+        else
+        {
+            sb.Append(' ');
+            sb.Append("ApiSecret = (null)");
+        }
+
+        return sb.ToString();
     }
 
     public class ListResponse<T>
@@ -248,5 +277,7 @@ public class PasswordlessClient : IPasswordlessClient
             ArrayPool<byte>.Shared.Return(array, clearArray: true);
             return result;
         }
+
+
     }
 }

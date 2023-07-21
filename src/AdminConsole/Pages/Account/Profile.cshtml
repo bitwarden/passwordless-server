@@ -1,8 +1,7 @@
 @page
-@using Microsoft.Extensions.Options
 @using Microsoft.AspNetCore.Antiforgery
 @model Profile
-@inject IOptions<PasswordlessOptions> options
+@inject IOptions<PasswordlessClientOptions> PasswordlessClientOptions
 @inject IAntiforgery Antiforgery
 
 @{
@@ -128,8 +127,8 @@
             }
             
             const p = new Passwordless.Client({
-                apiUrl: "@options.Value.ApiUrl",
-                apiKey: "@options.Value.ApiKey"
+                apiUrl: "@PasswordlessClientOptions.Value.ApiUrl",
+                apiKey: "@PasswordlessClientOptions.Value.ApiKey"
             });
             
             const working = ref(false);
