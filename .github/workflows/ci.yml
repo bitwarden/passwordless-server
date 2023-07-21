@@ -1,0 +1,38 @@
+---
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs: {}
+  push:
+    branches-ignore:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+  checks: write
+
+jobs:
+  version:
+    uses: ./.github/workflows/_version.yml
+
+
+  test:
+    uses: ./.github/workflows/_test.yml
+
+
+  build:
+    needs:
+      - test
+      - version
+    strategy:
+      matrix:
+        project-name:
+          - AdminConsole
+          - Api
+    uses: ./.github/workflows/_build.yml
+    with:
+      project-name: ${{ matrix.project-name }}
+      project-path: ./src/${{ matrix.project-name }}
+      version: ${{ needs.version.outputs.version }}

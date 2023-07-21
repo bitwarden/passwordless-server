@@ -13,5 +13,5 @@ public class SqliteConsoleDbContext : ConsoleDbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite(_config.GetConnectionString("sqlite"));
+        => options.UseSqlite(_config.GetConnectionString("sqlite:admin"));
 }
