@@ -1,8 +1,8 @@
 ﻿@page "/playground"
-@using Microsoft.Extensions.Options
 @using Microsoft.AspNetCore.Antiforgery
 @model ClientModel
-@inject IOptionsSnapshot<PasswordlessOptions> passwordlessOptions
+@inject ICurrentContext CurrentContext
+@inject IOptions<PasswordlessClientOptions> Options
 @inject IAntiforgery Antiforgery
 
 @{
@@ -93,8 +93,8 @@
                 const signins = ref([]);
                 
                 const p = new Passwordless.Client({
-                    apiUrl: "@passwordlessOptions.Value.ApiUrl",
-                    apiKey: "@passwordlessOptions.Value.ApiKey"
+                    apiUrl: "@Options.Value.ApiUrl",
+                    apiKey: "@CurrentContext.ApiKey"
                 });
               
                 const autoFill = async (retries) => {
