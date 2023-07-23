@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.Net;
+using Passwordless.AdminConsole.Services;
 
 namespace AdminConsole.Pages;
 
 public class ClientModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly PasswordlessClient api;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
-    public ClientModel(ILogger<IndexModel> logger, PasswordlessClient api)
+    public ClientModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
     {
         _logger = logger;
-        this.api = api;
+        this._passwordlessClient = passwordlessClient;
     }
 
     public async Task OnGet()
@@ -21,7 +21,7 @@ public class ClientModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await api.VerifyToken(token);
+        var res = await _passwordlessClient.VerifyToken(token);
         return new JsonResult(res);
     }
 }

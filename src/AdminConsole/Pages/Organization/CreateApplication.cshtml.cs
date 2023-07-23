@@ -16,27 +16,24 @@ namespace AdminConsole.Pages.Organization;
 
 public class CreateApplicationModel : PageModel
 {
-    private readonly PasswordlessClient api;
     private readonly ConsoleDbContext db;
-    private readonly ICurrentContext _currentContext;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
-    private readonly HttpContextAccessor _httpContext;
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
     private readonly DataService _dataService;
     private readonly PasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
 
-    public CreateApplicationModel(ConsoleDbContext db, PasswordlessClient api,
-        IOptionsSnapshot<PasswordlessOptions> passwordlessOptions, ICurrentContext currentContext,
-        SignInManager<ConsoleAdmin> signInManager, DataService dataService, IOptions<StripeOptions> stripeOptions,
+    public CreateApplicationModel(ConsoleDbContext db,
+        IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
+        SignInManager<ConsoleAdmin> signInManager,
+        DataService dataService,
+        IOptions<StripeOptions> stripeOptions,
         PasswordlessManagementClient managementClient)
     {
         _dataService = dataService;
         _managementClient = managementClient;
         this.db = db;
-        this.api = api;
         _passwordlessOptions = passwordlessOptions;
-        _currentContext = currentContext;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
     }

@@ -11,7 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -125,16 +128,15 @@ void RunTheApp()
 
     services.AddHostedService<TimedHostedService>();
 
-    // Replace IPasswordlessClient with our tenant aware version
-    services.AddScoped<IPasswordlessClient>(sp =>
-    {
-        var factory = sp.GetRequiredService<IHttpClientFactory>();
-        HttpClient client = factory.CreateClient();
+    services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
 
-        var ctx = sp.GetRequiredService<ICurrentContext>();
-        client.BaseAddress = new Uri(ctx.Options.ApiUrl);
-        client.DefaultRequestHeaders.Add("ApiSecret", ctx.Options.ApiSecret);
-        return new PasswordlessClient(client);
+    // Create a special IPasswordlessClient style service for App scoped uses
+    services.AddPasswordlessClientCore<IScopedPasswordlessClient, ScopedPasswordlessClient>((sp, client) =>
+    {
+        // The App scoped client still uses the configuration based ApiUrl
+        var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;
+
+        client.BaseAddress = new Uri(options.ApiUrl);
     });
 
     // Magic link SigninManager
@@ -147,6 +149,10 @@ void RunTheApp()
     if (builder.Configuration.GetSection("Mail:Postmark").Exists())
     {
         services.AddSingleton<IMailProvider, PostmarkMailProvider>();
+    }
+    else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
+    {
+        services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
     }
 
     services.AddScoped<UsageService>();
@@ -173,6 +179,15 @@ void RunTheApp()
         app.UseExceptionHandler("/Error");
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
+    }
+
+    if (builder.Configuration.GetValue<bool>("SelfHosted"))
+    {
+        // When self-hosting. Migrate latest database changes during startup
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<ConsoleDbContext>();
+        dbContext.Database.Migrate();
     }
 
     app.UseCSP();

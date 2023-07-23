@@ -14,14 +14,15 @@ public static class AddDatabaseExtensionMethod
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         // Database information
-        var sqlite = configuration.GetConnectionString("sqlite");
-        var mssql = configuration.GetConnectionString("mssql");
+        var sqlite = configuration.GetConnectionString("sqlite:api");
+        var mssql = configuration.GetConnectionString("mssql:api");
+
         if (!string.IsNullOrEmpty(sqlite))
         {
             services.AddDbContext<DbTenantContext, SqliteContext>((sp, builder) =>
             {
-                var config = sp.GetRequiredService<IConfiguration>();
-                builder.UseSqlite(config.GetConnectionString("sqlite"));
+                // resolving config from SP to avoid capturing
+                builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<SqliteContext>>();
         }
@@ -29,8 +30,8 @@ public static class AddDatabaseExtensionMethod
         {
             services.AddDbContext<DbTenantContext, MsSqlContext>((sp, builder) =>
             {
-                var config = sp.GetRequiredService<IConfiguration>();
-                builder.UseSqlServer(config.GetConnectionString("mssql"));
+                // resolving config from SP to avoid capturing
+                builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<MsSqlContext>>();
         }
@@ -47,7 +48,9 @@ public static class AddDatabaseExtensionMethod
 
             var environment = sp.GetRequiredService<IWebHostEnvironment>();
 
-            if (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations"))
+            // This exception allows running migrations either when developing or when self hosting
+            // as well bootstrapping a test account.
+            if (context == null || (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations")))
             {
                 return new ManualTenantProvider("test");
             }

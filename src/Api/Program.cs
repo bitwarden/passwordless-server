@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
@@ -97,6 +99,14 @@ else
     app.MapGet("/",
         () =>
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
+}
+
+if (builder.Configuration.GetValue<bool>("SelfHosted"))
+{
+    // When self-hosting. Migrate latest database changes during startup
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DbTenantContext>();
+    dbContext.Database.Migrate();
 }
 
 app.UseCors("default");
