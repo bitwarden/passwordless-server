@@ -1,8 +1,8 @@
 @page
 @using Microsoft.Extensions.Options
 @using AdminConsole.Pages.Components.ManagePasskeys
+@inject IOptions<PasswordlessClientOptions> Options
 @model UserOnboarding
-@inject IOptions<PasswordlessOptions> options
 
 @{
     ViewBag.Title = "Let's get you set up";
@@ -86,8 +86,8 @@
     createApp({
         setup() {            
             const p = new Passwordless.Client({
-                apiUrl: "@options.Value.ApiUrl",
-                apiKey: "@options.Value.ApiKey"
+                apiUrl: "@Options.Value.ApiUrl",
+                apiKey: "@Options.Value.ApiKey"
             });
             
             const supportsPasskeys = ref(false);
