@@ -45,7 +45,6 @@ internal class UsageService
     {
         var api = PasswordlessClient.Create(new PasswordlessOptions
         {
-            ApiKey = app.ApiKey,
             ApiSecret = app.ApiSecret,
             ApiUrl = app.ApiUrl
         }, _httpClientFactory);

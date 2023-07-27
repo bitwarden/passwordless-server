@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Sdk.Tests" />
+    <InternalsVisibleTo Include="Passwordless.AdminConsole" />
   </ItemGroup>
+
 </Project>

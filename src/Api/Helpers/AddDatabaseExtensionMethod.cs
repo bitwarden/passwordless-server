@@ -49,9 +49,10 @@ public static class AddDatabaseExtensionMethod
             var environment = sp.GetRequiredService<IWebHostEnvironment>();
 
             // This exception allows running migrations either when developing or when self hosting
+            // as well bootstrapping a test account.
             if (context == null || (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations")))
             {
-                return new ManualTenantProvider("_efmigrations");
+                return new ManualTenantProvider("test");
             }
 
             return !string.IsNullOrEmpty(accountName)
