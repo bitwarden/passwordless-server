@@ -1,4 +1,5 @@
 using Datadog.Trace;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Passwordless.Service.Helpers;
 
@@ -8,11 +9,15 @@ public class FriendlyExceptionsMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<LoggingMiddleware> _logger;
+    private readonly IProblemDetailsService _problemDetailsService;
 
-    public FriendlyExceptionsMiddleware(RequestDelegate next, ILogger<LoggingMiddleware> logger)
+    public FriendlyExceptionsMiddleware(RequestDelegate next,
+        ILogger<LoggingMiddleware> logger,
+        IProblemDetailsService problemDetailsService)
     {
         _next = next;
         _logger = logger;
+        _problemDetailsService = problemDetailsService;
     }
 
     public Task InvokeAsync(HttpContext context)
@@ -38,23 +43,42 @@ public class FriendlyExceptionsMiddleware
             Tracer.Instance.ActiveScope?.Span.SetException(apiException);
             _logger.UncaughtApiException(apiException);
 
+            var problemDetailsContext = new ProblemDetailsContext
+            {
+                HttpContext = context,
+                ProblemDetails = new ProblemDetails
+                {
+                    Status = apiException.StatusCode,
+                    Title = apiException.Message,
+                    Type = $"https://docs.passwordless.dev/guide/errors.html#{apiException.ErrorCode}",
+                },
+            };
+
             var extras = apiException.Extras ?? new Dictionary<string, object>();
 
             extras.TryAdd("errorCode", apiException.ErrorCode);
 
-            var problem = Results.Problem(
-                statusCode: apiException.StatusCode,
-                title: apiException.Message,
-                extensions: extras,
-                type: $"https://docs.passwordless.dev/guide/errors.html#{apiException.ErrorCode}");
-            await problem.ExecuteAsync(context);
+            foreach (var pair in extras)
+            {
+                problemDetailsContext.ProblemDetails.Extensions.TryAdd(pair.Key, pair.Value);
+            }
+            context.Response.StatusCode = apiException.StatusCode;
+            await _problemDetailsService.WriteAsync(problemDetailsContext);
         }
         catch (Exception exception)
         {
             Tracer.Instance.ActiveScope?.Span.SetException(exception);
             _logger.UncaughtException(exception);
-            var problem = Results.Problem("The api has encountered an error", statusCode: 500);
-            await problem.ExecuteAsync(context);
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await _problemDetailsService.WriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = context,
+                ProblemDetails = new ProblemDetails
+                {
+                    Detail = "The api has encountered an error",
+                    Status = StatusCodes.Status500InternalServerError,
+                },
+            });
         }
     }
 }

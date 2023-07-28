@@ -26,7 +26,7 @@ public static class IdentityBuilderExtensions
     public static IServiceCollection AddPasswordless<TUser>(this IServiceCollection services, IConfiguration configuration)
         where TUser : class, new()
     {
-        return services.AddPasswordless<TUser>(configuration.Bind);
+        return services.AddPasswordlessCore(typeof(TUser), configuration.Bind, defaultScheme: null);
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public static class IdentityBuilderExtensions
     public static IServiceCollection AddPasswordless<TUser>(this IServiceCollection services, Action<PasswordlessAspNetCoreOptions> configure)
         where TUser : class, new()
     {
-        return services.AddPasswordlessCore(typeof(TUser), configure);
+        return services.AddPasswordlessCore(typeof(TUser), configure, defaultScheme: null);
     }
 
 
@@ -50,7 +50,7 @@ public static class IdentityBuilderExtensions
     /// <returns>The <see cref="IdentityBuilder" />.</returns>
     public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, IConfiguration configuration)
     {
-        builder.Services.AddPasswordlessCore(builder.UserType, configuration.Bind);
+        builder.Services.AddPasswordlessCore(builder.UserType, configuration.Bind, IdentityConstants.ApplicationScheme);
         return builder;
     }
 
@@ -62,14 +62,22 @@ public static class IdentityBuilderExtensions
     /// <returns>The <see cref="IdentityBuilder" />.</returns>
     public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, Action<PasswordlessAspNetCoreOptions> configure)
     {
-        builder.Services.AddPasswordlessCore(builder.UserType, configure);
+        builder.Services.AddPasswordlessCore(builder.UserType, configure, IdentityConstants.ApplicationScheme);
         return builder;
     }
 
     private static IServiceCollection AddPasswordlessCore(this IServiceCollection services,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type userType,
-        Action<PasswordlessAspNetCoreOptions> configure)
+        Action<PasswordlessAspNetCoreOptions> configure,
+        string? defaultScheme)
     {
+        // If a default scheme was passed in (ASP.NET Identity in use) then configure our option to take that one
+        // but still call their configure callback after so they have the oppurtunity to override it.
+        if (!string.IsNullOrEmpty(defaultScheme))
+        {
+            services.Configure<PasswordlessAspNetCoreOptions>(options => options.SignInScheme = defaultScheme);
+        }
+
         services.Configure(configure);
 
         // Add the SDK services but don't configure it there since ASP.NET Core options are a superset of their options.

@@ -69,12 +69,16 @@ public class PasswordlessService<TUser, TRegisterRequest>
             return Unauthorized();
         }
 
+
         var user = await UserStore.FindByIdAsync(userId, cancellationToken);
 
         if (user is null)
         {
+            _logger.LogDebug("Could not find user with id {UserId} while attempting to add credential", userId);
             return Unauthorized();
         }
+
+        _logger.LogInformation("Found user {UserId} while attempting to add credential", userId);
 
         var username = await UserStore.GetUserNameAsync(user, cancellationToken);
 
@@ -113,6 +117,9 @@ public class PasswordlessService<TUser, TRegisterRequest>
         }
 
         var registerTokenResponse = await PasswordlessClient.CreateRegisterToken(customizeContext.Options);
+
+        _logger.LogDebug("Successfully created a register token for user {UserId}", userId);
+
         return Ok(registerTokenResponse);
     }
 

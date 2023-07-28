@@ -15,11 +15,11 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
     /// <summary>
     /// 
     /// </summary>
-    public static PasswordlessEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints)
+    public static PasswordlessEndpointConventionBuilder MapPasswordless(this IEndpointRouteBuilder endpoints, bool enableRegisterEndpoint = false)
     {
         // TODO: When a custom register body isn't passed in, we can make a reasonable assumption
         // about what each endpoint produces and we can build on those.
-        var builder = endpoints.MapPasswordless(new PasswordlessEndpointOptions());
+        var builder = endpoints.MapPasswordless(new PasswordlessEndpointOptions(enableRegisterEndpoint));
         return builder;
     }
 
@@ -36,7 +36,7 @@ public static class PasswordlessApiEndpointRouteBuilderExtensions
     /// </summary>
     public static PasswordlessEndpointConventionBuilder MapPasswordless<TRegisterBody>(this IEndpointRouteBuilder endpoints)
     {
-        return endpoints.MapPasswordless<PasswordlessRegisterRequest>(new PasswordlessEndpointOptions());
+        return endpoints.MapPasswordless<PasswordlessRegisterRequest>(new PasswordlessEndpointOptions(enableRegisterEndpoint: true));
     }
 
     /// <summary>

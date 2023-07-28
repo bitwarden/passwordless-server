@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ namespace Passwordless.AspNetCore;
 /// <summary>
 /// Represents all the options you can use to configure Passwordless in your ASP.NET Core application.
 /// </summary>
+[DebuggerDisplay("SignInScheme = {SignInScheme}, UserIdClaimType = {UserIdClaimType}")]
 public class PasswordlessAspNetCoreOptions : PasswordlessOptions
 {
     /// <summary>
