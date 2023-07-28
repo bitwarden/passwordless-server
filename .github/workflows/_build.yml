@@ -14,7 +14,7 @@ on:
       version:
         type: string
         required: true
-
+    
 jobs:
   build:
     name: Build ${{ inputs.project-name }}
@@ -61,7 +61,7 @@ jobs:
           mv ${{ inputs.project-name }}.zip ../../
           pwd
           ls -atlh ../../
-
+        
       - name: Upload project artifact
         uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535  # v3.0.0
         with:
