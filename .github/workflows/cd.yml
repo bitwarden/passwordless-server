@@ -13,6 +13,7 @@ permissions:
   deployments: write
   id-token: write
   checks: write
+  packages: write
 
 jobs:
   version:
