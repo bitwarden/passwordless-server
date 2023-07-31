@@ -17,6 +17,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Datadog.Trace" Version="2.30.0" />
+    <PackageReference Include="FluentValidation" Version="11.6.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.6.0" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.5.108">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

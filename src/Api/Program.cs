@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
@@ -75,6 +76,9 @@ services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
 services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
 services.AddScoped<ITokenService, TokenService>();
+
+services.AddValidatorsFromAssemblyContaining<Program>();
+
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));

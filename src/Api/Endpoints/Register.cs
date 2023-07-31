@@ -1,4 +1,5 @@
 ﻿using ApiHelpers;
+using FluentValidation;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Models;
@@ -31,8 +32,15 @@ public static class RegisterEndpoints
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
+        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory, IValidator<RegistrationCompleteDTO> validator) =>
         {
+            var validation = await validator.ValidateAsync(payload);
+
+            if (!validation.IsValid)
+            {
+                throw new ValidationException(validation.Errors);
+            }
+
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
             var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
