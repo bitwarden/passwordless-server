@@ -50,21 +50,6 @@ public class FriendlyExceptionsMiddleware
                 type: $"https://docs.passwordless.dev/guide/errors.html#{apiException.ErrorCode}");
             await problem.ExecuteAsync(context);
         }
-        catch (ValidationException validationException)
-        {
-            Tracer.Instance.ActiveScope?.Span.SetException(validationException);
-            _logger.UncaughtException(validationException);
-
-            await Results.ValidationProblem(
-                validationException.Errors
-                    .GroupBy(x => x.PropertyName)
-                    .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray()),
-                validationException.Message,
-                validationException.Source,
-                StatusCodes.Status400BadRequest,
-                "One or more validation errors occured"
-            ).ExecuteAsync(context);
-        }
         catch (Exception exception)
         {
             Tracer.Instance.ActiveScope?.Span.SetException(exception);

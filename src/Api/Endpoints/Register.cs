@@ -38,7 +38,14 @@ public static class RegisterEndpoints
 
             if (!validation.IsValid)
             {
-                throw new ValidationException(validation.Errors);
+                return ValidationProblem(
+                    validation.Errors
+                        .GroupBy(x => x.PropertyName)
+                        .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray()),
+                    null,
+                    null,
+                    StatusCodes.Status400BadRequest,
+                    "One or more validation errors occured");
             }
 
             var fido2Service = await fido2ServiceFactory.CreateAsync();
