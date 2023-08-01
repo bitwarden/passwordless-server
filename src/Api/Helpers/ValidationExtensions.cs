@@ -6,6 +6,6 @@ namespace Passwordless.Api.Helpers;
 
 public static class ValidationExtensions
 {
-    public static IServiceCollection AddValidators(this IServiceCollection services) =>
-        services.AddTransient<IValidator<RegistrationCompleteDTO>, RegistrationCompleteDTOValidator>();
+    public static IServiceCollection AddValidators(this IServiceCollection services) => services
+        .AddTransient<IValidator<RegistrationCompleteDTO>, RegistrationCompleteDTOValidator>();
 }
