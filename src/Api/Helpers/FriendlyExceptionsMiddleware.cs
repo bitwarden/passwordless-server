@@ -1,5 +1,4 @@
 using Datadog.Trace;
-using FluentValidation;
 using Microsoft.Data.Sqlite;
 using Passwordless.Service.Helpers;
 
