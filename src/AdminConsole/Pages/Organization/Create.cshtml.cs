@@ -54,14 +54,14 @@ public class Create : PageModel
         }
 
         var validationResult = await _validator.ValidateAsync(form, cancellationToken);
-        
+
         if (!validationResult.IsValid)
         {
             validationResult.AddToModelState(ModelState);
-            
+
             return Page();
         }
-        
+
         // Check if admin email is already used? (Use UserManager)
         var existingUser = await _userManager.FindByEmailAsync(input.AdminEmail);
 
