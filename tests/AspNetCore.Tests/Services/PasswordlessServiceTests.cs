@@ -9,6 +9,7 @@ using Moq;
 using Passwordless.AspNetCore.Services;
 using Passwordless.AspNetCore.Services.Implementations;
 using Passwordless.Net;
+using Passwordless.Net.Models;
 
 namespace Passwordless.AspNetCore.Tests.Services;
 
@@ -58,8 +59,8 @@ public class PasswordlessServiceTests
         _options.Register.Discoverable = true;
 
         _mockPasswordlessClient
-            .Setup(s => s.CreateRegisterToken(
-                It.Is<RegisterOptions>(o => o.UserId != null && o.Discoverable == true)))
+            .Setup(s => s.CreateRegisterTokenAsync(
+                It.Is<RegisterOptions>(o => o.UserId != null && o.Discoverable == true), default))
             .ReturnsAsync(expectedResponse);
 
         var sut = CreateSut();
@@ -198,7 +199,7 @@ public class PasswordlessServiceTests
         await _testUserStore.CreateAsync(user);
 
         _mockPasswordlessClient
-            .Setup(s => s.VerifyToken("test_token"))
+            .Setup(s => s.VerifyTokenAsync("test_token", default))
             .ReturnsAsync(new VerifiedUser
             {
                 UserId = user.Id.ToString(),
@@ -230,7 +231,7 @@ public class PasswordlessServiceTests
         await _testUserStore.CreateAsync(user);
 
         _mockPasswordlessClient
-            .Setup(s => s.VerifyToken("test_token"))
+            .Setup(s => s.VerifyTokenAsync("test_token", default))
             .ReturnsAsync(new VerifiedUser
             {
                 UserId = user.Id.ToString(),
@@ -269,7 +270,7 @@ public class PasswordlessServiceTests
         await _testUserStore.CreateAsync(user);
 
         _mockPasswordlessClient
-            .Setup(s => s.VerifyToken("test_token"))
+            .Setup(s => s.VerifyTokenAsync("test_token", default))
             .ReturnsAsync(new VerifiedUser
             {
                 UserId = user.Id.ToString(),
@@ -291,7 +292,7 @@ public class PasswordlessServiceTests
     public async Task LoginUserAsync_PasswordlessClientReturnsNull_ReturnsUnauthorized()
     {
         _mockPasswordlessClient
-            .Setup(s => s.VerifyToken("test_token"))
+            .Setup(s => s.VerifyTokenAsync("test_token", default))
             .Returns(Task.FromResult<VerifiedUser?>(null));
 
         var sut = CreateSut();
@@ -306,7 +307,7 @@ public class PasswordlessServiceTests
         var userId = Guid.NewGuid();
 
         _mockPasswordlessClient
-            .Setup(s => s.VerifyToken("test_token"))
+            .Setup(s => s.VerifyTokenAsync("test_token", default))
             .ReturnsAsync(new VerifiedUser
             {
                 UserId = userId.ToString(),
@@ -330,9 +331,9 @@ public class PasswordlessServiceTests
         await _testUserStore.CreateAsync(user);
 
         _mockPasswordlessClient
-            .Setup(s => s.CreateRegisterToken(
+            .Setup(s => s.CreateRegisterTokenAsync(
                 It.Is<RegisterOptions>(o => o.UserId == user.Id.ToString()
-                    && o.Username == "add_credential_test_1")))
+                    && o.Username == "add_credential_test_1"), default))
             .ReturnsAsync(new RegisterTokenResponse
             {
                 Token = "test_register_token",
@@ -390,8 +391,8 @@ public class PasswordlessServiceTests
             .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
             .Returns(Options.Create(identityOptions));
 
-        _mockPasswordlessClient.Setup(s => s.CreateRegisterToken(It.Is<RegisterOptions>(o
-            => o.UserId == user.Id.ToString() && o.Username == "username_with_email" && o.Aliases != null && o.Aliases.Contains("test@email.com"))))
+        _mockPasswordlessClient.Setup(s => s.CreateRegisterTokenAsync(It.Is<RegisterOptions>(o
+            => o.UserId == user.Id.ToString() && o.Username == "username_with_email" && o.Aliases != null && o.Aliases.Contains("test@email.com")), default))
             .ReturnsAsync(new RegisterTokenResponse
             {
                 Token = "test_email_token",
@@ -453,8 +454,8 @@ public class PasswordlessServiceTests
             .Setup(s => s.GetService(typeof(IOptions<IdentityOptions>)))
             .Returns(Options.Create(identityOptions));
 
-        _mockPasswordlessClient.Setup(s => s.CreateRegisterToken(It.Is<RegisterOptions>(o
-            => o.UserId == user.Id.ToString() && o.Username == "username_with_email" && o.Aliases != null && o.Aliases.Contains("test@email.com"))))
+        _mockPasswordlessClient.Setup(s => s.CreateRegisterTokenAsync(It.Is<RegisterOptions>(o
+            => o.UserId == user.Id.ToString() && o.Username == "username_with_email" && o.Aliases != null && o.Aliases.Contains("test@email.com")), default))
             .ReturnsAsync(new RegisterTokenResponse
             {
                 Token = "test_email_token",

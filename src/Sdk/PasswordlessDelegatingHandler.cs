@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using Passwordless.Net.Helpers;
-using static Passwordless.Net.PasswordlessHttpRequestExtensions;
 
 namespace Passwordless.Net;
 
@@ -10,7 +9,7 @@ internal class PasswordlessDelegatingHandler : DelegatingHandler
     {
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (request.Options.TryGetValue(SkipErrorHandlingOption, out var doNotErrorHandler) && doNotErrorHandler)
+        if (request.ShouldSkipErrorHandling())
         {
             return response;
         }

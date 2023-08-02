@@ -116,7 +116,7 @@ public class PasswordlessService<TUser, TRegisterRequest>
             return Unauthorized();
         }
 
-        var registerTokenResponse = await PasswordlessClient.CreateRegisterToken(customizeContext.Options);
+        var registerTokenResponse = await PasswordlessClient.CreateRegisterTokenAsync(customizeContext.Options);
 
         _logger.LogDebug("Successfully created a register token for user {UserId}", userId);
 
@@ -184,13 +184,13 @@ public class PasswordlessService<TUser, TRegisterRequest>
             return Unauthorized();
         }
 
-        var token = await PasswordlessClient.CreateRegisterToken(customizeContext.Options);
+        var token = await PasswordlessClient.CreateRegisterTokenAsync(customizeContext.Options);
         return Ok(token);
     }
 
     public virtual async Task<IResult> LoginUserAsync(PasswordlessLoginRequest loginRequest, CancellationToken cancellationToken)
     {
-        var verifiedUser = await PasswordlessClient.VerifyToken(loginRequest.Token);
+        var verifiedUser = await PasswordlessClient.VerifyTokenAsync(loginRequest.Token);
 
         if (verifiedUser is null)
         {

@@ -28,8 +28,8 @@ public class UserModel : PageModel
 
     public async Task OnGet()
     {
-        Credentials = await _passwordlessClient.ListCredentials(UserId);
-        Aliases = await _passwordlessClient.ListAliases(UserId);
+        Credentials = await _passwordlessClient.ListCredentialsAsync(UserId);
+        Aliases = await _passwordlessClient.ListAliasesAsync(UserId);
         // RegisterToken = await api.CreateRegisterToken(new PasswordlessApi.RegisterOptions {
         //     UserId = UserId,
         //     Username = username,
@@ -46,7 +46,7 @@ public class UserModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await _passwordlessClient.VerifyToken(token);
+        var res = await _passwordlessClient.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
 }
