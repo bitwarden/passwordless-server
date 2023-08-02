@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using AdminConsole.Billing;
 using AdminConsole.Db;
@@ -6,10 +5,12 @@ using AdminConsole.Helpers;
 using AdminConsole.Identity;
 using AdminConsole.Models;
 using AdminConsole.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages.Organization;
@@ -21,6 +22,7 @@ public class CreateApplicationModel : PageModel
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
     private readonly DataService _dataService;
     private readonly PasswordlessManagementClient _managementClient;
+    private readonly IValidator<CreateApplicationForm> _validator;
     private readonly StripeOptions _stripeOptions;
 
     public CreateApplicationModel(ConsoleDbContext db,
@@ -28,10 +30,12 @@ public class CreateApplicationModel : PageModel
         SignInManager<ConsoleAdmin> signInManager,
         DataService dataService,
         IOptions<StripeOptions> stripeOptions,
-        PasswordlessManagementClient managementClient)
+        PasswordlessManagementClient managementClient,
+        IValidator<CreateApplicationForm> validator)
     {
         _dataService = dataService;
         _managementClient = managementClient;
+        _validator = validator;
         this.db = db;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
@@ -49,18 +53,23 @@ public class CreateApplicationModel : PageModel
 
     public async Task<IActionResult> OnPost(CreateApplicationForm form)
     {
-        if (!ModelState.IsValid)
+        var validationResult = await _validator.ValidateAsync(form);
+
+        if (!validationResult.IsValid)
         {
+            validationResult.AddToModelState(this.ModelState);
+
             return Page();
         }
 
-        Application app = new();
-        int orgId = User.GetOrgId();
-        app.Id = form.Id;
-        app.OrganizationId = orgId;
-        app.Name = form.Name;
-        app.Description = form.Description;
-        app.CreatedAt = DateTime.UtcNow;
+        Application app = new()
+        {
+            Id = form.Id,
+            Name = form.Name,
+            Description = form.Description,
+            CreatedAt = DateTime.UtcNow,
+            OrganizationId = User.GetOrgId()
+        };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
@@ -125,16 +134,18 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required]
-        [MaxLength(60)]
         public string Name { get; set; }
-
-        [Required]
-        [MaxLength(62)]
         public string Id { get; set; }
-
-        [Required]
-        [MaxLength(120)]
         public string Description { get; set; }
+    }
+
+    public class CreateApplicationFormValidator : AbstractValidator<CreateApplicationForm>
+    {
+        public CreateApplicationFormValidator()
+        {
+            RuleFor(x => x.Name).NotNull().NotEmpty().MaximumLength(60);
+            RuleFor(x => x.Id).NotNull().NotEmpty().MaximumLength(62);
+            RuleFor(x => x.Name).NotNull().NotEmpty().MaximumLength(120);
+        }
     }
 }
