@@ -1,5 +1,5 @@
-﻿using System.Buffers.Text;
-using System.Buffers;
+﻿using System.Buffers;
+using System.Buffers.Text;
 
 namespace Passwordless.Net;
 
@@ -20,7 +20,7 @@ internal static class Base64Url
 #endif
         Span<char> span = array.AsSpan(0, charsWritten);
 
-        
+
         for (int i = 0; i < span.Length; i++)
         {
             ref char reference = ref span[i];

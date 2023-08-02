@@ -6,7 +6,8 @@ public class RegisterOptions
 #if NET6_0_OR_GREATER
     required
 #endif
-    string UserId { get; set; }
+    string UserId
+    { get; set; }
 
     public string? DisplayName { get; set; }
 
@@ -14,7 +15,8 @@ public class RegisterOptions
 #if NET6_0_OR_GREATER
     required
 #endif
-    string Username { get; set; }
+    string Username
+    { get; set; }
 
     public string Attestation { get; set; }
     public string AuthenticatorType { get; set; }

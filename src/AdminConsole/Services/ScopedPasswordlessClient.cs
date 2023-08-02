@@ -1,6 +1,5 @@
 using Passwordless.Net;
 using Passwordless.Net.Models;
-using static Passwordless.Net.PasswordlessClient;
 using PC = Passwordless.Net.PasswordlessClient;
 
 namespace Passwordless.AdminConsole.Services;
