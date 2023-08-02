@@ -108,7 +108,7 @@ void RunTheApp()
         .AddEntityFrameworkStores<ConsoleDbContext>()
         .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
         .AddDefaultTokenProviders()
-        .AddPasswordless();
+        .AddPasswordless(builder.Configuration.GetSection("Passwordless"));
 
     services.ConfigureApplicationCookie(o =>
     {
@@ -200,7 +200,7 @@ void RunTheApp()
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseAuthorization();
-    app.UsePasswordless();
+    app.MapPasswordless();
     app.MapRazorPages();
     app.Run();
 }

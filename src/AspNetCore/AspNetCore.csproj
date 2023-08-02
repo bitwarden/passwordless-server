@@ -11,6 +11,14 @@
     <VersionPrefix>0.0.10</VersionPrefix>
   </PropertyGroup>
 
+  <PropertyGroup Label="NuGet Package Properties">
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
   <!-- 
     This is for sure the lazy way to do this and we can probably get away with just referencing individual nuget packages
   -->
