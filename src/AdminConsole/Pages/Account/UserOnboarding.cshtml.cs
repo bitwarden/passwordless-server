@@ -16,7 +16,7 @@ public class UserOnboarding : PageModel
     public List<Credential> Credentials { get; set; }
     public async Task OnGet()
     {
-        Credentials = await _passwordlessClient.ListCredentials(HttpContext.User.Claims
+        Credentials = await _passwordlessClient.ListCredentialsAsync(HttpContext.User.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
     }
 }

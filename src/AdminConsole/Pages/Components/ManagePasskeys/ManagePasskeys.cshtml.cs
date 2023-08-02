@@ -21,7 +21,7 @@ public class ManagePasskeys : ViewComponent
         var m = new PasskeysModel();
         if (userId != null)
         {
-            m.Credentials = await _client.ListCredentials(userId);
+            m.Credentials = await _client.ListCredentialsAsync(userId);
         }
 
         return View(m);

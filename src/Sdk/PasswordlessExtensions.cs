@@ -4,6 +4,6 @@ public static class PasswordlessExtensions
 {
     public static string ToBase64Url(this byte[] bytes)
     {
-        return PasswordlessClient.Base64Url.Encode(bytes);
+        return Base64Url.Encode(bytes);
     }
 }

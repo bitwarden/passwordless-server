@@ -31,7 +31,7 @@ public class CredentialDeleteModel : PageModel
 
     public async Task<IActionResult> OnPost()
     {
-        await _passwordlessClient.DeleteCredential(CredentialId);
+        await _passwordlessClient.DeleteCredentialAsync(CredentialId);
 
         return RedirectToPage("/app/credentials/user", null, new { UserId = UserId });
     }
