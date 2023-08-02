@@ -25,7 +25,7 @@ public class NewAccountModel : PageModel
     {
         // Create new account
         var userId = Guid.NewGuid().ToString();
-        var token = await _passwordlessClient.CreateRegisterToken(new RegisterOptions()
+        var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions()
         {
             UserId = userId,
             Username = "Playground: " + email,
@@ -39,7 +39,7 @@ public class NewAccountModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await _passwordlessClient.VerifyToken(token);
+        var res = await _passwordlessClient.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
 }

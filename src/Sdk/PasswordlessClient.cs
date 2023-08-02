@@ -1,30 +1,15 @@
-using System.Buffers;
-using System.Buffers.Text;
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Passwordless.Net.Models;
 
 namespace Passwordless.Net;
 
-public interface IPasswordlessClient
-{
-    Task<RegisterTokenResponse> CreateRegisterToken(RegisterOptions registerOptions);
-    Task DeleteCredential(string id);
-    Task DeleteCredential(byte[] id);
-    Task<List<AliasPointer>> ListAliases(string userId);
-    Task<List<Credential>> ListCredentials(string userId);
-    Task<List<PasswordlessUserSummary>?> ListUsers();
-    Task<VerifiedUser?> VerifyToken(string verifyToken);
-    Task DeleteUserAsync(string userId);
-}
-
-public class RegisterTokenResponse
-{
-    public string Token { get; set; }
-}
-
+/// <summary>
+/// TODO: FILL IN
+/// </summary>
 [DebuggerDisplay("{DebuggerToString()}")]
 public class PasswordlessClient : IPasswordlessClient
 {
@@ -43,14 +28,14 @@ public class PasswordlessClient : IPasswordlessClient
         _client = client;
     }
 
-    public async Task<RegisterTokenResponse> CreateRegisterToken(RegisterOptions registerOptions)
+    public async Task<RegisterTokenResponse> CreateRegisterTokenAsync(RegisterOptions registerOptions, CancellationToken cancellationToken = default)
     {
-        var res = await _client.PostAsJsonAsync("register/token", registerOptions);
+        var res = await _client.PostAsJsonAsync("register/token", registerOptions, cancellationToken);
         res.EnsureSuccessStatusCode();
-        return (await res.Content.ReadFromJsonAsync<RegisterTokenResponse>())!;
+        return (await res.Content.ReadFromJsonAsync<RegisterTokenResponse>(options: null, cancellationToken))!;
     }
 
-    public async Task<VerifiedUser?> VerifyToken(string verifyToken)
+    public async Task<VerifiedUser?> VerifyTokenAsync(string verifyToken, CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "signin/verify")
         {
@@ -62,7 +47,7 @@ public class PasswordlessClient : IPasswordlessClient
 
         // We just want to return null if there is a problem.
         request.SkipErrorHandling();
-        var response = await _client.SendAsync(request);
+        var response = await _client.SendAsync(request, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
@@ -73,43 +58,43 @@ public class PasswordlessClient : IPasswordlessClient
         return null;
     }
 
-    public async Task DeleteUserAsync(string userId)
+    public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default)
     {
-        await _client.PostAsJsonAsync("users/delete", new { UserId = userId });
+        await _client.PostAsJsonAsync("users/delete", new { UserId = userId }, cancellationToken);
     }
 
-    public async Task<List<PasswordlessUserSummary>?> ListUsers()
+    public async Task<List<PasswordlessUserSummary>?> ListUsersAsync(CancellationToken cancellationToken = default)
     {
-        var response = await _client.GetFromJsonAsync<ListResponse<PasswordlessUserSummary>>("users/list");
+        var response = await _client.GetFromJsonAsync<ListResponse<PasswordlessUserSummary>>("users/list", cancellationToken);
         return response!.Values;
     }
 
-    public async Task<List<AliasPointer>> ListAliases(string userId)
+    public async Task<List<AliasPointer>> ListAliasesAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var response = await _client.GetFromJsonAsync<ListResponse<AliasPointer>>($"alias/list?userid={userId}");
+        var response = await _client.GetFromJsonAsync<ListResponse<AliasPointer>>($"alias/list?userid={userId}", cancellationToken);
         return response!.Values;
     }
 
 
-    public async Task<List<Credential>> ListCredentials(string userId)
+    public async Task<List<Credential>> ListCredentialsAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var response = await _client.GetFromJsonAsync<ListResponse<Credential>>($"credentials/list?userid={userId}");
+        var response = await _client.GetFromJsonAsync<ListResponse<Credential>>($"credentials/list?userid={userId}", cancellationToken);
         return response!.Values;
     }
 
-    public async Task DeleteCredential(string id)
+    public async Task DeleteCredentialAsync(string id, CancellationToken cancellationToken = default)
     {
-        await _client.PostAsJsonAsync("credentials/delete", new { CredentialId = id });
+        await _client.PostAsJsonAsync("credentials/delete", new { CredentialId = id }, cancellationToken);
     }
 
-    public async Task DeleteCredential(byte[] id)
+    public async Task DeleteCredentialAsync(byte[] id, CancellationToken cancellationToken = default)
     {
-        await DeleteCredential(Base64Url.Encode(id));
+        await DeleteCredentialAsync(Base64Url.Encode(id), cancellationToken);
     }
 
-    public async Task<UsersCount> GetUsersCount()
+    public async Task<UsersCount> GetUsersCountAsync(CancellationToken cancellationToken = default)
     {
-        return (await _client.GetFromJsonAsync<UsersCount>("users/count"))!;
+        return (await _client.GetFromJsonAsync<UsersCount>("users/count", cancellationToken))!;
     }
 
     private string DebuggerToString()
@@ -125,7 +110,7 @@ public class PasswordlessClient : IPasswordlessClient
                 sb.Append(' ');
                 sb.Append("ApiSecret = ");
                 sb.Append("***");
-                sb.Append(apiSecret.AsSpan(apiSecret.Length - 4));
+                sb.Append(apiSecret.Substring(apiSecret.Length - 4));
             }
         }
         else
@@ -150,134 +135,12 @@ public class PasswordlessClient : IPasswordlessClient
             {
                 return Base64Url.DecodeUtf8(reader.ValueSpan);
             }
-            return Base64Url.Decode(reader.GetString());
+            return Base64Url.Decode(reader.GetString().AsSpan());
         }
 
         public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
         {
             writer.WriteStringValue(Base64Url.Encode(value));
         }
-    }
-
-    public static class Base64Url
-    {
-        /// <summary>
-        /// Converts arg data to a Base64Url encoded string.
-        /// </summary>
-        public static string Encode(ReadOnlySpan<byte> arg)
-        {
-            int minimumLength = (int)(((long)arg.Length + 2L) / 3 * 4);
-            char[] array = ArrayPool<char>.Shared.Rent(minimumLength);
-            Convert.TryToBase64Chars(arg, array, out var charsWritten);
-            Span<char> span = array.AsSpan(0, charsWritten);
-            for (int i = 0; i < span.Length; i++)
-            {
-                ref char reference = ref span[i];
-                switch (reference)
-                {
-                    case '+':
-                        reference = '-';
-                        break;
-                    case '/':
-                        reference = '_';
-                        break;
-                }
-            }
-            int num = span.IndexOf('=');
-            if (num > -1)
-            {
-                span = span.Slice(0, num);
-            }
-            string result = new string(span);
-            ArrayPool<char>.Shared.Return(array, clearArray: true);
-            return result;
-        }
-
-        /// <summary>
-        /// Decodes a Base64Url encoded string to its raw bytes.
-        /// </summary>
-        public static byte[] Decode(ReadOnlySpan<char> text)
-        {
-            int num = (text.Length % 4) switch
-            {
-                2 => 2,
-                3 => 1,
-                _ => 0,
-            };
-            int num2 = text.Length + num;
-            char[] array = ArrayPool<char>.Shared.Rent(num2);
-            text.CopyTo(array);
-            for (int i = 0; i < text.Length; i++)
-            {
-                ref char reference = ref array[i];
-                switch (reference)
-                {
-                    case '-':
-                        reference = '+';
-                        break;
-                    case '_':
-                        reference = '/';
-                        break;
-                }
-            }
-            switch (num)
-            {
-                case 1:
-                    array[num2 - 1] = '=';
-                    break;
-                case 2:
-                    array[num2 - 1] = '=';
-                    array[num2 - 2] = '=';
-                    break;
-            }
-            byte[] result = Convert.FromBase64CharArray(array, 0, num2);
-            ArrayPool<char>.Shared.Return(array, clearArray: true);
-            return result;
-        }
-
-        /// <summary>
-        /// Decodes a Base64Url encoded string to its raw bytes.
-        /// </summary>
-        public static byte[] DecodeUtf8(ReadOnlySpan<byte> text)
-        {
-            int num = (text.Length % 4) switch
-            {
-                2 => 2,
-                3 => 1,
-                _ => 0,
-            };
-            int num2 = text.Length + num;
-            byte[] array = ArrayPool<byte>.Shared.Rent(num2);
-            text.CopyTo(array);
-            for (int i = 0; i < text.Length; i++)
-            {
-                ref byte reference = ref array[i];
-                switch (reference)
-                {
-                    case 45:
-                        reference = 43;
-                        break;
-                    case 95:
-                        reference = 47;
-                        break;
-                }
-            }
-            switch (num)
-            {
-                case 1:
-                    array[num2 - 1] = 61;
-                    break;
-                case 2:
-                    array[num2 - 1] = 61;
-                    array[num2 - 2] = 61;
-                    break;
-            }
-            Base64.DecodeFromUtf8InPlace(array.AsSpan(0, num2), out var bytesWritten);
-            byte[] result = array.AsSpan(0, bytesWritten).ToArray();
-            ArrayPool<byte>.Shared.Return(array, clearArray: true);
-            return result;
-        }
-
-
     }
 }

@@ -24,7 +24,7 @@ public static class HealthEndpoints
         app.MapGet("health/api", async (HttpContext ctx, HttpRequest req, IPasswordlessClient client) =>
         {
             var sw = Stopwatch.StartNew();
-            await client.ListUsers();
+            await client.ListUsersAsync();
             sw.Stop();
             app.Logger.LogInformation("health_api took {Latency}", sw.ElapsedMilliseconds);
             return Results.Text("Took: " + sw.ElapsedMilliseconds);

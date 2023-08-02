@@ -2,9 +2,20 @@
 
 public class RegisterOptions
 {
-    public required string UserId { get; set; }
+    public
+#if NET6_0_OR_GREATER
+    required
+#endif
+    string UserId { get; set; }
+
     public string? DisplayName { get; set; }
-    public required string Username { get; set; }
+
+    public
+#if NET6_0_OR_GREATER
+    required
+#endif
+    string Username { get; set; }
+
     public string Attestation { get; set; }
     public string AuthenticatorType { get; set; }
     public bool Discoverable { get; set; }

@@ -1,4 +1,5 @@
 using Passwordless.Net;
+using Passwordless.Net.Models;
 using static Passwordless.Net.PasswordlessClient;
 using PC = Passwordless.Net.PasswordlessClient;
 
@@ -20,47 +21,47 @@ public class ScopedPasswordlessClient : IScopedPasswordlessClient
         _currentContext = currentContext;
     }
 
-    public async Task<RegisterTokenResponse> CreateRegisterToken(RegisterOptions registerOptions)
+    public async Task<RegisterTokenResponse> CreateRegisterTokenAsync(RegisterOptions registerOptions, CancellationToken cancellationToken = default)
     {
-        var res = await PostAsync("register/token", registerOptions);
+        var res = await PostAsync("register/token", registerOptions, cancellationToken);
         res.EnsureSuccessStatusCode();
-        return (await res.Content.ReadFromJsonAsync<RegisterTokenResponse>())!;
+        return (await res.Content.ReadFromJsonAsync<RegisterTokenResponse>(options: null, cancellationToken))!;
     }
 
-    public async Task DeleteCredential(string id)
+    public async Task DeleteCredentialAsync(string id, CancellationToken cancellationToken = default)
     {
-        await PostAsync("credentials/delete", new { CredentialId = id });
+        await PostAsync("credentials/delete", new { CredentialId = id }, cancellationToken);
     }
 
-    public async Task DeleteCredential(byte[] id)
+    public async Task DeleteCredentialAsync(byte[] id, CancellationToken cancellationToken = default)
     {
-        await DeleteCredential(Base64Url.Encode(id));
+        await DeleteCredentialAsync(Base64Url.Encode(id), cancellationToken);
     }
 
-    public async Task DeleteUserAsync(string userId)
+    public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default)
     {
-        await PostAsync("users/delete", new { UserId = userId });
+        await PostAsync("users/delete", new { UserId = userId }, cancellationToken);
     }
 
-    public async Task<List<AliasPointer>> ListAliases(string userId)
+    public async Task<List<AliasPointer>> ListAliasesAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var response = await GetAsync<PC.ListResponse<AliasPointer>>($"alias/list?userid={userId}");
+        var response = await GetAsync<PC.ListResponse<AliasPointer>>($"alias/list?userid={userId}", cancellationToken);
         return response!.Values;
     }
 
-    public async Task<List<Credential>> ListCredentials(string userId)
+    public async Task<List<Credential>> ListCredentialsAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var response = await GetAsync<PC.ListResponse<Credential>>($"credentials/list?userid={userId}");
+        var response = await GetAsync<PC.ListResponse<Credential>>($"credentials/list?userid={userId}", cancellationToken);
         return response!.Values;
     }
 
-    public async Task<List<PasswordlessUserSummary>?> ListUsers()
+    public async Task<List<PasswordlessUserSummary>?> ListUsersAsync(CancellationToken cancellationToken = default)
     {
-        var response = await GetAsync<PC.ListResponse<PasswordlessUserSummary>>("users/list");
+        var response = await GetAsync<PC.ListResponse<PasswordlessUserSummary>>("users/list", cancellationToken);
         return response!.Values;
     }
 
-    public async Task<VerifiedUser?> VerifyToken(string verifyToken)
+    public async Task<VerifiedUser?> VerifyTokenAsync(string verifyToken, CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "signin/verify")
         {
@@ -72,7 +73,7 @@ public class ScopedPasswordlessClient : IScopedPasswordlessClient
 
         // We just want to return null if there is a problem.
         request.SkipErrorHandling();
-        var response = await SendAsync(request);
+        var response = await SendAsync(request, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
@@ -83,23 +84,23 @@ public class ScopedPasswordlessClient : IScopedPasswordlessClient
         return null;
     }
 
-    private Task<HttpResponseMessage> PostAsync<T>(string? requestUri, T value)
+    private Task<HttpResponseMessage> PostAsync<T>(string? requestUri, T value, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
         {
             Content = JsonContent.Create(value),
         };
-        return SendAsync(request);
+        return SendAsync(request, cancellationToken);
     }
 
-    private async Task<T?> GetAsync<T>(string? requestUri)
+    private async Task<T?> GetAsync<T>(string? requestUri, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-        var response = await SendAsync(request);
-        return await response.Content.ReadFromJsonAsync<T>();
+        var response = await SendAsync(request, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<T>(options: null, cancellationToken);
     }
 
-    private Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+    private Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         request.Headers.Add("ApiSecret", _currentContext.ApiSecret);
         return _client.SendAsync(request);
