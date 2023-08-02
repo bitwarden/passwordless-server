@@ -1,4 +1,4 @@
-namespace AdminConsole.Services.Mail;
+namespace Passwordless.Common.Services.Mail;
 
 // ReSharper disable once UnusedType.Global
 public class FileMailProvider : IMailProvider
@@ -9,13 +9,13 @@ public class FileMailProvider : IMailProvider
     {
         _logger = logger;
     }
+    
     public Task SendAsync(MailMessage message)
     {
         string msg = message.TextBody;
         msg = "# New message " + DateTime.Now + Environment.NewLine + Environment.NewLine + msg + Environment.NewLine + Environment.NewLine;
         File.AppendAllText("mail.md", msg);
         _logger.LogInformation("Sent email to mail.md");
-
         return Task.CompletedTask;
     }
 }

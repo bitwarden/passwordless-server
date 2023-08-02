@@ -1,8 +1,10 @@
 using System.Collections.Specialized;
 using System.Web;
 using AdminConsole.Identity;
+using AdminConsole.Services.Mail;
+using Passwordless.Common.Services.Mail;
 
-namespace AdminConsole.Services.Mail;
+namespace Passwordless.AdminConsole.Services.Mail;
 
 public class DefaultMailService : IMailService
 {
@@ -25,7 +27,7 @@ public class DefaultMailService : IMailService
         uriBuilder.Query = query.ToString();
         MailMessage message = new()
         {
-            To = email,
+            To = new List<string>{ email },
             From = _fromEmail,
             Subject = "Verify your passwordless.dev account",
             TextBody =
@@ -55,9 +57,9 @@ public class DefaultMailService : IMailService
 
     public Task SendInviteAsync(Invite inv, string link)
     {
-        var message = new MailMessage()
+        var message = new MailMessage
         {
-            To = inv.ToEmail,
+            To = new List<string>{ inv.ToEmail },
             From = _fromEmail,
             Subject = "You've been invited to join an organization in passwordless.dev",
             TextBody =
@@ -70,9 +72,9 @@ public class DefaultMailService : IMailService
 
     public Task SendEmailIsAlreadyInUseAsync(string email)
     {
-        var message = new MailMessage()
+        var message = new MailMessage
         {
-            To = email,
+            To = new List<string> { email },
             From = _fromEmail,
             Subject = "You're email is already connected to an organization",
             TextBody =

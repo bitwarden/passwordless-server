@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
         });
 
         // TODO: Get rid of this service, all consumers should use the interface
-        services.AddTransient(sp => (PasswordlessClient)sp.GetRequiredService<IPasswordlessClient>());
+        services.AddTransient<IPasswordlessClient, PasswordlessClient>();
 
         return services;
     }

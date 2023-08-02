@@ -63,6 +63,10 @@ public static class AccountEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        app.MapPost("/apps/{appId}/delete", DeleteApplicationAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
         app.MapGet("/apps/delete/cancel/{appId}",
                 async (string appId, HttpContext ctx, HttpRequest req, ISharedManagementService service) =>
                 {
@@ -73,6 +77,17 @@ public static class AccountEndpoints
                     return Ok(res);
                 })
             .RequireCors("default");
+    }
+    
+    public static async Task<IResult> DeleteApplicationAsync(
+        string appId,
+        DeleteAppDto payload,
+        ISharedManagementService service,
+        ILogger logger)
+    {
+        var result = await service.DeleteApplicationAsync(appId, payload.DeletedBy);
+        logger.LogWarning("account/delete was issued {@Res}", result);
+        return Ok(result);
     }
 
     public record AvailableResponse(bool Available);

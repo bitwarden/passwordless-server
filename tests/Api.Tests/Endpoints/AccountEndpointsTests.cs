@@ -1,0 +1,36 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Passwordless.Api.Models;
+using Passwordless.Server.Endpoints;
+using Passwordless.Service;
+
+namespace Passwordless.Api.Tests.Endpoints;
+
+public class AccountEndpointsTests
+{
+    #region DeleteApplicationAsync
+
+    [Fact]
+    public async Task DeleteApplicationAsync_Returns_ExpectedResult()
+    {
+        const string appId = "demo-application";
+        var payload = new DeleteAppDto { DeletedBy = "admin@example.com" };
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
+        sharedManagementServiceMock.Setup(x => x.DeleteApplicationAsync(
+            It.Is<string>(p => p == appId),
+            It.Is<string>(p => p == payload.DeletedBy)))
+            .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
+        var loggerMock = new Mock<ILogger>();
+
+        var actual = await AccountEndpoints.DeleteApplicationAsync(appId, payload, sharedManagementServiceMock.Object, loggerMock.Object);
+        
+        Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
+        var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
+        Assert.Equal("Success!", actualResult?.Message);
+        Assert.True(actualResult?.IsDeleted);
+        Assert.Equal(deletedAt, actualResult?.DeleteAt);
+    }
+    #endregion
+}
