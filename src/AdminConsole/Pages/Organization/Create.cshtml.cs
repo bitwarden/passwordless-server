@@ -54,11 +54,10 @@ public class Create : PageModel
         }
 
         var validationResult = await _validator.ValidateAsync(form, cancellationToken);
+        validationResult.AddToModelState(ModelState);
 
-        if (!validationResult.IsValid)
+        if (!ModelState.IsValid)
         {
-            validationResult.AddToModelState(ModelState);
-
             return Page();
         }
 

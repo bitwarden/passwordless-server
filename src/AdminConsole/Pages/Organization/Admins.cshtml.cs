@@ -87,11 +87,10 @@ public class Admins : PageModel
         }
 
         var validationResult = await _validator.ValidateAsync(form);
+        validationResult.AddToModelState(ModelState);
 
-        if (!validationResult.IsValid)
+        if (!ModelState.IsValid)
         {
-            validationResult.AddToModelState(ModelState);
-
             // todo: Is there a pattern where we don't need to repeat this?
             return await OnGet();
         }

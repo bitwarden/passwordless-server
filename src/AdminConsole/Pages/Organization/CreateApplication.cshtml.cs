@@ -54,11 +54,10 @@ public class CreateApplicationModel : PageModel
     public async Task<IActionResult> OnPost(CreateApplicationForm form)
     {
         var validationResult = await _validator.ValidateAsync(form);
+        validationResult.AddToModelState(this.ModelState);
 
-        if (!validationResult.IsValid)
+        if (!ModelState.IsValid)
         {
-            validationResult.AddToModelState(this.ModelState);
-
             return Page();
         }
 

@@ -2,9 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using AdminConsole.Identity;
 using AdminConsole.Services;
 using AdminConsole.Services.Mail;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Helpers;
 
 namespace AdminConsole.Pages.Organization;
 
@@ -13,16 +15,18 @@ public class Join : PageModel
     private readonly InvitationService _invitationService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IMailService _mailService;
+    private readonly IValidator<JoinForm> _validator;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
     public Join(InvitationService invitationService,
         UserManager<ConsoleAdmin> userManager, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
-        IMailService mailService)
+        IMailService mailService, IValidator<JoinForm> validator)
     {
         _invitationService = invitationService;
         _userManager = userManager;
         _magicLinkSignInManager = magicLinkSignInManager;
         _mailService = mailService;
+        _validator = validator;
     }
 
     public Invite Invite { get; set; }
@@ -66,12 +70,9 @@ public class Join : PageModel
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
 
-
-        if (!form.AcceptsTermsAndPrivacy)
-        {
-            ModelState.AddModelError("AcceptsTermsAndPrivacy", "You must accept the terms and privacy policy to continue.");
-        }
-
+        var validationResult = await _validator.ValidateAsync(form);
+        validationResult.AddToModelState(ModelState);
+        
         if (!ModelState.IsValid)
         {
             Invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
@@ -109,14 +110,22 @@ public class Join : PageModel
     {
         public string Code { get; set; }
 
-        [MaxLength(50)]
-        [EmailAddress]
-        [Required]
         public string Email { get; set; }
 
         [Required]
         public bool AcceptsTermsAndPrivacy { get; set; }
 
-        [MaxLength(50)][Required] public string Name { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class JoinFormValidator : AbstractValidator<JoinForm>
+    {
+        public JoinFormValidator()
+        {
+            RuleFor(x => x.Email).NotNull().NotEmpty().EmailAddress().MaximumLength(50);
+            RuleFor(x => x.Name).NotNull().NotEmpty().MaximumLength(50);
+            RuleFor(x => x.AcceptsTermsAndPrivacy).Must(x => x)
+                .WithMessage("You must accept the terms and privacy policy to continue.");
+        }
     }
 }
