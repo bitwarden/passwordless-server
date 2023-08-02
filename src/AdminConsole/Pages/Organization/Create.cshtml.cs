@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using AdminConsole.Db;
 using AdminConsole.Identity;
 using AdminConsole.Services.Mail;
@@ -47,11 +46,6 @@ public class Create : PageModel
     {
         var input = form;
         var input2 = Form;
-
-        if (!form.AcceptsTermsAndPrivacy)
-        {
-            ModelState.AddModelError("AcceptsTermsAndPrivacy", "You must accept the terms and privacy policy to continue.");
-        }
 
         var validationResult = await _validator.ValidateAsync(form, cancellationToken);
         validationResult.AddToModelState(ModelState);
@@ -112,8 +106,6 @@ public record CreateModel
     public string UseCase { get; set; }
     public string AdminEmail { get; set; }
     public string AdminName { get; set; }
-
-    [Required]
     public bool AcceptsTermsAndPrivacy { get; set; }
 }
 
@@ -124,5 +116,7 @@ public class CreateModelValidator : AbstractValidator<CreateModel>
         RuleFor(x => x.OrgName).NotNull().NotEmpty().MaximumLength(50);
         RuleFor(x => x.AdminEmail).NotNull().NotEmpty().EmailAddress().MaximumLength(50);
         RuleFor(x => x.AdminName).NotNull().NotEmpty().MaximumLength(50);
+        RuleFor(x => x.AcceptsTermsAndPrivacy).Must(x => x)
+            .WithMessage("You must accept the terms and privacy policy to continue.");
     }
 }

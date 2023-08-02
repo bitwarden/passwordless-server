@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using AdminConsole.Identity;
 using AdminConsole.Services;
 using AdminConsole.Services.Mail;
@@ -112,7 +111,6 @@ public class Join : PageModel
 
         public string Email { get; set; }
 
-        [Required]
         public bool AcceptsTermsAndPrivacy { get; set; }
 
         public string Name { get; set; }
