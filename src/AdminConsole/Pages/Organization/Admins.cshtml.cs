@@ -1,10 +1,11 @@
-using System.ComponentModel.DataAnnotations;
 using AdminConsole.Helpers;
 using AdminConsole.Identity;
 using AdminConsole.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages.Organization;
@@ -16,15 +17,17 @@ public class Admins : PageModel
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly SignInManager<ConsoleAdmin> _signinManager;
     private readonly IPasswordlessClient _passwordlessClient;
+    private readonly IValidator<InviteForm> _validator;
 
     public Admins(DataService dataService,
-        InvitationService invitationService, UserManager<ConsoleAdmin> userManager, SignInManager<ConsoleAdmin> signinManager, IPasswordlessClient passwordlessClient)
+        InvitationService invitationService, UserManager<ConsoleAdmin> userManager, SignInManager<ConsoleAdmin> signinManager, IPasswordlessClient passwordlessClient, IValidator<InviteForm> validator)
     {
         _dataService = dataService;
         _invitationService = invitationService;
         _userManager = userManager;
         _signinManager = signinManager;
         _passwordlessClient = passwordlessClient;
+        _validator = validator;
     }
 
     public List<ConsoleAdmin> ConsoleAdmins { get; set; }
@@ -44,7 +47,6 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnPostDelete(string userId)
     {
-
         var users = await _dataService.GetConsoleAdmins();
         if (users is not { Count: > 1 })
         {
@@ -83,8 +85,13 @@ public class Admins : PageModel
             ModelState.AddModelError("error", "You need to upgrade to a paid organization to invite more admins.");
             return await OnGet();
         }
-        if (!ModelState.IsValid)
+
+        var validationResult = await _validator.ValidateAsync(form);
+
+        if (!validationResult.IsValid)
         {
+            validationResult.AddToModelState(ModelState);
+
             // todo: Is there a pattern where we don't need to repeat this?
             return await OnGet();
         }
@@ -110,8 +117,13 @@ public class Admins : PageModel
 
 public class InviteForm
 {
-    [EmailAddress]
-    [Required]
-    [MaxLength(50)]
     public string Email { get; set; }
+}
+
+public class InviteFormValidator : AbstractValidator<InviteForm>
+{
+    public InviteFormValidator()
+    {
+        RuleFor(x => x.Email).NotNull().NotEmpty().EmailAddress().MaximumLength(50);
+    }
 }
