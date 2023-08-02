@@ -17,11 +17,11 @@ public class SharedManagementServiceTests
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
-    
+
     private readonly SharedManagementService _sut;
 
-    private readonly DateTime _now = new (2023, 08, 02, 15, 10, 00);
-    
+    private readonly DateTime _now = new(2023, 08, 02, 15, 10, 00);
+
     public SharedManagementServiceTests()
     {
         _sut = new SharedManagementService(
@@ -33,7 +33,7 @@ public class SharedManagementServiceTests
         _systemClockMock.Setup(x => x.UtcNow)
             .Returns(new DateTimeOffset(_now));
     }
-    
+
     #region DeleteApplicationAsync
     [Fact]
     public async Task DeleteApplicationAsync_Throws_ApiException_WhenAppNotFound()
@@ -50,16 +50,16 @@ public class SharedManagementServiceTests
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await _sut.DeleteApplicationAsync(appId, deletedBy));
-        
+
         Assert.Equal("app_not_found", actual.ErrorCode);
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("App was not found.", actual.Message);
-        
+
         tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Never);
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
         tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
     }
-    
+
     [Fact]
     public async Task DeleteApplicationAsync_Deletes_Immediately_WhenLessThan3DaysOld()
     {
@@ -82,12 +82,12 @@ public class SharedManagementServiceTests
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
-        
+
         tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Never);
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
         tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
     }
-    
+
     [Fact]
     public async Task DeleteApplicationAsync_Deletes_Scheduled_WhenMoreThan3DaysOld()
     {
@@ -111,11 +111,11 @@ public class SharedManagementServiceTests
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddDays(14), actual.DeleteAt.Value);
-        
+
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
         tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddDays(14))), Times.Once);
     }
-    
+
     [Fact]
     public async Task DeleteApplicationAsync_Deletes_Immediately_WhenNoUsers()
     {
@@ -136,15 +136,15 @@ public class SharedManagementServiceTests
             .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.DeleteApplicationAsync(appId, deletedBy);
-        
+
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
-        
+
         tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
         tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
     }
-    
+
     [Fact]
     public async Task DeleteApplicationAsync_Deletes_Scheduled_WhenUsers()
     {
@@ -165,7 +165,7 @@ public class SharedManagementServiceTests
             .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.DeleteApplicationAsync(appId, deletedBy);
-        
+
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddDays(14), actual.DeleteAt.Value);
 

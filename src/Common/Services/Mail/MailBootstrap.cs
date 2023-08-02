@@ -12,7 +12,7 @@ public static class MailBootstrap
         }
         else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
         {
-             builder.Services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
+            builder.Services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
         }
     }
 }

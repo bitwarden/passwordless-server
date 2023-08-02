@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Passwordless.Api.Models;
 using Passwordless.Server.Endpoints;
@@ -25,7 +24,7 @@ public class AccountEndpointsTests
         var loggerMock = new Mock<ILogger>();
 
         var actual = await AccountEndpoints.DeleteApplicationAsync(appId, payload, sharedManagementServiceMock.Object, loggerMock.Object);
-        
+
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
         Assert.Equal("Success!", actualResult?.Message);

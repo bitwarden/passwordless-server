@@ -78,7 +78,7 @@ public static class AccountEndpoints
                 })
             .RequireCors("default");
     }
-    
+
     public static async Task<IResult> DeleteApplicationAsync(
         string appId,
         DeleteAppDto payload,

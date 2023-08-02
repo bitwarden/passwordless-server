@@ -15,7 +15,7 @@ public sealed class DefaultMailService : IMailService
         IConfigurationSection mailOptions = configuration.GetSection("Mail");
         _fromEmail = mailOptions.GetValue<string>("From") ?? null;
     }
-    
+
     public async Task SendApplicationDeletedAsync(AccountMetaInformation accountInformation, string deletedBy)
     {
         MailMessage message = new()

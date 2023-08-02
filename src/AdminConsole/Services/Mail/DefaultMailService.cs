@@ -27,7 +27,7 @@ public class DefaultMailService : IMailService
         uriBuilder.Query = query.ToString();
         MailMessage message = new()
         {
-            To = new List<string>{ email },
+            To = new List<string> { email },
             From = _fromEmail,
             Subject = "Verify your passwordless.dev account",
             TextBody =
@@ -59,7 +59,7 @@ public class DefaultMailService : IMailService
     {
         var message = new MailMessage
         {
-            To = new List<string>{ inv.ToEmail },
+            To = new List<string> { inv.ToEmail },
             From = _fromEmail,
             Subject = "You've been invited to join an organization in passwordless.dev",
             TextBody =

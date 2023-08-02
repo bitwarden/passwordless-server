@@ -9,7 +9,7 @@ public class FileMailProvider : IMailProvider
     {
         _logger = logger;
     }
-    
+
     public Task SendAsync(MailMessage message)
     {
         string msg = message.TextBody;

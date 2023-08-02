@@ -130,7 +130,7 @@ public class EfTenantStorage : ITenantStorage
 
         return res;
     }
-    
+
     public async Task<bool> HasUsersAsync()
     {
         var res = await db.Credentials.AnyAsync();
