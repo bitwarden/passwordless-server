@@ -1,70 +1,103 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AspNetCore;
+using Passwordless.AspNetCore.Services;
+using Passwordless.AspNetCore.Services.Implementations;
 using Passwordless.Net;
 
+// Trick to make it show up where it's more likely to be useful
 namespace Microsoft.Extensions.DependencyInjection;
 
-public class PasswordlessAspNetCoreOptions
-{
-    public PasswordlessOptions Api { get; set; } = new PasswordlessOptions();
-    public Func<ConvertUserContext, Task> ConvertUser { get; set; } = DefaultConvertUser;
-
-
-    private static Task DefaultConvertUser(ConvertUserContext convertUserContext)
-    {
-        return Task.CompletedTask;
-    }
-}
-
+/// <summary>
+/// Default extensions to <see cref="IServiceCollection"/> and <see cref="IdentityBuilder"/> for <see cref="PasswordlessApiEndpointRouteBuilderExtensions.MapPasswordless(IEndpointRouteBuilder)"/>.
+/// </summary>
 public static class IdentityBuilderExtensions
 {
-    public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, Action<PasswordlessAspNetCoreOptions>? configureOptions = null)
+    /// <summary>
+    /// Adds the services to support <see cref="PasswordlessApiEndpointRouteBuilderExtensions.MapPasswordless(IEndpointRouteBuilder)" />
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection" />.</param>
+    /// <param name="configuration">The <see cref="IConfiguration" /> to use to bind to <see cref="PasswordlessAspNetCoreOptions" />. Generally it's own section.</param>
+    /// <returns>The <see cref="IServiceCollection" />.</returns>
+    public static IServiceCollection AddPasswordless<TUser>(this IServiceCollection services, IConfiguration configuration)
+        where TUser : class, new()
     {
-        builder.Services.AddProblemDetails();
+        return services.AddPasswordlessCore(typeof(TUser), configuration.Bind, defaultScheme: null);
+    }
 
-        builder.Services.AddOptions<PasswordlessAspNetCoreOptions>()
-            .Configure(o => configureOptions?.Invoke(o))
-            .PostConfigure<IConfiguration>((options, config) =>
-            {
-                var passwordlessSection = config.GetSection("Passwordless");
+    /// <summary>
+    /// Adds the services to support <see cref="PasswordlessApiEndpointRouteBuilderExtensions.MapPasswordless(IEndpointRouteBuilder)" />
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection" />.</param>
+    /// <param name="configure">Configures the <see cref="PasswordlessAspNetCoreOptions" />.</param>
+    /// <returns>The <see cref="IServiceCollection" />.</returns>
+    public static IServiceCollection AddPasswordless<TUser>(this IServiceCollection services, Action<PasswordlessAspNetCoreOptions> configure)
+        where TUser : class, new()
+    {
+        return services.AddPasswordlessCore(typeof(TUser), configure, defaultScheme: null);
+    }
 
-                if (passwordlessSection == null)
-                {
-                    return;
-                }
 
-                if (options.Api.ApiSecret == null)
-                {
-                    options.Api.ApiSecret = passwordlessSection.GetValue<string>("Api:ApiSecret")
-                        ?? passwordlessSection.GetValue<string>("ApiSecret")!;
-                }
+    /// <summary>
+    /// Adds the services to support <see cref="PasswordlessApiEndpointRouteBuilderExtensions.MapPasswordless(IEndpointRouteBuilder)" />
+    /// </summary>
+    /// <param name="builder">The current <see cref="IdentityBuilder" /> instance.</param>
+    /// <param name="configuration">The <see cref="IConfiguration" /> to use to bind to <see cref="PasswordlessAspNetCoreOptions" />. Generally it's own section.</param>
+    /// <returns>The <see cref="IdentityBuilder" />.</returns>
+    public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, IConfiguration configuration)
+    {
+        builder.Services.AddPasswordlessCore(builder.UserType, configuration.Bind, IdentityConstants.ApplicationScheme);
+        return builder;
+    }
 
-                var configApiUrl = passwordlessSection.GetValue<string>("Api:ApiUrl")
-                        ?? passwordlessSection.GetValue<string>("ApiUrl");
+    /// <summary>
+    /// Adds the services to support <see cref="PasswordlessApiEndpointRouteBuilderExtensions.MapPasswordless(IEndpointRouteBuilder)" />
+    /// </summary>
+    /// <param name="builder">The current <see cref="IdentityBuilder" /> instance.</param>
+    /// <param name="configure">Configures the <see cref="PasswordlessAspNetCoreOptions" />.</param>
+    /// <returns>The <see cref="IdentityBuilder" />.</returns>
+    public static IdentityBuilder AddPasswordless(this IdentityBuilder builder, Action<PasswordlessAspNetCoreOptions> configure)
+    {
+        builder.Services.AddPasswordlessCore(builder.UserType, configure, IdentityConstants.ApplicationScheme);
+        return builder;
+    }
 
-                if (configApiUrl != null)
-                {
-                    options.Api.ApiUrl = configApiUrl;
-                }
-            });
+    private static IServiceCollection AddPasswordlessCore(this IServiceCollection services,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type userType,
+        Action<PasswordlessAspNetCoreOptions> configure,
+        string? defaultScheme)
+    {
+        // If a default scheme was passed in (ASP.NET Identity in use) then configure our option to take that one
+        // but still call their configure callback after so they have the oppurtunity to override it.
+        if (!string.IsNullOrEmpty(defaultScheme))
+        {
+            services.Configure<PasswordlessAspNetCoreOptions>(options => options.SignInScheme = defaultScheme);
+        }
 
-        builder.Services.AddPasswordlessSdk(passwordlessOptions => { });
+        services.Configure(configure);
 
-        builder.Services.AddOptions<PasswordlessOptions>()
+        // Add the SDK services but don't configure it there since ASP.NET Core options are a superset of their options.
+        services.AddPasswordlessSdk(passwordlessOptions => { });
+
+        services.TryAddScoped(
+            typeof(IPasswordlessService<PasswordlessRegisterRequest>),
+            typeof(PasswordlessService<>).MakeGenericType(userType));
+
+        services.TryAddScoped<ICustomizeRegisterOptions, NoopCustomizeRegisterOptions>();
+
+        // Override SDK options to come from ASP.NET Core options
+        services.AddOptions<PasswordlessOptions>()
             .Configure<IOptions<PasswordlessAspNetCoreOptions>>((options, aspNetCoreOptionsAccessor) =>
             {
                 var aspNetCoreOptions = aspNetCoreOptionsAccessor.Value;
-                options.ApiSecret = aspNetCoreOptions.Api.ApiSecret;
-                options.ApiUrl = aspNetCoreOptions.Api.ApiUrl;
+                options.ApiSecret = aspNetCoreOptions.ApiSecret;
+                options.ApiUrl = aspNetCoreOptions.ApiUrl;
             });
 
-        builder.Services.AddScoped(
-            typeof(IPasswordlessIdentityService),
-            typeof(PasswordlessIdentityService<>).MakeGenericType(builder.UserType)
-        );
-
-        return builder;
+        return services;
     }
 }
