@@ -72,7 +72,7 @@ public class Join : PageModel
 
         var validationResult = await _validator.ValidateAsync(form);
         validationResult.AddToModelState(ModelState);
-        
+
         if (!ModelState.IsValid)
         {
             Invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
