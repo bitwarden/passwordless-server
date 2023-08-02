@@ -138,10 +138,12 @@
                 working.value = true;
                 try {
                     const data = new FormData(e.target);
-                    const req = await fetch("/passwordless/create-token", {
-                        method: "GET",                    
+                    const req = await fetch("/passwordless-add-credential", {
+                        method: "POST",
+                        body: JSON.stringify({ displayName: data.get("nickname")}),
                         headers: {
-                            RequestVerificationToken: "@requestToken"
+                            RequestVerificationToken: "@requestToken",
+                            "Content-Type": "application/json"
                         }
                     });
     
