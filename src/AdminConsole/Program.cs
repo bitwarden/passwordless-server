@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 using Serilog;
@@ -84,6 +85,8 @@ void RunTheApp()
             .AddDataProtection()
             .PersistKeysToDbContext<ConsoleDbContext>();
     }
+
+    services.AddValidators();
 
     services.AddRazorPages(options =>
     {
