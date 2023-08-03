@@ -39,7 +39,11 @@ public class MailKitSmtpMailProvider : IMailProvider
         mimeMessage.Subject = message.Subject;
         var toAddresses = message.To.Select(MailboxAddress.Parse).ToList();
         mimeMessage.To.AddRange(toAddresses);
-
+        if (message.Bcc.Any())
+        {
+            var bccAddresses = message.Bcc.Select(MailboxAddress.Parse).ToList();
+            mimeMessage.Bcc.AddRange(bccAddresses);
+        }
         var builder = new BodyBuilder();
         if (!string.IsNullOrWhiteSpace(message.TextBody))
         {

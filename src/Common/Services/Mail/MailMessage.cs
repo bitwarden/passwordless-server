@@ -10,4 +10,6 @@ public record MailMessage(IEnumerable<string> To, string? From, string Subject, 
     public MailMessage() : this(new List<string>(), null, null, null, null, null)
     {
     }
+
+    public ICollection<string> Bcc { get; set; } = new List<string>();
 }
