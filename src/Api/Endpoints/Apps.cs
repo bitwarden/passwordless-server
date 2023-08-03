@@ -63,7 +63,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/{appId}/mark_delete", MarkDeleteApplicationAsync)
+        app.MapPost("/apps/mark_delete", MarkDeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -80,12 +80,11 @@ public static class AppsEndpoints
     }
 
     public static async Task<IResult> MarkDeleteApplicationAsync(
-        string appId,
         DeleteAppDto payload,
         ISharedManagementService service,
         ILogger logger)
     {
-        var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy);
+        var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy);
         logger.LogWarning("account/delete was issued {@Res}", result);
         return Ok(result);
     }

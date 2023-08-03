@@ -8,22 +8,20 @@ namespace Passwordless.Api.Tests.Endpoints;
 
 public class AccountEndpointsTests
 {
-    #region DeleteApplicationAsync
-
+    #region MarkDeleteApplicationAsync
     [Fact]
-    public async Task DeleteApplicationAsync_Returns_ExpectedResult()
+    public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()
     {
-        const string appId = "demo-application";
-        var payload = new DeleteAppDto { DeletedBy = "admin@example.com" };
+        var payload = new DeleteAppDto { AppId = "demo-application", DeletedBy = "admin@example.com" };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.MarkDeleteApplicationAsync(
-            It.Is<string>(p => p == appId),
+            It.Is<string>(p => p == "demo-application"),
             It.Is<string>(p => p == payload.DeletedBy)))
             .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
         var loggerMock = new Mock<ILogger>();
 
-        var actual = await AppsEndpoints.MarkDeleteApplicationAsync(appId, payload, sharedManagementServiceMock.Object, loggerMock.Object);
+        var actual = await AppsEndpoints.MarkDeleteApplicationAsync(payload, sharedManagementServiceMock.Object, loggerMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
