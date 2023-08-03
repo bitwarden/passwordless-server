@@ -14,12 +14,27 @@
     @* <button class="btn-primary mt-3">Save billing</button> *@
 </form>
 
+<br />
+
+<h2 class="h2">Delete Application</h2>
+<p>
+    Newly created applications will be deleted automatically provided they have no credentials stored in them. Otherwise,
+    they will be flagged for deletion by the system and administrators of the organization will be notified.  After a specified amount of time,
+    the application and all credentials/users/etc. will be removed from the system.  If you would like to cancel this action,
+    you have until the end of the specified time to do so. A button will be provided here and a notification email with 
+    a link will be emailed to the organization administrators.
+</p>
+<form method="post" class="mt-3" asp-page-handler="delete">
+    <div id="deleteApplication"></div>
+</form>
+
 @section Scripts
 {
     <script type="module">
     import { createApp } from 'vue';
-    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")'   
-        
+    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")';
+    import DeleteApplication from '@Url.Content("~/js/deleteapplication.mjs")';
+    
     const items = [
     {
         title: 'Free',
@@ -37,9 +52,10 @@
         disabled: true
     }];   
     
-    
     createApp(RadioBoxes, {
         items: items  
     } ).mount('#planpicker');
+        
+    createApp(DeleteApplication).mount('#deleteApplication');
     </script>
 }
