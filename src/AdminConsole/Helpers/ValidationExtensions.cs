@@ -5,11 +5,11 @@ namespace Passwordless.AdminConsole.Helpers;
 
 public static class ValidationExtensions
 {
-    public static void AddToModelState(this ValidationResult result, ModelStateDictionary modelState)
+    public static void AddToModelState(this ValidationResult result, ModelStateDictionary modelState, string modelName)
     {
         foreach (var error in result.Errors)
         {
-            modelState.AddModelError(error.PropertyName, error.ErrorMessage);
+            modelState.AddModelError($"{modelName}.{error.PropertyName}", error.ErrorMessage);
         }
     }
 }

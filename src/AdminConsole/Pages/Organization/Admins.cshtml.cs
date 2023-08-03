@@ -87,7 +87,7 @@ public class Admins : PageModel
         }
 
         var validationResult = await _validator.ValidateAsync(form);
-        validationResult.AddToModelState(ModelState);
+        validationResult.AddToModelState(ModelState, nameof(Form));
 
         if (!ModelState.IsValid)
         {

@@ -48,7 +48,7 @@ public class Create : PageModel
         var input2 = Form;
 
         var validationResult = await _validator.ValidateAsync(form, cancellationToken);
-        validationResult.AddToModelState(ModelState);
+        validationResult.AddToModelState(ModelState, nameof(Form));
 
         if (!ModelState.IsValid)
         {
@@ -95,8 +95,6 @@ public class Create : PageModel
 
         return RedirectToPage("/Organization/Verify");
     }
-
-
 }
 
 public record CreateModel
