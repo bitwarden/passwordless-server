@@ -49,7 +49,7 @@ public class SharedManagementServiceTests
             .Returns(tenantStorageMock.Object);
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
-            await _sut.DeleteApplicationAsync(appId, deletedBy));
+            await _sut.MarkDeleteApplicationAsync(appId, deletedBy));
 
         Assert.Equal("app_not_found", actual.ErrorCode);
         Assert.Equal(400, actual.StatusCode);
@@ -78,7 +78,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.DeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
@@ -107,7 +107,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.DeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddDays(14), actual.DeleteAt.Value);
@@ -135,7 +135,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.DeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
@@ -164,7 +164,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.DeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddDays(14), actual.DeleteAt.Value);

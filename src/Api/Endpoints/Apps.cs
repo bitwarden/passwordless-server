@@ -6,7 +6,7 @@ using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Server.Endpoints;
 
-public static class AccountEndpoints
+public static class AppsEndpoints
 {
     public static void MapAccountEndpoints(this WebApplication app)
     {
@@ -63,7 +63,7 @@ public static class AccountEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/{appId}/delete", DeleteApplicationAsync)
+        app.MapPost("/apps/{appId}/mark_delete", MarkDeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -79,13 +79,13 @@ public static class AccountEndpoints
             .RequireCors("default");
     }
 
-    public static async Task<IResult> DeleteApplicationAsync(
+    public static async Task<IResult> MarkDeleteApplicationAsync(
         string appId,
         DeleteAppDto payload,
         ISharedManagementService service,
         ILogger logger)
     {
-        var result = await service.DeleteApplicationAsync(appId, payload.DeletedBy);
+        var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy);
         logger.LogWarning("account/delete was issued {@Res}", result);
         return Ok(result);
     }

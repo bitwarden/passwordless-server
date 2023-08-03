@@ -24,7 +24,7 @@ public interface ISharedManagementService
     Task<string> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
     Task UnFreezeAccount(string accountName);
-    Task<AppDeletionResult> DeleteApplicationAsync(string appId, string deletedBy);
+    Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy);
     Task<AppDeletionResult> DeleteAccount(string appId, string cancelLink);
     Task SendAbortEmail(EmailAboutAccountDeletion input);
 }
@@ -194,7 +194,7 @@ public class SharedManagementService : ISharedManagementService
         await storage.SetAppDeletionDate(null);
     }
 
-    public async Task<AppDeletionResult> DeleteApplicationAsync(string appId, string deletedBy)
+    public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy)
     {
         var storage = tenantFactory.Create(appId);
         var accountInformation = await storage.GetAccountInformation();

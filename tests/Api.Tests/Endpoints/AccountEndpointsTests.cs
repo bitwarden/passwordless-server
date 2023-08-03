@@ -17,13 +17,13 @@ public class AccountEndpointsTests
         var payload = new DeleteAppDto { DeletedBy = "admin@example.com" };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
-        sharedManagementServiceMock.Setup(x => x.DeleteApplicationAsync(
+        sharedManagementServiceMock.Setup(x => x.MarkDeleteApplicationAsync(
             It.Is<string>(p => p == appId),
             It.Is<string>(p => p == payload.DeletedBy)))
             .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
         var loggerMock = new Mock<ILogger>();
 
-        var actual = await AccountEndpoints.DeleteApplicationAsync(appId, payload, sharedManagementServiceMock.Object, loggerMock.Object);
+        var actual = await AppsEndpoints.MarkDeleteApplicationAsync(appId, payload, sharedManagementServiceMock.Object, loggerMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
