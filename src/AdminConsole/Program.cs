@@ -15,6 +15,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.Common.Services.Mail;
 using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -143,17 +145,8 @@ void RunTheApp()
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
     // Setup mail service & provider
+    builder.AddMail();
     services.AddSingleton<IMailService, DefaultMailService>();
-    // Register depend on configuration
-    services.AddSingleton<IMailProvider, FileMailProvider>();
-    if (builder.Configuration.GetSection("Mail:Postmark").Exists())
-    {
-        services.AddSingleton<IMailProvider, PostmarkMailProvider>();
-    }
-    else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
-    {
-        services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
-    }
 
     services.AddScoped<UsageService>();
     services.AddScoped<DataService>();

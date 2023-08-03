@@ -1,7 +1,7 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace AdminConsole.Services.Mail;
+namespace Passwordless.Common.Services.Mail;
 
 // ReSharper disable once UnusedType.Global
 public class MailKitSmtpMailProvider : IMailProvider
@@ -37,7 +37,8 @@ public class MailKitSmtpMailProvider : IMailProvider
         var from = _fromEmail ?? message.From;
         mimeMessage.From.Add(MailboxAddress.Parse(from));
         mimeMessage.Subject = message.Subject;
-        mimeMessage.To.Add(MailboxAddress.Parse(message.To));
+        var toAddresses = message.To.Select(MailboxAddress.Parse).ToList();
+        mimeMessage.To.AddRange(toAddresses);
 
         var builder = new BodyBuilder();
         if (!string.IsNullOrWhiteSpace(message.TextBody))

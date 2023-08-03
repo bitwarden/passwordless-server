@@ -1,9 +1,11 @@
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Passwordless.Service.Helpers;
+using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
@@ -22,6 +24,7 @@ public interface ISharedManagementService
     Task<string> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
     Task UnFreezeAccount(string accountName);
+    Task<AppDeletionResult> DeleteApplicationAsync(string appId, string deletedBy);
     Task<AppDeletionResult> DeleteAccount(string appId, string cancelLink);
     Task SendAbortEmail(EmailAboutAccountDeletion input);
 }
@@ -30,14 +33,21 @@ public class SharedManagementService : ISharedManagementService
 {
     private readonly ILogger _logger;
     private readonly IConfiguration config;
+    private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
+    private readonly IMailService _mailService;
 
-    public SharedManagementService(ILogger<SharedManagementService> logger, IConfiguration config,
-        ITenantStorageFactory tenantFactory)
+    public SharedManagementService(ITenantStorageFactory tenantFactory,
+        IMailService mailService,
+        IConfiguration config,
+        ISystemClock systemClock,
+        ILogger<SharedManagementService> logger)
     {
-        _logger = logger;
-        this.config = config;
         this.tenantFactory = tenantFactory;
+        _mailService = mailService;
+        this.config = config;
+        _systemClock = systemClock;
+        _logger = logger;
     }
 
 
@@ -182,6 +192,37 @@ public class SharedManagementService : ISharedManagementService
         // queue deletion
         await storage.LockAllApiKeys(false);
         await storage.SetAppDeletionDate(null);
+    }
+
+    public async Task<AppDeletionResult> DeleteApplicationAsync(string appId, string deletedBy)
+    {
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
+        if (accountInformation == null)
+        {
+            throw new ApiException("app_not_found", "App was not found.", 400);
+        }
+        bool canDeleteImmediately = accountInformation.CreatedAt > _systemClock.UtcNow.AddDays(-3);
+
+        if (!canDeleteImmediately)
+        {
+            canDeleteImmediately = !(await storage.HasUsersAsync());
+        }
+
+        if (canDeleteImmediately)
+        {
+            await storage.DeleteAccount();
+            await _mailService.SendApplicationDeletedAsync(accountInformation, deletedBy);
+            return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
+                _systemClock.UtcNow.UtcDateTime);
+        }
+        else
+        {
+            var deleteAt = _systemClock.UtcNow.AddDays(14).UtcDateTime;
+            await storage.SetAppDeletionDate(deleteAt);
+            await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deletedBy);
+            return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
+        }
     }
 
 

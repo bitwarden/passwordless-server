@@ -36,6 +36,7 @@ public interface ITenantStorage
 
 
     Task<int> GetUsersCount();
+    Task<bool> HasUsersAsync();
     Task DeleteUser(string userId);
     Task<List<ApiKeyDesc>> GetAllApiKeys();
     Task SetAppDeletionDate(DateTime? deletionAt);
