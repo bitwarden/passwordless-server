@@ -1,6 +1,6 @@
 namespace Passwordless.Api.Models;
 
-public sealed class DeleteAppDto
+public sealed class MarkDeleteAppDto
 {
     public string AppId { get; set; }
 
