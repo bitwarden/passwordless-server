@@ -23,7 +23,7 @@ public interface ISharedManagementService
     Task FreezeAccount(string accountName);
     Task UnFreezeAccount(string accountName);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
-    Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy);
+    Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
 }
 
@@ -188,9 +188,6 @@ public class SharedManagementService : ISharedManagementService
     public async Task UnFreezeAccount(string accountName)
     {
         var storage = tenantFactory.Create(accountName);
-        // lock API keys?
-        // send email to admin
-        // queue deletion
         await storage.LockAllApiKeys(false);
         await storage.SetAppDeletionDate(null);
     }
@@ -213,7 +210,7 @@ public class SharedManagementService : ISharedManagementService
             _systemClock.UtcNow.UtcDateTime);
     }
 
-    public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy)
+    public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
     {
         var storage = tenantFactory.Create(appId);
         var accountInformation = await storage.GetAccountInformation();
@@ -245,7 +242,10 @@ public class SharedManagementService : ISharedManagementService
 
         var deleteAt = _systemClock.UtcNow.AddMonths(1).UtcDateTime;
         await storage.SetAppDeletionDate(deleteAt);
-        await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deletedBy);
+
+        var cancellationLink = $"{baseUrl}/apps/delete/cancel/{appId}";
+        await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deletedBy, cancellationLink);
+        
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
     }
 

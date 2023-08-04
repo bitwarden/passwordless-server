@@ -45,7 +45,7 @@ public sealed class DefaultMailService : IMailService
         await _provider.SendAsync(message);
     }
 
-    public async Task SendApplicationToBeDeletedAsync(AccountMetaInformation accountInformation, string deletedBy)
+    public async Task SendApplicationToBeDeletedAsync(AccountMetaInformation accountInformation, string deletedBy, string cancellationLink)
     {
         MailMessage message = new()
         {
@@ -65,7 +65,7 @@ public sealed class DefaultMailService : IMailService
                   </head>
                   <body>
                     <p>Your app '{accountInformation.AcountName}' is scheduled for deletion at {accountInformation.DeleteAt:F} by '{deletedBy}'.</p>
-                    <p>If this was unintentional, please visit the your administration console.</p>
+                    <p>If this was unintentional, please visit the your administration console or click <a href="{cancellationLink}">this link</a></p>
                   </body>
                 </html>
                 """,

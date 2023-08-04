@@ -42,6 +42,7 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
+        const string baseUrl = "http://localhost:7001";
 
         var tenantStorageMock = new Mock<ITenantStorage>();
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -51,7 +52,7 @@ public class SharedManagementServiceTests
             .Returns(tenantStorageMock.Object);
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
-            await _sut.MarkDeleteApplicationAsync(appId, deletedBy));
+            await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl));
 
         Assert.Equal("app_not_found", actual.ErrorCode);
         Assert.Equal(400, actual.StatusCode);
@@ -67,6 +68,7 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
+        const string baseUrl = "http://localhost:7001";
 
         var tenantStorageMock = new Mock<ITenantStorage>();
         var accountInformation = new AccountMetaInformation
@@ -80,7 +82,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
@@ -95,6 +97,7 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
+        const string baseUrl = "http://localhost:7001";
 
         var tenantStorageMock = new Mock<ITenantStorage>();
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
@@ -109,7 +112,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);
@@ -123,6 +126,7 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
+        const string baseUrl = "http://localhost:7001";
 
         var tenantStorageMock = new Mock<ITenantStorage>();
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(false);
@@ -137,7 +141,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
@@ -152,6 +156,7 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
+        const string baseUrl = "http://localhost:7001";
 
         var tenantStorageMock = new Mock<ITenantStorage>();
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
@@ -166,7 +171,7 @@ public class SharedManagementServiceTests
             .Setup(x => x.Create(It.Is<string>(p => p == appId)))
             .Returns(tenantStorageMock.Object);
 
-        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
+        var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);

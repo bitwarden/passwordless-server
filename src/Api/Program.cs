@@ -78,8 +78,8 @@ services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
 services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
 services.AddScoped<ITokenService, TokenService>();
-
 services.AddSingleton<ISystemClock, SystemClock>();
+services.AddScoped<IRequestContext, RequestContext>();
 builder.AddMail();
 builder.Services.AddSingleton<IMailService, DefaultMailService>();
 

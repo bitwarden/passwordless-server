@@ -1,4 +1,5 @@
 ﻿using Passwordless.Api.Authorization;
+using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using static Microsoft.AspNetCore.Http.Results;
@@ -61,15 +62,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapGet("/apps/delete/cancel/{appId}",
-                async (string appId, HttpContext ctx, HttpRequest req, ISharedManagementService service) =>
-                {
-                    await service.UnFreezeAccount(appId);
-
-                    var res = new CancelResult(
-                        "Your account will not be deleted since the process was aborted with the cancellation link");
-                    return Ok(res);
-                })
+        app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
     }
 
@@ -86,9 +79,11 @@ public static class AppsEndpoints
     public static async Task<IResult> MarkDeleteApplicationAsync(
         MarkDeleteAppDto payload,
         ISharedManagementService service,
+        IRequestContext requestContext,
         ILogger logger)
     {
-        var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy);
+        var baseUrl = requestContext.GetBaseUrl();
+        var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
         return Ok(result);
     }
@@ -97,6 +92,13 @@ public static class AppsEndpoints
     {
         var result = await service.GetApplicationsPendingDeletionAsync();
         return Ok(result);
+    }
+
+    public static async Task<IResult> CancelDeletionAsync(string appId, ISharedManagementService service)
+    {
+        await service.UnFreezeAccount(appId);
+        var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
+        return Ok(res);
     }
 
     public record AvailableResponse(bool Available);
