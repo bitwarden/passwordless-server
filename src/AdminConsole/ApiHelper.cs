@@ -43,4 +43,25 @@ public class PasswordlessManagementClient
         res.EnsureSuccessStatusCode();
         return await res.Content.ReadFromJsonAsync<NewAppResponse>();
     }
+
+    public async Task<IEnumerable<string>> ListApplicationsPendingDeletionAsync()
+    {
+        try
+        {
+            var res = await _client.GetAsync("apps/list_pending_deletion");
+            res.EnsureSuccessStatusCode();
+            return await res.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? Array.Empty<string>();
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    public async Task<bool> DeleteApplicationAsync(string application)
+    {
+        var request = new { AppId = application };
+        var res = await _client.PostAsJsonAsync("apps/delete", request);
+        return res.IsSuccessStatusCode;
+    }
 }

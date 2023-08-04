@@ -18,7 +18,7 @@ public class EfStorage : IStorage
     public async Task<ICollection<string>> GetApplicationsPendingDeletionAsync()
     {
         // Will replace IgnoreQueryFilters at a later stage. To possibly use different db contexts.
-        var tenants = await _db.AccountInfo.IgnoreQueryFilters()
+        var tenants = await _db.AccountInfo
             .Where(x => x.DeleteAt <= _systemClock.UtcNow.UtcDateTime)
             .Select(x => x.Tenant)
             .ToListAsync();

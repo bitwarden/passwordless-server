@@ -13,9 +13,12 @@ public class EfStorageFactory<TContext> : IStorageFactory
         _services = services;
     }
 
+    /**
+     * If you need more than the tenant scope.
+     */
     public IStorage Create()
     {
-        var context = ActivatorUtilities.CreateInstance<TContext>(_services);
+        var context = ActivatorUtilities.CreateInstance<TContext>(_services, new NoTenantProvider());
         var systemClock = _services.GetRequiredService<ISystemClock>();
         return new EfStorage(context, systemClock);
     }
