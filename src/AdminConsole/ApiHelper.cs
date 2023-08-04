@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.Net;
 
 namespace AdminConsole;
@@ -42,5 +43,12 @@ public class PasswordlessManagementClient
         var res = await _client.PostAsJsonAsync("apps/create", registerOptions);
         res.EnsureSuccessStatusCode();
         return await res.Content.ReadFromJsonAsync<NewAppResponse>();
+    }
+
+    public async Task<MarkDeleteApplicationResponse> MarkDeleteApplication(MarkDeleteApplicationRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("apps/mark_delete", new { request.AppId, request.DeletedBy });
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<MarkDeleteApplicationResponse>();
     }
 }
