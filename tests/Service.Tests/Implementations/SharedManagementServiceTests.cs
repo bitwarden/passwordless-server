@@ -13,6 +13,7 @@ namespace Passwordless.Service.Tests.Implementations;
 public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
+    private readonly Mock<IStorageFactory> _storageFactoryMock = new();
     private readonly Mock<IMailService> _mailServiceMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
@@ -26,6 +27,7 @@ public class SharedManagementServiceTests
     {
         _sut = new SharedManagementService(
             _tenantStorageFactoryMock.Object,
+            _storageFactoryMock.Object,
             _mailServiceMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
@@ -34,9 +36,9 @@ public class SharedManagementServiceTests
             .Returns(new DateTimeOffset(_now));
     }
 
-    #region DeleteApplicationAsync
+    #region MarkDeleteApplicationAsync
     [Fact]
-    public async Task DeleteApplicationAsync_Throws_ApiException_WhenAppNotFound()
+    public async Task MarkDeleteApplicationAsync_Throws_ApiException_WhenAppNotFound()
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
@@ -61,7 +63,7 @@ public class SharedManagementServiceTests
     }
 
     [Fact]
-    public async Task DeleteApplicationAsync_Deletes_Immediately_WhenLessThan3DaysOld()
+    public async Task MarkDeleteApplicationAsync_Deletes_Immediately_WhenLessThan3DaysOld()
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
@@ -89,7 +91,7 @@ public class SharedManagementServiceTests
     }
 
     [Fact]
-    public async Task DeleteApplicationAsync_Deletes_Scheduled_WhenMoreThan3DaysOld()
+    public async Task MarkDeleteApplicationAsync_Deletes_Scheduled_WhenMoreThan3DaysOld()
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
@@ -117,7 +119,7 @@ public class SharedManagementServiceTests
     }
 
     [Fact]
-    public async Task DeleteApplicationAsync_Deletes_Immediately_WhenNoUsers()
+    public async Task MarkDeleteApplicationAsync_Deletes_Immediately_WhenNoUsers()
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
@@ -146,7 +148,7 @@ public class SharedManagementServiceTests
     }
 
     [Fact]
-    public async Task DeleteApplicationAsync_Deletes_Scheduled_WhenUsers()
+    public async Task MarkDeleteApplicationAsync_Deletes_Scheduled_WhenUsers()
     {
         const string appId = "mockedAppId";
         const string deletedBy = "admin@example.com";
@@ -173,5 +175,25 @@ public class SharedManagementServiceTests
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
         tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddDays(14))), Times.Once);
     }
+    #endregion
+
+    #region ListApplicationsPendingDeletionAsync
+    [Fact]
+    public async Task ListApplicationsPendingDeletionAsync_Returns_ExpectedResult()
+    {
+        var storageMock = new Mock<IStorage>();
+        var expected = new List<string> { "app1", "app2" };
+        storageMock.Setup(x => x.GetApplicationsPendingDeletionAsync()).ReturnsAsync(expected);
+        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+
+        var actual = await _sut.GetApplicationsPendingDeletionAsync();
+
+        Assert.Equal(expected, actual);
+
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Once);
+        storageMock.Verify(x => x.GetApplicationsPendingDeletionAsync(), Times.Once);
+    }
+
     #endregion
 }

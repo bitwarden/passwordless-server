@@ -50,6 +50,10 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        app.MapGet("/apps/list_pending_deletion", GetApplicationsPendingDeletionAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
         app.MapPost("/apps/delete", async (AppIdDTO payload, HttpRequest req, ISharedManagementService service) =>
             {
                 var urib = new UriBuilder(req.GetDisplayUrl());
@@ -86,6 +90,12 @@ public static class AppsEndpoints
     {
         var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy);
         logger.LogWarning("account/delete was issued {@Res}", result);
+        return Ok(result);
+    }
+
+    public static async Task<IResult> GetApplicationsPendingDeletionAsync(ISharedManagementService service)
+    {
+        var result = await service.GetApplicationsPendingDeletionAsync();
         return Ok(result);
     }
 

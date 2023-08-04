@@ -30,4 +30,21 @@ public class AccountEndpointsTests
         Assert.Equal(deletedAt, actualResult?.DeleteAt);
     }
     #endregion
+
+    #region GetApplicationsPendingDeletionAsync
+    [Fact]
+    public async Task GetApplicationsPendingDeletionAsync_Returns_ExpectedResult()
+    {
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var expected = new List<string> { "app1", "app2" };
+        sharedManagementServiceMock.Setup(x => x.GetApplicationsPendingDeletionAsync())
+            .ReturnsAsync(expected);
+
+        var actual = await AppsEndpoints.GetApplicationsPendingDeletionAsync(sharedManagementServiceMock.Object);
+
+        Assert.Equal(typeof(Ok<IEnumerable<string>>), actual.GetType());
+        var actualResult = (actual as Ok<IEnumerable<string>>)?.Value;
+        Assert.Equal(expected, actualResult);
+    }
+    #endregion
 }

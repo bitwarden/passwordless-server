@@ -27,6 +27,7 @@ public interface ISharedManagementService
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy);
     Task<AppDeletionResult> DeleteAccount(string appId, string cancelLink);
     Task SendAbortEmail(EmailAboutAccountDeletion input);
+    Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -35,15 +36,18 @@ public class SharedManagementService : ISharedManagementService
     private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
+    private readonly IStorageFactory _storageFactory;
     private readonly IMailService _mailService;
 
     public SharedManagementService(ITenantStorageFactory tenantFactory,
+        IStorageFactory storageFactory,
         IMailService mailService,
         IConfiguration config,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger)
     {
         this.tenantFactory = tenantFactory;
+        _storageFactory = storageFactory;
         _mailService = mailService;
         this.config = config;
         _systemClock = systemClock;
@@ -342,6 +346,12 @@ public class SharedManagementService : ISharedManagementService
             input.AccountName, input.CancelLink);
     }
 
+    public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
+    {
+        var storage = _storageFactory.Create();
+        var tenants = await storage.GetApplicationsPendingDeletionAsync();
+        return tenants;
+    }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
         ITenantStorage storage)

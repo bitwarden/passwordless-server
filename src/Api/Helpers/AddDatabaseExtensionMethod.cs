@@ -25,6 +25,7 @@ public static class AddDatabaseExtensionMethod
                 builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<SqliteContext>>();
+            services.AddScoped<IStorageFactory, EfStorageFactory<SqliteContext>>();
         }
         else if (!string.IsNullOrEmpty(mssql))
         {
@@ -34,6 +35,7 @@ public static class AddDatabaseExtensionMethod
                 builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<MsSqlContext>>();
+            services.AddScoped<IStorageFactory, EfStorageFactory<MsSqlContext>>();
         }
         else
         {
@@ -62,6 +64,7 @@ public static class AddDatabaseExtensionMethod
 
         // Add storage
         services.AddScoped<ITenantStorage, EfTenantStorage>();
+        services.AddScoped<IStorage, EfStorage>();
 
         return services;
     }
