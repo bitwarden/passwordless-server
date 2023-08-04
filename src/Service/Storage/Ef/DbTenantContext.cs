@@ -48,7 +48,6 @@ public class DbTenantContext : DbContext
 
         modelBuilder.Entity<EFStoredCredential>(b =>
         {
-            b.HasQueryFilter(c => c.Tenant == Tenant);
             b.HasKey(x => new { x.Tenant, x.DescriptorId });
             b.Property(x => x.DescriptorTransports).HasConversion(
                 v => JsonSerializer.Serialize(v, jsonOptions),
@@ -56,18 +55,15 @@ public class DbTenantContext : DbContext
         });
 
         modelBuilder.Entity<TokenKey>()
-            .HasQueryFilter(c => c.Tenant == Tenant)
             .HasKey(c => new { c.Tenant, c.KeyId });
 
 
         modelBuilder.Entity<AccountMetaInformation>()
-            .HasQueryFilter(c => c.Tenant == Tenant)
             .Ignore(c => c.AdminEmails)
             .HasKey(x => x.AcountName);
 
         modelBuilder.Entity<ApiKeyDesc>(b =>
         {
-            b.HasQueryFilter(c => c.Tenant == Tenant);
             b.HasKey(x => new { x.Tenant, x.Id });
             b.Property(x => x.Scopes)
                 .HasConversion(
@@ -75,9 +71,17 @@ public class DbTenantContext : DbContext
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
         });
 
-        var ap = modelBuilder.Entity<AliasPointer>()
-            .HasQueryFilter(c => c.Tenant == Tenant)
+        modelBuilder.Entity<AliasPointer>()
             .HasKey(x => new { x.Tenant, x.Alias });
+
+        if (Tenant != null)
+        {
+            modelBuilder.Entity<EFStoredCredential>().HasQueryFilter(c => c.Tenant == Tenant);
+            modelBuilder.Entity<TokenKey>().HasQueryFilter(c => c.Tenant == Tenant);
+            modelBuilder.Entity<AccountMetaInformation>().HasQueryFilter(c => c.Tenant == Tenant);
+            modelBuilder.Entity<ApiKeyDesc>().HasQueryFilter(c => c.Tenant == Tenant);
+            modelBuilder.Entity<AliasPointer>().HasQueryFilter(c => c.Tenant == Tenant);
+        }
 
         base.OnModelCreating(modelBuilder);
     }
