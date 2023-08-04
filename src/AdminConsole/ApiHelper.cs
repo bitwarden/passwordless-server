@@ -60,8 +60,9 @@ public class PasswordlessManagementClient
 
     public async Task<bool> DeleteApplicationAsync(string application)
     {
-        var request = new { AppId = application };
+        var request = new { appId = application };
         var res = await _client.PostAsJsonAsync("apps/delete", request);
+        var why = await res.Content.ReadAsStringAsync();
         return res.IsSuccessStatusCode;
     }
 }
