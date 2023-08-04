@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using static Microsoft.AspNetCore.Http.Results;
@@ -54,16 +53,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/delete", async (AppIdDTO payload, HttpRequest req, ISharedManagementService service) =>
-            {
-                var urib = new UriBuilder(req.GetDisplayUrl());
-                urib.Path = "";
-                var cancelLink = $"{urib.Uri.AbsoluteUri}apps/delete/cancel/{payload.AppId}";
-                AppDeletionResult res = await service.DeleteAccount(payload.AppId, cancelLink);
-                // logg this
-                app.Logger.LogWarning("account/delete was issued {@Res}", res);
-                return Ok(res);
-            })
+        app.MapPost("/apps/delete", DeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -83,13 +73,23 @@ public static class AppsEndpoints
             .RequireCors("default");
     }
 
+    public static async Task<IResult> DeleteApplicationAsync(
+        AppIdDTO payload,
+        ISharedManagementService service,
+        ILogger logger)
+    {
+        var result = await service.DeleteApplicationAsync(payload.AppId);
+        logger.LogWarning("account/delete was issued {@Res}", result);
+        return Ok(result);
+    }
+
     public static async Task<IResult> MarkDeleteApplicationAsync(
-        DeleteAppDto payload,
+        MarkDeleteAppDto payload,
         ISharedManagementService service,
         ILogger logger)
     {
         var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy);
-        logger.LogWarning("account/delete was issued {@Res}", result);
+        logger.LogWarning("mark account/delete was issued {@Res}", result);
         return Ok(result);
     }
 

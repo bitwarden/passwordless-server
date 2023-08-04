@@ -22,6 +22,7 @@ public sealed class DefaultMailService : IMailService
         {
             To = accountInformation.AdminEmails,
             From = _fromEmail,
+            Bcc = new List<string> { "account-deletion@passwordless.dev" },
             Subject = $"Your app '{accountInformation.AcountName}' has been deleted.",
             TextBody =
                 $"Your app '{accountInformation.AcountName}' has been deleted at {accountInformation.DeleteAt:F} by '{deletedBy}'.",
@@ -49,8 +50,9 @@ public sealed class DefaultMailService : IMailService
         MailMessage message = new()
         {
             To = accountInformation.AdminEmails,
+            Bcc = new List<string> { "account-deletion@passwordless.dev" },
             From = _fromEmail,
-            Subject = $"Your app '{accountInformation.AcountName}' is scheduled for deletion.",
+            Subject = $"Your app '{accountInformation.AcountName}' is scheduled for deletion in 30 days.",
             TextBody =
                 $"Your app '{accountInformation.AcountName}' is scheduled for deletion at {accountInformation.DeleteAt:F} by '{deletedBy}'.",
             HtmlBody =
@@ -59,10 +61,11 @@ public sealed class DefaultMailService : IMailService
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">
-                    <title>Your app '{accountInformation.AcountName}' is scheduled for deletion.</title>
+                    <title>Your app '{accountInformation.AcountName}' is scheduled for deletion in 30 days.</title>
                   </head>
                   <body>
                     <p>Your app '{accountInformation.AcountName}' is scheduled for deletion at {accountInformation.DeleteAt:F} by '{deletedBy}'.</p>
+                    <p>If this was unintentional, please visit the your administration console.</p>
                   </body>
                 </html>
                 """,

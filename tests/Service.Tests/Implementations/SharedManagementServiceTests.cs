@@ -112,10 +112,10 @@ public class SharedManagementServiceTests
         var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
 
         Assert.False(actual.IsDeleted);
-        Assert.Equal(_systemClockMock.Object.UtcNow.AddDays(14), actual.DeleteAt.Value);
+        Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);
 
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddDays(14))), Times.Once);
+        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
     }
 
     [Fact]
@@ -169,11 +169,88 @@ public class SharedManagementServiceTests
         var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy);
 
         Assert.False(actual.IsDeleted);
-        Assert.Equal(_systemClockMock.Object.UtcNow.AddDays(14), actual.DeleteAt.Value);
+        Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);
 
         tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddDays(14))), Times.Once);
+        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
+    }
+    #endregion
+
+    #region DeleteApplicationAsync
+    [Fact]
+    public async Task DeleteApplicationAsync_Throws_ApiException_WhenAppNotFound()
+    {
+        const string appId = "mockedAppId";
+
+        var tenantStorageMock = new Mock<ITenantStorage>();
+        tenantStorageMock.Setup(x => x.GetAccountInformation())
+            .ReturnsAsync(null as AccountMetaInformation);
+        _tenantStorageFactoryMock
+            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
+            .Returns(tenantStorageMock.Object);
+
+        var actual = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _sut.DeleteApplicationAsync(appId));
+
+        Assert.Equal("app_not_found", actual.ErrorCode);
+        Assert.Equal(400, actual.StatusCode);
+        Assert.Equal("App was not found.", actual.Message);
+
+        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteApplicationAsync_Deletes_Immediately_WhenDeletedAtIsSetInThePast()
+    {
+        const string appId = "mockedAppId";
+
+        var tenantStorageMock = new Mock<ITenantStorage>();
+        var accountInformation = new AccountMetaInformation
+        {
+            AcountName = appId,
+            DeleteAt = _now.AddDays(-1)
+        };
+        tenantStorageMock.Setup(x => x.GetAccountInformation())
+            .ReturnsAsync(accountInformation);
+        _tenantStorageFactoryMock
+            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
+            .Returns(tenantStorageMock.Object);
+
+        var actual = await _sut.DeleteApplicationAsync(appId);
+
+        Assert.True(actual.IsDeleted);
+        Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
+
+        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteApplicationAsync_Throws_ApiException_WhenDeletedAtIsSetInTheFuture()
+    {
+        const string appId = "mockedAppId";
+
+        var tenantStorageMock = new Mock<ITenantStorage>();
+        tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
+        var accountInformation = new AccountMetaInformation
+        {
+            AcountName = appId,
+            DeleteAt = _now.AddDays(1)
+        };
+        tenantStorageMock.Setup(x => x.GetAccountInformation())
+            .ReturnsAsync(accountInformation);
+        _tenantStorageFactoryMock
+            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
+            .Returns(tenantStorageMock.Object);
+
+        var actual = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _sut.DeleteApplicationAsync(appId));
+
+        Assert.Equal("app_not_pending_deletion", actual.ErrorCode);
+        Assert.Equal(400, actual.StatusCode);
+        Assert.Equal("App was not scheduled for deletion.", actual.Message);
+
+        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
     }
     #endregion
 
