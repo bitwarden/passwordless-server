@@ -16,7 +16,7 @@
 
 <br />
 
-<h2 class="h2">Delete Application</h2>
+<h2 class="h2">Delete Application : @(Model.ApplicationId)</h2>
 <p>
     Newly created applications will be deleted automatically provided they have no credentials stored in them. Otherwise,
     they will be flagged for deletion by the system and administrators of the organization will be notified.  After a specified amount of time,
@@ -24,7 +24,7 @@
     you have until the end of the specified time to do so. A button will be provided here and a notification email with 
     a link will be emailed to the organization administrators.
 </p>
-<form method="post" class="mt-3" asp-page-handler="delete">
+<form method="post" class="mt-3">
     <div id="deleteApplication"></div>
 </form>
 
@@ -55,7 +55,9 @@
     createApp(RadioBoxes, {
         items: items  
     } ).mount('#planpicker');
-        
-    createApp(DeleteApplication).mount('#deleteApplication');
+    
+    createApp(DeleteApplication, {
+        appId: "@(Model.ApplicationId)",
+    }).mount('#deleteApplication');
     </script>
 }
