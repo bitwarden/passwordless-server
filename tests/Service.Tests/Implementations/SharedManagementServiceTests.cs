@@ -13,6 +13,7 @@ namespace Passwordless.Service.Tests.Implementations;
 public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
+    private readonly Mock<IStorageFactory> _storageFactoryMock = new();
     private readonly Mock<IMailService> _mailServiceMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
@@ -26,6 +27,7 @@ public class SharedManagementServiceTests
     {
         _sut = new SharedManagementService(
             _tenantStorageFactoryMock.Object,
+            _storageFactoryMock.Object,
             _mailServiceMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
@@ -250,5 +252,25 @@ public class SharedManagementServiceTests
 
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
     }
+    #endregion
+
+    #region ListApplicationsPendingDeletionAsync
+    [Fact]
+    public async Task ListApplicationsPendingDeletionAsync_Returns_ExpectedResult()
+    {
+        var storageMock = new Mock<IStorage>();
+        var expected = new List<string> { "app1", "app2" };
+        storageMock.Setup(x => x.GetApplicationsPendingDeletionAsync()).ReturnsAsync(expected);
+        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+
+        var actual = await _sut.GetApplicationsPendingDeletionAsync();
+
+        Assert.Equal(expected, actual);
+
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Once);
+        storageMock.Verify(x => x.GetApplicationsPendingDeletionAsync(), Times.Once);
+    }
+
     #endregion
 }
