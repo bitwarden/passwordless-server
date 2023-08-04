@@ -1,5 +1,6 @@
 ﻿using AdminConsole.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole;
 
 namespace AdminConsole.Pages.Settings;
 

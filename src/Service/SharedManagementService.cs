@@ -245,7 +245,7 @@ public class SharedManagementService : ISharedManagementService
 
         var cancellationLink = $"{baseUrl}/apps/delete/cancel/{appId}";
         await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deletedBy, cancellationLink);
-        
+
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
     }
 

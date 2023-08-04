@@ -10,7 +10,7 @@ public class RequestContext : IRequestContext
     {
         _httpContextAccessor = httpContextAccessor;
     }
-    
+
     public string GetBaseUrl()
     {
         if (_httpContextAccessor.HttpContext == null)
