@@ -48,7 +48,7 @@ public class PasswordlessManagementClient
     {
         try
         {
-            var res = await _client.GetAsync("apps/list_pending_deletion");
+            var res = await _client.GetAsync("apps/list-pending-deletion");
             res.EnsureSuccessStatusCode();
             return await res.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? Array.Empty<string>();
         }
