@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Global;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service;
 
@@ -33,18 +33,18 @@ public class SharedManagementService : ISharedManagementService
     private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
-    private readonly IStorageFactory _storageFactory;
+    private readonly IGlobalStorageFactory _globalStorageFactory;
     private readonly IMailService _mailService;
 
     public SharedManagementService(ITenantStorageFactory tenantFactory,
-        IStorageFactory storageFactory,
+        IGlobalStorageFactory globalStorageFactory,
         IMailService mailService,
         IConfiguration config,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger)
     {
         this.tenantFactory = tenantFactory;
-        _storageFactory = storageFactory;
+        _globalStorageFactory = globalStorageFactory;
         _mailService = mailService;
         this.config = config;
         _systemClock = systemClock;
@@ -251,7 +251,7 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
     {
-        var storage = _storageFactory.Create();
+        var storage = _globalStorageFactory.Create();
         var tenants = await storage.GetApplicationsPendingDeletionAsync();
         return tenants;
     }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service.Models;
 

@@ -10,7 +10,7 @@ using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
 using Passwordless.Service.Mail;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Tenant;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 

@@ -1,3 +1,5 @@
+using Passwordless.Service.Storage.Ef.Tenant;
+
 namespace Passwordless.Service.Storage.Ef;
 
 public class AliasPointer : PerTenant

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Global;
 
 namespace Passwordless.Api.IntegrationTests;
 
@@ -47,10 +47,10 @@ public class TestWebApplicationFactory<TProgram>
         return base.CreateHost(builder);
     }
 
-    public DbTenantContext CreateDbContext(IServiceScope scope, string? appId)
+    public DbGlobalContext CreateDbContext(IServiceScope scope, string? appId)
     {
-        var dbContextOptions = scope.ServiceProvider.GetRequiredService<DbContextOptions<SqliteContext>>();
-        var context = new SqliteContext(dbContextOptions, new ManualTenantProvider(appId!));
+        var dbContextOptions = scope.ServiceProvider.GetRequiredService<DbContextOptions<DbGlobalSqliteContext>>();
+        var context = new DbGlobalSqliteContext(dbContextOptions);
         return context;
     }
 }

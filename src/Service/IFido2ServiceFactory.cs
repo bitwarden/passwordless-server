@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Passwordless.Service.Storage;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service;
 

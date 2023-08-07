@@ -1,4 +1,4 @@
-namespace Passwordless.Service.Storage.Ef;
+namespace Passwordless.Service.Storage.Ef.Tenant;
 
 public class ManualTenantProvider : ITenantProvider
 {

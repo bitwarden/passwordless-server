@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Api.IntegrationTests;
 

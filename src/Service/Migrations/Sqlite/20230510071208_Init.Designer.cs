@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Global;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 #nullable disable
 
 namespace Passwordless.Service.Migrations.Sqlite
 {
-    [DbContext(typeof(SqliteContext))]
+    [DbContext(typeof(DbGlobalSqliteContext))]
     [Migration("20230510071208_Init")]
     partial class Init
     {

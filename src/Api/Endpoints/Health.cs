@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Api.Endpoints;
 

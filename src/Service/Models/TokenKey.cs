@@ -1,4 +1,6 @@
-﻿namespace Passwordless.Service.Models;
+﻿using Passwordless.Service.Storage.Ef.Tenant;
+
+namespace Passwordless.Service.Models;
 
 public class TokenKey : PerTenant
 {

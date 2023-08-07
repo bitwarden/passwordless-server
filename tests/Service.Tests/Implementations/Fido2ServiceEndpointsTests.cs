@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service.Tests.Implementations;
 

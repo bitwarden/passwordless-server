@@ -5,15 +5,15 @@ using Moq;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Global;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service.Tests.Implementations;
 
 public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
-    private readonly Mock<IStorageFactory> _storageFactoryMock = new();
+    private readonly Mock<IGlobalStorageFactory> _storageFactoryMock = new();
     private readonly Mock<IMailService> _mailServiceMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
@@ -258,7 +258,7 @@ public class SharedManagementServiceTests
     [Fact]
     public async Task ListApplicationsPendingDeletionAsync_Returns_ExpectedResult()
     {
-        var storageMock = new Mock<IStorage>();
+        var storageMock = new Mock<IGlobalStorage>();
         var expected = new List<string> { "app1", "app2" };
         storageMock.Setup(x => x.GetApplicationsPendingDeletionAsync()).ReturnsAsync(expected);
         _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);

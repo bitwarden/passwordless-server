@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.Global;
+using Passwordless.Service.Storage.Ef.Tenant;
 
 #nullable disable
 
 namespace Passwordless.Service.Migrations.Mssql
 {
-    [DbContext(typeof(MsSqlContext))]
+    [DbContext(typeof(DbGlobalMsSqlContext))]
     partial class MsSqlContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

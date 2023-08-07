@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
-namespace Passwordless.Service.Storage.Ef;
+namespace Passwordless.Service.Storage.Ef.Global;
 
-public class EfStorage : IStorage
+public class EfGlobalGlobalStorage : IGlobalStorage
 {
 
-    private readonly DbTenantContext _db;
+    private readonly DbGlobalContext _db;
     private readonly ISystemClock _systemClock;
 
-    public EfStorage(DbTenantContext db, ISystemClock systemClock)
+    public EfGlobalGlobalStorage(DbGlobalContext db, ISystemClock systemClock)
     {
         _db = db;
         _systemClock = systemClock;
