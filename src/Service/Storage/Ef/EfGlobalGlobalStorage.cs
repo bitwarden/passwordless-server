@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
-namespace Passwordless.Service.Storage.Ef.Global;
+namespace Passwordless.Service.Storage.Ef;
 
 public class EfGlobalGlobalStorage : IGlobalStorage
 {

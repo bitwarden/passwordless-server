@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef.Global;
 
-namespace Passwordless.Service.Storage.Ef.Tenant;
+namespace Passwordless.Service.Storage.Ef;
 
 public abstract class DbTenantContext : DbGlobalContext
 {

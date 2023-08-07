@@ -1,4 +1,4 @@
-namespace Passwordless.Service.Storage.Ef.Global;
+namespace Passwordless.Service.Storage.Ef;
 
 public interface IGlobalStorage
 {

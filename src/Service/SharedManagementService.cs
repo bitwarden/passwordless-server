@@ -7,8 +7,7 @@ using Microsoft.Extensions.Logging;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef.Global;
-using Passwordless.Service.Storage.Ef.Tenant;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
 

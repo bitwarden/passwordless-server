@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Passwordless.Service.Storage.Ef.Tenant;
+namespace Passwordless.Service.Storage.Ef;
 
 public class DbTenantSqliteContext : DbTenantContext
 {

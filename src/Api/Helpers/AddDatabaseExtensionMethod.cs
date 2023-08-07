@@ -2,8 +2,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
-using Passwordless.Service.Storage.Ef.Global;
-using Passwordless.Service.Storage.Ef.Tenant;
+using Passwordless.Service.Storage.Ef;
 
 #nullable enable
 

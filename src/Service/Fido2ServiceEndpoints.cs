@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
-using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service;
 

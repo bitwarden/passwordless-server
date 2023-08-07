@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Passwordless.Service.Storage.Ef.Global;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.Helpers;
 

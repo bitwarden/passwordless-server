@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Passwordless.Service.Storage.Ef.Tenant;
+namespace Passwordless.Service.Storage.Ef;
 
 public interface ITenantStorageFactory
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Passwordless.Service.Storage.Ef.Global;
+namespace Passwordless.Service.Storage.Ef;
 
 public class EfGlobalStorageFactory<TContext> : IGlobalStorageFactory
     where TContext : DbGlobalContext

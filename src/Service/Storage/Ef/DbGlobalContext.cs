@@ -3,7 +3,7 @@ using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Service.Models;
 
-namespace Passwordless.Service.Storage.Ef.Global;
+namespace Passwordless.Service.Storage.Ef;
 
 public abstract class DbGlobalContext : DbContext
 {

@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
-using Passwordless.Service.Storage.Ef.Global;
-using Passwordless.Service.Storage.Ef.Tenant;
 
 #nullable disable
 

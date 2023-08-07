@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef.Tenant;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
 

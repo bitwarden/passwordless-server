@@ -1,4 +1,4 @@
-﻿namespace Passwordless.Service.Storage.Ef.Tenant;
+﻿namespace Passwordless.Service.Storage.Ef;
 
 public abstract class PerTenant
 {

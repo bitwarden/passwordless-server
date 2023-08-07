@@ -2,7 +2,7 @@
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Storage.Ef.Tenant;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Server.Endpoints;
 

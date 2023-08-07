@@ -1,7 +1,6 @@
 using System.Text;
 using Fido2NetLib.Objects;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef.Tenant;
 
 namespace Passwordless.Service.Storage.Ef;
 
