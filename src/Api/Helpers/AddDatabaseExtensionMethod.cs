@@ -23,7 +23,7 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
-            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbTenantSqliteContext>>();
+            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbGlobalSqliteContext>>();
             services.AddDbContext<DbTenantContext, DbTenantSqliteContext>((sp, builder) =>
             {
                 // resolving config from SP to avoid capturing
@@ -38,7 +38,7 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
-            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbTenantMsSqlContext>>();
+            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbGlobalMsSqlContext>>();
             services.AddDbContext<DbTenantContext, DbTenantMsSqlContext>((sp, builder) =>
             {
                 // resolving config from SP to avoid capturing
