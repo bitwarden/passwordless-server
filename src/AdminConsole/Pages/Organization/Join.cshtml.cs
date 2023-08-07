@@ -58,15 +58,6 @@ public class Join : PageModel
 
     public async Task<IActionResult> OnPost(JoinForm form)
     {
-        Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
-        var ok = await _invitationService.ConsumeInvite(invite);
-
-        if (!ok)
-        {
-            ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
-        }
-
-
         if (!form.AcceptsTermsAndPrivacy)
         {
             ModelState.AddModelError("AcceptsTermsAndPrivacy", "You must accept the terms and privacy policy to continue.");
@@ -76,6 +67,14 @@ public class Join : PageModel
         {
             Invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
             return Page();
+        }
+
+        Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
+        var ok = await _invitationService.ConsumeInvite(invite);
+
+        if (!ok)
+        {
+            ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
 
         ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(form.Email);
