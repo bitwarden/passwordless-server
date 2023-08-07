@@ -24,7 +24,7 @@ public interface ISharedManagementService
     Task UnFreezeAccount(string accountName);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
-    Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
+    Task<ApplicationsPendingDeletionResponse> GetApplicationsPendingDeletionAsync();
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -249,13 +249,13 @@ public class SharedManagementService : ISharedManagementService
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
     }
 
-    public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
+    public async Task<ApplicationsPendingDeletionResponse> GetApplicationsPendingDeletionAsync()
     {
         var storage = _storageFactory.Create();
         var tenants = await storage.GetApplicationsPendingDeletionAsync();
-        return tenants;
+        return new ApplicationsPendingDeletionResponse { ApplicationsPendingDeletion = tenants };
     }
-
+    
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
         ITenantStorage storage)
     {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.Services;
 
 namespace AdminConsole.Pages.Settings;
 
@@ -15,7 +16,9 @@ public class SettingsModel : PageModel
 
     public Models.Organization Organization { get; set; }
     public string ApplicationId { get; set; }
-
+    public bool PendingDelete { get; set; }
+    public DateTime? DeleteAt { get; set; }
+    
     public SettingsModel(ILogger<SettingsModel> logger, DataService dataService, ICurrentContext currentContext, PasswordlessManagementClient client)
     {
         _logger = logger;
@@ -28,9 +31,17 @@ public class SettingsModel : PageModel
     {
         Organization = await _dataService.GetOrganization();
         ApplicationId = _currentContext.AppId ?? String.Empty;
+        try
+        {
+            await GetDeletedState();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("failed to get deleted stuff.");
+        }
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostDeleteAsync()
     {
         const string unknown = "unknown";
 
@@ -49,5 +60,14 @@ public class SettingsModel : PageModel
         var result = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
 
         return new JsonResult(result);
+    }
+
+    private async Task GetDeletedState()
+    {
+        var appsPendingDelete = await _client.GetApplicationsPendingDeletion();
+
+        var application = appsPendingDelete.ApplicationPendingDeletions.FirstOrDefault(x => x.Tenant == ApplicationId);
+        PendingDelete = application != null;
+        DeleteAt = application?.DeleteAt;
     }
 }

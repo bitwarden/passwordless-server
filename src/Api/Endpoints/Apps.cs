@@ -50,7 +50,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapGet("/apps/list_pending_deletion", GetApplicationsPendingDeletionAsync)
+        app.MapGet("/apps/list-pending-deletion", GetApplicationsPendingDeletionAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -58,7 +58,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/mark_delete", MarkDeleteApplicationAsync)
+        app.MapPost("/apps/mark-delete", MarkDeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
