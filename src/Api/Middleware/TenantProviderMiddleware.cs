@@ -1,7 +1,7 @@
 using ApiHelpers;
 using Passwordless.Service;
 
-namespace Passwordless.Api;
+namespace Passwordless.Api.Middleware;
 
 public class TenantProviderMiddleware
 {

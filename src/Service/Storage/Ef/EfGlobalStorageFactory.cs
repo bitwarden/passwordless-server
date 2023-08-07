@@ -3,20 +3,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Passwordless.Service.Storage.Ef;
 
-public class EfStorageFactory<TContext> : IStorageFactory
-    where TContext : DbTenantContext
+public class EfGlobalStorageFactory<TContext> : IGlobalStorageFactory
+    where TContext : DbGlobalContext
 {
     private readonly IServiceProvider _services;
 
-    public EfStorageFactory(IServiceProvider services)
+    public EfGlobalStorageFactory(IServiceProvider services)
     {
         _services = services;
     }
 
-    public IStorage Create()
+    /**
+     * If you need more than the tenant scope.
+     */
+    public IGlobalStorage Create()
     {
         var context = ActivatorUtilities.CreateInstance<TContext>(_services);
         var systemClock = _services.GetRequiredService<ISystemClock>();
-        return new EfStorage(context, systemClock);
+        return new EfGlobalGlobalStorage(context, systemClock);
     }
 }

@@ -9,7 +9,7 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Migrations.Sqlite
 {
-    [DbContext(typeof(SqliteContext))]
+    [DbContext(typeof(DbGlobalSqliteContext))]
     partial class SqliteContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

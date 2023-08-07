@@ -1,9 +1,8 @@
 ﻿using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef;
 
-namespace Passwordless.Service.Storage;
+namespace Passwordless.Service.Storage.Ef;
 
 public interface ITenantStorage
 {
