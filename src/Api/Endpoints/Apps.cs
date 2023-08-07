@@ -64,6 +64,9 @@ public static class AppsEndpoints
 
         app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
+
+        app.MapGet("/apps/summary/{appId}", GetApplicationSummary)
+            .RequireCors("default");
     }
 
     public static async Task<IResult> DeleteApplicationAsync(
@@ -99,6 +102,11 @@ public static class AppsEndpoints
         await service.UnFreezeAccount(appId);
         var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
         return Ok(res);
+    }
+
+    public static async Task<IResult> GetApplicationSummary(string appId, ISharedManagementService service)
+    {
+        return Ok(await service.GetApplicationSummary(appId));
     }
 
     public record AvailableResponse(bool Available);

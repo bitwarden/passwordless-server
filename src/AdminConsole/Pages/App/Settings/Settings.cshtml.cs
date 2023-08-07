@@ -57,17 +57,21 @@ public class SettingsModel : PageModel
             });
         }
 
-        var result = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
+        await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
 
-        return new JsonResult(result);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostCancelAsync()
+    {
+        return RedirectToPage();
     }
 
     private async Task GetDeletedState()
     {
-        var appsPendingDelete = await _client.GetApplicationsPendingDeletion();
+        var application = await _client.GetApplicationSummary(ApplicationId);
 
-        var application = appsPendingDelete.ApplicationPendingDeletions.FirstOrDefault(x => x.Tenant == ApplicationId);
-        PendingDelete = application != null;
+        PendingDelete = application.DeleteAt != null;
         DeleteAt = application?.DeleteAt;
     }
 }

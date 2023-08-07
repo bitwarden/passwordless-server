@@ -66,12 +66,9 @@ else
         items: items  
     } ).mount('#planpicker');
     
-    if (!@Model.PendingDelete)
-    {
-        createApp(DeleteApplication, {
-            appId: "@(Model.ApplicationId)"
-        }).mount('#deleteApplication');
-    }
+    createApp(DeleteApplication, {
+        appId: "@(Model.ApplicationId)"
+    }).mount('#deleteApplication');
     
     </script>
 }

@@ -4,5 +4,6 @@ namespace Passwordless.Service.Storage.Ef;
 
 public interface IGlobalStorage
 {
-    Task<ICollection<ApplicationPendingDeletion>> GetApplicationsPendingDeletionAsync();
+    Task<ICollection<string>> GetApplicationsPendingDeletionAsync();
+    Task<ApplicationSummary> GetApplicationSummary(string applicationId);
 }

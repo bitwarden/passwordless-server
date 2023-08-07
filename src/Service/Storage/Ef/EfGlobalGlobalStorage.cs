@@ -16,14 +16,21 @@ public class EfGlobalGlobalStorage : IGlobalStorage
         _systemClock = systemClock;
     }
 
-    public async Task<ICollection<ApplicationPendingDeletion>> GetApplicationsPendingDeletionAsync()
+    public async Task<ICollection<string>> GetApplicationsPendingDeletionAsync()
     {
         // Will replace IgnoreQueryFilters at a later stage. To possibly use different db contexts.
         var tenants = await _db.AccountInfo
             .Where(x => x.DeleteAt <= _systemClock.UtcNow.UtcDateTime)
-            .Select(x => new ApplicationPendingDeletion(x.Tenant, x.DeleteAt.Value))
+            .Select(x => x.Tenant)
             .ToListAsync();
         
         return tenants;
+    }
+
+    public async Task<ApplicationSummary> GetApplicationSummary(string applicationId)
+    {
+        return await _db.AccountInfo
+            .Where(x => x.Tenant == applicationId)
+            .Select(x => new ApplicationSummary(x.Tenant, x.DeleteAt)).FirstOrDefaultAsync();
     }
 }

@@ -47,7 +47,7 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
             using IServiceScope scope = _serviceProvider.CreateScope();
             var client = scope.ServiceProvider.GetRequiredService<PasswordlessManagementClient>();
             var db = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
-            var applicationIds = await client.ListApplicationsPendingDeletionAsync();
+            var applicationIds = await client.GetApplicationsPendingDeletion();
             foreach (var applicationId in applicationIds)
             {
                 await client.DeleteApplicationAsync(applicationId);
