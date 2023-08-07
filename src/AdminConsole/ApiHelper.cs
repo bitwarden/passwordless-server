@@ -29,3 +29,42 @@ public class PasswordlessManagementOptions
     public string ApiUrl { get; set; }
     public string ManagementKey { get; set; }
 }
+
+public class PasswordlessManagementClient
+{
+    private readonly HttpClient _client;
+
+    public PasswordlessManagementClient(HttpClient client)
+    {
+        _client = client;
+    }
+
+    public async Task<NewAppResponse> CreateApplication(NewAppOptions registerOptions)
+    {
+        var res = await _client.PostAsJsonAsync("apps/create", registerOptions);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<NewAppResponse>();
+    }
+
+    public async Task<IEnumerable<string>> ListApplicationsPendingDeletionAsync()
+    {
+        try
+        {
+            var res = await _client.GetAsync("apps/list-pending-deletion");
+            res.EnsureSuccessStatusCode();
+            return await res.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? Array.Empty<string>();
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    public async Task<bool> DeleteApplicationAsync(string application)
+    {
+        var request = new { appId = application };
+        var res = await _client.PostAsJsonAsync("apps/delete", request);
+        var why = await res.Content.ReadAsStringAsync();
+        return res.IsSuccessStatusCode;
+    }
+}

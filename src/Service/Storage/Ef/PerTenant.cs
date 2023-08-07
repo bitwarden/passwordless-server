@@ -1,6 +1,6 @@
-﻿namespace Passwordless.Service;
+﻿namespace Passwordless.Service.Storage.Ef;
 
-public class PerTenant
+public abstract class PerTenant
 {
     public string Tenant { get; set; }
 }

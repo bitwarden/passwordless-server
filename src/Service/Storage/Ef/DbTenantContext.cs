@@ -1,28 +1,10 @@
-using System.Text.Json;
-using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
-public class SqliteContext : DbTenantContext
-{
-    public SqliteContext(DbContextOptions<SqliteContext> options, ITenantProvider tenantProvider)
-        : base(options, tenantProvider)
-    {
-    }
-}
-
-public class MsSqlContext : DbTenantContext
-{
-    public MsSqlContext(DbContextOptions<MsSqlContext> options, ITenantProvider tenantProvider)
-        : base(options, tenantProvider)
-    {
-    }
-}
-
-public class DbTenantContext : DbContext
+public abstract class DbTenantContext : DbGlobalContext
 {
     public string Tenant { get; }
 
@@ -34,50 +16,13 @@ public class DbTenantContext : DbContext
         Tenant = tenantProvider.Tenant;
     }
 
-
-
-    public DbSet<EFStoredCredential> Credentials => Set<EFStoredCredential>();
-    public DbSet<AliasPointer> Aliases => Set<AliasPointer>();
-    public DbSet<TokenKey> TokenKeys => Set<TokenKey>();
-    public DbSet<ApiKeyDesc> ApiKeys => Set<ApiKeyDesc>();
-    public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var jsonOptions = new JsonSerializerOptions();
-
-        modelBuilder.Entity<EFStoredCredential>(b =>
-        {
-            b.HasQueryFilter(c => c.Tenant == Tenant);
-            b.HasKey(x => new { x.Tenant, x.DescriptorId });
-            b.Property(x => x.DescriptorTransports).HasConversion(
-                v => JsonSerializer.Serialize(v, jsonOptions),
-                v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions));
-        });
-
-        modelBuilder.Entity<TokenKey>()
-            .HasQueryFilter(c => c.Tenant == Tenant)
-            .HasKey(c => new { c.Tenant, c.KeyId });
-
-
-        modelBuilder.Entity<AccountMetaInformation>()
-            .HasQueryFilter(c => c.Tenant == Tenant)
-            .Ignore(c => c.AdminEmails)
-            .HasKey(x => x.AcountName);
-
-        modelBuilder.Entity<ApiKeyDesc>(b =>
-        {
-            b.HasQueryFilter(c => c.Tenant == Tenant);
-            b.HasKey(x => new { x.Tenant, x.Id });
-            b.Property(x => x.Scopes)
-                .HasConversion(
-                    v => string.Join(',', v),
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
-        });
-
-        var ap = modelBuilder.Entity<AliasPointer>()
-            .HasQueryFilter(c => c.Tenant == Tenant)
-            .HasKey(x => new { x.Tenant, x.Alias });
+        modelBuilder.Entity<EFStoredCredential>().HasQueryFilter(c => c.Tenant == Tenant);
+        modelBuilder.Entity<TokenKey>().HasQueryFilter(c => c.Tenant == Tenant);
+        modelBuilder.Entity<AccountMetaInformation>().HasQueryFilter(c => c.Tenant == Tenant);
+        modelBuilder.Entity<ApiKeyDesc>().HasQueryFilter(c => c.Tenant == Tenant);
+        modelBuilder.Entity<AliasPointer>().HasQueryFilter(c => c.Tenant == Tenant);
 
         base.OnModelCreating(modelBuilder);
     }

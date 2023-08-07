@@ -10,7 +10,7 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Migrations.Mssql
 {
-    [DbContext(typeof(MsSqlContext))]
+    [DbContext(typeof(DbGlobalMsSqlContext))]
     partial class MsSqlContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

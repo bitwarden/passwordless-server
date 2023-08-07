@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Migrations.Mssql
 {
-    [DbContext(typeof(MsSqlContext))]
+    [DbContext(typeof(DbGlobalMsSqlContext))]
     [Migration("20230510071243_Init")]
     partial class Init
     {

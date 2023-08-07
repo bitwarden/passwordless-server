@@ -4,13 +4,13 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
-public class EfStorage : IStorage
+public class EfGlobalGlobalStorage : IGlobalStorage
 {
 
-    private readonly DbTenantContext _db;
+    private readonly DbGlobalContext _db;
     private readonly ISystemClock _systemClock;
 
-    public EfStorage(DbTenantContext db, ISystemClock systemClock)
+    public EfGlobalGlobalStorage(DbGlobalContext db, ISystemClock systemClock)
     {
         _db = db;
         _systemClock = systemClock;
@@ -19,7 +19,7 @@ public class EfStorage : IStorage
     public async Task<ICollection<ApplicationPendingDeletion>> GetApplicationsPendingDeletionAsync()
     {
         // Will replace IgnoreQueryFilters at a later stage. To possibly use different db contexts.
-        var tenants = await _db.AccountInfo.IgnoreQueryFilters()
+        var tenants = await _db.AccountInfo
             .Where(x => x.DeleteAt <= _systemClock.UtcNow.UtcDateTime)
             .Select(x => new ApplicationPendingDeletion(x.Tenant, x.DeleteAt.Value))
             .ToListAsync();

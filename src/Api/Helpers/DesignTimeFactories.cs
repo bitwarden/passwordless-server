@@ -4,23 +4,23 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.Helpers;
 
-public class SqliteContextFactory : IDesignTimeDbContextFactory<SqliteContext>
+public class SqliteContextFactory : IDesignTimeDbContextFactory<DbGlobalSqliteContext>
 {
-    public SqliteContext CreateDbContext(string[] args)
+    public DbGlobalSqliteContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<SqliteContext>();
+        var options = new DbContextOptionsBuilder<DbGlobalSqliteContext>();
         const string devDefault = "Data Source=Data/passwordless_dev.db";
         options.UseSqlite(args.Length == 1 ? args[0] : devDefault);
-        return new SqliteContext(options.Options, new ManualTenantProvider(null!));
+        return new DbGlobalSqliteContext(options.Options);
     }
 }
 
-public class MsSqlContextFactory : IDesignTimeDbContextFactory<MsSqlContext>
+public class MsSqlContextFactory : IDesignTimeDbContextFactory<DbGlobalMsSqlContext>
 {
-    public MsSqlContext CreateDbContext(string[] args)
+    public DbGlobalMsSqlContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<MsSqlContext>();
+        var options = new DbContextOptionsBuilder<DbGlobalMsSqlContext>();
         options.UseSqlServer(args.Length == 1 ? args[0] : null);
-        return new MsSqlContext(options.Options, new ManualTenantProvider(null!));
+        return new DbGlobalMsSqlContext(options.Options);
     }
 }
