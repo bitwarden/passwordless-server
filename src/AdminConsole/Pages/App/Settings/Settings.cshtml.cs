@@ -76,9 +76,14 @@ public class SettingsModel : PageModel
 
     private async Task GetDeletedState()
     {
-        var application = await _client.GetApplicationSummary(ApplicationId);
+        var application = await _client.GetApplicationInformation(ApplicationId);
 
         PendingDelete = application.DeleteAt != null;
-        DeleteAt = application?.DeleteAt;
+        DeleteAt = GetDeleteAt(application);
     }
+
+    private static DateTime? GetDeleteAt(ApplicationInformationResponse? application) =>
+        application is { DeleteAt: not null }
+            ? application.DeleteAt.Value.ToLocalTime()
+            : null;
 }

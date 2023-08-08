@@ -41,11 +41,11 @@ public class PasswordlessManagementClient
         return res.IsSuccessStatusCode;
     }
 
-    public async Task<ApplicationSummaryResponse> GetApplicationSummary(string applicationId)
+    public async Task<ApplicationInformationResponse> GetApplicationInformation(string applicationId)
     {
-        var response = await _client.GetAsync($"apps/summary/{applicationId}");
+        var response = await _client.GetAsync($"apps/information/{applicationId}");
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ApplicationSummaryResponse>();
+        return await response.Content.ReadFromJsonAsync<ApplicationInformationResponse>();
     }
 
     public async Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId)

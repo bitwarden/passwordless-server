@@ -62,10 +62,12 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        // This will be used by an email link to cancel
         app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
 
-        app.MapGet("/apps/summary/{appId}", GetApplicationSummary)
+        app.MapGet("/apps/information/{appId}", GetApplicationInformation)
+            .RequireManagementKey()
             .RequireCors("default");
     }
 
@@ -104,9 +106,9 @@ public static class AppsEndpoints
         return Ok(res);
     }
 
-    public static async Task<IResult> GetApplicationSummary(string appId, ISharedManagementService service)
+    public static async Task<IResult> GetApplicationInformation(string appId, ISharedManagementService service)
     {
-        return Ok(await service.GetApplicationSummary(appId));
+        return Ok(await service.GetApplicationInformation(appId));
     }
 
     public record AvailableResponse(bool Available);

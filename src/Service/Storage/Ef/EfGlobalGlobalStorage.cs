@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
@@ -24,12 +23,5 @@ public class EfGlobalGlobalStorage : IGlobalStorage
             .Select(x => x.Tenant)
             .ToListAsync();
         return tenants;
-    }
-
-    public async Task<ApplicationSummary> GetApplicationSummary(string applicationId)
-    {
-        return await _db.AccountInfo
-            .Where(x => x.Tenant == applicationId)
-            .Select(x => new ApplicationSummary(x.Tenant, x.DeleteAt)).FirstOrDefaultAsync();
     }
 }

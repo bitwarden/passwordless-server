@@ -24,7 +24,7 @@ public interface ISharedManagementService
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
-    Task<ApplicationSummary> GetApplicationSummary(string applicationId);
+    Task<AccountMetaInformation> GetApplicationInformation(string applicationId);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -266,13 +266,12 @@ public class SharedManagementService : ISharedManagementService
         return secretKey;
     }
 
-    public async Task<ApplicationSummary> GetApplicationSummary(string applicationId)
+    public async Task<AccountMetaInformation> GetApplicationInformation(string applicationId)
     {
-        return await _globalStorageFactory
-            .Create()
-            .GetApplicationSummary(applicationId);
+        return await tenantFactory.Create(applicationId)
+            .GetAccountInformation();
     }
-    
+
     private static async Task<string> SetupApiKey(string accountName, ITenantStorage storage)
     {
         // create tenant and store apikey
