@@ -26,7 +26,7 @@ public class PasswordlessManagementClient
         return await response.Content.ReadFromJsonAsync<MarkDeleteApplicationResponse>();
     }
 
-    public async Task<ICollection<string>> GetApplicationsPendingDeletion()
+    public async Task<ICollection<string>> ListApplicationsPendingDeletionAsync()
     {
         var response = await _client.GetAsync("apps/list-pending-deletion");
         response.EnsureSuccessStatusCode();
