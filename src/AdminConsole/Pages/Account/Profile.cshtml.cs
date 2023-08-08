@@ -21,7 +21,7 @@ public class Profile : PageModel
 
     public async Task<IActionResult> OnPostRemoveCredential(string credentialId)
     {
-        await _client.DeleteCredential(credentialId);
+        await _client.DeleteCredentialAsync(credentialId);
         return RedirectToPage();
     }
 
@@ -30,7 +30,7 @@ public class Profile : PageModel
         var userId = _userManager.GetUserId(HttpContext.User);
         if (userId != null)
         {
-            Credentials = await _client.ListCredentials(userId);
+            Credentials = await _client.ListCredentialsAsync(userId);
         }
     }
 }

@@ -1,3 +1,4 @@
+using AdminConsole;
 using AdminConsole.Db;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
@@ -46,7 +47,7 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
             using IServiceScope scope = _serviceProvider.CreateScope();
             var client = scope.ServiceProvider.GetRequiredService<PasswordlessManagementClient>();
             var db = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
-            var applicationIds = await client.GetApplicationsPendingDeletion();
+            var applicationIds = await client.ListApplicationsPendingDeletionAsync();
             foreach (var applicationId in applicationIds)
             {
                 await client.DeleteApplicationAsync(applicationId);

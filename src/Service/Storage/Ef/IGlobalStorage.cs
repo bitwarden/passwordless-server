@@ -1,6 +1,6 @@
+namespace Passwordless.Service.Storage.Ef;
 using Passwordless.Service.Models;
 
-namespace Passwordless.Service.Storage.Ef;
 
 public interface IGlobalStorage
 {

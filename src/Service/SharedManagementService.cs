@@ -23,7 +23,7 @@ public interface ISharedManagementService
     Task UnFreezeAccount(string accountName);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
-    Task<ICollection<string>> GetApplicationsPendingDeletionAsync();
+    Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
     Task<ApplicationSummary> GetApplicationSummary(string applicationId);
 }
 
@@ -249,18 +249,11 @@ public class SharedManagementService : ISharedManagementService
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
     }
 
-    public async Task<ICollection<string>> GetApplicationsPendingDeletionAsync()
+    public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
     {
         var storage = _globalStorageFactory.Create();
         var tenants = await storage.GetApplicationsPendingDeletionAsync();
         return tenants;
-    }
-
-    public async Task<ApplicationSummary> GetApplicationSummary(string applicationId)
-    {
-        return await _globalStorageFactory
-            .Create()
-            .GetApplicationSummary(applicationId);
     }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
@@ -273,6 +266,13 @@ public class SharedManagementService : ISharedManagementService
         return secretKey;
     }
 
+    public async Task<ApplicationSummary> GetApplicationSummary(string applicationId)
+    {
+        return await _globalStorageFactory
+            .Create()
+            .GetApplicationSummary(applicationId);
+    }
+    
     private static async Task<string> SetupApiKey(string accountName, ITenantStorage storage)
     {
         // create tenant and store apikey

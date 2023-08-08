@@ -49,7 +49,7 @@ internal class UsageService
             ApiUrl = app.ApiUrl
         }, _httpClientFactory);
 
-        var countResponse = await api.GetUsersCount();
+        var countResponse = await api.GetUsersCountAsync();
 
         return countResponse.Count;
     }

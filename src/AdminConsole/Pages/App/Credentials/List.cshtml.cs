@@ -20,12 +20,12 @@ public class ListModel : PageModel
 
     public async Task OnGet()
     {
-        Users = await _api.ListUsers() ?? new List<PasswordlessUserSummary>();
+        Users = await _api.ListUsersAsync() ?? new List<PasswordlessUserSummary>();
     }
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await _api.VerifyToken(token);
+        var res = await _api.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
 }
