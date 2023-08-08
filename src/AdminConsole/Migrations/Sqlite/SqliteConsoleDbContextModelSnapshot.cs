@@ -164,6 +164,9 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
                     b.Property<int>("CurrentUserCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("DeleteAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");

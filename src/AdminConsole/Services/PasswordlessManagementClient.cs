@@ -41,13 +41,6 @@ public class PasswordlessManagementClient
         return res.IsSuccessStatusCode;
     }
 
-    public async Task<ApplicationInformationResponse> GetApplicationInformation(string applicationId)
-    {
-        var response = await _client.GetAsync($"apps/information/{applicationId}");
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ApplicationInformationResponse>();
-    }
-
     public async Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId)
     {
         var response = await _client.GetAsync($"apps/delete/cancel/{applicationId}");

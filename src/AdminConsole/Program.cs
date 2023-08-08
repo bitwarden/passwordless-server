@@ -152,6 +152,7 @@ void RunTheApp()
     services.AddScoped<UsageService>();
     services.AddScoped<DataService>();
     services.AddScoped<InvitationService>();
+    services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
 
     // Work around to get LinkGeneration to work with /{app}/-links.
