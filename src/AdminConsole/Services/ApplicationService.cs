@@ -14,11 +14,11 @@ public class ApplicationService
         _client = client;
         _db = db;
     }
-    
+
     public async Task MarkApplicationForDeletion(string applicationId, string userName)
     {
         var response = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
-        
+
         var application = await _db.Applications
             .Where(x => x.Id == applicationId)
             .FirstOrDefaultAsync();
@@ -32,7 +32,7 @@ public class ApplicationService
     public async Task CancelDeletionForApplication(string applicationId)
     {
         _ = await _client.CancelApplicationDeletion(applicationId);
-        
+
         var application = await _db.Applications
             .Where(x => x.Id == applicationId)
             .FirstOrDefaultAsync();

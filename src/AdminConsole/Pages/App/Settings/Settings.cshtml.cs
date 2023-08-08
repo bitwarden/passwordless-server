@@ -61,7 +61,7 @@ public class SettingsModel : PageModel
         try
         {
             await _appService.CancelDeletionForApplication(applicationId);
-            
+
             return RedirectToPage();
         }
         catch (Exception)
