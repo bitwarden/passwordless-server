@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
-using Passwordless.Net;
 
 namespace AdminConsole;
 

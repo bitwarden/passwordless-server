@@ -262,7 +262,7 @@ public class SharedManagementService : ISharedManagementService
             .Create()
             .GetApplicationSummary(applicationId);
     }
-    
+
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
         ITenantStorage storage)
     {

@@ -1,4 +1,3 @@
-using AdminConsole;
 using AdminConsole.Db;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;

@@ -23,7 +23,7 @@ public class EfGlobalGlobalStorage : IGlobalStorage
             .Where(x => x.DeleteAt <= _systemClock.UtcNow.UtcDateTime)
             .Select(x => x.Tenant)
             .ToListAsync();
-        
+
         return tenants;
     }
 
