@@ -1,4 +1,4 @@
-namespace AdminConsole.Services.Mail;
+namespace Passwordless.Common.Services.Mail;
 
 /// <summary>
 /// Used to send a mail message

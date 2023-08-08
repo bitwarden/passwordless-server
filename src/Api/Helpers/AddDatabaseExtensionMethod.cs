@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
-using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
 
 #nullable enable
@@ -19,21 +18,33 @@ public static class AddDatabaseExtensionMethod
 
         if (!string.IsNullOrEmpty(sqlite))
         {
-            services.AddDbContext<DbTenantContext, SqliteContext>((sp, builder) =>
+            services.AddDbContext<DbGlobalContext, DbGlobalSqliteContext>((sp, builder) =>
             {
                 // resolving config from SP to avoid capturing
                 builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
-            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<SqliteContext>>();
+            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbGlobalSqliteContext>>();
+            services.AddDbContext<DbTenantContext, DbTenantSqliteContext>((sp, builder) =>
+            {
+                // resolving config from SP to avoid capturing
+                builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
+            });
+            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantSqliteContext>>();
         }
         else if (!string.IsNullOrEmpty(mssql))
         {
-            services.AddDbContext<DbTenantContext, MsSqlContext>((sp, builder) =>
+            services.AddDbContext<DbGlobalContext, DbGlobalMsSqlContext>((sp, builder) =>
             {
                 // resolving config from SP to avoid capturing
                 builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
-            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<MsSqlContext>>();
+            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbGlobalMsSqlContext>>();
+            services.AddDbContext<DbTenantContext, DbTenantMsSqlContext>((sp, builder) =>
+            {
+                // resolving config from SP to avoid capturing
+                builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
+            });
+            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantMsSqlContext>>();
         }
         else
         {
@@ -43,17 +54,7 @@ public static class AddDatabaseExtensionMethod
         services.AddScoped<ITenantProvider>(sp =>
         {
             var context = sp.GetService<IHttpContextAccessor>()?.HttpContext;
-            var accountName = context?.User
-                .FindFirstValue(CustomClaimTypes.AccountName);
-
-            var environment = sp.GetRequiredService<IWebHostEnvironment>();
-
-            // This exception allows running migrations either when developing or when self hosting
-            // as well bootstrapping a test account.
-            if (context == null || (environment.IsDevelopment() && (context?.Request.Path == "/" || context?.Request.Path == "/ApplyDatabaseMigrations")))
-            {
-                return new ManualTenantProvider("test");
-            }
+            var accountName = context?.User.FindFirstValue(CustomClaimTypes.AccountName);
 
             return !string.IsNullOrEmpty(accountName)
                 ? new ManualTenantProvider(accountName)
@@ -61,6 +62,7 @@ public static class AddDatabaseExtensionMethod
         });
 
         // Add storage
+        services.AddScoped<IGlobalStorage, EfGlobalGlobalStorage>();
         services.AddScoped<ITenantStorage, EfTenantStorage>();
 
         return services;

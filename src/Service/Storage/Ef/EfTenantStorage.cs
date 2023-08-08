@@ -131,6 +131,12 @@ public class EfTenantStorage : ITenantStorage
         return res;
     }
 
+    public async Task<bool> HasUsersAsync()
+    {
+        var res = await db.Credentials.AnyAsync();
+        return res;
+    }
+
     public async Task DeleteUser(string userId)
     {
         await db.Credentials.Where(c => c.UserId == userId).ExecuteDeleteAsync();

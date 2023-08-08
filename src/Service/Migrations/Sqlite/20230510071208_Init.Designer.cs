@@ -10,7 +10,7 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Migrations.Sqlite
 {
-    [DbContext(typeof(SqliteContext))]
+    [DbContext(typeof(DbGlobalSqliteContext))]
     [Migration("20230510071208_Init")]
     partial class Init
     {

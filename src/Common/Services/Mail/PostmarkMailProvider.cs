@@ -1,6 +1,6 @@
 using PostmarkDotNet;
 
-namespace AdminConsole.Services.Mail;
+namespace Passwordless.Common.Services.Mail;
 
 public class PostmarkMailProvider : IMailProvider
 {
@@ -20,12 +20,13 @@ public class PostmarkMailProvider : IMailProvider
     {
         PostmarkMessage pm = new PostmarkMessage
         {
-            To = message.To,
+            To = string.Join(',', message.To),
             From = _fromEmail ?? message.From,
             Subject = message.Subject,
             TextBody = message.TextBody,
             HtmlBody = message.HtmlBody,
-            Tag = message.Tag
+            Tag = message.Tag,
+            Bcc = message.Bcc.Any() ? string.Join(',', message.Bcc) : null
         };
 
         IEnumerable<PostmarkResponse>? res = await _client.SendMessagesAsync(pm);

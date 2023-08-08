@@ -1,14 +1,13 @@
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Passwordless.Service.Helpers;
+using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 
 namespace Passwordless.Service;
 
@@ -22,22 +21,33 @@ public interface ISharedManagementService
     Task<string> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
     Task UnFreezeAccount(string accountName);
-    Task<AppDeletionResult> DeleteAccount(string appId, string cancelLink);
-    Task SendAbortEmail(EmailAboutAccountDeletion input);
+    Task<AppDeletionResult> DeleteApplicationAsync(string appId);
+    Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
+    Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
 }
 
 public class SharedManagementService : ISharedManagementService
 {
     private readonly ILogger _logger;
     private readonly IConfiguration config;
+    private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
+    private readonly IGlobalStorageFactory _globalStorageFactory;
+    private readonly IMailService _mailService;
 
-    public SharedManagementService(ILogger<SharedManagementService> logger, IConfiguration config,
-        ITenantStorageFactory tenantFactory)
+    public SharedManagementService(ITenantStorageFactory tenantFactory,
+        IGlobalStorageFactory globalStorageFactory,
+        IMailService mailService,
+        IConfiguration config,
+        ISystemClock systemClock,
+        ILogger<SharedManagementService> logger)
     {
-        _logger = logger;
-        this.config = config;
         this.tenantFactory = tenantFactory;
+        _globalStorageFactory = globalStorageFactory;
+        _mailService = mailService;
+        this.config = config;
+        _systemClock = systemClock;
+        _logger = logger;
     }
 
 
@@ -177,130 +187,73 @@ public class SharedManagementService : ISharedManagementService
     public async Task UnFreezeAccount(string accountName)
     {
         var storage = tenantFactory.Create(accountName);
-        // lock API keys?
-        // send email to admin
-        // queue deletion
         await storage.LockAllApiKeys(false);
         await storage.SetAppDeletionDate(null);
     }
 
-
-    public async Task<AppDeletionResult> DeleteAccount(string appId, string cancelLink)
+    public async Task<AppDeletionResult> DeleteApplicationAsync(string appId)
     {
         var storage = tenantFactory.Create(appId);
-        var app = await storage.GetAccountInformation();
-        // check if we have credentials and the app was newly created
-        // if no credentials, remove.
-        var userCount = await storage.GetUsersCount();
-        if (userCount == 0 && app.CreatedAt > DateTime.UtcNow.AddDays(-3))
+        var accountInformation = await storage.GetAccountInformation();
+        if (accountInformation == null)
         {
-            await storage.DeleteAccount();
-            return new AppDeletionResult("The App was deleted because it had no users.", true, DateTime.UtcNow);
+            throw new ApiException("app_not_found", "App was not found.", 400);
         }
-
-        // check if all api keys are locked more than 14 days ago
-        var now = DateTime.UtcNow;
-        List<ApiKeyDesc> keys = await storage.GetAllApiKeys();
-        var haveBeenLocked = keys.All(x => x.IsLocked && x.LastLockedAt < now.AddDays(-14));
-        if (!haveBeenLocked)
+        if (!accountInformation.DeleteAt.HasValue || accountInformation.DeleteAt > _systemClock.UtcNow)
         {
-            await FreezeAccount(appId);
-            await storage.SetAppDeletionDate(now.AddDays(30));
-            var sendConfirmationEmailInput = new EmailAboutAccountDeletion
-            {
-                CancelLink = cancelLink,
-                Emails = app.AdminEmails,
-                AccountName = app.AcountName,
-                Message =
-                    $"Your Passwordless.dev app '{app.AcountName}' has been frozen because the account/delete endpoint was called. Your data will be deleted after 30 days. To stop this, please visit the URL: " +
-                    cancelLink
-            };
-
-            // Send warning email with url to abort
-            await SendAbortEmail(sendConfirmationEmailInput);
-            return new AppDeletionResult(
-                $"All API keys have now been frozen. It will be deleted in 30 days. Please visit this link to cancel: {cancelLink}",
-                false, null);
+            throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
-
-        // Check MarkedForDeletionAt is set, otherwise set it to 14 days in the future
-
-        if (app.DeleteAt == null)
-        {
-            var deletionAt = now.AddDays(14);
-
-            var sendConfirmationEmailInput = new EmailAboutAccountDeletion
-            {
-                CancelLink = cancelLink,
-                Emails = app.AdminEmails,
-                AccountName = app.AcountName,
-                Message =
-                    $"Your Passwordless.dev app '{app.AcountName}' has now been frozen for 14 days and will be permanently deleted at: {deletionAt}. To stop this, please visit the URL: " +
-                    cancelLink
-            };
-
-            // Send warning email with url to abort
-            await SendAbortEmail(sendConfirmationEmailInput);
-            return new AppDeletionResult("The App was marked for deletion. It will be deleted in 14 days.", false,
-                deletionAt);
-        }
-        else if (app.DeleteAt < now)
-        {
-            await storage.DeleteAccount();
-            var sendConfirmationEmailInput = new EmailAboutAccountDeletion
-            {
-                CancelLink = cancelLink,
-                Emails = app.AdminEmails,
-                AccountName = app.AcountName,
-                Message = $"Your Passwordless.dev app '{app.AcountName}' has now been permanently deleted"
-            };
-
-            // Send warning email with url to abort
-            await SendAbortEmail(sendConfirmationEmailInput);
-            return new AppDeletionResult("The app was deleted because it had been marked for deletion.", true,
-                app.DeleteAt);
-        }
-
-        return new AppDeletionResult("The app is marked for deletion. It will be deleted in 14 days.", false,
-            app.DeleteAt);
+        await storage.DeleteAccount();
+        await _mailService.SendApplicationDeletedAsync(accountInformation, "system");
+        return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
+            _systemClock.UtcNow.UtcDateTime);
     }
 
-    public async Task SendAbortEmail(EmailAboutAccountDeletion input)
+    public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
     {
-        var x = input.Emails.ToList();
-
-        var emails = x.Select(x => new EmailAddress(x)).ToList();
-
-        var message = new SendGridMessage();
-        message.AddTos(emails);
-        message.AddBcc("account-deletion@passwordless.dev");
-
-        message.SetSubject(input.AccountName + " Passwordless account deletion and data loss process");
-        message.PlainTextContent = input.Message;
-
-        message.SetFrom(new EmailAddress("noreply@passwordless.dev", "Passwordless Support"));
-        message.SetReplyTo(new EmailAddress("support@passwordless.dev", "Passwordless Support"));
-        message.SetClickTracking(false, false);
-
-        var client = new SendGridClient(config["SENDGRID_API_KEY"]);
-
-        try
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
+        if (accountInformation == null)
         {
-            var res = await client.SendEmailAsync(message);
-            if (res.StatusCode != System.Net.HttpStatusCode.Accepted)
-                throw new Exception("Sendgrid failure. Status:" + res.StatusCode);
+            throw new ApiException("app_not_found", "App was not found.", 400);
         }
-        catch (Exception ex)
+        if (accountInformation.DeleteAt.HasValue)
         {
-            _logger.LogError(ex, "Failed to send DeletionEmail to {Emails} for {Account} with CancelLink {CancelLink}",
-                emails, input.AccountName, input.CancelLink);
-            throw;
+            throw new ApiException("app_pending_deletion", "App is already pending to be deleted.", 400);
+        }
+        bool canDeleteImmediately = accountInformation.CreatedAt > _systemClock.UtcNow.AddDays(-3);
+
+        if (!canDeleteImmediately)
+        {
+            canDeleteImmediately = !(await storage.HasUsersAsync());
         }
 
-        _logger.LogWarning("Email sent to {Emails} for {Account} with CancelLink {CancelLink}", emails,
-            input.AccountName, input.CancelLink);
+        if (canDeleteImmediately)
+        {
+            await storage.DeleteAccount();
+            await _mailService.SendApplicationDeletedAsync(accountInformation, deletedBy);
+            return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
+                _systemClock.UtcNow.UtcDateTime);
+        }
+
+        // Lock/Freeze all API keys that have been issued.
+        await storage.LockAllApiKeys(true);
+
+        var deleteAt = _systemClock.UtcNow.AddMonths(1).UtcDateTime;
+        await storage.SetAppDeletionDate(deleteAt);
+
+        var cancellationLink = $"{baseUrl}/apps/delete/cancel/{appId}";
+        await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deletedBy, cancellationLink);
+
+        return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
     }
 
+    public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
+    {
+        var storage = _globalStorageFactory.Create();
+        var tenants = await storage.GetApplicationsPendingDeletionAsync();
+        return tenants;
+    }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
         ITenantStorage storage)
