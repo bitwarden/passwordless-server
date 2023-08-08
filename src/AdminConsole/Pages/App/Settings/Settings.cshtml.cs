@@ -9,6 +9,7 @@ namespace AdminConsole.Pages.Settings;
 
 public class SettingsModel : PageModel
 {
+    private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
     private readonly DataService _dataService;
     private readonly ICurrentContext _currentContext;
@@ -18,7 +19,7 @@ public class SettingsModel : PageModel
     public string ApplicationId { get; set; }
     public bool PendingDelete { get; set; }
     public DateTime? DeleteAt { get; set; }
-    
+
     public SettingsModel(ILogger<SettingsModel> logger, DataService dataService, ICurrentContext currentContext, PasswordlessManagementClient client)
     {
         _logger = logger;
@@ -43,18 +44,13 @@ public class SettingsModel : PageModel
 
     public async Task<IActionResult> OnPostDeleteAsync()
     {
-        const string unknown = "unknown";
+        var userName = User.Identity?.Name ?? Unknown;
+        var applicationId = _currentContext.AppId ?? Unknown;
 
-        var userName = User.Identity?.Name ?? unknown;
-        var applicationId = _currentContext.AppId ?? unknown;
-
-        if (userName == unknown || applicationId == unknown)
+        if (userName == Unknown || applicationId == Unknown)
         {
             _logger.LogError("Failed to delete application with name: {appName} and by user: {username}.", applicationId, userName);
-            return StatusCode(StatusCodes.Status500InternalServerError, new
-            {
-                Message = "Something unexpected happened. Please try again later."
-            });
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected happened. Please try again later." });
         }
 
         await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
@@ -64,7 +60,18 @@ public class SettingsModel : PageModel
 
     public async Task<IActionResult> OnPostCancelAsync()
     {
-        return RedirectToPage();
+        var applicationId = _currentContext.AppId ?? Unknown;
+
+        try
+        {
+            _ = await _client.CancelApplicationDeletion(applicationId);
+            return RedirectToPage();
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Failed to cancel application deletion for application: {appId}", applicationId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
     }
 
     private async Task GetDeletedState()

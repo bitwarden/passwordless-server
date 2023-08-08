@@ -32,7 +32,7 @@ public class PasswordlessManagementClient
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ICollection<string>>();
     }
-    
+
     public async Task<bool> DeleteApplicationAsync(string application)
     {
         var request = new { appId = application };
@@ -46,5 +46,12 @@ public class PasswordlessManagementClient
         var response = await _client.GetAsync($"apps/summary/{applicationId}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ApplicationSummaryResponse>();
+    }
+
+    public async Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId)
+    {
+        var response = await _client.GetAsync($"apps/delete/cancel/{applicationId}");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CancelApplicationDeletionResponse>();
     }
 }
