@@ -82,11 +82,12 @@
             setup() {
 
                 async function signIn(token) {
-                    var res = await fetch("/passwordless/verify-signin", {
+                    var res = await fetch("/passwordless-login", {
                         method: "POST",
-                        body: new URLSearchParams({ token }),
+                        body: JSON.stringify({ token }),
                         headers: {
                             RequestVerificationToken: "@requestToken",
+                            "Content-Type": "application/json"
                         }
                     });
                     
