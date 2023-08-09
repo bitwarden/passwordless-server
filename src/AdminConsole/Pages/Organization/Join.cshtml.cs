@@ -110,7 +110,7 @@ public class Join : PageModel
 
         [Required, EmailAddress, MaxLength(50)]
         public string Email { get; set; }
-        
+
         [Required]
         public bool AcceptsTermsAndPrivacy { get; set; }
 
