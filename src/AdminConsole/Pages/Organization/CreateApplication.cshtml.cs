@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using AdminConsole.Billing;
 using AdminConsole.Db;
@@ -5,12 +6,10 @@ using AdminConsole.Helpers;
 using AdminConsole.Identity;
 using AdminConsole.Models;
 using AdminConsole.Services;
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages.Organization;
@@ -22,7 +21,6 @@ public class CreateApplicationModel : PageModel
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
     private readonly DataService _dataService;
     private readonly PasswordlessManagementClient _managementClient;
-    private readonly IValidator<CreateApplicationForm> _validator;
     private readonly StripeOptions _stripeOptions;
 
     public CreateApplicationModel(ConsoleDbContext db,
@@ -30,12 +28,10 @@ public class CreateApplicationModel : PageModel
         SignInManager<ConsoleAdmin> signInManager,
         DataService dataService,
         IOptions<StripeOptions> stripeOptions,
-        PasswordlessManagementClient managementClient,
-        IValidator<CreateApplicationForm> validator)
+        PasswordlessManagementClient managementClient)
     {
         _dataService = dataService;
         _managementClient = managementClient;
-        _validator = validator;
         this.db = db;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
@@ -53,9 +49,6 @@ public class CreateApplicationModel : PageModel
 
     public async Task<IActionResult> OnPost(CreateApplicationForm form)
     {
-        var validationResult = await _validator.ValidateAsync(form);
-        validationResult.AddToModelState(this.ModelState, nameof(Form));
-
         if (!ModelState.IsValid)
         {
             return Page();
@@ -133,18 +126,11 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
+        [Required, MaxLength(60)]
         public string Name { get; set; }
+        [Required, MaxLength(62)]
         public string Id { get; set; }
+        [Required, MaxLength(120)]
         public string Description { get; set; }
-    }
-
-    public class CreateApplicationFormValidator : AbstractValidator<CreateApplicationForm>
-    {
-        public CreateApplicationFormValidator()
-        {
-            RuleFor(x => x.Name).NotNull().NotEmpty().MaximumLength(60);
-            RuleFor(x => x.Id).NotNull().NotEmpty().MaximumLength(62);
-            RuleFor(x => x.Name).NotNull().NotEmpty().MaximumLength(120);
-        }
     }
 }

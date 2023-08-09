@@ -1,5 +1,4 @@
 ﻿using ApiHelpers;
-using FluentValidation;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Models;
@@ -32,22 +31,8 @@ public static class RegisterEndpoints
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory, IValidator<RegistrationCompleteDTO> validator) =>
+        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
-            var validation = await validator.ValidateAsync(payload);
-
-            if (!validation.IsValid)
-            {
-                return ValidationProblem(
-                    validation.Errors
-                        .GroupBy(x => x.PropertyName)
-                        .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray()),
-                    null,
-                    null,
-                    StatusCodes.Status400BadRequest,
-                    "One or more validation errors occured");
-            }
-
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
             var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
@@ -55,6 +40,7 @@ public static class RegisterEndpoints
             // Avoid serializing the certificate
             return Ok(result);
         })
+            .WithParameterValidation()
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));

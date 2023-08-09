@@ -83,8 +83,6 @@ services.AddScoped<IRequestContext, RequestContext>();
 builder.AddMail();
 builder.Services.AddSingleton<IMailService, DefaultMailService>();
 
-services.AddValidators();
-
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));

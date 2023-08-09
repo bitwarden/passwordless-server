@@ -1,11 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using AdminConsole.Helpers;
 using AdminConsole.Identity;
 using AdminConsole.Services;
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages.Organization;
@@ -17,17 +16,15 @@ public class Admins : PageModel
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly SignInManager<ConsoleAdmin> _signinManager;
     private readonly IPasswordlessClient _passwordlessClient;
-    private readonly IValidator<InviteForm> _validator;
 
     public Admins(DataService dataService,
-        InvitationService invitationService, UserManager<ConsoleAdmin> userManager, SignInManager<ConsoleAdmin> signinManager, IPasswordlessClient passwordlessClient, IValidator<InviteForm> validator)
+        InvitationService invitationService, UserManager<ConsoleAdmin> userManager, SignInManager<ConsoleAdmin> signinManager, IPasswordlessClient passwordlessClient)
     {
         _dataService = dataService;
         _invitationService = invitationService;
         _userManager = userManager;
         _signinManager = signinManager;
         _passwordlessClient = passwordlessClient;
-        _validator = validator;
     }
 
     public List<ConsoleAdmin> ConsoleAdmins { get; set; }
@@ -86,9 +83,6 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        var validationResult = await _validator.ValidateAsync(form);
-        validationResult.AddToModelState(ModelState, nameof(Form));
-
         if (!ModelState.IsValid)
         {
             // todo: Is there a pattern where we don't need to repeat this?
@@ -116,13 +110,6 @@ public class Admins : PageModel
 
 public class InviteForm
 {
+    [Required, EmailAddress, MaxLength(50)]
     public string Email { get; set; }
-}
-
-public class InviteFormValidator : AbstractValidator<InviteForm>
-{
-    public InviteFormValidator()
-    {
-        RuleFor(x => x.Email).NotNull().NotEmpty().EmailAddress().MaximumLength(50);
-    }
 }

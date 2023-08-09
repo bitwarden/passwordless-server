@@ -1,11 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using AdminConsole.Identity;
 using AdminConsole.Services;
 using AdminConsole.Services.Mail;
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Helpers;
 
 namespace AdminConsole.Pages.Organization;
 
@@ -14,18 +13,16 @@ public class Join : PageModel
     private readonly InvitationService _invitationService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IMailService _mailService;
-    private readonly IValidator<JoinForm> _validator;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
     public Join(InvitationService invitationService,
         UserManager<ConsoleAdmin> userManager, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
-        IMailService mailService, IValidator<JoinForm> validator)
+        IMailService mailService)
     {
         _invitationService = invitationService;
         _userManager = userManager;
         _magicLinkSignInManager = magicLinkSignInManager;
         _mailService = mailService;
-        _validator = validator;
     }
 
     public Invite Invite { get; set; }
@@ -111,21 +108,13 @@ public class Join : PageModel
     {
         public string Code { get; set; }
 
+        [Required, EmailAddress, MaxLength(50)]
         public string Email { get; set; }
-
+        
+        [Required]
         public bool AcceptsTermsAndPrivacy { get; set; }
 
+        [Required, MaxLength(50)]
         public string Name { get; set; }
-    }
-
-    public class JoinFormValidator : AbstractValidator<JoinForm>
-    {
-        public JoinFormValidator()
-        {
-            RuleFor(x => x.Email).NotNull().NotEmpty().EmailAddress().MaximumLength(50);
-            RuleFor(x => x.Name).NotNull().NotEmpty().MaximumLength(50);
-            RuleFor(x => x.AcceptsTermsAndPrivacy).Must(x => x)
-                .WithMessage("You must accept the terms and privacy policy to continue.");
-        }
     }
 }
