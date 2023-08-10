@@ -19,13 +19,19 @@ public class ApplicationService
     {
         var response = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
 
-        var application = await _db.Applications
-            .Where(x => x.Id == applicationId)
-            .FirstOrDefaultAsync();
+        var application = await _db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
 
         if (application == null) return;
 
-        application.DeleteAt = response.DeleteAt;
+        if (response.IsDeleted)
+        {
+            _db.Applications.Entry(application).State = EntityState.Deleted;
+        }
+        else
+        {
+            application.DeleteAt = response.DeleteAt;
+        }
+
         await _db.SaveChangesAsync();
     }
 

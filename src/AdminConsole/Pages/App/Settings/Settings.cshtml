@@ -22,7 +22,7 @@
 {
     <form method="post" asp-page-handler="Cancel">
         <p>@Model.ApplicationId will be deleted on <local-time datetime="@Model.DeleteAt?.ToString("u")"></local-time>. If you would like to cancel this action, click "Cancel".</p>
-        <button id="btn-cancel-delete" class="btn-secondary" type="submit">Cancel</button>
+        <button id="btn-cancel-delete" class="btn-secondary mt-3" type="submit">Cancel</button>
     </form>
 }
 else

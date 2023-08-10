@@ -51,7 +51,7 @@ public class SettingsModel : PageModel
 
         await _appService.MarkApplicationForDeletion(applicationId, userName);
 
-        return RedirectToPage();
+        return RedirectToPage("/Organization/Overview");
     }
 
     public async Task<IActionResult> OnPostCancelAsync()
