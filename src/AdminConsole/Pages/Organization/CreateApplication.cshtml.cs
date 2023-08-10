@@ -54,13 +54,14 @@ public class CreateApplicationModel : PageModel
             return Page();
         }
 
-        Application app = new();
-        int orgId = User.GetOrgId();
-        app.Id = form.Id;
-        app.OrganizationId = orgId;
-        app.Name = form.Name;
-        app.Description = form.Description;
-        app.CreatedAt = DateTime.UtcNow;
+        Application app = new()
+        {
+            Id = form.Id,
+            Name = form.Name,
+            Description = form.Description,
+            CreatedAt = DateTime.UtcNow,
+            OrganizationId = User.GetOrgId()
+        };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
@@ -125,16 +126,11 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required]
-        [MaxLength(60)]
+        [Required, MaxLength(60)]
         public string Name { get; set; }
-
-        [Required]
-        [MaxLength(62)]
+        [Required, MaxLength(62)]
         public string Id { get; set; }
-
-        [Required]
-        [MaxLength(120)]
+        [Required, MaxLength(120)]
         public string Description { get; set; }
     }
 }
