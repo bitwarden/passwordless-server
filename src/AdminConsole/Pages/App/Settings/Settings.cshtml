@@ -14,29 +14,38 @@
     @* <button class="btn-primary mt-3">Save billing</button> *@
 </form>
 
-<br />
+<br/>
 
-<h2 class="h2">Delete Application : @(Model.ApplicationId)</h2>
+<h2 class="h2">Delete Application</h2>
+<div class="bg-white shadow sm:rounded-lg px-4 py-5 sm:p-6">
 @if (Model.PendingDelete)
 {
-    <form method="post" class="mt-3" asp-page-handler="Cancel">
-        <p>@Model.ApplicationId will be deleted on @(Model.DeleteAt). If you would like to cancel this action, click "Cancel".</p>
-        <button id="btn-cancel-delete" class="btn-danger" type="submit">Cancel</button>
+    <form method="post" asp-page-handler="Cancel">
+        <p>@Model.ApplicationId will be deleted on <local-time datetime="@Model.DeleteAt?.ToString("u")"></local-time>. If you would like to cancel this action, click "Cancel".</p>
+        <button id="btn-cancel-delete" class="btn-secondary" type="submit">Cancel</button>
     </form>
 }
 else
 {
-    <form method="post" class="mt-3" asp-page-handler="Delete">
+    <form method="post" asp-page-handler="Delete">
         <p>
-            Newly created applications will be deleted automatically provided they have no credentials stored in them. Otherwise,
-            they will be flagged for deletion by the system and administrators of the organization will be notified. After a specified amount of time,
-            the application and all credentials/users/etc. will be removed from the system. If you would like to cancel this action,
-            you have until the end of the specified time to do so. A button will be provided here and a notification email with
-            a link will be emailed to the organization administrators.
-        </p>
-        <div id="deleteApplication"></div>
+                If your app contains no credentials and was newly created, <strong>the app will be deleted immediately</strong>.
+            </p>
+            <p class="">If you app <strong>do contain credentials</strong>, the following will happen once you choose to delete the application:</p>
+
+            <ul role="list" class="list-decimal list-inside my-2">
+                <li class="">No data will be deleted immediately.</li>
+                <li>Your API Keys will be frozen - meaning no authentication calls can be made</li>
+                <li>Admins can cancel the process at any time. The API will return to normal behaviour.</li>
+                <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
+            </ul>
+
+
+            <div id="deleteApplication"></div>
+        
     </form>
 }
+</div>
 
 @section Scripts
 {
