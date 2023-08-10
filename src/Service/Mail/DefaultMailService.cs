@@ -16,7 +16,7 @@ public sealed class DefaultMailService : IMailService
         _fromEmail = mailOptions.GetValue<string>("From") ?? null;
     }
 
-    public async Task SendApplicationDeletedAsync(AccountMetaInformation accountInformation, string deletedBy)
+    public async Task SendApplicationDeletedAsync(AccountMetaInformation accountInformation, DateTime deletedAt, string deletedBy)
     {
         MailMessage message = new()
         {
@@ -25,7 +25,7 @@ public sealed class DefaultMailService : IMailService
             Bcc = new List<string> { "account-deletion@passwordless.dev" },
             Subject = $"Your app '{accountInformation.AcountName}' has been deleted.",
             TextBody =
-                $"Your app '{accountInformation.AcountName}' has been deleted at {accountInformation.DeleteAt:F} by '{deletedBy}'.",
+                $"Your app '{accountInformation.AcountName}' has been deleted at {deletedAt:F} GMT by '{deletedBy}'.",
             HtmlBody =
                 $"""
                 <!doctype html>
@@ -35,7 +35,7 @@ public sealed class DefaultMailService : IMailService
                     <title>Your app '{accountInformation.AcountName}' has been deleted.</title>
                   </head>
                   <body>
-                    <p>Your app '{accountInformation.AcountName}' has been deleted at {accountInformation.DeleteAt:F} by '{deletedBy}'.</p>
+                    <p>Your app '{accountInformation.AcountName}' has been deleted at {deletedAt:F} GMT by '{deletedBy}'.</p>
                   </body>
                 </html>
                 """,
@@ -45,7 +45,7 @@ public sealed class DefaultMailService : IMailService
         await _provider.SendAsync(message);
     }
 
-    public async Task SendApplicationToBeDeletedAsync(AccountMetaInformation accountInformation, string deletedBy, string cancellationLink)
+    public async Task SendApplicationToBeDeletedAsync(AccountMetaInformation accountInformation, DateTime deleteAt, string deletedBy, string cancellationLink)
     {
         MailMessage message = new()
         {
@@ -54,7 +54,7 @@ public sealed class DefaultMailService : IMailService
             From = _fromEmail,
             Subject = $"Your app '{accountInformation.AcountName}' is scheduled for deletion in 30 days.",
             TextBody =
-                $"Your app '{accountInformation.AcountName}' is scheduled for deletion at {accountInformation.DeleteAt:F} by '{deletedBy}'.",
+                $"Your app '{accountInformation.AcountName}' is scheduled for deletion at {deleteAt:F} GMT by '{deletedBy}'.",
             HtmlBody =
                 $"""
                 <!doctype html>
@@ -64,7 +64,7 @@ public sealed class DefaultMailService : IMailService
                     <title>Your app '{accountInformation.AcountName}' is scheduled for deletion in 30 days.</title>
                   </head>
                   <body>
-                    <p>Your app '{accountInformation.AcountName}' is scheduled for deletion at {accountInformation.DeleteAt:F} by '{deletedBy}'.</p>
+                    <p>Your app '{accountInformation.AcountName}' is scheduled for deletion at {deleteAt:F} GMT by '{deletedBy}'.</p>
                     <p>If this was unintentional, please visit the your administration console or click <a href="{cancellationLink}">this link</a></p>
                   </body>
                 </html>

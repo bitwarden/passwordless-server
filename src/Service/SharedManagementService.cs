@@ -204,7 +204,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
         await storage.DeleteAccount();
-        await _mailService.SendApplicationDeletedAsync(accountInformation, "system");
+        await _mailService.SendApplicationDeletedAsync(accountInformation, _systemClock.UtcNow.UtcDateTime, "system");
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
             _systemClock.UtcNow.UtcDateTime);
     }
@@ -231,7 +231,7 @@ public class SharedManagementService : ISharedManagementService
         if (canDeleteImmediately)
         {
             await storage.DeleteAccount();
-            await _mailService.SendApplicationDeletedAsync(accountInformation, deletedBy);
+            await _mailService.SendApplicationDeletedAsync(accountInformation, _systemClock.UtcNow.UtcDateTime, deletedBy);
             return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
                 _systemClock.UtcNow.UtcDateTime);
         }
@@ -243,7 +243,7 @@ public class SharedManagementService : ISharedManagementService
         await storage.SetAppDeletionDate(deleteAt);
 
         var cancellationLink = $"{baseUrl}/apps/delete/cancel/{appId}";
-        await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deletedBy, cancellationLink);
+        await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deleteAt, deletedBy, cancellationLink);
 
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
     }
