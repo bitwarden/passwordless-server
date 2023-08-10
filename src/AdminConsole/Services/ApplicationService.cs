@@ -15,13 +15,13 @@ public class ApplicationService
         _db = db;
     }
 
-    public async Task MarkApplicationForDeletion(string applicationId, string userName)
+    public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletion(string applicationId, string userName)
     {
         var response = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
 
         var application = await _db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
 
-        if (application == null) return;
+        if (application == null) return response;
 
         if (response.IsDeleted)
         {
@@ -33,6 +33,8 @@ public class ApplicationService
         }
 
         await _db.SaveChangesAsync();
+
+        return response;
     }
 
     public async Task CancelDeletionForApplication(string applicationId)

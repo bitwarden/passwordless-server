@@ -49,9 +49,9 @@ public class SettingsModel : PageModel
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected happened. Please try again later." });
         }
 
-        await _appService.MarkApplicationForDeletion(applicationId, userName);
+        var response = await _appService.MarkApplicationForDeletion(applicationId, userName);
 
-        return RedirectToPage("/Organization/Overview");
+        return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostCancelAsync()
