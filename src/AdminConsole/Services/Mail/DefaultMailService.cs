@@ -84,4 +84,19 @@ public class DefaultMailService : IMailService
 
         return _provider.SendAsync(message);
     }
+
+    public Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
+    {
+        var message = new MailMessage
+        {
+            To = emails,
+            From = _fromEmail,
+            Subject = $"Your organization '{organizationName}' was deleted.",
+            TextBody =
+                $"""Your organization '{organizationName}' was deleted by {deletedBy} at {deletedAt:F} GMT.""",
+            Tag = "organization-deleted"
+        };
+
+        return _provider.SendAsync(message);
+    }
 }
