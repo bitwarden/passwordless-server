@@ -98,15 +98,6 @@ void RunTheApp()
     services.AddScoped<ICurrentContext, CurrentContext>();
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
-    services.AddPasswordlessSdk(options => { });
-    services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
-    services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
-    {
-        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
-
-        client.BaseAddress = new Uri(options.Value.ApiUrl);
-    });
-
     services.AddHttpClient();
     services.AddManagementApi();
 
