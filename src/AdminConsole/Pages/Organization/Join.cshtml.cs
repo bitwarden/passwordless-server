@@ -108,14 +108,13 @@ public class Join : PageModel
     {
         public string Code { get; set; }
 
-        [MaxLength(50)]
-        [EmailAddress]
-        [Required]
+        [Required, EmailAddress, MaxLength(50)]
         public string Email { get; set; }
 
         [Required]
         public bool AcceptsTermsAndPrivacy { get; set; }
 
-        [MaxLength(50)][Required] public string Name { get; set; }
+        [Required, MaxLength(50)]
+        public string Name { get; set; }
     }
 }

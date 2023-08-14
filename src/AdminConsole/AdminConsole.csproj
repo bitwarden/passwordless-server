@@ -48,7 +48,6 @@
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.3" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.4" />
-        <PackageReference Include="Passwordless.AspNetCore" Version="0.0.12" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
         <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
         <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.5.2" />
@@ -59,7 +58,6 @@
         <Folder Include="Identity\" />
         <Folder Include="Migrations" />
         <Folder Include="Models\" />
-        <Folder Include="Pages\Organization\" />
         <Folder Include="Pages\App\" />
         <Folder Include="Pages\App\Credentials\" />
         <Folder Include="Pages\App\Dashboard\" />

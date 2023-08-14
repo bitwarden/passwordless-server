@@ -10,4 +10,5 @@ public interface IMailService
     Task SendPasswordlessSignInAsync(string returnUrl, string token, string email);
     Task SendInviteAsync(Invite inv, string link);
     Task SendEmailIsAlreadyInUseAsync(string email);
+    Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt);
 }

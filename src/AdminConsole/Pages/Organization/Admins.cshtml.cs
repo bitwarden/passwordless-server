@@ -44,7 +44,6 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnPostDelete(string userId)
     {
-
         var users = await _dataService.GetConsoleAdmins();
         if (users is not { Count: > 1 })
         {
@@ -83,6 +82,7 @@ public class Admins : PageModel
             ModelState.AddModelError("error", "You need to upgrade to a paid organization to invite more admins.");
             return await OnGet();
         }
+
         if (!ModelState.IsValid)
         {
             // todo: Is there a pattern where we don't need to repeat this?
@@ -110,8 +110,6 @@ public class Admins : PageModel
 
 public class InviteForm
 {
-    [EmailAddress]
-    [Required]
-    [MaxLength(50)]
+    [Required, EmailAddress, MaxLength(50)]
     public string Email { get; set; }
 }

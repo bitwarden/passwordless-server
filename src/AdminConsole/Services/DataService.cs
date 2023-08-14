@@ -75,4 +75,12 @@ public class DataService
 
         return user;
     }
+
+    public async Task<bool> DeleteOrganizationAsync(int organizationId)
+    {
+        var organization = new Organization { Id = organizationId };
+        _db.Organizations.Entry(organization).State = EntityState.Deleted;
+        var rowsAffected = await _db.SaveChangesAsync();
+        return rowsAffected == 1;
+    }
 }
