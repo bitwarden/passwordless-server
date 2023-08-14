@@ -43,9 +43,9 @@
                         @Html.Partial("_NavLinkPartial", ("Playground", "/app/Playground/Client", "Icons/Beaker"))
                     </div>
                 }
-
-                <partial name="_NavLinkPartial" model="@("Billing", "/billing/manage", "Icons/CodeBracketSquare")"/>
-                <partial name="_NavLinkPartial" model="@("Admins", "/organization/admins", "Icons/Users")"/>
+                @Html.Partial("_NavLinkPartial", ("Billing", "/billing/manage", "Icons/CodeBracketSquare"))
+                @Html.Partial("_NavLinkPartial", ("Admins", "/organization/admins", "Icons/Users"))
+                @Html.Partial("_NavLinkPartial", ("Settings", "/organization/settings", "Icons/Cog"))
             </nav>
         </div>
         <div class="flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black">
