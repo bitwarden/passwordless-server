@@ -22,7 +22,6 @@
         <None Remove="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
         <None Remove="Microsoft.AspNetCore.Identity.UI" />
         <None Remove="Models\" />
-        <None Remove="Pages\Organization\" />
         <None Remove="Pages\App\" />
         <None Remove="Pages\App\Credentials\" />
         <None Remove="Pages\App\Dashboard\" />
