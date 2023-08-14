@@ -102,6 +102,6 @@ public class ScopedPasswordlessClient : IScopedPasswordlessClient
     private Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         request.Headers.Add("ApiSecret", _currentContext.ApiSecret);
-        return _client.SendAsync(request);
+        return _client.SendAsync(request, cancellationToken);
     }
 }

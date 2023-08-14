@@ -8,11 +8,11 @@ namespace AdminConsole.Pages;
 public class ListModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IScopedPasswordlessClient _api;
+    private readonly IPasswordlessClient _api;
 
     public List<PasswordlessUserSummary> Users { get; set; }
 
-    public ListModel(ILogger<IndexModel> logger, IScopedPasswordlessClient api)
+    public ListModel(ILogger<IndexModel> logger, IPasswordlessClient api)
     {
         _logger = logger;
         _api = api;

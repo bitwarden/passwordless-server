@@ -12,12 +12,10 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Services.Mail;
-using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
@@ -133,15 +131,8 @@ void RunTheApp()
 
     services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
 
-    // Create a special IPasswordlessClient style service for App scoped uses
-    services.AddPasswordlessClientCore<IScopedPasswordlessClient, ScopedPasswordlessClient>((sp, client) =>
-    {
-        // The App scoped client still uses the configuration based ApiUrl
-        var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;
-
-        client.BaseAddress = new Uri(options.ApiUrl);
-    });
-
+    services.AddScopedPasswordlessSdk();
+    
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
@@ -194,6 +185,7 @@ void RunTheApp()
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
+    app.UseMiddleware<ScopedPasswordlessContextMiddleware>();
     app.UseAuthorization();
     app.MapPasswordless();
     app.MapRazorPages();
