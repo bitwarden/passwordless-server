@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.AdminConsole.Services.PasswordlessClient;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Net;
 using Serilog;
@@ -133,14 +134,20 @@ void RunTheApp()
 
     services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
 
+    // HttpMessageHandlers create their own state.
+    services.AddHttpContextAccessor();
+
     // Create a special IPasswordlessClient style service for App scoped uses
-    services.AddPasswordlessClientCore<IScopedPasswordlessClient, ScopedPasswordlessClient>((sp, client) =>
+    services.AddScoped<ScopedApiSecretHttpMessageHandler>();
+    services.Configure<PasswordlessOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
+    services.AddPasswordlessClientCore((sp, client) =>
     {
         // The App scoped client still uses the configuration based ApiUrl
         var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;
 
         client.BaseAddress = new Uri(options.ApiUrl);
-    });
+    }).AddHttpMessageHandler<ScopedApiSecretHttpMessageHandler>()
+        .AddHttpMessageHandler<PasswordlessDelegatingHandler>();
 
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();

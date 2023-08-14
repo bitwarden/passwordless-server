@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using Passwordless.AspNetCore;
 using Passwordless.AspNetCore.Services;
 using Passwordless.AspNetCore.Services.Implementations;
-using Passwordless.Net;
 
 // Trick to make it show up where it's more likely to be useful
 namespace Microsoft.Extensions.DependencyInjection;
@@ -81,7 +79,7 @@ public static class IdentityBuilderExtensions
         services.Configure(configure);
 
         // Add the SDK services but don't configure it there since ASP.NET Core options are a superset of their options.
-        services.AddPasswordlessSdk(passwordlessOptions => { });
+        //services.AddPasswordlessSdk(passwordlessOptions => { });
 
         services.TryAddScoped(
             typeof(IPasswordlessService<PasswordlessRegisterRequest>),
@@ -90,13 +88,13 @@ public static class IdentityBuilderExtensions
         services.TryAddScoped<ICustomizeRegisterOptions, NoopCustomizeRegisterOptions>();
 
         // Override SDK options to come from ASP.NET Core options
-        services.AddOptions<PasswordlessOptions>()
+        /**services.AddOptions<PasswordlessOptions>()
             .Configure<IOptions<PasswordlessAspNetCoreOptions>>((options, aspNetCoreOptionsAccessor) =>
             {
                 var aspNetCoreOptions = aspNetCoreOptionsAccessor.Value;
                 options.ApiSecret = aspNetCoreOptions.ApiSecret;
                 options.ApiUrl = aspNetCoreOptions.ApiUrl;
-            });
+            });**/
 
         return services;
     }
