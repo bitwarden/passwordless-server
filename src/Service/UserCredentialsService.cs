@@ -67,5 +67,5 @@ public class UserSummary
     public int AliasCount { get; set; }
     public List<string> Aliases { get; set; }
     public int CredentialsCount { get; set; }
-    public DateTime LastUsedAt { get; set; }
+    public DateTime? LastUsedAt { get; set; }
 }
