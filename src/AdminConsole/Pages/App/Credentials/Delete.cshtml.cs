@@ -8,7 +8,7 @@ namespace AdminConsole.Pages;
 public class CredentialDeleteModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IPasswordlessClient _passwordlessClient;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
     [BindProperty(SupportsGet = true)]
     public string UserId { get; set; }
@@ -18,7 +18,7 @@ public class CredentialDeleteModel : PageModel
 
     public Credential Credential { get; set; }
 
-    public CredentialDeleteModel(ILogger<IndexModel> logger, IPasswordlessClient passwordlessClient)
+    public CredentialDeleteModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
     {
         _logger = logger;
         this._passwordlessClient = passwordlessClient;

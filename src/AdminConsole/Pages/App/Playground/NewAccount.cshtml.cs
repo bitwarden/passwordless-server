@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages;
@@ -7,9 +8,9 @@ namespace AdminConsole.Pages;
 public class NewAccountModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IPasswordlessClient _passwordlessClient;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
-    public NewAccountModel(ILogger<IndexModel> logger, IPasswordlessClient passwordlessClient)
+    public NewAccountModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
     {
         _logger = logger;
         this._passwordlessClient = passwordlessClient;

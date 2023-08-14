@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.Net;
+using Passwordless.AdminConsole.Services;
 
 namespace AdminConsole.Pages;
 
 public class ClientModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IPasswordlessClient _passwordlessClient;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
-    public ClientModel(ILogger<IndexModel> logger, IPasswordlessClient passwordlessClient)
+    public ClientModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
     {
         _logger = logger;
         this._passwordlessClient = passwordlessClient;

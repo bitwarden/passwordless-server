@@ -12,10 +12,12 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
@@ -96,6 +98,15 @@ void RunTheApp()
     services.AddScoped<ICurrentContext, CurrentContext>();
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
+    services.AddPasswordlessSdk(options => { });
+    services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
+    services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
+    {
+        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
+
+        client.BaseAddress = new Uri(options.Value.ApiUrl);
+    });
+
     services.AddHttpClient();
     services.AddManagementApi();
 
@@ -131,8 +142,14 @@ void RunTheApp()
 
     services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
 
-    services.AddScopedPasswordlessSdk();
-    
+    services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
+    services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
+    {
+        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
+
+        client.BaseAddress = new Uri(options.Value.ApiUrl);
+    });
+
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
@@ -185,7 +202,6 @@ void RunTheApp()
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
-    app.UseMiddleware<ScopedPasswordlessContextMiddleware>();
     app.UseAuthorization();
     app.MapPasswordless();
     app.MapRazorPages();
