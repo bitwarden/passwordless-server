@@ -22,4 +22,6 @@ public class AccountMetaInformation : PerTenant
     public string AcountName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? DeleteAt { get; set; }
+
+    public AppFeature Features { get; set; }
 }

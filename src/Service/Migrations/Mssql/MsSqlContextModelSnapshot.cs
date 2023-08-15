@@ -47,6 +47,25 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("AccountInfo");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("AuditLoggingIsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AuditLoggingRetentionPeriod")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DeveloperLoggingEndsAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Tenant");
+
+                    b.ToTable("AppFeatures");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
                 {
                     b.Property<string>("Tenant")
@@ -172,6 +191,22 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.HasKey("Tenant", "DescriptorId");
 
                     b.ToTable("Credentials");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithOne("Features")
+                        .HasForeignKey("Passwordless.Service.Models.AppFeature", "Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
+                {
+                    b.Navigation("Features");
                 });
 #pragma warning restore 612, 618
         }

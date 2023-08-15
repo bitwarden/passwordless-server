@@ -16,6 +16,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<TokenKey> TokenKeys => Set<TokenKey>();
     public DbSet<ApiKeyDesc> ApiKeys => Set<ApiKeyDesc>();
     public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
+    public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +49,15 @@ public abstract class DbGlobalContext : DbContext
 
         modelBuilder.Entity<AliasPointer>()
             .HasKey(x => new { x.Tenant, x.Alias });
+
+        modelBuilder.Entity<AppFeature>(b =>
+        {
+            b.HasKey(x => x.Tenant);
+            b.HasOne(x => x.Application)
+                .WithOne(x => x.Features)
+                .HasForeignKey<AppFeature>(x => x.Tenant)
+                .IsRequired();
+        });
 
         base.OnModelCreating(modelBuilder);
     }
