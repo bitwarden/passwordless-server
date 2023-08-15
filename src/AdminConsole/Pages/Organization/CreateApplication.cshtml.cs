@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages.Organization;

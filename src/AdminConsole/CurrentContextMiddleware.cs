@@ -20,6 +20,7 @@ public class CurrentContext : ICurrentContext
     public string? ApiSecret { get; private set; }
 
     public string? ApiKey { get; private set; }
+    public bool IsFrozen { get; private set; }
 
     public void SetApp(Application application)
     {
@@ -31,6 +32,7 @@ public class CurrentContext : ICurrentContext
         AppId = application.Id;
         ApiSecret = application.ApiSecret;
         ApiKey = application.ApiKey;
+        IsFrozen = application.DeleteAt.HasValue;
     }
 }
 
@@ -43,6 +45,7 @@ public interface ICurrentContext
     string? AppId { get; }
     string? ApiSecret { get; }
     string? ApiKey { get; }
+    bool IsFrozen { get; }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]

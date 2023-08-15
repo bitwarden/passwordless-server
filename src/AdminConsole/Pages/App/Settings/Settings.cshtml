@@ -14,12 +14,46 @@
     @* <button class="btn-primary mt-3">Save billing</button> *@
 </form>
 
+<br/>
+
+<h2 class="h2">Delete Application</h2>
+<div class="bg-white shadow sm:rounded-lg px-4 py-5 sm:p-6">
+@if (Model.PendingDelete)
+{
+    <form method="post" asp-page-handler="Cancel">
+        <p>@Model.ApplicationId will be deleted on <local-time datetime="@Model.DeleteAt?.ToString("u")"></local-time>. If you would like to cancel this action, click "Cancel".</p>
+        <button id="btn-cancel-delete" class="btn-secondary mt-3" type="submit">Cancel</button>
+    </form>
+}
+else
+{
+    <form method="post" asp-page-handler="Delete">
+        <p>
+                If your app contains no credentials and was newly created, <strong>the app will be deleted immediately</strong>.
+            </p>
+            <p class="">If you app <strong>do contain credentials</strong>, the following will happen once you choose to delete the application:</p>
+
+            <ul role="list" class="list-decimal list-inside my-2">
+                <li class="">No data will be deleted immediately.</li>
+                <li>Your API Keys will be frozen - meaning no authentication calls can be made</li>
+                <li>Admins can cancel the process at any time. The API will return to normal behaviour.</li>
+                <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
+            </ul>
+
+
+            <div id="deleteApplication"></div>
+        
+    </form>
+}
+</div>
+
 @section Scripts
 {
     <script type="module">
     import { createApp } from 'vue';
-    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")'   
-        
+    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")';
+    import DeleteApplication from '@Url.Content("~/js/deleteapplication.mjs")';
+
     const items = [
     {
         title: 'Free',
@@ -37,9 +71,13 @@
         disabled: true
     }];   
     
-    
     createApp(RadioBoxes, {
         items: items  
     } ).mount('#planpicker');
+    
+    createApp(DeleteApplication, {
+        appId: "@(Model.ApplicationId)"
+    }).mount('#deleteApplication');
+    
     </script>
 }

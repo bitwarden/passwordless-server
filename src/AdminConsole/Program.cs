@@ -133,13 +133,12 @@ void RunTheApp()
 
     services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
 
-    // Create a special IPasswordlessClient style service for App scoped uses
-    services.AddPasswordlessClientCore<IScopedPasswordlessClient, ScopedPasswordlessClient>((sp, client) =>
+    services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
+    services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
-        // The App scoped client still uses the configuration based ApiUrl
-        var options = sp.GetRequiredService<IOptions<PasswordlessOptions>>().Value;
+        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
 
-        client.BaseAddress = new Uri(options.ApiUrl);
+        client.BaseAddress = new Uri(options.Value.ApiUrl);
     });
 
     // Magic link SigninManager
@@ -152,6 +151,7 @@ void RunTheApp()
     services.AddScoped<UsageService>();
     services.AddScoped<DataService>();
     services.AddScoped<InvitationService>();
+    services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
 
     // Work around to get LinkGeneration to work with /{app}/-links.

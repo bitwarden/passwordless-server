@@ -23,7 +23,6 @@ public class DataService
     {
         return await _db.Applications
             .Where(a => a.OrganizationId == _orgId).ToListAsync();
-
     }
 
     public async Task<Organization> GetOrganization()

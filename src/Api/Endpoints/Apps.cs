@@ -62,6 +62,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        // This will be used by an email link to cancel
         app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
     }

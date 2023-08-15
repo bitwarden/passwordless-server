@@ -24,4 +24,6 @@ public class Application
     public string? BillingPriceId { get; set; }
 
     public int CurrentUserCount { get; set; }
+
+    public DateTime? DeleteAt { get; set; }
 }
