@@ -97,7 +97,6 @@ public class AppTests : BackendTests
         {
             Content = JsonContent.Create(new SetFeaturesDto
             {
-                AuditLoggingIsEnabled = true,
                 AuditLoggingRetentionPeriod = 30
             })
         };
@@ -111,7 +110,7 @@ public class AppTests : BackendTests
             var storage = factory.Create(app.AppId);
             var info = await storage.GetAppFeaturesAsync();
             Assert.Equal(info.Tenant, app.AppId);
-            Assert.True(info.AuditLoggingIsEnabled);
+            Assert.False(info.AuditLoggingIsEnabled);
             Assert.Equal(30, info.AuditLoggingRetentionPeriod);
             Assert.Null(info.DeveloperLoggingEndsAt);
         }

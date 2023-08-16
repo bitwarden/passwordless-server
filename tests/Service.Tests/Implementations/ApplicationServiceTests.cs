@@ -33,7 +33,6 @@ public class ApplicationServiceTests
     {
         var payload = new SetFeaturesDto
         {
-            AuditLoggingIsEnabled = true,
             AuditLoggingRetentionPeriod = 7
         };
 

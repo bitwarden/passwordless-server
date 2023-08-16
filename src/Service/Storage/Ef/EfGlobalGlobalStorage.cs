@@ -31,7 +31,6 @@ public class EfGlobalGlobalStorage : IGlobalStorage
         var applications = await _db.AppFeatures.Where(x => payload.Tenants.Contains(x.Tenant)).ToListAsync();
         applications.ForEach(a =>
         {
-            a.AuditLoggingIsEnabled = payload.AuditLoggingIsEnabled;
             a.AuditLoggingRetentionPeriod = payload.AuditLoggingRetentionPeriod;
         });
     }

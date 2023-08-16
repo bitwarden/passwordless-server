@@ -103,8 +103,7 @@ public class AccountEndpointsTests
     {
         var payload = new SetFeaturesDto
         {
-            AuditLoggingRetentionPeriod = 14,
-            AuditLoggingIsEnabled = true
+            AuditLoggingRetentionPeriod = 14
         };
         var applicationServiceMock = new Mock<IApplicationService>();
 
