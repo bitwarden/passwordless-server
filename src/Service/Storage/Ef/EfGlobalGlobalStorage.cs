@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
@@ -23,5 +24,15 @@ public class EfGlobalGlobalStorage : IGlobalStorage
             .Select(x => x.Tenant)
             .ToListAsync();
         return tenants;
+    }
+
+    public async Task SetFeaturesAsync(SetFeaturesBulkDto payload)
+    {
+        var applications = await _db.AppFeatures.Where(x => payload.Tenants.Contains(x.Tenant)).ToListAsync();
+        applications.ForEach(a =>
+        {
+            a.AuditLoggingIsEnabled = payload.AuditLoggingIsEnabled;
+            a.AuditLoggingRetentionPeriod = payload.AuditLoggingRetentionPeriod;
+        });
     }
 }

@@ -9,7 +9,7 @@ public class AppFeature : PerTenant
     /// <summary>
     /// The audit logging retention period in days.
     /// </summary>
-    public bool AuditLoggingRetentionPeriod { get; set; }
+    public int AuditLoggingRetentionPeriod { get; set; }
 
     /// <summary>
     /// Developer logging is only enabled when an end date has been set, and has to be manually re-enabled every time.

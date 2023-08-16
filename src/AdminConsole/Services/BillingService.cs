@@ -2,6 +2,9 @@ using AdminConsole.Billing;
 using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Services;
+using Passwordless.Api.Models;
 using Stripe;
 using Application = AdminConsole.Models.Application;
 
@@ -10,13 +13,21 @@ namespace AdminConsole.Services;
 public class SharedBillingService
 {
     private readonly ConsoleDbContext _dbContext;
+    private readonly IPasswordlessManagementClient _passwordlessClient;
+    private readonly PlansOptions _plansOptions;
     private readonly ILogger<SharedBillingService> _logger;
     private readonly StripeOptions _stripeOptions;
 
-    public SharedBillingService(ConsoleDbContext dbContext, ILogger<SharedBillingService> logger,
+    public SharedBillingService(
+        ConsoleDbContext dbContext,
+        IPasswordlessManagementClient passwordlessClient,
+        IOptionsSnapshot<PlansOptions> plansOptions,
+        ILogger<SharedBillingService> logger,
         IOptions<StripeOptions> stripeOptions)
     {
         _dbContext = dbContext;
+        _passwordlessClient = passwordlessClient;
+        _plansOptions = plansOptions.Value;
         _logger = logger;
         _stripeOptions = stripeOptions.Value;
     }
@@ -121,6 +132,13 @@ public class SharedBillingService
         }
 
         await _dbContext.SaveChangesAsync();
+
+        var features = _plansOptions[planName];
+        var setFeaturesRequest = new SetApplicationFeaturesRequest();
+        setFeaturesRequest.AppIds = apps.Select(x => x.Id).ToList();
+        setFeaturesRequest.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
+        setFeaturesRequest.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        await _passwordlessClient.SetFeaturesAsync(setFeaturesRequest);
     }
 
     private async Task<Subscription> GetSubscription(string subscriptionId)

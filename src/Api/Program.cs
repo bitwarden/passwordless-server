@@ -76,6 +76,7 @@ services.ConfigureHttpJsonOptions(options =>
 services.AddDatabase(builder.Configuration);
 services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
+services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();

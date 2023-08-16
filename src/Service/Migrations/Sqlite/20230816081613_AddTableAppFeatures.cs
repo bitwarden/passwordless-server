@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Passwordless.Service.Migrations.Mssql;
+namespace Passwordless.Service.Migrations.Sqlite;
 
 /// <inheritdoc />
 public partial class AddTableAppFeatures : Migration
@@ -14,10 +14,10 @@ public partial class AddTableAppFeatures : Migration
             name: "AppFeatures",
             columns: table => new
             {
-                Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                AuditLoggingIsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                AuditLoggingRetentionPeriod = table.Column<bool>(type: "bit", nullable: false),
-                DeveloperLoggingEndsAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                Tenant = table.Column<string>(type: "TEXT", nullable: false),
+                AuditLoggingIsEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                AuditLoggingRetentionPeriod = table.Column<int>(type: "INTEGER", nullable: false),
+                DeveloperLoggingEndsAt = table.Column<DateTime>(type: "TEXT", nullable: true)
             },
             constraints: table =>
             {

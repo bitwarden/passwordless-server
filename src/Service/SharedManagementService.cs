@@ -16,7 +16,7 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 public interface ISharedManagementService
 {
     Task<bool> IsAvailable(string appId);
-    Task<AccountKeysCreation> GenerateAccount(string accountName, string adminEmail);
+    Task<AccountKeysCreation> GenerateAccount(AppCreateDTO appCreationOptions);
     Task<string> ValidateSecretKey(string secretKey);
     Task<string> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
@@ -24,6 +24,7 @@ public interface ISharedManagementService
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
+    Task SetFeaturesAsync(SetFeaturesBulkDto payload);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -58,9 +59,17 @@ public class SharedManagementService : ISharedManagementService
         return !await storage.TenantExists();
     }
 
-    public async Task<AccountKeysCreation> GenerateAccount(string accountName, string adminEmail)
+    public async Task<AccountKeysCreation> GenerateAccount(AppCreateDTO appCreationOptions)
     {
-        if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(adminEmail))
+        if (appCreationOptions == null)
+        {
+            throw new ApiException("No application creation options have been defined.", 400);
+        }
+
+        var accountName = appCreationOptions.AppId;
+        var adminEmail = appCreationOptions.AdminEmail;
+
+        if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))
         {
             throw new ApiException("Please set argument 'accountName' and 'adminEmail'", 400);
         }
@@ -91,7 +100,13 @@ public class SharedManagementService : ISharedManagementService
             AcountName = accountName,
             AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
-            SubscriptionTier = "Free"
+            SubscriptionTier = "Free",
+            Features = new AppFeature
+            {
+                Tenant = accountName,
+                AuditLoggingIsEnabled = appCreationOptions.AuditLoggingIsEnabled,
+                AuditLoggingRetentionPeriod = appCreationOptions.AuditLoggingRetentionPeriod
+            }
         };
         await storage.SaveAccountInformation(account);
         return new AccountKeysCreation
@@ -253,6 +268,21 @@ public class SharedManagementService : ISharedManagementService
         var storage = _globalStorageFactory.Create();
         var tenants = await storage.GetApplicationsPendingDeletionAsync();
         return tenants;
+    }
+
+    public async Task SetFeaturesAsync(SetFeaturesBulkDto payload)
+    {
+        if (payload == null)
+        {
+            throw new ApiException("No 'body' or 'parameters' were passed.", 400);
+        }
+
+        if (payload.Tenants == null || !payload.Tenants.Any())
+        {
+            throw new ApiException("'Tenants' is required.", 400);
+        }
+        var storage = _globalStorageFactory.Create();
+        await storage.SetFeaturesAsync(payload);
     }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,

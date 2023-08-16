@@ -50,7 +50,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<bool>("AuditLoggingIsEnabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("AuditLoggingRetentionPeriod")
+                    b.Property<int>("AuditLoggingRetentionPeriod")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")

@@ -277,4 +277,80 @@ public class SharedManagementServiceTests
     }
 
     #endregion
+
+    #region SetFeaturesAsync
+    [Fact]
+    public async Task SetFeaturesAsync_Throws_ApiException_WhenPayloadIsNull()
+    {
+        var storageMock = new Mock<IGlobalStorage>();
+        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+
+        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(null));
+
+        Assert.Equal(400, actual.StatusCode);
+        Assert.Equal("No 'body' or 'parameters' were passed.", actual.Message);
+
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsNull()
+    {
+        var payload = new SetFeaturesBulkDto { Tenants = null };
+        var storageMock = new Mock<IGlobalStorage>();
+        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+
+        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(payload));
+
+        Assert.Equal(400, actual.StatusCode);
+        Assert.Equal("'Tenants' is required.", actual.Message);
+
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsEmpty()
+    {
+        var payload = new SetFeaturesBulkDto { Tenants = new List<string>(0) };
+        var storageMock = new Mock<IGlobalStorage>();
+        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+
+        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(payload));
+
+        Assert.Equal(400, actual.StatusCode);
+        Assert.Equal("'Tenants' is required.", actual.Message);
+
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetFeaturesAsync_Returns_ExpectedResult()
+    {
+        var payload = new SetFeaturesBulkDto
+        {
+            Tenants = new List<string>
+            {
+                "app1",
+                "app2"
+            },
+            AuditLoggingIsEnabled = true,
+            AuditLoggingRetentionPeriod = 7
+        };
+        var storageMock = new Mock<IGlobalStorage>();
+        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+
+        await _sut.SetFeaturesAsync(payload);
+
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Once);
+        storageMock.Verify(x => x.SetFeaturesAsync(
+            It.Is<SetFeaturesBulkDto>(p => p == payload)), Times.Once);
+    }
+    #endregion
 }

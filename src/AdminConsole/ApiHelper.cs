@@ -10,7 +10,7 @@ public static class ManagementApiExtensions
         services.AddOptions<PasswordlessManagementOptions>()
             .BindConfiguration("PasswordlessManagement");
 
-        services.AddHttpClient<PasswordlessManagementClient>((sp, client) =>
+        services.AddHttpClient<IPasswordlessManagementClient, PasswordlessManagementClient>((sp, client) =>
         {
             var options = sp.GetRequiredService<IOptions<PasswordlessManagementOptions>>().Value;
 

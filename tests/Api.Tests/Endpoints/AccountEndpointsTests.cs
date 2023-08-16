@@ -4,6 +4,7 @@ using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
 
@@ -75,6 +76,41 @@ public class AccountEndpointsTests
         Assert.Equal(typeof(Ok<IEnumerable<string>>), actual.GetType());
         var actualResult = (actual as Ok<IEnumerable<string>>)?.Value;
         Assert.Equal(expected, actualResult);
+    }
+    #endregion
+
+    #region SetFeaturesBulkAsync
+    [Fact]
+    public async Task SetFeaturesBulkAsync_Returns_ExpectedResult()
+    {
+        var payload = new SetFeaturesBulkDto
+        {
+            AuditLoggingRetentionPeriod = 14,
+            AuditLoggingIsEnabled = true,
+            Tenants = new[] { "1", "2", "3" }
+        };
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+
+        var actual = await AppsEndpoints.SetFeaturesBulkAsync(payload, sharedManagementServiceMock.Object);
+
+        Assert.Equal(typeof(NoContent), actual.GetType());
+    }
+    #endregion
+
+    #region SetFeaturesAsync
+    [Fact]
+    public async Task SetFeaturesAsync_Returns_ExpectedResult()
+    {
+        var payload = new SetFeaturesDto
+        {
+            AuditLoggingRetentionPeriod = 14,
+            AuditLoggingIsEnabled = true
+        };
+        var applicationServiceMock = new Mock<IApplicationService>();
+
+        var actual = await AppsEndpoints.SetFeaturesAsync(payload, applicationServiceMock.Object);
+
+        Assert.Equal(typeof(NoContent), actual.GetType());
     }
     #endregion
 }

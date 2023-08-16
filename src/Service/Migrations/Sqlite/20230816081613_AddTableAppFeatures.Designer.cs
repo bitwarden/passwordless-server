@@ -2,48 +2,43 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
 
 #nullable disable
 
-namespace Passwordless.Service.Migrations.Mssql
+namespace Passwordless.Service.Migrations.Sqlite
 {
-    [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20230815135127_AddTableAppFeatures")]
+    [DbContext(typeof(DbGlobalSqliteContext))]
+    [Migration("20230816081613_AddTableAppFeatures")]
     partial class AddTableAppFeatures
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
                     b.Property<string>("AcountName")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AdminEmailsSerialized")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DeleteAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SubscriptionTier")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("AcountName");
 
@@ -53,16 +48,16 @@ namespace Passwordless.Service.Migrations.Mssql
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("AuditLoggingIsEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<bool>("AuditLoggingRetentionPeriod")
-                        .HasColumnType("bit");
+                    b.Property<int>("AuditLoggingRetentionPeriod")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Tenant");
 
@@ -72,16 +67,16 @@ namespace Passwordless.Service.Migrations.Mssql
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
                 {
                     b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("KeyId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("KeyMaterial")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "KeyId");
 
@@ -91,28 +86,28 @@ namespace Passwordless.Service.Migrations.Mssql
             modelBuilder.Entity("Passwordless.Service.Storage.ApiKeyDesc", b =>
                 {
                     b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AccountName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ApiKey")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("LastLockedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("LastUnlockedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Scopes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "Id");
 
@@ -122,16 +117,16 @@ namespace Passwordless.Service.Migrations.Mssql
             modelBuilder.Entity("Passwordless.Service.Storage.Ef.AliasPointer", b =>
                 {
                     b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Alias")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Plaintext")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "Alias");
 
@@ -141,55 +136,55 @@ namespace Passwordless.Service.Migrations.Mssql
             modelBuilder.Entity("Passwordless.Service.Storage.Ef.EFStoredCredential", b =>
                 {
                     b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
                     b.Property<byte[]>("DescriptorId")
-                        .HasColumnType("varbinary(900)");
+                        .HasColumnType("BLOB");
 
                     b.Property<Guid>("AaGuid")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AttestationFmt")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("DescriptorTransports")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("DescriptorType")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Device")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastUsedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Nickname")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<byte[]>("PublicKey")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("RPID")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<long>("SignatureCounter")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("SignatureCounter")
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("UserHandle")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "DescriptorId");
 

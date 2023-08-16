@@ -13,6 +13,7 @@ public interface ITenantStorage
     Task DeleteCredential(byte[] id);
     Task<bool> ExistsAsync(byte[] credentialId);
     Task<AccountMetaInformation> GetAccountInformation();
+    Task<AppFeature> GetAppFeaturesAsync();
     Task<ApiKeyDesc> GetApiKeyAsync(string apiKey);
     Task<StoredCredential> GetCredential(byte[] credentialId);
     Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByAliasAsync(string alias);
@@ -40,4 +41,5 @@ public interface ITenantStorage
     Task<List<ApiKeyDesc>> GetAllApiKeys();
     Task SetAppDeletionDate(DateTime? deletionAt);
     Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId);
+    Task SetFeaturesAsync(SetFeaturesDto features);
 }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
@@ -21,15 +22,17 @@ public class CreateApplicationModel : PageModel
     private readonly SignInManager<ConsoleAdmin> _signInManager;
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
     private readonly DataService _dataService;
-    private readonly PasswordlessManagementClient _managementClient;
+    private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
+    private readonly PlansOptions _plansOptions;
 
     public CreateApplicationModel(ConsoleDbContext db,
         IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
         SignInManager<ConsoleAdmin> signInManager,
         DataService dataService,
         IOptions<StripeOptions> stripeOptions,
-        PasswordlessManagementClient managementClient)
+        IPasswordlessManagementClient managementClient,
+        IOptionsSnapshot<PlansOptions> plansOptions)
     {
         _dataService = dataService;
         _managementClient = managementClient;
@@ -37,6 +40,7 @@ public class CreateApplicationModel : PageModel
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
+        _plansOptions = plansOptions.Value;
     }
 
     public CreateApplicationForm Form { get; set; }
@@ -86,7 +90,15 @@ public class CreateApplicationModel : PageModel
         NewAppResponse res;
         try
         {
-            res = await _managementClient.CreateApplication(new NewAppOptions { AppId = app.Id, AdminEmail = email });
+            var plan = _plansOptions[app.BillingPlan];
+            var newAppOptions = new NewAppOptions
+            {
+                AppId = app.Id,
+                AdminEmail = email,
+                AuditLoggingIsEnabled = plan.AuditLoggingIsEnabled,
+                AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod
+            };
+            res = await _managementClient.CreateApplication(newAppOptions);
         }
         catch (Exception e)
         {

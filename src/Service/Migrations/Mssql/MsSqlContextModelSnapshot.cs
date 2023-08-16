@@ -55,8 +55,8 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<bool>("AuditLoggingIsEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("AuditLoggingRetentionPeriod")
-                        .HasColumnType("bit");
+                    b.Property<int>("AuditLoggingRetentionPeriod")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
                         .HasColumnType("datetime2");

@@ -1,9 +1,10 @@
 using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.Api.Models;
 using Passwordless.Net;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class PasswordlessManagementClient
+public class PasswordlessManagementClient : IPasswordlessManagementClient
 {
     private readonly HttpClient _client;
 
@@ -46,5 +47,11 @@ public class PasswordlessManagementClient
         var response = await _client.GetAsync($"apps/delete/cancel/{applicationId}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<CancelApplicationDeletionResponse>();
+    }
+
+    public async Task SetFeaturesAsync(SetApplicationFeaturesRequest request)
+    {
+        var response = await _client.PostAsJsonAsync($"apps/features", request);
+        response.EnsureSuccessStatusCode();
     }
 }

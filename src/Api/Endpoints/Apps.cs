@@ -2,6 +2,7 @@
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Server.Endpoints;
@@ -27,7 +28,7 @@ public static class AppsEndpoints
 
         app.MapPost("/apps/create", async (AppCreateDTO payload, ISharedManagementService service) =>
             {
-                var result = await service.GenerateAccount(payload.AppId, payload.AdminEmail);
+                var result = await service.GenerateAccount(payload);
 
                 return Ok(result);
             })
@@ -65,6 +66,30 @@ public static class AppsEndpoints
         // This will be used by an email link to cancel
         app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
+
+        app.MapPost("/apps/features_bulk", SetFeaturesBulkAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("/apps/features", SetFeaturesAsync)
+            .RequireSecretKey()
+            .RequireCors("default");
+    }
+
+    public static async Task<IResult> SetFeaturesBulkAsync(
+        SetFeaturesBulkDto payload,
+        ISharedManagementService service)
+    {
+        await service.SetFeaturesAsync(payload);
+        return NoContent();
+    }
+
+    public static async Task<IResult> SetFeaturesAsync(
+        SetFeaturesDto payload,
+        IApplicationService service)
+    {
+        await service.SetFeaturesAsync(payload);
+        return NoContent();
     }
 
     public static async Task<IResult> DeleteApplicationAsync(
