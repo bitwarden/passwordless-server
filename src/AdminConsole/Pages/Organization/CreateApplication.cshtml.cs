@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
+using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
+using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
 
 namespace AdminConsole.Pages.Organization;
 
@@ -93,12 +95,11 @@ public class CreateApplicationModel : PageModel
             var plan = _plansOptions[app.BillingPlan];
             var newAppOptions = new NewAppOptions
             {
-                AppId = app.Id,
                 AdminEmail = email,
                 AuditLoggingIsEnabled = plan.AuditLoggingIsEnabled,
                 AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod
             };
-            res = await _managementClient.CreateApplication(newAppOptions);
+            res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
         catch (Exception e)
         {

@@ -1,6 +1,6 @@
-﻿namespace Passwordless.Service.Models;
+namespace Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 
-public record AppCreateDTO
+public class NewAppOptions
 {
     public string AdminEmail { get; set; } = "";
     public bool AuditLoggingIsEnabled { get; set; } = false;

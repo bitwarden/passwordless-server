@@ -17,16 +17,14 @@ public class AppTests : BackendTests
     }
 
     [Theory]
-    [InlineData("")]
     [InlineData("a")]
     [InlineData("1")]
     public async Task CreateAccountWithInvalidName(string name)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/create")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{name}/create")
         {
             Content = JsonContent.Create(new
             {
-                AppId = name,
                 AdminEmail = "anders@passwordless.dev",
             }),
         };
@@ -39,11 +37,10 @@ public class AppTests : BackendTests
     public async Task CreateAccountWithValidName()
     {
         var name = "anders";
-        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/create")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{name}/create")
         {
             Content = JsonContent.Create(new
             {
-                AppId = name,
                 AdminEmail = "anders@passwordless.dev",
             }),
         };
@@ -64,11 +61,10 @@ public class AppTests : BackendTests
     public async Task CreateAccountWithAppFeatures()
     {
         var name = $"app{Guid.NewGuid():N}";
-        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/create")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{name}/create")
         {
             Content = JsonContent.Create(new
             {
-                AppId = name,
                 AdminEmail = "anders@passwordless.dev",
             }),
         };

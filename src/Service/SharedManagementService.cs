@@ -16,7 +16,7 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 public interface ISharedManagementService
 {
     Task<bool> IsAvailable(string appId);
-    Task<AccountKeysCreation> GenerateAccount(AppCreateDTO appCreationOptions);
+    Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions);
     Task<string> ValidateSecretKey(string secretKey);
     Task<string> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
@@ -59,14 +59,18 @@ public class SharedManagementService : ISharedManagementService
         return !await storage.TenantExists();
     }
 
-    public async Task<AccountKeysCreation> GenerateAccount(AppCreateDTO appCreationOptions)
+    public async Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions)
     {
+        if (string.IsNullOrWhiteSpace(appId))
+        {
+            throw new ApiException($"'{nameof(appId)}' cannot be null, empty or whitespace.", 400);
+        }
         if (appCreationOptions == null)
         {
             throw new ApiException("No application creation options have been defined.", 400);
         }
 
-        var accountName = appCreationOptions.AppId;
+        var accountName = appId;
         var adminEmail = appCreationOptions.AdminEmail;
 
         if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))

@@ -1,6 +1,6 @@
 using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Passwordless.Api.Models;
-using Passwordless.Net;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -13,9 +13,9 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         _client = client;
     }
 
-    public async Task<NewAppResponse> CreateApplication(NewAppOptions registerOptions)
+    public async Task<NewAppResponse> CreateApplication(string appId, NewAppOptions registerOptions)
     {
-        var res = await _client.PostAsJsonAsync("apps/create", registerOptions);
+        var res = await _client.PostAsJsonAsync($"/admin/apps/{appId}/create", registerOptions);
         res.EnsureSuccessStatusCode();
         return await res.Content.ReadFromJsonAsync<NewAppResponse>();
     }

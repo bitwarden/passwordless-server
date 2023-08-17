@@ -1,4 +1,5 @@
-﻿using Passwordless.Api.Authorization;
+﻿using Microsoft.AspNetCore.Mvc;
+using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
@@ -26,9 +27,12 @@ public static class AppsEndpoints
             })
             .RequireCors("default");
 
-        app.MapPost("/apps/create", async (AppCreateDTO payload, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/create", async (
+                [FromRoute] string appId,
+                [FromBody] AppCreateDTO payload,
+                ISharedManagementService service) =>
             {
-                var result = await service.GenerateAccount(payload);
+                var result = await service.GenerateAccount(appId, payload);
 
                 return Ok(result);
             })

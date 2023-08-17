@@ -26,7 +26,7 @@ public class BasicTests : IClassFixture<TestWebApplicationFactory<Program>>
     {
         var appId = $"app{Guid.NewGuid():N}";
 
-        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/create")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{appId}/create")
         {
             Content = JsonContent.Create(new
             {
