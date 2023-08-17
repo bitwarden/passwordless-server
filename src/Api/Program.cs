@@ -6,9 +6,11 @@ using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
+using Passwordless.Api.Middleware;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Features;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
@@ -88,6 +90,7 @@ services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
+services.AddScoped<IFeaturesContext, NullFeaturesContext>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -126,6 +129,7 @@ app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
+app.UseMiddleware<FeaturesManagementContextMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
 app.MapAliasEndpoints();

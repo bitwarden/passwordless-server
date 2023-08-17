@@ -3,6 +3,7 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
+using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -30,10 +31,13 @@ public static class AppsEndpoints
         app.MapPost("/admin/apps/{appId}/create", async (
                 [FromRoute] string appId,
                 [FromBody] AppCreateDTO payload,
-                ISharedManagementService service) =>
+                ISharedManagementService service,
+                IFeaturesContext featuresContext) =>
             {
-                var result = await service.GenerateAccount(appId, payload);
+                // Since we're creating an app, we cannot have a features context yet.
+                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod);
 
+                var result = await service.GenerateAccount(appId, payload);
                 return Ok(result);
             })
             .RequireManagementKey()
