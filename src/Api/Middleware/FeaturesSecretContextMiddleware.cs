@@ -1,14 +1,15 @@
+using Passwordless.Common.Parsers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.Middleware;
 
-public class FeaturesManagementContextMiddleware
+public class FeaturesSecretContextMiddleware
 {
     private readonly RequestDelegate _next;
-    public const string AuthenticationType = "ManagementKey";
+    public const string AuthenticationType = "ApiSecret";
 
-    public FeaturesManagementContextMiddleware(RequestDelegate next)
+    public FeaturesSecretContextMiddleware(RequestDelegate next)
     {
         _next = next;
     }
@@ -20,12 +21,13 @@ public class FeaturesManagementContextMiddleware
             await _next(httpContext);
             return;
         }
-        if (!httpContext.Request.RouteValues.ContainsKey("appId"))
+        if (!httpContext.Request.RouteValues.ContainsKey("ApiSecret"))
         {
             await _next(httpContext);
             return;
         }
-        var appId = httpContext.Request.RouteValues["appId"].ToString();
+        var apiSecret = httpContext.Request.Headers["ApiSecret"].ToString();
+        var appId = ApiKeyParser.GetAppId(apiSecret);
         var storage = storageFactory.Create(appId);
         var features = await storage.GetAppFeaturesAsync();
         if (features != null)

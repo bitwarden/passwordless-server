@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Passwordless.Common.Parsers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
@@ -163,20 +164,13 @@ public class SharedManagementService : ISharedManagementService
     {
         try
         {
-            return ParseAppId(apiKey);
+            return ApiKeyParser.GetAppId(apiKey);
         }
         catch (Exception)
         {
             _logger.LogError("Could not parse accountname={apikey}", apiKey);
             throw new ApiException("Please supply the apikey or apisecret header with correct value.", 401);
         }
-    }
-
-    private static string ParseAppId(string apiKey)
-    {
-        ReadOnlySpan<char> span = apiKey.AsSpan();
-        var i = span.IndexOf(':');
-        return span[..i].ToString();
     }
 
     private static bool CheckApiKeyMatch(string hash, string input)

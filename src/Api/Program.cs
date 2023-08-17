@@ -130,6 +130,7 @@ app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.UseMiddleware<FeaturesManagementContextMiddleware>();
+app.UseMiddleware<FeaturesSecretContextMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
 app.MapAliasEndpoints();
