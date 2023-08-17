@@ -31,10 +31,13 @@ public static class AppsEndpoints
         app.MapPost("/admin/apps/{appId}/create", async (
                 [FromRoute] string appId,
                 [FromBody] AppCreateDTO payload,
-                ISharedManagementService service) =>
+                ISharedManagementService service,
+                IFeaturesContext featuresContext) =>
             {
-                var result = await service.GenerateAccount(appId, payload);
+                // Since we're creating an app, we cannot have a features context yet.
+                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod);
 
+                var result = await service.GenerateAccount(appId, payload);
                 return Ok(result);
             })
             .RequireManagementKey()
