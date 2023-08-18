@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
@@ -12,7 +13,7 @@ public class ListModel : PageModel
 
     public List<PasswordlessUserSummary> Users { get; set; }
 
-    public ListModel(ILogger<IndexModel> logger, IScopedPasswordlessClient api)
+    public ListModel(ILogger<IndexModel> logger, IScopedPasswordlessClient api, ICurrentContext context)
     {
         _logger = logger;
         _api = api;

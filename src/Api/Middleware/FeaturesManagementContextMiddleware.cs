@@ -30,7 +30,7 @@ public class FeaturesManagementContextMiddleware
         var features = await storage.GetAppFeaturesAsync();
         if (features != null)
         {
-            featuresContext = new FeaturesContext(features.AuditLoggingIsEnabled, features.AuditLoggingRetentionPeriod);
+            featuresContext = new FeaturesContext(features.AuditLoggingIsEnabled, features.AuditLoggingRetentionPeriod, features.DeveloperLoggingEndsAt);
         }
         await _next(httpContext);
     }

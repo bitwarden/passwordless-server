@@ -35,7 +35,7 @@ public static class AppsEndpoints
                 IFeaturesContext featuresContext) =>
             {
                 // Since we're creating an app, we cannot have a features context yet.
-                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod);
+                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod, null);
 
                 var result = await service.GenerateAccount(appId, payload);
                 return Ok(result);
@@ -79,6 +79,10 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        app.MapGet("/admin/apps/{appId}/features", GetFeaturesAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
         app.MapPost("/apps/features", SetFeaturesAsync)
             .RequireSecretKey()
             .RequireCors("default");
@@ -99,6 +103,18 @@ public static class AppsEndpoints
     {
         await service.SetFeaturesAsync(payload);
         return NoContent();
+    }
+
+
+    public static async Task<IResult> GetFeaturesAsync(IFeaturesContext featuresContext)
+    {
+        var dto = new AppFeatureDto
+        {
+            AuditLoggingIsEnabled = featuresContext.AuditLoggingIsEnabled,
+            AuditLoggingRetentionPeriod = featuresContext.AuditLoggingRetentionPeriod,
+            DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt
+        };
+        return Ok(dto);
     }
 
     public static async Task<IResult> DeleteApplicationAsync(

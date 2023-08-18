@@ -112,4 +112,21 @@ public class AppTests : BackendTests
         }
         Assert.Equal(HttpStatusCode.NoContent, res.StatusCode);
     }
+
+    [Fact]
+    public async Task GetFeaturesAsync_Modifies_Features()
+    {
+        var app = await CreateAppAsync();
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/admin/apps/{app.AppId}/features");
+        request.Headers.Add("ManagementKey", "dev_test_key");
+        var actualResponse = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, actualResponse.StatusCode);
+
+        var actual = await actualResponse.Content.ReadFromJsonAsync<AppFeatureDto>();
+
+        Assert.Equal(365, actual.AuditLoggingRetentionPeriod);
+        Assert.False(actual.AuditLoggingIsEnabled);
+        Assert.Null(actual.DeveloperLoggingEndsAt);
+    }
 }
