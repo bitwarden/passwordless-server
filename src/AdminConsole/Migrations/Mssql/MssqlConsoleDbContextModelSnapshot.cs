@@ -220,6 +220,9 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("BecamePaidAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("BillingCustomerId")
                         .HasColumnType("nvarchar(max)");
 

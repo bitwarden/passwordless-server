@@ -101,6 +101,14 @@ public class SharedBillingService
 
         // Create a new Subscription
         Subscription subscription = await GetSubscription(subscriptionId);
+
+        // If subscription is not set, it means we were using a free plan.
+        if (org.BillingSubscriptionId == null)
+        {
+            // Customer started paying for the first time
+            org.BecamePaidAt = subscription.Created;
+        }
+
         // set the subscriptionId on the Org
         org.BillingSubscriptionId = subscription.Id;
 
