@@ -4,4 +4,7 @@ public sealed record FeaturesContext(
         bool AuditLoggingIsEnabled,
         int AuditLoggingRetentionPeriod,
         DateTime? DeveloperLoggingEndsAt)
-    : IFeaturesContext;
+    : IFeaturesContext
+{
+    public bool IsInFeaturesContext => true;
+}

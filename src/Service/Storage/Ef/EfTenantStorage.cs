@@ -55,6 +55,11 @@ public class EfTenantStorage : ITenantStorage
         return db.AccountInfo.FirstOrDefaultAsync();
     }
 
+    public AppFeature GetAppFeatures()
+    {
+        return db.AppFeatures.FirstOrDefault();
+    }
+
     public Task<AppFeature> GetAppFeaturesAsync()
     {
         return db.AppFeatures.FirstOrDefaultAsync();

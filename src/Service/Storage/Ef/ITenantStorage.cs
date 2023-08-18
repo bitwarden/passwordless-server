@@ -13,6 +13,7 @@ public interface ITenantStorage
     Task DeleteCredential(byte[] id);
     Task<bool> ExistsAsync(byte[] credentialId);
     Task<AccountMetaInformation> GetAccountInformation();
+    AppFeature GetAppFeatures();
     Task<AppFeature> GetAppFeaturesAsync();
     Task<ApiKeyDesc> GetApiKeyAsync(string apiKey);
     Task<StoredCredential> GetCredential(byte[] credentialId);

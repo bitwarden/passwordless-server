@@ -106,7 +106,7 @@ public class AppTests : BackendTests
             var storage = factory.Create(app.AppId);
             var info = await storage.GetAppFeaturesAsync();
             Assert.Equal(info.Tenant, app.AppId);
-            Assert.False(info.AuditLoggingIsEnabled);
+            Assert.True(info.AuditLoggingIsEnabled);
             Assert.Equal(30, info.AuditLoggingRetentionPeriod);
             Assert.Null(info.DeveloperLoggingEndsAt);
         }
@@ -114,7 +114,7 @@ public class AppTests : BackendTests
     }
 
     [Fact]
-    public async Task GetFeaturesAsync_Modifies_Features()
+    public async Task GetFeaturesAsync_Returns_ExpectedResult()
     {
         var app = await CreateAppAsync();
         var request = new HttpRequestMessage(HttpMethod.Get, $"/admin/apps/{app.AppId}/features");
@@ -126,7 +126,7 @@ public class AppTests : BackendTests
         var actual = await actualResponse.Content.ReadFromJsonAsync<AppFeatureDto>();
 
         Assert.Equal(365, actual.AuditLoggingRetentionPeriod);
-        Assert.False(actual.AuditLoggingIsEnabled);
+        Assert.True(actual.AuditLoggingIsEnabled);
         Assert.Null(actual.DeveloperLoggingEndsAt);
     }
 }

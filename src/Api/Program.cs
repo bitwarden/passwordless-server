@@ -6,7 +6,7 @@ using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
-using Passwordless.Api.Middleware;
+using Passwordless.Common.Parsers;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
@@ -90,7 +90,34 @@ services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
-services.AddScoped<IFeaturesContext, NullFeaturesContext>();
+services.AddScoped<IFeaturesContext>(sp =>
+{
+    var httpContext = sp.GetService<IHttpContextAccessor>()?.HttpContext;
+    if (httpContext == null) return new NullFeaturesContext();
+
+    string appId = null;
+    if (httpContext.Request.RouteValues.ContainsKey("appId"))
+    {
+        appId = httpContext.Request.RouteValues["appId"].ToString();
+    }
+    if (httpContext.Request.Headers.ContainsKey("ApiKey"))
+    {
+        appId = ApiKeyParser.GetAppId(httpContext.Request.Headers["ApiKey"].ToString());
+    }
+    if (httpContext.Request.Headers.ContainsKey("ApiSecret"))
+    {
+        appId = ApiKeyParser.GetAppId(httpContext.Request.Headers["ApiSecret"].ToString());
+    }
+    if (appId == null) return new NullFeaturesContext();
+    var storageFactory = sp.GetRequiredService<ITenantStorageFactory>();
+    var storage = storageFactory.Create(appId);
+    var features = storage.GetAppFeatures();
+    if (features != null)
+    {
+        return new FeaturesContext(features.AuditLoggingIsEnabled, features.AuditLoggingRetentionPeriod, features.DeveloperLoggingEndsAt);
+    }
+    return new NullFeaturesContext();
+});
 
 if (builder.Environment.IsDevelopment())
 {
@@ -129,8 +156,6 @@ app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
-app.UseMiddleware<FeaturesManagementContextMiddleware>();
-app.UseMiddleware<FeaturesApiKeyContextMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
 app.MapAliasEndpoints();
