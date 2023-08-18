@@ -51,4 +51,12 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/features", request);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<AppFeatureDto> GetFeaturesAsync(string appId)
+    {
+        var response = await _client.GetAsync($"admin/apps/{appId}/features");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<AppFeatureDto>();
+        return result;
+    }
 }

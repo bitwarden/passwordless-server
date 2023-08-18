@@ -79,6 +79,10 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        app.MapGet("/admin/apps/{appId}/features", GetFeaturesAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
         app.MapPost("/apps/features", SetFeaturesAsync)
             .RequireSecretKey()
             .RequireCors("default");
@@ -99,6 +103,15 @@ public static class AppsEndpoints
     {
         await service.SetFeaturesAsync(payload);
         return NoContent();
+    }
+
+
+    public static async Task<IResult> GetFeaturesAsync(
+        [FromRoute] string appId,
+        ISharedManagementService service)
+    {
+        var features = await service.GetFeaturesAsync(appId);
+        return Ok(features);
     }
 
     public static async Task<IResult> DeleteApplicationAsync(

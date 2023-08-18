@@ -26,6 +26,7 @@ public interface ISharedManagementService
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
+    Task<AppFeatureDto> GetFeaturesAsync(string appId);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -281,6 +282,14 @@ public class SharedManagementService : ISharedManagementService
         }
         var storage = tenantFactory.Create(appId);
         await storage.SetFeaturesAsync(payload);
+    }
+
+    public async Task<AppFeatureDto> GetFeaturesAsync(string appId)
+    {
+        var storage = tenantFactory.Create(appId);
+        var entity = await storage.GetAppFeaturesAsync();
+        var dto = AppFeatureDto.FromEntity(entity);
+        return dto;
     }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
