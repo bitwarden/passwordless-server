@@ -14,7 +14,8 @@ public class AccountEndpointsTests
     [Fact]
     public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()
     {
-        var payload = new MarkDeleteAppDto { AppId = "demo-application", DeletedBy = "admin@example.com" };
+        var appId = "demo-application";
+        var payload = new MarkDeleteAppDto { DeletedBy = "admin@example.com" };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.MarkDeleteApplicationAsync(
@@ -27,6 +28,7 @@ public class AccountEndpointsTests
         var loggerMock = new Mock<ILogger>();
 
         var actual = await AppsEndpoints.MarkDeleteApplicationAsync(
+            appId,
             payload,
             sharedManagementServiceMock.Object,
             httpContextAccessorMock.Object,
@@ -44,7 +46,7 @@ public class AccountEndpointsTests
     [Fact]
     public async Task DeleteApplicationAsync_Returns_ExpectedResult()
     {
-        var payload = new AppIdDTO() { AppId = "demo-application" };
+        var appId = "demo-application";
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.DeleteApplicationAsync(
@@ -52,7 +54,7 @@ public class AccountEndpointsTests
             .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
         var loggerMock = new Mock<ILogger>();
 
-        var actual = await AppsEndpoints.DeleteApplicationAsync(payload, sharedManagementServiceMock.Object, loggerMock.Object);
+        var actual = await AppsEndpoints.DeleteApplicationAsync(appId, sharedManagementServiceMock.Object, loggerMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;

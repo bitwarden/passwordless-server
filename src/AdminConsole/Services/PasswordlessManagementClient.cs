@@ -22,7 +22,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
 
     public async Task<MarkDeleteApplicationResponse> MarkDeleteApplication(MarkDeleteApplicationRequest request)
     {
-        var response = await _client.PostAsJsonAsync("apps/mark-delete", new { request.AppId, request.DeletedBy });
+        var response = await _client.PostAsJsonAsync($"admin/apps/{request.AppId}/mark-delete", new { request.DeletedBy });
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<MarkDeleteApplicationResponse>();
     }
@@ -36,9 +36,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
 
     public async Task<bool> DeleteApplicationAsync(string application)
     {
-        var request = new { appId = application };
-        var res = await _client.PostAsJsonAsync("apps/delete", request);
-        var why = await res.Content.ReadAsStringAsync();
+        var res = await _client.DeleteAsync($"admin/apps/{application}/delete");
         return res.IsSuccessStatusCode;
     }
 

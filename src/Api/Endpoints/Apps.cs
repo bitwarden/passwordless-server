@@ -43,17 +43,17 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/freeze", async (AppIdDTO payload, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/freeze", async ([FromRoute] string appId, ISharedManagementService service) =>
             {
-                await service.FreezeAccount(payload.AppId);
+                await service.FreezeAccount(appId);
                 return Ok();
             })
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/unfreeze", async (AppIdDTO payload, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/unfreeze", async ([FromRoute] string appId, ISharedManagementService service) =>
             {
-                await service.UnFreezeAccount(payload.AppId);
+                await service.UnFreezeAccount(appId);
                 return Ok();
             })
             .RequireManagementKey()
@@ -63,11 +63,11 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/delete", DeleteApplicationAsync)
+        app.MapDelete("/admin/apps/{appId}", DeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/mark-delete", MarkDeleteApplicationAsync)
+        app.MapPost("/admin/apps/{appId}/mark-delete", MarkDeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -101,23 +101,24 @@ public static class AppsEndpoints
     }
 
     public static async Task<IResult> DeleteApplicationAsync(
-        AppIdDTO payload,
+        [FromRoute] string appId,
         ISharedManagementService service,
         ILogger logger)
     {
-        var result = await service.DeleteApplicationAsync(payload.AppId);
+        var result = await service.DeleteApplicationAsync(appId);
         logger.LogWarning("account/delete was issued {@Res}", result);
         return Ok(result);
     }
 
     public static async Task<IResult> MarkDeleteApplicationAsync(
-        MarkDeleteAppDto payload,
+        [FromRoute] string appId,
+        [FromBody] MarkDeleteAppDto payload,
         ISharedManagementService service,
         IRequestContext requestContext,
         ILogger logger)
     {
         var baseUrl = requestContext.GetBaseUrl();
-        var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy, baseUrl);
+        var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
         return Ok(result);
     }
