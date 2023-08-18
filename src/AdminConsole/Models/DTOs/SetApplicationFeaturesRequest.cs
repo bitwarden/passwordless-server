@@ -1,9 +1,7 @@
-namespace Passwordless.Api.Models;
+namespace Passwordless.AdminConsole.Models.DTOs;
 
 public sealed class SetApplicationFeaturesRequest
 {
-    public IEnumerable<string> AppIds { get; set; }
-
     public bool AuditLoggingIsEnabled { get; set; }
 
     public int AuditLoggingRetentionPeriod { get; set; }

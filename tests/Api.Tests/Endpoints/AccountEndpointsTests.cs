@@ -81,19 +81,19 @@ public class AccountEndpointsTests
     }
     #endregion
 
-    #region SetFeaturesBulkAsync
+    #region ManageFeaturesAsync
     [Fact]
-    public async Task SetFeaturesBulkAsync_Returns_ExpectedResult()
+    public async Task ManageFeaturesAsync_Returns_ExpectedResult()
     {
-        var payload = new SetFeaturesBulkDto
+        const string appId = "myappid";
+        var payload = new ManageFeaturesDto
         {
             AuditLoggingRetentionPeriod = 14,
-            AuditLoggingIsEnabled = true,
-            Tenants = new[] { "1", "2", "3" }
+            AuditLoggingIsEnabled = true
         };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
 
-        var actual = await AppsEndpoints.SetFeaturesBulkAsync(payload, sharedManagementServiceMock.Object);
+        var actual = await AppsEndpoints.ManageFeaturesAsync(appId, payload, sharedManagementServiceMock.Object);
 
         Assert.Equal(typeof(NoContent), actual.GetType());
     }

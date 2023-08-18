@@ -75,7 +75,7 @@ public static class AppsEndpoints
         app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
 
-        app.MapPost("/apps/features_bulk", SetFeaturesBulkAsync)
+        app.MapPost("/admin/apps/{appId}/features", ManageFeaturesAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -84,11 +84,12 @@ public static class AppsEndpoints
             .RequireCors("default");
     }
 
-    public static async Task<IResult> SetFeaturesBulkAsync(
-        SetFeaturesBulkDto payload,
+    public static async Task<IResult> ManageFeaturesAsync(
+        [FromRoute] string appId,
+        [FromBody] ManageFeaturesDto payload,
         ISharedManagementService service)
     {
-        await service.SetFeaturesAsync(payload);
+        await service.SetFeaturesAsync(appId, payload);
         return NoContent();
     }
 

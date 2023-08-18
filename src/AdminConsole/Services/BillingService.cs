@@ -3,8 +3,8 @@ using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
-using Passwordless.Api.Models;
 using Stripe;
 using Application = AdminConsole.Models.Application;
 
@@ -124,21 +124,19 @@ public class SharedBillingService
 
         // set the new plans on each app
         List<Application> apps = await _dbContext.Applications.Where(a => a.OrganizationId == orgId).ToListAsync();
+        var features = _plansOptions[planName];
+        var setFeaturesRequest = new SetApplicationFeaturesRequest();
+        setFeaturesRequest.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
+        setFeaturesRequest.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
         foreach (Application app in apps)
         {
             app.BillingSubscriptionItemId = lineItem.Id;
             app.BillingPriceId = priceId;
             app.BillingPlan = planName;
+            await _passwordlessClient.SetFeaturesAsync(app.Id, setFeaturesRequest);
         }
 
         await _dbContext.SaveChangesAsync();
-
-        var features = _plansOptions[planName];
-        var setFeaturesRequest = new SetApplicationFeaturesRequest();
-        setFeaturesRequest.AppIds = apps.Select(x => x.Id).ToList();
-        setFeaturesRequest.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
-        setFeaturesRequest.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
-        await _passwordlessClient.SetFeaturesAsync(setFeaturesRequest);
     }
 
     private async Task<Subscription> GetSubscription(string subscriptionId)

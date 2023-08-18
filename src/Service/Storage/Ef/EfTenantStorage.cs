@@ -170,6 +170,14 @@ public class EfTenantStorage : ITenantStorage
         await db.SaveChangesAsync();
     }
 
+    public async Task SetFeaturesAsync(ManageFeaturesDto features)
+    {
+        var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
+        existingEntity.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
+        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        await db.SaveChangesAsync();
+    }
+
     public async Task SetAppDeletionDate(DateTime deletionAt)
     {
         await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));

@@ -25,7 +25,7 @@ public interface ISharedManagementService
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
-    Task SetFeaturesAsync(SetFeaturesBulkDto payload);
+    Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -268,18 +268,18 @@ public class SharedManagementService : ISharedManagementService
         return tenants;
     }
 
-    public async Task SetFeaturesAsync(SetFeaturesBulkDto payload)
+    public async Task SetFeaturesAsync(string appId, ManageFeaturesDto payload)
     {
         if (payload == null)
         {
             throw new ApiException("No 'body' or 'parameters' were passed.", 400);
         }
 
-        if (payload.Tenants == null || !payload.Tenants.Any())
+        if (string.IsNullOrWhiteSpace(appId))
         {
-            throw new ApiException("'Tenants' is required.", 400);
+            throw new ApiException($"'{nameof(appId)}' is required.", 400);
         }
-        var storage = _globalStorageFactory.Create();
+        var storage = tenantFactory.Create(appId);
         await storage.SetFeaturesAsync(payload);
     }
 

@@ -25,7 +25,7 @@ public class ApplicationServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("No 'body' or 'parameters' were passed.", actual.Message);
 
-        _storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
+        _storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesDto>()), Times.Never);
     }
 
     [Fact]

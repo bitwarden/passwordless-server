@@ -282,75 +282,67 @@ public class SharedManagementServiceTests
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenPayloadIsNull()
     {
-        var storageMock = new Mock<IGlobalStorage>();
-        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+        const string appId = "myappid";
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
 
-        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(null));
+        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(appId, null));
 
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("No 'body' or 'parameters' were passed.", actual.Message);
 
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesDto>()), Times.Never);
     }
 
     [Fact]
-    public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsNull()
+    public async Task SetFeaturesAsync_Throws_ApiException_WhenAppIdIsNull()
     {
-        var payload = new SetFeaturesBulkDto { Tenants = null };
-        var storageMock = new Mock<IGlobalStorage>();
-        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+        var payload = new ManageFeaturesDto();
 
-        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(payload));
+        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(null, payload));
 
         Assert.Equal(400, actual.StatusCode);
-        Assert.Equal("'Tenants' is required.", actual.Message);
+        Assert.Equal("'appId' is required.", actual.Message);
 
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
     }
 
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsEmpty()
     {
-        var payload = new SetFeaturesBulkDto { Tenants = new List<string>(0) };
-        var storageMock = new Mock<IGlobalStorage>();
-        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+        var payload = new ManageFeaturesDto();
 
-        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(payload));
+        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(string.Empty, payload));
 
         Assert.Equal(400, actual.StatusCode);
-        Assert.Equal("'Tenants' is required.", actual.Message);
+        Assert.Equal("'appId' is required.", actual.Message);
 
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<SetFeaturesBulkDto>()), Times.Never);
     }
 
     [Fact]
     public async Task SetFeaturesAsync_Returns_ExpectedResult()
     {
-        var payload = new SetFeaturesBulkDto
+        const string appId = "myappid";
+        var payload = new ManageFeaturesDto
         {
-            Tenants = new List<string>
-            {
-                "app1",
-                "app2"
-            },
             AuditLoggingIsEnabled = true,
             AuditLoggingRetentionPeriod = 7
         };
-        var storageMock = new Mock<IGlobalStorage>();
-        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))
+            .Returns(storageMock.Object);
 
-        await _sut.SetFeaturesAsync(payload);
+        await _sut.SetFeaturesAsync(appId, payload);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
-        _storageFactoryMock.Verify(x => x.Create(), Times.Once);
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
+        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         storageMock.Verify(x => x.SetFeaturesAsync(
-            It.Is<SetFeaturesBulkDto>(p => p == payload)), Times.Once);
+            It.Is<ManageFeaturesDto>(p => p == payload)), Times.Once);
     }
     #endregion
 }

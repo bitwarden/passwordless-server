@@ -1,6 +1,5 @@
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
-using Passwordless.Api.Models;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -47,9 +46,9 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         return await response.Content.ReadFromJsonAsync<CancelApplicationDeletionResponse>();
     }
 
-    public async Task SetFeaturesAsync(SetApplicationFeaturesRequest request)
+    public async Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request)
     {
-        var response = await _client.PostAsJsonAsync($"apps/features", request);
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/features", request);
         response.EnsureSuccessStatusCode();
     }
 }
