@@ -2,5 +2,6 @@ namespace Passwordless.Service.Features;
 
 public sealed record FeaturesContext(
         bool AuditLoggingIsEnabled,
-        int AuditLoggingRetentionPeriod)
+        int AuditLoggingRetentionPeriod,
+        DateTime? DeveloperLoggingEndsAt)
     : IFeaturesContext;

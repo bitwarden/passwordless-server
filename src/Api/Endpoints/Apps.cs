@@ -35,7 +35,7 @@ public static class AppsEndpoints
                 IFeaturesContext featuresContext) =>
             {
                 // Since we're creating an app, we cannot have a features context yet.
-                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod);
+                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod, null);
 
                 var result = await service.GenerateAccount(appId, payload);
                 return Ok(result);
@@ -106,12 +106,15 @@ public static class AppsEndpoints
     }
 
 
-    public static async Task<IResult> GetFeaturesAsync(
-        [FromRoute] string appId,
-        ISharedManagementService service)
+    public static async Task<IResult> GetFeaturesAsync(IFeaturesContext featuresContext)
     {
-        var features = await service.GetFeaturesAsync(appId);
-        return Ok(features);
+        var dto = new AppFeatureDto
+        {
+            AuditLoggingIsEnabled = featuresContext.AuditLoggingIsEnabled,
+            AuditLoggingRetentionPeriod = featuresContext.AuditLoggingRetentionPeriod,
+            DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt
+        };
+        return Ok(dto);
     }
 
     public static async Task<IResult> DeleteApplicationAsync(
