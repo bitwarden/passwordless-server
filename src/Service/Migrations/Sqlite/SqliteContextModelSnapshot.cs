@@ -42,50 +42,6 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.ToTable("AccountInfo");
                 });
 
-            modelBuilder.Entity("Passwordless.Service.Models.AppEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AppName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Facility")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("HostName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PerformedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("PerformedOn")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Severity")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("TargetedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TenantId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppEvents");
-                });
-
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Property<string>("Tenant")
