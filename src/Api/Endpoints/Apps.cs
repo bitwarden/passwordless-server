@@ -73,6 +73,7 @@ public static class AppsEndpoints
             .RequireCors("default");
 
         app.MapPost("/admin/apps/{appId}/features", ManageFeaturesAsync)
+            .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -81,6 +82,7 @@ public static class AppsEndpoints
             .RequireCors("default");
 
         app.MapPost("/apps/features", SetFeaturesAsync)
+            .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors("default");
     }
