@@ -130,7 +130,7 @@ public class AppTests : BackendTests
         Assert.False(res.IsSuccessStatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
-    
+
     [Fact]
     public async Task GetFeaturesAsync_Returns_ExpectedResult()
     {
@@ -147,7 +147,7 @@ public class AppTests : BackendTests
         Assert.True(actual.AuditLoggingIsEnabled);
         Assert.Null(actual.DeveloperLoggingEndsAt);
     }
-    
+
     [Fact]
     public async Task ManageFeaturesAsync_Returns_BadRequest_WhenAuditLoggingRetentionPeriodIsNegative()
     {
