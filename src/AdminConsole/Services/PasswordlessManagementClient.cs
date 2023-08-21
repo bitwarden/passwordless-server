@@ -59,4 +59,10 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var result = await response.Content.ReadFromJsonAsync<AppFeatureDto>();
         return result;
     }
+
+    public async Task LogEventAsync(AuditLogEventRequest createOrganizationCreatedEvent)
+    {
+        var response = await _client.PostAsJsonAsync("events", createOrganizationCreatedEvent);
+        response.EnsureSuccessStatusCode();
+    }
 }

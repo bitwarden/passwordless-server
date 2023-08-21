@@ -5,6 +5,8 @@ using AdminConsole.Services.Mail;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Services;
+using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
 
 namespace AdminConsole.Pages.Organization;
 
@@ -15,17 +17,21 @@ public class Create : PageModel
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly IMailService _mailService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
+    private readonly IAuditLogService _auditLogService;
 
     public CreateModel Form { get; set; }
 
     public Create(ConsoleDbContext context,
         UserManager<ConsoleAdmin> userManager,
-        IMailService mailService, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager)
+        IMailService mailService, 
+        MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
+        IAuditLogService auditLogService)
     {
         _context = context;
         _userManager = userManager;
         _mailService = mailService;
         _magicLinkSignInManager = magicLinkSignInManager;
+        _auditLogService = auditLogService;
     }
 
     public IActionResult OnGet()
@@ -65,7 +71,7 @@ public class Create : PageModel
 
         _context.Organizations.Add(org);
         await _context.SaveChangesAsync(cancellationToken);
-
+        
         // Create user
         var user = new ConsoleAdmin()
         {
@@ -82,6 +88,8 @@ public class Create : PageModel
         var url = Url.Page("/Account/useronboarding");
 
         await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
+        
+        await _auditLogService.LogOrganizationEvent(CreateOrganizationCreatedEvent(org, user));
 
         return RedirectToPage("/Organization/Verify");
     }
