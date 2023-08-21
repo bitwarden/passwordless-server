@@ -4,6 +4,7 @@ using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
 
@@ -13,7 +14,8 @@ public class AccountEndpointsTests
     [Fact]
     public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()
     {
-        var payload = new MarkDeleteAppDto { AppId = "demo-application", DeletedBy = "admin@example.com" };
+        var appId = "demo-application";
+        var payload = new MarkDeleteAppDto { DeletedBy = "admin@example.com" };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.MarkDeleteApplicationAsync(
@@ -26,6 +28,7 @@ public class AccountEndpointsTests
         var loggerMock = new Mock<ILogger>();
 
         var actual = await AppsEndpoints.MarkDeleteApplicationAsync(
+            appId,
             payload,
             sharedManagementServiceMock.Object,
             httpContextAccessorMock.Object,
@@ -43,7 +46,7 @@ public class AccountEndpointsTests
     [Fact]
     public async Task DeleteApplicationAsync_Returns_ExpectedResult()
     {
-        var payload = new AppIdDTO() { AppId = "demo-application" };
+        var appId = "demo-application";
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.DeleteApplicationAsync(
@@ -51,7 +54,7 @@ public class AccountEndpointsTests
             .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
         var loggerMock = new Mock<ILogger>();
 
-        var actual = await AppsEndpoints.DeleteApplicationAsync(payload, sharedManagementServiceMock.Object, loggerMock.Object);
+        var actual = await AppsEndpoints.DeleteApplicationAsync(appId, sharedManagementServiceMock.Object, loggerMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
@@ -75,6 +78,40 @@ public class AccountEndpointsTests
         Assert.Equal(typeof(Ok<IEnumerable<string>>), actual.GetType());
         var actualResult = (actual as Ok<IEnumerable<string>>)?.Value;
         Assert.Equal(expected, actualResult);
+    }
+    #endregion
+
+    #region ManageFeaturesAsync
+    [Fact]
+    public async Task ManageFeaturesAsync_Returns_ExpectedResult()
+    {
+        const string appId = "myappid";
+        var payload = new ManageFeaturesDto
+        {
+            AuditLoggingRetentionPeriod = 14,
+            AuditLoggingIsEnabled = true
+        };
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+
+        var actual = await AppsEndpoints.ManageFeaturesAsync(appId, payload, sharedManagementServiceMock.Object);
+
+        Assert.Equal(typeof(NoContent), actual.GetType());
+    }
+    #endregion
+
+    #region SetFeaturesAsync
+    [Fact]
+    public async Task SetFeaturesAsync_Returns_ExpectedResult()
+    {
+        var payload = new SetFeaturesDto
+        {
+            AuditLoggingRetentionPeriod = 14
+        };
+        var applicationServiceMock = new Mock<IApplicationService>();
+
+        var actual = await AppsEndpoints.SetFeaturesAsync(payload, applicationServiceMock.Object);
+
+        Assert.Equal(typeof(NoContent), actual.GetType());
     }
     #endregion
 }

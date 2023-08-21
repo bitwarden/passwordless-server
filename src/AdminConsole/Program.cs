@@ -159,6 +159,8 @@ void RunTheApp()
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
 
+    // Plan Features
+    services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
     WebApplication app = builder.Build();
 
 

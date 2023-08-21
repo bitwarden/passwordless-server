@@ -9,6 +9,7 @@ using Passwordless.Api.Helpers;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Features;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
@@ -76,6 +77,7 @@ services.ConfigureHttpJsonOptions(options =>
 services.AddDatabase(builder.Configuration);
 services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
+services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();
@@ -87,6 +89,7 @@ services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
+services.AddScoped<IFeatureContextProvider, FeatureContextProvider>();
 
 if (builder.Environment.IsDevelopment())
 {

@@ -42,6 +42,25 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.ToTable("AccountInfo");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AuditLoggingIsEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AuditLoggingRetentionPeriod")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeveloperLoggingEndsAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Tenant");
+
+                    b.ToTable("AppFeatures");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
                 {
                     b.Property<string>("Tenant")
@@ -167,6 +186,22 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.HasKey("Tenant", "DescriptorId");
 
                     b.ToTable("Credentials");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithOne("Features")
+                        .HasForeignKey("Passwordless.Service.Models.AppFeature", "Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
+                {
+                    b.Navigation("Features");
                 });
 #pragma warning restore 612, 618
         }

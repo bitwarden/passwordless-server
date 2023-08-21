@@ -55,6 +55,11 @@ public class EfTenantStorage : ITenantStorage
         return db.AccountInfo.FirstOrDefaultAsync();
     }
 
+    public Task<AppFeature> GetAppFeaturesAsync()
+    {
+        return db.AppFeatures.FirstOrDefaultAsync();
+    }
+
     public async Task<List<AliasPointer>> GetAliasesByUserId(string userid)
     {
         var res = await db.Aliases.Where(a => a.UserId == userid).ToListAsync();
@@ -156,6 +161,21 @@ public class EfTenantStorage : ITenantStorage
     public async Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId)
     {
         return !await db.Aliases.AnyAsync(a => aliases.Contains(a.Alias) && a.UserId != userId);
+    }
+
+    public async Task SetFeaturesAsync(SetFeaturesDto features)
+    {
+        var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
+        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task SetFeaturesAsync(ManageFeaturesDto features)
+    {
+        var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
+        existingEntity.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
+        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        await db.SaveChangesAsync();
     }
 
     public async Task SetAppDeletionDate(DateTime deletionAt)

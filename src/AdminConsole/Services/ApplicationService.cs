@@ -6,10 +6,10 @@ namespace Passwordless.AdminConsole.Services;
 
 public class ApplicationService
 {
-    private readonly PasswordlessManagementClient _client;
+    private readonly IPasswordlessManagementClient _client;
     private readonly ConsoleDbContext _db;
 
-    public ApplicationService(PasswordlessManagementClient client, ConsoleDbContext db)
+    public ApplicationService(IPasswordlessManagementClient client, ConsoleDbContext db)
     {
         _client = client;
         _db = db;

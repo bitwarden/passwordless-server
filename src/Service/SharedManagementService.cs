@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Passwordless.Common.Parsers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
@@ -16,7 +17,7 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 public interface ISharedManagementService
 {
     Task<bool> IsAvailable(string appId);
-    Task<AccountKeysCreation> GenerateAccount(string accountName, string adminEmail);
+    Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions);
     Task<string> ValidateSecretKey(string secretKey);
     Task<string> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
@@ -24,6 +25,8 @@ public interface ISharedManagementService
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
+    Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
+    Task<AppFeatureDto> GetFeaturesAsync(string appId);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -58,9 +61,21 @@ public class SharedManagementService : ISharedManagementService
         return !await storage.TenantExists();
     }
 
-    public async Task<AccountKeysCreation> GenerateAccount(string accountName, string adminEmail)
+    public async Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions)
     {
-        if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(adminEmail))
+        if (string.IsNullOrWhiteSpace(appId))
+        {
+            throw new ApiException($"'{nameof(appId)}' cannot be null, empty or whitespace.", 400);
+        }
+        if (appCreationOptions == null)
+        {
+            throw new ApiException("No application creation options have been defined.", 400);
+        }
+
+        var accountName = appId;
+        var adminEmail = appCreationOptions.AdminEmail;
+
+        if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))
         {
             throw new ApiException("Please set argument 'accountName' and 'adminEmail'", 400);
         }
@@ -91,7 +106,13 @@ public class SharedManagementService : ISharedManagementService
             AcountName = accountName,
             AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
-            SubscriptionTier = "Free"
+            SubscriptionTier = "Free",
+            Features = new AppFeature
+            {
+                Tenant = accountName,
+                AuditLoggingIsEnabled = appCreationOptions.AuditLoggingIsEnabled,
+                AuditLoggingRetentionPeriod = appCreationOptions.AuditLoggingRetentionPeriod
+            }
         };
         await storage.SaveAccountInformation(account);
         return new AccountKeysCreation
@@ -144,20 +165,13 @@ public class SharedManagementService : ISharedManagementService
     {
         try
         {
-            return ParseAppId(apiKey);
+            return ApiKeyParser.GetAppId(apiKey);
         }
         catch (Exception)
         {
             _logger.LogError("Could not parse accountname={apikey}", apiKey);
             throw new ApiException("Please supply the apikey or apisecret header with correct value.", 401);
         }
-    }
-
-    private static string ParseAppId(string apiKey)
-    {
-        ReadOnlySpan<char> span = apiKey.AsSpan();
-        var i = span.IndexOf(':');
-        return span[..i].ToString();
     }
 
     private static bool CheckApiKeyMatch(string hash, string input)
@@ -253,6 +267,29 @@ public class SharedManagementService : ISharedManagementService
         var storage = _globalStorageFactory.Create();
         var tenants = await storage.GetApplicationsPendingDeletionAsync();
         return tenants;
+    }
+
+    public async Task SetFeaturesAsync(string appId, ManageFeaturesDto payload)
+    {
+        if (payload == null)
+        {
+            throw new ApiException("No 'body' or 'parameters' were passed.", 400);
+        }
+
+        if (string.IsNullOrWhiteSpace(appId))
+        {
+            throw new ApiException($"'{nameof(appId)}' is required.", 400);
+        }
+        var storage = tenantFactory.Create(appId);
+        await storage.SetFeaturesAsync(payload);
+    }
+
+    public async Task<AppFeatureDto> GetFeaturesAsync(string appId)
+    {
+        var storage = tenantFactory.Create(appId);
+        var entity = await storage.GetAppFeaturesAsync();
+        var dto = AppFeatureDto.FromEntity(entity);
+        return dto;
     }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,

@@ -23,6 +23,7 @@ public abstract class DbTenantContext : DbGlobalContext
         modelBuilder.Entity<AccountMetaInformation>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<ApiKeyDesc>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<AliasPointer>().HasQueryFilter(c => c.Tenant == Tenant);
+        modelBuilder.Entity<AppFeature>().HasQueryFilter(c => c.Tenant == Tenant);
 
         base.OnModelCreating(modelBuilder);
     }

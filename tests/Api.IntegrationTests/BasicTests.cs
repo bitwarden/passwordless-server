@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests;
 
@@ -19,6 +20,27 @@ public class BasicTests : IClassFixture<TestWebApplicationFactory<Program>>
     public Task<HttpResponseMessage> PostAsync(string url, object payload)
     {
         return _client.PostAsJsonAsync(url, payload);
+    }
+
+    public async Task<(string AppId, AccountKeysCreation Result)> CreateAppAsync()
+    {
+        var appId = $"app{Guid.NewGuid():N}";
+
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{appId}/create")
+        {
+            Content = JsonContent.Create(new
+            {
+                AppId = appId,
+                AdminEmail = "anders@passwordless.dev",
+                AuditLoggingIsEnabled = true,
+                AuditLoggingRetentionPeriod = 365
+            }),
+        };
+        request.Headers.Add("ManagementKey", "dev_test_key");
+        var res = await _client.SendAsync(request);
+        res.EnsureSuccessStatusCode();
+        var result = await res.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        return (appId, result);
     }
 }
 

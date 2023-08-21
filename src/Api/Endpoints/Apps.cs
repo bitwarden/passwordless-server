@@ -1,7 +1,10 @@
-﻿using Passwordless.Api.Authorization;
+﻿using Microsoft.AspNetCore.Mvc;
+using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
+using Passwordless.Service.Features;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Server.Endpoints;
@@ -25,26 +28,29 @@ public static class AppsEndpoints
             })
             .RequireCors("default");
 
-        app.MapPost("/apps/create", async (AppCreateDTO payload, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/create", async (
+                [FromRoute] string appId,
+                [FromBody] AppCreateDTO payload,
+                ISharedManagementService service) =>
             {
-                var result = await service.GenerateAccount(payload.AppId, payload.AdminEmail);
+                var result = await service.GenerateAccount(appId, payload);
 
                 return Ok(result);
             })
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/freeze", async (AppIdDTO payload, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/freeze", async ([FromRoute] string appId, ISharedManagementService service) =>
             {
-                await service.FreezeAccount(payload.AppId);
+                await service.FreezeAccount(appId);
                 return Ok();
             })
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/unfreeze", async (AppIdDTO payload, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/unfreeze", async ([FromRoute] string appId, ISharedManagementService service) =>
             {
-                await service.UnFreezeAccount(payload.AppId);
+                await service.UnFreezeAccount(appId);
                 return Ok();
             })
             .RequireManagementKey()
@@ -54,37 +60,82 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/delete", DeleteApplicationAsync)
+        app.MapDelete("/admin/apps/{appId}", DeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/apps/mark-delete", MarkDeleteApplicationAsync)
+        app.MapPost("/admin/apps/{appId}/mark-delete", MarkDeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
         // This will be used by an email link to cancel
         app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
             .RequireCors("default");
+
+        app.MapPost("/admin/apps/{appId}/features", ManageFeaturesAsync)
+            .WithParameterValidation()
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapGet("/admin/apps/{appId}/features", GetFeaturesAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("/apps/features", SetFeaturesAsync)
+            .WithParameterValidation()
+            .RequireSecretKey()
+            .RequireCors("default");
+    }
+
+    public static async Task<IResult> ManageFeaturesAsync(
+        [FromRoute] string appId,
+        [FromBody] ManageFeaturesDto payload,
+        ISharedManagementService service)
+    {
+        await service.SetFeaturesAsync(appId, payload);
+        return NoContent();
+    }
+
+    public static async Task<IResult> SetFeaturesAsync(
+        SetFeaturesDto payload,
+        IApplicationService service)
+    {
+        await service.SetFeaturesAsync(payload);
+        return NoContent();
+    }
+
+
+    public static async Task<IResult> GetFeaturesAsync(IFeatureContextProvider featuresContextProvider)
+    {
+        var featuresContext = await featuresContextProvider.UseContext();
+        var dto = new AppFeatureDto
+        {
+            AuditLoggingIsEnabled = featuresContext.AuditLoggingIsEnabled,
+            AuditLoggingRetentionPeriod = featuresContext.AuditLoggingRetentionPeriod,
+            DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt
+        };
+        return Ok(dto);
     }
 
     public static async Task<IResult> DeleteApplicationAsync(
-        AppIdDTO payload,
+        [FromRoute] string appId,
         ISharedManagementService service,
         ILogger logger)
     {
-        var result = await service.DeleteApplicationAsync(payload.AppId);
+        var result = await service.DeleteApplicationAsync(appId);
         logger.LogWarning("account/delete was issued {@Res}", result);
         return Ok(result);
     }
 
     public static async Task<IResult> MarkDeleteApplicationAsync(
-        MarkDeleteAppDto payload,
+        [FromRoute] string appId,
+        [FromBody] MarkDeleteAppDto payload,
         ISharedManagementService service,
         IRequestContext requestContext,
         ILogger logger)
     {
         var baseUrl = requestContext.GetBaseUrl();
-        var result = await service.MarkDeleteApplicationAsync(payload.AppId, payload.DeletedBy, baseUrl);
+        var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
         return Ok(result);
     }
