@@ -9,6 +9,7 @@ using Passwordless.Api.Helpers;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.AuditLog;
 using Passwordless.Service.Features;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
@@ -84,6 +85,8 @@ services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
 builder.AddMail();
 builder.Services.AddSingleton<IMailService, DefaultMailService>();
+
+services.AddAuditLogging(builder.Configuration);
 
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>

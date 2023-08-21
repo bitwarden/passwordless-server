@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Storage.Ef.AuditLog;
 
 namespace Passwordless.Api;
 
@@ -9,10 +10,11 @@ public static class DevelopmentEndpoints
 {
     public static void UseDevelopmentEndpoints(this WebApplication app)
     {
-        app.Map("/", async (DbGlobalContext dbContext) =>
+        app.Map("/", async (DbGlobalContext dbContext, DbAuditLogContext auditLogContext) =>
         {
             // TODO: If people complain, put this behind ?do=migrate and just return a link here.
             await dbContext.Database.MigrateAsync();
+            await auditLogContext.Database.MigrateAsync();
 
             // seed with a development api key
             if (!await dbContext.ApiKeys.AnyAsync())
