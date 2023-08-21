@@ -138,6 +138,7 @@ app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
 app.MapHealthEndpoints();
+app.MapAuditLogEndpoints();
 
 app.Run();
 

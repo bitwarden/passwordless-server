@@ -1,6 +1,6 @@
 using Passwordless.Service.Models;
 
-namespace Passwordless.Service.AuditLog;
+namespace Passwordless.Service.AuditLog.Loggers;
 
 public interface IAuditLogger
 {
