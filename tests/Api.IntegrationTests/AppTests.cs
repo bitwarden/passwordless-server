@@ -114,6 +114,24 @@ public class AppTests : BackendTests
     }
 
     [Fact]
+    public async Task SetFeaturesAsync_Returns_BadRequest_WhenAuditLoggingRetentionPeriodIsNegative()
+    {
+        var app = await CreateAppAsync();
+        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/features")
+        {
+            Content = JsonContent.Create(new SetFeaturesDto
+            {
+                AuditLoggingRetentionPeriod = -1
+            })
+        };
+        request.Headers.Add("ApiSecret", app.Result.ApiSecret1);
+        var res = await _client.SendAsync(request);
+
+        Assert.False(res.IsSuccessStatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
+    }
+    
+    [Fact]
     public async Task GetFeaturesAsync_Returns_ExpectedResult()
     {
         var app = await CreateAppAsync();
@@ -128,5 +146,23 @@ public class AppTests : BackendTests
         Assert.Equal(365, actual.AuditLoggingRetentionPeriod);
         Assert.True(actual.AuditLoggingIsEnabled);
         Assert.Null(actual.DeveloperLoggingEndsAt);
+    }
+    
+    [Fact]
+    public async Task ManageFeaturesAsync_Returns_BadRequest_WhenAuditLoggingRetentionPeriodIsNegative()
+    {
+        var app = await CreateAppAsync();
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{app.AppId}/features")
+        {
+            Content = JsonContent.Create(new SetFeaturesDto
+            {
+                AuditLoggingRetentionPeriod = -1
+            })
+        };
+        request.Headers.Add("ManagementKey", "dev_test_key");
+        var res = await _client.SendAsync(request);
+
+        Assert.False(res.IsSuccessStatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 }
