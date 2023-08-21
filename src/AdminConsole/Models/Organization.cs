@@ -19,6 +19,7 @@ public class Organization
     public List<Application> Applications { get; set; }
     public string? BillingCustomerId { get; set; }
     public string? BillingSubscriptionId { get; set; }
+    public DateTime? BecamePaidAt { get; set; }
 
     public bool HasSubscription => !string.IsNullOrEmpty(BillingSubscriptionId);
     public int MaxApplications { get; set; } = 1;

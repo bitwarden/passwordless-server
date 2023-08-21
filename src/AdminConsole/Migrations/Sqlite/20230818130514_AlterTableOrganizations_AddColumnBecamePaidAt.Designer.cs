@@ -3,6 +3,7 @@ using System;
 using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Passwordless.AdminConsole.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteConsoleDbContext))]
-    partial class SqliteConsoleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230818130514_AlterTableOrganizations_AddColumnBecamePaidAt")]
+    partial class AlterTableOrganizations_AddColumnBecamePaidAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
