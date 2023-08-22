@@ -66,4 +66,12 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var response = await _client.PostAsJsonAsync("events", createOrganizationCreatedEvent);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<OrganizationAuditLogResponse> GetOrganizationAuditLog(int organizationId)
+    {
+        var response = await _client.GetAsync($"events/{organizationId}");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<OrganizationAuditLogResponse>();
+    }
 }

@@ -14,4 +14,5 @@ public interface IPasswordlessManagementClient
     Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
     Task LogEventAsync(AuditLogEventRequest createOrganizationCreatedEvent);
+    Task<OrganizationAuditLogResponse> GetOrganizationAuditLog(int organizationId);
 }
