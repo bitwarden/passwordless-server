@@ -35,7 +35,7 @@ public static class AppsEndpoints
                 IFeaturesContext featuresContext) =>
             {
                 // Since we're creating an app, we cannot have a features context yet.
-                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod);
+                featuresContext = new FeaturesContext(payload.AuditLoggingIsEnabled, payload.AuditLoggingRetentionPeriod, null);
 
                 var result = await service.GenerateAccount(appId, payload);
                 return Ok(result);
