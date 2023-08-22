@@ -9,13 +9,13 @@ public static class AuditLog
     {
         app.MapGet("events", async () =>
         {
-            
+
         }).RequireManagementKey()
             .RequireCors("default");
-        
+
         app.MapPost("events", async (AuditEventRequest request) =>
         {
-            
+
         }).RequireManagementKey()
             .RequireCors("default");
 

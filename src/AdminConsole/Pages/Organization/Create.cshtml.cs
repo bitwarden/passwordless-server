@@ -23,7 +23,7 @@ public class Create : PageModel
 
     public Create(ConsoleDbContext context,
         UserManager<ConsoleAdmin> userManager,
-        IMailService mailService, 
+        IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IAuditLogService auditLogService)
     {
@@ -71,7 +71,7 @@ public class Create : PageModel
 
         _context.Organizations.Add(org);
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         // Create user
         var user = new ConsoleAdmin()
         {
@@ -88,7 +88,7 @@ public class Create : PageModel
         var url = Url.Page("/Account/useronboarding");
 
         await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
-        
+
         await _auditLogService.LogOrganizationEvent(CreateOrganizationCreatedEvent(org, user));
 
         return RedirectToPage("/Organization/Verify");
