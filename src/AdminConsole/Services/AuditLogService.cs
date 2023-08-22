@@ -4,8 +4,7 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface IAuditLogService
 {
-    Task LogOrganizationEvent(AuditLogEventRequest createOrganizationCreatedEvent);
-    Task LogApplicationEvent();
+    Task LogOrganizationEvent(AuditLogEventRequest organizationEvent);
 }
 
 public class AuditLogService : IAuditLogService
@@ -16,14 +15,9 @@ public class AuditLogService : IAuditLogService
     {
         _client = client;
     }
-    
-    public async Task LogOrganizationEvent(AuditLogEventRequest createOrganizationCreatedEvent)
-    {
-        await _client.LogEventAsync(createOrganizationCreatedEvent);
-    }
 
-    public Task LogApplicationEvent()
+    public async Task LogOrganizationEvent(AuditLogEventRequest organizationEvent)
     {
-        throw new NotImplementedException();
+        await _client.LogEventAsync(organizationEvent);
     }
 }
