@@ -1,3 +1,4 @@
+using Passwordless.AdminConsole.AuditLog.DTOs;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 

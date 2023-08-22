@@ -1,6 +1,6 @@
 using AdminConsole.Identity;
 using AdminConsole.Models;
-using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.AuditLog.DTOs;
 
 namespace Passwordless.AdminConsole.AuditLog;
 

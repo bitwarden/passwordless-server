@@ -1,4 +1,4 @@
-using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.AuditLog.DTOs;
 
 namespace Passwordless.AdminConsole.Services;
 

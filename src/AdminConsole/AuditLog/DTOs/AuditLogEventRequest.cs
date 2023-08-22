@@ -1,4 +1,4 @@
-namespace Passwordless.AdminConsole.Models.DTOs;
+namespace Passwordless.AdminConsole.AuditLog.DTOs;
 
 public record AuditLogEventRequest(
     string PerformedBy,
