@@ -8,17 +8,17 @@ public static class AuditLog
 {
     public static void MapAuditLogEndpoints(this WebApplication app)
     {
-        app.MapGet("events/{appId}", async () =>
+        app.MapGet("events/{appId}", async (string appId) =>
             {
             }).RequireManagementKey()
             .RequireCors("default");
 
-        app.MapGet("events/{organizationId}", async () =>
+        app.MapGet("events/{organizationId:int}", async (int organizationId) =>
             {
             }).RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("events", async (AuditEventRequest request, IAuditLoggerFactory factory, HttpRequest httpRequest) =>
+        app.MapPost("events", async (AuditEventRequest request, IAuditLoggerFactory factory) =>
             {
                 var auditLogger = await factory.Create();
                 await auditLogger.LogEvent(request.ToEvent());
