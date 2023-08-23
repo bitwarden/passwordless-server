@@ -11,16 +11,17 @@ namespace AdminConsole.Pages;
 [IgnoreAntiforgeryToken]
 public class ErrorModel : PageModel
 {
-    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-
-    public ErrorModel()
-    {
-    }
-
     public string? RequestId { get; set; }
 
+    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     public string Message { get; set; }
+
+    private readonly ILogger<ErrorModel> _logger;
+
+    public ErrorModel(ILogger<ErrorModel> logger)
+    {
+        _logger = logger;
+    }
 
     public ProblemDetails? ProblemDetails { get; set; }
 
