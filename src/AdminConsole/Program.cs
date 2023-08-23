@@ -139,7 +139,7 @@ void RunTheApp()
         var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
 
         client.BaseAddress = new Uri(options.Value.ApiUrl);
-    });
+    }).AddHttpMessageHandler<PasswordlessDelegatingHandler>();
 
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
