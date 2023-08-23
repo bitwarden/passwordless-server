@@ -18,6 +18,19 @@ public static class AuditEventExtensions
         ApiKeyAbbreviated = apiAbbreviation
     };
 
+    public static AuditEventResponse ToEvent(this AuditEvent dbEvent) => new()
+    {
+        PerformedAt = dbEvent.PerformedAt,
+        Message = dbEvent.Message,
+        PerformedBy = dbEvent.PerformedBy,
+        TenantId = dbEvent.TenantId,
+        OrganizationId = dbEvent.OrganizationId,
+        EventType = dbEvent.EventType.ToString(),
+        Severity = dbEvent.Severity.ToString(),
+        Subject = dbEvent.Subject,
+        ApiKeyAbbreviated = dbEvent.ApiKeyAbbreviated
+    };
+
     public static AuditEvent ToEvent(this AuditEventDto auditEventDto) => new()
     {
         Id = Guid.NewGuid(),

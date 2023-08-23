@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Passwordless.Service.Helpers;
 
 namespace Passwordless.Service.AuditLog;
 
@@ -18,6 +19,6 @@ public class AuditLoggerStorageFactory : IAuditLoggerStorageFactory
     {
         if (_options.Value.DatabaseStorage) return ActivatorUtilities.CreateInstance<AuditLoggerEfStorage>(_provider);
 
-        throw new Exception("Invalid AuditLogger storage configuration");
+        throw new ApiException("Invalid AuditLogger storage configuration");
     }
 }
