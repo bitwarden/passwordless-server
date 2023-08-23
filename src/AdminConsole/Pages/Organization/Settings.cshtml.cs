@@ -11,6 +11,7 @@ namespace AdminConsole.Pages.Organization;
 public class SettingsModel : PageModel
 {
     private readonly DataService _dataService;
+    private readonly SharedBillingService _billingService;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
     private readonly IMailService _mailService;
     private readonly ISystemClock _systemClock;
@@ -21,12 +22,14 @@ public class SettingsModel : PageModel
 
     public SettingsModel(
         DataService dataService,
+        SharedBillingService billingService,
         SignInManager<ConsoleAdmin> signInManager,
         IMailService mailService,
         ISystemClock systemClock,
         ILogger<SettingsModel> logger)
     {
         _dataService = dataService;
+        _billingService = billingService;
         _signInManager = signInManager;
         _mailService = mailService;
         _systemClock = systemClock;
@@ -44,6 +47,19 @@ public class SettingsModel : PageModel
         var organization = await _dataService.GetOrganizationWithData();
         var emails = organization.Admins.Select(x => x.Email).ToList();
         await _mailService.SendOrganizationDeletedAsync(organization.Name, emails, username, _systemClock.UtcNow.UtcDateTime);
+
+        if (organization.HasSubscription)
+        {
+            var hasSubscription = await _billingService.CancelSubscription(organization.BillingSubscriptionId!);
+            if (hasSubscription)
+            {
+                _logger.LogError(
+                    "Organization {orgId} tried to cancel subscription {subscriptionId}, but failed.",
+                    organization.Name,
+                    organization.BillingSubscriptionId);
+                throw new Exception("Failed to cancel subscription.");
+            }
+        }
 
         var isDeleted = await _dataService.DeleteOrganizationAsync(Organization.Id);
         if (isDeleted)

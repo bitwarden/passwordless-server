@@ -158,4 +158,24 @@ public class SharedBillingService
     {
         // todo: Handled paid or unpaid events
     }
+
+    /// <summary>
+    /// Cancels a Stripe subscription.
+    /// </summary>
+    /// <param name="subscriptionId"></param>
+    /// <returns>Whether operation was successful</returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<bool> CancelSubscription(string subscriptionId)
+    {
+        if (string.IsNullOrWhiteSpace(subscriptionId))
+        {
+            throw new ArgumentNullException(nameof(subscriptionId));
+        }
+        var service = new SubscriptionService();
+        var subscription = await service.CancelAsync(subscriptionId);
+
+        return subscription.CancelAt.HasValue
+               || subscription.CanceledAt.HasValue
+               || subscription.Status == "canceled";
+    }
 }
