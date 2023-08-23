@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Reflection;
 using AdminConsole;
 using AdminConsole.Authorization;
@@ -140,8 +139,6 @@ void RunTheApp()
         var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
 
         client.BaseAddress = new Uri(options.Value.ApiUrl);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/problem+details"));
     }).AddHttpMessageHandler<PasswordlessDelegatingHandler>();
 
     // Magic link SigninManager
