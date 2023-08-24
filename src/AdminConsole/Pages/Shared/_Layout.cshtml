@@ -47,11 +47,13 @@
                         {
                             @Html.Partial("_NavLinkPartial", ("Playground", "/app/Playground/Client", "Icons/Beaker"))
                         }
+                            @Html.Partial("_NavLinkPartial", ("App Logs", "/app/Settings/Log", "Icons/CodeBracketSquare"))
                     </div>
                 }
                 @Html.Partial("_NavLinkPartial", ("Billing", "/billing/manage", "Icons/CodeBracketSquare"))
                 @Html.Partial("_NavLinkPartial", ("Admins", "/organization/admins", "Icons/Users"))
                 @Html.Partial("_NavLinkPartial", ("Settings", "/organization/settings", "Icons/Cog"))
+                @Html.Partial("_NavLinkPartial", ("Audit Logs", "/organization/log", "Icons/CodeBracketSquare"))
             </nav>
         </div>
         <div class="flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black">
