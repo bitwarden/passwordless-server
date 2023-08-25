@@ -37,10 +37,13 @@
                 {
                     <div class="m-2 rounded-md bg-opacity-25 bg-black p-4">
                         <div class="text-xs font-semibold text-blue-200 ml-3 mb-3 truncate">App: @CurrentContext.AppId</div>
-                        @Html.Partial("_NavLinkPartial", ("Getting Started", "/app/onboarding/getstarted", "Icons/Users"))
-                        @Html.Partial("_NavLinkPartial", ("Users", "/app/credentials/list", "Icons/Users"))
+                        @if (!CurrentContext.IsFrozen)
+                        {
+                            @Html.Partial("_NavLinkPartial", ("Getting Started", "/app/onboarding/getstarted", "Icons/Users"))
+                            @Html.Partial("_NavLinkPartial", ("Playground", "/app/Playground/Client", "Icons/Beaker"))
+                            @Html.Partial("_NavLinkPartial", ("Users", "/app/credentials/list", "Icons/Users"))
+                        }
                         @Html.Partial("_NavLinkPartial", ("Settings", "/app/Settings/Settings", "Icons/Cog"))
-                        @Html.Partial("_NavLinkPartial", ("Playground", "/app/Playground/Client", "Icons/Beaker"))
                     </div>
                 }
                 @Html.Partial("_NavLinkPartial", ("Billing", "/billing/manage", "Icons/CodeBracketSquare"))
