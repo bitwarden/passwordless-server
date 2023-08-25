@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Passwordless.Common.AuditLog;
+using Passwordless.Common.AuditLog.Models;
+using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.AuditLog.Models;
-using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef.AuditLog;
 
 namespace Passwordless.Service.AuditLog;
@@ -20,10 +22,8 @@ public class AuditLoggerEfStorage : IAuditLogStorage
         await _db.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<AuditEvent>> GetAuditLogAsync(int organizationId, CancellationToken cancellationToken)
-    {
-        return await _db.AppEvents
-            .Where(x => x.OrganizationId == organizationId)
+    public async Task<IEnumerable<AuditEvent>> GetAuditLogAsync(string tenantId, CancellationToken cancellationToken) =>
+        await _db.AppEvents
+            .Where(x => x.TenantId == tenantId)
             .ToListAsync(cancellationToken);
-    }
 }

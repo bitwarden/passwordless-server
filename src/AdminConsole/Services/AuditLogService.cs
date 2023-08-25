@@ -1,29 +1,38 @@
+using Passwordless.AdminConsole.AuditLog;
 using Passwordless.AdminConsole.AuditLog.DTOs;
+using Passwordless.AdminConsole.AuditLog.Loggers;
+using Passwordless.AdminConsole.AuditLog.Storage;
 
 namespace Passwordless.AdminConsole.Services;
 
 public interface IAuditLogService
 {
-    Task LogOrganizationEvent(AuditLogEventRequest organizationEvent);
+    Task LogOrganizationEvent(OrganizationEventDto organizationEvent);
     Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId);
+    Task<ApplicationAuditLogResponse> GetAuditLogs();
 }
 
 public class AuditLogService : IAuditLogService
 {
-    private readonly IPasswordlessManagementClient _client;
+    private readonly IScopedPasswordlessClient _scopedPasswordlessClient;
+    private readonly IAuditLoggerProvider _provider;
+    private readonly IAuditLoggerStorageProvider _storageProvider;
 
-    public AuditLogService(IPasswordlessManagementClient client)
+    public AuditLogService(IScopedPasswordlessClient scopedPasswordlessClient,
+        IAuditLoggerProvider provider,
+        IAuditLoggerStorageProvider storageProvider)
     {
-        _client = client;
+        _scopedPasswordlessClient = scopedPasswordlessClient;
+        _provider = provider;
+        _storageProvider = storageProvider;
     }
 
-    public async Task LogOrganizationEvent(AuditLogEventRequest organizationEvent)
-    {
-        await _client.LogEventAsync(organizationEvent);
-    }
+    public async Task LogOrganizationEvent(OrganizationEventDto organizationEvent) =>
+        await (await _provider.Create()).LogEvent(organizationEvent);
 
-    public async Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId)
-    {
-        return await _client.GetOrganizationAuditLog(organizationId);
-    }
+    public async Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId) =>
+        new(organizationId, (await _storageProvider.Create().GetOrganizationEvents(organizationId)).Select(x => x.ToResponse()));
+
+    public async Task<ApplicationAuditLogResponse> GetAuditLogs() =>
+        await _scopedPasswordlessClient.GetApplicationAuditLog();
 }

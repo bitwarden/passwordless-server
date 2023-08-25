@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Passwordless.Common.AuditLog;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.Storage.Ef.AuditLog;
 
@@ -10,6 +11,7 @@ public static class AddAuditLoggingMethods
 {
     public static IServiceCollection AddAuditLogging(this IServiceCollection services, IConfiguration configuration)
     {
+
 
         services
             .AddTransient<INullAuditLogger, NullAuditLogger>()

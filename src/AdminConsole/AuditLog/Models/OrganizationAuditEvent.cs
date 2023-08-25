@@ -1,8 +1,8 @@
 using Passwordless.Common.AuditLog.Enums;
 
-namespace Passwordless.Service.AuditLog.Models;
+namespace Passwordless.AdminConsole.AuditLog.Models;
 
-public class AuditEvent
+public class OrganizationAuditEvent
 {
     public Guid Id { get; init; }
     public DateTime PerformedAt { get; init; }
@@ -11,6 +11,6 @@ public class AuditEvent
     public Severity Severity { get; init; }
     public string PerformedBy { get; init; }
     public string Subject { get; init; }
-    public string TenantId { get; init; }
-    public string ApiKeyId { get; init; }
+    public int OrganizationId { get; init; }
+    public string ManagementKeyId { get; init; }
 }

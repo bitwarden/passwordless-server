@@ -18,7 +18,6 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<Application> Applications { get; set; }
     public DbSet<Onboarding> Onboardings { get; set; }
-
     public DbSet<Invite> Invites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

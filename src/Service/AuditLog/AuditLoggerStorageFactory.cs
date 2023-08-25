@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Passwordless.Common.AuditLog;
 using Passwordless.Service.Helpers;
 
 namespace Passwordless.Service.AuditLog;

@@ -1,8 +1,8 @@
 ﻿using ApiHelpers;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
-using Passwordless.Service.AuditLog;
 using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;

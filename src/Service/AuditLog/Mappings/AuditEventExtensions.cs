@@ -1,8 +1,10 @@
-using Passwordless.Service.AuditLog.Enums;
+using Passwordless.Common.AuditLog.Enums;
+using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Models;
+using AuditEvent = Passwordless.Service.AuditLog.Models.AuditEvent;
 
-namespace Passwordless.Service.AuditLog;
+namespace Passwordless.Service.AuditLog.Mappings;
 
 public static class AuditEventExtensions
 {
@@ -15,7 +17,7 @@ public static class AuditEventExtensions
         PerformedBy = tokenRequest.UserId,
         Subject = tenantName,
         TenantId = tenantName,
-        ApiKeyAbbreviated = apiAbbreviation
+        ApiKeyId = apiAbbreviation
     };
 
     public static AuditEventResponse ToEvent(this AuditEvent dbEvent) => new()
@@ -24,11 +26,10 @@ public static class AuditEventExtensions
         Message = dbEvent.Message,
         PerformedBy = dbEvent.PerformedBy,
         TenantId = dbEvent.TenantId,
-        OrganizationId = dbEvent.OrganizationId,
         EventType = dbEvent.EventType.ToString(),
         Severity = dbEvent.Severity.ToString(),
         Subject = dbEvent.Subject,
-        ApiKeyAbbreviated = dbEvent.ApiKeyAbbreviated
+        ApiKeyId = dbEvent.ApiKeyId
     };
 
     public static AuditEvent ToEvent(this AuditEventDto auditEventDto) => new()
@@ -41,7 +42,6 @@ public static class AuditEventExtensions
         PerformedBy = auditEventDto.PerformedBy,
         Subject = auditEventDto.Subject,
         TenantId = auditEventDto.TenantId,
-        OrganizationId = auditEventDto.OrganizationId,
-        ApiKeyAbbreviated = auditEventDto.ApiKeyAbbreviated
+        ApiKeyId = auditEventDto.ApiKeyId
     };
 }

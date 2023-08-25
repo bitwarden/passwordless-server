@@ -1,0 +1,37 @@
+@page
+@model AdminConsole.Pages.Settings.Log
+
+@{
+    ViewBag.Title = "Audit Log";
+}
+
+
+<div>
+    <table>
+        <thead>
+        <tr>
+            <th>Performed By</th>
+            <th>Performed At</th>
+            <th>Severity</th>
+            <th>Message</th>
+            <th>Subject</th>
+            <th>Event Type</th>
+            <th>Api Key</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var auditEvent in Model.Events)
+        {
+            <tr>
+                <td>@auditEvent.PerformedBy</td>
+                <td>@auditEvent.PerformedAt.ToLocalTime()</td>
+                <td>@auditEvent.Severity</td>
+                <td>@auditEvent.Message</td>
+                <td>@auditEvent.Subject</td>
+                <td>@auditEvent.EventType</td>
+                <td>@string.Join("*****", auditEvent.ApiKeyAbbreviated)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

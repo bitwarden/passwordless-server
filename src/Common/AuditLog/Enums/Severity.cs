@@ -1,4 +1,4 @@
-namespace Passwordless.Service.AuditLog.Enums;
+namespace Passwordless.Common.AuditLog.Enums;
 
 public enum Severity
 {

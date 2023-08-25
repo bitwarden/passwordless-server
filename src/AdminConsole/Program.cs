@@ -145,6 +145,8 @@ void RunTheApp()
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
+    services.AddAuditLogging(builder.Configuration);
+
     // Setup mail service & provider
     builder.AddMail();
     services.AddSingleton<IMailService, DefaultMailService>();

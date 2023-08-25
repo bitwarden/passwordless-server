@@ -10,5 +10,5 @@ public class AuditEventResponse
     public string EventType { get; set; }
     public string Severity { get; set; }
     public string Subject { get; set; }
-    public string ApiKeyAbbreviated { get; set; }
+    public string ApiKeyId { get; set; }
 }

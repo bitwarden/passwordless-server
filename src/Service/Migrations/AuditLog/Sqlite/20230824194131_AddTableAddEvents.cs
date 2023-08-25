@@ -23,7 +23,7 @@ public partial class AddTableAddEvents : Migration
                 Subject = table.Column<string>(type: "TEXT", nullable: true),
                 TenantId = table.Column<string>(type: "TEXT", nullable: true),
                 OrganizationId = table.Column<int>(type: "INTEGER", nullable: true),
-                ApiKeyAbbreviated = table.Column<string>(type: "TEXT", nullable: true)
+                ApiKeyId = table.Column<string>(type: "TEXT", nullable: true)
             },
             constraints: table =>
             {

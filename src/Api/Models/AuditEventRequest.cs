@@ -1,5 +1,5 @@
-using Passwordless.Service.AuditLog.Enums;
-using Passwordless.Service.Models;
+using Passwordless.Common.AuditLog.Enums;
+using Passwordless.Common.AuditLog.Models;
 
 namespace Passwordless.Api.Models;
 

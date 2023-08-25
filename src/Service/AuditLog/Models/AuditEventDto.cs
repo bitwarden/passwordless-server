@@ -1,6 +1,6 @@
-using Passwordless.Service.AuditLog.Enums;
+using Passwordless.Common.AuditLog.Enums;
 
-namespace Passwordless.Service.Models;
+namespace Passwordless.Common.AuditLog.Models;
 
 public class AuditEventDto
 {
@@ -12,5 +12,5 @@ public class AuditEventDto
     public AuditEventType EventType { get; set; }
     public Severity Severity { get; set; }
     public string Subject { get; set; }
-    public string ApiKeyAbbreviated { get; set; }
+    public string ApiKeyId { get; set; }
 }

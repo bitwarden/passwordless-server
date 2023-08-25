@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef.AuditLog;
 namespace Passwordless.Service.Migrations.AuditLog.Sqlite
 {
     [DbContext(typeof(DbAuditSqliteContext))]
-    [Migration("20230821135032_AddTableAddEvents")]
+    [Migration("20230824194131_AddTableAddEvents")]
     partial class AddTableAddEvents
     {
         /// <inheritdoc />
@@ -26,7 +26,7 @@ namespace Passwordless.Service.Migrations.AuditLog.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ApiKeyAbbreviated")
+                    b.Property<string>("ApiKeyId")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EventType")

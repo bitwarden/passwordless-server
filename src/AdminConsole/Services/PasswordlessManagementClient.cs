@@ -74,4 +74,5 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
 
         return await response.Content.ReadFromJsonAsync<OrganizationAuditLogResponse>();
     }
+
 }
