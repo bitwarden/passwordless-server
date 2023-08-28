@@ -93,7 +93,7 @@ public class DefaultMailService : IMailService
             From = _fromEmail,
             Subject = $"Your organization '{organizationName}' was deleted.",
             TextBody =
-                $"""Your organization '{organizationName}' was deleted by {deletedBy} at {deletedAt:F} GMT.""",
+                $"""Your organization '{organizationName}' was deleted by {deletedBy} at {deletedAt:F} UTC.""",
             Tag = "organization-deleted"
         };
 
