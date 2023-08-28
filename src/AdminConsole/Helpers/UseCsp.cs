@@ -15,7 +15,7 @@ public static class UseCspExtensions
             if (context.Items.ContainsKey("csp-nonce"))
             {
                 var logger = app.ApplicationServices.GetService<ILogger>();
-                logger.LogError("CSP nonce already exists in context.");
+                logger?.LogError("CSP nonce already exists in context.");
             }
             else
             {

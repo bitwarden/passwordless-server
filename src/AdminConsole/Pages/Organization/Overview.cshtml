@@ -14,7 +14,9 @@
                 <div class="flex min-w-0 flex-1 items-center">
                     <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                     <div>
-                        <p class="truncate text-sm font-medium text-primary-500">@app.Name</p>
+                        <p class="truncate text-sm font-medium text-primary-500 flex items-center">
+                            @app.Name (@Html.Partial("Shared/Icons/Users") @app.CurrentUserCount)
+                        </p>
                         <p class="mt-2 flex items-center text-sm text-gray-500">
                             <span class="truncate">@app.Description</span>
                         </p>
@@ -30,9 +32,12 @@
                                 @* </svg> *@
                                 App Id: @app.Id
                             </p>
-                            <p class="mt-2 flex items-center text-sm text-gray-500">
-                                @Html.Partial("Shared/Icons/Users") <span class="ml-1">@app.CurrentUserCount Users</span>
-                            </p>
+                            @if (app.DeleteAt.HasValue)
+                            {
+                                <p class="mt-2 text-sm text-red-900">
+                                    Being deleted at: <local-time datetime="@app.DeleteAt.Value.ToLocalTime()"></local-time>
+                                </p>
+                            }
                         </div>
                     </div>
                     </div>

@@ -40,14 +40,11 @@
                         @if (!CurrentContext.IsFrozen)
                         {
                             @Html.Partial("_NavLinkPartial", ("Getting Started", "/app/onboarding/getstarted", "Icons/Users"))
+                            @Html.Partial("_NavLinkPartial", ("Playground", "/app/Playground/Client", "Icons/Beaker"))
                             @Html.Partial("_NavLinkPartial", ("Users", "/app/credentials/list", "Icons/Users"))
                         }
                         @Html.Partial("_NavLinkPartial", ("Settings", "/app/Settings/Settings", "Icons/Cog"))
-                        @if (!CurrentContext.IsFrozen)
-                        {
-                            @Html.Partial("_NavLinkPartial", ("Playground", "/app/Playground/Client", "Icons/Beaker"))
-                        }
-                            @Html.Partial("_NavLinkPartial", ("App Logs", "/app/Settings/Log", "Icons/CodeBracketSquare"))
+                        @Html.Partial("_NavLinkPartial", ("App Logs", "/app/Settings/Log", "Icons/CodeBracketSquare"))
                     </div>
                 }
                 @Html.Partial("_NavLinkPartial", ("Billing", "/billing/manage", "Icons/CodeBracketSquare"))
