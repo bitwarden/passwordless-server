@@ -1,6 +1,6 @@
 using Passwordless.Common.AuditLog.Enums;
 
-namespace Passwordless.Service.AuditLog.Models;
+namespace Passwordless.Common.AuditLog.Models;
 
 public class AuditEvent
 {
@@ -11,6 +11,4 @@ public class AuditEvent
     public Severity Severity { get; init; }
     public string PerformedBy { get; init; }
     public string Subject { get; init; }
-    public string TenantId { get; init; }
-    public string ApiKeyId { get; init; }
 }

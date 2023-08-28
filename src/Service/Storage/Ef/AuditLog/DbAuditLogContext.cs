@@ -10,11 +10,11 @@ public class DbAuditLogContext : DbContext
 
     }
 
-    public DbSet<AuditEvent> AppEvents => Set<AuditEvent>();
+    public DbSet<ApplicationAuditEvent> AppEvents => Set<ApplicationAuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AuditEvent>()
+        modelBuilder.Entity<ApplicationAuditEvent>()
             .HasKey(x => x.Id);
 
         base.OnModelCreating(modelBuilder);

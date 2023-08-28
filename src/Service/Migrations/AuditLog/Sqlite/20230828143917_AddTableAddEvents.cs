@@ -15,15 +15,14 @@ public partial class AddTableAddEvents : Migration
             columns: table => new
             {
                 Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                TenantId = table.Column<string>(type: "TEXT", nullable: true),
+                ApiKeyId = table.Column<string>(type: "TEXT", nullable: true),
                 PerformedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                 EventType = table.Column<int>(type: "INTEGER", nullable: false),
-                Message = table.Column<string>(type: "TEXT", nullable: true),
+                Message = table.Column<string>(type: "TEXT", nullable: false),
                 Severity = table.Column<int>(type: "INTEGER", nullable: false),
-                PerformedBy = table.Column<string>(type: "TEXT", nullable: true),
-                Subject = table.Column<string>(type: "TEXT", nullable: true),
-                TenantId = table.Column<string>(type: "TEXT", nullable: true),
-                OrganizationId = table.Column<int>(type: "INTEGER", nullable: true),
-                ApiKeyId = table.Column<string>(type: "TEXT", nullable: true)
+                PerformedBy = table.Column<string>(type: "TEXT", nullable: false),
+                Subject = table.Column<string>(type: "TEXT", nullable: false)
             },
             constraints: table =>
             {

@@ -21,7 +21,7 @@ public class AuditLoggerEfStorage : IAuditLogStorage
         await _db.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<AuditEvent>> GetAuditLogAsync(string tenantId, CancellationToken cancellationToken) =>
+    public async Task<IEnumerable<ApplicationAuditEvent>> GetAuditLogAsync(string tenantId, CancellationToken cancellationToken) =>
         await _db.AppEvents
             .Where(x => x.TenantId == tenantId)
             .ToListAsync(cancellationToken);

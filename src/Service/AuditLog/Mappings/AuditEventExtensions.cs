@@ -2,7 +2,6 @@ using Passwordless.Common.AuditLog.Enums;
 using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Models;
-using AuditEvent = Passwordless.Service.AuditLog.Models.AuditEvent;
 
 namespace Passwordless.Service.AuditLog.Mappings;
 
@@ -20,7 +19,7 @@ public static class AuditEventExtensions
         ApiKeyId = apiAbbreviation
     };
 
-    public static AuditEventResponse ToEvent(this AuditEvent dbEvent) => new()
+    public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new()
     {
         PerformedAt = dbEvent.PerformedAt,
         Message = dbEvent.Message,
@@ -32,7 +31,7 @@ public static class AuditEventExtensions
         ApiKeyId = dbEvent.ApiKeyId
     };
 
-    public static AuditEvent ToEvent(this AuditEventDto auditEventDto) => new()
+    public static ApplicationAuditEvent ToEvent(this AuditEventDto auditEventDto) => new()
     {
         Id = Guid.NewGuid(),
         PerformedAt = auditEventDto.PerformedAt,
