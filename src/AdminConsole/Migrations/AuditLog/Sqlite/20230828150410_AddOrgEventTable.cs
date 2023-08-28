@@ -5,7 +5,7 @@
 namespace Passwordless.AdminConsole.Migrations.AuditLog.Sqlite;
 
 /// <inheritdoc />
-public partial class AddTableAddEvents : Migration
+public partial class AddOrgEventTable : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,20 +14,19 @@ public partial class AddTableAddEvents : Migration
             name: "OrganizationEvents",
             columns: table => new
             {
-                OrganizationId = table.Column<int>(type: "INTEGER", nullable: false)
-                    .Annotation("Sqlite:Autoincrement", true),
                 Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
+                ManagementKeyId = table.Column<string>(type: "TEXT", nullable: false),
                 PerformedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                 EventType = table.Column<int>(type: "INTEGER", nullable: false),
                 Message = table.Column<string>(type: "TEXT", nullable: false),
                 Severity = table.Column<int>(type: "INTEGER", nullable: false),
                 PerformedBy = table.Column<string>(type: "TEXT", nullable: false),
-                Subject = table.Column<string>(type: "TEXT", nullable: false),
-                ManagementKeyId = table.Column<string>(type: "TEXT", nullable: false)
+                Subject = table.Column<string>(type: "TEXT", nullable: false)
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_OrganizationEvents", x => x.OrganizationId);
+                table.PrimaryKey("PK_OrganizationEvents", x => x.Id);
             });
     }
 

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Passwordless.AdminConsole.Migrations.AuditLog.Sqlite
 {
     [DbContext(typeof(SqliteConsoleAuditLogDbContext))]
-    [Migration("20230825194446_AlterKeyAuditEvent")]
-    partial class AlterKeyAuditEvent
+    [Migration("20230828150410_AddOrgEventTable")]
+    partial class AddOrgEventTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
