@@ -1,4 +1,3 @@
-using Passwordless.Common.AuditLog;
 using Passwordless.Common.AuditLog.Models;
 
 namespace Passwordless.Service.AuditLog.Loggers;

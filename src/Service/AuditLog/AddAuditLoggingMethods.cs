@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Passwordless.Common.AuditLog;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.Storage.Ef.AuditLog;
 

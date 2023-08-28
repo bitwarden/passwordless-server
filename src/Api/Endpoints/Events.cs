@@ -1,6 +1,5 @@
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
-using Passwordless.Common.AuditLog;
 using Passwordless.Service.AuditLog;
 using Passwordless.Service.AuditLog.Mappings;
 
