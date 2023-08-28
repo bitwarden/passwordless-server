@@ -78,9 +78,10 @@ public class DataService
 
     public async Task<bool> DeleteOrganizationAsync(int organizationId)
     {
-        var organization = new Organization { Id = organizationId };
-        _db.Organizations.Entry(organization).State = EntityState.Deleted;
+        var organization = await _db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId);
+        if (organization == null) return false;
+        _db.Organizations.Remove(organization);
         var rowsAffected = await _db.SaveChangesAsync();
-        return rowsAffected == 1;
+        return rowsAffected > 0;
     }
 }
