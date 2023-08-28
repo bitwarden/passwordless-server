@@ -2,6 +2,7 @@ using AdminConsole.Db.AuditLog;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.AuditLog.Loggers;
 using Passwordless.AdminConsole.AuditLog.Storage;
+using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.AuditLog;
 
@@ -14,6 +15,7 @@ public static class AddAuditLoggingRegistration
             .AddTransient<IOrganizationAuditLogger, OrganizationAuditLogger>()
             .AddTransient<INoOpAuditLogger, NoOpAuditLogger>()
             .AddTransient<IAuditLoggerProvider, AuditLoggerProvider>()
+            .AddTransient<IAuditLogService, AuditLogService>()
             .AddAuditDatabase(configuration);
 
     private static IServiceCollection AddAuditDatabase(this IServiceCollection serviceCollection, IConfiguration configuration)

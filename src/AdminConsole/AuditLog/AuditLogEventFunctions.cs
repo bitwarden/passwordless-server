@@ -17,6 +17,15 @@ public static class AuditLogEventFunctions
             organization.Id,
             "");
 
+    public static OrganizationEventDto CreateLoginViaMagicLinkEvent(ConsoleAdmin user) =>
+        new("System",
+            AuditEventType.AdminMagicLinkLogin,
+            $"Login email sent for {user.Id} to {user.Email}.",
+            Severity.Informational,
+            user.Id,
+            user.OrganizationId,
+            "");
+
     public static OrganizationAuditEvent ToNewEvent(this OrganizationEventDto dto) =>
         new()
         {

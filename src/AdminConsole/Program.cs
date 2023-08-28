@@ -146,9 +146,6 @@ void RunTheApp()
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
-    services.AddAuditLogging(builder.Configuration);
-    services.AddFeatures();
-
     // Setup mail service & provider
     builder.AddMail();
     services.AddSingleton<IMailService, DefaultMailService>();
@@ -158,7 +155,9 @@ void RunTheApp()
     services.AddScoped<InvitationService>();
     services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
-    services.AddAuditLogging();
+
+    services.AddAuditLogging(builder.Configuration);
+    services.AddFeatures();
 
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
