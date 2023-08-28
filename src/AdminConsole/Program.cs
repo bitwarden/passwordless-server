@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.AuditLog;
+using Passwordless.AdminConsole.Features;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Services.Mail;
@@ -146,6 +147,7 @@ void RunTheApp()
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
     services.AddAuditLogging(builder.Configuration);
+    services.AddFeatures();
 
     // Setup mail service & provider
     builder.AddMail();

@@ -1,4 +1,4 @@
-using AdminConsole.Services;
+using Passwordless.AdminConsole.Features;
 
 namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
@@ -6,17 +6,17 @@ public class AuditLoggerProvider : IAuditLoggerProvider
 {
     private readonly IOrganizationAuditLogger _organizationAuditLogger;
     private readonly INoOpAuditLogger _noOpAuditLogger;
-    private readonly DataService _dataService;
+    private readonly IFeaturesContext _featuresContext;
 
-    public AuditLoggerProvider(IOrganizationAuditLogger organizationAuditLogger, INoOpAuditLogger noOpAuditLogger, DataService dataService)
+    public AuditLoggerProvider(IOrganizationAuditLogger organizationAuditLogger, INoOpAuditLogger noOpAuditLogger, IFeaturesContext featuresContext)
     {
         _organizationAuditLogger = organizationAuditLogger;
         _noOpAuditLogger = noOpAuditLogger;
-        _dataService = dataService;
+        _featuresContext = featuresContext;
     }
 
     public async Task<IAuditLogger> Create() =>
-        true
+        await _featuresContext.IsAuditLoggingEnabled()
             ? _organizationAuditLogger
             : _noOpAuditLogger;
 }

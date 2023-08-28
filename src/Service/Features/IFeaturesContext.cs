@@ -6,5 +6,4 @@ public interface IFeaturesContext
     public int AuditLoggingRetentionPeriod { get; init; }
     public DateTime? DeveloperLoggingEndsAt { get; init; }
     public bool IsInFeaturesContext { get; }
-
 }
