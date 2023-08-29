@@ -15,7 +15,8 @@ public static class AuditLogEventFunctions
             Severity.Informational,
             organization.Id.ToString(),
             organization.Id,
-            "");
+            "",
+            DateTime.UtcNow);
 
     public static OrganizationEventDto CreateLoginViaMagicLinkEvent(ConsoleAdmin user) =>
         new("System",
@@ -24,7 +25,8 @@ public static class AuditLogEventFunctions
             Severity.Informational,
             user.Id,
             user.OrganizationId,
-            "");
+            "",
+            DateTime.UtcNow);
 
     public static OrganizationAuditEvent ToNewEvent(this OrganizationEventDto dto) =>
         new()
@@ -47,7 +49,8 @@ public static class AuditLogEventFunctions
             auditEvent.Severity,
             auditEvent.Subject,
             auditEvent.OrganizationId,
-            auditEvent.ManagementKeyId);
+            auditEvent.ManagementKeyId,
+            auditEvent.PerformedAt);
 
     public static AuditLogEvent ToResponse(this OrganizationEventDto dto) =>
         new(dto.PerformedAt,

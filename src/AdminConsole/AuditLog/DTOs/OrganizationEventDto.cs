@@ -9,7 +9,5 @@ public record OrganizationEventDto(
     Severity Severity,
     string Subject,
     int OrganizationId,
-    string ManagementKeyId)
-{
-    public DateTime PerformedAt { get; } = DateTime.UtcNow;
-};
+    string ManagementKeyId,
+    DateTime PerformedAt);
