@@ -151,7 +151,7 @@
                         const registerToken = await req.json();
                         const nicknameForDevice = data.get("nickname");
                         
-                        const {token, error} = await p.register(registerToken, nicknameForDevice);
+                        const {token, error} = await p.register(registerToken.token, nicknameForDevice);
                         document.location.reload();
                     }
                 } finally {
