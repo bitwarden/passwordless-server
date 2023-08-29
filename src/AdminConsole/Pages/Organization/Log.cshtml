@@ -6,7 +6,7 @@
 }
 
 <div>
-    <table>
+    <table class="table">
         <thead>
         <tr>
             <th>Performed By</th>
@@ -33,4 +33,8 @@
         }
         </tbody>
     </table>
+    @foreach (var page in Model.PageList)
+    {
+        <a class="pr-3 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
+    }
 </div>

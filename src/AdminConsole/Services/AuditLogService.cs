@@ -8,7 +8,8 @@ namespace Passwordless.AdminConsole.Services;
 public interface IAuditLogService
 {
     Task LogOrganizationEvent(OrganizationEventDto organizationEvent);
-    Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId);
+    Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId, int pageNumber, int numberOfResults);
+    Task<int> GetAuditLogCount(int organizationId);
     Task<ApplicationAuditLogResponse> GetAuditLogs();
 }
 
@@ -30,8 +31,12 @@ public class AuditLogService : IAuditLogService
     public async Task LogOrganizationEvent(OrganizationEventDto organizationEvent) =>
         await (await _provider.Create()).LogEvent(organizationEvent);
 
-    public async Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId) =>
-        new(organizationId, (await _storageProvider.Create().GetOrganizationEvents(organizationId)).Select(x => x.ToResponse()));
+    public async Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId, int pageNumber, int numberOfResults) =>
+        new(organizationId, (await _storageProvider.Create().GetOrganizationEvents(organizationId, pageNumber, numberOfResults))
+            .Select(x => x.ToResponse()));
+
+    public async Task<int> GetAuditLogCount(int organizationId) =>
+        await _storageProvider.Create().GetOrganizationEventCount(organizationId);
 
     public async Task<ApplicationAuditLogResponse> GetAuditLogs() =>
         await _scopedPasswordlessClient.GetApplicationAuditLog();
