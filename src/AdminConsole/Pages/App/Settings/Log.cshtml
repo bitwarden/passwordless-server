@@ -7,8 +7,8 @@
 
 
 <div>
-    <table>
-        <thead>
+    <table class="shadow-sm bg-white text-center">
+        <thead class="border text-sm">
         <tr>
             <th>Performed By</th>
             <th>Performed At</th>
@@ -19,10 +19,10 @@
             <th>Api Key</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody class="border text-sm">
         @foreach (var auditEvent in Model.Events)
         {
-            <tr>
+            <tr class="border">
                 <td>@auditEvent.PerformedBy</td>
                 <td>@auditEvent.PerformedAt.ToLocalTime()</td>
                 <td>@auditEvent.Severity</td>
@@ -39,10 +39,15 @@
         var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";
     }
     
-    <a @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex-1)">Prev</a>
-    @foreach (var page in Model.PageList.Pages)
+    @if (Model.PageList.TotalPages > 1)
     {
-        <a class="pr-3 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
+        <div class="flex justify-center">
+            <a class="px-1" @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex-1)">Prev</a>
+            @foreach (var page in Model.PageList.Pages)
+            {
+                <a class="px-1 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
+            }
+            <a class="px-1" @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex+1)">Next</a>
+        </div>
     }
-    <a @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex+1)">Next</a>
 </div>
