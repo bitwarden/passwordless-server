@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.Net;
+using ProblemDetails = Passwordless.Net.ProblemDetails;
 
 namespace AdminConsole.Pages;
 
@@ -20,9 +23,15 @@ public class ErrorModel : PageModel
         _logger = logger;
     }
 
+    public ProblemDetails? ProblemDetails { get; set; }
+
     public void OnGet(string message)
     {
         Message = message;
         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+
+        var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();
+        var exception = (PasswordlessApiException)exceptionHandlerPathFeature?.Error;
+        ProblemDetails = exception?.Details;
     }
 }

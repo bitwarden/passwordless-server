@@ -1,4 +1,5 @@
 using Passwordless.Service.Helpers;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Storage;
 

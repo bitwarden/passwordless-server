@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Microsoft.Extensions.Options
 @model LoginModel
-@inject IOptions<PasswordlessOptions> PasswordlessOptions
+@inject IOptions<PasswordlessClientOptions> PasswordlessOptions
 @inject IAntiforgery Antiforgery
 @attribute [AllowAnonymous]
 
@@ -82,11 +82,12 @@
             setup() {
 
                 async function signIn(token) {
-                    var res = await fetch("/passwordless/verify-signin", {
+                    var res = await fetch("/passwordless-login", {
                         method: "POST",
-                        body: new URLSearchParams({ token }),
+                        body: JSON.stringify({ token }),
                         headers: {
                             RequestVerificationToken: "@requestToken",
+                            "Content-Type": "application/json"
                         }
                     });
                     

@@ -1,65 +1,141 @@
-﻿using AdminConsole.Db;
-using Microsoft.Extensions.Options;
-using Passwordless.Net;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using AdminConsole.Db;
+using AdminConsole.Models;
+using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole;
+namespace Passwordless.AdminConsole;
 
 public class CurrentContext : ICurrentContext
 {
-    public string Tenant { get; set; }
-    public PasswordlessOptions Options { get; set; }
+#if DEBUG
+    private bool _contextSet;
+#endif
+
+    public bool InAppContext { get; private set; }
+
+    public string? AppId { get; private set; }
+
+    public string? ApiSecret { get; private set; }
+
+    public string? ApiKey { get; private set; }
+    public bool IsFrozen { get; private set; }
+
+    public FeaturesContext Features { get; private set; }
+
+    public void SetApp(Application application)
+    {
+#if DEBUG
+        Debug.Assert(!_contextSet, "Context should only be set one time per lifetime.");
+        _contextSet = true;
+#endif
+        InAppContext = true;
+        AppId = application.Id;
+        ApiSecret = application.ApiSecret;
+        ApiKey = application.ApiKey;
+        IsFrozen = application.DeleteAt.HasValue;
+    }
+
+    public void SetFeatures(FeaturesContext context)
+    {
+        Features = context;
+    }
 }
+
+public record FeaturesContext(
+    bool AuditLoggingIsEnabled,
+    int AuditLoggingRetentionPeriod,
+    DateTime? DeveloperLoggingEndsAt)
+{
+    public static FeaturesContext FromDto(AppFeatureDto dto)
+    {
+        return new FeaturesContext(dto.AuditLoggingIsEnabled, dto.AuditLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt);
+    }
+}
+
 
 public interface ICurrentContext
 {
-    string Tenant { get; set; }
-    PasswordlessOptions Options { get; set; }
+    [MemberNotNullWhen(true, nameof(AppId))]
+    [MemberNotNullWhen(true, nameof(ApiSecret))]
+    [MemberNotNullWhen(true, nameof(ApiKey))]
+    bool InAppContext { get; }
+    string? AppId { get; }
+    string? ApiSecret { get; }
+    string? ApiKey { get; }
+    bool IsFrozen { get; }
+    FeaturesContext Features { get; }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("There should only be one caller of this method, you are probably not it.")]
+    void SetApp(Application application);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("There should only be one caller of this method, you are probably not it.")]
+    void SetFeatures(FeaturesContext context);
 }
+
 
 public class CurrentContextMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly IOptions<PasswordlessOptions> defaultOptions;
 
-    public CurrentContextMiddleware(RequestDelegate next, IOptions<PasswordlessOptions> defaultOptions)
+    public CurrentContextMiddleware(RequestDelegate next)
     {
         _next = next;
-        this.defaultOptions = defaultOptions;
     }
 
-    // IMessageWriter is injected into InvokeAsync
-    public async Task InvokeAsync(HttpContext httpContext, ICurrentContext currentcontext, ConsoleDbContext dbContext, IOptionsSnapshot<PasswordlessOptions> optionsSnapshot)
+    // Keep method non-async for non-app calls so that we can avoid the creation of a state machine when it's not needed
+    public Task InvokeAsync(
+        HttpContext httpContext,
+        ICurrentContext currentContext,
+        ConsoleDbContext dbContext,
+        IPasswordlessManagementClient passwordlessClient)
     {
         var name = httpContext.GetRouteData();
 
-        name.Values.TryGetValue("app", out var tenantName);
-
-        currentcontext.Tenant = tenantName as string;
-
-        // load options from db
-        var appConfig = dbContext.Applications.FirstOrDefault(t => t.Id == currentcontext.Tenant);
-
-        if (appConfig != null && !string.IsNullOrEmpty(currentcontext.Tenant))
+        if (!name.Values.TryGetValue("app", out var appRouteValue) || appRouteValue is not string appId)
         {
-            // use the options from the database
-            currentcontext.Options = new PasswordlessOptions()
-            {
-
-                ApiUrl = optionsSnapshot.Value.ApiUrl ?? appConfig.ApiUrl,
-                ApiKey = appConfig.ApiKey,
-                ApiSecret = appConfig.ApiSecret,
-
-            };
-        }
-        else
-        {
-            currentcontext.Options = this.defaultOptions.Value;
+            return _next(httpContext);
         }
 
-        // Override optionsSnapshot with values from the database
-        optionsSnapshot.Value.ApiKey = currentcontext.Options.ApiKey;
-        optionsSnapshot.Value.ApiSecret = currentcontext.Options.ApiSecret;
-        optionsSnapshot.Value.ApiUrl = currentcontext.Options.ApiUrl;
+        return InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient);
+    }
+
+    private async Task InvokeCoreAsync(
+        HttpContext httpContext,
+        string appId,
+        ICurrentContext currentContext,
+        ConsoleDbContext dbContext,
+        IPasswordlessManagementClient passwordlessClient)
+    {
+        var appConfig = await dbContext.Applications.FirstOrDefaultAsync(a => a.Id == appId);
+
+        if (appConfig is null)
+        {
+            await _next(httpContext);
+            return;
+        }
+
+#pragma warning disable CS0618 // I am the one valid caller of this method
+        currentContext.SetApp(appConfig);
+#pragma warning restore CS0618
+
+        var features = await passwordlessClient.GetFeaturesAsync(appId);
+        if (features is null)
+        {
+            await _next(httpContext);
+            return;
+        }
+
+        var featuresContext = FeaturesContext.FromDto(features);
+
+#pragma warning disable CS0618 // I am the one valid caller of this method
+        currentContext.SetFeatures(featuresContext);
+#pragma warning restore CS0618
 
         await _next(httpContext);
     }

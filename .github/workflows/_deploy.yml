@@ -19,6 +19,14 @@ on:
       version:
         type: string
         required: true
+    secrets:
+      APP_SERVICE_SP:
+        required: true
+      AZURE_RESOURCE_GROUP_NAME:
+        required: true
+      AZURE_APP_NAME:
+        required: true
+
 
 jobs:
   deploy:
@@ -43,7 +51,7 @@ jobs:
         run: |
           az webapp config appsettings set -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
             -n ${{ secrets.AZURE_APP_NAME }} --slot staging \
-            --settings DD_VERSION=${{ inputs.version }}
+            --settings DD_VERSION=${{ inputs.version }} > /dev/null
           az webapp deployment source config-zip \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
             --name ${{ secrets.AZURE_APP_NAME }} --slot staging --src ./${{ inputs.project-name }}.zip

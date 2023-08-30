@@ -40,6 +40,7 @@ public static class RegisterEndpoints
             // Avoid serializing the certificate
             return Ok(result);
         })
+            .WithParameterValidation()
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));

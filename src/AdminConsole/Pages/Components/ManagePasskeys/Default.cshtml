@@ -1,7 +1,7 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Microsoft.Extensions.Options
 @model PasskeysModel
-@inject IOptions<PasswordlessOptions> options
+@inject IOptions<PasswordlessClientOptions> Options
 
 <div id="xapp" class="flex flex-col gap-10">
     {{showDetails}}
@@ -115,16 +115,19 @@
                 showDetails.value = !showDetails.value;
             }
             const p = new Passwordless.Client({
-                apiUrl: "@options.Value.ApiUrl",
-                apiKey: "@options.Value.ApiKey"
+                apiUrl: "@Options.Value.ApiUrl",
+                apiKey: "@Options.Value.ApiKey"
             });
             
             const registerCredential = async (e) => {
                 e.preventDefault();
                 var data = new FormData(e.target);
-                var req = await fetch("/passwordless/create-token", {
+                var req = await fetch("/passwordless-add-credential", {
                     method: "POST",
-                    body: data                                      
+                    body: JSON.stringify({ displayName: data.get("nickname")}),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
                 });
 
                 if (req.ok) {

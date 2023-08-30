@@ -1,12 +1,17 @@
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
+using Passwordless.Api.Middleware;
+using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.Features;
+using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -73,12 +78,19 @@ services.ConfigureHttpJsonOptions(options =>
 services.AddDatabase(builder.Configuration);
 services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
+services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
 services.AddScoped<ITokenService, TokenService>();
+services.AddSingleton<ISystemClock, SystemClock>();
+services.AddScoped<IRequestContext, RequestContext>();
+builder.AddMail();
+builder.Services.AddSingleton<IMailService, DefaultMailService>();
+
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
+services.AddScoped<IFeatureContextProvider, FeatureContextProvider>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -114,6 +126,7 @@ app.UseSecurityHeaders();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<AcceptHeaderMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();

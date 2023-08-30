@@ -40,20 +40,13 @@ public class Create : PageModel
 
     public async Task<IActionResult> OnPost(CreateModel form, CancellationToken cancellationToken)
     {
-        var input = form;
-        var input2 = Form;
-
-        if (!form.AcceptsTermsAndPrivacy)
-        {
-            ModelState.AddModelError("AcceptsTermsAndPrivacy", "You must accept the terms and privacy policy to continue.");
-        }
-
         if (!ModelState.IsValid)
         {
             return Page();
         }
+
         // Check if admin email is already used? (Use UserManager)
-        var existingUser = await _userManager.FindByEmailAsync(input.AdminEmail);
+        var existingUser = await _userManager.FindByEmailAsync(form.AdminEmail);
 
         if (existingUser != null)
         {
@@ -61,13 +54,12 @@ public class Create : PageModel
             return RedirectToPage("/Organization/Verify");
         }
 
-
         // Create org
         var org = new Models.Organization()
         {
-            Name = input.OrgName,
-            InfoOrgType = input.OrgType,
-            InfoUseCase = input.UseCase,
+            Name = form.OrgName,
+            InfoOrgType = form.OrgType,
+            InfoUseCase = form.UseCase,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -77,14 +69,14 @@ public class Create : PageModel
         // Create user
         var user = new ConsoleAdmin()
         {
-            UserName = input.AdminEmail,
-            Email = input.AdminEmail,
+            UserName = form.AdminEmail,
+            Email = form.AdminEmail,
             OrganizationId = org.Id,
-            Name = input.AdminName
+            Name = form.AdminName
         };
 
-        await _userManager.SetUserNameAsync(user, input.AdminEmail);
-        await _userManager.SetEmailAsync(user, input.AdminEmail);
+        await _userManager.SetUserNameAsync(user, form.AdminEmail);
+        await _userManager.SetEmailAsync(user, form.AdminEmail);
         await _userManager.CreateAsync(user);
 
         var url = Url.Page("/Account/useronboarding");
@@ -93,25 +85,18 @@ public class Create : PageModel
 
         return RedirectToPage("/Organization/Verify");
     }
-
-
 }
 
 public record CreateModel
 {
-    [Required]
-    [MaxLength(50)]
+    [Required, MaxLength(50)]
     public string OrgName { get; set; }
     public string OrgType { get; set; }
     public string UseCase { get; set; }
-    [Required]
-    [EmailAddress]
-    [MaxLength(50)]
+    [Required, EmailAddress, MaxLength(50)]
     public string AdminEmail { get; set; }
-    [Required]
-    [MaxLength(50)]
+    [Required, MaxLength(50)]
     public string AdminName { get; set; }
-
     [Required]
     public bool AcceptsTermsAndPrivacy { get; set; }
 }

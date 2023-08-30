@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages;
@@ -7,7 +8,7 @@ namespace AdminConsole.Pages;
 public class UserModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly PasswordlessClient api;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
     public List<Credential> Credentials { get; set; }
     public List<AliasPointer> Aliases { get; set; }
@@ -19,16 +20,16 @@ public class UserModel : PageModel
 
     public string RegisterToken { get; set; }
 
-    public UserModel(ILogger<IndexModel> logger, PasswordlessClient api)
+    public UserModel(ILogger<IndexModel> logger, IScopedPasswordlessClient api)
     {
         _logger = logger;
-        this.api = api;
+        _passwordlessClient = api;
     }
 
     public async Task OnGet()
     {
-        Credentials = await api.ListCredentials(UserId);
-        Aliases = await api.ListAliases(UserId);
+        Credentials = await _passwordlessClient.ListCredentialsAsync(UserId);
+        Aliases = await _passwordlessClient.ListAliasesAsync(UserId);
         // RegisterToken = await api.CreateRegisterToken(new PasswordlessApi.RegisterOptions {
         //     UserId = UserId,
         //     Username = username,
@@ -45,7 +46,7 @@ public class UserModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await api.VerifyToken(token);
+        var res = await _passwordlessClient.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
 }

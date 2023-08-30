@@ -1,0 +1,39 @@
+﻿@page
+@model SettingsModel
+@{
+    ViewData["Title"] = "Organization Settings";
+}
+
+<h2 class="h2">Danger Zone</h2>
+<div class="bg-white shadow sm:rounded-lg px-4 py-5 sm:p-6">
+    @if (Model.CanDelete)
+    {
+        <form method="post" asp-page-handler="Delete">
+            <input type="hidden" asp-for="Organization.Id" />
+            <p>Unexpected bad things will happen if you don’t read this:</p>
+            <ul role="list" class="list-disc list-inside my-2">
+                <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
+                <li>This will permanently delete the organization <strong>'@Model.Organization.Name'</strong>.</li>
+                <li>All related data to the organization will be deleted: Settings, audit logs, developer logs or any related event logs.</li>
+            </ul>
+            <div id="deleteOrganization"></div>
+        </form>
+    }
+    else
+    {
+        <p>Your organization '@Model.Organization.Name' has @Model.Organization.Applications.Count applications that are active or pending deletion.</p>
+        <p>You can only delete an organization when you have no applications.</p>
+    }
+</div>
+
+@section Scripts
+{
+    <script type="module">
+    import { createApp } from 'vue';
+    import DeleteOrganization from '@Url.Content("~/js/deleteorganization.mjs")';
+
+    createApp(DeleteOrganization, {
+        id: "@(Model.Organization.Name)"
+    }).mount('#deleteOrganization');
+    </script>
+}

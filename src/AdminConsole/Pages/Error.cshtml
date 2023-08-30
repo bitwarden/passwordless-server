@@ -9,11 +9,22 @@
 <p class="mt-3 text-danger">@Model.Message</p>
 <a class="mt-3 underline" href="@Url.Page("/Index")">Restart from scratch</a>
 
-
 @if (Model.ShowRequestId)
 {
     <p class="mt-3 text-xs">
         <code>Request ID: @Model.RequestId</code>
     </p>
+}
+
+@if (Model.ProblemDetails != null)
+{
+    <h3 class="text-base font-semibold leading-6 text-gray-900">Details</h3>
+    <ul role="list" class="list-decimal list-inside my-2">
+        <li>Type: @Model.ProblemDetails.Type</li>
+        <li>Title: @Model.ProblemDetails.Title</li>
+        <li>Detail: @Model.ProblemDetails.Detail</li>
+        <li>Instance: @Model.ProblemDetails.Instance</li>
+        <li>Status: @Model.ProblemDetails.Status</li>
+    </ul>
 }
 

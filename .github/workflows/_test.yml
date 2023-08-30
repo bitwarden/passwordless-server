@@ -1,6 +1,6 @@
 ---
 name: _test
-run-name: Test & Format
+run-name: Test & Format & Pack
 
 on:
   workflow_call: {}

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages;
@@ -7,24 +9,24 @@ namespace AdminConsole.Pages;
 public class ListModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IPasswordlessClient api;
+    private readonly IScopedPasswordlessClient _api;
 
     public List<PasswordlessUserSummary> Users { get; set; }
 
-    public ListModel(ILogger<IndexModel> logger, IPasswordlessClient api)
+    public ListModel(ILogger<IndexModel> logger, IScopedPasswordlessClient api, ICurrentContext context)
     {
         _logger = logger;
-        this.api = api;
+        _api = api;
     }
 
     public async Task OnGet()
     {
-        Users = await api.ListUsers() ?? new List<PasswordlessUserSummary>();
+        Users = await _api.ListUsersAsync() ?? new List<PasswordlessUserSummary>();
     }
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await api.VerifyToken(token);
+        var res = await _api.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
 }

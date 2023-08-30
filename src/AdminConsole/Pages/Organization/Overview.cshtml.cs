@@ -34,4 +34,12 @@ public class OverviewModel : PageModel
             return RedirectToPage("/Error", new { message = "Organization not found" });
         }
     }
+
+    public string GetApplicationUrl(Models.Application application)
+    {
+        string url = application.DeleteAt.HasValue
+            ? "/app/Settings/Settings"
+            : "/app/credentials/list";
+        return url;
+    }
 }

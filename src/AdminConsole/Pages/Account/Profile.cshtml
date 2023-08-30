@@ -1,8 +1,7 @@
 @page
-@using Microsoft.Extensions.Options
 @using Microsoft.AspNetCore.Antiforgery
 @model Profile
-@inject IOptions<PasswordlessOptions> options
+@inject IOptions<PasswordlessClientOptions> PasswordlessClientOptions
 @inject IAntiforgery Antiforgery
 
 @{
@@ -128,8 +127,8 @@
             }
             
             const p = new Passwordless.Client({
-                apiUrl: "@options.Value.ApiUrl",
-                apiKey: "@options.Value.ApiKey"
+                apiUrl: "@PasswordlessClientOptions.Value.ApiUrl",
+                apiKey: "@PasswordlessClientOptions.Value.ApiKey"
             });
             
             const working = ref(false);
@@ -139,10 +138,12 @@
                 working.value = true;
                 try {
                     const data = new FormData(e.target);
-                    const req = await fetch("/passwordless/create-token", {
-                        method: "GET",                    
+                    const req = await fetch("/passwordless-add-credential", {
+                        method: "POST",
+                        body: JSON.stringify({ displayName: data.get("nickname")}),
                         headers: {
-                            RequestVerificationToken: "@requestToken"
+                            RequestVerificationToken: "@requestToken",
+                            "Content-Type": "application/json"
                         }
                     });
     

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
 
@@ -67,5 +67,5 @@ public class UserSummary
     public int AliasCount { get; set; }
     public List<string> Aliases { get; set; }
     public int CredentialsCount { get; set; }
-    public DateTime LastUsedAt { get; set; }
+    public DateTime? LastUsedAt { get; set; }
 }

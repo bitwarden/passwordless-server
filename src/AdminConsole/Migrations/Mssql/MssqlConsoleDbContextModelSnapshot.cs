@@ -170,6 +170,9 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
                     b.Property<int>("CurrentUserCount")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("DeleteAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -216,6 +219,9 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("BecamePaidAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("BillingCustomerId")
                         .HasColumnType("nvarchar(max)");

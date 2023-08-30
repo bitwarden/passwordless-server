@@ -12,7 +12,11 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.Common.Services.Mail;
 using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -106,7 +110,7 @@ void RunTheApp()
         .AddEntityFrameworkStores<ConsoleDbContext>()
         .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
         .AddDefaultTokenProviders()
-        .AddPasswordless();
+        .AddPasswordless(builder.Configuration.GetSection("Passwordless"));
 
     services.ConfigureApplicationCookie(o =>
     {
@@ -125,38 +129,29 @@ void RunTheApp()
     });
 
     services.AddHostedService<TimedHostedService>();
+    services.AddHostedService<ApplicationDeletionBackgroundService>();
 
-    // Replace IPasswordlessClient with our tenant aware version
-    services.AddScoped<IPasswordlessClient>(sp =>
+    services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
+
+    services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
+    services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
-        var factory = sp.GetRequiredService<IHttpClientFactory>();
-        HttpClient client = factory.CreateClient();
+        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
 
-        var ctx = sp.GetRequiredService<ICurrentContext>();
-        client.BaseAddress = new Uri(ctx.Options.ApiUrl);
-        client.DefaultRequestHeaders.Add("ApiSecret", ctx.Options.ApiSecret);
-        return new PasswordlessClient(client);
-    });
+        client.BaseAddress = new Uri(options.Value.ApiUrl);
+    }).AddHttpMessageHandler<PasswordlessDelegatingHandler>();
 
     // Magic link SigninManager
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
     // Setup mail service & provider
+    builder.AddMail();
     services.AddSingleton<IMailService, DefaultMailService>();
-    // Register depend on configuration
-    services.AddSingleton<IMailProvider, FileMailProvider>();
-    if (builder.Configuration.GetSection("Mail:Postmark").Exists())
-    {
-        services.AddSingleton<IMailProvider, PostmarkMailProvider>();
-    }
-    else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
-    {
-        services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
-    }
 
     services.AddScoped<UsageService>();
     services.AddScoped<DataService>();
     services.AddScoped<InvitationService>();
+    services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
 
     // Work around to get LinkGeneration to work with /{app}/-links.
@@ -164,6 +159,8 @@ void RunTheApp()
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
 
+    // Plan Features
+    services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
     WebApplication app = builder.Build();
 
 
@@ -199,7 +196,7 @@ void RunTheApp()
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseAuthorization();
-    app.UsePasswordless();
+    app.MapPasswordless();
     app.MapRazorPages();
     app.Run();
 }

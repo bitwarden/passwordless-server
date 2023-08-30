@@ -58,6 +58,12 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
             }
+        },
+        {
+            "name": "Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
         }
     ]
 }

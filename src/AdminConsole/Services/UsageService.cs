@@ -45,12 +45,11 @@ internal class UsageService
     {
         var api = PasswordlessClient.Create(new PasswordlessOptions
         {
-            ApiKey = app.ApiKey,
             ApiSecret = app.ApiSecret,
             ApiUrl = app.ApiUrl
         }, _httpClientFactory);
 
-        var countResponse = await api.GetUsersCount();
+        var countResponse = await api.GetUsersCountAsync();
 
         return countResponse.Count;
     }

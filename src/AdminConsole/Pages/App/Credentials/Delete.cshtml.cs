@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
 
 namespace AdminConsole.Pages;
@@ -7,7 +8,7 @@ namespace AdminConsole.Pages;
 public class CredentialDeleteModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly PasswordlessClient api;
+    private readonly IScopedPasswordlessClient _passwordlessClient;
 
     [BindProperty(SupportsGet = true)]
     public string UserId { get; set; }
@@ -17,10 +18,10 @@ public class CredentialDeleteModel : PageModel
 
     public Credential Credential { get; set; }
 
-    public CredentialDeleteModel(ILogger<IndexModel> logger, PasswordlessClient api)
+    public CredentialDeleteModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
     {
         _logger = logger;
-        this.api = api;
+        this._passwordlessClient = passwordlessClient;
     }
 
     public async Task<IActionResult> OnGet()
@@ -30,7 +31,7 @@ public class CredentialDeleteModel : PageModel
 
     public async Task<IActionResult> OnPost()
     {
-        await api.DeleteCredential(CredentialId);
+        await _passwordlessClient.DeleteCredentialAsync(CredentialId);
 
         return RedirectToPage("/app/credentials/user", null, new { UserId = UserId });
     }

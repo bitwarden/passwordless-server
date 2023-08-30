@@ -10,35 +10,39 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Services;
 using Passwordless.Net;
+using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
+using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
 
 namespace AdminConsole.Pages.Organization;
 
 public class CreateApplicationModel : PageModel
 {
-    private readonly PasswordlessClient api;
     private readonly ConsoleDbContext db;
-    private readonly ICurrentContext _currentContext;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
-    private readonly HttpContextAccessor _httpContext;
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
     private readonly DataService _dataService;
-    private readonly PasswordlessManagementClient _managementClient;
+    private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
+    private readonly PlansOptions _plansOptions;
 
-    public CreateApplicationModel(ConsoleDbContext db, PasswordlessClient api,
-        IOptionsSnapshot<PasswordlessOptions> passwordlessOptions, ICurrentContext currentContext,
-        SignInManager<ConsoleAdmin> signInManager, DataService dataService, IOptions<StripeOptions> stripeOptions,
-        PasswordlessManagementClient managementClient)
+    public CreateApplicationModel(ConsoleDbContext db,
+        IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
+        SignInManager<ConsoleAdmin> signInManager,
+        DataService dataService,
+        IOptions<StripeOptions> stripeOptions,
+        IPasswordlessManagementClient managementClient,
+        IOptionsSnapshot<PlansOptions> plansOptions)
     {
         _dataService = dataService;
         _managementClient = managementClient;
         this.db = db;
-        this.api = api;
         _passwordlessOptions = passwordlessOptions;
-        _currentContext = currentContext;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
+        _plansOptions = plansOptions.Value;
     }
 
     public CreateApplicationForm Form { get; set; }
@@ -57,13 +61,14 @@ public class CreateApplicationModel : PageModel
             return Page();
         }
 
-        Application app = new();
-        int orgId = User.GetOrgId();
-        app.Id = form.Id;
-        app.OrganizationId = orgId;
-        app.Name = form.Name;
-        app.Description = form.Description;
-        app.CreatedAt = DateTime.UtcNow;
+        Application app = new()
+        {
+            Id = form.Id,
+            Name = form.Name,
+            Description = form.Description,
+            CreatedAt = DateTime.UtcNow,
+            OrganizationId = User.GetOrgId()
+        };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
@@ -87,7 +92,14 @@ public class CreateApplicationModel : PageModel
         NewAppResponse res;
         try
         {
-            res = await _managementClient.CreateApplication(new NewAppOptions { AppId = app.Id, AdminEmail = email });
+            var plan = _plansOptions[app.BillingPlan];
+            var newAppOptions = new NewAppOptions
+            {
+                AdminEmail = email,
+                AuditLoggingIsEnabled = plan.AuditLoggingIsEnabled,
+                AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod
+            };
+            res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
         catch (Exception e)
         {
@@ -128,16 +140,11 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required]
-        [MaxLength(60)]
+        [Required, MaxLength(60)]
         public string Name { get; set; }
-
-        [Required]
-        [MaxLength(62)]
+        [Required, MaxLength(62)]
         public string Id { get; set; }
-
-        [Required]
-        [MaxLength(120)]
+        [Required, MaxLength(120)]
         public string Description { get; set; }
     }
 }

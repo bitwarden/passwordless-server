@@ -2,6 +2,7 @@ using AdminConsole.Db;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole;
 
 namespace AdminConsole.Pages.App.Onboarding;
 
@@ -20,7 +21,8 @@ public class GetStarted : PageModel
 
     public async Task<IActionResult> OnGet()
     {
-        var appID = _context.Tenant;
+        var appID = _context.AppId;
+
         Onboarding = await _dbContext.Applications.Where(a => a.Id == appID).Select(o => o.Onboarding)
             .FirstOrDefaultAsync();
 

@@ -23,7 +23,6 @@ public class DataService
     {
         return await _db.Applications
             .Where(a => a.OrganizationId == _orgId).ToListAsync();
-
     }
 
     public async Task<Organization> GetOrganization()
@@ -75,5 +74,14 @@ public class DataService
             .Where(u => u.NormalizedEmail == currentUserEmail).FirstOrDefaultAsync();
 
         return user;
+    }
+
+    public async Task<bool> DeleteOrganizationAsync(int organizationId)
+    {
+        var organization = await _db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId);
+        if (organization == null) return false;
+        _db.Organizations.Remove(organization);
+        var rowsAffected = await _db.SaveChangesAsync();
+        return rowsAffected > 0;
     }
 }
