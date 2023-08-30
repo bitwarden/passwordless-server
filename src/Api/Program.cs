@@ -7,6 +7,7 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.MockServices;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
@@ -77,7 +78,7 @@ services.ConfigureHttpJsonOptions(options =>
 
 services.AddDatabase(builder.Configuration);
 services.AddTransient<ISharedManagementService, SharedManagementService>();
-services.AddScoped<UserCredentialsService>();
+services.AddScoped<IUserCredentialsService, UserCredentialsService>();
 services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2ServiceFactory, DefaultFido2ServiceFactory>();
 services.AddScoped<ITokenService, TokenService>();
@@ -96,6 +97,8 @@ if (builder.Environment.IsDevelopment())
 {
     services.AddDatabaseDeveloperPageExceptionFilter();
 }
+
+services.AddMockServices();
 
 WebApplication app = builder.Build();
 

@@ -35,4 +35,9 @@
   <ItemGroup>
     <Folder Include="Data" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <MockMode Condition="'$(MockMode)' == ''">false</MockMode>
+    <DefineConstants Condition="'$(MockMode)' == 'true'">$(DefineConstants);MOCK_MODE</DefineConstants>
+  </PropertyGroup>
 </Project>

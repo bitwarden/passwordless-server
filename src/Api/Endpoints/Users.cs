@@ -10,7 +10,7 @@ public static class UsersEndpoints
 {
     public static void MapUsersEndpoints(this WebApplication app)
     {
-        app.MapMethods("/users/list", new[] { "get" }, async (UserCredentialsService userService) =>
+        app.MapMethods("/users/list", new[] { "get" }, async (IUserCredentialsService userService) =>
         {
             //userId = req.Query["userId"];                
             // todo: Add Include credentials
@@ -23,7 +23,7 @@ public static class UsersEndpoints
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapMethods("/users/count", new[] { "get" }, async (HttpRequest req, UserCredentialsService userService) =>
+        app.MapMethods("/users/count", new[] { "get" }, async (HttpRequest req, IUserCredentialsService userService) =>
         {
             var res = await userService.GetUsersCount();
 
@@ -32,7 +32,7 @@ public static class UsersEndpoints
             .RequireSecretKey();
 
         app.MapMethods("/users/delete", new[] { "post" }, async (ClaimsPrincipal user,
-            UserDeletePayload payload, UserCredentialsService userService) =>
+            UserDeletePayload payload, IUserCredentialsService userService) =>
         {
             await userService.DeleteUser(payload.UserId);
 

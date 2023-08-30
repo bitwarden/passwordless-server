@@ -10,7 +10,7 @@ public static class CredentialsEndpoints
 {
     public static void MapCredentialsEndpoints(this WebApplication app)
     {
-        app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload, UserCredentialsService userCredentialsService) =>
+        app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload, IUserCredentialsService userCredentialsService) =>
         {
             await userCredentialsService.DeleteCredential(payload.CredentialId);
             return Results.Ok();
@@ -19,7 +19,7 @@ public static class CredentialsEndpoints
             .RequireCors("default");
 
 
-        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpContext ctx, HttpRequest req, ITenantStorage storage, UserCredentialsService userCredentialService) =>
+        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpContext ctx, HttpRequest req, ITenantStorage storage, IUserCredentialsService userCredentialService) =>
         {
             string userId = "";
             if (req.Method == "POST")

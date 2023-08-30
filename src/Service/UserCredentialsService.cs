@@ -1,20 +1,23 @@
-﻿using Microsoft.Extensions.Configuration;
-using Passwordless.Service.Helpers;
+﻿using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
 
-public class UserCredentialsService
+public interface IUserCredentialsService
+{
+    Task<StoredCredential[]> GetAllCredentials(string userId);
+    Task DeleteCredential(byte[] credentialId);
+    Task<List<UserSummary>> GetAllUsers(string paginationLastId);
+    Task<int> GetUsersCount();
+    Task DeleteUser(string userId);
+}
+
+public class UserCredentialsService : IUserCredentialsService
 {
     private readonly ITenantStorage _storage;
 
     public UserCredentialsService(ITenantStorage storage)
-    {
-        _storage = storage;
-    }
-
-    public UserCredentialsService(string tenant, IConfiguration config, ITenantStorage storage)
     {
         _storage = storage;
     }
