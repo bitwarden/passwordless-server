@@ -21,8 +21,15 @@ public class AuditLoggerEfStorage : IAuditLogStorage
         await _db.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ApplicationAuditEvent>> GetAuditLogAsync(string tenantId, CancellationToken cancellationToken) =>
+    public async Task<IEnumerable<ApplicationAuditEvent>> GetAuditLogAsync(string tenantId, int pageNumber, int resultsPerPage, CancellationToken cancellationToken) =>
         await _db.AppEvents
+            .OrderByDescending(x => x.PerformedAt)
+            .Skip(resultsPerPage * (pageNumber - 1))
+            .Take(resultsPerPage)
+            .AsNoTracking()
             .Where(x => x.TenantId == tenantId)
             .ToListAsync(cancellationToken);
+
+    public async Task<int> GetAuditLogCountAsync(string tenantId, CancellationToken cancellationToken) =>
+        await _db.AppEvents.CountAsync(x => x.TenantId == tenantId, cancellationToken);
 }

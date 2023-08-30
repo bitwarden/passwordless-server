@@ -5,13 +5,12 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface IScopedPasswordlessClient : IPasswordlessClient
 {
-    Task<ApplicationAuditLogResponse> GetApplicationAuditLog();
+    Task<ApplicationAuditLogResponse> GetApplicationAuditLog(int pageNumber, int pageSize);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
 {
     private readonly HttpClient _client;
-    private readonly ICurrentContext _currentContext;
 
     public ScopedPasswordlessClient(HttpClient httpClient, ICurrentContext context) : base(httpClient)
     {
@@ -19,12 +18,11 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         httpClient.DefaultRequestHeaders.Add("ApiSecret", context.ApiSecret);
 
         _client = httpClient;
-        _currentContext = context;
     }
 
-    public async Task<ApplicationAuditLogResponse> GetApplicationAuditLog()
+    public async Task<ApplicationAuditLogResponse> GetApplicationAuditLog(int pageNumber, int pageSize)
     {
-        var response = await _client.GetAsync($"events/{_currentContext.AppId}");
+        var response = await _client.GetAsync($"events?pageNumber={pageNumber}&numberOfResults={pageSize}");
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<ApplicationAuditLogResponse>();

@@ -34,4 +34,15 @@
         }
         </tbody>
     </table>
+    @{
+        var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";
+    }
+    
+    <a @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex-1)">Prev</a>
+    @foreach (var page in Model.PageList.Pages)
+    {
+        <a class="pr-3 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
+    }
+    <a @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex+1)">Next</a>
 </div>

@@ -12,7 +12,6 @@ public class Log : PageModel
     private readonly DataService _dataService;
 
     public Models.Organization Organization { get; set; }
-
     public IEnumerable<AuditLogEvent> Events { get; set; }
     public PagedList PageList { get; set; }
 
