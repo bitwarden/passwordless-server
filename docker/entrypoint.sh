@@ -35,6 +35,45 @@ else
   export ConnectionStrings__sqlite__admin=${ConnectionStrings__sqlite__admin:-$SQLITE_CONNECTION_STRING_ADMIN}
 fi
 
+##############################################
+# Generate ApiKey, ApiSecret & ManagementKey #
+##############################################
+generate_random_hex() {
+  echo $(openssl rand -hex 16)
+}
+
+mounted_dir='/app/storage';
+mounted_config="$mounted_dir/config.json";
+
+# Check if the JSON file exists
+echo "checking if file exists."
+if [ ! -f "$mounted_config" ]; then
+  touch "$mounted_config";
+fi
+
+# Read JSON values
+api_key=$(jq -r '.Passwordless.ApiKey' "$mounted_config")
+api_secret=$(jq -r '.Passwordless.ApiSecret' "$mounted_config")
+management_key=$(jq -r '.PasswordlessManagement.ManagementKey' "$mounted_config")
+
+if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key" == "null" ]; then
+  if [ "$api_key" == "null" ]; then
+    api_key="test:public:$(generate_random_hex)"
+  fi
+  if [ "$api_secret" == "null" ]; then
+    api_secret="test:secret:$(generate_random_hex)"
+  fi
+  if [ "$management_key" == "null" ]; then
+    management_key=$(generate_random_hex)
+  fi
+    
+  mounted_temp = "$mounted_dir/temp.json";
+  jq --arg api_key "$api_key" --arg api_secret "$api_secret" --arg management_key "$management_key" \
+    '.Passwordless.ApiKey = $api_key | .Passwordless.ApiSecret = $api_secret | .PasswordlessManagement.ManagementKey = $management_key' \
+    "$mounted_config" > "$mounted_temp"
+  mv "$mounted_temp" "$mounted_config"
+fi
+
 # Generate SSL certificates
 if [ "$BWP_ENABLE_SSL" = "true" -a ! -f /etc/bitwarden_passwordless/${BWP_SSL_KEY:-ssl.key} ]; then
   openssl req \

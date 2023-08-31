@@ -21,7 +21,10 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 # Add packages
 RUN apt-get update && apt-get install -y \
     npm \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
+
+# We need jq for generating our configuration files in /app/storage/config.json
+RUN apt install -y jq
 
 # Copy csproj files as distinct layers
 WORKDIR /source
