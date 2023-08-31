@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.Common.Configuration;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Net;
 using Serilog;
@@ -41,6 +42,15 @@ finally
 void RunTheApp()
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
+
+    if (isSelfHosted)
+    {
+        builder.Configuration.AddJsonFile("/app/storage/config.json", "config.json");
+        builder.Configuration.AddJsonFile("/app/config.json", "config.json");
+    }
+
     builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 
     builder.Host.UseSerilog((ctx, sp, config) =>
@@ -177,7 +187,7 @@ void RunTheApp()
         app.UseHsts();
     }
 
-    if (builder.Configuration.GetValue<bool>("SelfHosted"))
+    if (isSelfHosted)
     {
         // When self-hosting. Migrate latest database changes during startup
         using var scope = app.Services.CreateScope();

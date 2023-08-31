@@ -7,6 +7,7 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Common.Configuration;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
@@ -17,6 +18,15 @@ using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
+
+if (isSelfHosted)
+{
+    builder.Configuration.AddJsonFile("/app/storage/config.json", "config.json");
+    builder.Configuration.AddJsonFile("/app/config.json", "config.json");
+}
+
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 builder.Host.UseSerilog((ctx, sp, config) =>
 {
@@ -113,7 +123,7 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-if (builder.Configuration.GetValue<bool>("SelfHosted"))
+if (isSelfHosted)
 {
     // When self-hosting. Migrate latest database changes during startup
     using var scope = app.Services.CreateScope();
