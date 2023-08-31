@@ -19,9 +19,9 @@ public static class IConfigurationBuilderExtensions
         {
             throw new ArgumentNullException(nameof(fileName));
         }
-        if (!Directory.Exists(directory))
+        if (!optional && !Directory.Exists(directory))
         {
-            return builder;
+            throw new ArgumentException($"'{fileName}' is required, but its directory doesn't exist.");
         }
         var fileProvider = new PhysicalFileProvider(directory);
         return builder.AddJsonFile(fileProvider, fileName, optional, reloadOnChange);

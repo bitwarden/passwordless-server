@@ -47,8 +47,7 @@ void RunTheApp()
 
     if (isSelfHosted)
     {
-        builder.Configuration.AddJsonFile("/app/storage/config.json", "config.json");
-        builder.Configuration.AddJsonFile("/app/config.json", "config.json");
+        builder.AddSelfHostingConfiguration();
     }
 
     builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
