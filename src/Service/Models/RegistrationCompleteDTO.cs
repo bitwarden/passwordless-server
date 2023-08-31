@@ -9,6 +9,6 @@ public class RegistrationCompleteDTO : RequestBase
 
     public AuthenticatorAttestationRawResponse Response { get; set; }
 
-    [MaxLength(255)]
+    [MaxLength(64)]
     public string Nickname { get; set; }
 }
