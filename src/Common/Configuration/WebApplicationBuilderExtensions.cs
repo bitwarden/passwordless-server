@@ -10,8 +10,7 @@ public static class WebApplicationBuilderExtensions
         }
         else
         {
-            builder.Configuration.AddJsonFile("/app/storage/config.json", "config.json", true, true);
-            builder.Configuration.AddJsonFile("/app/config.json", "config.json", true, true);
+            builder.Configuration.AddJsonFile("/app/storage", "config.json", true, true);
         }
     }
 }

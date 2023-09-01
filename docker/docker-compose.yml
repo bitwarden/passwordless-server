@@ -10,8 +10,8 @@ services:
     image: ${REGISTRY:-bitwarden}/passwordless:${TAG:-beta}
     restart: always
     ports:
-      - "80:8080"
-      - "443:8443"
+      - "5000:5000"
+      - "5001:5001"
     volumes:
       - bitwarden_passwordless:/etc/bitwarden_passwordless
       - logs:/var/log/bitwarden_passwordless

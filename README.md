@@ -88,7 +88,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
    `~/src/passwordless-server`
 3. In your terminal execute:
     ```bash
-    docker build -t passwordless . -f docker/Dockerfile
+    docker build -t bitwarden/passwordless . -f docker/Dockerfile
     ```
 
 ## Need support?

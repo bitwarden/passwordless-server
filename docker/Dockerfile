@@ -82,6 +82,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     tzdata \
     unzip \
+    jq \
     && rm -rf /var/lib/apt/lists/*
 
 # Create required directories
@@ -136,4 +137,8 @@ RUN chmod +x /entrypoint.sh
 VOLUME ["/etc/bitwarden_passwordless"]
 
 WORKDIR /app
+
+EXPOSE 5000
+EXPOSE 5001
+
 ENTRYPOINT ["/entrypoint.sh"]
