@@ -20,20 +20,16 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 
 # Add packages
 RUN apt-get update && apt-get install -y \
-    npm \
+    npm jq \
     && rm -rf /var/lib/apt/lists/* 
-
-# We need jq for generating our configuration files in /app/storage/config.json
-RUN apt install -y jq
 
 # Copy csproj files as distinct layers
 WORKDIR /source
 COPY src/AdminConsole/*.csproj ./src/AdminConsole/
 COPY src/Api/*.csproj ./src/Api/
-COPY src/AspNetCore/*.csproj ./src/AspNetCore/
 COPY src/ApiHelpers/*.csproj ./src/ApiHelpers/
-COPY src/Sdk/*.csproj ./src/Sdk/
 COPY src/Service/*.csproj ./src/Service/
+COPY src/Common/*.csproj ./src/Common/
 COPY Directory.Build.props .
 
 # Restore AdminConsole project dependencies and tools
@@ -48,10 +44,9 @@ RUN . /tmp/rid.txt && dotnet restore -r $RID
 WORKDIR /source
 COPY src/AdminConsole/. ./src/AdminConsole/
 COPY src/Api/. ./src/Api/
-COPY src/AspNetCore/. ./src/AspNetCore/
 COPY src/ApiHelpers/. ./src/ApiHelpers/
-COPY src/Sdk/. ./src/Sdk/
 COPY src/Service/. ./src/Service/
+COPY src/Common/. ./src/Common/
 COPY .git/. ./.git/
 
 # Build Admin app

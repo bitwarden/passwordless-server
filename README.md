@@ -79,6 +79,18 @@ No grant of any rights in the trademarks, service marks, or logos of Bitwarden i
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
 
+## Docker
+
+### How to build the image
+
+1. Clone the repository
+2. Set your working directory to match the root of the cloned files, for example:
+   `~/src/passwordless-server`
+3. In your terminal execute:
+    ```bash
+    docker build -t passwordless . -f docker/Dockerfile
+    ```
+
 ## Need support?
 
 If you need support from the Passwordless.dev team, send us a message at support@passwordless.dev.
