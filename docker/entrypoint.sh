@@ -35,6 +35,9 @@ else
   export ConnectionStrings__sqlite__admin=${ConnectionStrings__sqlite__admin:-$SQLITE_CONNECTION_STRING_ADMIN}
 fi
 
+export Passwordless__ApiUrl=$PasswordlessManagement_ApiUrl
+export PasswordlessManagement__ApiUrl=$PasswordlessManagement_ApiUrl
+
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #
 ##############################################
