@@ -103,7 +103,6 @@ public static class AppsEndpoints
         return NoContent();
     }
 
-
     public static async Task<IResult> GetFeaturesAsync(IFeatureContextProvider featuresContextProvider)
     {
         var featuresContext = await featuresContextProvider.UseContext();

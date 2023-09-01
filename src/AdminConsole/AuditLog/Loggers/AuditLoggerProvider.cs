@@ -1,22 +1,20 @@
-using Passwordless.AdminConsole.Features;
-
 namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
 public class AuditLoggerProvider : IAuditLoggerProvider
 {
     private readonly IOrganizationAuditLogger _organizationAuditLogger;
     private readonly INoOpAuditLogger _noOpAuditLogger;
-    private readonly IFeaturesContext _featuresContext;
+    private readonly ICurrentContext _currentContext;
 
-    public AuditLoggerProvider(IOrganizationAuditLogger organizationAuditLogger, INoOpAuditLogger noOpAuditLogger, IFeaturesContext featuresContext)
+    public AuditLoggerProvider(IOrganizationAuditLogger organizationAuditLogger, INoOpAuditLogger noOpAuditLogger, ICurrentContext currentContext)
     {
         _organizationAuditLogger = organizationAuditLogger;
         _noOpAuditLogger = noOpAuditLogger;
-        _featuresContext = featuresContext;
+        _currentContext = currentContext;
     }
 
-    public async Task<IAuditLogger> Create() =>
-        await _featuresContext.IsAuditLoggingEnabled()
-            ? _organizationAuditLogger
-            : _noOpAuditLogger;
+    public Task<IAuditLogger> Create() =>
+        _currentContext.OrganizationFeatures.AuditLoggingIsEnabled
+            ? Task.FromResult<IAuditLogger>(_organizationAuditLogger)
+            : Task.FromResult<IAuditLogger>(_noOpAuditLogger);
 }

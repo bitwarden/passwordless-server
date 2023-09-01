@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using AdminConsole.Db;
+using AdminConsole.Helpers;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Models.DTOs;
@@ -23,8 +24,9 @@ public class CurrentContext : ICurrentContext
 
     public string? ApiKey { get; private set; }
     public bool IsFrozen { get; private set; }
-
     public FeaturesContext Features { get; private set; }
+    public int? OrgId { get; private set; }
+    public FeaturesContext OrganizationFeatures { get; private set; } = new(false, 0, null);
 
     public void SetApp(Application application)
     {
@@ -43,6 +45,12 @@ public class CurrentContext : ICurrentContext
     {
         Features = context;
     }
+
+    public void SetOrganization(int organizationId, FeaturesContext featuresContext)
+    {
+        OrgId = organizationId;
+        OrganizationFeatures = featuresContext;
+    }
 }
 
 public record FeaturesContext(
@@ -56,7 +64,6 @@ public record FeaturesContext(
     }
 }
 
-
 public interface ICurrentContext
 {
     [MemberNotNullWhen(true, nameof(AppId))]
@@ -68,6 +75,8 @@ public interface ICurrentContext
     string? ApiKey { get; }
     bool IsFrozen { get; }
     FeaturesContext Features { get; }
+    int? OrgId { get; }
+    FeaturesContext OrganizationFeatures { get; }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
@@ -76,8 +85,11 @@ public interface ICurrentContext
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
     void SetFeatures(FeaturesContext context);
-}
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("There should only be one caller of this method, you are probably not it.")]
+    void SetOrganization(int organizationId, FeaturesContext context);
+}
 
 public class CurrentContextMiddleware
 {
@@ -97,12 +109,14 @@ public class CurrentContextMiddleware
     {
         var name = httpContext.GetRouteData();
 
-        if (!name.Values.TryGetValue("app", out var appRouteValue) || appRouteValue is not string appId)
-        {
-            return _next(httpContext);
-        }
+        var hasAppRouteValue = name.Values.TryGetValue("app", out var appRouteValue);
+        var appId = hasAppRouteValue && appRouteValue != null ? (string)appRouteValue : String.Empty;
 
-        return InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient);
+        var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == "OrgId");
+
+        return hasOrgIdClaim
+            ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient)
+            : _next(httpContext);
     }
 
     private async Task InvokeCoreAsync(
@@ -112,6 +126,29 @@ public class CurrentContextMiddleware
         ConsoleDbContext dbContext,
         IPasswordlessManagementClient passwordlessClient)
     {
+        var orgId = httpContext.User.GetOrgId();
+        var enterpriseApps = await dbContext.Applications.Where(x => x.OrganizationId == orgId).AsNoTracking().ToListAsync();
+
+        var tasks = enterpriseApps
+            .Select(x => passwordlessClient.GetFeaturesAsync(x.Id))
+            .ToList();
+
+        await Task.WhenAll(tasks);
+
+        var dto = tasks.Select(x => x.Result)
+            .ToList()
+            .Aggregate(new FeaturesContext(false, 0, DateTime.MinValue), PopulateMaxFeatureContext);
+
+#pragma warning disable CS0618 // I am the one valid caller of this method
+        currentContext.SetOrganization(orgId, dto);
+#pragma warning restore CS0618
+
+        if (string.IsNullOrWhiteSpace(appId))
+        {
+            await _next(httpContext);
+            return;
+        }
+
         var appConfig = await dbContext.Applications.FirstOrDefaultAsync(a => a.Id == appId);
 
         if (appConfig is null)
@@ -139,4 +176,11 @@ public class CurrentContextMiddleware
 
         await _next(httpContext);
     }
+
+    private static FeaturesContext PopulateMaxFeatureContext(FeaturesContext featuresContext, AppFeatureDto appFeatureDto) =>
+        new(appFeatureDto.AuditLoggingIsEnabled,
+            appFeatureDto.AuditLoggingRetentionPeriod > featuresContext.AuditLoggingRetentionPeriod
+                ? appFeatureDto.AuditLoggingRetentionPeriod
+                : featuresContext.AuditLoggingRetentionPeriod,
+            appFeatureDto.DeveloperLoggingEndsAt > featuresContext.DeveloperLoggingEndsAt ? appFeatureDto.DeveloperLoggingEndsAt : featuresContext.DeveloperLoggingEndsAt);
 }

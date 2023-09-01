@@ -1,4 +1,3 @@
-using Passwordless.AdminConsole.AuditLog.DTOs;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 
@@ -13,6 +12,4 @@ public interface IPasswordlessManagementClient
     Task<ICollection<string>> ListApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
-    Task LogEventAsync(AuditLogEventRequest createOrganizationCreatedEvent);
-    Task<OrganizationAuditLogResponse> GetOrganizationAuditLog(int organizationId);
 }

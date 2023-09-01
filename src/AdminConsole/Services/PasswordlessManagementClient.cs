@@ -1,4 +1,3 @@
-using Passwordless.AdminConsole.AuditLog.DTOs;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 
@@ -60,19 +59,4 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var result = await response.Content.ReadFromJsonAsync<AppFeatureDto>();
         return result;
     }
-
-    public async Task LogEventAsync(AuditLogEventRequest createOrganizationCreatedEvent)
-    {
-        var response = await _client.PostAsJsonAsync("events", createOrganizationCreatedEvent);
-        response.EnsureSuccessStatusCode();
-    }
-
-    public async Task<OrganizationAuditLogResponse> GetOrganizationAuditLog(int organizationId)
-    {
-        var response = await _client.GetAsync($"events/{organizationId}");
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<OrganizationAuditLogResponse>();
-    }
-
 }

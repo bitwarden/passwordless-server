@@ -15,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.AuditLog;
-using Passwordless.AdminConsole.Features;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Services.Mail;
@@ -157,7 +156,6 @@ void RunTheApp()
     services.AddBilling(builder);
 
     services.AddAuditLogging(builder.Configuration);
-    services.AddFeatures();
 
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
