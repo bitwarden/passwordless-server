@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.Common.Utils;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -60,5 +61,23 @@ public abstract class DbGlobalContext : DbContext
         });
 
         base.OnModelCreating(modelBuilder);
+    }
+
+    public async Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
+    {
+        ApiKeys.Add(new ApiKeyDesc
+        {
+            Tenant = appName,
+            Id = "9795",
+            ApiKey = publicKey
+        });
+        ApiKeys.Add(new ApiKeyDesc
+        {
+            Tenant = appName,
+            Id = "6d02",
+            ApiKey = ApiKeyUtils.HashPrivateApiKey(privateKey),
+            Scopes = new[] { "token_register", "token_verify" },
+        });
+        AccountInfo.Add(new AccountMetaInformation { Tenant = appName, AcountName = appName });
     }
 }

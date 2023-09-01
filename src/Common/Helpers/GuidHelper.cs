@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Passwordless.Service.Helpers;
+namespace Passwordless.Common.Helpers;
 
 public static class GuidHelper
 {

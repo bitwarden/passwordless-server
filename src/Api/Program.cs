@@ -9,6 +9,7 @@ using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Common.Utils;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
 using Passwordless.Service.Features;
@@ -126,8 +127,18 @@ if (isSelfHosted)
 {
     // When self-hosting. Migrate latest database changes during startup
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<DbTenantContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
     dbContext.Database.Migrate();
+
+    if (!await dbContext.ApiKeys.AnyAsync())
+    {
+        var passwordlessConfiguration = builder.Configuration.GetRequiredSection("Passwordless");
+        var apiKey = passwordlessConfiguration.GetValue<string>("ApiKey");
+        var apiSecret = passwordlessConfiguration.GetValue<string>("ApiSecret");
+        var appName = ApiKeyUtils.GetAppId(apiKey);
+        await dbContext.SeedDefaultApplicationAsync(appName, apiKey, apiSecret);
+        await dbContext.SaveChangesAsync();
+    }
 }
 
 app.UseCors("default");

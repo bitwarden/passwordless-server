@@ -1,6 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Passwordless.Service.Models;
-using Passwordless.Service.Storage;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api;
@@ -14,29 +12,18 @@ public static class DevelopmentEndpoints
             // TODO: If people complain, put this behind ?do=migrate and just return a link here.
             await dbContext.Database.MigrateAsync();
 
-            // seed with a development api key
-            if (!await dbContext.ApiKeys.AnyAsync())
+            if (await dbContext.ApiKeys.AnyAsync())
             {
-                dbContext.ApiKeys.Add(new ApiKeyDesc()
-                {
-                    Tenant = "test",
-                    Id = "9795",
-                    ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795"
-                });
-                dbContext.ApiKeys.Add(new ApiKeyDesc()
-                {
-                    Tenant = "test",
-                    Id = "6d02",
-                    ApiKey = "4RtmMr0hVknaQAIhaRtPHw==:xR7bg3NVsC80a8GDDhH39g==",
-                    Scopes = new[] { "token_register", "token_verify" },
-                });
-                dbContext.AccountInfo.Add(new AccountMetaInformation() { Tenant = "test", AcountName = "test" });
-                await dbContext.SaveChangesAsync();
-
-                return "Database created and seeded.";
+                return "All OK. Happy Developing!";
             }
 
-            return "All OK. Happy Developing!";
+            // seed with a development api key
+            await dbContext.SeedDefaultApplicationAsync(
+                "test",
+                "test:public:2e728aa5986f4ba8b073a5b28a939795",
+                "test:secret:a679563b331846c79c20b114a4f56d02");
+            await dbContext.SaveChangesAsync();
+            return "Database created and seeded.";
         });
     }
 }

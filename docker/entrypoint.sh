@@ -45,13 +45,10 @@ generate_random_hex() {
 mounted_dir='/app/storage';
 mounted_config="$mounted_dir/config.json";
 
-# Check if the JSON file exists
-echo "checking if file exists."
 if [ ! -f "$mounted_config" ]; then
-  touch "$mounted_config";
+  echo "{}" > "$mounted_config";
 fi
 
-# Read JSON values
 api_key=$(jq -r '.Passwordless.ApiKey' "$mounted_config")
 api_secret=$(jq -r '.Passwordless.ApiSecret' "$mounted_config")
 management_key=$(jq -r '.PasswordlessManagement.ManagementKey' "$mounted_config")
@@ -67,7 +64,7 @@ if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key
     management_key=$(generate_random_hex)
   fi
     
-  mounted_temp = "$mounted_dir/temp.json";
+  mounted_temp="$mounted_dir/temp.json";
   jq --arg api_key "$api_key" --arg api_secret "$api_secret" --arg management_key "$management_key" \
     '.Passwordless.ApiKey = $api_key | .Passwordless.ApiSecret = $api_secret | .PasswordlessManagement.ManagementKey = $management_key' \
     "$mounted_config" > "$mounted_temp"
