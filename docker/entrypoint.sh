@@ -55,8 +55,9 @@ fi
 api_key=$(jq -r '.Passwordless.ApiKey' "$mounted_config")
 api_secret=$(jq -r '.Passwordless.ApiSecret' "$mounted_config")
 management_key=$(jq -r '.PasswordlessManagement.ManagementKey' "$mounted_config")
+salt_token=$(jq -r '.SALT_TOKEN' "$mounted_config")
 
-if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key" == "null" ]; then
+if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key" == "null" ] || [ "$salt_token" == "null" ]; then
   if [ "$api_key" == "null" ]; then
     api_key="test:public:$(generate_random_hex)"
   fi
@@ -66,10 +67,13 @@ if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key
   if [ "$management_key" == "null" ]; then
     management_key=$(generate_random_hex)
   fi
+  if [ "$salt_token" == "null" ]; then
+      salt_token=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
+    fi
     
   mounted_temp="$mounted_dir/temp.json";
-  jq --arg api_key "$api_key" --arg api_secret "$api_secret" --arg management_key "$management_key" \
-    '.Passwordless.ApiKey = $api_key | .Passwordless.ApiSecret = $api_secret | .PasswordlessManagement.ManagementKey = $management_key' \
+  jq --arg api_key "$api_key" --arg api_secret "$api_secret" --arg management_key "$management_key" --arg salt_token "$salt_token" \
+    '.Passwordless.ApiKey = $api_key | .Passwordless.ApiSecret = $api_secret | .PasswordlessManagement.ManagementKey = $management_key | .SALT_TOKEN = $salt_token' \
     "$mounted_config" > "$mounted_temp"
   mv "$mounted_temp" "$mounted_config"
 fi

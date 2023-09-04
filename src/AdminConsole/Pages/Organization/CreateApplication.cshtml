@@ -1,5 +1,5 @@
 @page
-@inject IOptions<PasswordlessOptions> options
+@inject IOptions<PasswordlessManagementOptions> Options
 @model CreateApplicationModel
 
 
@@ -81,7 +81,7 @@
             });
 
             const checkAvailability = async (appId) => {
-                var res = await fetch("@options.Value.ApiUrl/apps/available", {
+                var res = await fetch("@Options.Value.PublicApiUrl/apps/available", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
