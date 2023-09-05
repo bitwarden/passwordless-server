@@ -128,7 +128,7 @@ public class CurrentContextMiddleware
         IPasswordlessManagementClient passwordlessClient, PlansOptions optionsValue)
     {
         var orgId = httpContext.User.GetOrgId();
-        
+
         if (await dbContext.Applications.AnyAsync(x => x.OrganizationId == orgId && x.BillingPlan.ToLower() == "enterprise")
             && optionsValue.TryGetValue("Enterprise", out var enterprisePlan))
         {
