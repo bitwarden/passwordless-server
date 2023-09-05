@@ -10,7 +10,7 @@ public static class WebApplicationBuilderExtensions
         }
         else
         {
-            builder.Configuration.AddJsonFile("/app/storage", "config.json", true, true);
+            builder.Configuration.AddJsonFile("/etc/bitwarden_passwordless", "config.json", true, true);
         }
     }
 }

@@ -8,47 +8,72 @@ addgroup --gid $PGID bitwarden
 PUID="${PUID:-1000}"
 adduser --no-create-home --shell /bin/bash --disabled-password --uid $PUID --gid $PGID --gecos "" bitwarden
 
-# Translate environment variables for application settings
-MYSQL_CONNECTION_STRING_API="server=$BWP_DB_SERVER;port=${BWP_DB_PORT:-3306};database=$BWP_DB_DATABASE_API;user=$BWP_DB_USERNAME;password=$BWP_DB_PASSWORD"
-POSTGRESQL_CONNECTION_STRING_API="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=$BWP_DB_DATABASE_API;Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
-MSSQL_CONNECTION_STRING_API="Server=$BWP_DB_SERVER,${BWP_DB_PORT:-1433};Database=$BWP_DB_DATABASE_API;User Id=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD;Encrypt=True;TrustServerCertificate=True"
-SQLITE_CONNECTION_STRING_API="Data Source=$BWP_DB_FILE_API;"
-
-MYSQL_CONNECTION_STRING_ADMIN="server=$BWP_DB_SERVER;port=${BWP_DB_PORT:-3306};database=$BWP_DB_DATABASE_ADMIN;user=$BWP_DB_USERNAME;password=$BWP_DB_PASSWORD"
-POSTGRESQL_CONNECTION_STRING_ADMIN="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=$BWP_DB_DATABASE_ADMIN;Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
-MSSQL_CONNECTION_STRING_ADMIN="Server=$BWP_DB_SERVER,${BWP_DB_PORT:-1433};Database=$BWP_DB_DATABASE_ADMIN;User Id=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD;Encrypt=True;TrustServerCertificate=True"
-SQLITE_CONNECTION_STRING_ADMIN="Data Source=$BWP_DB_FILE_ADMIN;"
-
+############
+# Database #
+############
 export DatabaseProvider=$BWP_DB_PROVIDER
 
-if [ "$BWP_DB_PROVIDER" = "mysql" -o "$BWP_DB_PROVIDER" = "mariadb" ]; then
+if [ "$BWP_DB_PROVIDER" = "mysql" ] || [ "$BWP_DB_PROVIDER" = "mariadb" ]; then
+  MYSQL_CONNECTION_STRING_API="server=$BWP_DB_SERVER;port=${BWP_DB_PORT:-3306};database=$BWP_DB_DATABASE_API;user=$BWP_DB_USERNAME;password=$BWP_DB_PASSWORD"
+  MYSQL_CONNECTION_STRING_ADMIN="server=$BWP_DB_SERVER;port=${BWP_DB_PORT:-3306};database=$BWP_DB_DATABASE_ADMIN;user=$BWP_DB_USERNAME;password=$BWP_DB_PASSWORD"
   export ConnectionStrings__mysql__api=${ConnectionStrings__mysql__api:-$MYSQL_CONNECTION_STRING_API}
   export ConnectionStrings__mysql__admin=${ConnectionStrings__mysql__admin:-$MYSQL_CONNECTION_STRING_ADMIN}
-elif [ "$BWP_DB_PROVIDER" = "postgresql" -o "$BWP_DB_PROVIDER" = "postgres" ]; then
+elif [ "$BWP_DB_PROVIDER" = "postgresql" ] || [ "$BWP_DB_PROVIDER" = "postgres" ]; then
+  POSTGRESQL_CONNECTION_STRING_API="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=$BWP_DB_DATABASE_API;Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
+  POSTGRESQL_CONNECTION_STRING_ADMIN="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=$BWP_DB_DATABASE_ADMIN;Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
   export ConnectionStrings__postgresql__api=${ConnectionStrings__postgresql__api:-$POSTGRESQL_CONNECTION_STRING_API}
   export ConnectionStrings__postgresql__admin=${ConnectionStrings__postgresql__admin:-$POSTGRESQL_CONNECTION_STRING_ADMIN}
-elif [ "$BWP_DB_PROVIDER" = "mssql" -o "$BWP_DB_PROVIDER" = "sqlserver" ]; then
+elif [ "$BWP_DB_PROVIDER" = "mssql" ] || [ "$BWP_DB_PROVIDER" = "sqlserver" ]; then
+  MSSQL_CONNECTION_STRING_API="Server=$BWP_DB_SERVER,${BWP_DB_PORT:-1433};Database=$BWP_DB_DATABASE_API;User Id=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD;Encrypt=True;TrustServerCertificate=True"
+  MSSQL_CONNECTION_STRING_ADMIN="Server=$BWP_DB_SERVER,${BWP_DB_PORT:-1433};Database=$BWP_DB_DATABASE_ADMIN;User Id=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD;Encrypt=True;TrustServerCertificate=True"
   export ConnectionStrings__mssql__api=${ConnectionStrings__mssql__api:-$MSSQL_CONNECTION_STRING_API}
   export ConnectionStrings__mssql__admin=${ConnectionStrings__mssql__admin:-$MSSQL_CONNECTION_STRING_ADMIN}
 else
+  SQLITE_CONNECTION_STRING_API="Data Source=$BWP_DB_FILE_API;"
+  SQLITE_CONNECTION_STRING_ADMIN="Data Source=$BWP_DB_FILE_ADMIN;"
   export ConnectionStrings__sqlite__api=${ConnectionStrings__sqlite__api:-$SQLITE_CONNECTION_STRING_API}
   export ConnectionStrings__sqlite__admin=${ConnectionStrings__sqlite__admin:-$SQLITE_CONNECTION_STRING_ADMIN}
 fi
 
+#########################
+# Internal & Public Url #
+#########################
 export Passwordless__ApiUrl=$PasswordlessManagement_ApiUrl
 export PasswordlessManagement__ApiUrl=$PasswordlessManagement_ApiUrl
+
+if [ "$BWP_DOMAIN" == "null" ]; then
+  echo "ERROR: Missing configuration for environment variable 'BWP_DOMAIN'";
+  exit 1;
+else
+  export PasswordlessManagement__PublicUrl="http://$BWP_DOMAIN"$BWP_DOMAIN
+fi
+
+if [ "$BWP_DOMAIN_API_PORT" == "null" ]; then
+  echo "ERROR: Missing configuration for environment variable 'BWP_DOMAIN_API_PORT'";
+  exit 1;
+else
+  export PasswordlessManagement__PublicApiPort=$BWP_DOMAIN_API_PORT
+fi
 
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #
 ##############################################
 generate_random_hex() {
+  # shellcheck disable=SC2046
+  # shellcheck disable=SC2005
   echo $(openssl rand -hex 16)
 }
 
-mounted_dir='/app/storage';
+mounted_dir='/etc/bitwarden_passwordless';
 mounted_config="$mounted_dir/config.json";
 
+if [ ! -d "$mounted_dir" ]; then
+  echo "WARNING: Using non-persistent storage! Use the '--mount' parameter to map a persistent directory to the container's directory '$mounted_dir'.";
+  mkdir "$mounted_dir";
+fi
+
 if [ ! -f "$mounted_config" ]; then
+  echo "WARNING: '$mounted_config' does not exist and is being generated.";
   echo "{}" > "$mounted_config";
 fi
 
@@ -69,7 +94,7 @@ if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key
   fi
   if [ "$salt_token" == "null" ]; then
       salt_token=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
-    fi
+  fi
     
   mounted_temp="$mounted_dir/temp.json";
   jq --arg api_key "$api_key" --arg api_secret "$api_secret" --arg management_key "$management_key" --arg salt_token "$salt_token" \
@@ -79,7 +104,7 @@ if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key
 fi
 
 # Generate SSL certificates
-if [ "$BWP_ENABLE_SSL" = "true" -a ! -f /etc/bitwarden_passwordless/${BWP_SSL_KEY:-ssl.key} ]; then
+if [ "$BWP_ENABLE_SSL" = "true" ] && [ ! -f /etc/bitwarden_passwordless/${BWP_SSL_KEY:-ssl.key} ]; then
   openssl req \
   -x509 \
   -newkey rsa:4096 \
