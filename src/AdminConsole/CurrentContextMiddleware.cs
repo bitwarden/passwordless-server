@@ -5,6 +5,7 @@ using AdminConsole.Db;
 using AdminConsole.Helpers;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
 
@@ -105,7 +106,8 @@ public class CurrentContextMiddleware
         HttpContext httpContext,
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
-        IPasswordlessManagementClient passwordlessClient)
+        IPasswordlessManagementClient passwordlessClient,
+        IOptions<PlansOptions> options)
     {
         var name = httpContext.GetRouteData();
 
@@ -115,33 +117,25 @@ public class CurrentContextMiddleware
         var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == "OrgId");
 
         return hasOrgIdClaim
-            ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient)
+            ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient, options.Value)
             : _next(httpContext);
     }
 
-    private async Task InvokeCoreAsync(
-        HttpContext httpContext,
+    private async Task InvokeCoreAsync(HttpContext httpContext,
         string appId,
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
-        IPasswordlessManagementClient passwordlessClient)
+        IPasswordlessManagementClient passwordlessClient, PlansOptions optionsValue)
     {
         var orgId = httpContext.User.GetOrgId();
-        var enterpriseApps = await dbContext.Applications.Where(x => x.OrganizationId == orgId).AsNoTracking().ToListAsync();
-
-        var tasks = enterpriseApps
-            .Select(x => passwordlessClient.GetFeaturesAsync(x.Id))
-            .ToList();
-
-        await Task.WhenAll(tasks);
-
-        var dto = tasks.Select(x => x.Result)
-            .ToList()
-            .Aggregate(new FeaturesContext(false, 0, DateTime.MinValue), PopulateMaxFeatureContext);
-
+        
+        if (await dbContext.Applications.AnyAsync(x => x.OrganizationId == orgId && x.BillingPlan.ToLower() == "enterprise")
+            && optionsValue.TryGetValue("Enterprise", out var enterprisePlan))
+        {
 #pragma warning disable CS0618 // I am the one valid caller of this method
-        currentContext.SetOrganization(orgId, dto);
+            currentContext.SetOrganization(orgId, new FeaturesContext(enterprisePlan.AuditLoggingIsEnabled, enterprisePlan.AuditLoggingRetentionPeriod, null));
 #pragma warning restore CS0618
+        }
 
         if (string.IsNullOrWhiteSpace(appId))
         {
@@ -176,11 +170,4 @@ public class CurrentContextMiddleware
 
         await _next(httpContext);
     }
-
-    private static FeaturesContext PopulateMaxFeatureContext(FeaturesContext featuresContext, AppFeatureDto appFeatureDto) =>
-        new(appFeatureDto.AuditLoggingIsEnabled,
-            appFeatureDto.AuditLoggingRetentionPeriod > featuresContext.AuditLoggingRetentionPeriod
-                ? appFeatureDto.AuditLoggingRetentionPeriod
-                : featuresContext.AuditLoggingRetentionPeriod,
-            appFeatureDto.DeveloperLoggingEndsAt > featuresContext.DeveloperLoggingEndsAt ? appFeatureDto.DeveloperLoggingEndsAt : featuresContext.DeveloperLoggingEndsAt);
 }
