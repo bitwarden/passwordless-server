@@ -10,8 +10,6 @@ public static class AddAuditLoggingMethods
 {
     public static IServiceCollection AddAuditLogging(this IServiceCollection services, IConfiguration configuration)
     {
-
-
         services
             .AddTransient<INullAuditLogger, NullAuditLogger>()
             .AddTransient<IAuditLogger, AuditLogger>()
