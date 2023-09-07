@@ -198,6 +198,7 @@ void RunTheApp()
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
+    app.UseMiddleware<AuditLogStorageCommitMiddleware>();
     app.UseAuthorization();
     app.MapPasswordless();
     app.MapRazorPages();

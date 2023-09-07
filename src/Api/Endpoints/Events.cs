@@ -2,7 +2,6 @@ using ApiHelpers;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Common.AuditLog.Models;
-using Passwordless.Service.AuditLog;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Helpers;
@@ -17,10 +16,9 @@ public static class AuditLog
                     int pageNumber,
                     int numberOfResults,
                     HttpRequest request,
-                    IAuditLoggerStorageFactory auditLoggerStorageFactory,
+                    IAuditLogStorage storage,
                     CancellationToken cancellationToken) =>
                 {
-                    var storage = auditLoggerStorageFactory.Create();
                     var tenantId = request.GetTenantName();
 
                     return new
@@ -35,9 +33,8 @@ public static class AuditLog
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapPost("events", async (AppAuditEventRequest eventRequest, HttpRequest httpRequest, IAuditLoggerFactory auditLoggerFactory) =>
-                await (await auditLoggerFactory.Create())
-                    .LogEvent(eventRequest.ToDto(httpRequest)))
+        app.MapPost("events", (AppAuditEventRequest eventRequest, HttpRequest httpRequest, IAuditLogger auditLogger) =>
+                auditLogger.LogEvent(eventRequest.ToDto(httpRequest)))
             .RequireSecretKey()
             .RequireCors("default");
     }

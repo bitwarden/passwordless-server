@@ -16,14 +16,13 @@ public static class RegisterEndpoints
     {
         app.MapPost("/register/token", async (RegisterToken registerToken,
                 IFido2ServiceFactory fido2ServiceFactory,
-                IAuditLoggerFactory auditLoggerFactory,
+                IAuditLogger auditLogger,
                 HttpRequest request) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.CreateToken(registerToken);
 
-            await (await auditLoggerFactory.Create())
-                .LogEvent(registerToken.ToEvent(request.GetTenantName(), request.GetApiSecret().GetLast(4)));
+            auditLogger.LogEvent(registerToken.ToEvent(request.GetTenantName(), request.GetApiSecret().GetLast(4)));
 
             return Ok(new RegisterTokenResponse(result));
         })
