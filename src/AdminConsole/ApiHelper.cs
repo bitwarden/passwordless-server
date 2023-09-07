@@ -24,31 +24,16 @@ public static class ManagementApiExtensions
 
 public class PasswordlessManagementOptions
 {
-    private string _publicUrl;
-    public string PublicUrl
-    {
-        get => string.IsNullOrEmpty(_publicUrl) ? ApiUrl : _publicUrl;
-        set
-        {
-            _publicUrl = value;
-        }
-    }
-
-    public int PublicApiPort { get; set; }
-
     public string ApiUrl { get; set; }
     public string ManagementKey { get; set; }
 
+    private string? _publicApiUrl;
     public string PublicApiUrl
     {
-        get
+        get => _publicApiUrl ?? ApiUrl;
+        set
         {
-            if (string.IsNullOrEmpty(_publicUrl))
-            {
-                return ApiUrl;
-            }
-
-            return $"{PublicUrl}:{PublicApiPort}";
+            _publicApiUrl = value;
         }
     }
 }
