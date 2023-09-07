@@ -2,22 +2,22 @@ using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.AuditLog.Models;
-using Passwordless.Service.Storage.Ef.AuditLog;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.AuditLog.Loggers;
 
 public class AuditLoggerEfStorage : IAuditLogStorage, IAuditLogger
 {
-    private readonly DbAuditLogContext _db;
+    private readonly DbTenantContext _db;
     private readonly List<ApplicationAuditEvent> _items = new();
 
-    public AuditLoggerEfStorage(DbAuditLogContext db)
+    public AuditLoggerEfStorage(DbTenantContext db)
     {
         _db = db;
     }
 
     public async Task<IEnumerable<ApplicationAuditEvent>> GetAuditLogAsync(string tenantId, int pageNumber, int resultsPerPage, CancellationToken cancellationToken) =>
-        await _db.AppEvents
+        await _db.ApplicationEvents
             .OrderByDescending(x => x.PerformedAt)
             .Skip(resultsPerPage * (pageNumber - 1))
             .Take(resultsPerPage)
@@ -26,7 +26,7 @@ public class AuditLoggerEfStorage : IAuditLogStorage, IAuditLogger
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetAuditLogCountAsync(string tenantId, CancellationToken cancellationToken) =>
-        await _db.AppEvents.CountAsync(x => x.TenantId == tenantId, cancellationToken);
+        await _db.ApplicationEvents.CountAsync(x => x.TenantId == tenantId, cancellationToken);
 
     public void LogEvent(AuditEventDto auditEvent)
     {
@@ -35,7 +35,7 @@ public class AuditLoggerEfStorage : IAuditLogStorage, IAuditLogger
 
     public async Task FlushAsync()
     {
-        _db.AppEvents.AddRange(_items);
+        _db.ApplicationEvents.AddRange(_items);
         await _db.SaveChangesAsync();
     }
 }
