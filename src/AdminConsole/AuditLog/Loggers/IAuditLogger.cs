@@ -4,5 +4,6 @@ namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
 public interface IAuditLogger
 {
-    Task LogEvent(OrganizationEventDto auditEvent);
+    void LogEvent(OrganizationEventDto auditEvent);
+    Task FlushAsync();
 }
