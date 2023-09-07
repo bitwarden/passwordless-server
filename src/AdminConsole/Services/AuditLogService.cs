@@ -22,7 +22,7 @@ public class AuditLogService : IAuditLogService
         _scopedPasswordlessClient = scopedPasswordlessClient;
         _storage = storage;
     }
-    
+
     public async Task<OrganizationAuditLogResponse> GetAuditLogs(int organizationId, int pageNumber, int pageSize) =>
         new(organizationId, (await _storage.GetOrganizationEvents(organizationId, pageNumber, pageSize))
             .Select(x => x.ToResponse()));

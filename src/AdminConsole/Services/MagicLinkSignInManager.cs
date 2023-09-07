@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.AuditLog.Loggers;
-using Passwordless.AdminConsole.Services;
 using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace AdminConsole;
-
 
 public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : class
 {

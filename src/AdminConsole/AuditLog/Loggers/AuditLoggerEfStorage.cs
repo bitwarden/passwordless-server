@@ -13,7 +13,7 @@ public class AuditLoggerEfStorage : IAuditLoggerStorage, IAuditLogger
     {
         _context = context;
     }
-    
+
     public async Task<IEnumerable<OrganizationEventDto>> GetOrganizationEvents(int organizationId, int pageNumber, int resultsPerPage) =>
         (await _context.OrganizationEvents
             .Where(x => x.OrganizationId == organizationId)
@@ -24,12 +24,15 @@ public class AuditLoggerEfStorage : IAuditLoggerStorage, IAuditLogger
             .ToListAsync())
         .Select(x => x.ToDto());
 
-    public async Task<int> GetOrganizationEventCount(int organizationId) => await _context.OrganizationEvents.CountAsync();
+    public async Task<int> GetOrganizationEventCount(int organizationId) =>
+        await _context.OrganizationEvents
+        .CountAsync(x => x.OrganizationId == organizationId);
+
     public void LogEvent(OrganizationEventDto auditEvent)
     {
         _items.Add(auditEvent.ToNewEvent());
     }
-    
+
     public async Task FlushAsync()
     {
         _context.OrganizationEvents.AddRange(_items);
