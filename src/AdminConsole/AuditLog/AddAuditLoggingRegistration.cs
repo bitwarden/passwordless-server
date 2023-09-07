@@ -1,5 +1,3 @@
-using AdminConsole.Db.AuditLog;
-using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.AuditLog.Loggers;
 using Passwordless.AdminConsole.Services;
 
@@ -12,28 +10,10 @@ public static class AddAuditLoggingRegistration
             .AddScoped<IAuditLoggerStorage, AuditLoggerEfStorage>()
             .AddScoped<AuditLoggerEfStorage>()
             .AddScoped(GetAuditLogger)
-            .AddTransient<IAuditLogService, AuditLogService>()
-            .AddAuditDatabase(configuration);
+            .AddTransient<IAuditLogService, AuditLogService>();
 
     private static IAuditLogger GetAuditLogger(IServiceProvider serviceProvider) =>
         serviceProvider.GetRequiredService<ICurrentContext>().OrganizationFeatures.AuditLoggingIsEnabled
             ? serviceProvider.GetRequiredService<AuditLoggerEfStorage>()
             : NoOpAuditLogger.Instance;
-
-    private static IServiceCollection AddAuditDatabase(this IServiceCollection serviceCollection, IConfiguration configuration)
-    {
-        const string sqliteAuditKey = "sqlite:audit";
-
-        var auditSqlite = configuration.GetConnectionString(sqliteAuditKey);
-
-        if (!string.IsNullOrWhiteSpace(auditSqlite))
-        {
-            serviceCollection.AddDbContext<ConsoleAuditLogDbContext, SqliteConsoleAuditLogDbContext>((provider, builder) =>
-            {
-                builder.UseSqlite(provider.GetRequiredService<IConfiguration>().GetConnectionString(sqliteAuditKey));
-            });
-        }
-
-        return serviceCollection;
-    }
 }

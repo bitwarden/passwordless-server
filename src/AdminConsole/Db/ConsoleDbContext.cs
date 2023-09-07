@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Passwordless.AdminConsole.AuditLog.Models;
 
 namespace AdminConsole.Db;
 
@@ -19,6 +20,7 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
     public DbSet<Application> Applications { get; set; }
     public DbSet<Onboarding> Onboardings { get; set; }
     public DbSet<Invite> Invites { get; set; }
+    public DbSet<OrganizationAuditEvent> OrganizationEvents => Set<OrganizationAuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,6 +36,9 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
         {
             o.HasKey(i => i.HashedCode);
         });
+
+        builder.Entity<OrganizationAuditEvent>()
+            .HasKey(x => x.Id);
 
         base.OnModelCreating(builder);
     }

@@ -56,7 +56,6 @@
     <ItemGroup>
         <Folder Include="Identity\" />
         <Folder Include="Migrations" />
-        <Folder Include="Migrations\AuditLog\Sqlite\" />
         <Folder Include="Models\" />
         <Folder Include="Pages\App\" />
         <Folder Include="Pages\App\Credentials\" />

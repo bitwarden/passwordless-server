@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations" />
-    <Folder Include="Migrations\AuditLog\Sqlite\" />
   </ItemGroup>
 
   <ItemGroup>

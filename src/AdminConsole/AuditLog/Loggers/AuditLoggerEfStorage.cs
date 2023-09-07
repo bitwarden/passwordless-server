@@ -1,4 +1,4 @@
-using AdminConsole.Db.AuditLog;
+using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.AuditLog.DTOs;
 using Passwordless.AdminConsole.AuditLog.Models;
@@ -7,9 +7,9 @@ namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
 public class AuditLoggerEfStorage : IAuditLoggerStorage, IAuditLogger
 {
-    private readonly ConsoleAuditLogDbContext _context;
+    private readonly ConsoleDbContext _context;
     private readonly List<OrganizationAuditEvent> _items = new();
-    public AuditLoggerEfStorage(ConsoleAuditLogDbContext context)
+    public AuditLoggerEfStorage(ConsoleDbContext context)
     {
         _context = context;
     }
