@@ -10,11 +10,18 @@ public static class AddAuditLoggingRegistration
 {
     public static IServiceCollection AddAuditLogging(this IServiceCollection serviceCollection, IConfiguration configuration) =>
         serviceCollection
-            .AddTransient<IAuditLoggerStorageProvider, AuditLoggerStorageProvider>()
-            .AddTransient<IAuditLoggerEfStorage, AuditLoggerEfStorage>()
-            .AddTransient<IOrganizationAuditLogger, OrganizationAuditLogger>()
-            .AddTransient<INoOpAuditLogger, NoOpAuditLogger>()
-            .AddTransient<IAuditLoggerProvider, AuditLoggerProvider>()
+            .AddScoped<IAuditLoggerStorage, AuditLoggerEfStorage>()
+            .AddScoped<AuditLoggerEfStorage>()
+            .AddScoped<IAuditLogger>(sp =>
+            {
+                var cc = sp.GetRequiredService<ICurrentContext>();
+                if (cc.OrganizationFeatures.AuditLoggingIsEnabled)
+                {
+                    return sp.GetRequiredService<AuditLoggerEfStorage>();
+                }
+
+                return NoOpAuditLogger.Instance;
+            })
             .AddTransient<IAuditLogService, AuditLogService>()
             .AddAuditDatabase(configuration);
 

@@ -2,7 +2,13 @@ using Passwordless.AdminConsole.AuditLog.DTOs;
 
 namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
-public class NoOpAuditLogger : INoOpAuditLogger
+public class NoOpAuditLogger : IAuditLogger
 {
-    public Task LogEvent(OrganizationEventDto auditEvent) => Task.CompletedTask;
+    public void LogEvent(OrganizationEventDto auditEvent)
+    {
+    }
+
+    public Task FlushAsync() => Task.CompletedTask;
+
+    public static NoOpAuditLogger Instance { get; } = new();
 }
