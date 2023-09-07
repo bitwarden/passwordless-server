@@ -11,18 +11,14 @@ public static class AddAuditLoggingRegistration
         serviceCollection
             .AddScoped<IAuditLoggerStorage, AuditLoggerEfStorage>()
             .AddScoped<AuditLoggerEfStorage>()
-            .AddScoped<IAuditLogger>(sp =>
-            {
-                var cc = sp.GetRequiredService<ICurrentContext>();
-                if (cc.OrganizationFeatures.AuditLoggingIsEnabled)
-                {
-                    return sp.GetRequiredService<AuditLoggerEfStorage>();
-                }
-
-                return NoOpAuditLogger.Instance;
-            })
+            .AddScoped(GetAuditLogger)
             .AddTransient<IAuditLogService, AuditLogService>()
             .AddAuditDatabase(configuration);
+
+    private static IAuditLogger GetAuditLogger(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ICurrentContext>().OrganizationFeatures.AuditLoggingIsEnabled
+            ? serviceProvider.GetRequiredService<AuditLoggerEfStorage>()
+            : NoOpAuditLogger.Instance;
 
     private static IServiceCollection AddAuditDatabase(this IServiceCollection serviceCollection, IConfiguration configuration)
     {
