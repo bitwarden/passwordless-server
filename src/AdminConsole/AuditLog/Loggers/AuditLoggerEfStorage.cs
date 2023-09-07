@@ -1,11 +1,9 @@
-using System.Diagnostics.Tracing;
 using AdminConsole.Db.AuditLog;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.AuditLog.DTOs;
-using Passwordless.AdminConsole.AuditLog.Loggers;
 using Passwordless.AdminConsole.AuditLog.Models;
 
-namespace Passwordless.AdminConsole.AuditLog.Storage;
+namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
 public class AuditLoggerEfStorage : IAuditLoggerStorage, IAuditLogger
 {

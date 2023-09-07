@@ -1,7 +1,6 @@
 using Passwordless.AdminConsole.AuditLog;
 using Passwordless.AdminConsole.AuditLog.DTOs;
 using Passwordless.AdminConsole.AuditLog.Loggers;
-using Passwordless.AdminConsole.AuditLog.Storage;
 
 namespace Passwordless.AdminConsole.Services;
 

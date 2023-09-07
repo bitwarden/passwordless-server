@@ -1,7 +1,6 @@
 using AdminConsole.Db.AuditLog;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.AuditLog.Loggers;
-using Passwordless.AdminConsole.AuditLog.Storage;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.AuditLog;

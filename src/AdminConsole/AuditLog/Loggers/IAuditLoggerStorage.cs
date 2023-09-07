@@ -1,6 +1,6 @@
 using Passwordless.AdminConsole.AuditLog.DTOs;
 
-namespace Passwordless.AdminConsole.AuditLog.Storage;
+namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
 public interface IAuditLoggerStorage
 {
