@@ -33,8 +33,8 @@ public static class AuditLog
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapPost("events", (AppAuditEventRequest eventRequest, HttpRequest httpRequest, IAuditLogger auditLogger) =>
-                auditLogger.LogEvent(eventRequest.ToDto(httpRequest)))
+        app.MapPost("events", async (AppAuditEventRequest eventRequest, HttpRequest httpRequest, AuditLoggerProvider auditLogger) =>
+                (await auditLogger.Create()).LogEvent(eventRequest.ToDto(httpRequest)))
             .RequireSecretKey()
             .RequireCors("default");
     }
