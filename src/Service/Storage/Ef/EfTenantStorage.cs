@@ -228,7 +228,7 @@ public class EfTenantStorage : ITenantStorage
     {
         return (await db.AccountInfo.FirstOrDefaultAsync()) != null;
     }
-    
+
     public async Task UpdateCredential(byte[] credentialId, uint counter, string country, string device)
     {
         var c = await db.Credentials.Where(c => c.DescriptorId == credentialId).FirstOrDefaultAsync();

@@ -13,7 +13,7 @@ public class AuditLogStorageCommitMiddleware
         await _next(context);
 
         var logger = await auditLogger.Create();
-        
+
         await logger.FlushAsync();
     }
 }
