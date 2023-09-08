@@ -8,6 +8,7 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
 using Passwordless.Server.Endpoints;
@@ -125,6 +126,8 @@ else
 
 if (isSelfHosted)
 {
+    app.UseMiddleware<HttpOverridesMiddleware>();
+
     // When self-hosting. Migrate latest database changes during startup
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();

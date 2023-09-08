@@ -17,6 +17,7 @@ using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Net;
 using Serilog;
@@ -188,6 +189,8 @@ void RunTheApp()
 
     if (isSelfHosted)
     {
+        app.UseMiddleware<HttpOverridesMiddleware>();
+
         // When self-hosting. Migrate latest database changes during startup
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider
