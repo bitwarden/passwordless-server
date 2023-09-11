@@ -103,12 +103,11 @@ public class CurrentContextMiddleware
     }
 
     // Keep method non-async for non-app calls so that we can avoid the creation of a state machine when it's not needed
-    public async Task InvokeAsync(
+    public Task InvokeAsync(
         HttpContext httpContext,
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
         IPasswordlessManagementClient passwordlessClient,
-        IAuditLogger auditLogger,
         IOptions<PlansOptions> options)
     {
         var name = httpContext.GetRouteData();
@@ -118,13 +117,9 @@ public class CurrentContextMiddleware
 
         var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == "OrgId");
 
-        var action = hasOrgIdClaim
+        return hasOrgIdClaim
             ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient, options.Value)
             : _next(httpContext);
-
-        await action;
-
-        await auditLogger.FlushAsync();
     }
 
     private async Task InvokeCoreAsync(HttpContext httpContext,
