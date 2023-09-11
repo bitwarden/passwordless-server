@@ -6,7 +6,6 @@ using AdminConsole.Helpers;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.AuditLog.Loggers;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
 
