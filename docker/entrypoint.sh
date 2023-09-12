@@ -20,7 +20,7 @@ if [ "$BWP_DB_PROVIDER" = "mysql" ] || [ "$BWP_DB_PROVIDER" = "mariadb" ]; then
   export ConnectionStrings__mysql__admin=${ConnectionStrings__mysql__admin:-$MYSQL_CONNECTION_STRING_ADMIN}
 elif [ "$BWP_DB_PROVIDER" = "postgresql" ] || [ "$BWP_DB_PROVIDER" = "postgres" ]; then
   POSTGRESQL_CONNECTION_STRING_API="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=${BWP_DB_DATABASE_API:-Api};Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
-  POSTGRESQL_CONNECTION_STRING_ADMIN="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=${BWP_DB_DATABASE_ADMIN-Admin};Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
+  POSTGRESQL_CONNECTION_STRING_ADMIN="Host=$BWP_DB_SERVER;Port=${BWP_DB_PORT:-5432};Database=${BWP_DB_DATABASE_ADMIN:-Admin};Username=$BWP_DB_USERNAME;Password=$BWP_DB_PASSWORD"
   export ConnectionStrings__postgresql__api=${ConnectionStrings__postgresql__api:-$POSTGRESQL_CONNECTION_STRING_API}
   export ConnectionStrings__postgresql__admin=${ConnectionStrings__postgresql__admin:-$POSTGRESQL_CONNECTION_STRING_ADMIN}
 elif [ "$BWP_DB_PROVIDER" = "mssql" ] || [ "$BWP_DB_PROVIDER" = "sqlserver" ]; then
