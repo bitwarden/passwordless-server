@@ -87,13 +87,12 @@ services.AddScoped<IRequestContext, RequestContext>();
 builder.AddMail();
 builder.Services.AddSingleton<IMailService, DefaultMailService>();
 
-services.AddAuditLogging(builder.Configuration);
-
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
 services.AddScoped<IFeatureContextProvider, FeatureContextProvider>();
+services.AddAuditLogging();
 
 if (builder.Environment.IsDevelopment())
 {

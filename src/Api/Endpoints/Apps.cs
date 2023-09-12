@@ -2,7 +2,10 @@
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
+using Passwordless.Common.AuditLog.Enums;
+using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service;
+using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -130,11 +133,24 @@ public static class AppsEndpoints
         [FromBody] MarkDeleteAppDto payload,
         ISharedManagementService service,
         IRequestContext requestContext,
-        ILogger logger)
+        ILogger logger,
+        IAuditLogger auditLogger)
     {
         var baseUrl = requestContext.GetBaseUrl();
         var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
+
+        auditLogger.LogEvent(new AuditEventDto
+        {
+            PerformedAt = DateTime.UtcNow,
+            Message = $"Account was marked for deletion",
+            PerformedBy = payload.DeletedBy,
+            TenantId = appId,
+            EventType = AuditEventType.ApiManagementAppMarkedForDeletion,
+            Severity = Severity.Informational,
+            Subject = appId
+        });
+
         return Ok(result);
     }
 
@@ -144,10 +160,22 @@ public static class AppsEndpoints
         return Ok(result);
     }
 
-    public static async Task<IResult> CancelDeletionAsync(string appId, ISharedManagementService service)
+    public static async Task<IResult> CancelDeletionAsync(string appId, ISharedManagementService service, IAuditLogger auditLogger)
     {
         await service.UnFreezeAccount(appId);
         var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
+
+        auditLogger.LogEvent(new AuditEventDto
+        {
+            PerformedAt = DateTime.UtcNow,
+            Message = $"Account deletion was canceled",
+            PerformedBy = "system",
+            TenantId = appId,
+            EventType = AuditEventType.ApiManagementAppDeletionCanceled,
+            Severity = Severity.Informational,
+            Subject = appId
+        });
+
         return Ok(res);
     }
 

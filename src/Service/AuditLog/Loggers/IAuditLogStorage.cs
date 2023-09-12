@@ -4,6 +4,6 @@ namespace Passwordless.Service.AuditLog.Loggers;
 
 public interface IAuditLogStorage
 {
-    Task<IEnumerable<ApplicationAuditEvent>> GetAuditLogAsync(string tenantId, int pageNumber, int resultsPerPage, CancellationToken cancellationToken);
-    Task<int> GetAuditLogCountAsync(string tenantId, CancellationToken cancellationToken);
+    Task<IEnumerable<ApplicationAuditEvent>> GetAuditLogAsync(int pageNumber, int resultsPerPage, CancellationToken cancellationToken);
+    Task<int> GetAuditLogCountAsync(CancellationToken cancellationToken);
 }

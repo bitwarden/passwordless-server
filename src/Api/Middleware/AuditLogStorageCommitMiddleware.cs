@@ -8,12 +8,16 @@ public class AuditLogStorageCommitMiddleware
 
     public AuditLogStorageCommitMiddleware(RequestDelegate next) => _next = next;
 
-    public async Task InvokeAsync(HttpContext context, AuditLoggerProvider auditLogger)
+    public async Task InvokeAsync(HttpContext context, AuditLoggerProvider auditLoggerProvider)
     {
-        await _next(context);
-
-        var logger = await auditLogger.Create();
-
-        await logger.FlushAsync();
+        try
+        {
+            await _next(context);
+        }
+        finally
+        {
+            var logger = await auditLoggerProvider.Create();
+            await logger.FlushAsync();
+        }
     }
 }
