@@ -1,5 +1,7 @@
 using Passwordless.Common.AuditLog.Enums;
 using Passwordless.Common.AuditLog.Models;
+using Passwordless.Common.Extensions;
+using Passwordless.Common.Models;
 using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Models;
 
@@ -7,18 +9,42 @@ namespace Passwordless.Service.AuditLog.Mappings;
 
 public static class AuditEventExtensions
 {
-    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantName, string apiAbbreviation) => new()
+    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantName, DateTime performedAt, PrivateKey secretKey) => new()
     {
         Message = $"Created registration token for {tokenRequest.UserId}",
         Severity = Severity.Informational,
         EventType = AuditEventType.ApiAuthUserRegistered,
-        PerformedAt = DateTime.UtcNow,
+        PerformedAt = performedAt,
         PerformedBy = tokenRequest.UserId,
         Subject = tenantName,
         TenantId = tenantName,
-        ApiKeyId = apiAbbreviation
+        ApiKeyId = secretKey.AbbreviatedValue
     };
 
+    public static AuditEventDto ToEvent(this FidoRegistrationBeginDTO dto, string tenantName, DateTime performedAt, PublicKey publicKey) => new()
+    {
+        Message = $"Beginning passkey registration for token: {string.Join("***", dto.Token.GetLast(4))}",
+        PerformedBy = "",
+        PerformedAt = performedAt,
+        EventType = AuditEventType.ApiAuthPasskeyRegistrationBegan,
+        Severity = Severity.Informational,
+        Subject = tenantName,
+        TenantId = tenantName,
+        ApiKeyId = publicKey.AbbreviatedValue
+    };
+    
+    public static AuditEventDto RegistrationCompletedEvent(string token, string tenantName, DateTime performedAt, PublicKey publicKey) => new()
+    {
+        Message = $"Completed passkey registration  for token: {string.Join("***", token.GetLast(4))}.",
+        PerformedBy = "",
+        PerformedAt = performedAt,
+        EventType = AuditEventType.ApiAuthPasskeyRegistrationCompleted,
+        Severity = Severity.Informational,
+        Subject = tenantName,
+        TenantId = tenantName,
+        ApiKeyId = publicKey.AbbreviatedValue
+    };
+    
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,
