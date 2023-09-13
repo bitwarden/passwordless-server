@@ -1,14 +1,27 @@
+using Passwordless.Common.AuditLog.Enums;
+
 namespace Passwordless.Service.AuditLog.Models;
 
 public class AuditEventResponse
 {
-    public DateTime PerformedAt { get; init; } = DateTime.UtcNow;
-    public string Message { get; init; } = string.Empty;
-    public string PerformedBy { get; init; } = string.Empty;
-    public string? TenantId { get; init; }
-    public int? OrganizationId { get; init; }
-    public string EventType { get; set; }
-    public string Severity { get; set; }
-    public string Subject { get; set; }
-    public string ApiKeyId { get; set; }
+    public AuditEventResponse(DateTime performedAt, string message, string performedBy, string applicationId, AuditEventType eventType, Severity severity, string subject, string apiKeyId)
+    {
+        PerformedAt = performedAt;
+        Message = message;
+        PerformedBy = performedBy;
+        TenantId = applicationId;
+        EventType = eventType.ToString();
+        Severity = severity.ToString();
+        Subject = subject;
+        ApiKeyId = apiKeyId;
+    }
+
+    public DateTime PerformedAt { get; }
+    public string Message { get; }
+    public string PerformedBy { get; }
+    public string TenantId { get; }
+    public string EventType { get; }
+    public string Severity { get; }
+    public string Subject { get; }
+    public string ApiKeyId { get; }
 }

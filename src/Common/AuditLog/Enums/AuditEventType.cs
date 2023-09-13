@@ -2,6 +2,7 @@ namespace Passwordless.Common.AuditLog.Enums;
 
 public enum AuditEventType
 {
+    Unknown = 0,
     ApiAuthUserRegistered = 1000,
     ApiManagementAppMarkedForDeletion = 1010,
     ApiManagementAppDeletionCanceled = 1011,

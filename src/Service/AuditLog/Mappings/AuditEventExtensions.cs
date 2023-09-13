@@ -19,17 +19,17 @@ public static class AuditEventExtensions
         ApiKeyId = apiAbbreviation
     };
 
-    public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new()
-    {
-        PerformedAt = dbEvent.PerformedAt,
-        Message = dbEvent.Message,
-        PerformedBy = dbEvent.PerformedBy,
-        TenantId = dbEvent.TenantId,
-        EventType = dbEvent.EventType.ToString(),
-        Severity = dbEvent.Severity.ToString(),
-        Subject = dbEvent.Subject,
-        ApiKeyId = dbEvent.ApiKeyId
-    };
+    public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
+    (
+        dbEvent.PerformedAt,
+        dbEvent.Message,
+        dbEvent.PerformedBy,
+        dbEvent.TenantId,
+        dbEvent.EventType,
+        dbEvent.Severity,
+        dbEvent.Subject,
+        dbEvent.ApiKeyId
+    );
 
     public static ApplicationAuditEvent ToEvent(this AuditEventDto auditEventDto) => new()
     {
