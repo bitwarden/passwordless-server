@@ -10,7 +10,6 @@ namespace AdminConsole.Pages.Logs;
 public class Log : PageModel
 {
     private readonly IAuditLogService _auditLogService;
-    private readonly IPasswordlessManagementClient _managementClient;
     private readonly ICurrentContext _currentContext;
 
     public IEnumerable<AuditLogEvent> Events { get; private set; } = new List<AuditLogEvent>();
@@ -20,7 +19,6 @@ public class Log : PageModel
     public Log(IAuditLogService auditLogService, IPasswordlessManagementClient managementClient, ICurrentContext currentContext)
     {
         _auditLogService = auditLogService;
-        _managementClient = managementClient;
         _currentContext = currentContext;
     }
 
