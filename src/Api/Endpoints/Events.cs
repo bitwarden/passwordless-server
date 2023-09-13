@@ -16,11 +16,6 @@ public static class AuditLog
         app.MapGet("events", GetAuditLogEvents)
             .RequireSecretKey()
             .RequireCors("default");
-
-        app.MapPost("events", async (AppAuditEventRequest eventRequest, HttpRequest httpRequest, AuditLoggerProvider auditLogger) =>
-                (await auditLogger.Create()).LogEvent(eventRequest.ToDto(httpRequest)))
-            .RequireSecretKey()
-            .RequireCors("default");
     }
 
     private static async Task<IResult> GetAuditLogEvents(int pageNumber,
@@ -42,15 +37,4 @@ public static class AuditLog
             TotalEventCount = await storage.GetAuditLogCountAsync(cancellationToken)
         });
     }
-
-    private static AuditEventDto ToDto(this AppAuditEventRequest eventRequest, HttpRequest httpRequest) => new()
-    {
-        Message = eventRequest.Message,
-        PerformedBy = eventRequest.PerformedBy,
-        EventType = eventRequest.EventType,
-        Severity = eventRequest.Severity,
-        Subject = eventRequest.Subject,
-        TenantId = httpRequest.GetTenantName(),
-        ApiKeyId = httpRequest.GetApiSecret().GetLast(4)
-    };
 }
