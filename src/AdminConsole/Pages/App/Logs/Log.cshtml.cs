@@ -1,4 +1,5 @@
 using AdminConsole.Pages.Components;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.AuditLog.DTOs;
@@ -23,9 +24,11 @@ public class Log : PageModel
         _currentContext = currentContext;
     }
 
-    public async Task OnGet(int pageNumber = 1, int numberOfRecords = 100)
+    public async Task<ActionResult> OnGet(int pageNumber = 1, int numberOfRecords = 100)
     {
         var features = _currentContext.Features;
+
+        if (features.AuditLoggingIsEnabled == false) return Redirect("onboarding/get-started");
 
         RetentionPeriod = features.AuditLoggingRetentionPeriod;
 
@@ -34,5 +37,7 @@ public class Log : PageModel
         Events = eventsResponse.Events;
 
         PageList = new PagedList(eventsResponse.TotalEventCount, pageNumber, numberOfRecords);
+
+        return Page();
     }
 }
