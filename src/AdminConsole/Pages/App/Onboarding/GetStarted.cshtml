@@ -215,7 +215,7 @@
                 fileContents += "Read the docs at https://docs.passwordless.dev";
                 //fileContents += "Email: " + email.value + "\n";
                 // store apikey on first line and apisecret on second line
-                fileContents += "\nAPI Url: https://v4.passwordless.dev";
+                fileContents += "\nAPI Url: @Model.ApiUrl";
                 fileContents += "\nPublic ApiKey: @Model.Onboarding.ApiKey";
                 fileContents += "\nPrivate ApiSecret: @Model.Onboarding.ApiSecret";
             
