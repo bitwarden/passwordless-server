@@ -32,26 +32,26 @@ public static class RegisterEndpoints
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapPost("/register/begin", async (FidoRegistrationBeginDTO payload, 
-                IFido2ServiceFactory fido2ServiceFactory, 
+        app.MapPost("/register/begin", async (FidoRegistrationBeginDTO payload,
+                IFido2ServiceFactory fido2ServiceFactory,
                 HttpRequest request,
                 AuditLoggerProvider provider,
                 ISystemClock clock) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.RegisterBegin(payload);
-            
+
             var logger = await provider.Create();
             logger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new PublicKey(request.GetPublicApiKey())));
-            
+
             return Ok(result);
         })
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload, 
-                HttpRequest request, 
+        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload,
+                HttpRequest request,
                 IFido2ServiceFactory fido2ServiceFactory,
                 AuditLoggerProvider provider,
                 ISystemClock clock) =>

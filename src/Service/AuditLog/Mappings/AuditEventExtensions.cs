@@ -32,7 +32,7 @@ public static class AuditEventExtensions
         TenantId = tenantName,
         ApiKeyId = publicKey.AbbreviatedValue
     };
-    
+
     public static AuditEventDto RegistrationCompletedEvent(string token, string tenantName, DateTime performedAt, PublicKey publicKey) => new()
     {
         Message = $"Completed passkey registration  for token: {string.Join("***", token.GetLast(4))}.",
@@ -44,7 +44,7 @@ public static class AuditEventExtensions
         TenantId = tenantName,
         ApiKeyId = publicKey.AbbreviatedValue
     };
-    
+
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,
