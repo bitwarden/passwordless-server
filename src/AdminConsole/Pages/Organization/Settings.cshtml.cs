@@ -50,8 +50,8 @@ public class SettingsModel : PageModel
 
         if (organization.HasSubscription)
         {
-            var hasSubscription = await _billingService.CancelSubscription(organization.BillingSubscriptionId!);
-            if (hasSubscription)
+            var isSubscriptionDeleted = await _billingService.CancelSubscription(organization.BillingSubscriptionId!);
+            if (!isSubscriptionDeleted)
             {
                 _logger.LogError(
                     "Organization {orgId} tried to cancel subscription {subscriptionId}, but failed.",

@@ -1,6 +1,6 @@
 namespace Passwordless.Api.Authorization;
 
-public class MangementOptions
+public class ManagementOptions
 {
     public string ManagementKey { get; set; }
 }

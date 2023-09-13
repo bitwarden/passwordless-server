@@ -130,8 +130,12 @@
                             feedback.status = "error";
                             if (error.from == "client" && !error.erroCode) {
                                 feedback.message = "No passkey was added. Please try again.";
-                            } else {                            
-                                feedback.message = error.title;
+                            } else {
+                                if (error.errors && error.errors.nickname && error.errors.nickname.length > 0) {
+                                    feedback.message = error.errors.nickname[0];
+                                } else {
+                                    feedback.message = error.title;
+                                }
                             }
                         }
                     } catch (e) {                    
