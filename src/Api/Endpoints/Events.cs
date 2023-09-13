@@ -1,11 +1,8 @@
 using ApiHelpers;
 using Passwordless.Api.Authorization;
-using Passwordless.Api.Models;
-using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Features;
-using Passwordless.Service.Helpers;
 
 namespace Passwordless.Server.Endpoints;
 
