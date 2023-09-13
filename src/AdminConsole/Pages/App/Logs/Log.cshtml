@@ -1,0 +1,60 @@
+@page "/logs"
+@model AdminConsole.Pages.Logs.Log
+
+@{
+    ViewBag.Title = "Application Logs";
+}
+
+<div>
+    @if (Model.Events.Any())
+    {
+        <table class="shadow-sm bg-white text-center">
+            <thead class="border text-sm">
+            <tr>
+                <th>Performed By</th>
+                <th>Performed At</th>
+                <th>Severity</th>
+                <th>Message</th>
+                <th>Subject</th>
+                <th>Event Type</th>
+                <th>Api Key</th>
+            </tr>
+            </thead>
+            <tbody class="border text-sm">
+            @foreach (var auditEvent in Model.Events)
+            {
+                <tr class="border">
+                    <td>@auditEvent.PerformedBy</td>
+                    <td>@auditEvent.PerformedAt.ToLocalTime()</td>
+                    <td>@auditEvent.Severity</td>
+                    <td>@auditEvent.Message</td>
+                    <td>@auditEvent.Subject</td>
+                    <td>@auditEvent.EventType</td>
+                    <td>@string.Join("*****", auditEvent.ApiKeyAbbreviated)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>This application has no events from the past @Model.RetentionPeriod days.</p>
+    }
+    
+    @{
+        var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";
+    }
+
+    @if (Model.PageList.TotalPages > 1)
+    {
+        <div class="flex justify-center">
+            <a class="px-1" @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex - 1)">Prev</a>
+            @foreach (var page in Model.PageList.Pages)
+            {
+                <a class="px-1 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
+            }
+            <a class="px-1" @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex + 1)">Next</a>
+        </div>
+    }
+</div>
