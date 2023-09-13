@@ -37,7 +37,7 @@ public static class AuditEventExtensions
         PerformedAt = auditEventDto.PerformedAt,
         EventType = auditEventDto.EventType,
         Message = auditEventDto.Message,
-        Severity = Severity.Alert,
+        Severity = auditEventDto.Severity,
         PerformedBy = auditEventDto.PerformedBy,
         Subject = auditEventDto.Subject,
         TenantId = auditEventDto.TenantId,
