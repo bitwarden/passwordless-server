@@ -9,54 +9,114 @@ namespace Passwordless.Service.AuditLog.Mappings;
 
 public static class AuditEventExtensions
 {
-    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantName, DateTime performedAt, PrivateKey secretKey) => new()
+    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantId, DateTime performedAt, PrivateKey secretKey) => new()
     {
         Message = $"Created registration token for {tokenRequest.UserId}",
         Severity = Severity.Informational,
         EventType = AuditEventType.ApiAuthUserRegistered,
         PerformedAt = performedAt,
         PerformedBy = tokenRequest.UserId,
-        Subject = tenantName,
-        TenantId = tenantName,
+        Subject = tenantId,
+        TenantId = tenantId,
         ApiKeyId = secretKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this FidoRegistrationBeginDTO dto, string tenantName, DateTime performedAt, PublicKey publicKey) => new()
+    public static AuditEventDto ToEvent(this FidoRegistrationBeginDTO dto, string tenantId, DateTime performedAt, PublicKey publicKey) => new()
     {
         Message = $"Beginning passkey registration for token: {string.Join("***", dto.Token.GetLast(4))}",
         PerformedBy = "",
         PerformedAt = performedAt,
         EventType = AuditEventType.ApiAuthPasskeyRegistrationBegan,
         Severity = Severity.Informational,
-        Subject = tenantName,
-        TenantId = tenantName,
+        Subject = tenantId,
+        TenantId = tenantId,
         ApiKeyId = publicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto RegistrationCompletedEvent(string token, string tenantName, DateTime performedAt, PublicKey publicKey) => new()
+    public static AuditEventDto RegistrationCompletedEvent(string token, string tenantId, DateTime performedAt, PublicKey publicKey) => new()
     {
         Message = $"Completed passkey registration  for token: {string.Join("***", token.GetLast(4))}.",
         PerformedBy = "",
         PerformedAt = performedAt,
         EventType = AuditEventType.ApiAuthPasskeyRegistrationCompleted,
         Severity = Severity.Informational,
-        Subject = tenantName,
-        TenantId = tenantName,
+        Subject = tenantId,
+        TenantId = tenantId,
         ApiKeyId = publicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this AliasPayload payload, string tenantName, DateTime performedAt, PrivateKey privateKey) => new()
+    public static AuditEventDto ToEvent(this AliasPayload payload, string tenantId, DateTime performedAt, PrivateKey privateKey) => new()
     {
         Message = $"Added set aliases for user ({payload.UserId}).",
         PerformedAt = performedAt,
         PerformedBy = payload.UserId,
-        TenantId = tenantName,
+        TenantId = tenantId,
         EventType = AuditEventType.ApiUserSetAliases,
         Severity = Severity.Informational,
         Subject = payload.UserId,
         ApiKeyId = privateKey.AbbreviatedValue
     };
-    
+
+    public static AuditEventDto ToEvent(this AppCreateDTO dto, string tenantId, DateTime performedAt) => new()
+    {
+        PerformedAt = performedAt,
+        Message = $"{tenantId} created.",
+        PerformedBy = dto.AdminEmail,
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiManagementAppCreated,
+        Severity = Severity.Informational,
+        Subject = tenantId,
+        ApiKeyId = ""
+    };
+
+    public static AuditEventDto AppFrozenEvent(string tenantId, DateTime performedAt) => new()
+    {
+        PerformedAt = performedAt,
+        Message = "Application frozen.",
+        PerformedBy = "System",
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiManagementAppFrozen,
+        Severity = Severity.Alert,
+        Subject = tenantId,
+        ApiKeyId = string.Empty
+    };
+
+    public static AuditEventDto AppUnfrozenEvent(string tenantId, DateTime performedAt) => new()
+    {
+        PerformedAt = performedAt,
+        Message = "Application unfrozen.",
+        PerformedBy = "System",
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiManagementAppUnfrozen,
+        Severity = Severity.Alert,
+        Subject = tenantId,
+        ApiKeyId = string.Empty
+    };
+
+    public static AuditEventDto AppMarkedToDeleteEvent(string performedBy, string tenantId, DateTime performedAt) => new()
+    {
+        PerformedAt = performedAt,
+        Message = "Application was marked for deletion.",
+        PerformedBy = performedBy,
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiManagementAppMarkedForDeletion,
+        Severity = Severity.Informational,
+        Subject = tenantId,
+        ApiKeyId = string.Empty
+    };
+
+    public static AuditEventDto AppDeleteCancelledEvent(string tenantId, DateTime performedAt) => new()
+    {
+        PerformedAt = performedAt,
+        Message = "Application deletion was cancelled.",
+        PerformedBy = "System",
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiManagementAppDeletionCancelled,
+        Severity = Severity.Informational,
+        Subject = tenantId,
+        ApiKeyId = string.Empty
+    };
+
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,

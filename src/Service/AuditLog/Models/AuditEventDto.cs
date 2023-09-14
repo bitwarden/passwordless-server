@@ -7,9 +7,9 @@ public class AuditEventDto
     public DateTime PerformedAt { get; init; } = DateTime.UtcNow;
     public string Message { get; init; } = string.Empty;
     public string PerformedBy { get; init; } = string.Empty;
-    public string? TenantId { get; init; }
-    public AuditEventType EventType { get; set; }
-    public Severity Severity { get; set; }
-    public string Subject { get; set; }
-    public string ApiKeyId { get; set; }
+    public string TenantId { get; init; } = string.Empty;
+    public AuditEventType EventType { get; init; }
+    public Severity Severity { get; init; }
+    public string Subject { get; init; } = string.Empty;
+    public string ApiKeyId { get; init; } = string.Empty;
 }

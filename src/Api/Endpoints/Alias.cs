@@ -15,10 +15,10 @@ public static class AliasEndpoints
 {
     public static void MapAliasEndpoints(this WebApplication app)
     {
-        app.MapPost("/alias", async (AliasPayload payload, 
-                IFido2ServiceFactory fido2ServiceFactory, 
-                AuditLoggerProvider provider, 
-                HttpRequest request, 
+        app.MapPost("/alias", async (AliasPayload payload,
+                IFido2ServiceFactory fido2ServiceFactory,
+                AuditLoggerProvider provider,
+                HttpRequest request,
                 ISystemClock clock) =>
             {
                 var fido2Service = await fido2ServiceFactory.CreateAsync();

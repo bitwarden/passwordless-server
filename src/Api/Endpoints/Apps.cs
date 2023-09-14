@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
-using Passwordless.Common.AuditLog.Enums;
-using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
+using static Passwordless.Service.AuditLog.Mappings.AuditEventExtensions;
 
 namespace Passwordless.Server.Endpoints;
 
@@ -34,26 +35,46 @@ public static class AppsEndpoints
         app.MapPost("/admin/apps/{appId}/create", async (
                 [FromRoute] string appId,
                 [FromBody] AppCreateDTO payload,
-                ISharedManagementService service) =>
+                ISharedManagementService service,
+                AuditLoggerProvider provider,
+                ISystemClock clock) =>
             {
                 var result = await service.GenerateAccount(appId, payload);
+
+                var logger = await provider.Create();
+                logger.LogEvent(payload.ToEvent(appId, clock.UtcNow.UtcDateTime));
+
                 return Ok(result);
             })
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/admin/apps/{appId}/freeze", async ([FromRoute] string appId, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/freeze", async ([FromRoute] string appId,
+                ISharedManagementService service,
+                AuditLoggerProvider provider,
+                ISystemClock clock) =>
             {
                 await service.FreezeAccount(appId);
-                return Ok();
+
+                var logger = await provider.Create();
+                logger.LogEvent(AppFrozenEvent(appId, clock.UtcNow.UtcDateTime));
+
+                return NoContent();
             })
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/admin/apps/{appId}/unfreeze", async ([FromRoute] string appId, ISharedManagementService service) =>
+        app.MapPost("/admin/apps/{appId}/unfreeze", async ([FromRoute] string appId,
+                ISharedManagementService service,
+                AuditLoggerProvider provider,
+                ISystemClock clock) =>
             {
                 await service.UnFreezeAccount(appId);
-                return Ok();
+
+                var logger = await provider.Create();
+                logger.LogEvent(AppUnfrozenEvent(appId, clock.UtcNow.UtcDateTime));
+
+                return NoContent();
             })
             .RequireManagementKey()
             .RequireCors("default");
@@ -134,22 +155,15 @@ public static class AppsEndpoints
         ISharedManagementService service,
         IRequestContext requestContext,
         ILogger logger,
-        IAuditLogger auditLogger)
+        AuditLoggerProvider provider,
+        ISystemClock clock)
     {
         var baseUrl = requestContext.GetBaseUrl();
         var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
 
-        auditLogger.LogEvent(new AuditEventDto
-        {
-            PerformedAt = DateTime.UtcNow,
-            Message = $"Account was marked for deletion",
-            PerformedBy = payload.DeletedBy,
-            TenantId = appId,
-            EventType = AuditEventType.ApiManagementAppMarkedForDeletion,
-            Severity = Severity.Informational,
-            Subject = appId
-        });
+        var auditLogger = await provider.Create();
+        auditLogger.LogEvent(AppMarkedToDeleteEvent(payload.DeletedBy, appId, clock.UtcNow.UtcDateTime));
 
         return Ok(result);
     }
@@ -160,25 +174,21 @@ public static class AppsEndpoints
         return Ok(result);
     }
 
-    public static async Task<IResult> CancelDeletionAsync(string appId, ISharedManagementService service, IAuditLogger auditLogger)
+    public static async Task<IResult> CancelDeletionAsync(string appId,
+        ISharedManagementService service,
+        AuditLoggerProvider provider,
+        ISystemClock clock)
     {
         await service.UnFreezeAccount(appId);
         var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
 
-        auditLogger.LogEvent(new AuditEventDto
-        {
-            PerformedAt = DateTime.UtcNow,
-            Message = $"Account deletion was canceled",
-            PerformedBy = "system",
-            TenantId = appId,
-            EventType = AuditEventType.ApiManagementAppDeletionCanceled,
-            Severity = Severity.Informational,
-            Subject = appId
-        });
+        var auditLogger = await provider.Create();
+        auditLogger.LogEvent(AppDeleteCancelledEvent(appId, clock.UtcNow.UtcDateTime));
 
         return Ok(res);
     }
 
     public record AvailableResponse(bool Available);
+
     public record CancelResult(string Message);
 }
