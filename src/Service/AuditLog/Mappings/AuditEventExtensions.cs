@@ -45,6 +45,18 @@ public static class AuditEventExtensions
         ApiKeyId = publicKey.AbbreviatedValue
     };
 
+    public static AuditEventDto ToEvent(this AliasPayload payload, string tenantName, DateTime performedAt, PrivateKey privateKey) => new()
+    {
+        Message = $"Added set aliases for user ({payload.UserId}).",
+        PerformedAt = performedAt,
+        PerformedBy = payload.UserId,
+        TenantId = tenantName,
+        EventType = AuditEventType.ApiUserSetAliases,
+        Severity = Severity.Informational,
+        Subject = payload.UserId,
+        ApiKeyId = privateKey.AbbreviatedValue
+    };
+    
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,

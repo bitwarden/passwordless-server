@@ -1,6 +1,11 @@
-﻿using Passwordless.Api.Authorization;
+﻿using ApiHelpers;
+using Microsoft.AspNetCore.Authentication;
+using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
+using Passwordless.Common.Models;
 using Passwordless.Service;
+using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 
@@ -10,13 +15,20 @@ public static class AliasEndpoints
 {
     public static void MapAliasEndpoints(this WebApplication app)
     {
-        app.MapPost("/alias", async (AliasPayload payload, IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            await fido2Service.SetAlias(payload);
+        app.MapPost("/alias", async (AliasPayload payload, 
+                IFido2ServiceFactory fido2ServiceFactory, 
+                AuditLoggerProvider provider, 
+                HttpRequest request, 
+                ISystemClock clock) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                await fido2Service.SetAlias(payload);
 
-            return Results.Ok();
-        })
+                var auditLogger = await provider.Create();
+                auditLogger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new PrivateKey(request.GetApiSecret())));
+
+                return Results.NoContent();
+            })
             .RequireSecretKey()
             .RequireCors("default");
 
