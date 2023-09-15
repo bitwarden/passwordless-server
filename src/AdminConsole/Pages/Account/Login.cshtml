@@ -73,9 +73,8 @@
     </div>
 </div>
 
+@Html.Partial("Shared/_PasswordlessClientJs")
 @section Scripts {
-    <script src="https://cdn.passwordless.dev/dist/0.6.4/umd/passwordless.umd.js"></script>
-
     <script type="module">
         import { createApp, ref } from 'vue';
         createApp({
