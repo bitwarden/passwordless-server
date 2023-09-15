@@ -5,9 +5,9 @@ using Passwordless.Api.Models;
 using Passwordless.Common.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
+using static Passwordless.Service.AuditLog.Mappings.AuditEventExtensions;
 
 namespace Passwordless.Server.Endpoints;
 
@@ -25,7 +25,7 @@ public static class AliasEndpoints
                 await fido2Service.SetAlias(payload);
 
                 var auditLogger = await provider.Create();
-                auditLogger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
+                auditLogger.LogEvent(UserAliasSetEvent(payload.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
                 return Results.NoContent();
             })

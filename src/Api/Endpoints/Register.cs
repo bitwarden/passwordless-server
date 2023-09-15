@@ -4,7 +4,6 @@ using Passwordless.Api.Authorization;
 using Passwordless.Common.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 using static Passwordless.Service.AuditLog.Mappings.AuditEventExtensions;
@@ -25,7 +24,7 @@ public static class RegisterEndpoints
             var result = await fido2Service.CreateToken(registerToken);
 
             var logger = await provider.Create();
-            logger.LogEvent(registerToken.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
+            logger.LogEvent(RegistrationTokenCreatedEvent(registerToken.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
             return Ok(new RegisterTokenResponse(result));
         })
@@ -42,7 +41,7 @@ public static class RegisterEndpoints
             var result = await fido2Service.RegisterBegin(payload);
 
             var logger = await provider.Create();
-            logger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationPublicKey(request.GetPublicApiKey())));
+            logger.LogEvent(RegistrationBeganEvent(payload.Token, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationPublicKey(request.GetPublicApiKey())));
 
             return Ok(result);
         })

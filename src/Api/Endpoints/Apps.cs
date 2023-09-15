@@ -5,7 +5,6 @@ using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -42,7 +41,7 @@ public static class AppsEndpoints
                 var result = await service.GenerateAccount(appId, payload);
 
                 var logger = await provider.Create();
-                logger.LogEvent(payload.ToEvent(appId, clock.UtcNow.UtcDateTime));
+                logger.LogEvent(ApplicationCreatedEvent(payload.AdminEmail, appId, clock.UtcNow.UtcDateTime));
 
                 return Ok(result);
             })

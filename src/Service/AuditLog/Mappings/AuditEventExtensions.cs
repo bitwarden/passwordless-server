@@ -3,27 +3,26 @@ using Passwordless.Common.AuditLog.Models;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
 using Passwordless.Service.AuditLog.Models;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Service.AuditLog.Mappings;
 
 public static class AuditEventExtensions
 {
-    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantId, DateTime performedAt, ApplicationSecretKey secretKey) => new()
+    public static AuditEventDto RegistrationTokenCreatedEvent(string performedBy, string tenantId, DateTime performedAt, ApplicationSecretKey secretKey) => new()
     {
-        Message = $"Created registration token for {tokenRequest.UserId}",
+        Message = $"Created registration token for {performedBy}",
         Severity = Severity.Informational,
         EventType = AuditEventType.ApiAuthUserRegistered,
         PerformedAt = performedAt,
-        PerformedBy = tokenRequest.UserId,
+        PerformedBy = performedBy,
         Subject = tenantId,
         TenantId = tenantId,
         ApiKeyId = secretKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this FidoRegistrationBeginDTO dto, string tenantId, DateTime performedAt, ApplicationPublicKey applicationPublicKey) => new()
+    public static AuditEventDto RegistrationBeganEvent(string token, string tenantId, DateTime performedAt, ApplicationPublicKey applicationPublicKey) => new()
     {
-        Message = $"Beginning passkey registration for token: {string.Join("***", dto.Token.GetLast(4))}",
+        Message = $"Beginning passkey registration for token: {string.Join("***", token.GetLast(4))}",
         PerformedBy = "",
         PerformedAt = performedAt,
         EventType = AuditEventType.ApiAuthPasskeyRegistrationBegan,
@@ -45,23 +44,23 @@ public static class AuditEventExtensions
         ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this AliasPayload payload, string tenantId, DateTime performedAt, ApplicationSecretKey applicationSecretKey) => new()
+    public static AuditEventDto UserAliasSetEvent(string performedBy, string tenantId, DateTime performedAt, ApplicationSecretKey applicationSecretKey) => new()
     {
-        Message = $"Added set aliases for user ({payload.UserId}).",
+        Message = $"Added set aliases for user ({performedBy}).",
         PerformedAt = performedAt,
-        PerformedBy = payload.UserId,
+        PerformedBy = performedBy,
         TenantId = tenantId,
         EventType = AuditEventType.ApiUserSetAliases,
         Severity = Severity.Informational,
-        Subject = payload.UserId,
+        Subject = performedBy,
         ApiKeyId = applicationSecretKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this AppCreateDTO dto, string tenantId, DateTime performedAt) => new()
+    public static AuditEventDto ApplicationCreatedEvent(string performedBy, string tenantId, DateTime performedAt) => new()
     {
         PerformedAt = performedAt,
         Message = $"{tenantId} created.",
-        PerformedBy = dto.AdminEmail,
+        PerformedBy = performedBy,
         TenantId = tenantId,
         EventType = AuditEventType.ApiManagementAppCreated,
         Severity = Severity.Informational,
