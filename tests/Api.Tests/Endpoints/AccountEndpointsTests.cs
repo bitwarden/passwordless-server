@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Passwordless.Api.Helpers;
@@ -5,6 +6,7 @@ using Passwordless.Api.Models;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
@@ -27,7 +29,11 @@ public class AccountEndpointsTests
         var httpContextAccessorMock = new Mock<IRequestContext>();
         httpContextAccessorMock.Setup(x => x.GetBaseUrl()).Returns("http://localhost:7001");
         var loggerMock = new Mock<ILogger>();
-        var auditLoggerMock = new Mock<IAuditLogger>();
+        var featureContextProviderMock = new Mock<IFeatureContextProvider>();
+        featureContextProviderMock.Setup(x => x.UseContext())
+            .ReturnsAsync(new NullFeaturesContext());
+        var auditLoggerProviderStub = new AuditLoggerProvider(featureContextProviderMock.Object, new NoOpAuditLogger());
+        var systemClockMock = new Mock<ISystemClock>();
 
         var actual = await AppsEndpoints.MarkDeleteApplicationAsync(
             appId,
@@ -35,7 +41,8 @@ public class AccountEndpointsTests
             sharedManagementServiceMock.Object,
             httpContextAccessorMock.Object,
             loggerMock.Object,
-            auditLoggerMock.Object);
+            auditLoggerProviderStub,
+            systemClockMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
