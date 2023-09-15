@@ -6,7 +6,7 @@ using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
-using static Passwordless.Service.AuditLog.Mappings.AuditEventExtensions;
+using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
 namespace Passwordless.Server.Endpoints;
 

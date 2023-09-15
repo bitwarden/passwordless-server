@@ -7,7 +7,7 @@ using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
-using static Passwordless.Service.AuditLog.Mappings.AuditEventExtensions;
+using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
 namespace Passwordless.Server.Endpoints;
 
