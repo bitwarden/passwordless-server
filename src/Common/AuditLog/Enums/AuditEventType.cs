@@ -10,6 +10,7 @@ public enum AuditEventType
     ApiSignInCompleted = 1004,
     ApiSignInVerified = 1005,
     ApiUserSetAliases = 1100,
+    ApiUserDeleteCredential = 1101,
     ApiManagementAppMarkedForDeletion = 1200,
     ApiManagementAppDeletionCancelled = 1201,
     ApiManagementAppCreated = 1202,

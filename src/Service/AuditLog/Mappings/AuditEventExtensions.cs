@@ -117,6 +117,18 @@ public static class AuditEventExtensions
         ApiKeyId = string.Empty
     };
 
+    public static AuditEventDto DeleteCredentialEvent(string performedBy, DateTime performedAt, string tenantId, PrivateKey apiSecret) => new()
+    {
+        PerformedAt = performedAt,
+        Message = $"Deleted credential for user {performedBy}",
+        PerformedBy = performedBy,
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiUserDeleteCredential,
+        Severity = Severity.Informational,
+        Subject = performedBy,
+        ApiKeyId = apiSecret.AbbreviatedValue
+    };
+
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,
