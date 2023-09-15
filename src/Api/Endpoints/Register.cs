@@ -42,7 +42,7 @@ public static class RegisterEndpoints
             var result = await fido2Service.RegisterBegin(payload);
 
             var logger = await provider.Create();
-            logger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new PublicKey(request.GetPublicApiKey())));
+            logger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationPublicKey(request.GetPublicApiKey())));
 
             return Ok(result);
         })
@@ -61,7 +61,7 @@ public static class RegisterEndpoints
             var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
 
             var logger = await provider.Create();
-            logger.LogEvent(RegistrationCompletedEvent(result.Token, request.GetTenantName(), clock.UtcNow.UtcDateTime, new PublicKey(request.GetPublicApiKey())));
+            logger.LogEvent(RegistrationCompletedEvent(result.Token, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationPublicKey(request.GetPublicApiKey())));
 
             // Avoid serializing the certificate
             return Ok(result);

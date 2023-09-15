@@ -21,7 +21,7 @@ public static class AuditEventExtensions
         ApiKeyId = secretKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this FidoRegistrationBeginDTO dto, string tenantId, DateTime performedAt, PublicKey publicKey) => new()
+    public static AuditEventDto ToEvent(this FidoRegistrationBeginDTO dto, string tenantId, DateTime performedAt, ApplicationPublicKey applicationPublicKey) => new()
     {
         Message = $"Beginning passkey registration for token: {string.Join("***", dto.Token.GetLast(4))}",
         PerformedBy = "",
@@ -30,10 +30,10 @@ public static class AuditEventExtensions
         Severity = Severity.Informational,
         Subject = tenantId,
         TenantId = tenantId,
-        ApiKeyId = publicKey.AbbreviatedValue
+        ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto RegistrationCompletedEvent(string token, string tenantId, DateTime performedAt, PublicKey publicKey) => new()
+    public static AuditEventDto RegistrationCompletedEvent(string token, string tenantId, DateTime performedAt, ApplicationPublicKey applicationPublicKey) => new()
     {
         Message = $"Completed passkey registration  for token: {string.Join("***", token.GetLast(4))}.",
         PerformedBy = "",
@@ -42,7 +42,7 @@ public static class AuditEventExtensions
         Severity = Severity.Informational,
         Subject = tenantId,
         TenantId = tenantId,
-        ApiKeyId = publicKey.AbbreviatedValue
+        ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
     public static AuditEventDto ToEvent(this AliasPayload payload, string tenantId, DateTime performedAt, PrivateKey privateKey) => new()
@@ -129,7 +129,7 @@ public static class AuditEventExtensions
         ApiKeyId = apiSecret.AbbreviatedValue
     };
 
-    public static AuditEventDto UserSignInBeganEvent(string performedBy, DateTime performedAt, string tenantId, PublicKey publicKey) => new()
+    public static AuditEventDto UserSignInBeganEvent(string performedBy, DateTime performedAt, string tenantId, ApplicationPublicKey applicationPublicKey) => new()
     {
         PerformedAt = performedAt,
         Message = $"User {performedBy} began sign in.",
@@ -138,10 +138,10 @@ public static class AuditEventExtensions
         EventType = AuditEventType.ApiUserSignInBegan,
         Severity = Severity.Informational,
         Subject = tenantId,
-        ApiKeyId = publicKey.AbbreviatedValue
+        ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto UserSignInCompletedEvent(string performedBy, DateTime performedAt, string tenantId, PublicKey publicKey) => new()
+    public static AuditEventDto UserSignInCompletedEvent(string performedBy, DateTime performedAt, string tenantId, ApplicationPublicKey applicationPublicKey) => new()
     {
         PerformedAt = performedAt,
         Message = $"User {performedBy} completed sign in.",
@@ -150,7 +150,7 @@ public static class AuditEventExtensions
         EventType = AuditEventType.ApiUserSignInCompleted,
         Severity = Severity.Informational,
         Subject = tenantId,
-        ApiKeyId = publicKey.AbbreviatedValue
+        ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
     public static AuditEventDto UserSignInTokenVerifiedEvent(string performedBy, DateTime performedAt, string tenantId, PrivateKey privateKey) => new()

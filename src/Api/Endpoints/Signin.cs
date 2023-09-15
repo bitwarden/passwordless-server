@@ -21,7 +21,7 @@ public static class SigninEndpoints
             var result = await fido2Service.SignInBegin(payload);
 
             var logger = await provider.Create();
-            logger.LogEvent(UserSignInBeganEvent(payload.UserId, clock.UtcNow.UtcDateTime, request.GetTenantName(), new PublicKey(request.GetPublicApiKey())));
+            logger.LogEvent(UserSignInBeganEvent(payload.UserId, clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationPublicKey(request.GetPublicApiKey())));
 
             return Ok(result);
         })
@@ -36,7 +36,7 @@ public static class SigninEndpoints
             var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
 
             var logger = await provider.Create();
-            logger.LogEvent(UserSignInCompletedEvent("specific user", clock.UtcNow.UtcDateTime, request.GetTenantName(), new PublicKey(request.GetPublicApiKey())));
+            logger.LogEvent(UserSignInCompletedEvent("specific user", clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationPublicKey(request.GetPublicApiKey())));
 
             return Ok(result);
         })
