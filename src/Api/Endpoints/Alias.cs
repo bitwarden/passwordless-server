@@ -25,7 +25,7 @@ public static class AliasEndpoints
                 await fido2Service.SetAlias(payload);
 
                 var auditLogger = await provider.Create();
-                auditLogger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new PrivateKey(request.GetApiSecret())));
+                auditLogger.LogEvent(payload.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
                 return Results.NoContent();
             })

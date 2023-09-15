@@ -24,7 +24,7 @@ public static class CredentialsEndpoints
             await userCredentialsService.DeleteCredential(payload.CredentialId);
 
             var logger = await provider.Create();
-            logger.LogEvent(DeleteCredentialEvent("i did it", clock.UtcNow.UtcDateTime, request.GetTenantName(), new PrivateKey(request.GetApiSecret())));
+            logger.LogEvent(DeleteCredentialEvent("i did it", clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationSecretKey(request.GetApiSecret())));
 
             return Results.NoContent();
         })

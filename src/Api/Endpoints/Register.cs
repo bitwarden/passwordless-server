@@ -25,7 +25,7 @@ public static class RegisterEndpoints
             var result = await fido2Service.CreateToken(registerToken);
 
             var logger = await provider.Create();
-            logger.LogEvent(registerToken.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new PrivateKey(request.GetApiSecret())));
+            logger.LogEvent(registerToken.ToEvent(request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
             return Ok(new RegisterTokenResponse(result));
         })

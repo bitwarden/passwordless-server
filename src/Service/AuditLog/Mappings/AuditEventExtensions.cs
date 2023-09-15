@@ -9,7 +9,7 @@ namespace Passwordless.Service.AuditLog.Mappings;
 
 public static class AuditEventExtensions
 {
-    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantId, DateTime performedAt, PrivateKey secretKey) => new()
+    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantId, DateTime performedAt, ApplicationSecretKey secretKey) => new()
     {
         Message = $"Created registration token for {tokenRequest.UserId}",
         Severity = Severity.Informational,
@@ -45,7 +45,7 @@ public static class AuditEventExtensions
         ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto ToEvent(this AliasPayload payload, string tenantId, DateTime performedAt, PrivateKey privateKey) => new()
+    public static AuditEventDto ToEvent(this AliasPayload payload, string tenantId, DateTime performedAt, ApplicationSecretKey applicationSecretKey) => new()
     {
         Message = $"Added set aliases for user ({payload.UserId}).",
         PerformedAt = performedAt,
@@ -54,7 +54,7 @@ public static class AuditEventExtensions
         EventType = AuditEventType.ApiUserSetAliases,
         Severity = Severity.Informational,
         Subject = payload.UserId,
-        ApiKeyId = privateKey.AbbreviatedValue
+        ApiKeyId = applicationSecretKey.AbbreviatedValue
     };
 
     public static AuditEventDto ToEvent(this AppCreateDTO dto, string tenantId, DateTime performedAt) => new()
@@ -117,7 +117,7 @@ public static class AuditEventExtensions
         ApiKeyId = string.Empty
     };
 
-    public static AuditEventDto DeleteCredentialEvent(string performedBy, DateTime performedAt, string tenantId, PrivateKey apiSecret) => new()
+    public static AuditEventDto DeleteCredentialEvent(string performedBy, DateTime performedAt, string tenantId, ApplicationSecretKey apiSecret) => new()
     {
         PerformedAt = performedAt,
         Message = $"Deleted credential for user {performedBy}",
@@ -153,7 +153,7 @@ public static class AuditEventExtensions
         ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto UserSignInTokenVerifiedEvent(string performedBy, DateTime performedAt, string tenantId, PrivateKey privateKey) => new()
+    public static AuditEventDto UserSignInTokenVerifiedEvent(string performedBy, DateTime performedAt, string tenantId, ApplicationSecretKey applicationSecretKey) => new()
     {
         PerformedAt = performedAt,
         Message = $"User {performedBy} verified sign in token.",
@@ -162,7 +162,7 @@ public static class AuditEventExtensions
         EventType = AuditEventType.ApiUserSignInCompleted,
         Severity = Severity.Informational,
         Subject = tenantId,
-        ApiKeyId = privateKey.AbbreviatedValue
+        ApiKeyId = applicationSecretKey.AbbreviatedValue
     };
 
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new

@@ -50,7 +50,7 @@ public static class SigninEndpoints
             var result = await fido2Service.SignInVerify(payload);
 
             var logger = await provider.Create();
-            logger.LogEvent(UserSignInTokenVerifiedEvent("i did it", clock.UtcNow.UtcDateTime, request.GetTenantName(), new PrivateKey(request.GetApiSecret())));
+            logger.LogEvent(UserSignInTokenVerifiedEvent("i did it", clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationSecretKey(request.GetApiSecret())));
 
             return Ok(result);
         })
