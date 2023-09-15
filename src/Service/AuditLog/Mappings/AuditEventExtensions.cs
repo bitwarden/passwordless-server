@@ -129,6 +129,42 @@ public static class AuditEventExtensions
         ApiKeyId = apiSecret.AbbreviatedValue
     };
 
+    public static AuditEventDto UserSignInBeganEvent(string performedBy, DateTime performedAt, string tenantId, PublicKey publicKey) => new()
+    {
+        PerformedAt = performedAt,
+        Message = $"User {performedBy} began sign in.",
+        PerformedBy = performedBy,
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiUserSignInBegan,
+        Severity = Severity.Informational,
+        Subject = tenantId,
+        ApiKeyId = publicKey.AbbreviatedValue
+    };
+
+    public static AuditEventDto UserSignInCompletedEvent(string performedBy, DateTime performedAt, string tenantId, PublicKey publicKey) => new()
+    {
+        PerformedAt = performedAt,
+        Message = $"User {performedBy} completed sign in.",
+        PerformedBy = performedBy,
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiUserSignInCompleted,
+        Severity = Severity.Informational,
+        Subject = tenantId,
+        ApiKeyId = publicKey.AbbreviatedValue
+    };
+
+    public static AuditEventDto UserSignInTokenVerifiedEvent(string performedBy, DateTime performedAt, string tenantId, PrivateKey privateKey) => new()
+    {
+        PerformedAt = performedAt,
+        Message = $"User {performedBy} verified sign in token.",
+        PerformedBy = performedBy,
+        TenantId = tenantId,
+        EventType = AuditEventType.ApiUserSignInCompleted,
+        Severity = Severity.Informational,
+        Subject = tenantId,
+        ApiKeyId = privateKey.AbbreviatedValue
+    };
+
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,
