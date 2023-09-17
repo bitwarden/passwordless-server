@@ -18,15 +18,18 @@
     <form v-on:submit="registerCredential">
         <fieldset id="registerCredentialFields">
             <div class="mt-2 flex">
-                        <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
-                            <input
-                                type="text" name="nickname" id="nickname" placeholder="Enter a nickname (e.g. My Work laptop) for this security key"
-                                class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
-                        </div>
-                        <button type="submit" class="btn-secondary">
-                            Add Passkey
-                        </button>
-                    </div>
+                <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
+                    <input
+                        type="text" name="nickname" id="nickname" placeholder="Enter a nickname (e.g. My Work laptop) for this security key"
+                        class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                </div>
+                <button type="submit" class="btn-secondary">
+                    Add Passkey
+                </button>
+                <div id="webauthn-unsupported-alert" class="hidden">
+                    @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                </div>
+            </div>
         </fieldset>
     </form>
 
@@ -158,7 +161,12 @@
     }).mount('#app');    
     </script>
     <script type="module">
-            import { disableHtmlElementIfWebAuthnUnsupported } from "@Url.Content("/js/webauthn-extensions.mjs")";
-            disableHtmlElementIfWebAuthnUnsupported("registerCredentialFields");
-        </script>
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const registerCredentialFields = document.getElementById("registerCredentialFields");
+            registerCredentialFields.disabled = true;
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
+    </script>
 }

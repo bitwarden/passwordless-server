@@ -22,8 +22,8 @@
 
             <div class="mt-8">
                 <div class="mt-6">
-                    <form v-on:submit.prevent="createNewAccount" class="space-y-6">
-                        <fieldset id="registerCredentialFields>">
+                    <form v-on:submit.prevent="createNewAccount">
+                        <fieldset id="registerCredentialFields" class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name (Visible in Browser UI)</label>
                                 <div class="mt-2">
@@ -47,6 +47,10 @@
 
                             <div>
                                 <button type="submit" btn-primary>Register</button>
+                            </div>
+
+                            <div id="webauthn-unsupported-alert" class="hidden">
+                                @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
                             </div>
                         </fieldset>
                     </form>
@@ -150,7 +154,12 @@
     }
     </script>
     <script type="module">
-            import { disableHtmlElementIfWebAuthnUnsupported } from "@Url.Content("/js/webauthn-extensions.mjs")";
-            disableHtmlElementIfWebAuthnUnsupported("registerCredentialFields");
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const registerCredentialFields = document.getElementById("registerCredentialFields");
+            registerCredentialFields.disabled = true;
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
     </script>
 }

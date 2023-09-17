@@ -66,6 +66,9 @@
                 <Feedback name="_error" message="Sorry, we don't recognize that passkey. Do you have another one?" />
                 </div>
                 <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
+                <div id="webauthn-unsupported-alert" class="hidden">
+                    @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                </div>
             </form>
 
             <a href="@Url.Page("/Organization/Create")" class="btn-secondary mt-3">Sign up</a>
@@ -145,4 +148,11 @@
                 }
         }}).mount('#xapp');
 	</script>
+    <script type="module">
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
+    </script>
 }

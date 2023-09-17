@@ -23,8 +23,8 @@
 
             <div class="mt-8">
                 <div class="mt-6">
-                    <form v-on:submit.prevent="loginSubmit" href="#" name="signin" method="post" class="space-y-6">
-                        <fieldset id="registerCredentialFields">
+                    <form v-on:submit.prevent="loginSubmit" href="#" name="signin" method="post">
+                        <fieldset id="registerCredentialFields" class="space-y-6">
                             <div>
                                 <label for="alias" class="block text-sm font-medium leading-6 text-gray-900">Email address / username</label>
                                 <div class="mt-2">
@@ -34,6 +34,10 @@
 
                             <div>
                                 <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
+                            </div>
+
+                            <div id="webauthn-unsupported-alert" class="hidden">
+                                @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
                             </div>
                         </fieldset>
                     </form>
@@ -164,7 +168,12 @@
         }
     </script>
     <script type="module">
-        import { disableHtmlElementIfWebAuthnUnsupported } from "@Url.Content("/js/webauthn-extensions.mjs")";
-        disableHtmlElementIfWebAuthnUnsupported("registerCredentialFields");
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const registerCredentialFields = document.getElementById("registerCredentialFields");
+            registerCredentialFields.disabled = true;
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
     </script>
 }

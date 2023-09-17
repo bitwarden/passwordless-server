@@ -107,6 +107,9 @@
                         <button type="submit" class="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             Add Passkey
                         </button>
+                        <div id="webauthn-unsupported-alert" class="hidden">
+                            @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                        </div>
                     </div>
                 </fieldset>
             </form>
@@ -189,7 +192,12 @@
     }
     </script>
     <script type="module">
-        import { disableHtmlElementIfWebAuthnUnsupported } from "@Url.Content("/js/webauthn-extensions.mjs")";
-        disableHtmlElementIfWebAuthnUnsupported("registerCredentialFields");
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const registerCredentialFields = document.getElementById("registerCredentialFields");
+            registerCredentialFields.disabled = true;
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
     </script>
 }
