@@ -17,9 +17,6 @@ public class SettingsModel : PageModel
     private readonly ISystemClock _systemClock;
     private readonly ILogger<SettingsModel> _logger;
 
-    [BindProperty]
-    public Models.Organization Organization { get; set; }
-
     public SettingsModel(
         DataService dataService,
         SharedBillingService billingService,
@@ -38,12 +35,21 @@ public class SettingsModel : PageModel
 
     public async Task OnGet()
     {
-        Organization = await _dataService.GetOrganizationWithData();
+        var organization = await _dataService.GetOrganizationWithData();
+        Id = organization.Id;
+        Name = organization.Name;
+        ApplicationsCount = organization.Applications.Count;
     }
 
     public async Task<IActionResult> OnPostDeleteAsync()
     {
         var username = User.Identity?.Name ?? throw new InvalidOperationException();
+        if (!string.Equals(Name, NameConfirmation, StringComparison.Ordinal))
+        {
+            ModelState.AddModelError(string.Empty, "Name confirmation does not match.");
+            return Page();
+        }
+
         var organization = await _dataService.GetOrganizationWithData();
         var emails = organization.Admins.Select(x => x.Email).ToList();
         await _mailService.SendOrganizationDeletedAsync(organization.Name, emails, username, _systemClock.UtcNow.UtcDateTime);
@@ -61,7 +67,7 @@ public class SettingsModel : PageModel
             }
         }
 
-        var isDeleted = await _dataService.DeleteOrganizationAsync(Organization.Id);
+        var isDeleted = await _dataService.DeleteOrganizationAsync(Id);
         if (isDeleted)
         {
             await _signInManager.SignOutAsync();
@@ -70,5 +76,32 @@ public class SettingsModel : PageModel
         return RedirectToPage();
     }
 
-    public bool CanDelete => !Organization.Applications.Any();
+    /// <summary>
+    /// Organization Id
+    /// </summary>
+    [BindProperty(SupportsGet = true)]
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Organization Name
+    /// </summary>
+    [BindProperty(SupportsGet = true)]
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The organization's name which is confirmed by the end user to allow the organization to be deleted.
+    /// </summary>
+    [BindProperty(SupportsGet = true)]
+    public string NameConfirmation { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the organization can be deleted.
+    /// </summary>
+    public bool CanDelete => ApplicationsCount == 0;
+
+    /// <summary>
+    /// The amount of active applications belonging to the organization.
+    /// </summary>
+    [BindProperty(SupportsGet = true)]
+    public int ApplicationsCount { get; set; }
 }
