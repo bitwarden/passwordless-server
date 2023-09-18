@@ -111,7 +111,8 @@ public class SharedManagementService : ISharedManagementService
             {
                 Tenant = accountName,
                 AuditLoggingIsEnabled = appCreationOptions.AuditLoggingIsEnabled,
-                AuditLoggingRetentionPeriod = appCreationOptions.AuditLoggingRetentionPeriod
+                AuditLoggingRetentionPeriod = appCreationOptions.AuditLoggingRetentionPeriod,
+                MaxUsers = appCreationOptions.MaxUsers
             }
         };
         await storage.SaveAccountInformation(account);

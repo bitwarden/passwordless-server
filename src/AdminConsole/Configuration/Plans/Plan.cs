@@ -4,4 +4,5 @@ public class Plan
 {
     public bool AuditLoggingIsEnabled { get; set; }
     public int AuditLoggingRetentionPeriod { get; set; }
+    public int? MaxUsers { get; set; }
 }

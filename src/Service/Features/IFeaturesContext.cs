@@ -2,9 +2,9 @@ namespace Passwordless.Service.Features;
 
 public interface IFeaturesContext
 {
-    public bool AuditLoggingIsEnabled { get; init; }
-    public int AuditLoggingRetentionPeriod { get; init; }
-    public DateTime? DeveloperLoggingEndsAt { get; init; }
-    public bool IsInFeaturesContext { get; }
-
+    bool AuditLoggingIsEnabled { get; init; }
+    int AuditLoggingRetentionPeriod { get; init; }
+    DateTime? DeveloperLoggingEndsAt { get; init; }
+    int? MaxUsers { get; init; }
+    bool IsInFeaturesContext { get; }
 }

@@ -97,7 +97,8 @@ public class CreateApplicationModel : PageModel
             {
                 AdminEmail = email,
                 AuditLoggingIsEnabled = plan.AuditLoggingIsEnabled,
-                AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod
+                AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod,
+                MaxUsers = plan.MaxUsers
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }

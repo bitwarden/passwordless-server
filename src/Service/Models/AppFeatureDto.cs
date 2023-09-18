@@ -5,6 +5,7 @@ public class AppFeatureDto
     public bool AuditLoggingIsEnabled { get; set; }
     public int AuditLoggingRetentionPeriod { get; set; }
     public DateTime? DeveloperLoggingEndsAt { get; set; }
+    public int? MaxUsers { get; set; }
 
     public static AppFeatureDto FromEntity(AppFeature entity)
     {
@@ -13,7 +14,8 @@ public class AppFeatureDto
         {
             AuditLoggingIsEnabled = entity.AuditLoggingIsEnabled,
             AuditLoggingRetentionPeriod = entity.AuditLoggingRetentionPeriod,
-            DeveloperLoggingEndsAt = entity.DeveloperLoggingEndsAt
+            DeveloperLoggingEndsAt = entity.DeveloperLoggingEndsAt,
+            MaxUsers = entity.MaxUsers
         };
         return dto;
     }

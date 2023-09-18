@@ -1,5 +1,4 @@
 using AdminConsole.Billing;
-using AdminConsole.Db;
 using AdminConsole.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +14,11 @@ namespace AdminConsole.Pages.Billing;
 public class Webhook : PageModel
 {
     private readonly SharedBillingService _sharedBillingService;
-    private readonly ConsoleDbContext _dbContext;
     private readonly StripeOptions _stripeOptions;
 
-    public Webhook(SharedBillingService sharedBillingService, ConsoleDbContext dbContext, IOptions<StripeOptions> stripeOptions)
+    public Webhook(SharedBillingService sharedBillingService, IOptions<StripeOptions> stripeOptions)
     {
         _sharedBillingService = sharedBillingService;
-        _dbContext = dbContext;
         _stripeOptions = stripeOptions.Value;
     }
 

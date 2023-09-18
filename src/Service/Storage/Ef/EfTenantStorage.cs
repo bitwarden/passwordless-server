@@ -175,7 +175,14 @@ public class EfTenantStorage : ITenantStorage
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
         existingEntity.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
         existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        existingEntity.MaxUsers = features.MaxUsers;
         await db.SaveChangesAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> IsUserExistsAsync(string userId)
+    {
+        return await db.Credentials.AnyAsync(x => x.UserId == userId);
     }
 
     public async Task SetAppDeletionDate(DateTime deletionAt)

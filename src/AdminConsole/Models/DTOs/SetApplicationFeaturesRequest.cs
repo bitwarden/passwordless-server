@@ -5,4 +5,5 @@ public sealed class SetApplicationFeaturesRequest
     public bool AuditLoggingIsEnabled { get; set; }
 
     public int AuditLoggingRetentionPeriod { get; set; }
+    public int? MaxUsers { get; set; }
 }

@@ -136,6 +136,7 @@ public class SharedBillingService
         var setFeaturesRequest = new SetApplicationFeaturesRequest();
         setFeaturesRequest.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
         setFeaturesRequest.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        setFeaturesRequest.MaxUsers = features.MaxUsers;
         foreach (Application app in apps)
         {
             app.BillingSubscriptionItemId = lineItem.Id;

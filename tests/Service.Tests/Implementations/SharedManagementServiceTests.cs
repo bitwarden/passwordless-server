@@ -339,7 +339,7 @@ public class SharedManagementServiceTests
 
         await _sut.SetFeaturesAsync(appId, payload);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
+        _tenantStorageFactoryMock.Verify(x => x.Create(It.Is<string>(p => p == appId)), Times.Once);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         storageMock.Verify(x => x.SetFeaturesAsync(
             It.Is<ManageFeaturesDto>(p => p == payload)), Times.Once);

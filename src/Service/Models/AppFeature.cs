@@ -16,5 +16,10 @@ public class AppFeature : PerTenant
     /// </summary>
     public DateTime? DeveloperLoggingEndsAt { get; set; }
 
+    /// <summary>
+    /// The maximum number of users with credentials allowed in the application.
+    /// </summary>
+    public int? MaxUsers { get; set; }
+
     public AccountMetaInformation Application { get; set; }
 }

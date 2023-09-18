@@ -5,9 +5,9 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -17,28 +17,28 @@ namespace Passwordless.Service;
 using Aliases = HashSet<string>;
 
 
-public class Fido2ServiceEndpoints : IFido2Service
+public class Fido2Service : IFido2Service
 {
     private readonly ITenantStorage _storage;
     private Fido2 _fido2;
     private readonly string _tenant;
-    private readonly ILogger log;
-    private readonly IConfiguration config;
+    private readonly ILogger _logger;
     private readonly ITokenService _tokenService;
+    private readonly IFeatureContextProvider _featureContextProvider;
 
     // Internal for testing
-    internal Fido2ServiceEndpoints(
+    internal Fido2Service(
         string tenant,
-        ILogger log,
-        IConfiguration config,
+        ILogger logger,
         ITenantStorage storage,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        IFeatureContextProvider featureContextProvider)
     {
         _storage = storage;
         _tenant = tenant;
-        this.log = log;
-        this.config = config;
+        this._logger = logger;
         _tokenService = tokenService;
+        _featureContextProvider = featureContextProvider;
     }
 
     private async Task Init()
@@ -46,9 +46,14 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService)
+    public static async Task<Fido2Service> Create(
+        string tenant,
+        ILogger logger,
+        ITenantStorage storage,
+        ITokenService tokenService,
+        IFeatureContextProvider featureContextProvider)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService);
+        var instance = new Fido2Service(tenant, logger, storage, tokenService, featureContextProvider);
         await instance.Init();
         return instance;
     }
@@ -138,6 +143,17 @@ public class Fido2ServiceEndpoints : IFido2Service
         ValidateUserId(tokenProps.UserId);
         ValidateUsername(tokenProps.Username);
 
+        var exists = await _storage.IsUserExistsAsync(tokenProps.UserId);
+        if (!exists)
+        {
+            var features = await _featureContextProvider.UseContext();
+            var currentUserCount = await _storage.GetUsersCount();
+            if (features.MaxUsers.HasValue && currentUserCount >= features.MaxUsers)
+            {
+                throw new ApiException("max_users_reached", "Maximum number of users reached", 400);
+            }
+        }
+
         // Attestation
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
         if (tokenProps.Attestation.ToLower() != "none")
@@ -195,7 +211,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
         catch (Exception e)
         {
-            log.LogError(e, "Error while saving alias during /register/complete");
+            _logger.LogError(e, "Error while saving alias during /register/complete");
             throw;
         }
 
@@ -255,18 +271,18 @@ public class Fido2ServiceEndpoints : IFido2Service
         {
             // Get registered credentials from database
             existingCredentials = (await _storage.GetCredentialsByUserIdAsync(userId)).Select(c => c.Descriptor).ToList();
-            log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "userid");
+            _logger.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "userid");
         }
         else if (!string.IsNullOrEmpty(request.Alias))
         {
             var hashedAlias = HashAlias(request.Alias, _tenant);
 
             existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
-            log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
+            _logger.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
         }
         else
         {
-            log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "empty");
+            _logger.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "empty");
         }
 
         // Create options
@@ -354,25 +370,6 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
     }
 
-    //public Task SetAlias(string userId, Aliases aliases)
-    //{
-    //    ValidateUserId(userId);
-    //    return SetAlias(Encoding.UTF8.GetBytes(userId), aliases);
-    //}
-
-    //public async Task SetAlias(byte[] userId, Aliases aliases)
-    //{
-    //    if (userId == null || userId.Length == 0) { throw new ApiException("userId most not be null", 400); }
-    //    ValidateAliases(aliases, true);
-    //    var values = new Aliases(aliases.Count);
-    //    foreach (var alias in aliases)
-    //    {
-    //        values.Add(HashAlias(alias, _tenant));
-    //    }
-
-    //    await _storage.StoreAlias(userId, values);
-    //}
-
     public Task<List<AliasPointer>> GetAliases(string userId)
     {
         return _storage.GetAliasesByUserId(userId);
@@ -432,7 +429,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         var sw = Stopwatch.StartNew();
         var hashedUsername = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(tenant + username)));
         sw.Stop();
-        log.LogInformation("SHA256 Hashing username took {duration}ms", sw.ElapsedMilliseconds);
+        _logger.LogInformation("SHA256 Hashing username took {duration}ms", sw.ElapsedMilliseconds);
 
         return hashedUsername;
     }

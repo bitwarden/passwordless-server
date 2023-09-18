@@ -112,7 +112,8 @@ public static class AppsEndpoints
         {
             AuditLoggingIsEnabled = featuresContext.AuditLoggingIsEnabled,
             AuditLoggingRetentionPeriod = featuresContext.AuditLoggingRetentionPeriod,
-            DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt
+            DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt,
+            MaxUsers = featuresContext.MaxUsers
         };
         return Ok(dto);
     }

@@ -61,6 +61,9 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("MaxUsers")
+                        .HasColumnType("int");
+
                     b.HasKey("Tenant");
 
                     b.ToTable("AppFeatures");

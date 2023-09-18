@@ -43,4 +43,11 @@ public interface ITenantStorage
     Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId);
     Task SetFeaturesAsync(SetFeaturesDto features);
     Task SetFeaturesAsync(ManageFeaturesDto features);
+
+    /// <summary>
+    /// Check whether a user exists with a given userId.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<bool> IsUserExistsAsync(string userId);
 }

@@ -33,7 +33,8 @@ public class BasicTests : IClassFixture<TestWebApplicationFactory<Program>>
                 AppId = appId,
                 AdminEmail = "anders@passwordless.dev",
                 AuditLoggingIsEnabled = true,
-                AuditLoggingRetentionPeriod = 365
+                AuditLoggingRetentionPeriod = 365,
+                MaxUsers = 10000
             }),
         };
         request.Headers.Add("ManagementKey", "dev_test_key");

@@ -81,9 +81,41 @@ public class AppTests : BackendTests
             Assert.False(info.AuditLoggingIsEnabled);
             Assert.Equal(365, info.AuditLoggingRetentionPeriod);
             Assert.Null(info.DeveloperLoggingEndsAt);
+            Assert.Null(info.MaxUsers);
         }
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
+
+    [Fact]
+    public async Task CreateAccountWithMaxUsers()
+    {
+        var name = $"app{Guid.NewGuid():N}";
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{name}/create")
+        {
+            Content = JsonContent.Create(new
+            {
+                AdminEmail = "anders@passwordless.dev",
+                MaxUsers = 10000
+            }),
+        };
+        request.Headers.Add("ManagementKey", "dev_test_key");
+        var res = await _client.SendAsync(request);
+
+        Assert.True(res.IsSuccessStatusCode);
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var factory = scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>();
+            var storage = factory.Create(name);
+            var info = await storage.GetAppFeaturesAsync();
+            Assert.Equal(info.Tenant, name);
+            Assert.False(info.AuditLoggingIsEnabled);
+            Assert.Equal(365, info.AuditLoggingRetentionPeriod);
+            Assert.Null(info.DeveloperLoggingEndsAt);
+            Assert.Equal(10000, info.MaxUsers);
+        }
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+    }
+
 
     [Fact]
     public async Task SetFeaturesAsync_Modifies_Features()

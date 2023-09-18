@@ -26,6 +26,7 @@ public class TestWebApplicationFactory<TProgram>
                 new KeyValuePair<string, string?>("ConnectionStrings:sqlite:api", $"Data Source=test_{DbName}.db"),
                 new KeyValuePair<string, string?>("PasswordlessManagement:ManagementKey", "dev_test_key"),
                 new KeyValuePair<string, string?>("SALT_TOKEN", "YWJj"),
+                new KeyValuePair<string, string?>("Plans:Free:MaxUsers", "10000")
             });
         });
 

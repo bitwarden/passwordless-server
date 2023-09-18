@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Passwordless.Service.Features;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
@@ -12,30 +12,30 @@ public interface IFido2ServiceFactory
 public class DefaultFido2ServiceFactory : IFido2ServiceFactory
 {
     private readonly ILoggerFactory _loggerFactory;
-    private readonly IConfiguration _configuration;
     private readonly ITenantStorage _tenantStorage;
     private readonly ITokenService _tokenService;
+    private readonly IFeatureContextProvider _featureContextProvider;
 
     public DefaultFido2ServiceFactory(
         ILoggerFactory loggerFactory,
-        IConfiguration configuration,
         ITenantStorage tenantStorage,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        IFeatureContextProvider featureContextProvider)
     {
         _loggerFactory = loggerFactory;
-        _configuration = configuration;
         _tenantStorage = tenantStorage;
         _tokenService = tokenService;
+        _featureContextProvider = featureContextProvider;
     }
 
     public async Task<IFido2Service> CreateAsync()
     {
-        var fidoService = await Fido2ServiceEndpoints.Create(
+        var fidoService = await Fido2Service.Create(
             _tenantStorage.Tenant,
-            _loggerFactory.CreateLogger<Fido2ServiceEndpoints>(),
-            _configuration,
+            _loggerFactory.CreateLogger<Fido2Service>(),
             _tenantStorage,
-            _tokenService);
+            _tokenService,
+            _featureContextProvider);
         return fidoService;
     }
 }
