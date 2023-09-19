@@ -46,6 +46,7 @@
 
                         <div>
                             <button type="submit" btn-primary>Register</button>
+                            <div id="create-account-error-message" class="my-2 text-sm font-medium text-red-800"></div>
                         </div>
                     </form>
                 </div>
@@ -109,6 +110,12 @@
                         alert(error.title);
                     }
                     window.location.href = "../playground";
+                } else {
+                    const errorMessageField = document.getElementById("create-account-error-message");
+                    const body = await req.text();
+                    const problemDetails = JSON.parse(body);
+                    errorMessageField.textContent = problemDetails.title;
+                    errorMessageField.classList.remove("hidden");
                 }
             }
 
