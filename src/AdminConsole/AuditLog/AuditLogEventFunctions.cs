@@ -43,6 +43,15 @@ public static class AuditLogEventFunctions
             performedBy.OrganizationId.ToString(),
             performedBy.OrganizationId,
             performedAt);
+    
+    public static OrganizationEventDto CancelAdminInviteEvent(ConsoleAdmin performedBy, string invitedEmail, DateTime performedAt) =>
+        new(performedBy.Id,
+            AuditEventType.AdminCancelAdminInvite,
+            $"Cancel admin invite for {invitedEmail}",
+            Severity.Informational,
+            performedBy.OrganizationId.ToString(),
+            performedBy.OrganizationId,
+            performedAt);
 
     public static OrganizationAuditEvent ToNewEvent(this OrganizationEventDto dto) =>
         new()

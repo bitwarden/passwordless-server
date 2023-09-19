@@ -121,6 +121,12 @@ public class Admins : PageModel
     public async Task<IActionResult> OnPostCancel(string hashedCode)
     {
         await _invitationService.CancelInviteAsync(hashedCode);
+
+        var performedBy = await _dataService.GetUserAsync();
+        
+        var invitationCancelled = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
+        if (invitationCancelled is not null) _auditLogger.LogEvent(CancelAdminInviteEvent(performedBy, invitationCancelled.ToEmail, _systemClock.UtcNow.UtcDateTime));
+        
         return RedirectToPage();
     }
 }
