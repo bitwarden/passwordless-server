@@ -23,10 +23,10 @@ public class Admins : PageModel
     private readonly ISystemClock _systemClock;
 
     public Admins(DataService dataService,
-        InvitationService invitationService, 
-        UserManager<ConsoleAdmin> userManager, 
-        SignInManager<ConsoleAdmin> signinManager, 
-        IPasswordlessClient passwordlessClient, 
+        InvitationService invitationService,
+        UserManager<ConsoleAdmin> userManager,
+        SignInManager<ConsoleAdmin> signinManager,
+        IPasswordlessClient passwordlessClient,
         IAuditLogger auditLogger,
         ISystemClock systemClock)
     {
@@ -112,7 +112,7 @@ public class Admins : PageModel
         var userName = user.Name;
 
         await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
-        
+
         _auditLogger.LogEvent(InviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime));
 
         return RedirectToPage();
@@ -123,10 +123,9 @@ public class Admins : PageModel
         await _invitationService.CancelInviteAsync(hashedCode);
 
         var performedBy = await _dataService.GetUserAsync();
-        
         var invitationCancelled = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
         if (invitationCancelled is not null) _auditLogger.LogEvent(CancelAdminInviteEvent(performedBy, invitationCancelled.ToEmail, _systemClock.UtcNow.UtcDateTime));
-        
+
         return RedirectToPage();
     }
 }
