@@ -4,4 +4,4 @@ public record OrganizationAuditLogResponse(int OrganizationId, IEnumerable<Audit
 
 public record ApplicationAuditLogResponse(string TenantId, IEnumerable<AuditLogEvent> Events, int TotalEventCount);
 
-public record AuditLogEvent(DateTime PerformedAt, string EventType, string Message, string Severity, string PerformedBy, string Subject, string ApiKeyAbbreviated);
+public record AuditLogEvent(DateTime PerformedAt, string EventType, string Message, string Severity, string PerformedBy, string Subject);
