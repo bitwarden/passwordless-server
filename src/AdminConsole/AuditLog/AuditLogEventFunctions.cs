@@ -35,6 +35,15 @@ public static class AuditLogEventFunctions
             performedBy.OrganizationId,
             performedAt);
 
+    public static OrganizationEventDto InviteAdminEvent(ConsoleAdmin performedBy, string invitedEmail, DateTime performedAt) =>
+        new(performedBy.Id,
+            AuditEventType.AdminSendAdminInvite,
+            $"Sent admin invite to {invitedEmail}",
+            Severity.Informational,
+            performedBy.OrganizationId.ToString(),
+            performedBy.OrganizationId,
+            performedAt);
+
     public static OrganizationAuditEvent ToNewEvent(this OrganizationEventDto dto) =>
         new()
         {

@@ -76,7 +76,6 @@ public class Admins : PageModel
         await _userManager.DeleteAsync(user);
 
         var performedBy = users.FirstOrDefault(x => x.Email == User.GetEmail());
-        
         if (performedBy is not null) _auditLogger.LogEvent(DeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime));
 
         // if user is self
@@ -113,6 +112,8 @@ public class Admins : PageModel
         var userName = user.Name;
 
         await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
+        
+        _auditLogger.LogEvent(InviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime));
 
         return RedirectToPage();
     }

@@ -19,4 +19,5 @@ public enum AuditEventType
     AdminOrganizationCreated = 7000,
     AdminSendAdminInvite = 7001,
     AdminMagicLinkLogin = 7002,
+    AdminDeleteAdmin = 7003
 }
