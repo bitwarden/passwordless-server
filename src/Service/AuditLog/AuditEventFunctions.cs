@@ -31,10 +31,10 @@ public static class AuditEventFunctions
         ApiKeyId = applicationPublicKey.AbbreviatedValue
     };
 
-    public static AuditEventDto RegistrationCompletedEvent(string token, string tenantId, DateTime performedAt, ApplicationPublicKey applicationPublicKey) => new()
+    public static AuditEventDto RegistrationCompletedEvent(string performedBy, string tenantId, DateTime performedAt, ApplicationPublicKey applicationPublicKey) => new()
     {
-        Message = $"Completed passkey registration  for token: {string.Join("***", token.GetLast(4))}.",
-        PerformedBy = "",
+        Message = $"Completed passkey registration for user {performedBy}",
+        PerformedBy = performedBy,
         PerformedAt = performedAt,
         EventType = AuditEventType.ApiAuthPasskeyRegistrationCompleted,
         Severity = Severity.Informational,
