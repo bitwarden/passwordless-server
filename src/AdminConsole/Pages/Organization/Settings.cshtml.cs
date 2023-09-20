@@ -79,16 +79,19 @@ public class SettingsModel : PageModel
     /// <summary>
     /// Organization Id
     /// </summary>
+    [BindProperty]
     public int Id { get; set; }
 
     /// <summary>
     /// Organization Name
     /// </summary>
+    [BindProperty]
     public string Name { get; set; }
 
     /// <summary>
     /// The organization's name which is confirmed by the end user to allow the organization to be deleted.
     /// </summary>
+    [BindProperty]
     public string NameConfirmation { get; set; } = string.Empty;
 
     /// <summary>
@@ -99,5 +102,6 @@ public class SettingsModel : PageModel
     /// <summary>
     /// The amount of active applications belonging to the organization.
     /// </summary>
+    [BindProperty]
     public int ApplicationsCount { get; set; }
 }
