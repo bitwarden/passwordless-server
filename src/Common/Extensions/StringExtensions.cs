@@ -1,4 +1,4 @@
-namespace Passwordless.Service.Helpers;
+namespace Passwordless.Common.Extensions;
 
 public static class StringExtensions
 {
