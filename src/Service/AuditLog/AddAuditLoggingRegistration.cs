@@ -11,9 +11,10 @@ public static class AddAuditLoggingRegistration
             .AddScoped<AuditLoggerEfWriteStorage>()
             .AddScoped<IAuditLogStorage, AuditLoggerEfReadStorage>()
             .AddScoped<IAuditLogContext, AuditLogContext>()
-            .AddScoped<AuditLoggerProvider>()
-            .AddScoped<IAuditLogger>(sp => 
-                sp.GetRequiredService<IAuditLogContext>().Features.AuditLoggingIsEnabled
-                    ? sp.GetRequiredService<AuditLoggerEfWriteStorage>()
-                    : NoOpAuditLogger.Instance);
+            .AddScoped(GetAuditLogger);
+
+    private static IAuditLogger GetAuditLogger(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<IAuditLogContext>().Features.AuditLoggingIsEnabled
+            ? serviceProvider.GetRequiredService<AuditLoggerEfWriteStorage>()
+            : NoOpAuditLogger.Instance;
 }
