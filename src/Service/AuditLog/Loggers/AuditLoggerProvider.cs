@@ -1,20 +1,20 @@
-using Passwordless.Service.Features;
+using Passwordless.Service.AuditLog.Models;
 
 namespace Passwordless.Service.AuditLog.Loggers;
 
 public class AuditLoggerProvider
 {
-    private readonly IFeatureContextProvider _featureContextProvider;
+    private readonly IAuditLogContext _auditLogContext;
     private readonly IAuditLogger _auditLogger;
 
-    public AuditLoggerProvider(IFeatureContextProvider featureContextProvider, IAuditLogger auditLogger)
+    public AuditLoggerProvider(IAuditLogContext auditLogContext, IAuditLogger auditLogger)
     {
-        _featureContextProvider = featureContextProvider;
+        _auditLogContext = auditLogContext;
         _auditLogger = auditLogger;
     }
 
     public async Task<IAuditLogger> Create() =>
-        (await _featureContextProvider.UseContext()).AuditLoggingIsEnabled
+        _auditLogContext.Features.AuditLoggingIsEnabled
             ? _auditLogger
             : NoOpAuditLogger.Instance;
 }
