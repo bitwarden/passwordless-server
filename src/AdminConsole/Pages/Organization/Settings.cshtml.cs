@@ -16,7 +16,7 @@ public class SettingsModel : PageModel
     private readonly IMailService _mailService;
     private readonly ISystemClock _systemClock;
     private readonly ILogger<SettingsModel> _logger;
-    
+
     public SettingsModel(
         DataService dataService,
         SharedBillingService billingService,
@@ -48,7 +48,7 @@ public class SettingsModel : PageModel
     public async Task<IActionResult> OnPostDeleteAsync()
     {
         await LoadData();
-        
+
         var username = User.Identity?.Name ?? throw new InvalidOperationException();
         if (!string.Equals(Name, NameConfirmation, StringComparison.Ordinal))
         {
