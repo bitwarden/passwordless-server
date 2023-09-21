@@ -8,7 +8,7 @@ public class AuditLogStorageCommitMiddleware
 
     public AuditLogStorageCommitMiddleware(RequestDelegate next) => _next = next;
 
-    public async Task InvokeAsync(HttpContext context, AuditLoggerProvider auditLoggerProvider)
+    public async Task InvokeAsync(HttpContext context, IAuditLogger auditLogger)
     {
         try
         {
@@ -16,8 +16,7 @@ public class AuditLogStorageCommitMiddleware
         }
         finally
         {
-            var logger = await auditLoggerProvider.Create();
-            await logger.FlushAsync();
+            await auditLogger.FlushAsync();
         }
     }
 }

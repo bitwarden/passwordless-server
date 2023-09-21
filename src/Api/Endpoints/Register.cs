@@ -1,9 +1,12 @@
-﻿using ApiHelpers;
+using ApiHelpers;
 using Microsoft.AspNetCore.Authentication;
 using Passwordless.Api.Authorization;
+using Passwordless.Common.Extensions;
+using Passwordless.Common.Models;
 using Passwordless.Common.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 using static Passwordless.Service.AuditLog.AuditEventFunctions;
@@ -16,14 +19,13 @@ public static class RegisterEndpoints
     {
         app.MapPost("/register/token", async (RegisterToken registerToken,
                 IFido2ServiceFactory fido2ServiceFactory,
-                AuditLoggerProvider provider,
+                IAuditLogger logger,
                 HttpRequest request,
                 ISystemClock clock) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.CreateToken(registerToken);
-
-            var logger = await provider.Create();
+            
             logger.LogEvent(RegistrationTokenCreatedEvent(registerToken.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
             return Ok(new RegisterTokenResponse(result));

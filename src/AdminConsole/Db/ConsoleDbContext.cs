@@ -1,4 +1,4 @@
-﻿using AdminConsole.Identity;
+using AdminConsole.Identity;
 using AdminConsole.Models;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;

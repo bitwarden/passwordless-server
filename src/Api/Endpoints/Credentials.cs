@@ -1,4 +1,4 @@
-﻿using ApiHelpers;
+using ApiHelpers;
 using Microsoft.AspNetCore.Authentication;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;

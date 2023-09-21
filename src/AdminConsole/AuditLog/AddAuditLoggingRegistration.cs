@@ -5,15 +5,19 @@ namespace Passwordless.AdminConsole.AuditLog;
 
 public static class AddAuditLoggingRegistration
 {
-    public static IServiceCollection AddAuditLogging(this IServiceCollection serviceCollection, IConfiguration configuration) =>
+    public static IServiceCollection AddAuditLogging(this IServiceCollection serviceCollection) =>
         serviceCollection
-            .AddScoped<IAuditLoggerStorage, AuditLoggerEfStorage>()
-            .AddScoped<AuditLoggerEfStorage>()
+            .AddScoped<IAuditLoggerStorage, AuditLoggerEfReadStorage>()
+            .AddScoped<AuditLoggerEfWriteStorage>()
+            .AddScoped<AuditLoggerEfUnauthenticatedWriteStorage>()
             .AddScoped(GetAuditLogger)
             .AddTransient<IAuditLogService, AuditLogService>();
 
     private static IAuditLogger GetAuditLogger(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<ICurrentContext>().OrganizationFeatures.AuditLoggingIsEnabled
-            ? serviceProvider.GetRequiredService<AuditLoggerEfStorage>()
-            : NoOpAuditLogger.Instance;
+        serviceProvider.GetRequiredService<ICurrentContext>() switch
+        {
+            { OrgId: null } => serviceProvider.GetRequiredService<AuditLoggerEfUnauthenticatedWriteStorage>(),
+            { OrganizationFeatures.AuditLoggingIsEnabled: true } => serviceProvider.GetRequiredService<AuditLoggerEfWriteStorage>(),
+            _ => NoOpAuditLogger.Instance
+        };
 }

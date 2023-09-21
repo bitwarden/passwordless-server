@@ -155,7 +155,7 @@ void RunTheApp()
     services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
 
-    services.AddAuditLogging(builder.Configuration);
+    services.AddAuditLogging();
 
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
@@ -164,6 +164,7 @@ void RunTheApp()
 
     // Plan Features
     services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
+    services.AddScoped<OrganizationFeatureService>();
     WebApplication app = builder.Build();
 
 

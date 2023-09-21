@@ -16,16 +16,21 @@
     <partial name="_credentials" model="new PasskeysModel { Credentials = Model.Credentials }"/>
 
     <form v-on:submit="registerCredential">
-        <div class="mt-2 flex">
-            <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
-                <input
-                    type="text" name="nickname" id="nickname" placeholder="Enter a nickname (e.g. My Work laptop) for this security key"
-                    class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+        <fieldset id="registerCredentialFields">
+            <div class="mt-2 flex">
+                <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
+                    <input
+                        type="text" name="nickname" id="nickname" placeholder="Enter a nickname (e.g. My Work laptop) for this security key"
+                        class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                </div>
+                <button type="submit" class="btn-secondary">
+                    Add Passkey
+                </button>
+                <div id="webauthn-unsupported-alert" class="hidden">
+                    @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                </div>
             </div>
-            <button type="submit" class="btn-secondary">
-                Add Passkey
-            </button>
-        </div>
+        </fieldset>
     </form>
 
     <div class="status mt-3" v-cloak>
@@ -77,10 +82,9 @@
     </div>
 </div>
 
-
+@Html.Partial("Shared/_PasswordlessClientJs")
 @section Scripts
 {
-    <script src="https://cdn.passwordless.dev/dist/0.6.4/umd/passwordless.umd.js"></script>
     <script type="module">
     import { createApp, ref, reactive } from 'vue';
     createApp({
@@ -155,5 +159,14 @@
             }
         }
     }).mount('#app');    
+    </script>
+    <script type="module">
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const registerCredentialFields = document.getElementById("registerCredentialFields");
+            registerCredentialFields.disabled = true;
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
     </script>
 }

@@ -2,8 +2,8 @@ namespace Passwordless.Common.Extensions;
 
 public static class StringExtensions
 {
-    public static string GetLast(this string input, int characterCountToReturn) =>
-        string.IsNullOrWhiteSpace(input) || characterCountToReturn >= input.Length
+    public static string GetLast(this string input, int charactersToReturn) =>
+        charactersToReturn >= input.Length
             ? input
-            : input[^characterCountToReturn..];
+            : input[^charactersToReturn..];
 }

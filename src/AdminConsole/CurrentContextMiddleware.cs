@@ -1,12 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using AdminConsole.Db;
 using AdminConsole.Helpers;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole;
@@ -54,17 +52,6 @@ public class CurrentContext : ICurrentContext
     }
 }
 
-public record FeaturesContext(
-    bool AuditLoggingIsEnabled,
-    int AuditLoggingRetentionPeriod,
-    DateTime? DeveloperLoggingEndsAt)
-{
-    public static FeaturesContext FromDto(AppFeatureDto dto)
-    {
-        return new FeaturesContext(dto.AuditLoggingIsEnabled, dto.AuditLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt);
-    }
-}
-
 public interface ICurrentContext
 {
     [MemberNotNullWhen(true, nameof(AppId))]
@@ -107,7 +94,7 @@ public class CurrentContextMiddleware
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
         IPasswordlessManagementClient passwordlessClient,
-        IOptions<PlansOptions> options)
+        OrganizationFeatureService organizationFeatureService)
     {
         var name = httpContext.GetRouteData();
 
@@ -117,7 +104,7 @@ public class CurrentContextMiddleware
         var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == "OrgId");
 
         return hasOrgIdClaim
-            ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient, options.Value)
+            ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient, organizationFeatureService)
             : _next(httpContext);
     }
 
@@ -125,17 +112,14 @@ public class CurrentContextMiddleware
         string appId,
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
-        IPasswordlessManagementClient passwordlessClient, PlansOptions optionsValue)
+        IPasswordlessManagementClient passwordlessClient, OrganizationFeatureService organizationFeatureService)
     {
         var orgId = httpContext.User.GetOrgId();
+        var orgFeatures = organizationFeatureService.GetOrganizationFeatures(orgId);
 
-        if (await dbContext.Applications.AnyAsync(x => x.OrganizationId == orgId && x.BillingPlan.ToLower() == "enterprise")
-            && optionsValue.TryGetValue("Enterprise", out var enterprisePlan))
-        {
 #pragma warning disable CS0618 // I am the one valid caller of this method
-            currentContext.SetOrganization(orgId, new FeaturesContext(enterprisePlan.AuditLoggingIsEnabled, enterprisePlan.AuditLoggingRetentionPeriod, null));
+        currentContext.SetOrganization(orgId, orgFeatures);
 #pragma warning restore CS0618
-        }
 
         if (string.IsNullOrWhiteSpace(appId))
         {
