@@ -1,4 +1,4 @@
-﻿using AdminConsole.Identity;
+using AdminConsole.Identity;
 using AdminConsole.Services;
 using AdminConsole.Services.Mail;
 using Microsoft.AspNetCore.Authentication;
@@ -16,6 +16,9 @@ public class SettingsModel : PageModel
     private readonly IMailService _mailService;
     private readonly ISystemClock _systemClock;
     private readonly ILogger<SettingsModel> _logger;
+
+    [BindProperty]
+    public Models.Organization Organization { get; set; }
 
     public SettingsModel(
         DataService dataService,
