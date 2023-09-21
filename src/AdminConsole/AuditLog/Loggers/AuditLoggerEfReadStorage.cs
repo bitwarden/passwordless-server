@@ -1,15 +1,14 @@
 using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.AuditLog.DTOs;
-using Passwordless.AdminConsole.AuditLog.Models;
 
 namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
-public class AuditLoggerEfStorage : IAuditLoggerStorage, IAuditLogger
+public class AuditLoggerEfReadStorage : IAuditLoggerStorage
 {
     private readonly ConsoleDbContext _context;
-    private readonly List<OrganizationAuditEvent> _items = new();
-    public AuditLoggerEfStorage(ConsoleDbContext context)
+
+    public AuditLoggerEfReadStorage(ConsoleDbContext context)
     {
         _context = context;
     }
@@ -26,16 +25,5 @@ public class AuditLoggerEfStorage : IAuditLoggerStorage, IAuditLogger
 
     public async Task<int> GetOrganizationEventCount(int organizationId) =>
         await _context.OrganizationEvents
-        .CountAsync(x => x.OrganizationId == organizationId);
-
-    public void LogEvent(OrganizationEventDto auditEvent)
-    {
-        _items.Add(auditEvent.ToNewEvent());
-    }
-
-    public async Task FlushAsync()
-    {
-        _context.OrganizationEvents.AddRange(_items);
-        await _context.SaveChangesAsync();
-    }
+            .CountAsync(x => x.OrganizationId == organizationId);
 }

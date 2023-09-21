@@ -30,7 +30,7 @@ public class Log : PageModel
     {
         var features = _currentContext.OrganizationFeatures;
 
-        if (features.AuditLoggingIsEnabled) return RedirectToPage("Overview");
+        if (!features.AuditLoggingIsEnabled) return RedirectToPage("Overview");
 
         RetentionPeriod = features.AuditLoggingRetentionPeriod;
         Organization = await _dataService.GetOrganization();
