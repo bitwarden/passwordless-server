@@ -16,10 +16,7 @@ public class SettingsModel : PageModel
     private readonly IMailService _mailService;
     private readonly ISystemClock _systemClock;
     private readonly ILogger<SettingsModel> _logger;
-
-    [BindProperty]
-    public Models.Organization Organization { get; set; }
-
+    
     public SettingsModel(
         DataService dataService,
         SharedBillingService billingService,
@@ -38,14 +35,20 @@ public class SettingsModel : PageModel
 
     public async Task OnGet()
     {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
         var organization = await _dataService.GetOrganizationWithData();
-        Id = organization.Id;
         Name = organization.Name;
         ApplicationsCount = organization.Applications.Count;
     }
 
     public async Task<IActionResult> OnPostDeleteAsync()
     {
+        await LoadData();
+        
         var username = User.Identity?.Name ?? throw new InvalidOperationException();
         if (!string.Equals(Name, NameConfirmation, StringComparison.Ordinal))
         {
@@ -70,7 +73,7 @@ public class SettingsModel : PageModel
             }
         }
 
-        var isDeleted = await _dataService.DeleteOrganizationAsync(Id);
+        var isDeleted = await _dataService.DeleteOrganizationAsync();
         if (isDeleted)
         {
             await _signInManager.SignOutAsync();
@@ -80,15 +83,8 @@ public class SettingsModel : PageModel
     }
 
     /// <summary>
-    /// Organization Id
-    /// </summary>
-    [BindProperty]
-    public int Id { get; set; }
-
-    /// <summary>
     /// Organization Name
     /// </summary>
-    [BindProperty]
     public string Name { get; set; }
 
     /// <summary>
@@ -105,6 +101,5 @@ public class SettingsModel : PageModel
     /// <summary>
     /// The amount of active applications belonging to the organization.
     /// </summary>
-    [BindProperty]
     public int ApplicationsCount { get; set; }
 }

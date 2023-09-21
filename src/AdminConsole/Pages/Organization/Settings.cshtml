@@ -9,9 +9,6 @@
     @if (Model.CanDelete)
     {
         <form method="post" asp-page-handler="Delete">
-            <input type="hidden" asp-for="ApplicationsCount" />
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="Name" />
             <p>Unexpected bad things will happen if you don’t read this:</p>
             <ul role="list" class="list-disc list-inside my-2">
                 <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
