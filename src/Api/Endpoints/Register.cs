@@ -1,4 +1,4 @@
-﻿using ApiHelpers;
+using ApiHelpers;
 using Passwordless.Api.Authorization;
 using Passwordless.Common.Extensions;
 using Passwordless.Service;
