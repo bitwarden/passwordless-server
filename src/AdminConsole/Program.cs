@@ -164,6 +164,7 @@ void RunTheApp()
 
     // Plan Features
     services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
+    services.AddScoped<OrganizationFeatureService>();
     WebApplication app = builder.Build();
 
 
