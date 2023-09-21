@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
@@ -115,7 +115,6 @@ public class AppTests : BackendTests
         }
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
-
 
     [Fact]
     public async Task SetFeaturesAsync_Modifies_Features()
