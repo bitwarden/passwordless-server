@@ -82,5 +82,5 @@ public static class AuditLogEventFunctions
             dto.Severity.ToString(),
             dto.PerformedBy,
             dto.Subject,
-            "");
+            string.Empty);
 }
