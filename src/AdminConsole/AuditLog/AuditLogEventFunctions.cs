@@ -15,7 +15,6 @@ public static class AuditLogEventFunctions
             Severity.Informational,
             organization.Id.ToString(),
             organization.Id,
-            "",
             DateTime.UtcNow);
 
     public static OrganizationEventDto CreateLoginViaMagicLinkEvent(ConsoleAdmin user) =>
@@ -25,7 +24,6 @@ public static class AuditLogEventFunctions
             Severity.Informational,
             user.Id,
             user.OrganizationId,
-            "",
             DateTime.UtcNow);
 
     public static OrganizationAuditEvent ToNewEvent(this OrganizationEventDto dto) =>
@@ -38,8 +36,7 @@ public static class AuditLogEventFunctions
             Severity = dto.Severity,
             PerformedBy = dto.PerformedBy,
             Subject = dto.Subject,
-            OrganizationId = dto.OrganizationId,
-            ManagementKeyId = dto.ManagementKeyId
+            OrganizationId = dto.OrganizationId
         };
 
     public static OrganizationEventDto ToDto(this OrganizationAuditEvent auditEvent) =>
@@ -49,7 +46,6 @@ public static class AuditLogEventFunctions
             auditEvent.Severity,
             auditEvent.Subject,
             auditEvent.OrganizationId,
-            auditEvent.ManagementKeyId,
             auditEvent.PerformedAt);
 
     public static AuditLogEvent ToResponse(this OrganizationEventDto dto) =>
@@ -59,5 +55,5 @@ public static class AuditLogEventFunctions
             dto.Severity.ToString(),
             dto.PerformedBy,
             dto.Subject,
-            dto.ManagementKeyId);
+            string.Empty);
 }

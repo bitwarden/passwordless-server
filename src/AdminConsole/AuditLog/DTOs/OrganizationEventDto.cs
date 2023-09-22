@@ -9,5 +9,4 @@ public record OrganizationEventDto(
     Severity Severity,
     string Subject,
     int OrganizationId,
-    string ManagementKeyId,
     DateTime PerformedAt);

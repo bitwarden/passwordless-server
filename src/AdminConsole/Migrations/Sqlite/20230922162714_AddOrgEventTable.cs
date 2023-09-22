@@ -16,7 +16,6 @@ public partial class AddOrgEventTable : Migration
             {
                 Id = table.Column<Guid>(type: "TEXT", nullable: false),
                 OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
-                ManagementKeyId = table.Column<string>(type: "TEXT", nullable: false),
                 PerformedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                 EventType = table.Column<int>(type: "INTEGER", nullable: false),
                 Message = table.Column<string>(type: "TEXT", nullable: false),
