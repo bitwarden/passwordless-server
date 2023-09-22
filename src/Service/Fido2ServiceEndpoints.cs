@@ -6,11 +6,16 @@ using Fido2NetLib.Objects;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Passwordless.Common.Models;
+using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
+using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
 namespace Passwordless.Service;
 
@@ -25,20 +30,25 @@ public class Fido2ServiceEndpoints : IFido2Service
     private readonly ILogger log;
     private readonly IConfiguration config;
     private readonly ITokenService _tokenService;
+    private readonly IAuditLogger _auditLogger;
+    private readonly IAuditLogContext _auditLogContext;
 
     // Internal for testing
-    internal Fido2ServiceEndpoints(
-        string tenant,
+    internal Fido2ServiceEndpoints(string tenant,
         ILogger log,
         IConfiguration config,
         ITenantStorage storage,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        IAuditLogger auditLogger, 
+        IAuditLogContext auditLogContext)
     {
         _storage = storage;
         _tenant = tenant;
         this.log = log;
         this.config = config;
         _tokenService = tokenService;
+        _auditLogger = auditLogger;
+        _auditLogContext = auditLogContext;
     }
 
     private async Task Init()
@@ -46,9 +56,9 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService, IAuditLogger auditLogger, IAuditLogContext auditLogContext)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService);
+        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService, auditLogger, auditLogContext);
         await instance.Init();
         return instance;
     }
@@ -111,6 +121,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
             var session = _tokenService.EncodeToken(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
 
+            _auditLogger.LogEvent(RegistrationBeganEvent(userId, _auditLogContext));
 
             // return options to client
             return new SessionResponse<CredentialCreateOptions>() { Data = options, Session = session };
@@ -124,6 +135,9 @@ public class Fido2ServiceEndpoints : IFido2Service
     public Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
     {
         var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
+        
+        _auditLogger.LogEvent(UserSignInTokenVerifiedEvent(token.UserId, _auditLogContext));
+        
         return Task.FromResult(token);
     }
 
@@ -161,6 +175,8 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
 
         var token = _tokenService.EncodeToken(tokenProps, "register_");
+        
+        _auditLogger.LogEvent(RegistrationTokenCreatedEvent(tokenProps.UserId, _auditLogContext));
 
         return token;
     }
@@ -185,12 +201,14 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         var success = await _fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
 
+        var userId = Encoding.UTF8.GetString(success.Result.User.Id);
+
         // add aliases
         try
         {
             if (session.Aliases != null && session.Aliases.Any())
             {
-                await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = Encoding.UTF8.GetString(success.Result.User.Id) });
+                await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = userId });
             }
         }
         catch (Exception e)
@@ -220,7 +238,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         var tokenData = new VerifySignInToken()
         {
-            UserId = Encoding.UTF8.GetString(success.Result.User.Id),
+            UserId = userId,
             Success = true,
             Origin = request.Origin,
             RPID = session.Options.Rp.Id,
@@ -233,6 +251,9 @@ public class Fido2ServiceEndpoints : IFido2Service
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
         };
+        
+        
+        _auditLogger.LogEvent(RegistrationCompletedEvent(userId, _auditLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 
@@ -275,6 +296,8 @@ public class Fido2ServiceEndpoints : IFido2Service
             existingCredentials,
             uv
         );
+        
+        _auditLogger.LogEvent(UserSignInBeganEvent(request.UserId, _auditLogContext));
 
         var session = _tokenService.EncodeToken(options, "session_", true);
 
@@ -313,9 +336,11 @@ public class Fido2ServiceEndpoints : IFido2Service
         // Store the updated counter
         await _storage.UpdateCredential(res.CredentialId, res.Counter, country, device);
 
+        var userId = Encoding.UTF8.GetString(creds.UserHandle);
+
         var tokenData = new VerifySignInToken
         {
-            UserId = Encoding.UTF8.GetString(creds.UserHandle),
+            UserId = userId,
             Success = true,
             Origin = request.Origin,
             RPID = request.RPID,
@@ -328,6 +353,8 @@ public class Fido2ServiceEndpoints : IFido2Service
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
         };
+        
+        _auditLogger.LogEvent(UserSignInCompletedEvent(userId, _auditLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 

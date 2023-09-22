@@ -401,10 +401,6 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
                     b.Property<int>("EventType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ManagementKeyId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("TEXT");

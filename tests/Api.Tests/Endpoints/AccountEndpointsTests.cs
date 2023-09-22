@@ -32,8 +32,7 @@ public class AccountEndpointsTests
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         featureContextProviderMock.Setup(x => x.UseContext())
             .ReturnsAsync(new NullFeaturesContext());
-        var auditLoggerProviderStub = new AuditLoggerProvider(featureContextProviderMock.Object, new NoOpAuditLogger());
-        var systemClockMock = new Mock<ISystemClock>();
+        var auditLoggerMock = new Mock<IAuditLogger>();
 
         var actual = await AppsEndpoints.MarkDeleteApplicationAsync(
             appId,
@@ -41,8 +40,7 @@ public class AccountEndpointsTests
             sharedManagementServiceMock.Object,
             httpContextAccessorMock.Object,
             loggerMock.Object,
-            auditLoggerProviderStub,
-            systemClockMock.Object);
+            auditLoggerMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;

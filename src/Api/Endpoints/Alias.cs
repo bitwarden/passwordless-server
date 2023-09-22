@@ -17,14 +17,13 @@ public static class AliasEndpoints
     {
         app.MapPost("/alias", async (AliasPayload payload,
                 IFido2ServiceFactory fido2ServiceFactory,
-                AuditLoggerProvider provider,
+                IAuditLogger auditLogger,
                 HttpRequest request,
                 ISystemClock clock) =>
             {
                 var fido2Service = await fido2ServiceFactory.CreateAsync();
                 await fido2Service.SetAlias(payload);
 
-                var auditLogger = await provider.Create();
                 auditLogger.LogEvent(UserAliasSetEvent(payload.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
                 return Results.NoContent();

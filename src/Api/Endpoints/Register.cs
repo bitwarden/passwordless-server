@@ -1,15 +1,8 @@
 using ApiHelpers;
-using Microsoft.AspNetCore.Authentication;
 using Passwordless.Api.Authorization;
-using Passwordless.Common.Extensions;
-using Passwordless.Common.Models;
-using Passwordless.Common.Models;
 using Passwordless.Service;
-using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Mappings;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
-using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
 namespace Passwordless.Server.Endpoints;
 
@@ -18,32 +11,21 @@ public static class RegisterEndpoints
     public static void MapRegisterEndpoints(this WebApplication app)
     {
         app.MapPost("/register/token", async (RegisterToken registerToken,
-                IFido2ServiceFactory fido2ServiceFactory,
-                IAuditLogger logger,
-                HttpRequest request,
-                ISystemClock clock) =>
+                IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.CreateToken(registerToken);
             
-            logger.LogEvent(RegistrationTokenCreatedEvent(registerToken.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
-
             return Ok(new RegisterTokenResponse(result));
         })
             .RequireSecretKey()
             .RequireCors("default");
 
         app.MapPost("/register/begin", async (FidoRegistrationBeginDTO payload,
-                IFido2ServiceFactory fido2ServiceFactory,
-                HttpRequest request,
-                AuditLoggerProvider provider,
-                ISystemClock clock) =>
+                IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.RegisterBegin(payload);
-
-            var logger = await provider.Create();
-            logger.LogEvent(RegistrationBeganEvent(payload.Token, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationPublicKey(request.GetPublicApiKey())));
 
             return Ok(result);
         })
@@ -53,16 +35,11 @@ public static class RegisterEndpoints
 
         app.MapPost("/register/complete", async (RegistrationCompleteDTO payload,
                 HttpRequest request,
-                IFido2ServiceFactory fido2ServiceFactory,
-                AuditLoggerProvider provider,
-                ISystemClock clock) =>
+                IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
             var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
-
-            var logger = await provider.Create();
-            logger.LogEvent(RegistrationCompletedEvent(result.Token, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationPublicKey(request.GetPublicApiKey())));
 
             // Avoid serializing the certificate
             return Ok(result);

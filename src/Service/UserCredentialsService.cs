@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -37,6 +39,7 @@ public class UserCredentialsService
         {
             throw new ApiException("credentialId must not be null or empty", 400);
         }
+        
         await _storage.DeleteCredential(credentialId);
     }
 

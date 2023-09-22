@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Passwordless.AdminConsole.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteConsoleDbContext))]
-    [Migration("20230908131837_AddOrgEventTable")]
+    [Migration("20230922152018_AddOrgEventTable")]
     partial class AddOrgEventTable
     {
         /// <inheritdoc />
@@ -403,10 +403,6 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
 
                     b.Property<int>("EventType")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ManagementKeyId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Message")
                         .IsRequired()

@@ -15,13 +15,10 @@ public static class SigninEndpoints
     public static void MapSigninEndpoints(this WebApplication app)
     {
 
-        app.MapPost("/signin/begin", async (SignInBeginDTO payload, IFido2ServiceFactory fido2ServiceFactory, HttpRequest request, AuditLoggerProvider provider, ISystemClock clock) =>
+        app.MapPost("/signin/begin", async (SignInBeginDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.SignInBegin(payload);
-
-            var logger = await provider.Create();
-            logger.LogEvent(UserSignInBeganEvent(payload.UserId, clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationPublicKey(request.GetPublicApiKey())));
 
             return Ok(result);
         })
@@ -29,28 +26,22 @@ public static class SigninEndpoints
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
 
-        app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory, AuditLoggerProvider provider, ISystemClock clock) =>
+        app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
             var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
 
-            var logger = await provider.Create();
-            logger.LogEvent(UserSignInCompletedEvent("specific user", clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationPublicKey(request.GetPublicApiKey())));
-
             return Ok(result);
         })
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
 
-        app.MapPost("/signin/verify", async (SignInVerifyDTO payload, IFido2ServiceFactory fido2ServiceFactory, HttpRequest request, AuditLoggerProvider provider, ISystemClock clock) =>
+        app.MapPost("/signin/verify", async (SignInVerifyDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.SignInVerify(payload);
-
-            var logger = await provider.Create();
-            logger.LogEvent(UserSignInTokenVerifiedEvent("i did it", clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationSecretKey(request.GetApiSecret())));
 
             return Ok(result);
         })

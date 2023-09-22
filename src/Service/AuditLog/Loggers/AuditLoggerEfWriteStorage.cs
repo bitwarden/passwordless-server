@@ -8,17 +8,25 @@ namespace Passwordless.Service.AuditLog.Loggers;
 public class AuditLoggerEfWriteStorage : IAuditLogger
 {
     private readonly DbGlobalContext _storage;
+    private readonly IAuditLogContext _auditLogContext;
+    private readonly List<ApplicationAuditEvent> _items = new();
 
-    public AuditLoggerEfWriteStorage(DbGlobalContext storage)
+    public AuditLoggerEfWriteStorage(DbGlobalContext storage, IAuditLogContext auditLogContext)
     {
         _storage = storage;
+        _auditLogContext = auditLogContext;
     }
-
-    private readonly List<ApplicationAuditEvent> _items = new();
+    
     public void LogEvent(AuditEventDto auditEvent)
     {
         _items.Add(auditEvent.ToEvent());
     }
+
+    public void LogEvent(Func<IAuditLogContext, AuditEventDto> auditEventFunc)
+    {
+        LogEvent(auditEventFunc(_auditLogContext));
+    }
+
     public async Task FlushAsync()
     {
         _storage.ApplicationEvents.AddRange(_items);

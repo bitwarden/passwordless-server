@@ -35,13 +35,12 @@ public static class AppsEndpoints
                 [FromRoute] string appId,
                 [FromBody] AppCreateDTO payload,
                 ISharedManagementService service,
-                AuditLoggerProvider provider,
+                IAuditLogger auditLogger,
                 ISystemClock clock) =>
             {
                 var result = await service.GenerateAccount(appId, payload);
 
-                var logger = await provider.Create();
-                logger.LogEvent(ApplicationCreatedEvent(payload.AdminEmail, appId, clock.UtcNow.UtcDateTime));
+                auditLogger.LogEvent(ApplicationCreatedEvent(payload.AdminEmail, appId, clock.UtcNow.UtcDateTime));
 
                 return Ok(result);
             })
@@ -50,13 +49,12 @@ public static class AppsEndpoints
 
         app.MapPost("/admin/apps/{appId}/freeze", async ([FromRoute] string appId,
                 ISharedManagementService service,
-                AuditLoggerProvider provider,
+                IAuditLogger auditLogger,
                 ISystemClock clock) =>
             {
                 await service.FreezeAccount(appId);
 
-                var logger = await provider.Create();
-                logger.LogEvent(AppFrozenEvent(appId, clock.UtcNow.UtcDateTime));
+                auditLogger.LogEvent(AppFrozenEvent(appId, clock.UtcNow.UtcDateTime));
 
                 return NoContent();
             })
@@ -65,13 +63,12 @@ public static class AppsEndpoints
 
         app.MapPost("/admin/apps/{appId}/unfreeze", async ([FromRoute] string appId,
                 ISharedManagementService service,
-                AuditLoggerProvider provider,
+                IAuditLogger auditLogger,
                 ISystemClock clock) =>
             {
                 await service.UnFreezeAccount(appId);
 
-                var logger = await provider.Create();
-                logger.LogEvent(AppUnfrozenEvent(appId, clock.UtcNow.UtcDateTime));
+                auditLogger.LogEvent(AppUnfrozenEvent(appId, clock.UtcNow.UtcDateTime));
 
                 return NoContent();
             })
@@ -154,15 +151,13 @@ public static class AppsEndpoints
         ISharedManagementService service,
         IRequestContext requestContext,
         ILogger logger,
-        AuditLoggerProvider provider,
-        ISystemClock clock)
+        IAuditLogger auditLogger)
     {
         var baseUrl = requestContext.GetBaseUrl();
         var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
 
-        var auditLogger = await provider.Create();
-        auditLogger.LogEvent(AppMarkedToDeleteEvent(payload.DeletedBy, appId, clock.UtcNow.UtcDateTime));
+        auditLogger.LogEvent(AppMarkedToDeleteEvent(payload.DeletedBy));
 
         return Ok(result);
     }
@@ -175,13 +170,12 @@ public static class AppsEndpoints
 
     public static async Task<IResult> CancelDeletionAsync(string appId,
         ISharedManagementService service,
-        AuditLoggerProvider provider,
+        IAuditLogger auditLogger,
         ISystemClock clock)
     {
         await service.UnFreezeAccount(appId);
         var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
 
-        var auditLogger = await provider.Create();
         auditLogger.LogEvent(AppDeleteCancelledEvent(appId, clock.UtcNow.UtcDateTime));
 
         return Ok(res);

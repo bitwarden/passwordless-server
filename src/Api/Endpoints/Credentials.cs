@@ -1,10 +1,13 @@
+using System.Security.Claims;
 using ApiHelpers;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Azure.Documents;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Common.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
 using static Passwordless.Service.AuditLog.AuditEventFunctions;
@@ -17,14 +20,12 @@ public static class CredentialsEndpoints
     {
         app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload,
                 UserCredentialsService userCredentialsService,
-                HttpRequest request,
-                AuditLoggerProvider provider,
-                ISystemClock clock) =>
+                IAuditLogger auditLogger,
+                IAuditLogContext auditLogContext) =>
         {
             await userCredentialsService.DeleteCredential(payload.CredentialId);
 
-            var logger = await provider.Create();
-            logger.LogEvent(DeleteCredentialEvent("i did it", clock.UtcNow.UtcDateTime, request.GetTenantName(), new ApplicationSecretKey(request.GetApiSecret())));
+            auditLogger.LogEvent(DeleteCredentialEvent("System", auditLogContext));
 
             return Results.NoContent();
         })
