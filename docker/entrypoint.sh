@@ -97,12 +97,12 @@ else
   echo "[Configuration] SSL: Disabled";
   scheme="http"
 fi
-if [ "$BWP_DOMAIN_API_PORT" == "null" ]; then
-  echo "ERROR: Missing configuration for environment variable 'BWP_DOMAIN_API_PORT'";
+if [ "$BWP_PORT" == "null" ]; then
+  echo "WARNING: 'BWP_PORT' not set, defaulting to 5701.";
   exit 1; 
 fi
 
-export PasswordlessManagement__PublicApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_DOMAIN_API_PORT}/api";
+export PasswordlessManagement__PublicApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api";
 echo "[Configuration] API private: $PasswordlessManagement__ApiUrl";
 echo "[Configuration] API public: $PasswordlessManagement__PublicApiUrl";
 

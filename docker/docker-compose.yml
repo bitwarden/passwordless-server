@@ -10,7 +10,7 @@ services:
     image: ${REGISTRY:-bitwarden}/passwordless:${TAG:-latest}
     restart: always
     ports:
-      - "8443:8443"
+      - "5071:5071"
     volumes:
       - bitwarden_passwordless:/etc/bitwarden_passwordless
       - logs:/var/log/bitwarden_passwordless

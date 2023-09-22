@@ -139,7 +139,6 @@ VOLUME ["/etc/bitwarden_passwordless"]
 
 WORKDIR /app
 
-EXPOSE 8080
-EXPOSE 8443
+EXPOSE 5701
 
 ENTRYPOINT ["/entrypoint.sh"]
