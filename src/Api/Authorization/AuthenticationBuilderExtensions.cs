@@ -44,7 +44,7 @@ public static class AuthenticationBuilderExtensions
             options.ProblemDetailWriter = new DefaultProblemDetailWriter("ApiKey");
         });
 
-        builder.AddHeaderScheme<IOptions<MangementOptions>>("ManagementKey", options =>
+        builder.AddHeaderScheme<IOptions<ManagementOptions>>("ManagementKey", options =>
         {
             options.HeaderName = "ManagementKey";
             options.ClaimsCreator = (optionsAccessor, key) =>

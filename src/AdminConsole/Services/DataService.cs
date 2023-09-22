@@ -76,9 +76,9 @@ public class DataService
         return user;
     }
 
-    public async Task<bool> DeleteOrganizationAsync(int organizationId)
+    public async Task<bool> DeleteOrganizationAsync()
     {
-        var organization = await _db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId);
+        var organization = await _db.Organizations.FirstOrDefaultAsync(x => x.Id == _orgId);
         if (organization == null) return false;
         _db.Organizations.Remove(organization);
         var rowsAffected = await _db.SaveChangesAsync();

@@ -27,7 +27,7 @@ public static class UseCspExtensions
                     script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';
                     connect-src 'self' {passConfig.Value.PublicApiUrl};
                     style-src 'self' 'unsafe-inline';
-                    """.Replace("\r\n", " ");
+                    """.Replace("\n", " ");
 
             context.Response.Headers.Add("Content-Security-Policy",
                 new[] { csp });

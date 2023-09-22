@@ -69,7 +69,7 @@ services
     .AddCustomSchemes();
 
 services.AddAuthorization(options => options.AddPasswordlessPolicies());
-services.AddOptions<MangementOptions>()
+services.AddOptions<ManagementOptions>()
     .BindConfiguration("PasswordlessManagement");
 
 services.AddCors(options

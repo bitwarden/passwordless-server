@@ -79,7 +79,7 @@
     </div>
 
     <div class="mt-6 flex">
-        <a target="_blank" href="https://docs.passwordless.dev/guide/js-client.html#installation" class="text-sm font-semibold text-primary-700">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
+        <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="text-sm font-semibold text-primary-700">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
     </div>
 </div>
 </div>
@@ -218,7 +218,7 @@
                 fileContents += "Read the docs at https://docs.passwordless.dev";
                 //fileContents += "Email: " + email.value + "\n";
                 // store apikey on first line and apisecret on second line
-                fileContents += "\nAPI Url: https://v4.passwordless.dev";
+                fileContents += "\nAPI Url: @Options.Value.PublicApiUrl";
                 fileContents += "\nPublic ApiKey: @Model.Onboarding.ApiKey";
                 fileContents += "\nPrivate ApiSecret: @Model.Onboarding.ApiSecret";
             

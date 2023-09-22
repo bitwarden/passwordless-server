@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Services;
@@ -42,4 +43,7 @@ public class NewAccountModel : PageModel
         var res = await _passwordlessClient.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
+
+    [MaxLength(64)]
+    public string Nickname { get; set; }
 }
