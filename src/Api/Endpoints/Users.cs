@@ -35,9 +35,9 @@ public static class UsersEndpoints
         app.MapPost("/users/delete", async (UserDeletePayload payload, UserCredentialsService userService, IAuditLogger auditLogger) =>
         {
             await userService.DeleteUser(payload.UserId);
-            
+
             auditLogger.LogEvent(DeletedUserEvent(payload.UserId));
-            
+
             return Ok();
         })
             .RequireSecretKey();

@@ -21,7 +21,7 @@ public class AuditLogContext : IAuditLogContext
     {
         PerformedAt = systemClock.UtcNow.UtcDateTime;
     }
-    
+
     public string TenantId { get; private set; } = string.Empty;
     public IFeaturesContext Features { get; private set; } = new NullFeaturesContext();
     public string AbbreviatedKey { get; private set; } = string.Empty;

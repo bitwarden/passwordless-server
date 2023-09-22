@@ -31,7 +31,7 @@ public static class AuditEventFunctions
         ApiKeyId = auditLogContext.AbbreviatedKey
     };
 
-    public static AuditEventDto RegistrationCompletedEvent(string performedBy, IAuditLogContext auditLogContext)=> new()
+    public static AuditEventDto RegistrationCompletedEvent(string performedBy, IAuditLogContext auditLogContext) => new()
     {
         Message = $"Completed passkey registration for user {performedBy}",
         PerformedBy = performedBy,

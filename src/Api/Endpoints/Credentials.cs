@@ -1,10 +1,5 @@
-using System.Security.Claims;
-using ApiHelpers;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Azure.Documents;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
-using Passwordless.Common.Models;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.AuditLog.Models;

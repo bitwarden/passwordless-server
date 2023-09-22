@@ -6,10 +6,8 @@ using Fido2NetLib.Objects;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Passwordless.Common.Models;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Helpers;
@@ -39,7 +37,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         IConfiguration config,
         ITenantStorage storage,
         ITokenService tokenService,
-        IAuditLogger auditLogger, 
+        IAuditLogger auditLogger,
         IAuditLogContext auditLogContext)
     {
         _storage = storage;
@@ -135,9 +133,9 @@ public class Fido2ServiceEndpoints : IFido2Service
     public Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
     {
         var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
-        
+
         _auditLogger.LogEvent(UserSignInTokenVerifiedEvent(token.UserId, _auditLogContext));
-        
+
         return Task.FromResult(token);
     }
 
@@ -175,7 +173,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
 
         var token = _tokenService.EncodeToken(tokenProps, "register_");
-        
+
         _auditLogger.LogEvent(RegistrationTokenCreatedEvent(tokenProps.UserId, _auditLogContext));
 
         return token;
@@ -251,8 +249,8 @@ public class Fido2ServiceEndpoints : IFido2Service
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
         };
-        
-        
+
+
         _auditLogger.LogEvent(RegistrationCompletedEvent(userId, _auditLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
@@ -296,7 +294,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             existingCredentials,
             uv
         );
-        
+
         _auditLogger.LogEvent(UserSignInBeganEvent(request.UserId, _auditLogContext));
 
         var session = _tokenService.EncodeToken(options, "session_", true);
@@ -353,7 +351,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
         };
-        
+
         _auditLogger.LogEvent(UserSignInCompletedEvent(userId, _auditLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");

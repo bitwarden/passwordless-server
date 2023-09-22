@@ -15,7 +15,7 @@ public static class RegisterEndpoints
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
             var result = await fido2Service.CreateToken(registerToken);
-            
+
             return Ok(new RegisterTokenResponse(result));
         })
             .RequireSecretKey()

@@ -16,7 +16,7 @@ public class AuditLoggerEfWriteStorage : IAuditLogger
         _storage = storage;
         _auditLogContext = auditLogContext;
     }
-    
+
     public void LogEvent(AuditEventDto auditEvent)
     {
         _items.Add(auditEvent.ToEvent());
