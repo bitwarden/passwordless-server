@@ -7,6 +7,8 @@ using AdminConsole.Helpers;
 using AdminConsole.Identity;
 using AdminConsole.Services;
 using AdminConsole.Services.Mail;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +64,12 @@ void RunTheApp()
         if (ddConfig.Exists())
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+
+            // setup tracing
+            var settings = TracerSettings.FromDefaultSources();
+            settings.ServiceVersion = version;
+            Tracer.Configure(settings);
+
             var ddKey = ddConfig.GetValue<string>("ApiKey");
             if (!string.IsNullOrWhiteSpace(ddKey))
             {
