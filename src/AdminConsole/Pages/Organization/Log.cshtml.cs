@@ -39,7 +39,7 @@ public class Log : PageModel
         var countTask = _auditLogService.GetAuditLogCount(Organization.Id);
 
         await Task.WhenAll(eventTask, countTask);
-        
+
         Events = eventTask.Result.Events;
 
         var itemCount = countTask.Result;

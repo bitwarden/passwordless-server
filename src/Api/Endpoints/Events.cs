@@ -22,10 +22,10 @@ public static class AuditLog
         IAuditLogStorage storage,
         IFeatureContextProvider provider,
         CancellationToken cancellationToken,
-        [AsParameters]GetAuditLogEventsRequest getAuditLogEventsRequest)
+        [AsParameters] GetAuditLogEventsRequest getAuditLogEventsRequest)
     {
         if (!(await provider.UseContext()).AuditLoggingIsEnabled) return Results.Unauthorized();
-        
+
         if (!MiniValidator.TryValidate(getAuditLogEventsRequest, out var errors))
         {
             return Results.ValidationProblem(errors);
@@ -44,7 +44,7 @@ public static class AuditLog
     public struct GetAuditLogEventsRequest
     {
         public int PageNumber { get; set; }
-        [Range(1,1000)]
+        [Range(1, 1000)]
         public int? NumberOfResults { get; set; }
     }
 }

@@ -8,7 +8,7 @@ public class AuditLoggerEfWriteStorage : IAuditLogger
 {
     private readonly ConsoleDbContext _context;
     private readonly List<OrganizationAuditEvent> _events = new();
-    
+
     public AuditLoggerEfWriteStorage(ConsoleDbContext context)
     {
         _context = context;
