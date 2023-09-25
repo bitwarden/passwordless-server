@@ -11,15 +11,18 @@ public class Log : PageModel
 {
     private readonly IAuditLogService _auditLogService;
     private readonly ICurrentContext _currentContext;
+    private readonly ILogger<Log> _logger;
 
     public IEnumerable<AuditLogEvent> Events { get; private set; } = new List<AuditLogEvent>();
     public PagedList PageList { get; private set; }
     public int RetentionPeriod { get; private set; }
 
-    public Log(IAuditLogService auditLogService, IPasswordlessManagementClient managementClient, ICurrentContext currentContext)
+    public Log(IAuditLogService auditLogService, IPasswordlessManagementClient managementClient, ICurrentContext currentContext,
+        ILogger<Log> logger)
     {
         _auditLogService = auditLogService;
         _currentContext = currentContext;
+        _logger = logger;
     }
 
     public async Task<ActionResult> OnGet(int pageNumber = 1, int numberOfRecords = 100)
@@ -30,12 +33,20 @@ public class Log : PageModel
 
         RetentionPeriod = features.AuditLoggingRetentionPeriod;
 
-        var eventsResponse = await _auditLogService.GetAuditLogs(pageNumber, numberOfRecords);
+        try
+        {
+            var eventsResponse = await _auditLogService.GetAuditLogs(pageNumber, numberOfRecords);
 
-        Events = eventsResponse.Events;
+            Events = eventsResponse.Events;
 
-        PageList = new PagedList(eventsResponse.TotalEventCount, pageNumber, numberOfRecords);
+            PageList = new PagedList(eventsResponse.TotalEventCount, pageNumber, numberOfRecords);
 
-        return Page();
+            return Page();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving audit logs for {appId}", _currentContext.AppId);
+            return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
+        }
     }
 }

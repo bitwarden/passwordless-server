@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using ApiHelpers;
+using MiniValidation;
 using Passwordless.Api.Authorization;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.AuditLog.Mappings;
@@ -15,15 +17,19 @@ public static class AuditLog
             .RequireCors("default");
     }
 
-    private static async Task<IResult> GetAuditLogEvents(int pageNumber,
-        int numberOfResults,
+    private static async Task<IResult> GetAuditLogEvents(
         HttpRequest request,
         IAuditLogStorage storage,
         IFeatureContextProvider provider,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        int pageNumber,
+        [MaxLength(1000)] int numberOfResults = 100)
     {
         if (!(await provider.UseContext()).AuditLoggingIsEnabled) return Results.Unauthorized();
-
+        
+        if (MiniValidator.TryValidate(numberOfResults, out var errors)) 
+            return Results.ValidationProblem(errors);
+        
         var tenantId = request.GetTenantName();
 
         var eventsTask = storage.GetAuditLogAsync(pageNumber, numberOfResults, cancellationToken);
