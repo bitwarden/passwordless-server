@@ -4,7 +4,7 @@ using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.AuditLog.Loggers;
 
-public class AuditLoggerEfUnauthenticatedWriteStorage : AbstractAuditLoggerEfWriteStorage
+public class AuditLoggerEfUnauthenticatedWriteStorage : AuditLoggerEfWriteStorage
 {
     private readonly OrganizationFeatureService _organizationFeatureService;
 
