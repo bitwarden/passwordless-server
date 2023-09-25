@@ -1,5 +1,6 @@
 @page
 @using AdminConsole.Pages.Components.ManagePasskeys
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @inject IOptions<PasswordlessClientOptions> Options
 @inject IOptions<PasswordlessManagementOptions> ManagementOptions
 @model UserOnboarding
@@ -90,7 +91,7 @@
     createApp({
         setup() {            
             const p = new Passwordless.Client({
-                apiUrl: "@ManagementOptions.Value.PublicApiUrl",
+                apiUrl: "@ManagementOptions.Value.ApiUrl",
                 apiKey: "@Options.Value.ApiKey"
             });
             

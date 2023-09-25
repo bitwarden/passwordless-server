@@ -1,6 +1,7 @@
 using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Services;
 

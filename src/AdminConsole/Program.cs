@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
@@ -109,7 +110,7 @@ void RunTheApp()
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
     services.AddHttpClient();
-    services.AddManagementApi();
+    builder.AddManagementApi();
 
     // Database information
     services.AddDatabase(builder);

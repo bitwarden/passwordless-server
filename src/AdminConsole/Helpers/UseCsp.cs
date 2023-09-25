@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace AdminConsole.Helpers;
 
@@ -25,7 +26,7 @@ public static class UseCspExtensions
             var csp = $"""
                     default-src 'self';
                     script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';
-                    connect-src 'self' {passConfig.Value.PublicApiUrl};
+                    connect-src 'self' {passConfig.Value.ApiUrl};
                     style-src 'self' 'unsafe-inline';
                     """.Replace("\n", " ");
 

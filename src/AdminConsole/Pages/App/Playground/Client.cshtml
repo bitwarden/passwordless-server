@@ -1,5 +1,6 @@
 ﻿@page "/playground"
 @using Microsoft.AspNetCore.Antiforgery
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @model ClientModel
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
@@ -98,7 +99,7 @@
                 const signins = ref([]);
                 
                 const p = new Passwordless.Client({
-                    apiUrl: "@Options.Value.PublicApiUrl",
+                    apiUrl: "@Options.Value.ApiUrl",
                     apiKey: "@CurrentContext.ApiKey"
                 });
               

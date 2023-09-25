@@ -1,4 +1,5 @@
 @page "/playground/new-account"
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @model NewAccountModel
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
@@ -86,7 +87,7 @@
         setup() {
 
             const p = new Passwordless.Client({
-                apiUrl: "@Options.Value.PublicApiUrl",
+                apiUrl: "@Options.Value.ApiUrl",
                 apiKey: "@CurrentContext.ApiKey"
             });
 

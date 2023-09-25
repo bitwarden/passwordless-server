@@ -5,7 +5,7 @@ using AdminConsole.Db;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Models.DTOs;
-using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole;
 
