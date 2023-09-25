@@ -68,13 +68,13 @@ public abstract class DbGlobalContext : DbContext
         ApiKeys.Add(new ApiKeyDesc
         {
             Tenant = appName,
-            Id = "9795",
+            Id = publicKey.Substring(4),
             ApiKey = publicKey
         });
         ApiKeys.Add(new ApiKeyDesc
         {
             Tenant = appName,
-            Id = "6d02",
+            Id = privateKey[4..],
             ApiKey = ApiKeyUtils.HashPrivateApiKey(privateKey),
             Scopes = new[] { "token_register", "token_verify" },
         });
