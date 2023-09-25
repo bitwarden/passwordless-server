@@ -64,12 +64,12 @@ void RunTheApp()
         if (ddConfig.Exists())
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-            
+
             // setup tracing
             var settings = TracerSettings.FromDefaultSources();
             settings.ServiceVersion = version;
             Tracer.Configure(settings);
-            
+
             var ddKey = ddConfig.GetValue<string>("ApiKey");
             if (!string.IsNullOrWhiteSpace(ddKey))
             {

@@ -44,7 +44,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         var settings = TracerSettings.FromDefaultSources();
         settings.ServiceVersion = version;
         Tracer.Configure(settings);
-        
+
         // setup serilog logging
         var apiKey = ddConfig.GetValue<string>("ApiKey");
         if (!string.IsNullOrEmpty(apiKey))
