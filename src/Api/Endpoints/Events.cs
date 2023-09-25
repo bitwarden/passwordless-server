@@ -22,26 +22,29 @@ public static class AuditLog
         IAuditLogStorage storage,
         IFeatureContextProvider provider,
         CancellationToken cancellationToken,
-        int pageNumber,
-        [MaxLength(1000)] int numberOfResults = 100)
+        [AsParameters]GetAuditLogEventsRequest getAuditLogEventsRequest)
     {
         if (!(await provider.UseContext()).AuditLoggingIsEnabled) return Results.Unauthorized();
         
-        if (MiniValidator.TryValidate(numberOfResults, out var errors)) 
+        if (!MiniValidator.TryValidate(getAuditLogEventsRequest, out var errors))
+        {
             return Results.ValidationProblem(errors);
-        
+        }
+
         var tenantId = request.GetTenantName();
 
-        var eventsTask = storage.GetAuditLogAsync(pageNumber, numberOfResults, cancellationToken);
+        var eventsTask = storage.GetAuditLogAsync(getAuditLogEventsRequest.PageNumber, getAuditLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
         var eventCountTasks = storage.GetAuditLogCountAsync(cancellationToken);
 
         await Task.WhenAll(eventsTask, eventCountTasks);
 
-        return Results.Ok(new
-        {
-            TenantId = tenantId,
-            Events = eventsTask.Result.Select(x => x.ToEvent()),
-            TotalEventCount = eventCountTasks.Result
-        });
+        return Results.Ok(new { TenantId = tenantId, Events = eventsTask.Result.Select(x => x.ToEvent()), TotalEventCount = eventCountTasks.Result });
+    }
+
+    public struct GetAuditLogEventsRequest
+    {
+        public int PageNumber { get; set; }
+        [Range(1,1000)]
+        public int? NumberOfResults { get; set; }
     }
 }
