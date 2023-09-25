@@ -34,9 +34,15 @@ public class Log : PageModel
 
         RetentionPeriod = features.AuditLoggingRetentionPeriod;
         Organization = await _dataService.GetOrganization();
-        Events = (await _auditLogService.GetAuditLogs(Organization.Id, pageNumber, numberOfResults)).Events;
 
-        var itemCount = await _auditLogService.GetAuditLogCount(Organization.Id);
+        var eventTask = _auditLogService.GetAuditLogs(Organization.Id, pageNumber, numberOfResults);
+        var countTask = _auditLogService.GetAuditLogCount(Organization.Id);
+
+        await Task.WhenAll(eventTask, countTask);
+        
+        Events = eventTask.Result.Events;
+
+        var itemCount = countTask.Result;
 
         PageList = new PagedList(itemCount, pageNumber, numberOfResults);
 
