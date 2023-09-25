@@ -26,12 +26,16 @@ public static class AuditLog
 
         var tenantId = request.GetTenantName();
 
+        var eventsTask = storage.GetAuditLogAsync(pageNumber, numberOfResults, cancellationToken);
+        var eventCountTasks = storage.GetAuditLogCountAsync(cancellationToken);
+
+        await Task.WhenAll(eventsTask, eventCountTasks);
+
         return Results.Ok(new
         {
             TenantId = tenantId,
-            Events = (await storage.GetAuditLogAsync(pageNumber, numberOfResults, cancellationToken))
-                .Select(x => x.ToEvent()),
-            TotalEventCount = await storage.GetAuditLogCountAsync(cancellationToken)
+            Events = eventsTask.Result.Select(x => x.ToEvent()),
+            TotalEventCount = eventCountTasks.Result
         });
     }
 }
