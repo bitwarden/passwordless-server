@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Passwordless.Service.Helpers;
+﻿using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -10,11 +9,6 @@ public class UserCredentialsService
     private readonly ITenantStorage _storage;
 
     public UserCredentialsService(ITenantStorage storage)
-    {
-        _storage = storage;
-    }
-
-    public UserCredentialsService(string tenant, IConfiguration config, ITenantStorage storage)
     {
         _storage = storage;
     }
@@ -59,13 +53,4 @@ public class UserCredentialsService
 
         return _storage.DeleteUser(userId);
     }
-}
-
-public class UserSummary
-{
-    public string UserId { get; set; }
-    public int AliasCount { get; set; }
-    public List<string> Aliases { get; set; }
-    public int CredentialsCount { get; set; }
-    public DateTime? LastUsedAt { get; set; }
 }
