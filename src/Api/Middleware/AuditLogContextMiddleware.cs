@@ -20,10 +20,10 @@ public class AuditLogContextMiddleware
 
         switch (requestKey)
         {
-            case not null when requestKey.Contains("public"):
+            case not null when requestKey.Contains(ApplicationPublicKey.KeyIdentifier):
                 auditLogContext.SetContext(tenantId, featuresContext, new ApplicationPublicKey(requestKey));
                 break;
-            case not null when requestKey.Contains("secret"):
+            case not null when requestKey.Contains(ApplicationSecretKey.KeyIdentifier):
                 auditLogContext.SetContext(tenantId, featuresContext, new ApplicationSecretKey(requestKey));
                 break;
             default:

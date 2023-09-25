@@ -4,6 +4,7 @@ namespace Passwordless.Common.Models;
 
 public struct ApplicationSecretKey
 {
+    public const string KeyIdentifier = ":secret:";
     public string Value { get; }
     public string AbbreviatedValue => Value.GetLast(4);
 
@@ -11,7 +12,7 @@ public struct ApplicationSecretKey
 
     public ApplicationSecretKey(string key)
     {
-        if (!key.Contains("secret")) throw new ArgumentException("Api secret keys contain 'secret'.");
+        if (!key.Contains(KeyIdentifier)) throw new ArgumentException("Api secret keys contain 'secret'.");
 
         Value = key;
     }
