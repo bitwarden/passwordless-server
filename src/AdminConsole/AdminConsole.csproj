@@ -127,10 +127,4 @@
         <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
         <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
     </ItemGroup>
-    <ItemGroup>
-      <Content Remove="Pages\Shared\_TextField.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-      <Compile Remove="Pages\Shared\_TextField.cs" />
-    </ItemGroup>
 </Project>
