@@ -1,6 +1,6 @@
 using Passwordless.Service.Helpers;
 
-namespace Passwordless.Server.Endpoints;
+namespace Passwordless.Api.Endpoints;
 
 public static class HealthEndpoints
 {

@@ -13,7 +13,7 @@ public class MailKitHealthCheck : IHealthCheck
         _mailProvider = mailProvider;
     }
 
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         SmtpClient client = null;
         bool hasErrors = false;
