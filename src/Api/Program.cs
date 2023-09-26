@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
@@ -39,6 +41,12 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
+        // setup tracing
+        var settings = TracerSettings.FromDefaultSources();
+        settings.ServiceVersion = version;
+        Tracer.Configure(settings);
+
+        // setup serilog logging
         var apiKey = ddConfig.GetValue<string>("ApiKey");
         if (!string.IsNullOrEmpty(apiKey))
         {
