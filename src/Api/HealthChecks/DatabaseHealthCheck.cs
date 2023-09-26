@@ -21,7 +21,7 @@ public class DatabaseHealthCheck : IHealthCheck
     {
         try
         {
-            var storage = _tenantStorageFactory.Create("test");
+            var storage = _tenantStorageFactory.Create(null);
             await storage.GetAccountInformation();
         }
         catch
