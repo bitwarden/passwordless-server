@@ -6,7 +6,7 @@ namespace Passwordless.Api.HealthChecks;
 
 public static class HealthCheckResponseWriter
 {
-    public static Task WriteResponse(HttpContext context, HealthReport healthReport)
+    public static Task WriteResponseAsync(HttpContext context, HealthReport healthReport)
     {
         context.Response.ContentType = "application/json; charset=utf-8";
 

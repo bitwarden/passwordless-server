@@ -53,17 +53,17 @@ public static class HealthCheckBootstrap
         });
         app.MapHealthChecks("/health/storage", new HealthCheckOptions
         {
-            ResponseWriter = HealthCheckResponseWriter.WriteResponse,
+            ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync,
             Predicate = registration => registration.Tags.Contains(TagDatabase)
         });
         app.MapHealthChecks("/health/version", new HealthCheckOptions
         {
-            ResponseWriter = HealthCheckResponseWriter.WriteResponse,
+            ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync,
             Predicate = registration => registration.Tags.Contains(TagVersion)
         });
         app.MapHealthChecks("/health/mail", new HealthCheckOptions
         {
-            ResponseWriter = HealthCheckResponseWriter.WriteResponse,
+            ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync,
             Predicate = registration => registration.Tags.Contains(TagMail)
         });
     }
