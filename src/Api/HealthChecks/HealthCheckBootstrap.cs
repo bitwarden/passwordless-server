@@ -8,11 +8,11 @@ public static class HealthCheckBootstrap
     private const string TagDatabase = "db";
     private const string TagVersion = "version";
     private const string TagMail = "mail";
-    
+
     public static void AddPasswordlessHealthChecks(this WebApplicationBuilder builder)
     {
         var healthCheckBuilder = builder.Services.AddHealthChecks();
-        
+
         healthCheckBuilder.AddCheck<SimpleHealthCheck>(
             "http",
             tags: new[] { TagSimple });
@@ -23,19 +23,19 @@ public static class HealthCheckBootstrap
         var sqlite = builder.Configuration.GetConnectionString("sqlite:api");
         if (!string.IsNullOrEmpty(sqlite))
         {
-            healthCheckBuilder.AddSqlite(sqlite, tags: new []{ TagDatabase });
+            healthCheckBuilder.AddSqlite(sqlite, tags: new[] { TagDatabase });
         }
 
         var mssql = builder.Configuration.GetConnectionString("mssql:api");
         if (!string.IsNullOrEmpty(mssql))
         {
-            healthCheckBuilder.AddSqlServer(mssql, tags: new []{ TagDatabase });
+            healthCheckBuilder.AddSqlServer(mssql, tags: new[] { TagDatabase });
         }
 
         healthCheckBuilder.AddCheck<VersionHealthCheck>(
             "version",
             tags: new[] { TagVersion });
-        
+
         var mail = builder.Configuration.GetSection("Mail");
         if (mail.GetSection("MailKit").Exists())
         {

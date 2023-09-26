@@ -18,7 +18,7 @@ public static class HealthCheckResponseWriter
             jsonWriter.WriteStartObject();
             jsonWriter.WriteString("status", healthReport.Status.ToString());
             jsonWriter.WriteNumber("elapsedMilliseconds", healthReport.TotalDuration.TotalMilliseconds);
-            
+
             jsonWriter.WriteStartObject("results");
 
             foreach (var healthReportEntry in healthReport.Entries)
@@ -27,7 +27,7 @@ public static class HealthCheckResponseWriter
                 jsonWriter.WriteString("status", healthReportEntry.Value.Status.ToString());
                 jsonWriter.WriteNumber("elapsedMilliseconds", healthReportEntry.Value.Duration.TotalMilliseconds);
                 jsonWriter.WriteStartObject("data");
-                
+
                 foreach (var item in healthReportEntry.Value.Data)
                 {
                     jsonWriter.WritePropertyName(item.Key);

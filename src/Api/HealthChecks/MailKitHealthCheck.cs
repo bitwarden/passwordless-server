@@ -7,7 +7,7 @@ namespace Passwordless.Api.HealthChecks;
 public class MailKitHealthCheck : IHealthCheck
 {
     private readonly MailKitSmtpMailProvider _mailProvider;
-    
+
     public MailKitHealthCheck(MailKitSmtpMailProvider mailProvider)
     {
         _mailProvider = mailProvider;
