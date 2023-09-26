@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -11,6 +13,8 @@ public class Fido2ServiceEndpointsTests
     private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly Mock<ITenantStorage> _mockTenantStorage;
     private readonly Mock<ITokenService> _mockTokenService;
+    private readonly Mock<IAuditLogger> _mockAuditLogger;
+    private readonly Mock<IAuditLogContext> _mockAuditLogContext;
 
     private readonly Fido2ServiceEndpoints _sut;
 
@@ -19,12 +23,16 @@ public class Fido2ServiceEndpointsTests
         _mockConfiguration = new Mock<IConfiguration>();
         _mockTenantStorage = new Mock<ITenantStorage>();
         _mockTokenService = new Mock<ITokenService>();
+        _mockAuditLogger = new Mock<IAuditLogger>();
+        _mockAuditLogContext = new Mock<IAuditLogContext>();
 
         _sut = new Fido2ServiceEndpoints("test",
             NullLogger.Instance,
             _mockConfiguration.Object,
             _mockTenantStorage.Object,
-            _mockTokenService.Object);
+            _mockTokenService.Object,
+            _mockAuditLogger.Object,
+            _mockAuditLogContext.Object);
     }
 
     [Fact]

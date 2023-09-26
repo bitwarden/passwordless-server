@@ -1,24 +1,10 @@
-using Passwordless.Common.AuditLog.Enums;
 using Passwordless.Common.AuditLog.Models;
 using Passwordless.Service.AuditLog.Models;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Service.AuditLog.Mappings;
 
 public static class AuditEventExtensions
 {
-    public static AuditEventDto ToEvent(this RegisterToken tokenRequest, string tenantName, string apiAbbreviation) => new()
-    {
-        Message = $"Created registration token for {tokenRequest.UserId}",
-        Severity = Severity.Informational,
-        EventType = AuditEventType.ApiAuthUserRegistered,
-        PerformedAt = DateTime.UtcNow,
-        PerformedBy = tokenRequest.UserId,
-        Subject = tenantName,
-        TenantId = tenantName,
-        ApiKeyId = apiAbbreviation
-    };
-
     public static AuditEventResponse ToEvent(this ApplicationAuditEvent dbEvent) => new
     (
         dbEvent.PerformedAt,

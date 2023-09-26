@@ -5,6 +5,7 @@ using Passwordless.Api.Models;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
@@ -27,6 +28,9 @@ public class AccountEndpointsTests
         var httpContextAccessorMock = new Mock<IRequestContext>();
         httpContextAccessorMock.Setup(x => x.GetBaseUrl()).Returns("http://localhost:7001");
         var loggerMock = new Mock<ILogger>();
+        var featureContextProviderMock = new Mock<IFeatureContextProvider>();
+        featureContextProviderMock.Setup(x => x.UseContext())
+            .ReturnsAsync(new NullFeaturesContext());
         var auditLoggerMock = new Mock<IAuditLogger>();
 
         var actual = await AppsEndpoints.MarkDeleteApplicationAsync(
