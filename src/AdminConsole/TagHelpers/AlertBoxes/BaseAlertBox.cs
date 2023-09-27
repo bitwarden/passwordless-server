@@ -1,5 +1,4 @@
 using AdminConsole.TagHelpers.Icons;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Passwordless.AdminConsole.TagHelpers.Extensions;
 
@@ -7,20 +6,20 @@ namespace AdminConsole.TagHelpers.AlertBoxes;
 
 public abstract class BaseAlertBox : TagHelper
 {
-    protected readonly IHtmlGenerator HtmlGenerator;
-
-    private readonly string _baseClass = "rounded-md p-4 my-3 w-full";
+    private readonly string _baseClass = "rounded-md p-4 my-3";
 
     public ColorVariant? Variant { get; set; }
 
     public string? IconTag { get; set; }
+
+    public string? Class { get; set; }
 
     public string Message { get; set; }
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", GetBackgroundColorClass());
+        output.Attributes.SetAttribute("class", GetClass());
 
 
         var icon = RenderIcon(context);
@@ -49,38 +48,32 @@ public abstract class BaseAlertBox : TagHelper
             _ => null
         };
 
-        if (icon == null) return null;
-
-        var iconOutput = new TagHelperOutput(
-            string.Empty,
-            new TagHelperAttributeList(),
-            (useCachedResult, encoder) =>
-                Task.Factory.StartNew<TagHelperContent>(
-                    () => new DefaultTagHelperContent()
-                ));
-
-        icon.Process(context, iconOutput);
-
-        // {renderHtmlAttributes(iconOutput)}
-        return $"<{iconOutput.TagName} {iconOutput.Attributes.ToHtmlOutput()}>{iconOutput.Content.GetContent()}</{iconOutput.TagName}>";
+        return icon == null ? null : icon.RenderHtml(context);
     }
 
-    private string GetBackgroundColorClass()
+    private string GetClass()
     {
-        if (!Variant.HasValue)
+        var classes = new List<string>();
+        classes.Add(_baseClass);
+
+        if (Variant.HasValue)
         {
-            return _baseClass;
+            string colorClass = Variant switch
+            {
+                ColorVariant.Danger => "bg-red-50",
+                ColorVariant.Info => "bg-blue-50",
+                ColorVariant.Success => "bg-green-50",
+                _ => string.Empty
+            };
+            classes.Add(colorClass);
         }
 
-        string colorClass = Variant switch
+        if (!string.IsNullOrWhiteSpace(Class))
         {
-            ColorVariant.Danger => "bg-red-50",
-            ColorVariant.Info => "bg-blue-50",
-            ColorVariant.Success => "bg-green-50",
-            _ => string.Empty
-        };
+            classes.Add(Class);
+        }
 
-        return string.Join(' ', _baseClass, colorClass);
+        return string.Join(' ', classes);
     }
 
     private string GetTextColorClass()

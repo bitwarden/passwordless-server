@@ -8,22 +8,22 @@ public static class TagHelperAttributesListExtensions
     public static string ToHtmlOutput(this TagHelperAttributeList attributes)
     {
         // Create a string builder to build the attribute string
-        var attributeString = new StringBuilder();
+
+        var list = new List<string>(attributes.Count);
 
         foreach (var attribute in attributes)
         {
-            // Append the attribute name
-            attributeString.Append($" {attribute.Name}");
-
-            // Append the attribute value if it exists
+            var item = new StringBuilder();
+            item.Append($"{attribute.Name}");
             if (!string.IsNullOrEmpty(attribute.Value?.ToString()))
             {
-                attributeString.Append($"=\"{attribute.Value}\"");
+                item.Append($"=\"{attribute.Value}\"");
             }
+            list.Add(item.ToString());
         }
 
         // Convert the attribute string to a single string
-        string attributesHtml = attributeString.ToString();
+        string attributesHtml = string.Join(' ', list);
 
         return attributesHtml;
     }
