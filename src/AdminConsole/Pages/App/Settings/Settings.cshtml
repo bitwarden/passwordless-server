@@ -21,7 +21,7 @@
 @if (Model.PendingDelete)
 {
     <form method="post" asp-page-handler="Cancel">
-        @Html.Partial("Shared/Alerts/_DangerAlert", $"{@Model.ApplicationId} will be deleted on \"{Model.DeleteAt?.ToString("g")} UTC\". If you would like to cancel this action, click \"Cancel\".")
+        <danger-alert-box message="'@Model.ApplicationId' will be deleted on '@Model.DeleteAt?.ToString("g") UTC'. If you would like to cancel this action, click 'Cancel'."></danger-alert-box>
         <button id="btn-cancel-delete" class="btn-secondary mt-3" type="submit">Cancel</button>
     </form>
 }
