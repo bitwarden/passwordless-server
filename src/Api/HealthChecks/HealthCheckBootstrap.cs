@@ -40,7 +40,7 @@ public static class HealthCheckBootstrap
         if (mail.GetSection("MailKit").Exists())
         {
             healthCheckBuilder.AddCheck<MailKitHealthCheck>(
-                "mailkit",
+                "smtp",
                 tags: new[] { TagMail });
         }
     }
