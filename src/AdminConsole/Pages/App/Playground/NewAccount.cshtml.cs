@@ -26,10 +26,8 @@ public class NewAccountModel : PageModel
     {
         // Create new account
         var userId = Guid.NewGuid().ToString();
-        var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions()
+        var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions(userId, $"Playground: {email}")
         {
-            UserId = userId,
-            Username = "Playground: " + email,
             DisplayName = name,
             Aliases = new HashSet<string>(1) { email },
             AliasHashing = false

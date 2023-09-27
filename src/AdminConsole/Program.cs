@@ -140,8 +140,6 @@ void RunTheApp()
     services.AddHostedService<TimedHostedService>();
     services.AddHostedService<ApplicationDeletionBackgroundService>();
 
-    services.Configure<PasswordlessClientOptions>(builder.Configuration.GetRequiredSection("Passwordless"));
-
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {

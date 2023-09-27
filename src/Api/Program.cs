@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
-using Passwordless.Api.Endpoints;
+using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Services.Mail;
@@ -107,6 +107,8 @@ if (builder.Environment.IsDevelopment())
     services.AddDatabaseDeveloperPageExceptionFilter();
 }
 
+builder.AddPasswordlessHealthChecks();
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -150,6 +152,8 @@ app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
 app.MapHealthEndpoints();
 app.MapAuditLogEndpoints();
+
+app.MapPasswordlessHealthChecks();
 
 app.Run();
 

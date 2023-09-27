@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Antiforgery
 @model ClientModel
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessClientOptions> Options
+@inject IOptions<PasswordlessOptions> Options
 @inject IAntiforgery Antiforgery
 
 @{
@@ -37,7 +37,7 @@
                             </div>
 
                             <div id="webauthn-unsupported-alert" class="hidden">
-                                @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                                <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
                             </div>
                         </fieldset>
                     </form>
