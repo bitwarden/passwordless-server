@@ -31,7 +31,7 @@ jobs:
         run: dotnet restore --locked-mode
 
       - name: Build
-        run: dotnet build --verbosity minimal
+        run: dotnet build --verbosity minimal --configuration Release
 
       - name: Test with the dotnet CLI
         run: dotnet test --no-build --logger "trx;LogFileName=pw-test-results.trx"
