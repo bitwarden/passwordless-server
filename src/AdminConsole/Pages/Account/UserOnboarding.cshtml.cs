@@ -13,7 +13,8 @@ public class UserOnboarding : PageModel
         _passwordlessClient = passwordlessClient;
     }
 
-    public List<Credential> Credentials { get; set; }
+    public IReadOnlyCollection<Credential> Credentials { get; set; }
+
     public async Task OnGet()
     {
         Credentials = await _passwordlessClient.ListCredentialsAsync(HttpContext.User.Claims

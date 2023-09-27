@@ -30,7 +30,7 @@ public class ManagePasskeys : ViewComponent
 
 public class PasskeysModel
 {
-    public List<Credential> Credentials { get; set; } = new();
+    public IReadOnlyCollection<Credential> Credentials { get; set; } = new List<Credential>();
     public string? ApiKey { get; set; }
     public string? ApiUrl { get; set; }
 }
