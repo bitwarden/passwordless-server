@@ -9,14 +9,5 @@
 
 @if (!Model.Success)
 {
-    <div class="rounded-md bg-red-50 p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <danger-alert-icon></danger-alert-icon>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-medium text-red-800">Sorry, something went wrong. The token was not valid.</p>
-            </div>
-        </div>
-    </div>    
+    <danger-alert-box message="Sorry, something went wrong. The token was not valid."></danger-alert-box> 
 }

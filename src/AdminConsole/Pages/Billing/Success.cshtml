@@ -6,19 +6,9 @@
 }
 
 <div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
-  <div class="px-4 py-5 sm:px-6">
-    <div class="rounded-md bg-green-50 p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <success-alert-icon></success-alert-icon>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-medium text-green-800">Successfully upgraded your organization.</p>
-                
-            </div>
-        </div>
+    <div class="px-4 py-5 sm:px-6">
+        <success-alert-box message="Successfully upgraded your organization."></success-alert-box>
     </div>
-  </div>
   <div class="px-4 py-5 sm:p-6">
       <!-- Content goes here -->
       <p>To make any changes your payment or retrieve your invoices, please visit our <a class="link-blue" asp-page="/billing/manage">Billing page</a>.</p>

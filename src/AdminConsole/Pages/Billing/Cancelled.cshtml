@@ -1,5 +1,4 @@
 @page
-@using AdminConsole.TagHelpers.Icons
 @model AdminConsole.Pages.Billing.Cancelled
 
 
@@ -8,19 +7,9 @@
 }
 
 <div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
-  <div class="px-4 py-5 sm:px-6">
-    <div class="rounded-md bg-red-50 p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <success-alert-icon variant="ColorVariant.Danger"></success-alert-icon>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-medium text-red-800">Checkout was cancelled</p>
-                
-            </div>
-        </div>
+    <div class="px-4 py-5 sm:px-6">
+        <danger-alert-box message="Checkout was cancelled."></danger-alert-box>
     </div>
-  </div>
   <div class="px-4 py-5 sm:p-6">
       <!-- Content goes here -->
       <p>To try again, please visit our <a class="link-blue" asp-page="/billing/manage">Billing page</a>.</p>
