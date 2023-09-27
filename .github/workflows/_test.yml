@@ -41,7 +41,4 @@ jobs:
         run: >
           dotnet test
           --no-build
-          --configuration Release
-          --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
-          --
           RunConfiguration.CollectSourceInformation=true
