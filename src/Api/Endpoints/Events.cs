@@ -21,8 +21,8 @@ public static class AuditLog
         HttpRequest request,
         IAuditLogStorage storage,
         IFeatureContextProvider provider,
-        CancellationToken cancellationToken,
-        [AsParameters] GetAuditLogEventsRequest getAuditLogEventsRequest)
+        [AsParameters] GetAuditLogEventsRequest getAuditLogEventsRequest,
+        CancellationToken cancellationToken)
     {
         if (!(await provider.UseContext()).AuditLoggingIsEnabled) return Results.Unauthorized();
 
@@ -38,7 +38,12 @@ public static class AuditLog
 
         await Task.WhenAll(eventsTask, eventCountTasks);
 
-        return Results.Ok(new { TenantId = tenantId, Events = eventsTask.Result.Select(x => x.ToEvent()), TotalEventCount = eventCountTasks.Result });
+        return Results.Ok(new
+        {
+            TenantId = tenantId,
+            Events = eventsTask.Result.Select(x => x.ToEvent()),
+            TotalEventCount = eventCountTasks.Result
+        });
     }
 
     public struct GetAuditLogEventsRequest
