@@ -1,10 +1,12 @@
 using System.Reflection;
 using System.Text.Json;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
-using Passwordless.Api.Endpoints;
+using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Configuration;
@@ -49,6 +51,12 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
+        // setup tracing
+        var settings = TracerSettings.FromDefaultSources();
+        settings.ServiceVersion = version;
+        Tracer.Configure(settings);
+
+        // setup serilog logging
         var apiKey = ddConfig.GetValue<string>("ApiKey");
         if (!string.IsNullOrEmpty(apiKey))
         {
@@ -108,6 +116,8 @@ if (builder.Environment.IsDevelopment())
     services.AddDatabaseDeveloperPageExceptionFilter();
 }
 
+builder.AddPasswordlessHealthChecks();
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -159,7 +169,7 @@ app.MapAliasEndpoints();
 app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
-app.MapHealthEndpoints();
+app.MapPasswordlessHealthChecks();
 
 app.Run();
 

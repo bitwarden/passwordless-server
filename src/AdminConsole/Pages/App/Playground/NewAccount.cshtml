@@ -51,7 +51,7 @@
                             </div>
 
                             <div id="webauthn-unsupported-alert" class="hidden">
-                                @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                                <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
                             </div>
                         </fieldset>
                     </form>

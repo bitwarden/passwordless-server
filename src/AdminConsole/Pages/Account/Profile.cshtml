@@ -2,8 +2,8 @@
 @using Microsoft.AspNetCore.Antiforgery
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @model Profile
-@inject IOptions<PasswordlessClientOptions> PasswordlessClientOptions
 @inject IOptions<PasswordlessManagementOptions> PasswordlessManagementOptions
+@inject IOptions<PasswordlessOptions> PasswordlessClientOptions
 @inject IAntiforgery Antiforgery
 
 @{
@@ -110,7 +110,7 @@
                             Add Passkey
                         </button>
                         <div id="webauthn-unsupported-alert" class="hidden">
-                            @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                            <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
                         </div>
                     </div>
                 </fieldset>
