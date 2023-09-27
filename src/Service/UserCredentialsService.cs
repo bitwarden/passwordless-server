@@ -31,6 +31,7 @@ public class UserCredentialsService
         {
             throw new ApiException("credentialId must not be null or empty", 400);
         }
+
         await _storage.DeleteCredential(credentialId);
     }
 

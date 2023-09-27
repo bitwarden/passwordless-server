@@ -34,8 +34,6 @@ public static class AddDatabaseExtensionMethod
             throw new Exception("Unknown database type");
         }
 
-
-
         return services;
     }
 }

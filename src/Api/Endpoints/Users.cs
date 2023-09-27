@@ -1,8 +1,9 @@
-﻿using System.Security.Claims;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Service;
+using Passwordless.Service.AuditLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
+using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
 namespace Passwordless.Server.Endpoints;
 
@@ -31,10 +32,11 @@ public static class UsersEndpoints
         })
             .RequireSecretKey();
 
-        app.MapMethods("/users/delete", new[] { "post" }, async (ClaimsPrincipal user,
-            UserDeletePayload payload, UserCredentialsService userService) =>
+        app.MapPost("/users/delete", async (UserDeletePayload payload, UserCredentialsService userService, IAuditLogger auditLogger) =>
         {
             await userService.DeleteUser(payload.UserId);
+
+            auditLogger.LogEvent(DeletedUserEvent(payload.UserId));
 
             return Ok();
         })

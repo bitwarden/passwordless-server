@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.AuditLog;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Services.Mail;
@@ -160,6 +161,8 @@ void RunTheApp()
     services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
 
+    services.AddAuditLogging();
+
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
     services.Remove(defaultLinkGeneratorDescriptor);
@@ -167,6 +170,7 @@ void RunTheApp()
 
     // Plan Features
     services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
+    services.AddScoped<OrganizationFeatureService>();
     WebApplication app = builder.Build();
 
 
@@ -201,6 +205,7 @@ void RunTheApp()
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
+    app.UseMiddleware<AuditLogStorageCommitMiddleware>();
     app.UseAuthorization();
     app.MapPasswordless();
     app.MapRazorPages();
