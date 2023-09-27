@@ -1,9 +1,8 @@
 namespace AdminConsole.TagHelpers.Icons;
 
-public enum IconVariant
+public enum ColorVariant
 {
     Success,
     Danger,
-    Warning,
     Info,
 }

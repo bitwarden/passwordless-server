@@ -28,7 +28,7 @@
             <div class="rounded-md bg-blue-50 p-4 mb-4">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <success-alert-icon variant="IconVariant.Info"></success-alert-icon>
+                        <success-alert-icon variant="ColorVariant.Info"></success-alert-icon>
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium text-blue-800">@TempData["Message"]</p>
@@ -46,25 +46,14 @@
                 </div>
                 @if (Model.EmailSent)
                 {
-                    
-                    <div class="rounded-md bg-green-50 p-4">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <success-alert-icon></success-alert-icon>
-                            </div>
-                            <div class="ml-3 flex-1 md:flex md:justify-between">
-                                <p class="text-sm font-medium text-green-800">We've sent you a magic link to automatically sign you in (if we recognized the email)</p>
-                            </div>
-                        </div>
-                    </div>
-                   
+                    <success-alert-box message="We've sent you a magic link to automatically sign you in (if we recognized the email)"></success-alert-box>
                 }
                 <div class="feedback__unknown_credential hidden">
                 <Feedback name="_error" message="Sorry, we don't recognize that passkey. Do you have another one?" />
                 </div>
                 <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
                 <div id="webauthn-unsupported-alert" class="hidden">
-                    @Html.Partial("Shared/Alerts/_DangerAlert", "WebAuthn is not supported in this browser.")
+                    <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
                 </div>
             </form>
 

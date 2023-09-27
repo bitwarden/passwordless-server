@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AdminConsole.TagHelpers.Icons;
 
-[HtmlTargetElement("info-alert-icon")]
+[HtmlTargetElement(HtmlTag)]
 public sealed class InfoAlertIcon : BaseAlertIcon
 {
+    public const string HtmlTag = "info-alert-icon";
+
     public InfoAlertIcon()
     {
-        Variant = IconVariant.Info;
+        Variant = ColorVariant.Info;
     }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)

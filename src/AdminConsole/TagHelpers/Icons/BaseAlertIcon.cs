@@ -6,7 +6,7 @@ public abstract class BaseAlertIcon : TagHelper
 {
     private readonly string _baseClass = "h-5 w-5";
 
-    public IconVariant? Variant { get; set; }
+    public ColorVariant? Variant { get; set; }
 
     private string GetClass()
     {
@@ -17,10 +17,9 @@ public abstract class BaseAlertIcon : TagHelper
 
         string colorClass = Variant switch
         {
-            IconVariant.Danger => "text-red-400",
-            IconVariant.Warning => "text-yellow-400",
-            IconVariant.Info => "text-blue-400",
-            IconVariant.Success => "text-green-400",
+            ColorVariant.Danger => "text-red-400",
+            ColorVariant.Info => "text-blue-400",
+            ColorVariant.Success => "text-green-400",
             _ => null
         } ?? string.Empty;
 

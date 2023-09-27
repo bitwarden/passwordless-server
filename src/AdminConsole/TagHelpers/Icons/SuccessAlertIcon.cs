@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AdminConsole.TagHelpers.Icons;
 
-[HtmlTargetElement("success-alert-icon")]
+[HtmlTargetElement(HtmlTag)]
 public sealed class SuccessAlertIcon : BaseAlertIcon
 {
+    public const string HtmlTag = "success-alert-icon";
+
     public SuccessAlertIcon()
     {
-        Variant = IconVariant.Success;
+        Variant = ColorVariant.Success;
     }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)

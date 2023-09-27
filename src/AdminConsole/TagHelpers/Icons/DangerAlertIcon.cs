@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AdminConsole.TagHelpers.Icons;
 
-[HtmlTargetElement("danger-alert-icon")]
+[HtmlTargetElement(HtmlTag)]
 public sealed class DangerAlertIcon : BaseAlertIcon
 {
+    public const string HtmlTag = "danger-alert-icon";
+
     public DangerAlertIcon()
     {
-        Variant = IconVariant.Danger;
+        Variant = ColorVariant.Danger;
     }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
