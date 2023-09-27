@@ -35,7 +35,7 @@ server {
     
         include /etc/nginx/security-headers-ssl.conf;
     {{else}}
-        listen {{{String.Coalesce env.BWP_PORT "5071"}}} default_server;
+        listen {{{String.Coalesce env.BWP_PORT "5701"}}} default_server;
     {{/if}}
 
     include /etc/nginx/security-headers.conf;
