@@ -116,17 +116,19 @@ public static class AuditEventFunctions
         ApiKeyId = string.Empty
     };
 
-    public static AuditEventDto DeleteCredentialEvent(string performedBy, IAuditLogContext auditLogContext) => new()
-    {
-        PerformedAt = auditLogContext.PerformedAt,
-        Message = $"Deleted credential for user {performedBy}",
-        PerformedBy = performedBy,
-        TenantId = auditLogContext.TenantId,
-        EventType = AuditEventType.ApiUserDeleteCredential,
-        Severity = Severity.Informational,
-        Subject = performedBy,
-        ApiKeyId = auditLogContext.AbbreviatedKey
-    };
+
+    public static Func<IAuditLogContext, AuditEventDto> DeleteCredentialEvent(string userId) =>
+        context => new AuditEventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"Deleted credential for user {userId}",
+            PerformedBy = "System",
+            TenantId = context.TenantId,
+            EventType = AuditEventType.ApiUserDeleteCredential,
+            Severity = Severity.Informational,
+            Subject = userId,
+            ApiKeyId = context.AbbreviatedKey
+        };
 
     public static AuditEventDto UserSignInBeganEvent(string performedBy, IAuditLogContext auditLogContext) => new()
     {

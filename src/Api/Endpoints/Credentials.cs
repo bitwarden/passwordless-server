@@ -1,11 +1,8 @@
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Service;
-using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
-using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
 namespace Passwordless.Server.Endpoints;
 
@@ -14,13 +11,9 @@ public static class CredentialsEndpoints
     public static void MapCredentialsEndpoints(this WebApplication app)
     {
         app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload,
-                UserCredentialsService userCredentialsService,
-                IAuditLogger auditLogger,
-                IAuditLogContext auditLogContext) =>
+                UserCredentialsService userCredentialsService) =>
         {
             await userCredentialsService.DeleteCredential(payload.CredentialId);
-
-            auditLogger.LogEvent(DeleteCredentialEvent("System", auditLogContext));
 
             return Results.NoContent();
         })
