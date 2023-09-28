@@ -6,8 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Fido2" Version="3.0.1" />
-    <PackageReference Include="MessagePack" Version="2.1.165" />
-    <PackageReference Include="MessagePackAnalyzer" Version="2.1.165" />
+    <PackageReference Include="MessagePack" Version="2.5.129" />
+    <PackageReference Include="MessagePackAnalyzer" Version="2.5.129">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="3.1.7" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.4" />

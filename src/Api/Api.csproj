@@ -17,10 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Datadog.Trace" Version="2.30.0" />
-    <PackageReference Include="MessagePackAnalyzer" Version="2.5.108">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
       <PrivateAssets>all</PrivateAssets>
