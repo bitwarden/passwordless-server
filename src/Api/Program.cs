@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Endpoints;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
@@ -15,6 +16,7 @@ using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.AuditLog;
 using Passwordless.Service.Features;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
@@ -110,6 +112,7 @@ services.AddSingleton(sp =>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
 services.AddScoped<IFeatureContextProvider, FeatureContextProvider>();
+services.AddAuditLogging();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -162,6 +165,8 @@ app.UseAuthorization();
 app.UseMiddleware<AcceptHeaderMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseMiddleware<AuditLogContextMiddleware>();
+app.UseMiddleware<AuditLogStorageCommitMiddleware>();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
@@ -169,6 +174,9 @@ app.MapAliasEndpoints();
 app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
+app.MapHealthEndpoints();
+app.MapAuditLogEndpoints();
+
 app.MapPasswordlessHealthChecks();
 
 app.Run();

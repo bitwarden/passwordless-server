@@ -2,10 +2,13 @@ using System.ComponentModel.DataAnnotations;
 using AdminConsole.Helpers;
 using AdminConsole.Identity;
 using AdminConsole.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.AuditLog.Loggers;
 using Passwordless.Net;
+using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
 
 namespace AdminConsole.Pages.Organization;
 
@@ -16,15 +19,24 @@ public class Admins : PageModel
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly SignInManager<ConsoleAdmin> _signinManager;
     private readonly IPasswordlessClient _passwordlessClient;
+    private readonly IAuditLogger _auditLogger;
+    private readonly ISystemClock _systemClock;
 
     public Admins(DataService dataService,
-        InvitationService invitationService, UserManager<ConsoleAdmin> userManager, SignInManager<ConsoleAdmin> signinManager, IPasswordlessClient passwordlessClient)
+        InvitationService invitationService,
+        UserManager<ConsoleAdmin> userManager,
+        SignInManager<ConsoleAdmin> signinManager,
+        IPasswordlessClient passwordlessClient,
+        IAuditLogger auditLogger,
+        ISystemClock systemClock)
     {
         _dataService = dataService;
         _invitationService = invitationService;
         _userManager = userManager;
         _signinManager = signinManager;
         _passwordlessClient = passwordlessClient;
+        _auditLogger = auditLogger;
+        _systemClock = systemClock;
     }
 
     public List<ConsoleAdmin> ConsoleAdmins { get; set; }
@@ -63,6 +75,9 @@ public class Admins : PageModel
         // Delete from admin consoles
         await _userManager.DeleteAsync(user);
 
+        var performedBy = users.FirstOrDefault(x => x.Email == User.GetEmail());
+        if (performedBy is not null) _auditLogger.LogEvent(DeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime));
+
         // if user is self
         if (user.Email == User.GetEmail())
         {
@@ -98,12 +113,19 @@ public class Admins : PageModel
 
         await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
 
+        _auditLogger.LogEvent(InviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime));
+
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostCancel(string hashedCode)
     {
         await _invitationService.CancelInviteAsync(hashedCode);
+
+        var performedBy = await _dataService.GetUserAsync();
+        var invitationCancelled = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
+        if (invitationCancelled is not null) _auditLogger.LogEvent(CancelAdminInviteEvent(performedBy, invitationCancelled.ToEmail, _systemClock.UtcNow.UtcDateTime));
+
         return RedirectToPage();
     }
 }

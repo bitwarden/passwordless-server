@@ -44,11 +44,19 @@
                             @Html.Partial("_NavLinkPartial", ("Users", "/app/credentials/list", "Icons/Users"))
                         }
                         @Html.Partial("_NavLinkPartial", ("Settings", "/app/Settings/Settings", "Icons/Cog"))
+                        @if (CurrentContext.Features.AuditLoggingIsEnabled)
+                        {
+                            @Html.Partial("_NavLinkPartial", ("App Logs", "/app/logs/log", "Icons/CodeBracketSquare"))
+                        }
                     </div>
                 }
                 @Html.Partial("_NavLinkPartial", ("Billing", "/billing/manage", "Icons/CodeBracketSquare"))
                 @Html.Partial("_NavLinkPartial", ("Admins", "/organization/admins", "Icons/Users"))
                 @Html.Partial("_NavLinkPartial", ("Settings", "/organization/settings", "Icons/Cog"))
+                @if (CurrentContext.OrganizationFeatures.AuditLoggingIsEnabled)
+                {
+                    @Html.Partial("_NavLinkPartial", ("Organization Logs", "/organization/log", "Icons/CodeBracketSquare"))
+                }
             </nav>
         </div>
         <div class="flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black">

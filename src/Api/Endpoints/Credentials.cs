@@ -10,10 +10,12 @@ public static class CredentialsEndpoints
 {
     public static void MapCredentialsEndpoints(this WebApplication app)
     {
-        app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload, UserCredentialsService userCredentialsService) =>
+        app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload,
+                UserCredentialsService userCredentialsService) =>
         {
             await userCredentialsService.DeleteCredential(payload.CredentialId);
-            return Results.Ok();
+
+            return Results.NoContent();
         })
             .RequireSecretKey()
             .RequireCors("default");
