@@ -216,7 +216,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
 
         var now = DateTime.UtcNow;
-        var descriptor = new PublicKeyCredentialDescriptor(success.Result.CredentialId);
+        var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
             Descriptor = descriptor,
@@ -228,7 +228,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             LastUsedAt = now,
             Device = deviceInfo,
             Country = country,
-            AaGuid = success.Result.Aaguid,
+            AaGuid = success.Result.AaGuid,
             RPID = request.RPID,
             Origin = request.Origin,
             Nickname = request.Nickname
@@ -311,30 +311,31 @@ public class Fido2ServiceEndpoints : IFido2Service
             Origins = new HashSet<string>() { request.Origin },
             ServerName = request.ServerName
         });
-
+        
         // Get the assertion options we sent the client
         var options = _tokenService.DecodeToken<AssertionOptions>(request.Session, "session_", true);
 
         // Get registered credential from database
-        var creds = await _storage.GetCredential(request.Response.Id);
-        if (creds == null)
+        var credential = await _storage.GetCredential(request.Response.Id);
+        if (credential == null)
         {
             throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
         }
 
         // Get credential counter from database
-        var storedCounter = creds.SignatureCounter;
+        var storedCounter = credential.SignatureCounter;
 
         // Create callback to check if userhandle owns the credentialId
-        IsUserHandleOwnerOfCredentialIdAsync callback = (args, token) => Task.FromResult(creds.UserHandle.SequenceEqual(args.UserHandle));
+        IsUserHandleOwnerOfCredentialIdAsync callback = (args, token) => Task.FromResult(credential.UserHandle.SequenceEqual(args.UserHandle));
 
         // Make the assertion
-        var res = await _fido2.MakeAssertionAsync(request.Response, options, creds.PublicKey, storedCounter, callback);
+        var storedCredentials = (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList();
+        var res = await _fido2.MakeAssertionAsync(request.Response, options, credential.PublicKey, storedCredentials, storedCounter, callback);
 
         // Store the updated counter
         await _storage.UpdateCredential(res.CredentialId, res.Counter, country, device);
 
-        var userId = Encoding.UTF8.GetString(creds.UserHandle);
+        var userId = Encoding.UTF8.GetString(credential.UserHandle);
 
         var tokenData = new VerifySignInToken
         {
@@ -345,8 +346,8 @@ public class Fido2ServiceEndpoints : IFido2Service
             Timestamp = DateTime.UtcNow,
             Device = device,
             Country = country,
-            Nickname = creds.Nickname,
-            CredentialId = creds.Descriptor.Id,
+            Nickname = credential.Nickname,
+            CredentialId = credential.Descriptor.Id,
             ExpiresAt = DateTime.UtcNow.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
