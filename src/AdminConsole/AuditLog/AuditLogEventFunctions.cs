@@ -53,6 +53,24 @@ public static class AuditLogEventFunctions
             performedBy.OrganizationId,
             performedAt);
 
+    public static OrganizationEventDto AdminInvalidInviteUsedEvent(Invite invite, DateTime performedAt) =>
+        new(invite.ToEmail,
+            AuditEventType.AdminInvalidInviteUsed,
+            "Expired invite used.",
+            Severity.Warning,
+            invite.ToEmail,
+            invite.TargetOrgId,
+            performedAt);
+
+    public static OrganizationEventDto AdminAcceptedInviteEvent(Invite invite, ConsoleAdmin consoleAdmin, DateTime performedAt) =>
+        new(consoleAdmin.Id,
+            AuditEventType.AdminAcceptedInvite,
+            $"{consoleAdmin.Name} accepted invite sent to {invite.ToEmail}.",
+            Severity.Informational,
+            consoleAdmin.OrganizationId.ToString(),
+            consoleAdmin.OrganizationId,
+            performedAt);
+
     public static OrganizationAuditEvent ToNewEvent(this OrganizationEventDto dto) =>
         new()
         {
