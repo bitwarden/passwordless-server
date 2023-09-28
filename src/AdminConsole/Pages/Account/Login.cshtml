@@ -149,7 +149,7 @@
         }}).mount('#xapp');
 	</script>
     <script type="module">
-        const isSupported = Passwordless.isSupported();
+        const isSupported = Passwordless.isBrowserSupported();
         if (!isSupported) {
             const alert = document.getElementById("webauthn-unsupported-alert");
             alert.classList.remove("hidden");
