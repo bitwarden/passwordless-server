@@ -222,8 +222,8 @@ public class Fido2ServiceEndpoints : IFido2Service
             Descriptor = descriptor,
             PublicKey = success.Result.PublicKey,
             UserHandle = success.Result.User.Id,
-            SignatureCounter = success.Result.Counter,
-            AttestationFmt = success.Result.CredType,
+            SignatureCounter = success.Result.SignCount,
+            AttestationFmt = success.Result.AttestationFormat,
             CreatedAt = now,
             LastUsedAt = now,
             Device = deviceInfo,
@@ -241,7 +241,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Origin = request.Origin,
             RPID = session.Options.Rp.Id,
             Timestamp = DateTime.UtcNow,
-            CredentialId = success.Result.CredentialId,
+            CredentialId = success.Result.Id,
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
@@ -311,7 +311,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Origins = new HashSet<string>() { request.Origin },
             ServerName = request.ServerName
         });
-        
+
         // Get the assertion options we sent the client
         var options = _tokenService.DecodeToken<AssertionOptions>(request.Session, "session_", true);
 
@@ -333,7 +333,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         var res = await _fido2.MakeAssertionAsync(request.Response, options, credential.PublicKey, storedCredentials, storedCounter, callback);
 
         // Store the updated counter
-        await _storage.UpdateCredential(res.CredentialId, res.Counter, country, device);
+        await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
 
         var userId = Encoding.UTF8.GetString(credential.UserHandle);
 

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using Fido2NetLib.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -24,11 +25,12 @@ public class CredentialsTests : BackendTests
         context.Credentials.Add(new EFStoredCredential()
         {
             DescriptorId = "test"u8.ToArray(),
+            DescriptorType = PublicKeyCredentialType.PublicKey,
             UserHandle = "1"u8.ToArray(),
             Tenant = "test",
         });
 
-        await context.SaveChangesAsync();
+        var rows = await context.SaveChangesAsync();
         context.ChangeTracker.Clear();
 
         // Act
@@ -36,6 +38,7 @@ public class CredentialsTests : BackendTests
         request.Headers.Add("ApiSecret", _factory.ApiSecret);
         var httpResponse = await _client.SendAsync(request);
         using var credentialsResponse = await httpResponse.Content.ReadFromJsonAsync<JsonDocument>();
+        var json = await httpResponse.Content.ReadAsStringAsync();
         // Assert
         Assert.NotNull(credentialsResponse);
         var credentials = credentialsResponse.RootElement.GetProperty("values").Deserialize<StoredCredential[]>();
