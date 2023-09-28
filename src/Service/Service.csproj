@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fido2" Version="3.0.1" />
+    <PackageReference Include="Fido2" Version="4.0.0-beta3" />
     <PackageReference Include="MessagePack" Version="2.1.165" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.1.165" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="3.1.7" />
