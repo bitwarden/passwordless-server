@@ -15,7 +15,7 @@
                     <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                     <div>
                         <p class="truncate text-sm font-medium text-primary-500 flex items-center">
-                            @app.Name (@Html.Partial("Shared/Icons/Users") @app.CurrentUserCount)
+                            @app.Name (<partial name="Shared/Icons/Users" /> @app.CurrentUserCount)
                         </p>
                         <p class="mt-2 flex items-center text-sm text-gray-500">
                             <span class="truncate">@app.Description</span>
