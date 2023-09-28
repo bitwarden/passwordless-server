@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Fido2NetLib;
+using Fido2NetLib.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.IntegrationTests.Helpers;
 using Passwordless.Service.Models;
@@ -70,6 +71,7 @@ public class PublicSignInTests : PublicTests
 
         context.Credentials.Add(new EFStoredCredential()
         {
+            DescriptorType = PublicKeyCredentialType.PublicKey,
             DescriptorId = "test"u8.ToArray(),
             UserHandle = "1"u8.ToArray(),
             Tenant = "test",

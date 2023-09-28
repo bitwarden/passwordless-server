@@ -311,7 +311,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Origins = new HashSet<string>() { request.Origin },
             ServerName = request.ServerName
         });
-        
+
         // Get the assertion options we sent the client
         var options = _tokenService.DecodeToken<AssertionOptions>(request.Session, "session_", true);
 

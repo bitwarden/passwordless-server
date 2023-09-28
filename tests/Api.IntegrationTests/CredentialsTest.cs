@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using Fido2NetLib.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -23,6 +24,7 @@ public class CredentialsTests : BackendTests
 
         context.Credentials.Add(new EFStoredCredential()
         {
+            DescriptorType = PublicKeyCredentialType.PublicKey,
             DescriptorId = "test"u8.ToArray(),
             UserHandle = "1"u8.ToArray(),
             Tenant = "test",
