@@ -43,10 +43,9 @@ public class DefaultFido2ServiceFactory : IFido2ServiceFactory
             _loggerFactory.CreateLogger<Fido2Service>(),
             _tenantStorage,
             _tokenService,
+            _featureContextProvider,
             _auditLogger,
             _auditLogContext);
-            _tokenService,
-            _featureContextProvider);
         return fidoService;
     }
 }

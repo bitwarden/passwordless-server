@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.AuditLog.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -12,6 +14,8 @@ public class Fido2ServiceTests
     private readonly Mock<ITenantStorage> _mockTenantStorage;
     private readonly Mock<ITokenService> _mockTokenService;
     private readonly Mock<IFeatureContextProvider> _mockFeatureContextProvider;
+    private readonly Mock<IAuditLogger> _mockAuditLogger;
+    private readonly Mock<IAuditLogContext> _mockAuditLogContext;
 
     private readonly Fido2Service _sut;
 
@@ -20,12 +24,16 @@ public class Fido2ServiceTests
         _mockTenantStorage = new Mock<ITenantStorage>();
         _mockTokenService = new Mock<ITokenService>();
         _mockFeatureContextProvider = new Mock<IFeatureContextProvider>();
+        _mockAuditLogger = new Mock<IAuditLogger>();
+        _mockAuditLogContext = new Mock<IAuditLogContext>();
 
         _sut = new Fido2Service("test",
             NullLogger.Instance,
             _mockTenantStorage.Object,
             _mockTokenService.Object,
-            _mockFeatureContextProvider.Object);
+            _mockFeatureContextProvider.Object,
+            _mockAuditLogger.Object,
+            _mockAuditLogContext.Object);
     }
 
     #region CreateToken

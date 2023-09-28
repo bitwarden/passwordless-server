@@ -7,9 +7,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Passwordless.Service.Features;
 using Passwordless.Service.AuditLog.Loggers;
 using Passwordless.Service.AuditLog.Models;
+using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -62,7 +62,7 @@ public class Fido2Service : IFido2Service
         ITokenService tokenService,
         IFeatureContextProvider featureContextProvider,
         IAuditLogger auditLogger,
-        IAuditLoggerContext auditLogContext)
+        IAuditLogContext auditLogContext)
     {
         var instance = new Fido2Service(tenant, logger, storage, tokenService, featureContextProvider, auditLogger, auditLogContext);
         await instance.Init();
@@ -268,7 +268,7 @@ public class Fido2Service : IFido2Service
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
         };
-        
+
         _auditLogger.LogEvent(RegistrationCompletedEvent(userId, _auditLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
