@@ -1,3 +1,4 @@
+using AdminConsole.Identity;
 using AdminConsole.Services.Mail;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -5,10 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.AuditLog.Loggers;
+using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace AdminConsole;
-
 
 public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : class
 {
@@ -17,6 +19,7 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
     private readonly IMailService _mailService;
     private readonly IUrlHelperFactory _urlHelperFactory;
     private readonly IActionContextAccessor _actionContextAccessor;
+    private readonly IAuditLogger _auditLogger;
 
     public MagicLinkSignInManager(UserManager<TUser> userManager,
         IHttpContextAccessor contextAccessor,
@@ -25,12 +28,14 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         ILogger<SignInManager<TUser>> logger,
         IAuthenticationSchemeProvider schemes,
         IUserConfirmation<TUser> confirmation,
-        IMailService mailService, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor)
+        IMailService mailService, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor,
+        IAuditLogger auditLogger)
         : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
     {
         _mailService = mailService;
         _urlHelperFactory = urlHelperFactory;
         _actionContextAccessor = actionContextAccessor;
+        _auditLogger = auditLogger;
     }
 
     public async Task<SignInResult> SendEmailForSignInAsync(string email, string? returnUrl)
@@ -41,13 +46,14 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
             return SignInResult.Failed;
         }
 
-        var token = await UserManager.GenerateUserTokenAsync(user, Options.Tokens.PasswordResetTokenProvider,
-            PasswordlessSignInPurpose);
-
+        var token = await UserManager.GenerateUserTokenAsync(user, Options.Tokens.PasswordResetTokenProvider, PasswordlessSignInPurpose);
 
         var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
         var endpoint = urlBuilder.PageLink("/Account/Magic", values: new { returnUrl }) ?? urlBuilder.Content("~/");
         await _mailService.SendPasswordlessSignInAsync(endpoint, token, email);
+
+        if (user is ConsoleAdmin admin) _auditLogger.LogEvent(CreateLoginViaMagicLinkEvent(admin));
+
         return SignInResult.Success;
     }
 

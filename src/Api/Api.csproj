@@ -16,6 +16,8 @@
     <None Remove="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="7.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="7.0.0" />
     <PackageReference Include="Datadog.Trace" Version="2.30.0" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.5.108">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

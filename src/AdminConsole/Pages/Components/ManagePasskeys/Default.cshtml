@@ -1,7 +1,5 @@
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using Microsoft.Extensions.Options
 @model PasskeysModel
-@inject IOptions<PasswordlessClientOptions> Options
+@inject IOptions<PasswordlessOptions> Options
 
 <div id="xapp" class="flex flex-col gap-10">
     {{showDetails}}
@@ -103,9 +101,8 @@
     </div>
 </div>
 
+@Html.Partial("Shared/_PasswordlessClientJs")
 
-    
-    <script src="https://cdn.passwordless.dev/dist/0.6.4/umd/passwordless.umd.js"></script>
     <script async defer type="module">    
     import { createApp, ref } from 'vue';
     createApp({

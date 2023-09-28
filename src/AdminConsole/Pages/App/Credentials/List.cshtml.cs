@@ -11,7 +11,7 @@ public class ListModel : PageModel
     private readonly ILogger<IndexModel> _logger;
     private readonly IScopedPasswordlessClient _api;
 
-    public List<PasswordlessUserSummary> Users { get; set; }
+    public IReadOnlyCollection<PasswordlessUserSummary> Users { get; set; }
 
     public ListModel(ILogger<IndexModel> logger, IScopedPasswordlessClient api, ICurrentContext context)
     {

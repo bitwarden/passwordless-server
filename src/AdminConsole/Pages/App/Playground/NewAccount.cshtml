@@ -1,7 +1,7 @@
 @page "/playground/new-account"
 @model NewAccountModel
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessClientOptions> Options
+@inject IOptions<PasswordlessOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
@@ -22,32 +22,38 @@
 
             <div class="mt-8">
                 <div class="mt-6">
-                    <form v-on:submit.prevent="createNewAccount" class="space-y-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name (Visible in Browser UI)</label>
-                            <div class="mt-2">
-                                <input type="text" name="name" id="name" required class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                    <form v-on:submit.prevent="createNewAccount">
+                        <fieldset id="registerCredentialFields" class="space-y-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name (Visible in Browser UI)</label>
+                                <div class="mt-2">
+                                    <input type="text" name="name" id="name" required class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                                </div>
                             </div>
-                        </div>    
-                        <div>
-                            <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address / Username (Visible in Browser UI)</label>
-                            <div class="mt-2">
-                                <input id="email" name="email" type="text" required class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                            <div>
+                                <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address / Username (Visible in Browser UI)</label>
+                                <div class="mt-2">
+                                    <input id="email" name="email" type="text" required class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <label for="nickname" class="block text-sm font-medium leading-6 text-gray-900">Nickname for this device (optional)</label>
-                            <div class="mt-2">
-                                <input asp-for="Nickname" type="text" name="nickname" id="nickname" class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
-                                <span asp-validation-for="Nickname"></span>
+                            <div>
+                                <label for="nickname" class="block text-sm font-medium leading-6 text-gray-900">Nickname for this device (optional)</label>
+                                <div class="mt-2">
+                                    <input asp-for="Nickname" type="text" name="nickname" id="nickname" class="block p-2 w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
+                                    <span asp-validation-for="Nickname"></span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <button type="submit" btn-primary>Register</button>
-                            <div id="create-account-error-message" class="my-2 text-sm font-medium text-red-800 hidden"></div>
-                        </div>
+                            <div>
+                                <button type="submit" btn-primary>Register</button>
+                                <div id="create-account-error-message" class="my-2 text-sm font-medium text-red-800 hidden"></div>
+                            </div>
+
+                            <div id="webauthn-unsupported-alert" class="hidden">
+                                <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
+                            </div>
+                        </fieldset>
                     </form>
                 </div>
             </div>
@@ -73,9 +79,7 @@
     }
 </style>
 
-
-<script src="https://cdn.passwordless.dev/dist/0.6.4/umd/passwordless.umd.js"></script>
-
+@Html.Partial("Shared/_PasswordlessClientJs")
 @section Scripts {
     <script type="module">
     import { createApp, ref } from 'vue';
@@ -155,5 +159,14 @@
         }
         return res;
     }
+    </script>
+    <script type="module">
+        const isSupported = Passwordless.isSupported();
+        if (!isSupported) {
+            const registerCredentialFields = document.getElementById("registerCredentialFields");
+            registerCredentialFields.disabled = true;
+            const alert = document.getElementById("webauthn-unsupported-alert");
+            alert.classList.remove("hidden");
+        }
     </script>
 }

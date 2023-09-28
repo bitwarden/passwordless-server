@@ -28,14 +28,13 @@ public class NewAccountModel : PageModel
         var userId = Guid.NewGuid().ToString();
         try
         {
-            var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions
+            var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions(userId, $"Playground: {email}")
             {
-                UserId = userId,
-                Username = "Playground: " + email,
                 DisplayName = name,
                 Aliases = new HashSet<string>(1) { email },
                 AliasHashing = false
             });
+
             return new JsonResult(token);
         }
         catch (PasswordlessApiException e)

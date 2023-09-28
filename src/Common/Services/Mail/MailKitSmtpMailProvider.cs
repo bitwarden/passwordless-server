@@ -52,7 +52,15 @@ public class MailKitSmtpMailProvider : IMailProvider
         builder.HtmlBody = message.HtmlBody;
         mimeMessage.Body = builder.ToMessageBody();
 
-        using var client = new SmtpClient();
+        using var client = await GetClient();
+
+        await client.SendAsync(mimeMessage);
+        await client.DisconnectAsync(true);
+    }
+
+    public async Task<SmtpClient> GetClient()
+    {
+        var client = new SmtpClient();
         if (_smtpTrustServer)
         {
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
@@ -73,7 +81,6 @@ public class MailKitSmtpMailProvider : IMailProvider
             await client.AuthenticateAsync(_smtpUsername, _smtpPassword);
         }
 
-        await client.SendAsync(mimeMessage);
-        await client.DisconnectAsync(true);
+        return client;
     }
 }

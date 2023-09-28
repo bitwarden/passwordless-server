@@ -236,7 +236,6 @@ public class EfTenantStorage : ITenantStorage
         return (await db.AccountInfo.FirstOrDefaultAsync()) != null;
     }
 
-
     public async Task UpdateCredential(byte[] credentialId, uint counter, string country, string device)
     {
         var c = await db.Credentials.Where(c => c.DescriptorId == credentialId).FirstOrDefaultAsync();
@@ -247,8 +246,6 @@ public class EfTenantStorage : ITenantStorage
         db.Credentials.Update(c);
         await db.SaveChangesAsync();
     }
-
-
 
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {

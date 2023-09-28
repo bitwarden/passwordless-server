@@ -17,7 +17,7 @@ public class Profile : PageModel
         _userManager = userManager;
     }
 
-    public List<Credential> Credentials { get; set; } = new();
+    public IReadOnlyCollection<Credential> Credentials { get; set; } = new List<Credential>();
 
     public async Task<IActionResult> OnPostRemoveCredential(string credentialId)
     {

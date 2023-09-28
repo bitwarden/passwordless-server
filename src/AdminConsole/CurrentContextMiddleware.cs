@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using AdminConsole.Db;
+using AdminConsole.Helpers;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole;
@@ -23,8 +23,9 @@ public class CurrentContext : ICurrentContext
 
     public string? ApiKey { get; private set; }
     public bool IsFrozen { get; private set; }
-
     public FeaturesContext Features { get; private set; }
+    public int? OrgId { get; private set; }
+    public FeaturesContext OrganizationFeatures { get; private set; } = new(false, 0, null);
 
     public void SetApp(Application application)
     {
@@ -43,19 +44,13 @@ public class CurrentContext : ICurrentContext
     {
         Features = context;
     }
-}
 
-public record FeaturesContext(
-    bool AuditLoggingIsEnabled,
-    int AuditLoggingRetentionPeriod,
-    DateTime? DeveloperLoggingEndsAt)
-{
-    public static FeaturesContext FromDto(AppFeatureDto dto)
+    public void SetOrganization(int organizationId, FeaturesContext featuresContext)
     {
-        return new FeaturesContext(dto.AuditLoggingIsEnabled, dto.AuditLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt);
+        OrgId = organizationId;
+        OrganizationFeatures = featuresContext;
     }
 }
-
 
 public interface ICurrentContext
 {
@@ -68,6 +63,8 @@ public interface ICurrentContext
     string? ApiKey { get; }
     bool IsFrozen { get; }
     FeaturesContext Features { get; }
+    int? OrgId { get; }
+    FeaturesContext OrganizationFeatures { get; }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
@@ -76,8 +73,11 @@ public interface ICurrentContext
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
     void SetFeatures(FeaturesContext context);
-}
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("There should only be one caller of this method, you are probably not it.")]
+    void SetOrganization(int organizationId, FeaturesContext context);
+}
 
 public class CurrentContextMiddleware
 {
@@ -93,25 +93,40 @@ public class CurrentContextMiddleware
         HttpContext httpContext,
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
-        IPasswordlessManagementClient passwordlessClient)
+        IPasswordlessManagementClient passwordlessClient,
+        OrganizationFeatureService organizationFeatureService)
     {
         var name = httpContext.GetRouteData();
 
-        if (!name.Values.TryGetValue("app", out var appRouteValue) || appRouteValue is not string appId)
-        {
-            return _next(httpContext);
-        }
+        var hasAppRouteValue = name.Values.TryGetValue("app", out var appRouteValue);
+        var appId = hasAppRouteValue && appRouteValue != null ? (string)appRouteValue : String.Empty;
 
-        return InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient);
+        var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == "OrgId");
+
+        return hasOrgIdClaim
+            ? InvokeCoreAsync(httpContext, appId, currentContext, dbContext, passwordlessClient, organizationFeatureService)
+            : _next(httpContext);
     }
 
-    private async Task InvokeCoreAsync(
-        HttpContext httpContext,
+    private async Task InvokeCoreAsync(HttpContext httpContext,
         string appId,
         ICurrentContext currentContext,
         ConsoleDbContext dbContext,
-        IPasswordlessManagementClient passwordlessClient)
+        IPasswordlessManagementClient passwordlessClient, OrganizationFeatureService organizationFeatureService)
     {
+        var orgId = httpContext.User.GetOrgId();
+        var orgFeatures = organizationFeatureService.GetOrganizationFeatures(orgId);
+
+#pragma warning disable CS0618 // I am the one valid caller of this method
+        currentContext.SetOrganization(orgId, orgFeatures);
+#pragma warning restore CS0618
+
+        if (string.IsNullOrWhiteSpace(appId))
+        {
+            await _next(httpContext);
+            return;
+        }
+
         var appConfig = await dbContext.Applications.FirstOrDefaultAsync(a => a.Id == appId);
 
         if (appConfig is null)

@@ -1,15 +1,19 @@
 using System.Reflection;
 using System.Text.Json;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
+using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
+using Passwordless.Service.AuditLog;
 using Passwordless.Service.Features;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
@@ -38,6 +42,12 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
+        // setup tracing
+        var settings = TracerSettings.FromDefaultSources();
+        settings.ServiceVersion = version;
+        Tracer.Configure(settings);
+
+        // setup serilog logging
         var apiKey = ddConfig.GetValue<string>("ApiKey");
         if (!string.IsNullOrEmpty(apiKey))
         {
@@ -91,11 +101,14 @@ services.AddSingleton(sp =>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
 
 services.AddScoped<IFeatureContextProvider, FeatureContextProvider>();
+services.AddAuditLogging();
 
 if (builder.Environment.IsDevelopment())
 {
     services.AddDatabaseDeveloperPageExceptionFilter();
 }
+
+builder.AddPasswordlessHealthChecks();
 
 WebApplication app = builder.Build();
 
@@ -129,6 +142,8 @@ app.UseAuthorization();
 app.UseMiddleware<AcceptHeaderMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseMiddleware<AuditLogContextMiddleware>();
+app.UseMiddleware<AuditLogStorageCommitMiddleware>();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
@@ -137,6 +152,9 @@ app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
 app.MapHealthEndpoints();
+app.MapAuditLogEndpoints();
+
+app.MapPasswordlessHealthChecks();
 
 app.Run();
 
