@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.Net;
-using ProblemDetails = Passwordless.Net.PasswordlessProblemDetails;
+using Passwordless;
+using ProblemDetails = Passwordless.PasswordlessProblemDetails;
 
 namespace AdminConsole.Pages;
 
