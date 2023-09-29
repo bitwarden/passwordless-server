@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Reflection;
 using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.Net;
 
 namespace Passwordless.AdminConsole;
 

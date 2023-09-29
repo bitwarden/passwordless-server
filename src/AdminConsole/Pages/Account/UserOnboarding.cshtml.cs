@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.Net;
+using Passwordless;
 
 namespace AdminConsole.Pages.Account;
 

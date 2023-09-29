@@ -1,5 +1,4 @@
 using Passwordless.AdminConsole.AuditLog.DTOs;
-using Passwordless.Net;
 
 namespace Passwordless.AdminConsole.Services;
 

@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless;
 using Passwordless.AdminConsole.Services;
-using Passwordless.Net;
 
 namespace AdminConsole.Pages;
 
