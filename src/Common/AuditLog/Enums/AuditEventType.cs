@@ -22,4 +22,6 @@ public enum AuditEventType
     AdminMagicLinkLogin = 7002,
     AdminDeleteAdmin = 7003,
     AdminCancelAdminInvite = 7004,
+    AdminInvalidInviteUsed = 7005,
+    AdminAcceptedInvite = 7006
 }
