@@ -861,6 +861,25 @@ table.tbl-default td.td-indent, table.tbl-default th.th-indent {
   }
 }
 
+table.tbl-default a {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity));
+  text-decoration-line: underline;
+}
+
+table.tbl-default a:visited {
+  color: rgb(147 51 234 );
+}
+
+table.tbl-default a:hover {
+  --tw-text-opacity: 1;
+  color: rgb(30 64 175 / var(--tw-text-opacity));
+}
+
+table.tbl-default a {
+  text-decoration: none;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
