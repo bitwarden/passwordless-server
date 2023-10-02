@@ -30,7 +30,7 @@ public class CredentialsTests : BackendTests
             Tenant = "test",
         });
 
-        var rows = await context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         context.ChangeTracker.Clear();
 
         // Act
