@@ -30,7 +30,7 @@ public class CredentialsTests : BackendTests
             Tenant = "test",
         });
 
-        var rows = await context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         context.ChangeTracker.Clear();
 
         // Act
@@ -38,7 +38,7 @@ public class CredentialsTests : BackendTests
         request.Headers.Add("ApiSecret", _factory.ApiSecret);
         var httpResponse = await _client.SendAsync(request);
         using var credentialsResponse = await httpResponse.Content.ReadFromJsonAsync<JsonDocument>();
-        var json = await httpResponse.Content.ReadAsStringAsync();
+        
         // Assert
         Assert.NotNull(credentialsResponse);
         var credentials = credentialsResponse.RootElement.GetProperty("values").Deserialize<StoredCredential[]>();
