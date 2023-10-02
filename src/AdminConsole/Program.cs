@@ -15,15 +15,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.AuditLog;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
-using Passwordless.Net;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
