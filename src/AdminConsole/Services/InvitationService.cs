@@ -53,7 +53,6 @@ public class InvitationService
         string link = urlBuilder.PageLink("/organization/join", values: new { code = Convert.ToBase64String(code) });
         // send email
         await _mailService.SendInviteAsync(inv, link);
-
     }
 
     private string HashCode(byte[] code)

@@ -1,7 +1,7 @@
 using AdminConsole.Db;
 using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.Net;
+using Passwordless;
 
 namespace AdminConsole.Services;
 

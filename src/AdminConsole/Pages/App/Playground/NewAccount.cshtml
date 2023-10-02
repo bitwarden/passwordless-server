@@ -79,7 +79,7 @@
     }
 </style>
 
-@Html.Partial("Shared/_PasswordlessClientJs")
+<partial name="Shared/_PasswordlessClientJs" />
 @section Scripts {
     <script type="module">
     import { createApp, ref } from 'vue';
@@ -155,7 +155,7 @@
     }
     </script>
     <script type="module">
-        const isSupported = Passwordless.isSupported();
+        const isSupported = Passwordless.isBrowserSupported();
         if (!isSupported) {
             const registerCredentialFields = document.getElementById("registerCredentialFields");
             registerCredentialFields.disabled = true;

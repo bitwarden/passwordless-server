@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Passwordless;
 using Passwordless.AdminConsole;
-using Passwordless.Net;
 
 namespace AdminConsole.Pages.App.Onboarding;
 

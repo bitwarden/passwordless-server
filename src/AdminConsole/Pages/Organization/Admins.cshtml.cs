@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless;
 using Passwordless.AdminConsole.AuditLog.Loggers;
-using Passwordless.Net;
 using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
 
 namespace AdminConsole.Pages.Organization;
