@@ -38,7 +38,7 @@ public class CredentialsTests : BackendTests
         request.Headers.Add("ApiSecret", _factory.ApiSecret);
         var httpResponse = await _client.SendAsync(request);
         using var credentialsResponse = await httpResponse.Content.ReadFromJsonAsync<JsonDocument>();
-        
+
         // Assert
         Assert.NotNull(credentialsResponse);
         var credentials = credentialsResponse.RootElement.GetProperty("values").Deserialize<StoredCredential[]>();
