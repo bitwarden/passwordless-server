@@ -2,9 +2,12 @@ using System.ComponentModel.DataAnnotations;
 using AdminConsole.Identity;
 using AdminConsole.Services;
 using AdminConsole.Services.Mail;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.AuditLog.Loggers;
+using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
 
 namespace AdminConsole.Pages.Organization;
 
@@ -13,16 +16,22 @@ public class Join : PageModel
     private readonly InvitationService _invitationService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IMailService _mailService;
+    private readonly IAuditLogger _auditLogger;
+    private readonly ISystemClock _systemClock;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
     public Join(InvitationService invitationService,
         UserManager<ConsoleAdmin> userManager, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
-        IMailService mailService)
+        IMailService mailService,
+        IAuditLogger auditLogger,
+        ISystemClock systemClock)
     {
         _invitationService = invitationService;
         _userManager = userManager;
         _magicLinkSignInManager = magicLinkSignInManager;
         _mailService = mailService;
+        _auditLogger = auditLogger;
+        _systemClock = systemClock;
     }
 
     public Invite Invite { get; set; }
@@ -74,6 +83,7 @@ public class Join : PageModel
 
         if (!ok)
         {
+            _auditLogger.LogEvent(AdminInvalidInviteUsedEvent(invite, _systemClock.UtcNow.UtcDateTime));
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
 
@@ -94,6 +104,8 @@ public class Join : PageModel
 
             var url = Url.Page("/Account/useronboarding");
             await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
+
+            _auditLogger.LogEvent(AdminAcceptedInviteEvent(invite, user, _systemClock.UtcNow.UtcDateTime));
         }
         else
         {

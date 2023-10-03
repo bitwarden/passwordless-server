@@ -2,7 +2,7 @@ using AdminConsole.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.Net;
+using Passwordless;
 
 namespace AdminConsole.Pages.Account;
 

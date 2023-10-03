@@ -4,7 +4,7 @@ function rgba(color) {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./Pages/**/*.{razor,html,cshtml}", "./wwwroot/js/**/*.{js,mjs}"],
+  content: ["./Pages/**/*.{razor,html,cshtml}", "./wwwroot/js/**/*.{js,mjs}", "./TagHelpers/**/*.cs"],
     safelist: [
         'validation-summary-errors',
         'input-validation-error',

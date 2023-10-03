@@ -6,38 +6,67 @@
 }
 
 <div>
-    @if (Model.Events.Any())
-    {
-        <table class="shadow-sm bg-white text-center">
-            <thead class="border text-sm">
-            <tr>
-                <th>Performed By</th>
-                <th>Performed At</th>
-                <th>Severity</th>
-                <th>Message</th>
-                <th>Subject</th>
-                <th>Event Type</th>
-            </tr>
-            </thead>
-            <tbody class="border text-sm">
-            @foreach (var auditEvent in Model.Events)
-            {
-                <tr class="border">
-                    <td>@auditEvent.PerformedBy</td>
-                    <td>@auditEvent.PerformedAt.ToLocalTime()</td>
-                    <td>@auditEvent.Severity</td>
-                    <td>@auditEvent.Message</td>
-                    <td>@auditEvent.Subject</td>
-                    <td>@auditEvent.EventType</td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>This organization has no events from the past @Model.RetentionPeriod days.</p>
-    }
+    <div class="flow-root" asp-if="Model.Events.Any()">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                    <table class="tbl-default min-w-full">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="th-indent">
+                                Performed At
+                            </th>
+                            <th scope="col">
+                                Performed By
+                            </th>
+                            <th scope="col">
+                                Severity
+                            </th>
+                            <th scope="col">
+                                Message
+                            </th>
+                            <th scope="col">
+                                Subject
+                            </th>
+                            <th scope="col" class="whitespace-nowrap">
+                                Event Type
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var auditEvent in Model.Events)
+                        {
+                            <tr>
+                                <td
+                                    class="whitespace-nowrap td-indent td-strong">
+                                    @auditEvent.PerformedAt
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    @auditEvent.PerformedBy
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    @auditEvent.Severity
+                                </td>
+                                <td>
+                                    @auditEvent.Message
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    @auditEvent.Subject
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    @auditEvent.EventType
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <p asp-if="!Model.Events.Any()">This organization has no events from the past @Model.RetentionPeriod days.</p>
+    
     @{
         var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
         var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";

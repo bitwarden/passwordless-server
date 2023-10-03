@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
-using Passwordless.Net;
+using Passwordless;
 
 namespace AdminConsole.Helpers;
 
