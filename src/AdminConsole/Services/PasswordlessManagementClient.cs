@@ -35,7 +35,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
 
     public async Task<bool> DeleteApplicationAsync(string application)
     {
-        var res = await _client.DeleteAsync($"admin/apps/{application}/delete");
+        var res = await _client.DeleteAsync($"admin/apps/{application}");
         return res.IsSuccessStatusCode;
     }
 
