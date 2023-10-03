@@ -102,9 +102,9 @@ if [ "$BWP_PORT" == "null" ]; then
   exit 1; 
 fi
 
-export PasswordlessManagement__PublicApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api";
+export PasswordlessManagement__InternalApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api";
 echo "[Configuration] API private: $PasswordlessManagement__ApiUrl";
-echo "[Configuration] API public: $PasswordlessManagement__PublicApiUrl";
+echo "[Configuration] API public: $PasswordlessManagement__InternalApiUrl";
 
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #
