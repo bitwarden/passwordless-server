@@ -8,22 +8,22 @@
 <div class="mt-8 flow-root">
     <div class="inline-block min-w-full">
         <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-300">
-                <thead class="bg-gray-200">
+            <table class="tbl-default min-w-full">
+                <thead>
                 <tr>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Email</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Action</th>
+                    <th scope="col">Name</th>
+                    <th scope="col" class="th-indent">Email</th>
+                    <th scope="col">Action</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
+                <tbody>
                 <form asp-page-handler="Delete" method="post">
                     @foreach (var user in Model.ConsoleAdmins)
                     {
                         <tr>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@user.Name</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@user.Email</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap">@user.Name</td>
+                            <td class="whitespace-nowrap">@user.Email</td>
+                            <td class="whitespace-nowrap">
                                 <button class="btn-danger" name="userId" value="@user.Id">Delete</button>
                             </td>
                         </tr>
@@ -31,7 +31,7 @@
                 </form>
                 @if (Model.ConsoleAdmins.Count == 0)
               {
-                <tr><td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">No admins found</td><td></td><td></td><td></td></tr>
+                <tr><td class="whitespace-nowrap">No admins found</td><td></td><td></td><td></td></tr>
               }
                 </tbody>
             </table>
@@ -66,26 +66,26 @@
                 </form>
             }
         <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-300">
-                <thead class="bg-gray-200">
+            <table class="tbl-default min-w-full">
+                <thead>
                 <tr>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Recipient</th>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Invited</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Sender</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Action</th>
+                    <th scope="col" class="th-indent">Recipient</th>
+                    <th scope="col" class="th-indent">Invited</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="th-indent">Sender</th>
+                    <th scope="col">Action</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
+                <tbody>
                 <form asp-page-handler="Cancel" method="post">
                     @foreach (var inv in Model.Invites)
                     {
                         <tr>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@inv.ToEmail</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><local-time datetime="@inv.CreatedAt.ToLocalTime()"></local-time></td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Sent</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">@inv.FromName</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap">@inv.ToEmail</td>
+                            <td class="whitespace-nowrap"><local-time datetime="@inv.CreatedAt.ToLocalTime()"></local-time></td>
+                            <td class="whitespace-nowrap">Sent</td>
+                            <td class="whitespace-nowrap">@inv.FromName</td>
+                            <td class="whitespace-nowrap">
                                 <button class="btn-secondary" name="hashedCode" value="@inv.HashedCode">Cancel</button>
                             </td>
                         </tr>
@@ -93,7 +93,7 @@
                 </form>
                 @if (Model.Invites.Count == 0)
                     {
-                        <tr><td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">No invites found</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td class="whitespace-nowrap">No invites found</td><td></td><td></td><td></td><td></td></tr>
                     }
                 </tbody>
             </table>
