@@ -5,7 +5,6 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Passwordless.Service.AuditLog.Loggers;
@@ -26,7 +25,6 @@ public class Fido2ServiceEndpoints : IFido2Service
     private Fido2 _fido2;
     private readonly string _tenant;
     private readonly ILogger log;
-    private readonly IConfiguration config;
     private readonly ITokenService _tokenService;
     private readonly IAuditLogger _auditLogger;
     private readonly IAuditLogContext _auditLogContext;
@@ -34,7 +32,6 @@ public class Fido2ServiceEndpoints : IFido2Service
     // Internal for testing
     internal Fido2ServiceEndpoints(string tenant,
         ILogger log,
-        IConfiguration config,
         ITenantStorage storage,
         ITokenService tokenService,
         IAuditLogger auditLogger,
@@ -43,7 +40,6 @@ public class Fido2ServiceEndpoints : IFido2Service
         _storage = storage;
         _tenant = tenant;
         this.log = log;
-        this.config = config;
         _tokenService = tokenService;
         _auditLogger = auditLogger;
         _auditLogContext = auditLogContext;
@@ -54,9 +50,9 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService, IAuditLogger auditLogger, IAuditLogContext auditLogContext)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IAuditLogger auditLogger, IAuditLogContext auditLogContext)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService, auditLogger, auditLogContext);
+        var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, auditLogger, auditLogContext);
         await instance.Init();
         return instance;
     }
@@ -239,7 +235,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             UserId = userId,
             Success = true,
             Origin = request.Origin,
-            RPID = session.Options.Rp.Id,
+            RpId = session.Options.Rp.Id,
             Timestamp = DateTime.UtcNow,
             CredentialId = success.Result.Id,
             Device = deviceInfo,
@@ -342,7 +338,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             UserId = userId,
             Success = true,
             Origin = request.Origin,
-            RPID = request.RPID,
+            RpId = request.RPID,
             Timestamp = DateTime.UtcNow,
             Device = device,
             Country = country,
@@ -379,25 +375,6 @@ public class Fido2ServiceEndpoints : IFido2Service
             throw new ApiException("Alias validation failed: " + ex.Message, 400);
         }
     }
-
-    //public Task SetAlias(string userId, Aliases aliases)
-    //{
-    //    ValidateUserId(userId);
-    //    return SetAlias(Encoding.UTF8.GetBytes(userId), aliases);
-    //}
-
-    //public async Task SetAlias(byte[] userId, Aliases aliases)
-    //{
-    //    if (userId == null || userId.Length == 0) { throw new ApiException("userId most not be null", 400); }
-    //    ValidateAliases(aliases, true);
-    //    var values = new Aliases(aliases.Count);
-    //    foreach (var alias in aliases)
-    //    {
-    //        values.Add(HashAlias(alias, _tenant));
-    //    }
-
-    //    await _storage.StoreAlias(userId, values);
-    //}
 
     public Task<List<AliasPointer>> GetAliases(string userId)
     {
