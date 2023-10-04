@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Models;
+using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
-using static Passwordless.Service.AuditLog.AuditEventFunctions;
+using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Service;
 
@@ -28,8 +28,8 @@ public class Fido2ServiceEndpoints : IFido2Service
     private readonly ILogger log;
     private readonly IConfiguration config;
     private readonly ITokenService _tokenService;
-    private readonly IAuditLogger _auditLogger;
-    private readonly IAuditLogContext _auditLogContext;
+    private readonly IEventLogger _eventLogger;
+    private readonly IEventLogContext _eventLogContext;
 
     // Internal for testing
     internal Fido2ServiceEndpoints(string tenant,
@@ -37,16 +37,16 @@ public class Fido2ServiceEndpoints : IFido2Service
         IConfiguration config,
         ITenantStorage storage,
         ITokenService tokenService,
-        IAuditLogger auditLogger,
-        IAuditLogContext auditLogContext)
+        IEventLogger eventLogger,
+        IEventLogContext eventLogContext)
     {
         _storage = storage;
         _tenant = tenant;
         this.log = log;
         this.config = config;
         _tokenService = tokenService;
-        _auditLogger = auditLogger;
-        _auditLogContext = auditLogContext;
+        _eventLogger = eventLogger;
+        _eventLogContext = eventLogContext;
     }
 
     private async Task Init()
@@ -54,9 +54,9 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService, IAuditLogger auditLogger, IAuditLogContext auditLogContext)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger, IEventLogContext eventLogContext)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService, auditLogger, auditLogContext);
+        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService, eventLogger, eventLogContext);
         await instance.Init();
         return instance;
     }
@@ -119,7 +119,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
             var session = _tokenService.EncodeToken(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
 
-            _auditLogger.LogEvent(RegistrationBeganEvent(userId, _auditLogContext));
+            _eventLogger.LogEvent(RegistrationBeganEvent(userId, _eventLogContext));
 
             // return options to client
             return new SessionResponse<CredentialCreateOptions>() { Data = options, Session = session };
@@ -134,7 +134,7 @@ public class Fido2ServiceEndpoints : IFido2Service
     {
         var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
 
-        _auditLogger.LogEvent(UserSignInTokenVerifiedEvent(token.UserId, _auditLogContext));
+        _eventLogger.LogEvent(UserSignInTokenVerifiedEvent(token.UserId, _eventLogContext));
 
         return Task.FromResult(token);
     }
@@ -174,7 +174,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         var token = _tokenService.EncodeToken(tokenProps, "register_");
 
-        _auditLogger.LogEvent(RegistrationTokenCreatedEvent(tokenProps.UserId, _auditLogContext));
+        _eventLogger.LogEvent(RegistrationTokenCreatedEvent(tokenProps.UserId, _eventLogContext));
 
         return token;
     }
@@ -251,7 +251,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         };
 
 
-        _auditLogger.LogEvent(RegistrationCompletedEvent(userId, _auditLogContext));
+        _eventLogger.LogEvent(RegistrationCompletedEvent(userId, _eventLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 
@@ -295,7 +295,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             uv
         );
 
-        _auditLogger.LogEvent(UserSignInBeganEvent(request.UserId, _auditLogContext));
+        _eventLogger.LogEvent(UserSignInBeganEvent(request.UserId, _eventLogContext));
 
         var session = _tokenService.EncodeToken(options, "session_", true);
 
@@ -352,7 +352,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Type = "passkey_signin"
         };
 
-        _auditLogger.LogEvent(UserSignInCompletedEvent(userId, _auditLogContext));
+        _eventLogger.LogEvent(UserSignInCompletedEvent(userId, _eventLogContext));
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 

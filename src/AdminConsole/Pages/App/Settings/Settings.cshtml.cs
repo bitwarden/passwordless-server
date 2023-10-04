@@ -1,10 +1,8 @@
-﻿using AdminConsole.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Settings;
+namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : PageModel
 {

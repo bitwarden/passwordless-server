@@ -4,7 +4,7 @@ using Passwordless.Service;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
 
-namespace Passwordless.Server.Endpoints;
+namespace Passwordless.Api.Endpoints;
 
 public static class CredentialsEndpoints
 {

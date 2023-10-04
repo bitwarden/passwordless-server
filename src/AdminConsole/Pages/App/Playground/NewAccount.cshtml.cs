@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages;
+namespace Passwordless.AdminConsole.Pages.App.Playground;
 
 public class NewAccountModel : PageModel
 {

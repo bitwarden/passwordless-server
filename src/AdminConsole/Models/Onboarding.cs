@@ -1,4 +1,4 @@
-namespace AdminConsole.Models;
+namespace Passwordless.AdminConsole.Models;
 
 public class Onboarding
 {

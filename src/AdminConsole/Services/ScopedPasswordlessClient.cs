@@ -1,10 +1,10 @@
-using Passwordless.AdminConsole.AuditLog.DTOs;
+using Passwordless.AdminConsole.EventLog.DTOs;
 
 namespace Passwordless.AdminConsole.Services;
 
 public interface IScopedPasswordlessClient : IPasswordlessClient
 {
-    Task<ApplicationAuditLogResponse> GetApplicationAuditLog(int pageNumber, int pageSize);
+    Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -19,11 +19,11 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         _client = httpClient;
     }
 
-    public async Task<ApplicationAuditLogResponse> GetApplicationAuditLog(int pageNumber, int pageSize)
+    public async Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize)
     {
         var response = await _client.GetAsync($"events?pageNumber={pageNumber}&numberOfResults={pageSize}");
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<ApplicationAuditLogResponse>();
+        return await response.Content.ReadFromJsonAsync<ApplicationEventLogResponse>();
     }
 }

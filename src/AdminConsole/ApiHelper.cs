@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole;
+namespace Passwordless.AdminConsole;
 
 public static class ManagementApiExtensions
 {

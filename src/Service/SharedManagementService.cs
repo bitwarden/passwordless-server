@@ -110,8 +110,8 @@ public class SharedManagementService : ISharedManagementService
             Features = new AppFeature
             {
                 Tenant = accountName,
-                AuditLoggingIsEnabled = appCreationOptions.AuditLoggingIsEnabled,
-                AuditLoggingRetentionPeriod = appCreationOptions.AuditLoggingRetentionPeriod
+                EventLoggingIsEnabled = appCreationOptions.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod
             }
         };
         await storage.SaveAccountInformation(account);

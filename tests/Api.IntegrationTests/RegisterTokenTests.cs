@@ -1,5 +1,4 @@
 using System.Net;
-using Passwordless.IntegrationTests.Helpers;
 
 namespace Passwordless.Api.IntegrationTests;
 

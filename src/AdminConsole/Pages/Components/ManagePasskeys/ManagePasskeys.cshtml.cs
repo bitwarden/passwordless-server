@@ -1,9 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Passwordless;
 
-namespace AdminConsole.Pages.Components.ManagePasskeys;
+namespace Passwordless.AdminConsole.Pages.Components.ManagePasskeys;
 
 public class ManagePasskeys : ViewComponent
 {

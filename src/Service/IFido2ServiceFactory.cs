@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Models;
+using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
@@ -17,23 +17,23 @@ public class DefaultFido2ServiceFactory : IFido2ServiceFactory
     private readonly IConfiguration _configuration;
     private readonly ITenantStorage _tenantStorage;
     private readonly ITokenService _tokenService;
-    private readonly IAuditLogger _auditLogger;
-    private readonly IAuditLogContext _auditLogContext;
+    private readonly IEventLogger _eventLogger;
+    private readonly IEventLogContext _eventLogContext;
 
     public DefaultFido2ServiceFactory(
         ILoggerFactory loggerFactory,
         IConfiguration configuration,
         ITenantStorage tenantStorage,
         ITokenService tokenService,
-        IAuditLogger auditLogger,
-        IAuditLogContext auditLogContext)
+        IEventLogger eventLogger,
+        IEventLogContext eventLogContext)
     {
         _loggerFactory = loggerFactory;
         _configuration = configuration;
         _tenantStorage = tenantStorage;
         _tokenService = tokenService;
-        _auditLogger = auditLogger;
-        _auditLogContext = auditLogContext;
+        _eventLogger = eventLogger;
+        _eventLogContext = eventLogContext;
     }
 
     public async Task<IFido2Service> CreateAsync()
@@ -44,8 +44,8 @@ public class DefaultFido2ServiceFactory : IFido2ServiceFactory
             _configuration,
             _tenantStorage,
             _tokenService,
-            _auditLogger,
-            _auditLogContext);
+            _eventLogger,
+            _eventLogContext);
         return fidoService;
     }
 }

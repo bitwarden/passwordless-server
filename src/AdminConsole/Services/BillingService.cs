@@ -1,14 +1,13 @@
-using AdminConsole.Billing;
-using AdminConsole.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
-using Passwordless.AdminConsole.Services;
 using Stripe;
-using Application = AdminConsole.Models.Application;
+using Application = Passwordless.AdminConsole.Models.Application;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
 public class SharedBillingService
 {
@@ -134,8 +133,8 @@ public class SharedBillingService
         List<Application> apps = await _dbContext.Applications.Where(a => a.OrganizationId == orgId).ToListAsync();
         var features = _plansOptions[planName];
         var setFeaturesRequest = new SetApplicationFeaturesRequest();
-        setFeaturesRequest.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
-        setFeaturesRequest.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        setFeaturesRequest.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
+        setFeaturesRequest.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         foreach (Application app in apps)
         {
             app.BillingSubscriptionItemId = lineItem.Id;

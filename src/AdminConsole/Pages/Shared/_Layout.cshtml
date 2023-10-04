@@ -1,6 +1,6 @@
-﻿@using AdminConsole.Helpers
-@using AdminConsole.Identity
-@using Microsoft.AspNetCore.Identity
+﻿@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.Helpers
+@using Passwordless.AdminConsole.Identity
 @inject SignInManager<ConsoleAdmin> signinManager
 @inject UserManager<ConsoleAdmin> UserManager
 @inject IOptions<PasswordlessOptions> Options
@@ -45,7 +45,7 @@
                             <partial name="_NavLinkPartial" model=@("Users", "/app/credentials/list", "Icons/Users") />
                         }
                         <partial name="_NavLinkPartial" model=@("Settings", "/app/Settings/Settings", "Icons/Cog") />
-                        @if (CurrentContext.Features.AuditLoggingIsEnabled)
+                        @if (CurrentContext.Features.EventLoggingIsEnabled)
                         {
                             <partial name="_NavLinkPartial" model=@("App Logs", "/app/logs/log", "Icons/CodeBracketSquare") />
                         }
@@ -54,7 +54,7 @@
                 <partial name="_NavLinkPartial" model=@("Billing", "/billing/manage", "Icons/CodeBracketSquare") />
                 <partial name="_NavLinkPartial" model=@("Admins", "/organization/admins", "Icons/Users") />
                 <partial name="_NavLinkPartial" model=@("Settings", "/organization/settings", "Icons/Cog") />
-                @if (CurrentContext.OrganizationFeatures.AuditLoggingIsEnabled)
+                @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
                 {
                     <partial name="_NavLinkPartial" model=@("Organization Logs", "/organization/log", "Icons/CodeBracketSquare") />
                 }

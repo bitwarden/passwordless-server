@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace AdminConsole;
+namespace Passwordless.AdminConsole.RoutingHelpers;
 
 public static class RazorOptionsExtentions
 {

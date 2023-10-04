@@ -1,9 +1,8 @@
-using AdminConsole.Db;
-using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
-using Passwordless;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Models;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
 internal class UsageService
 {

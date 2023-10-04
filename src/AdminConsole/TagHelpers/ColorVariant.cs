@@ -1,4 +1,4 @@
-namespace AdminConsole.TagHelpers.Icons;
+namespace Passwordless.AdminConsole.TagHelpers;
 
 public enum ColorVariant
 {

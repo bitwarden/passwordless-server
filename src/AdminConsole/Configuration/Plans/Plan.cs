@@ -1,7 +1,7 @@
-namespace Passwordless.AdminConsole.Plans;
+namespace Passwordless.AdminConsole.Configuration.Plans;
 
 public class Plan
 {
-    public bool AuditLoggingIsEnabled { get; set; }
-    public int AuditLoggingRetentionPeriod { get; set; }
+    public bool EventLoggingIsEnabled { get; set; }
+    public int EventLoggingRetentionPeriod { get; set; }
 }

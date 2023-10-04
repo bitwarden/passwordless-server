@@ -1,15 +1,15 @@
-﻿using ApiHelpers;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Extensions;
 using Passwordless.Api.Models;
 using Passwordless.Common.Models;
 using Passwordless.Service;
-using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
-using static Passwordless.Service.AuditLog.AuditEventFunctions;
+using static Passwordless.Service.EventLog.EventFunctions;
 
-namespace Passwordless.Server.Endpoints;
+namespace Passwordless.Api.Endpoints;
 
 public static class AliasEndpoints
 {
@@ -17,14 +17,14 @@ public static class AliasEndpoints
     {
         app.MapPost("/alias", async (AliasPayload payload,
                 IFido2ServiceFactory fido2ServiceFactory,
-                IAuditLogger auditLogger,
+                IEventLogger eventLogger,
                 HttpRequest request,
                 ISystemClock clock) =>
             {
                 var fido2Service = await fido2ServiceFactory.CreateAsync();
                 await fido2Service.SetAlias(payload);
 
-                auditLogger.LogEvent(UserAliasSetEvent(payload.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
+                eventLogger.LogEvent(UserAliasSetEvent(payload.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
 
                 return Results.NoContent();
             })

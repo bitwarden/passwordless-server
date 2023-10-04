@@ -1,26 +1,25 @@
-using AdminConsole.Pages.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole;
-using Passwordless.AdminConsole.AuditLog.DTOs;
+using Passwordless.AdminConsole.EventLog.DTOs;
+using Passwordless.AdminConsole.Pages.Components;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Logs;
+namespace Passwordless.AdminConsole.Pages.App.Logs;
 
 public class Log : PageModel
 {
-    private readonly IAuditLogService _auditLogService;
+    private readonly IEventLogService _eventLogService;
     private readonly ICurrentContext _currentContext;
     private readonly ILogger<Log> _logger;
 
-    public IEnumerable<AuditLogEvent> Events { get; private set; } = new List<AuditLogEvent>();
+    public IEnumerable<EventLogEvent> Events { get; private set; } = new List<EventLogEvent>();
     public PagedList PageList { get; private set; }
     public int RetentionPeriod { get; private set; }
 
-    public Log(IAuditLogService auditLogService, IPasswordlessManagementClient managementClient, ICurrentContext currentContext,
+    public Log(IEventLogService eventLogService, IPasswordlessManagementClient managementClient, ICurrentContext currentContext,
         ILogger<Log> logger)
     {
-        _auditLogService = auditLogService;
+        _eventLogService = eventLogService;
         _currentContext = currentContext;
         _logger = logger;
     }
@@ -29,13 +28,13 @@ public class Log : PageModel
     {
         var features = _currentContext.Features;
 
-        if (features.AuditLoggingIsEnabled == false) return Redirect("onboarding/get-started");
+        if (features.EventLoggingIsEnabled == false) return Redirect("onboarding/get-started");
 
-        RetentionPeriod = features.AuditLoggingRetentionPeriod;
+        RetentionPeriod = features.EventLoggingRetentionPeriod;
 
         try
         {
-            var eventsResponse = await _auditLogService.GetAuditLogs(pageNumber, numberOfRecords);
+            var eventsResponse = await _eventLogService.GetEventLogs(pageNumber, numberOfRecords);
 
             Events = eventsResponse.Events;
 
@@ -45,7 +44,7 @@ public class Log : PageModel
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving audit logs for {appId}", _currentContext.AppId);
+            _logger.LogError(ex, "Error retrieving event logs for {appId}", _currentContext.AppId);
             return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
         }
     }

@@ -33,7 +33,7 @@ public class ApplicationServiceTests
     {
         var payload = new SetFeaturesDto
         {
-            AuditLoggingRetentionPeriod = 7
+            EventLoggingRetentionPeriod = 7
         };
 
         await _sut.SetFeaturesAsync(payload);

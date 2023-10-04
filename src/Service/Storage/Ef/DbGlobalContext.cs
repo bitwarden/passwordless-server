@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.Service.AuditLog.Models;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -18,7 +18,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<ApiKeyDesc> ApiKeys => Set<ApiKeyDesc>();
     public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
-    public DbSet<ApplicationAuditEvent> ApplicationEvents => Set<ApplicationAuditEvent>();
+    public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,7 +61,7 @@ public abstract class DbGlobalContext : DbContext
                 .IsRequired();
         });
 
-        modelBuilder.Entity<ApplicationAuditEvent>()
+        modelBuilder.Entity<ApplicationEvent>()
             .HasKey(x => x.Id);
 
         base.OnModelCreating(modelBuilder);

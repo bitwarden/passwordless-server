@@ -1,5 +1,5 @@
 ﻿@page
-@model SettingsModel
+@model Passwordless.AdminConsole.Pages.Organization.SettingsModel
 @{
     ViewData["Title"] = "Organization Settings";
 }
@@ -13,7 +13,7 @@
             <ul role="list" class="list-disc list-inside my-2">
                 <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
                 <li>This will permanently delete the organization <strong>'@Model.Name'</strong>.</li>
-                <li>All related data to the organization will be deleted: Settings, audit logs, developer logs or any related event logs.</li>
+                <li>All related data to the organization will be deleted: Settings, event logs, developer logs or any related event logs.</li>
             </ul>
             <div class="flex rounded-md my-2">
                 <input asp-for="NameConfirmation" type="text" class="block font-mono rounded-none rounded-l-md border-0 py-1.5 pl-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />

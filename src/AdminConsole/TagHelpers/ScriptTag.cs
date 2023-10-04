@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace AdminConsole.TagHelpers;
+namespace Passwordless.AdminConsole.TagHelpers;
 
 [HtmlTargetElement("script", Attributes = "")]
 public class ScriptTagNonce : TagHelper

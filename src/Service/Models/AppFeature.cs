@@ -4,12 +4,12 @@ namespace Passwordless.Service.Models;
 
 public class AppFeature : PerTenant
 {
-    public bool AuditLoggingIsEnabled { get; set; }
+    public bool EventLoggingIsEnabled { get; set; }
 
     /// <summary>
-    /// The audit logging retention period in days.
+    /// The event logging retention period in days.
     /// </summary>
-    public int AuditLoggingRetentionPeriod { get; set; }
+    public int EventLoggingRetentionPeriod { get; set; }
 
     /// <summary>
     /// Developer logging is only enabled when an end date has been set, and has to be manually re-enabled every time.

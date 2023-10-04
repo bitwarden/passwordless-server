@@ -1,4 +1,6 @@
-namespace Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Passwordless.AdminConsole.Helpers;
 
 public static class IUrlHelperExtensions
 {

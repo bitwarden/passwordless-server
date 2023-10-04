@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless;
 using ProblemDetails = Passwordless.PasswordlessProblemDetails;
 
-namespace AdminConsole.Pages;
+namespace Passwordless.AdminConsole.Pages;
 
 [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 [IgnoreAntiforgeryToken]

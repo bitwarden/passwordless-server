@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Passwordless.Service.AuditLog.Models;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -25,7 +25,7 @@ public abstract class DbTenantContext : DbGlobalContext
         modelBuilder.Entity<ApiKeyDesc>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<AliasPointer>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<AppFeature>().HasQueryFilter(c => c.Tenant == Tenant);
-        modelBuilder.Entity<ApplicationAuditEvent>().HasQueryFilter(c => c.TenantId == Tenant);
+        modelBuilder.Entity<ApplicationEvent>().HasQueryFilter(c => c.TenantId == Tenant);
 
         base.OnModelCreating(modelBuilder);
     }

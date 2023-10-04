@@ -1,12 +1,10 @@
-using AdminConsole.Db;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless;
-using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Db;
 
-namespace AdminConsole.Pages.App.Onboarding;
+namespace Passwordless.AdminConsole.Pages.App.Onboarding;
 
 public class GetStarted : PageModel
 {

@@ -1,11 +1,11 @@
 using System.Security.Claims;
-using AdminConsole.Db;
-using AdminConsole.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Identity;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
 public class CustomUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ConsoleAdmin>
 {

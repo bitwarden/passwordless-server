@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace AdminConsole.TagHelpers.Icons;
+namespace Passwordless.AdminConsole.TagHelpers.Icons;
 
 public abstract class BaseAlertIcon : TagHelper
 {

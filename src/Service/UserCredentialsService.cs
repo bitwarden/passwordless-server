@@ -1,21 +1,21 @@
-﻿using Passwordless.Service.AuditLog.Loggers;
+﻿using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
-using static Passwordless.Service.AuditLog.AuditEventFunctions;
+using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Service;
 
 public class UserCredentialsService
 {
     private readonly ITenantStorage _storage;
-    private readonly IAuditLogger _auditLogger;
+    private readonly IEventLogger _eventLogger;
 
     public UserCredentialsService(ITenantStorage storage,
-        IAuditLogger auditLogger)
+        IEventLogger eventLogger)
     {
         _storage = storage;
-        _auditLogger = auditLogger;
+        _eventLogger = eventLogger;
     }
 
     public async Task<StoredCredential[]> GetAllCredentials(string userId)
@@ -41,7 +41,7 @@ public class UserCredentialsService
 
         await _storage.DeleteCredential(credentialId);
 
-        _auditLogger.LogEvent(DeleteCredentialEvent(credential.UserId));
+        _eventLogger.LogEvent(DeleteCredentialEvent(credential.UserId));
     }
 
     public Task<List<UserSummary>> GetAllUsers(string paginationLastId)

@@ -1,5 +1,5 @@
-using AdminConsole.Db;
-using AdminConsole.Models;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Services;
 

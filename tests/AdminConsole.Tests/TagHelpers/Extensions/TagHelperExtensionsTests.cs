@@ -1,7 +1,7 @@
-using AdminConsole.TagHelpers.Icons;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Moq;
 using Passwordless.AdminConsole.TagHelpers.Extensions;
+using Passwordless.AdminConsole.TagHelpers.Icons;
 using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.TagHelpers.Extensions;

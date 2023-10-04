@@ -1,13 +1,13 @@
 using System.Security.Cryptography;
-using AdminConsole.Db;
-using AdminConsole.Identity;
-using AdminConsole.Services.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services.Mail;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
 public class InvitationService
 {

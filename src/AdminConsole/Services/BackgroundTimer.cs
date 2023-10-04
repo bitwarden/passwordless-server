@@ -1,6 +1,6 @@
-using AdminConsole.Db;
+using Passwordless.AdminConsole.Db;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
 public class TimedHostedService : BackgroundService
 {

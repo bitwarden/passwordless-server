@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
+using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
-using Passwordless.Server.Endpoints;
 using Passwordless.Service;
-using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 
@@ -31,7 +31,7 @@ public class AccountEndpointsTests
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         featureContextProviderMock.Setup(x => x.UseContext())
             .ReturnsAsync(new NullFeaturesContext());
-        var auditLoggerMock = new Mock<IAuditLogger>();
+        var eventLoggerMock = new Mock<IEventLogger>();
 
         var actual = await AppsEndpoints.MarkDeleteApplicationAsync(
             appId,
@@ -39,7 +39,7 @@ public class AccountEndpointsTests
             sharedManagementServiceMock.Object,
             httpContextAccessorMock.Object,
             loggerMock.Object,
-            auditLoggerMock.Object);
+            eventLoggerMock.Object);
 
         Assert.Equal(typeof(Ok<AppDeletionResult>), actual.GetType());
         var actualResult = (actual as Ok<AppDeletionResult>)?.Value;
@@ -95,8 +95,8 @@ public class AccountEndpointsTests
         const string appId = "myappid";
         var payload = new ManageFeaturesDto
         {
-            AuditLoggingRetentionPeriod = 14,
-            AuditLoggingIsEnabled = true
+            EventLoggingRetentionPeriod = 14,
+            EventLoggingIsEnabled = true
         };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
 
@@ -112,7 +112,7 @@ public class AccountEndpointsTests
     {
         var payload = new SetFeaturesDto
         {
-            AuditLoggingRetentionPeriod = 14
+            EventLoggingRetentionPeriod = 14
         };
         var applicationServiceMock = new Mock<IApplicationService>();
 

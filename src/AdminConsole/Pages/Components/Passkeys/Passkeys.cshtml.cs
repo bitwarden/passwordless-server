@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 
-namespace AdminConsole.Pages.Components.Passkeys;
+namespace Passwordless.AdminConsole.Pages.Components.Passkeys;
 
 public class Passkeys : ViewComponent
 {

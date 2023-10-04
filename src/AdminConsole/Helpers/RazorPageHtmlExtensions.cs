@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using NuGet.Protocol;
 
-namespace AdminConsole.Helpers;
+namespace Passwordless.AdminConsole.Helpers;
 
 public static class RazorPageHtmlExtensions
 {

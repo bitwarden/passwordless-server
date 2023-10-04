@@ -1,5 +1,5 @@
 @page "/logs"
-@model AdminConsole.Pages.Logs.Log
+@model Passwordless.AdminConsole.Pages.App.Logs.Log
 
 @{
     ViewBag.Title = "Application Logs";
@@ -37,30 +37,30 @@
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                        @foreach (var auditEvent in Model.Events)
+                        @foreach (var logEvent in Model.Events)
                         {
                             <tr>
                                 <td
                                     class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                    @auditEvent.PerformedAt
+                                    @logEvent.PerformedAt
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.PerformedBy
+                                    @logEvent.PerformedBy
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Severity
+                                    @logEvent.Severity
                                 </td>
                                 <td class=" px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Message
+                                    @logEvent.Message
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Subject
+                                    @logEvent.Subject
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.EventType
+                                    @logEvent.EventType
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @(string.IsNullOrEmpty(auditEvent.ApiKeyAbbreviated) ? "" : string.Concat("***", auditEvent.ApiKeyAbbreviated))
+                                    @(string.IsNullOrEmpty(logEvent.ApiKeyAbbreviated) ? "" : string.Concat("***", logEvent.ApiKeyAbbreviated))
                                 </td>
                             </tr>
                         }

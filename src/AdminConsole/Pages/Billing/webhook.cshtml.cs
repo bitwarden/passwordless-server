@@ -1,14 +1,14 @@
-using AdminConsole.Billing;
-using AdminConsole.Db;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Services;
 using Stripe;
 using Session = Stripe.Checkout.Session;
 
-namespace AdminConsole.Pages.Billing;
+namespace Passwordless.AdminConsole.Pages.Billing;
 
 [AllowAnonymous]
 [IgnoreAntiforgeryToken(Order = 2000)]

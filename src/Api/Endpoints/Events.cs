@@ -1,40 +1,40 @@
 using System.ComponentModel.DataAnnotations;
-using ApiHelpers;
 using MiniValidation;
 using Passwordless.Api.Authorization;
-using Passwordless.Service.AuditLog.Loggers;
-using Passwordless.Service.AuditLog.Mappings;
+using Passwordless.Api.Extensions;
+using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.EventLog.Mappings;
 using Passwordless.Service.Features;
 
-namespace Passwordless.Server.Endpoints;
+namespace Passwordless.Api.Endpoints;
 
-public static class AuditLog
+public static class EventLog
 {
-    public static void MapAuditLogEndpoints(this WebApplication app)
+    public static void MapEventLogEndpoints(this WebApplication app)
     {
-        app.MapGet("events", GetAuditLogEvents)
+        app.MapGet("events", GetEventLogEvents)
             .RequireSecretKey()
             .RequireCors("default");
     }
 
-    private static async Task<IResult> GetAuditLogEvents(
+    private static async Task<IResult> GetEventLogEvents(
         HttpRequest request,
-        IAuditLogStorage storage,
+        IEventLogStorage storage,
         IFeatureContextProvider provider,
-        [AsParameters] GetAuditLogEventsRequest getAuditLogEventsRequest,
+        [AsParameters] GetEventLogEventsRequest getEventLogEventsRequest,
         CancellationToken cancellationToken)
     {
-        if (!(await provider.UseContext()).AuditLoggingIsEnabled) return Results.Unauthorized();
+        if (!(await provider.UseContext()).EventLoggingIsEnabled) return Results.Unauthorized();
 
-        if (!MiniValidator.TryValidate(getAuditLogEventsRequest, out var errors))
+        if (!MiniValidator.TryValidate(getEventLogEventsRequest, out var errors))
         {
             return Results.ValidationProblem(errors);
         }
 
         var tenantId = request.GetTenantName();
 
-        var eventsTask = storage.GetAuditLogAsync(getAuditLogEventsRequest.PageNumber, getAuditLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
-        var eventCountTasks = storage.GetAuditLogCountAsync(cancellationToken);
+        var eventsTask = storage.GetEventLogAsync(getEventLogEventsRequest.PageNumber, getEventLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
+        var eventCountTasks = storage.GetEventLogCountAsync(cancellationToken);
 
         await Task.WhenAll(eventsTask, eventCountTasks);
 
@@ -46,7 +46,7 @@ public static class AuditLog
         });
     }
 
-    public struct GetAuditLogEventsRequest
+    public struct GetEventLogEventsRequest
     {
         public int PageNumber { get; set; }
         [Range(1, 1000)]

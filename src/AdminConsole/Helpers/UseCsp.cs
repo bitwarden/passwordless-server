@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
-using Passwordless;
 
-namespace AdminConsole.Helpers;
+namespace Passwordless.AdminConsole.Helpers;
 
 public static class UseCspExtensions
 {

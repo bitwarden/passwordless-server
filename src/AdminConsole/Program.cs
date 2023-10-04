@@ -1,12 +1,5 @@
 using System.Reflection;
 using AdminConsole;
-using AdminConsole.Authorization;
-using AdminConsole.Billing;
-using AdminConsole.Db;
-using AdminConsole.Helpers;
-using AdminConsole.Identity;
-using AdminConsole.Services;
-using AdminConsole.Services.Mail;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless;
 using Passwordless.AdminConsole;
-using Passwordless.AdminConsole.AuditLog;
+using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.EventLog;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AspNetCore;
@@ -162,7 +162,7 @@ void RunTheApp()
     services.AddScoped<ApplicationService>();
     services.AddBilling(builder);
 
-    services.AddAuditLogging();
+    services.AddEventLogging();
 
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
@@ -206,7 +206,7 @@ void RunTheApp()
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
-    app.UseMiddleware<AuditLogStorageCommitMiddleware>();
+    app.UseMiddleware<EventLogStorageCommitMiddleware>();
     app.UseAuthorization();
     app.MapPasswordless();
     app.MapRazorPages();
