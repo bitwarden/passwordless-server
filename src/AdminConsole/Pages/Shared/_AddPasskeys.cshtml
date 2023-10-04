@@ -13,42 +13,13 @@
                 <button type="submit" class="btn-secondary rounded-l-none">
                     Add Passkey
                 </button>
-                <div id="webauthn-unsupported-alert" class="hidden">
-                    <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
-                </div>
             </div>
         </fieldset>
     </form>
 
     <div class="status mt-3" v-cloak>
-        <div v-if="feedback.status =='completed'">
-            <div class="rounded-md bg-green-50 p-4 mb-3">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <success-alert-icon></success-alert-icon>
-                    </div>
-                    <div class="ml-3 flex-1 md:flex md:justify-between">
-                        <p class="text-sm font-medium text-green-800">{{feedback.message}}</p>
-                        <p class="mt-3 text-sm md:ml-6 md:mt-0">
-                            <a href="@Url.Page("")" class="whitespace-nowrap font-medium text-green-700 hover:text-green-600">
-                                Refresh
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div v-if="feedback.status =='error'">
-            <div class="rounded-md bg-red-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-red-800">{{feedback.message}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <success-alert-box v-if="feedback.status =='completed'" message="{{feedback.message}}"></success-alert-box>
+        <danger-alert-box v-if="feedback.status == 'error'" message="{{feedback.message}}"></danger-alert-box>
     </div>
 </div>
 
@@ -126,12 +97,3 @@
             }
         }
     }).mount('#addPasskeysPanel');</script>)
-@Html.PartialSectionScripts(@<script type="module">
-    const isSupported = Passwordless.isBrowserSupported();
-    if (!isSupported) {
-        const registerCredentialFields = document.getElementById("registerCredentialFields");
-        registerCredentialFields.disabled = true;
-        const alert = document.getElementById("webauthn-unsupported-alert");
-        alert.classList.remove("hidden");
-    }
-    </script>)
