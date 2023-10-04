@@ -1,5 +1,4 @@
 using System.Reflection;
-using AdminConsole;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
