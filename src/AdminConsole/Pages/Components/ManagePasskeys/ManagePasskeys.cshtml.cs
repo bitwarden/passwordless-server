@@ -33,4 +33,5 @@ public class PasskeysModel
     public IReadOnlyCollection<Credential> Credentials { get; set; } = new List<Credential>();
     public string? ApiKey { get; set; }
     public string? ApiUrl { get; set; }
+    public bool HideDetails { get; set; }
 }
