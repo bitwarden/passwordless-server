@@ -36,16 +36,16 @@ During development two SQLite databases are used:
 Both apps will allows you to automatically migrate the database and add seeded development data.
 Please visit both the apps in your browser, I recommend you start with the API app first.
 
-### Migrations
+#### Migrations
 
 Database changes are pretty straightforward thanks to EF migrations.
 
-#### Important Note:
+##### Important Note:
 When generating migrations, you can only have the connection string for your desired database platform in the 
 `appsettings.Development.json`.  If you have both, it will either error when attempting the migration, or pretend it did 
 what you wanted and not actually do anything.  You would have to change the code for it to run both migrations at once.
 
-#### For AdminConsole:
+##### For AdminConsole:
 1. Make your desired changes to the entities that define the database tables for the `ConsoleDbContext` located in 
 `AdminConsole/Db`
 2. Open the `AdminConsole` directory in your terminal of choice.
@@ -60,7 +60,7 @@ what you wanted and not actually do anything.  You would have to change the code
 `Api` works a little differently than `AdminConsole`. The application is the `Api` project while the migrations and 
 database definitions are stored in `Service`.
 
-#### For Api:
+##### For Api:
 1. Make your desired changes to the entities that define the database tables for the `DbGlobalContext` located in 
 `Service/Storage/Ef`
 2. Open the `Api` directory in your terminal of choice.
@@ -73,6 +73,6 @@ database definitions are stored in `Service`.
 4. Make sure you create the migration for both `Mssql` and `Sqlite`
 5. Run the `Api` project and visit `localhost:7000` which will automatically apply any new migrations.
 
-#### Remember:
+##### Remember:
 If you need to undo a migration you just applied, you can run `dotnet ef migrations remove` to undo the last migration 
 applied.
