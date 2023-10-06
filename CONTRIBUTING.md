@@ -38,7 +38,17 @@ Please visit both the apps in your browser, I recommend you start with the API a
 
 #### Migrations
 
-Database changes are pretty straightforward thanks to EF migrations.
+Database changes are pretty straightforward thanks to EF migrations.  To do this, you'll need the EF .NET tool for the
+.NET Core CLI.
+
+##### Installing .NET Core EF CLI Tool
+Go to your terminal of choice and execute the following command:
+```shell
+dotnet tool install --global dotnet-ef 
+```
+
+This will install `dotnet ef` globally.  Additional documentation around this can be found 
+[here](https://learn.microsoft.com/en-us/ef/core/get-started/overview/install#get-the-net-core-cli-tools).
 
 ##### Important Note
 
