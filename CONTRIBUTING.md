@@ -13,15 +13,15 @@ When developing, you need to to run both of the apps: `Api` and `AdminConsole`.
 
 In a terminal, run:
 
-* dotnet watch --project src/Api
-* dotnet watch --project src/AdminConsole
+* `dotnet watch --project src/Api`
+* `dotnet watch --project src/AdminConsole`
 
 This will launch the apps:
 
-* http:/localhost:7001 - API
-* https:/localhost:7002 - API
-* http:/localhost:8001 - AdminConsole
-* https:/localhost:8002 - AdminConsole
+* http://localhost:7001 - API
+* https://localhost:7002 - API
+* http://localhost:8001 - AdminConsole
+* https://localhost:8002 - AdminConsole
 
 If you're using the `https` endpoints, you might need to trust the cert. Using the HTTP endpoints is fine for local development.
 Do note that if not on `localhost`, WebAuthn will not work if not on `https`.
