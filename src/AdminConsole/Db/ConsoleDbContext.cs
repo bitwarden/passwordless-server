@@ -21,6 +21,7 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
     public DbSet<Onboarding> Onboardings { get; set; }
     public DbSet<Invite> Invites { get; set; }
     public DbSet<OrganizationEvent> OrganizationEvents => Set<OrganizationEvent>();
+    public DbSet<DataProtectionKey> DataProtectionKeys { set; get; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -42,6 +43,4 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
 
         base.OnModelCreating(builder);
     }
-
-    public DbSet<DataProtectionKey> DataProtectionKeys { set; get; }
 }
