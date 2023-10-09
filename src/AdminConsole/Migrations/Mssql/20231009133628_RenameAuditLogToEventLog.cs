@@ -2,21 +2,20 @@
 
 #nullable disable
 
-namespace Passwordless.AdminConsole.Migrations.Mssql
+namespace Passwordless.AdminConsole.Migrations.Mssql;
+
+/// <inheritdoc />
+public partial class RenameAuditLogToEventLog : Migration
 {
     /// <inheritdoc />
-    public partial class RenameAuditLogToEventLog : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
 
-        }
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
 
-        }
     }
 }
