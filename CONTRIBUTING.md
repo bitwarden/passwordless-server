@@ -42,6 +42,7 @@ Database changes are pretty straightforward thanks to EF migrations.  To do this
 .NET Core CLI.
 
 ##### Installing .NET Core EF CLI Tool
+
 Go to your terminal of choice and execute the following command:
 ```shell
 dotnet tool install --global dotnet-ef 
