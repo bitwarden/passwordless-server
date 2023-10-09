@@ -47,7 +47,7 @@ Go to your terminal of choice and execute the following command:
 dotnet tool install --global dotnet-ef 
 ```
 
-This will install `dotnet ef` globally.  Additional documentation around this can be found 
+This will install `dotnet ef` globally. Additional documentation around this can be found 
 [here](https://learn.microsoft.com/en-us/ef/core/get-started/overview/install#get-the-net-core-cli-tools).
 
 ##### Important Note
