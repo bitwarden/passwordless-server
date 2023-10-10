@@ -2,10 +2,10 @@
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@model Passwordless.AdminConsole.Pages.App.Playground.ClientModel
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
 @inject IAntiforgery Antiforgery
+@model ClientModel
 
 @{
     ViewData["Title"] = "Playground";

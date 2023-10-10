@@ -2,19 +2,21 @@
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Options
-@model Passwordless.AdminConsole.Pages.Account.LoginModel
 @inject IOptions<PasswordlessOptions> PasswordlessOptions
 @inject IAntiforgery Antiforgery
 @attribute [AllowAnonymous]
+@model LoginModel
 
 @{
     ViewData["Title"] = "Signin";
     var requestToken = Antiforgery.GetAndStoreTokens(Model.HttpContext).RequestToken;
 }
+
 @{
     ViewData["Title"] = "Home page";
     ViewData["HideTitle"] = true;
 }
+
 <div id="xapp" class="flex gap-6 flex-col mt-16 min-h-full">
     <div class="flex justify-center flex-col">
         <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Admin Console</h1>
@@ -67,11 +69,11 @@
                             "Content-Type": "application/json"
                         }
                     });
-                    
+
                     if (res.ok) {
                         location.href = "/Organization/Overview";
                     }
-                    
+
                     return res;
                 }
 
@@ -79,14 +81,14 @@
                     apiUrl: "@PasswordlessOptions.Value.ApiUrl",
                     apiKey: "@PasswordlessOptions.Value.ApiKey"
                 });
-                
+
                 const showFeedback = (name) => {
                     const feedback = document.querySelector(`.${name}`);
                     if (feedback) {
                         feedback.classList.remove("hidden");
                     }
                 }
-        
+
                 const autoFill = async () => {
                     const {token, error} = await p.signinWithAutofill();
                     if (error) {
@@ -95,29 +97,29 @@
                         }
                     } else {
                         await signIn(token);
-                    }    
-                    
+                    }
+
                 };
                 autoFill();
-        
+
                 const onSubmit = async (e) => {
                     let res = null;
                     const alias = new FormData(e.target).get("email");
 
-                    try {                   
+                    try {
                         const {token, error} = await p.signinWithAlias(alias);
                         if (token)  {
                             res = await signIn(token);
                         }
-                    } catch (e) {                        
-                    }                    
-                    
+                    } catch (e) {
+                    }
+
                     const passkeysFailed = (!res || !res.ok);
                     if (passkeysFailed && alias) {
                         e.target.submit();
                     }
                 };
-                
+
                 return {
                     onSubmit
                 }

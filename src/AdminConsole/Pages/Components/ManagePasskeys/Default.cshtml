@@ -1,11 +1,11 @@
 @using Microsoft.Extensions.Options
-@model Passwordless.AdminConsole.Pages.Components.ManagePasskeys.PasskeysModel
 @inject IOptions<PasswordlessOptions> Options
+@model PasskeysModel
 
 <div id="xapp" class="flex flex-col gap-10">
     {{showDetails}}
     <div class="">
-     
+
         <form asp-page-handler="removeCredential" method="post">
             <div class="flex flex-wrap gap-5 mb-3">
                 @foreach (var cred in Model.Credentials)
@@ -86,7 +86,7 @@
                     </div>
                 }</div>
         </form>
-                
+
         <form v-on:submit="registerCredential">
             <div class="mt-2 flex">
                 <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
@@ -104,7 +104,7 @@
 
 <partial name="Shared/_PasswordlessClientJs" />
 
-    <script async defer type="module">    
+    <script async defer type="module">
     import { createApp, ref } from 'vue';
     createApp({
         setup() {
@@ -116,7 +116,7 @@
                 apiUrl: "@Options.Value.ApiUrl",
                 apiKey: "@Options.Value.ApiKey"
             });
-            
+
             const registerCredential = async (e) => {
                 e.preventDefault();
                 var data = new FormData(e.target);
@@ -141,7 +141,7 @@
             return {
                 registerCredential,
                 showDetails,
-                onShow              
+                onShow
             }
         }
     }).mount('#xapp');
