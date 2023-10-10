@@ -1,8 +1,9 @@
 ﻿@page "/playground"
 @using Microsoft.AspNetCore.Antiforgery
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @model ClientModel
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessOptions> Options
+@inject IOptions<PasswordlessManagementOptions> Options
 @inject IAntiforgery Antiforgery
 
 @{

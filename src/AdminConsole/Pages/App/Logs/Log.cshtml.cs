@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.AuditLog.DTOs;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace AdminConsole.Pages.Logs;
 

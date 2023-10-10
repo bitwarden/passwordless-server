@@ -1,7 +1,8 @@
 @page "/playground/new-account"
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @model NewAccountModel
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessOptions> Options
+@inject IOptions<PasswordlessManagementOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{

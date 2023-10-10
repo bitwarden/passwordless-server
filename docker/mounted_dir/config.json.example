@@ -1,0 +1,15 @@
+{
+  "ConnectionStrings": {
+    "sqlite": {
+      "admin": "Data Source=/app/storage/admin.db",
+      "api": "Data Source=/app/storage/api.db"
+    }
+  },
+  "Passwordless": {
+    "ApiKey": "test:public:6c3bd9b57e931da80d765d615d7798e1",
+    "ApiSecret": "test:secret:9bd0132c7b7afe18ccef1aeadce12bec"
+  },
+  "PasswordlessManagement": {
+    "ManagementKey": "17b64cd1ca3fea9b7f163157ca83d0da"
+  }
+}

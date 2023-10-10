@@ -20,7 +20,10 @@ using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.AuditLog;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
+using Passwordless.Common.Configuration;
+using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -45,6 +48,14 @@ finally
 void RunTheApp()
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
+
+    if (isSelfHosted)
+    {
+        builder.AddSelfHostingConfiguration();
+    }
+
     builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 
     builder.Host.UseSerilog((ctx, sp, config) =>
@@ -109,7 +120,7 @@ void RunTheApp()
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
     services.AddHttpClient();
-    services.AddManagementApi();
+    builder.AddManagementApi();
 
     // Database information
     services.AddDatabase(builder);
@@ -188,8 +199,10 @@ void RunTheApp()
         app.UseHsts();
     }
 
-    if (builder.Configuration.GetValue<bool>("SelfHosted"))
+    if (isSelfHosted)
     {
+        app.UseMiddleware<HttpOverridesMiddleware>();
+
         // When self-hosting. Migrate latest database changes during startup
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider

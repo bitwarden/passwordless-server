@@ -15,6 +15,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "http (Self-Hosting)": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:8001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SelfHosted" : "true"
+      }
+    },
     "https": {
       "commandName": "Project",
       "applicationUrl": "https://localhost:8002",
@@ -22,11 +30,27 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "https (Self-Hosting)": {
+      "commandName": "Project",
+      "applicationUrl": "https://localhost:8002",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SelfHosted" : "true"
+      }
+    },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "IIS Express (Self-Hosting)": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SelfHosted" : "true"
       }
     }
   }

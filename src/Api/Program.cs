@@ -10,7 +10,10 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Common.Configuration;
+using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Common.Utils;
 using Passwordless.Server.Endpoints;
 using Passwordless.Service;
 using Passwordless.Service.AuditLog;
@@ -21,6 +24,14 @@ using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
+
+if (isSelfHosted)
+{
+    builder.AddSelfHostingConfiguration();
+}
+
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 builder.Host.UseSerilog((ctx, sp, config) =>
 {
@@ -126,12 +137,24 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-if (builder.Configuration.GetValue<bool>("SelfHosted"))
+if (isSelfHosted)
 {
+    app.UseMiddleware<HttpOverridesMiddleware>();
+
     // When self-hosting. Migrate latest database changes during startup
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<DbTenantContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
     dbContext.Database.Migrate();
+
+    if (!await dbContext.ApiKeys.AnyAsync())
+    {
+        var passwordlessConfiguration = builder.Configuration.GetRequiredSection("Passwordless");
+        var apiKey = passwordlessConfiguration.GetValue<string>("ApiKey");
+        var apiSecret = passwordlessConfiguration.GetValue<string>("ApiSecret");
+        var appName = ApiKeyUtils.GetAppId(apiKey);
+        await dbContext.SeedDefaultApplicationAsync(appName, apiKey, apiSecret);
+        await dbContext.SaveChangesAsync();
+    }
 }
 
 app.UseCors("default");
