@@ -1,7 +1,7 @@
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 
-namespace Passwordless.AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 public class PasswordlessManagementClient : IPasswordlessManagementClient
 {

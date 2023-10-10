@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Helpers;
 
@@ -21,7 +22,7 @@ public static class UseCspExtensions
                 context.Items.Add("csp-nonce", nonce);
             }
 
-            var passConfig = context.RequestServices.GetService<IOptions<PasswordlessOptions>>();
+            var passConfig = context.RequestServices.GetService<IOptions<PasswordlessManagementOptions>>();
             var csp = $"""
                     default-src 'self';
                     script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';
