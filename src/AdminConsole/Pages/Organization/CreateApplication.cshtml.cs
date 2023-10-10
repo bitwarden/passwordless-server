@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless;
 using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
