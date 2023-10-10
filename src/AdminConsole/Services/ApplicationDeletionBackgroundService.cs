@@ -1,6 +1,5 @@
 using AdminConsole.Db;
 using AdminConsole.Models;
-using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Services;
