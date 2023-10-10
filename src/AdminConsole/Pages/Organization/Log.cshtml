@@ -67,20 +67,17 @@
 
     <p asp-if="!Model.Events.Any()">This organization has no events from the past @Model.RetentionPeriod days.</p>
 
-    @{
-        var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
-        var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";
-    }
-
     @if (Model.PageList.TotalPages > 1)
     {
         <div class="flex justify-center">
-            <a class="px-1" @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex - 1)">Prev</a>
+            <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
+
             @foreach (var page in Model.PageList.Pages)
             {
-                <a class="px-1 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
+                <a asp-page="./Log" class="px-1 link-blue" asp-page="./Index" asp-route-pageNumber="@(page)">@(page)</a>
             }
-            <a class="px-1" @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex + 1)">Next</a>
+
+            <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
         </div>
     }
 </div>
