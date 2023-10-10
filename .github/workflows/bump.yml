@@ -1,0 +1,90 @@
+name: bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: Version to bump to
+
+env:
+  BUMP_BRANCH_NAME: bump-${{ inputs.version }}-${{ github.run_id }}
+
+jobs:
+  # Ensure that the provided version is greater than the current version
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: Get current version
+        id: current-version
+        run: |
+          props=$(cat Directory.Build.props)
+          version=$(echo "$props" | grep -oPm1 "(?<=<Version>)[^<]*")
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Validate new version
+        run: >
+          npx semver@7.5.4 "${{ inputs.version }}"
+          --range "> ${{ steps.current-version.outputs.version }}"
+          --include-prerelease
+
+  # Update version and commit
+  update:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: Configure credentials
+        run: |
+          git config --local user.email "106330231+passwordless-bot@users.noreply.github.com"
+          git config --local user.name "passwordless-bot"
+
+      - name: Create branch
+        run: git checkout -b $BUMP_BRANCH_NAME
+
+      - name: Rewrite version
+        run: sed -i "s/<Version>[^<]*/<Version>${{ inputs.version }}/" Directory.Build.props
+
+      - name: Commit changes
+        run: |
+          git add Directory.Build.props
+          git commit -m "Bump version to ${{ inputs.version }}"
+
+      - name: Push changes
+        run: git push origin $BUMP_BRANCH_NAME
+
+  # Create a pull request
+  pr:
+    needs:
+      - validate
+      - update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: Create pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh pr create
+          --base main
+          --head $BUMP_BRANCH_NAME
+          --title "Bump version to ${{ inputs.version }}"
+          --body "This is an automated pull request that bumps the version to ${{ inputs.version }}."
