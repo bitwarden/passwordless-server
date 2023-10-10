@@ -1,14 +1,14 @@
-using AdminConsole.Billing;
-using AdminConsole.Db;
-using AdminConsole.Helpers;
-using AdminConsole.Models;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Models;
+using Passwordless.AdminConsole.Services;
 using Stripe.Checkout;
 
-namespace AdminConsole.Pages.Billing;
+namespace Passwordless.AdminConsole.Pages.Billing;
 
 public class Manage : PageModel
 {

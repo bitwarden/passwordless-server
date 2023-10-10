@@ -1,8 +1,8 @@
-using AdminConsole.TagHelpers.Icons;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Passwordless.AdminConsole.TagHelpers.Extensions;
+using Passwordless.AdminConsole.TagHelpers.Icons;
 
-namespace AdminConsole.TagHelpers.AlertBoxes;
+namespace Passwordless.AdminConsole.TagHelpers.AlertBoxes;
 
 public abstract class BaseAlertBox : TagHelper
 {

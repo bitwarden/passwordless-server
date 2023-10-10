@@ -2,8 +2,8 @@ namespace Passwordless.Service.Models;
 
 public class AppFeatureDto
 {
-    public bool AuditLoggingIsEnabled { get; set; }
-    public int AuditLoggingRetentionPeriod { get; set; }
+    public bool EventLoggingIsEnabled { get; set; }
+    public int EventLoggingRetentionPeriod { get; set; }
     public DateTime? DeveloperLoggingEndsAt { get; set; }
 
     public static AppFeatureDto FromEntity(AppFeature entity)
@@ -11,8 +11,8 @@ public class AppFeatureDto
         if (entity == null) return null;
         var dto = new AppFeatureDto
         {
-            AuditLoggingIsEnabled = entity.AuditLoggingIsEnabled,
-            AuditLoggingRetentionPeriod = entity.AuditLoggingRetentionPeriod,
+            EventLoggingIsEnabled = entity.EventLoggingIsEnabled,
+            EventLoggingRetentionPeriod = entity.EventLoggingRetentionPeriod,
             DeveloperLoggingEndsAt = entity.DeveloperLoggingEndsAt
         };
         return dto;

@@ -1,7 +1,6 @@
 using System.Collections.Specialized;
 using System.Web;
-using AdminConsole.Identity;
-using AdminConsole.Services.Mail;
+using Passwordless.AdminConsole.Identity;
 using Passwordless.Common.Services.Mail;
 
 namespace Passwordless.AdminConsole.Services.Mail;

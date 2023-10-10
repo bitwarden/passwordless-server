@@ -1,7 +1,7 @@
-using AdminConsole.TagHelpers.Icons;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Passwordless.AdminConsole.TagHelpers.Icons;
 
-namespace AdminConsole.TagHelpers.AlertBoxes;
+namespace Passwordless.AdminConsole.TagHelpers.AlertBoxes;
 
 [HtmlTargetElement("success-alert-box")]
 public sealed class SuccessAlertBox : BaseAlertBox

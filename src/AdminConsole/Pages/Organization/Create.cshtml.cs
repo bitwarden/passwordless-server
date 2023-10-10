@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
-using AdminConsole.Db;
-using AdminConsole.Identity;
-using AdminConsole.Services.Mail;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.AuditLog.Loggers;
-using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.Mail;
+using static Passwordless.AdminConsole.EventLog.EventLogEventFunctions;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Create : PageModel
 {
@@ -17,7 +18,7 @@ public class Create : PageModel
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly IMailService _mailService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
-    private readonly IAuditLogger _auditLogger;
+    private readonly IEventLogger _eventLogger;
 
     public CreateModel Form { get; set; }
 
@@ -25,13 +26,13 @@ public class Create : PageModel
         UserManager<ConsoleAdmin> userManager,
         IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
-        IAuditLogger auditLogger)
+        IEventLogger eventLogger)
     {
         _context = context;
         _userManager = userManager;
         _mailService = mailService;
         _magicLinkSignInManager = magicLinkSignInManager;
-        _auditLogger = auditLogger;
+        _eventLogger = eventLogger;
     }
 
     public IActionResult OnGet()
@@ -89,7 +90,7 @@ public class Create : PageModel
 
         await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
 
-        _auditLogger.LogEvent(CreateOrganizationCreatedEvent(org, user));
+        _eventLogger.LogEvent(CreateOrganizationCreatedEvent(org, user));
 
         return RedirectToPage("/Organization/Verify");
     }

@@ -2,7 +2,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace AdminConsole.TagHelpers;
+namespace Passwordless.AdminConsole.TagHelpers;
 
 [HtmlTargetElement("*", Attributes = "btn-primary")]
 public class PrimaryButtonTagHelper : TagHelper

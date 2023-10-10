@@ -166,15 +166,15 @@ public class EfTenantStorage : ITenantStorage
     public async Task SetFeaturesAsync(SetFeaturesDto features)
     {
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
-        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         await db.SaveChangesAsync();
     }
 
     public async Task SetFeaturesAsync(ManageFeaturesDto features)
     {
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
-        existingEntity.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
-        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
+        existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         await db.SaveChangesAsync();
     }
 

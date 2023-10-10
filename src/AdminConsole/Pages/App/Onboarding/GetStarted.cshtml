@@ -1,7 +1,8 @@
 @page "/onboarding/get-started"
+@using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@model GetStarted
 @inject IOptions<PasswordlessManagementOptions> Options
+@model Passwordless.AdminConsole.Pages.App.Onboarding.GetStarted
 
 @{
     ViewData["Title"] = "Getting Started";
@@ -41,7 +42,7 @@
         </div>
 
         <div id="backend"></div>
-        
+
         <div class="mt-6 flex gap-10">
             <a target="_blank" href="https://docs.passwordless.dev/guide/backend.html" class="text-sm font-semibold text-primary-700">View the backend examples <span aria-hidden="true">&rarr;</span></a>
             <a target="_blank" href="https://docs.passwordless.dev/guide/api.html" class="text-sm font-semibold text-primary-700">Read the API docs <span aria-hidden="true">&rarr;</span></a>
@@ -57,7 +58,7 @@
         </div>
 
         <div id="frontend"></div>
-        
+
         <div class="mt-6 flex">
             <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="text-sm font-semibold text-primary-700">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
         </div>
@@ -96,7 +97,7 @@
         {
             title: 'React',
             desc: 'Docs'
-        }]  
+        }]
     } ).mount('#frontend');
     createApp(RadioBoxes, {
             items: [
@@ -120,16 +121,16 @@
                 title: 'Python',
                 desc: 'Docs'
             },
-            
-            ]  
+
+            ]
         } ).mount('#backend')
         </script>
 
 <script type="module">
     import { createApp, ref } from 'vue';
     createApp({
-        setup() {            
-            const onSave = () => {                
+        setup() {
+            const onSave = () => {
                 let fileContents = "This is your API key and secret. Please save them to a safe place. \n"
                 fileContents += "Read the docs at https://docs.passwordless.dev";
                 //fileContents += "Email: " + email.value + "\n";
@@ -137,18 +138,18 @@
                 fileContents += "\nAPI Url: @Options.Value.ApiUrl";
                 fileContents += "\nPublic ApiKey: @Model.Onboarding.ApiKey";
                 fileContents += "\nPrivate ApiSecret: @Model.Onboarding.ApiSecret";
-            
+
                 save("passwordless-apikeys-@Model.Onboarding.ApplicationId\.txt", fileContents);
                 }
-            
+
             return {
-                onSave        
+                onSave
             }
         }
-        
-    
+
+
     }).mount('#apikeys');
-    
+
     const save = (filename, data) => {
         const blob = new Blob([data], { type: "text/csv" });
         const nav = window.navigator;

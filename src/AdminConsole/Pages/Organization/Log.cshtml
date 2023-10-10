@@ -1,8 +1,8 @@
 @page
-@model AdminConsole.Pages.Organization.Log
+@model Passwordless.AdminConsole.Pages.Organization.Log
 
 @{
-    ViewBag.Title = "Audit Log";
+    ViewBag.Title = "Event Log";
 }
 
 <div>
@@ -34,27 +34,27 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var auditEvent in Model.Events)
+                        @foreach (var logEvent in Model.Events)
                         {
                             <tr>
                                 <td
                                     class="whitespace-nowrap td-indent td-strong">
-                                    @auditEvent.PerformedAt
+                                    @logEvent.PerformedAt
                                 </td>
                                 <td class="whitespace-nowrap">
-                                    @auditEvent.PerformedBy
+                                    @logEvent.PerformedBy
                                 </td>
                                 <td class="whitespace-nowrap">
-                                    @auditEvent.Severity
+                                    @logEvent.Severity
                                 </td>
                                 <td>
-                                    @auditEvent.Message
+                                    @logEvent.Message
                                 </td>
                                 <td class="whitespace-nowrap">
-                                    @auditEvent.Subject
+                                    @logEvent.Subject
                                 </td>
                                 <td class="whitespace-nowrap">
-                                    @auditEvent.EventType
+                                    @logEvent.EventType
                                 </td>
                             </tr>
                         }
@@ -64,9 +64,9 @@
             </div>
         </div>
     </div>
-    
+
     <p asp-if="!Model.Events.Any()">This organization has no events from the past @Model.RetentionPeriod days.</p>
-    
+
     @{
         var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
         var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";

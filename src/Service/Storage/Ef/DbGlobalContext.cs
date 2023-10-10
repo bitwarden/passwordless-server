@@ -2,7 +2,7 @@ using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Utils;
-using Passwordless.Service.AuditLog.Models;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -19,7 +19,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<ApiKeyDesc> ApiKeys => Set<ApiKeyDesc>();
     public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
-    public DbSet<ApplicationAuditEvent> ApplicationEvents => Set<ApplicationAuditEvent>();
+    public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,13 +62,13 @@ public abstract class DbGlobalContext : DbContext
                 .IsRequired();
         });
 
-        modelBuilder.Entity<ApplicationAuditEvent>()
+        modelBuilder.Entity<ApplicationEvent>()
             .HasKey(x => x.Id);
 
         base.OnModelCreating(modelBuilder);
     }
 
-    public async Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
+    public Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
     {
         ApiKeys.Add(new ApiKeyDesc
         {
@@ -76,6 +76,7 @@ public abstract class DbGlobalContext : DbContext
             Id = publicKey.Substring(4),
             ApiKey = publicKey
         });
+
         ApiKeys.Add(new ApiKeyDesc
         {
             Tenant = appName,
@@ -83,6 +84,9 @@ public abstract class DbGlobalContext : DbContext
             ApiKey = ApiKeyUtils.HashPrivateApiKey(privateKey),
             Scopes = new[] { "token_register", "token_verify" },
         });
+
         AccountInfo.Add(new AccountMetaInformation { Tenant = appName, AcountName = appName });
+
+        return Task.CompletedTask;
     }
 }

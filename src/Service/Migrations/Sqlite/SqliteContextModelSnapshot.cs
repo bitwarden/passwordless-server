@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Sqlite
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
 
-            modelBuilder.Entity("Passwordless.Service.AuditLog.Models.ApplicationAuditEvent", b =>
+            modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -85,14 +85,14 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<string>("Tenant")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("AuditLoggingIsEnabled")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AuditLoggingRetentionPeriod")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("EventLoggingIsEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EventLoggingRetentionPeriod")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Tenant");
 

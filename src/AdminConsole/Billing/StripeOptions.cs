@@ -1,4 +1,4 @@
-namespace AdminConsole.Billing;
+namespace Passwordless.AdminConsole.Billing;
 
 public class StripeOptions
 {

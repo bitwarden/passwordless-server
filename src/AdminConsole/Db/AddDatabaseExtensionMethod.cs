@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace AdminConsole.Db;
+namespace Passwordless.AdminConsole.Db;
 
 public static class AddDatabaseExtensionMethod
 {

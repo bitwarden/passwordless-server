@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AdminConsole.Identity;
+namespace Passwordless.AdminConsole.Identity;
 
 public class Invite
 {

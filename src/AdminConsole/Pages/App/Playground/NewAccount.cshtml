@@ -1,9 +1,10 @@
 @page "/playground/new-account"
+@using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@model NewAccountModel
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@model NewAccountModel
 
 @{
     ViewData["Title"] = "Playground";
@@ -92,9 +93,9 @@
             });
 
             const createNewAccount = async (e) => {
-                
+
                 const data = new FormData(e.target);
-                
+
                 var req = await fetch("?handler=token", {
                     method: "post",
                     body: data,
@@ -107,7 +108,7 @@
                     const { token } = await req.json();
 
                     const nicknameForDevice = data.get("nickname");
-                    
+
                     const { error } = await p.register(token , nicknameForDevice);
                     if (error) {
                         console.error(error);

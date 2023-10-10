@@ -1,10 +1,10 @@
-using AdminConsole.Db;
-using AdminConsole.Helpers;
-using AdminConsole.Identity;
-using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Models;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
 public class DataService
 {

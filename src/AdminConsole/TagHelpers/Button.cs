@@ -1,4 +1,4 @@
-namespace AdminConsole.TagHelpers;
+namespace Passwordless.AdminConsole.TagHelpers;
 
 
 /*

@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace AdminConsole.Helpers;
+namespace Passwordless.AdminConsole.Helpers;
 
 public static class ClaimsExtension
 {

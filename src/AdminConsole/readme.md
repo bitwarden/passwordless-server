@@ -1,7 +1,9 @@
 # Admin Console
+
 The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for creating and configuring applications, monitoring application usage, and managing billing.
 
 # Requirements
+
 - [.NET 7 SDK](https://dotnet.microsoft.com/en-us/download).
    - https://learn.microsoft.com/en-us/dotnet/core/install/
 - Database (one of the following):
@@ -13,6 +15,7 @@ The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for cre
       - https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 
 # Getting started
+
 1. (optional) Clone the repository.
 2. (optional) Open the project in your favorite IDE.
 3. (optional) Under `src/AdminConsole`, edit `appsettings.Development.json`.

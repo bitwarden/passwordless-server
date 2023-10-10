@@ -1,6 +1,8 @@
 @page
 @using AdminConsole.Pages.Components.ManagePasskeys
-@model UserOnboarding
+@using Microsoft.Extensions.Options
+@inject IOptions<PasswordlessOptions> Options
+@model Passwordless.AdminConsole.Pages.Account.UserOnboarding
 
 @{
     ViewBag.Title = "Let's get you set up";
@@ -10,7 +12,7 @@
 <div id="app">
     <p class="mb-3 v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
     <p class="mb-3 v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
-    
+
     <partial name="_Credentials" model="new PasskeysModel { Credentials = Model.Credentials, HideDetails = true }"/>
     <partial name="Shared/_PasswordlessClientJs" />
     <partial name="Shared/_AddPasskeys" />

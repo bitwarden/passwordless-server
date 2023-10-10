@@ -1,4 +1,4 @@
-namespace AdminConsole.Authorization;
+namespace Passwordless.AdminConsole.Authorization;
 
 public static class CustomPolicy
 {

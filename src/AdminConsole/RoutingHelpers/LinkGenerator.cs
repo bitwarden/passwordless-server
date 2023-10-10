@@ -1,4 +1,4 @@
-﻿namespace AdminConsole;
+﻿namespace Passwordless.AdminConsole.RoutingHelpers;
 
 
 public class LinkGeneratorDecorator : LinkGenerator

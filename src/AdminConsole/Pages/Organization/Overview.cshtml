@@ -1,5 +1,6 @@
 @page
-@model Pages.Organization.OverviewModel
+@model OverviewModel
+
 @{
     ViewData["Title"] = Model.Org.Name + " Applications";
 }
@@ -54,11 +55,11 @@
   </ul>
 </div>
 
-@if (Model.CanCreateApplication) 
+@if (Model.CanCreateApplication)
 {
     <a asp-page="/Organization/CreateApplication" class="block max-w-fit mt-4 rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Create Application</a>
 }
-else 
+else
 {
     <Feedback name="_error" LinkUrl="@Url.PageLink("/Billing/Manage")" LinkText="Upgrade" asp-if="!Model.CanCreateApplication"
           message="You need to upgrade to a paid organization to create more applications" />

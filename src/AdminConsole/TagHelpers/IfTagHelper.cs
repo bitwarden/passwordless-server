@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace AdminConsole.TagHelpers;
+namespace Passwordless.AdminConsole.TagHelpers;
 
 /// <summary>
 /// Suppresses the output of the element if the supplied predicate equates to <c>false</c>.

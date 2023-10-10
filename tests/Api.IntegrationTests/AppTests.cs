@@ -78,8 +78,8 @@ public class AppTests : BackendTests
             var storage = factory.Create(name);
             var info = await storage.GetAppFeaturesAsync();
             Assert.Equal(info.Tenant, name);
-            Assert.False(info.AuditLoggingIsEnabled);
-            Assert.Equal(365, info.AuditLoggingRetentionPeriod);
+            Assert.False(info.EventLoggingIsEnabled);
+            Assert.Equal(365, info.EventLoggingRetentionPeriod);
             Assert.Null(info.DeveloperLoggingEndsAt);
         }
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
@@ -93,7 +93,7 @@ public class AppTests : BackendTests
         {
             Content = JsonContent.Create(new SetFeaturesDto
             {
-                AuditLoggingRetentionPeriod = 30
+                EventLoggingRetentionPeriod = 30
             })
         };
         request.Headers.Add("ApiSecret", app.Result.ApiSecret1);
@@ -106,22 +106,22 @@ public class AppTests : BackendTests
             var storage = factory.Create(app.AppId);
             var info = await storage.GetAppFeaturesAsync();
             Assert.Equal(info.Tenant, app.AppId);
-            Assert.True(info.AuditLoggingIsEnabled);
-            Assert.Equal(30, info.AuditLoggingRetentionPeriod);
+            Assert.True(info.EventLoggingIsEnabled);
+            Assert.Equal(30, info.EventLoggingRetentionPeriod);
             Assert.Null(info.DeveloperLoggingEndsAt);
         }
         Assert.Equal(HttpStatusCode.NoContent, res.StatusCode);
     }
 
     [Fact]
-    public async Task SetFeaturesAsync_Returns_BadRequest_WhenAuditLoggingRetentionPeriodIsNegative()
+    public async Task SetFeaturesAsync_Returns_BadRequest_WhenEventLoggingRetentionPeriodIsNegative()
     {
         var app = await CreateAppAsync();
         var request = new HttpRequestMessage(HttpMethod.Post, "/apps/features")
         {
             Content = JsonContent.Create(new SetFeaturesDto
             {
-                AuditLoggingRetentionPeriod = -1
+                EventLoggingRetentionPeriod = -1
             })
         };
         request.Headers.Add("ApiSecret", app.Result.ApiSecret1);
@@ -143,20 +143,20 @@ public class AppTests : BackendTests
 
         var actual = await actualResponse.Content.ReadFromJsonAsync<AppFeatureDto>();
 
-        Assert.Equal(365, actual.AuditLoggingRetentionPeriod);
-        Assert.True(actual.AuditLoggingIsEnabled);
+        Assert.Equal(365, actual.EventLoggingRetentionPeriod);
+        Assert.True(actual.EventLoggingIsEnabled);
         Assert.Null(actual.DeveloperLoggingEndsAt);
     }
 
     [Fact]
-    public async Task ManageFeaturesAsync_Returns_BadRequest_WhenAuditLoggingRetentionPeriodIsNegative()
+    public async Task ManageFeaturesAsync_Returns_BadRequest_WhenEventLoggingRetentionPeriodIsNegative()
     {
         var app = await CreateAppAsync();
         var request = new HttpRequestMessage(HttpMethod.Post, $"/admin/apps/{app.AppId}/features")
         {
             Content = JsonContent.Create(new SetFeaturesDto
             {
-                AuditLoggingRetentionPeriod = -1
+                EventLoggingRetentionPeriod = -1
             })
         };
         request.Headers.Add("ManagementKey", "dev_test_key");

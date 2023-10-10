@@ -1,10 +1,9 @@
-using AdminConsole.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless;
+using Passwordless.AdminConsole.Identity;
 
-namespace AdminConsole.Pages.Account;
+namespace Passwordless.AdminConsole.Pages.Account;
 
 public class Profile : PageModel
 {

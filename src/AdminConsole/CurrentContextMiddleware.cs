@@ -1,10 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using AdminConsole.Db;
-using AdminConsole.Helpers;
-using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 

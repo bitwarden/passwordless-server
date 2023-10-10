@@ -1,4 +1,4 @@
-using ApiHelpers;
+using Passwordless.Api.Extensions;
 using Passwordless.Service;
 
 namespace Passwordless.Api.Middleware;

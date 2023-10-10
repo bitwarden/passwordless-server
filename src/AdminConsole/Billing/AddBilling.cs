@@ -1,7 +1,7 @@
-using AdminConsole.Services;
+using Passwordless.AdminConsole.Services;
 using Stripe;
 
-namespace AdminConsole.Billing;
+namespace Passwordless.AdminConsole.Billing;
 
 public static class AddBillingExtensionMethods
 {

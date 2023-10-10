@@ -7,7 +7,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Xunit.Sdk;
 
-namespace Passwordless.IntegrationTests.Helpers;
+namespace Passwordless.Api.IntegrationTests;
 
 public static class AssertHelper
 {

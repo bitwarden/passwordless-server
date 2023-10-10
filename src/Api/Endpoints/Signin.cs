@@ -1,10 +1,9 @@
-﻿using ApiHelpers;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
-namespace Passwordless.Server.Endpoints;
+namespace Passwordless.Api.Endpoints;
 
 public static class SigninEndpoints
 {
@@ -25,7 +24,7 @@ public static class SigninEndpoints
         app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var (deviceInfo, country) = Helpers.GetDeviceInfo(request);
+            var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
             var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
 
             return Ok(result);

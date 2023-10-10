@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace AdminConsole.Authorization;
+namespace Passwordless.AdminConsole.Authorization;
 
 public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
 {

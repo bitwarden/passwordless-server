@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace AdminConsole.Pages.Dashboard;
+namespace Passwordless.AdminConsole.Pages.App.Dashboard;
 
 public class IndexModel : PageModel
 {

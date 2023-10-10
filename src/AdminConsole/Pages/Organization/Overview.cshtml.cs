@@ -1,10 +1,10 @@
-using AdminConsole.Identity;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class OverviewModel : PageModel
 {

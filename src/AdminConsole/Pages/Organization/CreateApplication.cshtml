@@ -1,8 +1,8 @@
 @page
-@inject IOptions<PasswordlessManagementOptions> Options
+@using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
+@inject IOptions<PasswordlessManagementOptions> Options
 @model CreateApplicationModel
-
 
 @{
     ViewData["Title"] = "New App";

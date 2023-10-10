@@ -1,4 +1,4 @@
-namespace AdminConsole.Pages.Components;
+namespace Passwordless.AdminConsole.Pages.Components;
 
 public class PagedList
 {

@@ -1,22 +1,21 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using AdminConsole.Billing;
-using AdminConsole.Db;
-using AdminConsole.Helpers;
-using AdminConsole.Identity;
-using AdminConsole.Models;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless;
-using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Models;
+using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
 using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class CreateApplicationModel : PageModel
 {
@@ -96,8 +95,8 @@ public class CreateApplicationModel : PageModel
             var newAppOptions = new NewAppOptions
             {
                 AdminEmail = email,
-                AuditLoggingIsEnabled = plan.AuditLoggingIsEnabled,
-                AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod
+                EventLoggingIsEnabled = plan.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = plan.EventLoggingRetentionPeriod
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }

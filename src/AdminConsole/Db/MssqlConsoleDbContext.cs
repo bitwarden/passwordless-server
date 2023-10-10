@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace AdminConsole.Db;
+namespace Passwordless.AdminConsole.Db;
 
 public class MssqlConsoleDbContext : ConsoleDbContext
 {
