@@ -39,7 +39,7 @@ public class Log : PageModel
         var result = await _eventLogService.GetEventLogs(Organization.Id, pageNumber, numberOfResults);
         Events = result.Events;
         var itemCount = await _eventLogService.GetEventLogCount(Organization.Id);
-        
+
         PageList = new PagedList(itemCount, pageNumber, numberOfResults);
 
         return Page();
