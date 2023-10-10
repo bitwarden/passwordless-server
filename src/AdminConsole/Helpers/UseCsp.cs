@@ -24,12 +24,10 @@ public static class UseCspExtensions
 
             var passConfig = context.RequestServices.GetService<IOptions<PasswordlessManagementOptions>>();
             var csp =
-                $"""
-                default-src 'self';
-                script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';
-                connect-src 'self' {passConfig.Value.ApiUrl};
-                style-src 'self' 'unsafe-inline';
-                """.Replace("\r", " ").Replace("\n", " ");
+                "default-src 'self';" +
+                "script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';" +
+                "connect-src 'self' {passConfig.Value.ApiUrl};" +
+                "style-src 'self' 'unsafe-inline';";
 
             context.Response.Headers.Add(
                 "Content-Security-Policy",
