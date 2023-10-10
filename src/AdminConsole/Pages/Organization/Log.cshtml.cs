@@ -33,15 +33,13 @@ public class Log : PageModel
         RetentionPeriod = features.EventLoggingRetentionPeriod;
         Organization = await _dataService.GetOrganization();
 
-        var eventTask = _eventLogService.GetEventLogs(Organization.Id, pageNumber, numberOfResults);
-        var countTask = _eventLogService.GetEventLogCount(Organization.Id);
-
-        await Task.WhenAll(eventTask, countTask);
-
-        Events = eventTask.Result.Events;
-
-        var itemCount = countTask.Result;
-
+        // need to revisit this:
+        // - do not pass around org id
+        // - infinite scroll/paging over current approach?
+        var result = await _eventLogService.GetEventLogs(Organization.Id, pageNumber, numberOfResults);
+        Events = result.Events;
+        var itemCount = await _eventLogService.GetEventLogCount(Organization.Id);
+        
         PageList = new PagedList(itemCount, pageNumber, numberOfResults);
 
         return Page();
