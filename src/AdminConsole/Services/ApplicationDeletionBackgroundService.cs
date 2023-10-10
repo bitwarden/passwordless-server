@@ -50,11 +50,16 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
             var applicationIds = await client.ListApplicationsPendingDeletionAsync();
             foreach (var applicationId in applicationIds)
             {
-                await client.DeleteApplicationAsync(applicationId);
-                var application = new Application { Id = applicationId };
-                db.Entry(application).State = EntityState.Deleted;
-                db.Applications.Remove(application);
-                await db.SaveChangesAsync();
+                if (await client.DeleteApplicationAsync(applicationId))
+                {
+                    var application = new Application { Id = applicationId };
+                    db.Applications.Remove(application);
+                    await db.SaveChangesAsync();
+                }
+                else
+                {
+                    _logger.LogError("Failed to delete application: {appId}", applicationId);
+                }
             }
         }
         catch (Exception e)
