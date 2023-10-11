@@ -12,7 +12,6 @@ public class Fido2ServiceEndpointsTests
     private readonly Mock<ITenantStorage> _mockTenantStorage;
     private readonly Mock<ITokenService> _mockTokenService;
     private readonly Mock<IEventLogger> _mockEventLogger;
-    private readonly Mock<IEventLogContext> _mockEventLogContext;
 
     private readonly Fido2ServiceEndpoints _sut;
 
@@ -21,14 +20,12 @@ public class Fido2ServiceEndpointsTests
         _mockTenantStorage = new Mock<ITenantStorage>();
         _mockTokenService = new Mock<ITokenService>();
         _mockEventLogger = new Mock<IEventLogger>();
-        _mockEventLogContext = new Mock<IEventLogContext>();
 
         _sut = new Fido2ServiceEndpoints("test",
             NullLogger.Instance,
             _mockTenantStorage.Object,
             _mockTokenService.Object,
-            _mockEventLogger.Object,
-            _mockEventLogContext.Object);
+            _mockEventLogger.Object);
     }
 
     [Fact]
