@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Passwordless.Service.EventLog.Loggers;
-using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
