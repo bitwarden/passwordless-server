@@ -74,7 +74,7 @@
 
             @foreach (var page in Model.PageList.Pages)
             {
-                <a asp-page="./Log" class="px-1 link-blue" asp-page="./Index" asp-route-pageNumber="@(page)">@(page)</a>
+                <a asp-page="./Log" class="px-1 link-blue" asp-route-pageNumber="@(page)">@(page)</a>
             }
 
             <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
