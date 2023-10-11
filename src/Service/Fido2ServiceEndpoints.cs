@@ -5,7 +5,6 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Passwordless.Service.EventLog.Loggers;
@@ -26,7 +25,6 @@ public class Fido2ServiceEndpoints : IFido2Service
     private Fido2 _fido2;
     private readonly string _tenant;
     private readonly ILogger log;
-    private readonly IConfiguration config;
     private readonly ITokenService _tokenService;
     private readonly IEventLogger _eventLogger;
     private readonly IEventLogContext _eventLogContext;
@@ -34,7 +32,6 @@ public class Fido2ServiceEndpoints : IFido2Service
     // Internal for testing
     internal Fido2ServiceEndpoints(string tenant,
         ILogger log,
-        IConfiguration config,
         ITenantStorage storage,
         ITokenService tokenService,
         IEventLogger eventLogger,
@@ -43,7 +40,6 @@ public class Fido2ServiceEndpoints : IFido2Service
         _storage = storage;
         _tenant = tenant;
         this.log = log;
-        this.config = config;
         _tokenService = tokenService;
         _eventLogger = eventLogger;
         _eventLogContext = eventLogContext;
@@ -54,9 +50,9 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, IConfiguration config, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger, IEventLogContext eventLogContext)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger, IEventLogContext eventLogContext)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, config, storage, tokenService, eventLogger, eventLogContext);
+        var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, eventLogger, eventLogContext);
         await instance.Init();
         return instance;
     }
@@ -216,19 +212,19 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
 
         var now = DateTime.UtcNow;
-        var descriptor = new PublicKeyCredentialDescriptor(success.Result.CredentialId);
+        var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
             Descriptor = descriptor,
             PublicKey = success.Result.PublicKey,
             UserHandle = success.Result.User.Id,
-            SignatureCounter = success.Result.Counter,
-            AttestationFmt = success.Result.CredType,
+            SignatureCounter = success.Result.SignCount,
+            AttestationFmt = success.Result.AttestationFormat,
             CreatedAt = now,
             LastUsedAt = now,
             Device = deviceInfo,
             Country = country,
-            AaGuid = success.Result.Aaguid,
+            AaGuid = success.Result.AaGuid,
             RPID = request.RPID,
             Origin = request.Origin,
             Nickname = request.Nickname
@@ -239,9 +235,9 @@ public class Fido2ServiceEndpoints : IFido2Service
             UserId = userId,
             Success = true,
             Origin = request.Origin,
-            RPID = session.Options.Rp.Id,
+            RpId = session.Options.Rp.Id,
             Timestamp = DateTime.UtcNow,
-            CredentialId = success.Result.CredentialId,
+            CredentialId = success.Result.Id,
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
@@ -316,37 +312,38 @@ public class Fido2ServiceEndpoints : IFido2Service
         var options = _tokenService.DecodeToken<AssertionOptions>(request.Session, "session_", true);
 
         // Get registered credential from database
-        var creds = await _storage.GetCredential(request.Response.Id);
-        if (creds == null)
+        var credential = await _storage.GetCredential(request.Response.Id);
+        if (credential == null)
         {
             throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
         }
 
         // Get credential counter from database
-        var storedCounter = creds.SignatureCounter;
+        var storedCounter = credential.SignatureCounter;
 
         // Create callback to check if userhandle owns the credentialId
-        IsUserHandleOwnerOfCredentialIdAsync callback = (args, token) => Task.FromResult(creds.UserHandle.SequenceEqual(args.UserHandle));
+        IsUserHandleOwnerOfCredentialIdAsync callback = (args, token) => Task.FromResult(credential.UserHandle.SequenceEqual(args.UserHandle));
 
         // Make the assertion
-        var res = await _fido2.MakeAssertionAsync(request.Response, options, creds.PublicKey, storedCounter, callback);
+        var storedCredentials = (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList();
+        var res = await _fido2.MakeAssertionAsync(request.Response, options, credential.PublicKey, storedCredentials, storedCounter, callback);
 
         // Store the updated counter
-        await _storage.UpdateCredential(res.CredentialId, res.Counter, country, device);
+        await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
 
-        var userId = Encoding.UTF8.GetString(creds.UserHandle);
+        var userId = Encoding.UTF8.GetString(credential.UserHandle);
 
         var tokenData = new VerifySignInToken
         {
             UserId = userId,
             Success = true,
             Origin = request.Origin,
-            RPID = request.RPID,
+            RpId = request.RPID,
             Timestamp = DateTime.UtcNow,
             Device = device,
             Country = country,
-            Nickname = creds.Nickname,
-            CredentialId = creds.Descriptor.Id,
+            Nickname = credential.Nickname,
+            CredentialId = credential.Descriptor.Id,
             ExpiresAt = DateTime.UtcNow.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
