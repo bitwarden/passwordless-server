@@ -22,7 +22,7 @@ public static class UseCspExtensions
                 context.Items.Add("csp-nonce", nonce);
             }
 
-            var passConfig = context.RequestServices.GetService<IOptions<PasswordlessManagementOptions>>();
+            var passConfig = context.RequestServices.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
             var csp =
                 "default-src 'self';" +
                 $"script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';" +
