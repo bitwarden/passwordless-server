@@ -1,5 +1,6 @@
 using Passwordless.Common.EventLog.Enums;
 using Passwordless.Common.Models;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.EventLog.Models;
 
 namespace Passwordless.Service.EventLog;
@@ -115,9 +116,8 @@ public static class EventFunctions
         ApiKeyId = string.Empty
     };
 
-
-    public static Func<IEventLogContext, EventDto> DeleteCredentialEvent(string userId) =>
-        context => new EventDto
+    public static void LogDeleteCredentialEvent(this IEventLogger logger, string userId) =>
+        logger.LogEvent(context => new EventDto
         {
             PerformedAt = context.PerformedAt,
             Message = $"Deleted credential for user {userId}",
@@ -127,43 +127,46 @@ public static class EventFunctions
             Severity = Severity.Informational,
             Subject = userId,
             ApiKeyId = context.AbbreviatedKey
-        };
+        });
 
-    public static EventDto UserSignInBeganEvent(string performedBy, IEventLogContext eventLogContext) => new()
-    {
-        PerformedAt = eventLogContext.PerformedAt,
-        Message = $"User {performedBy} began sign in.",
-        PerformedBy = performedBy,
-        EventType = EventType.ApiUserSignInBegan,
-        Severity = Severity.Informational,
-        Subject = eventLogContext.TenantId,
-        TenantId = eventLogContext.TenantId,
-        ApiKeyId = eventLogContext.AbbreviatedKey
-    };
+    public static void LogUserSignInBeganEvent(this IEventLogger logger, string? performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = string.IsNullOrWhiteSpace(performedBy) ? "Discoverable/Autofill sign in began." : $"User {performedBy} began sign in.",
+            PerformedBy = performedBy ?? "User",
+            EventType = EventType.ApiUserSignInBegan,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 
-    public static EventDto UserSignInCompletedEvent(string performedBy, IEventLogContext eventLogContext) => new()
-    {
-        PerformedAt = eventLogContext.PerformedAt,
-        Message = $"User {performedBy} completed sign in.",
-        PerformedBy = performedBy,
-        TenantId = eventLogContext.TenantId,
-        EventType = EventType.ApiUserSignInCompleted,
-        Severity = Severity.Informational,
-        Subject = eventLogContext.TenantId,
-        ApiKeyId = eventLogContext.AbbreviatedKey
-    };
+    public static void LogUserSignInCompletedEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"User {performedBy} completed sign in.",
+            PerformedBy = performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiUserSignInCompleted,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 
-    public static EventDto UserSignInTokenVerifiedEvent(string performedBy, IEventLogContext eventLogContext) => new()
-    {
-        PerformedAt = eventLogContext.PerformedAt,
-        Message = $"User {performedBy} verified sign in token.",
-        PerformedBy = performedBy,
-        TenantId = eventLogContext.TenantId,
-        EventType = EventType.ApiUserSignInVerified,
-        Severity = Severity.Informational,
-        Subject = eventLogContext.TenantId,
-        ApiKeyId = eventLogContext.AbbreviatedKey
-    };
+    public static void LogUserSignInTokenVerifiedEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"User {performedBy} verified sign in token.",
+            PerformedBy = performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiUserSignInVerified,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 
     public static Func<IEventLogContext, EventDto> DeletedUserEvent(string userId) =>
         context => new EventDto
