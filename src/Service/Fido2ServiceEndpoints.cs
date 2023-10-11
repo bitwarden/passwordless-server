@@ -295,8 +295,6 @@ public class Fido2ServiceEndpoints : IFido2Service
             uv
         );
 
-        _eventLogger.LogUserSignInBeganEvent(request.UserId ?? request.Alias);
-
         var session = _tokenService.EncodeToken(options, "session_", true);
 
         // Return options to client

@@ -129,19 +129,6 @@ public static class EventFunctions
             ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogUserSignInBeganEvent(this IEventLogger logger, string? performedBy) =>
-        logger.LogEvent(context => new EventDto
-        {
-            PerformedAt = context.PerformedAt,
-            Message = string.IsNullOrWhiteSpace(performedBy) ? "Discoverable/Autofill sign in began." : $"User {performedBy} began sign in.",
-            PerformedBy = performedBy ?? "User",
-            EventType = EventType.ApiUserSignInBegan,
-            Severity = Severity.Informational,
-            Subject = context.TenantId,
-            TenantId = context.TenantId,
-            ApiKeyId = context.AbbreviatedKey
-        });
-
     public static void LogUserSignInCompletedEvent(this IEventLogger logger, string performedBy) =>
         logger.LogEvent(context => new EventDto
         {
