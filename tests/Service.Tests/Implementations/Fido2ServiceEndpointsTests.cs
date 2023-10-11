@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Passwordless.Service.EventLog.Loggers;
@@ -10,7 +9,6 @@ namespace Passwordless.Service.Tests.Implementations;
 
 public class Fido2ServiceEndpointsTests
 {
-    private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly Mock<ITenantStorage> _mockTenantStorage;
     private readonly Mock<ITokenService> _mockTokenService;
     private readonly Mock<IEventLogger> _mockEventLogger;
@@ -20,7 +18,6 @@ public class Fido2ServiceEndpointsTests
 
     public Fido2ServiceEndpointsTests()
     {
-        _mockConfiguration = new Mock<IConfiguration>();
         _mockTenantStorage = new Mock<ITenantStorage>();
         _mockTokenService = new Mock<ITokenService>();
         _mockEventLogger = new Mock<IEventLogger>();
@@ -28,7 +25,6 @@ public class Fido2ServiceEndpointsTests
 
         _sut = new Fido2ServiceEndpoints("test",
             NullLogger.Instance,
-            _mockConfiguration.Object,
             _mockTenantStorage.Object,
             _mockTokenService.Object,
             _mockEventLogger.Object,
