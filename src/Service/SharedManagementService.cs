@@ -2,7 +2,10 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Passwordless.Common.Models;
 using Passwordless.Common.Utils;
+using Passwordless.Service.EventLog;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
@@ -30,6 +33,7 @@ public interface ISharedManagementService
 public class SharedManagementService : ISharedManagementService
 {
     private readonly ILogger _logger;
+    private readonly IEventLogger _eventLogger;
     private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
@@ -41,7 +45,8 @@ public class SharedManagementService : ISharedManagementService
         IMailService mailService,
         IConfiguration config,
         ISystemClock systemClock,
-        ILogger<SharedManagementService> logger)
+        ILogger<SharedManagementService> logger,
+        IEventLogger eventLogger)
     {
         this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
@@ -49,6 +54,7 @@ public class SharedManagementService : ISharedManagementService
         this.config = config;
         _systemClock = systemClock;
         _logger = logger;
+        _eventLogger = eventLogger;
     }
 
 
@@ -139,6 +145,7 @@ public class SharedManagementService : ISharedManagementService
             }
         }
 
+        _eventLogger.LogInvalidApiSecretUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
         _logger.LogInformation("ApiSecret was not valid. {AppId} {ApiKey}", appId, secretKey?[..20]);
         throw new ApiException("ApiSecret was not valid", 401);
     }
@@ -155,6 +162,7 @@ public class SharedManagementService : ISharedManagementService
             return appId;
         }
 
+        _eventLogger.LogInvalidPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
         _logger.LogWarning("Apikey was not valid. {AppId} {ApiKey}", appId, publicKey);
         throw new ApiException("Apikey was not valid", 401);
     }

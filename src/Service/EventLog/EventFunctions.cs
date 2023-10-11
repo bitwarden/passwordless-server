@@ -167,4 +167,30 @@ public static class EventFunctions
             Subject = userId,
             ApiKeyId = context.AbbreviatedKey
         };
+
+    public static void LogInvalidApiSecretUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationSecretKey secretKey) =>
+        logger.LogEvent(new EventDto
+        {
+            PerformedAt = performedAt,
+            Message = "A request using an invalid ApiSecret was attempted.",
+            PerformedBy = "User",
+            TenantId = tenantId,
+            EventType = EventType.ApiAuthInvalidSecretKeyUsed,
+            Severity = Severity.Alert,
+            Subject = tenantId,
+            ApiKeyId = secretKey.AbbreviatedValue
+        });
+    
+    public static void LogInvalidPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
+        logger.LogEvent(new EventDto
+        {
+            PerformedAt = performedAt,
+            Message = "A request using an invalid PublicKey was attempted.",
+            PerformedBy = "User",
+            TenantId = tenantId,
+            EventType = EventType.ApiAuthInvalidPublicKeyUsed,
+            Severity = Severity.Alert,
+            Subject = tenantId,
+            ApiKeyId = publicKey.AbbreviatedValue
+        });
 }

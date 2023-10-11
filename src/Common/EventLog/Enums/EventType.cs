@@ -6,6 +6,8 @@ public enum EventType
     ApiAuthUserRegistered = 1000,
     ApiAuthPasskeyRegistrationBegan = 1001,
     ApiAuthPasskeyRegistrationCompleted = 1002,
+    ApiAuthInvalidSecretKeyUsed = 1003,
+    ApiAuthInvalidPublicKeyUsed = 1004,
     ApiUserSetAliases = 1100,
     ApiUserDeleteCredential = 1101,
     ApiUserSignInBegan = 1102,
