@@ -33,16 +33,13 @@ public static class EventLog
 
         var tenantId = request.GetTenantName();
 
-        var eventsTask = storage.GetEventLogAsync(getEventLogEventsRequest.PageNumber, getEventLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
-        var eventCountTasks = storage.GetEventLogCountAsync(cancellationToken);
-
-        await Task.WhenAll(eventsTask, eventCountTasks);
+        var events = await storage.GetEventLogAsync(getEventLogEventsRequest.PageNumber, getEventLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
 
         return Results.Ok(new
         {
             TenantId = tenantId,
-            Events = eventsTask.Result.Select(x => x.ToEvent()),
-            TotalEventCount = eventCountTasks.Result
+            Events = events.Select(x => x.ToEvent()),
+            TotalEventCount = await storage.GetEventLogCountAsync(cancellationToken)
         });
     }
 

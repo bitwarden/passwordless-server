@@ -130,7 +130,7 @@ public class Fido2ServiceEndpoints : IFido2Service
     {
         var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
 
-        _eventLogger.LogEvent(UserSignInTokenVerifiedEvent(token.UserId, _eventLogContext));
+        _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
         return Task.FromResult(token);
     }
@@ -291,8 +291,6 @@ public class Fido2ServiceEndpoints : IFido2Service
             uv
         );
 
-        _eventLogger.LogEvent(UserSignInBeganEvent(request.UserId, _eventLogContext));
-
         var session = _tokenService.EncodeToken(options, "session_", true);
 
         // Return options to client
@@ -349,7 +347,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Type = "passkey_signin"
         };
 
-        _eventLogger.LogEvent(UserSignInCompletedEvent(userId, _eventLogContext));
+        _eventLogger.LogUserSignInCompletedEvent(userId);
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 
