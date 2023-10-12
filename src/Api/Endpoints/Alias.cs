@@ -7,7 +7,6 @@ using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
-using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -24,7 +23,12 @@ public static class AliasEndpoints
                 var fido2Service = await fido2ServiceFactory.CreateAsync();
                 await fido2Service.SetAlias(payload);
 
-                eventLogger.LogEvent(UserAliasSetEvent(payload.UserId, request.GetTenantName(), clock.UtcNow.UtcDateTime, new ApplicationSecretKey(request.GetApiSecret())));
+                eventLogger.LogUserAliasSetEvent(
+                    payload.UserId,
+                    request.GetTenantName(),
+                    clock.UtcNow.UtcDateTime,
+                    new ApplicationSecretKey(request.GetApiSecret())
+                );
 
                 return Results.NoContent();
             })

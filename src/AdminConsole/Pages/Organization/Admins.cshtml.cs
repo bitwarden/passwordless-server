@@ -7,7 +7,6 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
-using static Passwordless.AdminConsole.EventLog.EventLogEventFunctions;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
@@ -76,7 +75,8 @@ public class Admins : PageModel
         await _userManager.DeleteAsync(user);
 
         var performedBy = users.FirstOrDefault(x => x.Email == User.GetEmail());
-        if (performedBy is not null) _eventLogger.LogEvent(DeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime));
+        if (performedBy is not null)
+            _eventLogger.LogDeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime);
 
         // if user is self
         if (user.Email == User.GetEmail())
@@ -113,7 +113,7 @@ public class Admins : PageModel
 
         await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
 
-        _eventLogger.LogEvent(InviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime));
+        _eventLogger.LogInviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime);
 
         return RedirectToPage();
     }
@@ -123,8 +123,16 @@ public class Admins : PageModel
         await _invitationService.CancelInviteAsync(hashedCode);
 
         var performedBy = await _dataService.GetUserAsync();
+
         var invitationCancelled = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
-        if (invitationCancelled is not null) _eventLogger.LogEvent(CancelAdminInviteEvent(performedBy, invitationCancelled.ToEmail, _systemClock.UtcNow.UtcDateTime));
+        if (invitationCancelled is not null)
+        {
+            _eventLogger.LogCancelAdminInviteEvent(
+                performedBy,
+                invitationCancelled.ToEmail,
+                _systemClock.UtcNow.UtcDateTime
+            );
+        }
 
         return RedirectToPage();
     }

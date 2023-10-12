@@ -7,7 +7,6 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
-using static Passwordless.AdminConsole.EventLog.EventLogEventFunctions;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
@@ -83,7 +82,7 @@ public class Join : PageModel
 
         if (!ok)
         {
-            _eventLogger.LogEvent(AdminInvalidInviteUsedEvent(invite, _systemClock.UtcNow.UtcDateTime));
+            _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _systemClock.UtcNow.UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
 
@@ -105,7 +104,7 @@ public class Join : PageModel
             var url = Url.Page("/Account/useronboarding");
             await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
 
-            _eventLogger.LogEvent(AdminAcceptedInviteEvent(invite, user, _systemClock.UtcNow.UtcDateTime));
+            _eventLogger.LogAdminAcceptedInviteEvent(invite, user, _systemClock.UtcNow.UtcDateTime);
         }
         else
         {

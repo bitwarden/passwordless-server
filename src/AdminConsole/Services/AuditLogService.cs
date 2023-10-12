@@ -1,4 +1,3 @@
-using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Loggers;
 

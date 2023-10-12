@@ -8,7 +8,6 @@ using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
-using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -40,7 +39,7 @@ public static class AppsEndpoints
             {
                 var result = await service.GenerateAccount(appId, payload);
 
-                eventLogger.LogEvent(ApplicationCreatedEvent(payload.AdminEmail, appId, clock.UtcNow.UtcDateTime));
+                eventLogger.LogApplicationCreatedEvent(payload.AdminEmail, appId, clock.UtcNow.UtcDateTime);
 
                 return Ok(result);
             })
@@ -54,7 +53,7 @@ public static class AppsEndpoints
             {
                 await service.FreezeAccount(appId);
 
-                eventLogger.LogEvent(AppFrozenEvent(appId, clock.UtcNow.UtcDateTime));
+                eventLogger.LogAppFrozenEvent(appId, clock.UtcNow.UtcDateTime);
 
                 return NoContent();
             })
@@ -68,7 +67,7 @@ public static class AppsEndpoints
             {
                 await service.UnFreezeAccount(appId);
 
-                eventLogger.LogEvent(AppUnfrozenEvent(appId, clock.UtcNow.UtcDateTime));
+                eventLogger.LogAppUnfrozenEvent(appId, clock.UtcNow.UtcDateTime);
 
                 return NoContent();
             })
@@ -157,7 +156,7 @@ public static class AppsEndpoints
         var result = await service.MarkDeleteApplicationAsync(appId, payload.DeletedBy, baseUrl);
         logger.LogWarning("mark account/delete was issued {@Res}", result);
 
-        eventLogger.LogEvent(AppMarkedToDeleteEvent(payload.DeletedBy));
+        eventLogger.LogAppMarkedToDeleteEvent(payload.DeletedBy);
 
         return Ok(result);
     }
@@ -176,7 +175,7 @@ public static class AppsEndpoints
         await service.UnFreezeAccount(appId);
         var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
 
-        eventLogger.LogEvent(AppDeleteCancelledEvent(appId, clock.UtcNow.UtcDateTime));
+        eventLogger.LogAppDeleteCancelledEvent(appId, clock.UtcNow.UtcDateTime);
 
         return Ok(res);
     }
