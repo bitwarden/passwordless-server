@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Passwordless.Service.EventLog.Loggers;
-using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -27,22 +26,19 @@ public class Fido2ServiceEndpoints : IFido2Service
     private readonly ILogger log;
     private readonly ITokenService _tokenService;
     private readonly IEventLogger _eventLogger;
-    private readonly IEventLogContext _eventLogContext;
 
     // Internal for testing
     internal Fido2ServiceEndpoints(string tenant,
         ILogger log,
         ITenantStorage storage,
         ITokenService tokenService,
-        IEventLogger eventLogger,
-        IEventLogContext eventLogContext)
+        IEventLogger eventLogger)
     {
         _storage = storage;
         _tenant = tenant;
         this.log = log;
         _tokenService = tokenService;
         _eventLogger = eventLogger;
-        _eventLogContext = eventLogContext;
     }
 
     private async Task Init()
@@ -50,9 +46,9 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger, IEventLogContext eventLogContext)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger)
     {
-        var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, eventLogger, eventLogContext);
+        var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, eventLogger);
         await instance.Init();
         return instance;
     }
@@ -115,7 +111,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
             var session = _tokenService.EncodeToken(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
 
-            _eventLogger.LogEvent(RegistrationBeganEvent(userId, _eventLogContext));
+            _eventLogger.LogRegistrationBeganEvent(userId);
 
             // return options to client
             return new SessionResponse<CredentialCreateOptions>() { Data = options, Session = session };
@@ -170,7 +166,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         var token = _tokenService.EncodeToken(tokenProps, "register_");
 
-        _eventLogger.LogEvent(RegistrationTokenCreatedEvent(tokenProps.UserId, _eventLogContext));
+        _eventLogger.LogRegistrationTokenCreatedEvent(tokenProps.UserId);
 
         return token;
     }
@@ -246,8 +242,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Type = "passkey_register"
         };
 
-
-        _eventLogger.LogEvent(RegistrationCompletedEvent(userId, _eventLogContext));
+        _eventLogger.LogRegistrationCompletedEvent(userId);
 
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 
