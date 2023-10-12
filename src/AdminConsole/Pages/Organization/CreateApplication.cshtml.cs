@@ -48,7 +48,7 @@ public class CreateApplicationModel : PageModel
 
     public async Task OnGet()
     {
-        CanCreateApplication = await _dataService.AllowedToCreateApplication();
+        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
     }
 
     public bool CanCreateApplication { get; set; }
@@ -72,14 +72,14 @@ public class CreateApplicationModel : PageModel
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
         // validate we're allowed to create more Orgs
-        if (!await _dataService.AllowedToCreateApplication())
+        if (!await _dataService.AllowedToCreateApplicationAsync())
         {
             ModelState.AddModelError("MaxApplications", "You have reached the maximum number of applications for your organization. Please upgrade to a paid organization");
             return Page();
         }
 
         // Attach a plan
-        var org = await _dataService.GetOrganization();
+        var org = await _dataService.GetOrganizationAsync();
         if (org.HasSubscription)
         {
             var priceId = _stripeOptions.UsersProPriceId;

@@ -19,21 +19,21 @@ public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDb
         _orgId = httpAccessor.HttpContext.User?.GetOrgId();
     }
 
-    public async Task<List<Application>> GetApplications()
+    public async Task<List<Application>> GetApplicationsAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         return await db.Applications
             .Where(a => a.OrganizationId == _orgId).ToListAsync();
     }
 
-    public async Task<Organization> GetOrganization()
+    public async Task<Organization> GetOrganizationAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         return await db.Organizations
             .Where(o => o.Id == _orgId).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> AllowedToCreateApplication()
+    public async Task<bool> AllowedToCreateApplicationAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var org = await db.Organizations.Where(o => o.Id == _orgId)
@@ -42,7 +42,7 @@ public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDb
         return org.Applications.Count < org.MaxApplications;
     }
 
-    public async Task<bool> CanInviteAdmin()
+    public async Task<bool> CanInviteAdminAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var org = await db.Organizations.Where(o => o.Id == _orgId)
@@ -51,7 +51,7 @@ public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDb
         return org.Admins.Count() < org.MaxAdmins;
     }
 
-    public async Task<Organization> GetOrganizationWithData()
+    public async Task<Organization> GetOrganizationWithDataAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var orgData = await db.Organizations
@@ -63,7 +63,7 @@ public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDb
         return orgData;
     }
 
-    public async Task<List<ConsoleAdmin>> GetConsoleAdmins()
+    public async Task<List<ConsoleAdmin>> GetConsoleAdminsAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var admins = await db.Users

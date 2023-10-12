@@ -4,13 +4,13 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface ISharedBillingService
 {
-    Task UpdateUsage();
+    Task UpdateUsageAsync();
 
-    Task UpdateStripe(string subscriptionItemId, int users);
+    Task UpdateStripeAsync(string subscriptionItemId, int users);
 
     Task ConvertFromFreeToPaidAsync(string customerId, string clientReferenceId, string subscriptionId);
 
-    Task UpdateSubscriptionStatus(Invoice? dataObject);
+    Task UpdateSubscriptionStatusAsync(Invoice? dataObject);
 
     /// <summary>
     /// Cancels a Stripe subscription.
@@ -18,5 +18,5 @@ public interface ISharedBillingService
     /// <param name="subscriptionId"></param>
     /// <returns>Whether operation was successful</returns>
     /// <exception cref="NotImplementedException"></exception>
-    Task<bool> CancelSubscription(string subscriptionId);
+    Task<bool> CancelSubscriptionAsync(string subscriptionId);
 }

@@ -32,7 +32,7 @@ public class Log : PageModel
         if (!features.EventLoggingIsEnabled) return RedirectToPage("Overview");
 
         RetentionPeriod = features.EventLoggingRetentionPeriod;
-        Organization = await _dataService.GetOrganization();
+        Organization = await _dataService.GetOrganizationAsync();
 
         // need to revisit this:
         // - do not pass around org id

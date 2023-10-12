@@ -28,7 +28,7 @@ public class SettingsModel : PageModel
 
     public async Task OnGet()
     {
-        Organization = await _dataService.GetOrganizationWithData();
+        Organization = await _dataService.GetOrganizationWithDataAsync();
         ApplicationId = _currentContext.AppId ?? String.Empty;
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
@@ -48,7 +48,7 @@ public class SettingsModel : PageModel
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected happened. Please try again later." });
         }
 
-        var response = await _appService.MarkApplicationForDeletion(applicationId, userName);
+        var response = await _appService.MarkApplicationForDeletionAsync(applicationId, userName);
 
         return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
     }
@@ -59,7 +59,7 @@ public class SettingsModel : PageModel
 
         try
         {
-            await _appService.CancelDeletionForApplication(applicationId);
+            await _appService.CancelDeletionForApplicationAsync(applicationId);
 
             return RedirectToPage();
         }

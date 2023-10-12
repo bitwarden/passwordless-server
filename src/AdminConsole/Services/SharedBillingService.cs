@@ -32,7 +32,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         _stripeOptions = stripeOptions.Value;
     }
 
-    public async Task UpdateUsage()
+    public async Task UpdateUsageAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         List<Application> apps = await db.Applications.Where(x => x.BillingPriceId != null)
@@ -49,7 +49,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
                 }
 
                 var users = app.CurrentUserCount;
-                await UpdateStripe(app.BillingSubscriptionItemId, users);
+                await UpdateStripeAsync(app.BillingSubscriptionItemId, users);
             }
             catch (Exception e)
             {
@@ -74,7 +74,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         await db.SaveChangesAsync();
     }
 
-    public async Task UpdateStripe(string subscriptionItemId, int users)
+    public async Task UpdateStripeAsync(string subscriptionItemId, int users)
     {
         // The idempotency key allows you to retry this usage record call if it fails.
         var idempotencyKey = Guid.NewGuid().ToString();
@@ -157,13 +157,13 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         return sub;
     }
 
-    public async Task UpdateSubscriptionStatus(Invoice? dataObject)
+    public async Task UpdateSubscriptionStatusAsync(Invoice? dataObject)
     {
         // todo: Handled paid or unpaid events
     }
 
     /// <inheritdoc />
-    public async Task<bool> CancelSubscription(string subscriptionId)
+    public async Task<bool> CancelSubscriptionAsync(string subscriptionId)
     {
         if (string.IsNullOrWhiteSpace(subscriptionId))
         {

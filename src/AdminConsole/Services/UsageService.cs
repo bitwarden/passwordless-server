@@ -16,7 +16,7 @@ internal class UsageService<TDbContext> : IUsageService where TDbContext : Conso
         _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
-    public async Task UpdateUsersCount()
+    public async Task UpdateUsersCountAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var apps = await db.Applications.ToListAsync();

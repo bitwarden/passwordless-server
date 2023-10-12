@@ -17,7 +17,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletion(string applicationId, string userName)
+    public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletionAsync(string applicationId, string userName)
     {
         var response = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
 
@@ -40,7 +40,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         return response;
     }
 
-    public async Task CancelDeletionForApplication(string applicationId)
+    public async Task CancelDeletionForApplicationAsync(string applicationId)
     {
         _ = await _client.CancelApplicationDeletion(applicationId);
 

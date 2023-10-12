@@ -67,7 +67,7 @@ public class InvitationService<TDbContext> : IInvitationService where TDbContext
         return HashCode(bytes);
     }
 
-    public async Task<List<Invite>> GetInvites(int orgId)
+    public async Task<List<Invite>> GetInvitesAsync(int orgId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         return await db.Invites.Where(i => i.TargetOrgId == orgId).ToListAsync();
@@ -86,7 +86,7 @@ public class InvitationService<TDbContext> : IInvitationService where TDbContext
         return await db.Invites.Where(i => i.HashedCode == hashed).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> ConsumeInvite(Invite inv)
+    public async Task<bool> ConsumeInviteAsync(Invite inv)
     {
         if (inv == null)
         {

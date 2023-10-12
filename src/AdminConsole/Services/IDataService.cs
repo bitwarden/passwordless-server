@@ -5,12 +5,12 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface IDataService
 {
-    Task<List<Application>> GetApplications();
-    Task<Organization> GetOrganization();
-    Task<bool> AllowedToCreateApplication();
-    Task<bool> CanInviteAdmin();
-    Task<Organization> GetOrganizationWithData();
-    Task<List<ConsoleAdmin>> GetConsoleAdmins();
+    Task<List<Application>> GetApplicationsAsync();
+    Task<Organization> GetOrganizationAsync();
+    Task<bool> AllowedToCreateApplicationAsync();
+    Task<bool> CanInviteAdminAsync();
+    Task<Organization> GetOrganizationWithDataAsync();
+    Task<List<ConsoleAdmin>> GetConsoleAdminsAsync();
     Task<ConsoleAdmin> GetUserAsync();
     Task<bool> DeleteOrganizationAsync();
     Task<Application?> GetApplicationAsync(string applicationId);

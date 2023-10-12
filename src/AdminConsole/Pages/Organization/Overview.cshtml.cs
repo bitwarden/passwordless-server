@@ -21,8 +21,8 @@ public class OverviewModel : PageModel
     public Models.Organization Org { get; set; }
     public async Task<IActionResult> OnGet()
     {
-        CanCreateApplication = await _dataService.AllowedToCreateApplication();
-        var orgData = await _dataService.GetOrganizationWithData();
+        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
+        var orgData = await _dataService.GetOrganizationWithDataAsync();
 
         if (orgData != null)
         {

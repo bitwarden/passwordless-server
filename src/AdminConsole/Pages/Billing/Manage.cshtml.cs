@@ -28,8 +28,8 @@ public class Manage : PageModel
 
     public async Task OnGet()
     {
-        Applications = await _dataService.GetApplications();
-        Organization = await _dataService.GetOrganization();
+        Applications = await _dataService.GetApplicationsAsync();
+        Organization = await _dataService.GetOrganizationAsync();
     }
 
     public async Task<IActionResult> OnPost()

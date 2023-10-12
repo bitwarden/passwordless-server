@@ -47,7 +47,7 @@ public class TimedHostedService : BackgroundService
         {
             using IServiceScope scope = _services.CreateScope();
             var usageService = scope.ServiceProvider.GetRequiredService<IUsageService>();
-            await usageService.UpdateUsersCount();
+            await usageService.UpdateUsersCountAsync();
         }
         catch (Exception e)
         {
@@ -61,7 +61,7 @@ public class TimedHostedService : BackgroundService
         {
             using IServiceScope scope = _services.CreateScope();
             var billingService = scope.ServiceProvider.GetRequiredService<ISharedBillingService>();
-            await billingService.UpdateUsage();
+            await billingService.UpdateUsageAsync();
         }
         catch (Exception e)
         {

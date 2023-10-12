@@ -79,7 +79,7 @@ public class Join : PageModel
         }
 
         Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
-        var ok = await _invitationService.ConsumeInvite(invite);
+        var ok = await _invitationService.ConsumeInviteAsync(invite);
 
         if (!ok)
         {

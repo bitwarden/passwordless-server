@@ -47,16 +47,16 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnGet()
     {
-        ConsoleAdmins = await _dataService.GetConsoleAdmins();
-        Invites = await _invitationService.GetInvites(User.GetOrgId().Value);
-        CanInviteAdmin = await _dataService.CanInviteAdmin();
+        ConsoleAdmins = await _dataService.GetConsoleAdminsAsync();
+        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
+        CanInviteAdmin = await _dataService.CanInviteAdminAsync();
 
         return Page();
     }
 
     public async Task<IActionResult> OnPostDelete(string userId)
     {
-        var users = await _dataService.GetConsoleAdmins();
+        var users = await _dataService.GetConsoleAdminsAsync();
         if (users is not { Count: > 1 })
         {
             ModelState.AddModelError("error", "At least one admin is required in an organization.");
@@ -91,7 +91,7 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnPostInvite(InviteForm form)
     {
-        CanInviteAdmin = await _dataService.CanInviteAdmin();
+        CanInviteAdmin = await _dataService.CanInviteAdminAsync();
         if (CanInviteAdmin is false)
         {
             ModelState.AddModelError("error", "You need to upgrade to a paid organization to invite more admins.");
@@ -104,7 +104,7 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        Models.Organization org = await _dataService.GetOrganization();
+        Models.Organization org = await _dataService.GetOrganizationAsync();
         var orgId = org.Id;
         var orgName = org.Name;
         ConsoleAdmin user = await _dataService.GetUserAsync();

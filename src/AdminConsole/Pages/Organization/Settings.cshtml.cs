@@ -40,7 +40,7 @@ public class SettingsModel : PageModel
 
     private async Task LoadData()
     {
-        var organization = await _dataService.GetOrganizationWithData();
+        var organization = await _dataService.GetOrganizationWithDataAsync();
         Name = organization.Name;
         ApplicationsCount = organization.Applications.Count;
     }
@@ -56,13 +56,13 @@ public class SettingsModel : PageModel
             return Page();
         }
 
-        var organization = await _dataService.GetOrganizationWithData();
+        var organization = await _dataService.GetOrganizationWithDataAsync();
         var emails = organization.Admins.Select(x => x.Email).ToList();
         await _mailService.SendOrganizationDeletedAsync(organization.Name, emails, username, _systemClock.UtcNow.UtcDateTime);
 
         if (organization.HasSubscription)
         {
-            var isSubscriptionDeleted = await _billingService.CancelSubscription(organization.BillingSubscriptionId!);
+            var isSubscriptionDeleted = await _billingService.CancelSubscriptionAsync(organization.BillingSubscriptionId!);
             if (!isSubscriptionDeleted)
             {
                 _logger.LogError(

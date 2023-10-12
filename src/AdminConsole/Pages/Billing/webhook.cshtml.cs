@@ -54,7 +54,7 @@ public class Webhook : PageModel
             case "invoice.payment_failed":
                 if (stripeEvent.Data.Object is Invoice invoice)
                 {
-                    await _sharedBillingService.UpdateSubscriptionStatus(invoice);
+                    await _sharedBillingService.UpdateSubscriptionStatusAsync(invoice);
                 }
                 break;
             default:
