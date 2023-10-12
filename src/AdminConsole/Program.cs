@@ -2,9 +2,7 @@ using System.Reflection;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless;
 using Passwordless.AdminConsole;
@@ -98,12 +96,6 @@ void RunTheApp()
     {
         services.AddDatabaseDeveloperPageExceptionFilter();
     }
-    else
-    {
-        services
-            .AddDataProtection()
-            .PersistKeysToDbContext<ConsoleDbContext>();
-    }
 
     services.AddRazorPages(options =>
     {
@@ -182,12 +174,7 @@ void RunTheApp()
     if (isSelfHosted)
     {
         app.UseMiddleware<HttpOverridesMiddleware>();
-
-        // When self-hosting. Migrate latest database changes during startup
-        using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider
-            .GetRequiredService<ConsoleDbContext>();
-        dbContext.Database.Migrate();
+        app.ExecuteMigration();
     }
 
     app.UseCSP();

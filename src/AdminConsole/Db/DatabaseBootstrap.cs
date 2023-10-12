@@ -1,3 +1,5 @@
+using System.Configuration;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Billing;
@@ -9,6 +11,8 @@ namespace Passwordless.AdminConsole.Db;
 
 public static class DatabaseBootstrap
 {
+    private static string ContextName;
+
     public static void AddDatabase(this WebApplicationBuilder builder)
     {
         // if not present, try use sqlite
@@ -26,6 +30,7 @@ public static class DatabaseBootstrap
         // if name starts with sqlite, use sqlite, else use mssql
         if (!String.IsNullOrEmpty(sqlite))
         {
+            ContextName = typeof(SqliteConsoleDbContext).FullName;
             builder.AddDatabaseContext<SqliteConsoleDbContext>((sp, o) =>
             {
                 o.UseSqlite(sqlite);
@@ -33,6 +38,7 @@ public static class DatabaseBootstrap
         }
         else if (!string.IsNullOrEmpty(mssql))
         {
+            ContextName = typeof(MssqlConsoleDbContext).FullName;
             builder.AddDatabaseContext<MssqlConsoleDbContext>((sp, o) =>
             {
                 o.UseSqlServer(mssql);
@@ -77,5 +83,23 @@ public static class DatabaseBootstrap
             .AddDefaultTokenProviders()
             .AddPasswordless(builder.Configuration.GetSection("Passwordless"));
 
+        if (!builder.Environment.IsDevelopment())
+        {
+            builder.Services
+                .AddDataProtection()
+                .PersistKeysToDbContext<TDbContext>();
+        }
+    }
+
+    public static void ExecuteMigration(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var type = Type.GetType(ContextName);
+        if (type == null)
+        {
+            throw new ConfigurationErrorsException("Unknown database type");
+        }
+        var dbContext = (ConsoleDbContext)scope.ServiceProvider.GetRequiredService(type);
+        dbContext.Database.Migrate();
     }
 }
