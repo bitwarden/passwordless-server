@@ -117,4 +117,11 @@ public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDb
             });
         await db.SaveChangesAsync();
     }
+
+    public async Task CreateOrganizationAsync(Organization organization)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        db.Organizations.Add(organization);
+        await db.SaveChangesAsync();
+    }
 }
