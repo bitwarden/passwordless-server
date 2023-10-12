@@ -181,7 +181,7 @@ public static class EventLoggerExtensions
             Subject = userId,
             ApiKeyId = context.AbbreviatedKey
         });
-    
+
     public static void LogInvalidApiSecretUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationSecretKey secretKey) =>
         logger.LogEvent(new EventDto
         {
@@ -194,7 +194,7 @@ public static class EventLoggerExtensions
             Subject = tenantId,
             ApiKeyId = secretKey.AbbreviatedValue
         });
-    
+
     public static void LogInvalidPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
         logger.LogEvent(new EventDto
         {

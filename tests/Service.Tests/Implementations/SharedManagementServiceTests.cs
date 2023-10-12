@@ -19,7 +19,7 @@ public class SharedManagementServiceTests
     private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
     private readonly Mock<IEventLogger> _eventLogger = new();
-    
+
     private readonly SharedManagementService _sut;
 
     private readonly DateTime _now = new(2023, 08, 02, 15, 10, 00);
@@ -32,7 +32,7 @@ public class SharedManagementServiceTests
             _mailServiceMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
-            _loggerMock.Object, 
+            _loggerMock.Object,
             _eventLogger.Object);
         _systemClockMock.Setup(x => x.UtcNow)
             .Returns(new DateTimeOffset(_now));

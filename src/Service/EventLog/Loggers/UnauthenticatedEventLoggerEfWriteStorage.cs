@@ -1,13 +1,12 @@
 using Passwordless.Service.EventLog.Models;
-using Passwordless.Service.Features;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.EventLog.Loggers;
 
 public class UnauthenticatedEventLoggerEfWriteStorage : EventLoggerEfWriteStorage
 {
-    public UnauthenticatedEventLoggerEfWriteStorage(DbGlobalContext storage, 
-        IEventLogContext eventLogContext) 
+    public UnauthenticatedEventLoggerEfWriteStorage(DbGlobalContext storage,
+        IEventLogContext eventLogContext)
         : base(storage, eventLogContext)
     {
     }
