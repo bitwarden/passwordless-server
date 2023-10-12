@@ -48,7 +48,6 @@ public static class AddDatabaseExtensionMethod
         where TDbContext : ConsoleDbContext
     {
         builder.Services.AddPooledDbContextFactory<TDbContext>(action);
-        builder.Services.AddDbContext<ConsoleDbContext, TDbContext>();
         builder.Services.AddScoped<IDataService, DataService<TDbContext>>();
         builder.Services.AddScoped<IUsageService, UsageService<TDbContext>>();
         builder.Services.AddScoped<IInvitationService, InvitationService<TDbContext>>();
