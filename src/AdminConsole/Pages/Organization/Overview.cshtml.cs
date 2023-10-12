@@ -8,10 +8,10 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class OverviewModel : PageModel
 {
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly UserManager<ConsoleAdmin> userManager;
 
-    public OverviewModel(DataService dataService, UserManager<ConsoleAdmin> userManager)
+    public OverviewModel(IDataService dataService, UserManager<ConsoleAdmin> userManager)
     {
         _dataService = dataService;
         this.userManager = userManager;

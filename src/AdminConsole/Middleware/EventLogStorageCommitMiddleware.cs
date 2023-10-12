@@ -1,6 +1,6 @@
 using Passwordless.AdminConsole.EventLog.Loggers;
 
-namespace Passwordless.AdminConsole;
+namespace Passwordless.AdminConsole.Middleware;
 
 public class EventLogStorageCommitMiddleware
 {

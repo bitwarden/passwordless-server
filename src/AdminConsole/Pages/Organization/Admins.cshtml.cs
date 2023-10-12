@@ -13,16 +13,17 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Admins : PageModel
 {
-    private readonly DataService _dataService;
-    private readonly InvitationService _invitationService;
+    private readonly IDataService _dataService;
+    private readonly IInvitationService _invitationService;
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly SignInManager<ConsoleAdmin> _signinManager;
     private readonly IPasswordlessClient _passwordlessClient;
     private readonly IEventLogger _eventLogger;
     private readonly ISystemClock _systemClock;
 
-    public Admins(DataService dataService,
-        InvitationService invitationService,
+    public Admins(
+        IDataService dataService,
+        IInvitationService invitationService,
         UserManager<ConsoleAdmin> userManager,
         SignInManager<ConsoleAdmin> signinManager,
         IPasswordlessClient passwordlessClient,
@@ -47,7 +48,7 @@ public class Admins : PageModel
     public async Task<IActionResult> OnGet()
     {
         ConsoleAdmins = await _dataService.GetConsoleAdmins();
-        Invites = await _invitationService.GetInvites(User.GetOrgId());
+        Invites = await _invitationService.GetInvites(User.GetOrgId().Value);
         CanInviteAdmin = await _dataService.CanInviteAdmin();
 
         return Page();

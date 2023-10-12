@@ -10,22 +10,22 @@ using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class SharedBillingService
+public class SharedBillingService<TDbContext> : ISharedBillingService where TDbContext : ConsoleDbContext
 {
-    private readonly ConsoleDbContext _dbContext;
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly IPasswordlessManagementClient _passwordlessClient;
     private readonly PlansOptions _plansOptions;
-    private readonly ILogger<SharedBillingService> _logger;
+    private readonly ILogger<SharedBillingService<TDbContext>> _logger;
     private readonly StripeOptions _stripeOptions;
 
     public SharedBillingService(
-        ConsoleDbContext dbContext,
+        IDbContextFactory<TDbContext> dbContextFactory,
         IPasswordlessManagementClient passwordlessClient,
         IOptionsSnapshot<PlansOptions> plansOptions,
-        ILogger<SharedBillingService> logger,
+        ILogger<SharedBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions)
     {
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _passwordlessClient = passwordlessClient;
         _plansOptions = plansOptions.Value;
         _logger = logger;
@@ -34,7 +34,8 @@ public class SharedBillingService
 
     public async Task UpdateUsage()
     {
-        List<Application> apps = await _dbContext.Applications.Where(x => x.BillingPriceId != null)
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        List<Application> apps = await db.Applications.Where(x => x.BillingPriceId != null)
             .ToListAsync();
 
         // update usage in stripe
@@ -59,7 +60,8 @@ public class SharedBillingService
 
     private async Task AddBillingSubscriptionItemId(Application app)
     {
-        var org = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == app.OrganizationId);
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == app.OrganizationId);
         Subscription subscription = await GetSubscription(org.BillingSubscriptionId);
 
         // Increase the limits
@@ -69,7 +71,7 @@ public class SharedBillingService
         // get the lineItem from the subscription
         SubscriptionItem? lineItem = subscription.Items.Data.FirstOrDefault(i => i.Price.Id == app.BillingPriceId);
         app.BillingSubscriptionItemId = lineItem.Id;
-        await _dbContext.SaveChangesAsync();
+        await db.SaveChangesAsync();
     }
 
     public async Task UpdateStripe(string subscriptionItemId, int users)
@@ -103,7 +105,8 @@ public class SharedBillingService
         var orgId = int.Parse(clientReferenceId);
 
         // SetCustomerId on the Org
-        var org = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
         if (org == null)
         {
             throw new InvalidOperationException("Org not found");
@@ -131,7 +134,7 @@ public class SharedBillingService
         SubscriptionItem? lineItem = subscription.Items.Data.FirstOrDefault(i => i.Price.Id == priceId);
 
         // set the new plans on each app
-        List<Application> apps = await _dbContext.Applications.Where(a => a.OrganizationId == orgId).ToListAsync();
+        List<Application> apps = await db.Applications.Where(a => a.OrganizationId == orgId).ToListAsync();
         var features = _plansOptions[planName];
         var setFeaturesRequest = new SetApplicationFeaturesRequest();
         setFeaturesRequest.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
@@ -144,7 +147,7 @@ public class SharedBillingService
             await _passwordlessClient.SetFeaturesAsync(app.Id, setFeaturesRequest);
         }
 
-        await _dbContext.SaveChangesAsync();
+        await db.SaveChangesAsync();
     }
 
     private async Task<Subscription> GetSubscription(string subscriptionId)

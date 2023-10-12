@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.EventLog.DTOs;
+using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Pages.Components;
 using Passwordless.AdminConsole.Services;
 
@@ -9,7 +10,7 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 public class Log : PageModel
 {
     private readonly IEventLogService _eventLogService;
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
 
     public Models.Organization Organization { get; set; }
@@ -17,7 +18,7 @@ public class Log : PageModel
     public PagedList PageList { get; set; }
     public int RetentionPeriod { get; private set; }
 
-    public Log(IEventLogService eventLogService, DataService dataService, ICurrentContext currentContext)
+    public Log(IEventLogService eventLogService, IDataService dataService, ICurrentContext currentContext)
     {
         _eventLogService = eventLogService;
         _dataService = dataService;

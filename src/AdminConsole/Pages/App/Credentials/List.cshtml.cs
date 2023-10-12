@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages.App.Credentials;

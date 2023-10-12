@@ -9,16 +9,16 @@ using Passwordless.AdminConsole.Services.Mail;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class InvitationService
+public class InvitationService<TDbContext> : IInvitationService where TDbContext : ConsoleDbContext
 {
-    private readonly ConsoleDbContext _db;
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly IMailService _mailService;
     private readonly IUrlHelperFactory _urlHelperFactory;
     private readonly IActionContextAccessor _actionContextAccessor;
 
-    public InvitationService(ConsoleDbContext db, IMailService mailService, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor)
+    public InvitationService(IDbContextFactory<TDbContext> dbContextFactory, IMailService mailService, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor)
     {
-        _db = db;
+        _dbContextFactory = dbContextFactory;
         _mailService = mailService;
         _urlHelperFactory = urlHelperFactory;
         _actionContextAccessor = actionContextAccessor;
@@ -46,8 +46,9 @@ public class InvitationService
         inv.ExpireAt = inv.CreatedAt.AddDays(7);
 
         // store
-        _db.Invites.Add(inv);
-        await _db.SaveChangesAsync();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        db.Invites.Add(inv);
+        await db.SaveChangesAsync();
 
         var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
         string link = urlBuilder.PageLink("/organization/join", values: new { code = Convert.ToBase64String(code) });
@@ -68,19 +69,21 @@ public class InvitationService
 
     public async Task<List<Invite>> GetInvites(int orgId)
     {
-
-        return await _db.Invites.Where(i => i.TargetOrgId == orgId).ToListAsync();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Invites.Where(i => i.TargetOrgId == orgId).ToListAsync();
     }
 
     public async Task CancelInviteAsync(string hashedCode)
     {
-        await _db.Invites.Where(i => i.HashedCode == hashedCode).ExecuteDeleteAsync();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await db.Invites.Where(i => i.HashedCode == hashedCode).ExecuteDeleteAsync();
     }
 
     public async Task<Invite> GetInviteFromRawCodeAsync(string code)
     {
         var hashed = HashCode(code);
-        return await _db.Invites.Where(i => i.HashedCode == hashed).FirstOrDefaultAsync();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Invites.Where(i => i.HashedCode == hashed).FirstOrDefaultAsync();
     }
 
     public async Task<bool> ConsumeInvite(Invite inv)
@@ -97,8 +100,9 @@ public class InvitationService
         }
 
         // delete it
-        _db.Invites.Remove(inv);
-        await _db.SaveChangesAsync();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        db.Invites.Remove(inv);
+        await db.SaveChangesAsync();
 
         return true;
     }

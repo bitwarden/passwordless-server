@@ -6,34 +6,37 @@ using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class DataService
+public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDbContext
 {
     private readonly IHttpContextAccessor _httpAccessor;
-    private readonly ConsoleDbContext _db;
-    private readonly int _orgId;
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly int? _orgId;
 
-    public DataService(IHttpContextAccessor httpAccessor, ConsoleDbContext db)
+    public DataService(IHttpContextAccessor httpAccessor, IDbContextFactory<TDbContext> dbContextFactory)
     {
         _httpAccessor = httpAccessor;
-        _db = db;
-        _orgId = httpAccessor.HttpContext.User.GetOrgId();
+        _dbContextFactory = dbContextFactory;
+        _orgId = httpAccessor.HttpContext.User?.GetOrgId();
     }
 
     public async Task<List<Application>> GetApplications()
     {
-        return await _db.Applications
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Applications
             .Where(a => a.OrganizationId == _orgId).ToListAsync();
     }
 
     public async Task<Organization> GetOrganization()
     {
-        return await _db.Organizations
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Organizations
             .Where(o => o.Id == _orgId).FirstOrDefaultAsync();
     }
 
     public async Task<bool> AllowedToCreateApplication()
     {
-        var org = await _db.Organizations.Where(o => o.Id == _orgId)
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var org = await db.Organizations.Where(o => o.Id == _orgId)
             .Include(o => o.Applications).FirstOrDefaultAsync();
 
         return org.Applications.Count < org.MaxApplications;
@@ -41,7 +44,8 @@ public class DataService
 
     public async Task<bool> CanInviteAdmin()
     {
-        var org = await _db.Organizations.Where(o => o.Id == _orgId)
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var org = await db.Organizations.Where(o => o.Id == _orgId)
             .Include(o => o.Admins).FirstOrDefaultAsync();
 
         return org.Admins.Count() < org.MaxAdmins;
@@ -49,7 +53,8 @@ public class DataService
 
     public async Task<Organization> GetOrganizationWithData()
     {
-        var orgData = await _db.Organizations
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var orgData = await db.Organizations
             .Where(o => o.Id == _orgId)
             .Include(o => o.Applications)
             .Include(o => o.Admins)
@@ -60,7 +65,8 @@ public class DataService
 
     public async Task<List<ConsoleAdmin>> GetConsoleAdmins()
     {
-        var admins = await _db.Users
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var admins = await db.Users
             .Where(a => a.OrganizationId == _orgId)
             .ToListAsync();
 
@@ -70,7 +76,8 @@ public class DataService
     public async Task<ConsoleAdmin> GetUserAsync()
     {
         var currentUserEmail = _httpAccessor.HttpContext.User.GetEmail().ToUpper();
-        var user = await _db.Users
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var user = await db.Users
             .Where(u => u.NormalizedEmail == currentUserEmail).FirstOrDefaultAsync();
 
         return user;
@@ -78,10 +85,36 @@ public class DataService
 
     public async Task<bool> DeleteOrganizationAsync()
     {
-        var organization = await _db.Organizations.FirstOrDefaultAsync(x => x.Id == _orgId);
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == _orgId);
         if (organization == null) return false;
-        _db.Organizations.Remove(organization);
-        var rowsAffected = await _db.SaveChangesAsync();
+        db.Organizations.Remove(organization);
+        var rowsAffected = await db.SaveChangesAsync();
         return rowsAffected > 0;
+    }
+
+    public async Task<Application?> GetApplicationAsync(string applicationId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var application = await db.Applications.SingleOrDefaultAsync(x => x.Id == applicationId);
+        return application;
+    }
+
+    public async Task<bool> CanConnectAsync()
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Database.CanConnectAsync();
+    }
+
+    public async Task CleanUpOnboardingAsync()
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        db.Onboardings
+            .Where(o => !string.IsNullOrEmpty(o.ApiSecret) && o.SensitiveInfoExpireAt < DateTime.UtcNow)
+            .ToList().ForEach(o =>
+            {
+                o.ApiSecret = string.Empty;
+            });
+        await db.SaveChangesAsync();
     }
 }

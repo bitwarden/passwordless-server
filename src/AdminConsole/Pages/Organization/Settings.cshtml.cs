@@ -10,16 +10,16 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class SettingsModel : PageModel
 {
-    private readonly DataService _dataService;
-    private readonly SharedBillingService _billingService;
+    private readonly IDataService _dataService;
+    private readonly ISharedBillingService _billingService;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
     private readonly IMailService _mailService;
     private readonly ISystemClock _systemClock;
     private readonly ILogger<SettingsModel> _logger;
 
     public SettingsModel(
-        DataService dataService,
-        SharedBillingService billingService,
+        IDataService dataService,
+        ISharedBillingService billingService,
         SignInManager<ConsoleAdmin> signInManager,
         IMailService mailService,
         ISystemClock systemClock,

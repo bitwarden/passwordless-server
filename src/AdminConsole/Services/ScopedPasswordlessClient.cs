@@ -1,4 +1,5 @@
 using Passwordless.AdminConsole.EventLog.DTOs;
+using Passwordless.AdminConsole.Middleware;
 
 namespace Passwordless.AdminConsole.Services;
 

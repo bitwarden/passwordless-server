@@ -7,18 +7,19 @@ using Passwordless.AdminConsole.Identity;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class CustomUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ConsoleAdmin>
+public class CustomUserClaimsPrincipalFactory<TDbContext> : UserClaimsPrincipalFactory<ConsoleAdmin>
+    where TDbContext : ConsoleDbContext
 {
-    private readonly ConsoleDbContext _context;
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
 
     public CustomUserClaimsPrincipalFactory(
         UserManager<ConsoleAdmin> userManager,
         IOptions<IdentityOptions> optionsAccessor,
-        ConsoleDbContext context
+        IDbContextFactory<TDbContext> dbContextFactory
     )
         : base(userManager, optionsAccessor)
     {
-        _context = context;
+        _dbContextFactory = dbContextFactory;
     }
 
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ConsoleAdmin user)
@@ -27,7 +28,8 @@ public class CustomUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<Conso
         identity.AddClaim(new Claim("OrgId", user.OrganizationId.ToString()));
 
         // add apps
-        List<string> apps = await _context.Applications.Where(a => a.OrganizationId == user.OrganizationId)
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        List<string> apps = await db.Applications.Where(a => a.OrganizationId == user.OrganizationId)
             .Select(a => a.Id).ToListAsync();
 
         foreach (var appId in apps)

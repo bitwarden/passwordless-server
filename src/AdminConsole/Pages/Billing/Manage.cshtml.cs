@@ -13,10 +13,10 @@ namespace Passwordless.AdminConsole.Pages.Billing;
 public class Manage : PageModel
 {
     private readonly ConsoleDbContext _context;
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly IOptions<StripeOptions> _stripeOptions;
 
-    public Manage(ConsoleDbContext context, DataService dataService, IOptions<StripeOptions> stripeOptions)
+    public Manage(ConsoleDbContext context, IDataService dataService, IOptions<StripeOptions> stripeOptions)
     {
         _context = context;
         _dataService = dataService;

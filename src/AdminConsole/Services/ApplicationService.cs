@@ -1,39 +1,41 @@
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class ApplicationService
+public class ApplicationService<TDbContext> : IApplicationService where TDbContext : ConsoleDbContext
 {
     private readonly IPasswordlessManagementClient _client;
-    private readonly ConsoleDbContext _db;
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
 
-    public ApplicationService(IPasswordlessManagementClient client, ConsoleDbContext db)
+    public ApplicationService(IPasswordlessManagementClient client, IDbContextFactory<TDbContext> dbContextFactory)
     {
         _client = client;
-        _db = db;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletion(string applicationId, string userName)
     {
         var response = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
 
-        var application = await _db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var application = await db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
 
         if (application == null) return response;
 
         if (response.IsDeleted)
         {
-            _db.Applications.Entry(application).State = EntityState.Deleted;
+            db.Applications.Entry(application).State = EntityState.Deleted;
         }
         else
         {
             application.DeleteAt = response.DeleteAt;
         }
 
-        await _db.SaveChangesAsync();
+        await db.SaveChangesAsync();
 
         return response;
     }
@@ -42,13 +44,28 @@ public class ApplicationService
     {
         _ = await _client.CancelApplicationDeletion(applicationId);
 
-        var application = await _db.Applications
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var application = await db.Applications
             .Where(x => x.Id == applicationId)
             .FirstOrDefaultAsync();
 
         if (application == null) return;
 
         application.DeleteAt = null;
-        await _db.SaveChangesAsync();
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<Onboarding?> GetOnboardingAsync(string applicationId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Onboardings.SingleOrDefaultAsync(x => x.ApplicationId == applicationId);
+    }
+
+    public async Task DeleteAsync(string applicationId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var application = new Application { Id = applicationId };
+        db.Applications.Remove(application);
+        await db.SaveChangesAsync();
     }
 }
