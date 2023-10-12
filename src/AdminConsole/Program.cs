@@ -119,8 +119,7 @@ void RunTheApp()
     services.AddHttpClient();
     builder.AddManagementApi();
 
-    // Database information
-    services.AddDatabase(builder);
+    builder.AddDatabase();
 
     services.ConfigureApplicationCookie(o =>
     {

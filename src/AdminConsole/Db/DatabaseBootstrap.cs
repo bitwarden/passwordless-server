@@ -7,9 +7,9 @@ using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Db;
 
-public static class AddDatabaseExtensionMethod
+public static class DatabaseBootstrap
 {
-    public static void AddDatabase(this IServiceCollection services, WebApplicationBuilder builder)
+    public static void AddDatabase(this WebApplicationBuilder builder)
     {
         // if not present, try use sqlite
         var sqlite = builder.Configuration.GetConnectionString("sqlite:admin");
@@ -19,8 +19,8 @@ public static class AddDatabaseExtensionMethod
         var migrating = builder.Configuration.GetValue<string>("ef_migrate");
         if (migrating == "1")
         {
-            services.AddDbContextFactory<MssqlConsoleDbContext>();
-            services.AddDbContextFactory<SqliteConsoleDbContext>();
+            builder.Services.AddDbContextFactory<MssqlConsoleDbContext>();
+            builder.Services.AddDbContextFactory<SqliteConsoleDbContext>();
         }
 
         // if name starts with sqlite, use sqlite, else use mssql
@@ -44,6 +44,13 @@ public static class AddDatabaseExtensionMethod
         }
     }
 
+    /// <summary>
+    /// Pooling is used to avoid issues with concurrent access to the same db context.
+    /// Abstract services that use the db context, and make injecting them easier as we can no longer resolve ConsoleDbContext.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="action"></param>
+    /// <typeparam name="TDbContext"></typeparam>
     private static void AddDatabaseContext<TDbContext>(this WebApplicationBuilder builder, Action<IServiceProvider, DbContextOptionsBuilder> action)
         where TDbContext : ConsoleDbContext
     {
