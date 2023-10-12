@@ -16,4 +16,5 @@ public interface IDataService
     Task<Application?> GetApplicationAsync(string applicationId);
     Task<bool> CanConnectAsync();
     Task CleanUpOnboardingAsync();
+    Task CreateOrganizationAsync(Organization organization);
 }

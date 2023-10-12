@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
-using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
@@ -12,13 +11,13 @@ namespace Passwordless.AdminConsole.Pages.Billing;
 
 public class Manage : PageModel
 {
-    private readonly ConsoleDbContext _context;
+    private readonly ISharedBillingService _billingService;
     private readonly IDataService _dataService;
     private readonly IOptions<StripeOptions> _stripeOptions;
 
-    public Manage(ConsoleDbContext context, IDataService dataService, IOptions<StripeOptions> stripeOptions)
+    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<StripeOptions> stripeOptions)
     {
-        _context = context;
+        _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
     }
@@ -75,8 +74,7 @@ public class Manage : PageModel
 
     public async Task<IActionResult> OnPostPortal()
     {
-        var customerId = _context.Organizations.Where(o => o.Id == User.GetOrgId()).Select(o => o.BillingCustomerId)
-            .FirstOrDefault();
+        var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);
         var returnUrl = Url.PageLink("/Billing/Manage");
 
         var options = new Stripe.BillingPortal.SessionCreateOptions

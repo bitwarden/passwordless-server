@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.Configuration;
-using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
@@ -19,25 +18,26 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class CreateApplicationModel : PageModel
 {
-    private readonly ConsoleDbContext db;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
+    private readonly IApplicationService _applicationService;
     private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
     private readonly PlansOptions _plansOptions;
 
-    public CreateApplicationModel(ConsoleDbContext db,
+    public CreateApplicationModel(
         IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
         SignInManager<ConsoleAdmin> signInManager,
+        IApplicationService applicationService,
         IDataService dataService,
         IOptions<StripeOptions> stripeOptions,
         IPasswordlessManagementClient managementClient,
         IOptionsSnapshot<PlansOptions> plansOptions)
     {
         _dataService = dataService;
+        _applicationService = applicationService;
         _managementClient = managementClient;
-        this.db = db;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
@@ -116,19 +116,14 @@ public class CreateApplicationModel : PageModel
         app.ApiKey = res.ApiKey2;
         app.ApiSecret = res.ApiSecret2;
         app.ApiUrl = _passwordlessOptions.Value.ApiUrl;
-
-
-        db.Applications.Add(app);
-
-        app.Onboarding = new Onboarding()
+        app.Onboarding = new Onboarding
         {
             ApiKey = res.ApiKey1,
             ApiSecret = res.ApiSecret1,
             SensitiveInfoExpireAt = DateTime.UtcNow.AddDays(7)
         };
-        // Add temporary onboarding keys
-        //db.Onboardings.Add();
-        await db.SaveChangesAsync();
+
+        await _applicationService.CreateApplicationAsync(app);
 
         var myUser = await _signInManager.UserManager.GetUserAsync(User);
         await _signInManager.RefreshSignInAsync(myUser);

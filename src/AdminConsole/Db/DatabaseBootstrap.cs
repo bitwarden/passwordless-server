@@ -63,6 +63,12 @@ public static class DatabaseBootstrap
         builder.AddBilling<TDbContext>();
         builder.Services.AddEventLogging<TDbContext>();
 
+        builder.Services.AddScoped<TDbContext>(sp =>
+        {
+            var dbContextFactory = sp.GetRequiredService<IDbContextFactory<TDbContext>>();
+            return dbContextFactory.CreateDbContext();
+        });
+
         // Identity
         builder.Services
             .AddIdentity<ConsoleAdmin, IdentityRole>()

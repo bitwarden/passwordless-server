@@ -19,4 +19,11 @@ public interface ISharedBillingService
     /// <returns>Whether operation was successful</returns>
     /// <exception cref="NotImplementedException"></exception>
     Task<bool> CancelSubscriptionAsync(string subscriptionId);
+
+    /// <summary>
+    /// Gets the Stripe CustomerId for the organization.
+    /// </summary>
+    /// <param name="organizationId"></param>
+    /// <returns></returns>
+    Task<string?> GetCustomerIdAsync(int organizationId);
 }

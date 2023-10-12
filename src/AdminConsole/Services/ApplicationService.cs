@@ -68,4 +68,11 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         db.Applications.Remove(application);
         await db.SaveChangesAsync();
     }
+
+    public async Task CreateApplicationAsync(Application application)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        db.Applications.Add(application);
+        await db.SaveChangesAsync();
+    }
 }

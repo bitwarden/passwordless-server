@@ -176,4 +176,14 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
                || subscription.CanceledAt.HasValue
                || subscription.Status == "canceled";
     }
+
+    public async Task<string?> GetCustomerIdAsync(int organizationId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var customerId = await db.Organizations
+            .Where(o => o.Id == organizationId)
+            .Select(o => o.BillingCustomerId)
+            .FirstOrDefaultAsync();
+        return customerId;
+    }
 }
