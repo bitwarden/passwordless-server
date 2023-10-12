@@ -8,7 +8,7 @@ public static class ClaimsExtension
     {
         var orgIdStr = user.FindFirstValue("OrgId");
         if (orgIdStr == null) return null;
-        int orgId = int.Parse(orgIdStr);
+        var orgId = int.Parse(orgIdStr, CultureInfo.InvariantCulture);
         return orgId;
     }
 
