@@ -11,7 +11,6 @@ using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
-using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Service;
 

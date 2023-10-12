@@ -1,5 +1,4 @@
-﻿using Passwordless.Service.EventLog;
-using Passwordless.Service.EventLog.Loggers;
+﻿using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;

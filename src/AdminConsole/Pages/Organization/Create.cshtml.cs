@@ -6,7 +6,6 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
-using static Passwordless.AdminConsole.EventLog.EventLogEventFunctions;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
@@ -87,7 +86,7 @@ public class Create : PageModel
 
         await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
 
-        _eventLogger.LogEvent(CreateOrganizationCreatedEvent(org, user));
+        _eventLogger.LogCreateOrganizationCreatedEvent(org, user);
 
         return RedirectToPage("/Organization/Verify");
     }
