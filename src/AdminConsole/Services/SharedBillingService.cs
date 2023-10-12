@@ -162,12 +162,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         // todo: Handled paid or unpaid events
     }
 
-    /// <summary>
-    /// Cancels a Stripe subscription.
-    /// </summary>
-    /// <param name="subscriptionId"></param>
-    /// <returns>Whether operation was successful</returns>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <inheritdoc />
     public async Task<bool> CancelSubscription(string subscriptionId)
     {
         if (string.IsNullOrWhiteSpace(subscriptionId))
