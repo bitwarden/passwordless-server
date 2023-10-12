@@ -7,41 +7,44 @@ namespace Passwordless.Service.EventLog;
 
 public static class EventFunctions
 {
-    public static EventDto RegistrationTokenCreatedEvent(string performedBy, IEventLogContext eventLogContext) => new()
-    {
-        Message = $"Created registration token for {performedBy}",
-        Severity = Severity.Informational,
-        EventType = EventType.ApiAuthUserRegistered,
-        PerformedAt = eventLogContext.PerformedAt,
-        PerformedBy = performedBy,
-        Subject = eventLogContext.TenantId,
-        TenantId = eventLogContext.TenantId,
-        ApiKeyId = eventLogContext.AbbreviatedKey
-    };
+    public static void LogRegistrationTokenCreatedEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Created registration token for {performedBy}",
+            Severity = Severity.Informational,
+            EventType = EventType.ApiAuthUserRegistered,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = performedBy,
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 
-    public static EventDto RegistrationBeganEvent(string performedBy, IEventLogContext eventLogContext) => new()
-    {
-        Message = $"Beginning passkey registration for {performedBy}",
-        PerformedBy = performedBy,
-        PerformedAt = eventLogContext.PerformedAt,
-        EventType = EventType.ApiAuthPasskeyRegistrationBegan,
-        Severity = Severity.Informational,
-        Subject = eventLogContext.TenantId,
-        TenantId = eventLogContext.TenantId,
-        ApiKeyId = eventLogContext.AbbreviatedKey
-    };
+    public static void LogRegistrationBeganEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Beginning passkey registration for {performedBy}",
+            PerformedBy = performedBy,
+            PerformedAt = context.PerformedAt,
+            EventType = EventType.ApiAuthPasskeyRegistrationBegan,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 
-    public static EventDto RegistrationCompletedEvent(string performedBy, IEventLogContext eventLogContext) => new()
-    {
-        Message = $"Completed passkey registration for user {performedBy}",
-        PerformedBy = performedBy,
-        PerformedAt = eventLogContext.PerformedAt,
-        EventType = EventType.ApiAuthPasskeyRegistrationCompleted,
-        Severity = Severity.Informational,
-        Subject = eventLogContext.TenantId,
-        TenantId = eventLogContext.TenantId,
-        ApiKeyId = eventLogContext.AbbreviatedKey
-    };
+    public static void LogRegistrationCompletedEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Completed passkey registration for user {performedBy}",
+            PerformedBy = performedBy,
+            PerformedAt = context.PerformedAt,
+            EventType = EventType.ApiAuthPasskeyRegistrationCompleted,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 
     public static EventDto UserAliasSetEvent(string performedBy, string tenantId, DateTime performedAt, ApplicationSecretKey applicationSecretKey) => new()
     {
