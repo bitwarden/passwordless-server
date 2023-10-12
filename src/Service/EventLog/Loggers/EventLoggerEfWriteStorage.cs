@@ -6,7 +6,7 @@ namespace Passwordless.Service.EventLog.Loggers;
 
 public class EventLoggerEfWriteStorage : IEventLogger
 {
-    private readonly DbGlobalContext _storage;
+    protected readonly DbGlobalContext _storage;
     private readonly IEventLogContext _eventLogContext;
     private readonly List<ApplicationEvent> _items = new();
 
@@ -16,7 +16,7 @@ public class EventLoggerEfWriteStorage : IEventLogger
         _eventLogContext = eventLogContext;
     }
 
-    public void LogEvent(EventDto @event)
+    public virtual void LogEvent(EventDto @event)
     {
         _items.Add(@event.ToEvent());
     }
@@ -26,7 +26,7 @@ public class EventLoggerEfWriteStorage : IEventLogger
         LogEvent(eventFunc(_eventLogContext));
     }
 
-    public async Task FlushAsync()
+    public virtual async Task FlushAsync()
     {
         _storage.ApplicationEvents.AddRange(_items);
         await _storage.SaveChangesAsync();

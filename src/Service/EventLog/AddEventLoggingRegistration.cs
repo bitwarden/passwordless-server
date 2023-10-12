@@ -9,12 +9,16 @@ public static class AddEventLoggingRegistration
     public static IServiceCollection AddEventLogging(this IServiceCollection services) =>
         services
             .AddScoped<EventLoggerEfWriteStorage>()
+            .AddScoped<UnauthenticatedEventLoggerEfWriteStorage>()
             .AddScoped<IEventLogStorage, EventLoggerEfReadStorage>()
             .AddScoped<IEventLogContext, EventLogContext>()
             .AddScoped(GetEventLogger);
 
     private static IEventLogger GetEventLogger(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<IEventLogContext>().Features.EventLoggingIsEnabled
-            ? serviceProvider.GetRequiredService<EventLoggerEfWriteStorage>()
-            : NoOpEventLogger.Instance;
+        serviceProvider.GetRequiredService<IEventLogContext>() switch
+        {
+            { TenantId: "" } => serviceProvider.GetRequiredService<UnauthenticatedEventLoggerEfWriteStorage>(),
+            { Features.EventLoggingIsEnabled: true } => serviceProvider.GetRequiredService<EventLoggerEfWriteStorage>(),
+            _ => NoOpEventLogger.Instance
+        };
 }

@@ -1,4 +1,5 @@
 using Passwordless.Common.EventLog.Enums;
+using Passwordless.Common.Models;
 using Passwordless.Service.EventLog.Models;
 
 namespace Passwordless.Service.EventLog.Loggers;
@@ -179,5 +180,31 @@ public static class EventLoggerExtensions
             Severity = Severity.Informational,
             Subject = userId,
             ApiKeyId = context.AbbreviatedKey
+        });
+    
+    public static void LogInvalidApiSecretUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationSecretKey secretKey) =>
+        logger.LogEvent(new EventDto
+        {
+            PerformedAt = performedAt,
+            Message = "A request using an invalid ApiSecret was attempted.",
+            PerformedBy = "Unknown User",
+            TenantId = tenantId,
+            EventType = EventType.ApiAuthInvalidSecretKeyUsed,
+            Severity = Severity.Alert,
+            Subject = tenantId,
+            ApiKeyId = secretKey.AbbreviatedValue
+        });
+    
+    public static void LogInvalidPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
+        logger.LogEvent(new EventDto
+        {
+            PerformedAt = performedAt,
+            Message = "A request using an invalid PublicKey was attempted.",
+            PerformedBy = "Unknown User",
+            TenantId = tenantId,
+            EventType = EventType.ApiAuthInvalidPublicKeyUsed,
+            Severity = Severity.Alert,
+            Subject = tenantId,
+            ApiKeyId = publicKey.AbbreviatedValue
         });
 }
