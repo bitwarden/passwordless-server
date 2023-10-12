@@ -28,7 +28,7 @@ public class SettingsModel : PageModel
 
     public async Task OnGet()
     {
-        Organization = await _dataService.GetOrganization();
+        Organization = await _dataService.GetOrganizationWithData();
         ApplicationId = _currentContext.AppId ?? String.Empty;
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
