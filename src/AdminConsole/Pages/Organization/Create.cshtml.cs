@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
@@ -13,7 +12,7 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Create : PageModel
 {
-    private readonly ConsoleDbContext _context;
+    private readonly IDataService _dataService;
 
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly IMailService _mailService;
@@ -22,13 +21,13 @@ public class Create : PageModel
 
     public CreateModel Form { get; set; }
 
-    public Create(ConsoleDbContext context,
+    public Create(IDataService dataService,
         UserManager<ConsoleAdmin> userManager,
         IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IEventLogger eventLogger)
     {
-        _context = context;
+        _dataService = dataService;
         _userManager = userManager;
         _mailService = mailService;
         _magicLinkSignInManager = magicLinkSignInManager;
@@ -62,16 +61,14 @@ public class Create : PageModel
         }
 
         // Create org
-        var org = new Models.Organization()
+        var org = new Models.Organization
         {
             Name = form.OrgName,
             InfoOrgType = form.OrgType,
             InfoUseCase = form.UseCase,
             CreatedAt = DateTime.UtcNow
         };
-
-        _context.Organizations.Add(org);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _dataService.CreateOrganizationAsync(org);
 
         // Create user
         var user = new ConsoleAdmin()
