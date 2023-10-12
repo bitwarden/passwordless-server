@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Passwordless.Api.Authorization;
-using Passwordless.Api.Extensions;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
-using Passwordless.Common.Models;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -16,19 +13,12 @@ public static class AliasEndpoints
     {
         app.MapPost("/alias", async (AliasPayload payload,
                 IFido2ServiceFactory fido2ServiceFactory,
-                IEventLogger eventLogger,
-                HttpRequest request,
-                ISystemClock clock) =>
+                IEventLogger eventLogger) =>
             {
                 var fido2Service = await fido2ServiceFactory.CreateAsync();
                 await fido2Service.SetAlias(payload);
 
-                eventLogger.LogUserAliasSetEvent(
-                    payload.UserId,
-                    request.GetTenantName(),
-                    clock.UtcNow.UtcDateTime,
-                    new ApplicationSecretKey(request.GetApiSecret())
-                );
+                eventLogger.LogUserAliasSetEvent(payload.UserId);
 
                 return Results.NoContent();
             })

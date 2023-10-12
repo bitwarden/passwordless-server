@@ -52,65 +52,56 @@ public static class EventLoggerExtensions
             ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogUserAliasSetEvent(
-        this IEventLogger logger,
-        string performedBy,
-        string tenantId,
-        DateTime performedAt,
-        ApplicationSecretKey applicationSecretKey) =>
-        logger.LogEvent(new EventDto
+    public static void LogUserAliasSetEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
         {
             Message = $"Added set aliases for user ({performedBy}).",
-            PerformedAt = performedAt,
+            PerformedAt = context.PerformedAt,
             PerformedBy = performedBy,
-            TenantId = tenantId,
+            TenantId = context.TenantId,
             EventType = EventType.ApiUserSetAliases,
             Severity = Severity.Informational,
             Subject = performedBy,
-            ApiKeyId = applicationSecretKey.AbbreviatedValue
+            ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogApplicationCreatedEvent(
-        this IEventLogger logger,
-        string performedBy,
-        string tenantId,
-        DateTime performedAt) =>
-        logger.LogEvent(new EventDto
+    public static void LogApplicationCreatedEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
         {
-            PerformedAt = performedAt,
-            Message = $"{tenantId} created.",
+            PerformedAt = context.PerformedAt,
+            Message = $"{context.TenantId} created.",
             PerformedBy = performedBy,
-            TenantId = tenantId,
+            TenantId = context.TenantId,
             EventType = EventType.ApiManagementAppCreated,
             Severity = Severity.Informational,
-            Subject = tenantId,
-            ApiKeyId = ""
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogAppFrozenEvent(this IEventLogger logger, string tenantId, DateTime performedAt) =>
-        logger.LogEvent(new EventDto
+    public static void LogAppFrozenEvent(this IEventLogger logger) =>
+        logger.LogEvent(context => new EventDto
         {
-            PerformedAt = performedAt,
+            PerformedAt = context.PerformedAt,
             Message = "Application frozen.",
             PerformedBy = "System",
-            TenantId = tenantId,
+            TenantId = context.TenantId,
             EventType = EventType.ApiManagementAppFrozen,
             Severity = Severity.Alert,
-            Subject = tenantId,
-            ApiKeyId = string.Empty
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogAppUnfrozenEvent(this IEventLogger logger, string tenantId, DateTime performedAt) =>
-        logger.LogEvent(new EventDto
+    public static void LogAppUnfrozenEvent(this IEventLogger logger) =>
+        logger.LogEvent(context => new EventDto
         {
-            PerformedAt = performedAt,
+            PerformedAt = context.PerformedAt,
             Message = "Application unfrozen.",
             PerformedBy = "System",
-            TenantId = tenantId,
+            TenantId = context.TenantId,
             EventType = EventType.ApiManagementAppUnfrozen,
             Severity = Severity.Alert,
-            Subject = tenantId,
-            ApiKeyId = string.Empty
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
         });
 
     public static void LogAppMarkedToDeleteEvent(this IEventLogger logger, string deletedBy) =>
@@ -123,20 +114,20 @@ public static class EventLoggerExtensions
             EventType = EventType.ApiManagementAppMarkedForDeletion,
             Severity = Severity.Informational,
             Subject = context.TenantId,
-            ApiKeyId = string.Empty
+            ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogAppDeleteCancelledEvent(this IEventLogger logger, string tenantId, DateTime performedAt) =>
-        logger.LogEvent(new EventDto
+    public static void LogAppDeleteCancelledEvent(this IEventLogger logger) =>
+        logger.LogEvent(context => new EventDto
         {
-            PerformedAt = performedAt,
+            PerformedAt = context.PerformedAt,
             Message = "Application deletion was cancelled.",
             PerformedBy = "System",
-            TenantId = tenantId,
+            TenantId = context.TenantId,
             EventType = EventType.ApiManagementAppDeletionCancelled,
             Severity = Severity.Informational,
-            Subject = tenantId,
-            ApiKeyId = string.Empty
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
         });
 
     public static void LogDeleteCredentialEvent(this IEventLogger logger, string userId) =>
