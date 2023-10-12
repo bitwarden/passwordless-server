@@ -1,14 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;
 
-public class EventLoggerEfUnauthenticatedWriteStorage : EventLoggerEfWriteStorage
+public class EventLoggerEfUnauthenticatedWriteStorage<TDbContext> : EventLoggerEfWriteStorage<TDbContext> where TDbContext : ConsoleDbContext
 {
-    private readonly OrganizationFeatureService _organizationFeatureService;
+    private readonly IOrganizationFeatureService _organizationFeatureService;
 
-    public EventLoggerEfUnauthenticatedWriteStorage(ConsoleDbContext context, OrganizationFeatureService organizationFeatureService) : base(context)
+    public EventLoggerEfUnauthenticatedWriteStorage(IDbContextFactory<TDbContext> dbContextFactory, IOrganizationFeatureService organizationFeatureService) : base(dbContextFactory)
     {
         _organizationFeatureService = organizationFeatureService;
     }

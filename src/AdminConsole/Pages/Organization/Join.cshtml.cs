@@ -13,14 +13,14 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Join : PageModel
 {
-    private readonly InvitationService _invitationService;
+    private readonly IInvitationService _invitationService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IMailService _mailService;
     private readonly IEventLogger _eventLogger;
     private readonly ISystemClock _systemClock;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
-    public Join(InvitationService invitationService,
+    public Join(IInvitationService invitationService,
         UserManager<ConsoleAdmin> userManager, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IMailService mailService,
         IEventLogger eventLogger,
@@ -79,7 +79,7 @@ public class Join : PageModel
         }
 
         Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
-        var ok = await _invitationService.ConsumeInvite(invite);
+        var ok = await _invitationService.ConsumeInviteAsync(invite);
 
         if (!ok)
         {

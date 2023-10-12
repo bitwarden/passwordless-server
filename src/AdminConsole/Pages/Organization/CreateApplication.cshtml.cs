@@ -22,7 +22,7 @@ public class CreateApplicationModel : PageModel
     private readonly ConsoleDbContext db;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
     private readonly PlansOptions _plansOptions;
@@ -30,7 +30,7 @@ public class CreateApplicationModel : PageModel
     public CreateApplicationModel(ConsoleDbContext db,
         IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
         SignInManager<ConsoleAdmin> signInManager,
-        DataService dataService,
+        IDataService dataService,
         IOptions<StripeOptions> stripeOptions,
         IPasswordlessManagementClient managementClient,
         IOptionsSnapshot<PlansOptions> plansOptions)
@@ -48,7 +48,7 @@ public class CreateApplicationModel : PageModel
 
     public async Task OnGet()
     {
-        CanCreateApplication = await _dataService.AllowedToCreateApplication();
+        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
     }
 
     public bool CanCreateApplication { get; set; }
@@ -66,20 +66,20 @@ public class CreateApplicationModel : PageModel
             Name = form.Name,
             Description = form.Description,
             CreatedAt = DateTime.UtcNow,
-            OrganizationId = User.GetOrgId()
+            OrganizationId = User.GetOrgId().Value
         };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
         // validate we're allowed to create more Orgs
-        if (!await _dataService.AllowedToCreateApplication())
+        if (!await _dataService.AllowedToCreateApplicationAsync())
         {
             ModelState.AddModelError("MaxApplications", "You have reached the maximum number of applications for your organization. Please upgrade to a paid organization");
             return Page();
         }
 
         // Attach a plan
-        var org = await _dataService.GetOrganization();
+        var org = await _dataService.GetOrganizationAsync();
         if (org.HasSubscription)
         {
             var priceId = _stripeOptions.UsersProPriceId;

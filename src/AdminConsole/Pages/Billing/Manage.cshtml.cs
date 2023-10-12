@@ -13,10 +13,10 @@ namespace Passwordless.AdminConsole.Pages.Billing;
 public class Manage : PageModel
 {
     private readonly ConsoleDbContext _context;
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly IOptions<StripeOptions> _stripeOptions;
 
-    public Manage(ConsoleDbContext context, DataService dataService, IOptions<StripeOptions> stripeOptions)
+    public Manage(ConsoleDbContext context, IDataService dataService, IOptions<StripeOptions> stripeOptions)
     {
         _context = context;
         _dataService = dataService;
@@ -28,8 +28,8 @@ public class Manage : PageModel
 
     public async Task OnGet()
     {
-        Applications = await _dataService.GetApplications();
-        Organization = await _dataService.GetOrganization();
+        Applications = await _dataService.GetApplicationsAsync();
+        Organization = await _dataService.GetOrganizationAsync();
     }
 
     public async Task<IActionResult> OnPost()

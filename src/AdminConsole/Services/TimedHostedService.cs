@@ -1,5 +1,3 @@
-using Passwordless.AdminConsole.Db;
-
 namespace Passwordless.AdminConsole.Services;
 
 public class TimedHostedService : BackgroundService
@@ -48,8 +46,8 @@ public class TimedHostedService : BackgroundService
         try
         {
             using IServiceScope scope = _services.CreateScope();
-            var usageService = scope.ServiceProvider.GetRequiredService<UsageService>();
-            await usageService.UpdateUsersCount();
+            var usageService = scope.ServiceProvider.GetRequiredService<IUsageService>();
+            await usageService.UpdateUsersCountAsync();
         }
         catch (Exception e)
         {
@@ -62,8 +60,8 @@ public class TimedHostedService : BackgroundService
         try
         {
             using IServiceScope scope = _services.CreateScope();
-            var billingService = scope.ServiceProvider.GetRequiredService<SharedBillingService>();
-            await billingService.UpdateUsage();
+            var billingService = scope.ServiceProvider.GetRequiredService<ISharedBillingService>();
+            await billingService.UpdateUsageAsync();
         }
         catch (Exception e)
         {
@@ -76,15 +74,8 @@ public class TimedHostedService : BackgroundService
         try
         {
             using IServiceScope scope = _services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
-            context.Onboardings
-                .Where(o => !string.IsNullOrEmpty(o.ApiSecret) && o.SensitiveInfoExpireAt < DateTime.UtcNow)
-                .ToList().ForEach(o =>
-                {
-                    o.ApiSecret = string.Empty;
-                });
-
-            await context.SaveChangesAsync();
+            var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
+            await dataService.CleanUpOnboardingAsync();
             _logger.LogInformation("Cleaned up onboarding data");
         }
         catch (Exception e)
