@@ -2,20 +2,16 @@ using System.Reflection;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
-using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
-using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.Mail;
@@ -100,12 +96,6 @@ void RunTheApp()
     {
         services.AddDatabaseDeveloperPageExceptionFilter();
     }
-    else
-    {
-        services
-            .AddDataProtection()
-            .PersistKeysToDbContext<ConsoleDbContext>();
-    }
 
     services.AddRazorPages(options =>
     {
@@ -121,16 +111,7 @@ void RunTheApp()
     services.AddHttpClient();
     builder.AddManagementApi();
 
-    // Database information
-    services.AddDatabase(builder);
-
-    // Identity
-    services
-        .AddIdentity<ConsoleAdmin, IdentityRole>()
-        .AddEntityFrameworkStores<ConsoleDbContext>()
-        .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
-        .AddDefaultTokenProviders()
-        .AddPasswordless(builder.Configuration.GetSection("Passwordless"));
+    builder.AddDatabase();
 
     services.ConfigureApplicationCookie(o =>
     {
@@ -166,14 +147,6 @@ void RunTheApp()
     builder.AddMail();
     services.AddSingleton<IMailService, DefaultMailService>();
 
-    services.AddScoped<UsageService>();
-    services.AddScoped<DataService>();
-    services.AddScoped<InvitationService>();
-    services.AddScoped<ApplicationService>();
-    services.AddBilling(builder);
-
-    services.AddEventLogging();
-
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
     services.Remove(defaultLinkGeneratorDescriptor);
@@ -181,7 +154,7 @@ void RunTheApp()
 
     // Plan Features
     services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
-    services.AddScoped<OrganizationFeatureService>();
+
     WebApplication app = builder.Build();
 
 
@@ -201,12 +174,7 @@ void RunTheApp()
     if (isSelfHosted)
     {
         app.UseMiddleware<HttpOverridesMiddleware>();
-
-        // When self-hosting. Migrate latest database changes during startup
-        using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider
-            .GetRequiredService<ConsoleDbContext>();
-        dbContext.Database.Migrate();
+        app.ExecuteMigration();
     }
 
     app.UseCSP();

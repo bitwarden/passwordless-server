@@ -1,5 +1,3 @@
-using Passwordless.AdminConsole.Db;
-using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Services;
@@ -45,15 +43,13 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
             var client = scope.ServiceProvider.GetRequiredService<IPasswordlessManagementClient>();
-            var db = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
+            var applicationService = scope.ServiceProvider.GetRequiredService<IApplicationService>();
             var applicationIds = await client.ListApplicationsPendingDeletionAsync();
             foreach (var applicationId in applicationIds)
             {
                 if (await client.DeleteApplicationAsync(applicationId))
                 {
-                    var application = new Application { Id = applicationId };
-                    db.Applications.Remove(application);
-                    await db.SaveChangesAsync();
+                    await applicationService.DeleteAsync(applicationId);
                 }
                 else
                 {

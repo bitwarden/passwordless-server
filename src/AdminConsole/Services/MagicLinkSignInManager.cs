@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services.Mail;
-using static Passwordless.AdminConsole.EventLog.EventLogEventFunctions;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Passwordless.AdminConsole.Services;
@@ -52,7 +51,8 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         var endpoint = urlBuilder.PageLink("/Account/Magic", values: new { returnUrl }) ?? urlBuilder.Content("~/");
         await _mailService.SendPasswordlessSignInAsync(endpoint, token, email);
 
-        if (user is ConsoleAdmin admin) _eventLogger.LogEvent(CreateLoginViaMagicLinkEvent(admin));
+        if (user is ConsoleAdmin admin)
+            _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
 
         return SignInResult.Success;
     }

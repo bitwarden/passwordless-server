@@ -1,3 +1,4 @@
+using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Services;
 using Stripe;
 
@@ -5,14 +6,14 @@ namespace Passwordless.AdminConsole.Billing;
 
 public static class AddBillingExtensionMethods
 {
-    public static IServiceCollection AddBilling(this IServiceCollection services, WebApplicationBuilder builder)
+    public static void AddBilling<TDbContext>(this WebApplicationBuilder builder)
+        where TDbContext : ConsoleDbContext
     {
-        services.AddOptions<StripeOptions>()
+        builder.Services.AddOptions<StripeOptions>()
             .BindConfiguration("Stripe");
 
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
 
-        services.AddScoped<SharedBillingService>();
-        return services;
+        builder.Services.AddScoped<ISharedBillingService, SharedBillingService<TDbContext>>();
     }
 }
