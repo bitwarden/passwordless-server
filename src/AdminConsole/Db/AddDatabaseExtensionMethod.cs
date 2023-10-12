@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.Identity;
@@ -25,11 +26,17 @@ public static class AddDatabaseExtensionMethod
         // if name starts with sqlite, use sqlite, else use mssql
         if (!String.IsNullOrEmpty(sqlite))
         {
-            builder.AddDatabaseContext<SqliteConsoleDbContext>();
+            builder.AddDatabaseContext<SqliteConsoleDbContext>((sp, o) =>
+            {
+                o.UseSqlite(sqlite);
+            });
         }
         else if (!string.IsNullOrEmpty(mssql))
         {
-            builder.AddDatabaseContext<MssqlConsoleDbContext>();
+            builder.AddDatabaseContext<MssqlConsoleDbContext>((sp, o) =>
+            {
+                o.UseSqlServer(mssql);
+            });
         }
         else
         {
@@ -37,9 +44,11 @@ public static class AddDatabaseExtensionMethod
         }
     }
 
-    private static void AddDatabaseContext<TDbContext>(this WebApplicationBuilder builder) where TDbContext : ConsoleDbContext
+    private static void AddDatabaseContext<TDbContext>(this WebApplicationBuilder builder, Action<IServiceProvider, DbContextOptionsBuilder> action)
+        where TDbContext : ConsoleDbContext
     {
-        builder.Services.AddDbContextFactory<TDbContext>();
+        builder.Services.AddPooledDbContextFactory<TDbContext>(action);
+        builder.Services.AddDbContext<ConsoleDbContext, TDbContext>();
         builder.Services.AddScoped<IDataService, DataService<TDbContext>>();
         builder.Services.AddScoped<IUsageService, UsageService<TDbContext>>();
         builder.Services.AddScoped<IInvitationService, InvitationService<TDbContext>>();
