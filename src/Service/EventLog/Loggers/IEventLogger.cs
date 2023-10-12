@@ -1,5 +1,4 @@
 using Passwordless.Common.EventLog.Enums;
-using Passwordless.Common.Models;
 using Passwordless.Service.EventLog.Models;
 
 namespace Passwordless.Service.EventLog.Loggers;
