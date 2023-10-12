@@ -26,11 +26,13 @@ public record OrganizationEventDto(
         };
 
     public EventLogEvent ToResponse() =>
-        new(PerformedAt,
+        new(
+            PerformedAt,
             EventType.ToString(),
             Message,
             Severity.ToString(),
             PerformedBy,
             Subject,
-            string.Empty);
+            string.Empty
+        );
 }
