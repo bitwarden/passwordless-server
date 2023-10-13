@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Fido2" Version="3.0.1" />
     <PackageReference Include="MessagePack" Version="2.5.129" />
