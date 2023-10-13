@@ -16,7 +16,7 @@ public class DataService<TDbContext> : IDataService where TDbContext : ConsoleDb
     {
         _httpAccessor = httpAccessor;
         _dbContextFactory = dbContextFactory;
-        _orgId = httpAccessor.HttpContext.User?.GetOrgId();
+        _orgId = httpAccessor.HttpContext?.User?.GetOrgId();
     }
 
     public async Task<List<Application>> GetApplicationsAsync()
