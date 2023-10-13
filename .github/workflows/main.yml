@@ -112,13 +112,6 @@ jobs:
       - name: Run restore
         run: dotnet restore
 
-      - name: Run build
-        run: >
-          dotnet build
-          --no-restore
-          --configuration Release
-          -p:ContinuousIntegrationBuild=true
-
       # When triggered by `push` or `pull_request` events, generate a prerelease version
       # for the apps, so as to clearly indicate that it's not a stable version release.
       - name: Generate prerelease version
@@ -135,7 +128,6 @@ jobs:
         run: >
           dotnet publish src/Api/
           --no-restore
-          --no-build
           --configuration Release
           --runtime win-x86
           --no-self-contained
@@ -147,7 +139,6 @@ jobs:
         run: >
           dotnet publish src/AdminConsole/
           --no-restore
-          --no-build
           --configuration Release
           --runtime win-x86
           --no-self-contained
