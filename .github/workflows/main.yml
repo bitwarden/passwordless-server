@@ -109,9 +109,6 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # v3.0.3
 
-      - name: Run restore
-        run: dotnet restore
-
       # When triggered by `push` or `pull_request` events, generate a prerelease version
       # for the apps, so as to clearly indicate that it's not a stable version release.
       - name: Generate prerelease version
@@ -127,7 +124,6 @@ jobs:
       - name: Publish API
         run: >
           dotnet publish src/Api/
-          --no-restore
           --configuration Release
           --runtime win-x86
           --no-self-contained
@@ -138,7 +134,6 @@ jobs:
       - name: Publish AdminConsole
         run: >
           dotnet publish src/AdminConsole/
-          --no-restore
           --configuration Release
           --runtime win-x86
           --no-self-contained
