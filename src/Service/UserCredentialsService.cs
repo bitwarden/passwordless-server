@@ -2,7 +2,6 @@
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
-using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Service;
 
@@ -41,7 +40,7 @@ public class UserCredentialsService
 
         await _storage.DeleteCredential(credentialId);
 
-        _eventLogger.LogEvent(DeleteCredentialEvent(credential.UserId));
+        _eventLogger.LogDeleteCredentialEvent(credential.UserId);
     }
 
     public Task<List<UserSummary>> GetAllUsers(string paginationLastId)

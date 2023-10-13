@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.EventLog.DTOs;
+using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Pages.Components;
 using Passwordless.AdminConsole.Services;
 
@@ -9,7 +10,7 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 public class Log : PageModel
 {
     private readonly IEventLogService _eventLogService;
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
 
     public Models.Organization Organization { get; set; }
@@ -17,7 +18,7 @@ public class Log : PageModel
     public PagedList PageList { get; set; }
     public int RetentionPeriod { get; private set; }
 
-    public Log(IEventLogService eventLogService, DataService dataService, ICurrentContext currentContext)
+    public Log(IEventLogService eventLogService, IDataService dataService, ICurrentContext currentContext)
     {
         _eventLogService = eventLogService;
         _dataService = dataService;
@@ -31,16 +32,14 @@ public class Log : PageModel
         if (!features.EventLoggingIsEnabled) return RedirectToPage("Overview");
 
         RetentionPeriod = features.EventLoggingRetentionPeriod;
-        Organization = await _dataService.GetOrganization();
+        Organization = await _dataService.GetOrganizationAsync();
 
-        var eventTask = _eventLogService.GetEventLogs(Organization.Id, pageNumber, numberOfResults);
-        var countTask = _eventLogService.GetEventLogCount(Organization.Id);
-
-        await Task.WhenAll(eventTask, countTask);
-
-        Events = eventTask.Result.Events;
-
-        var itemCount = countTask.Result;
+        // need to revisit this:
+        // - do not pass around org id
+        // - infinite scroll/paging over current approach?
+        var result = await _eventLogService.GetEventLogs(Organization.Id, pageNumber, numberOfResults);
+        Events = result.Events;
+        var itemCount = await _eventLogService.GetEventLogCount(Organization.Id);
 
         PageList = new PagedList(itemCount, pageNumber, numberOfResults);
 

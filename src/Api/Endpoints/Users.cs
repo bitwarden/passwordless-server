@@ -3,7 +3,6 @@ using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
-using static Passwordless.Service.EventLog.EventFunctions;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -36,7 +35,7 @@ public static class UsersEndpoints
         {
             await userService.DeleteUser(payload.UserId);
 
-            eventLogger.LogEvent(DeletedUserEvent(payload.UserId));
+            eventLogger.LogDeletedUserEvent(payload.UserId);
 
             return Ok();
         })

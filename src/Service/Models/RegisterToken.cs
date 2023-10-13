@@ -37,7 +37,7 @@ public class VerifySignInToken : Token
     public DateTime Timestamp { get; set; }
 
     [Key(12)]
-    public string RPID { get; set; }
+    public string RpId { get; set; }
 
     [Key(13)]
     public string Origin { get; set; }
