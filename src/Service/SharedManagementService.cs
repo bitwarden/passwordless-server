@@ -45,7 +45,7 @@ public class SharedManagementService : ISharedManagementService
         IConfiguration config,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
-        IEventLogger eventLogger)
+        UnauthenticatedEventLoggerEfWriteStorage eventLogger)
     {
         this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
@@ -200,10 +200,12 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
         }
+
         if (!accountInformation.DeleteAt.HasValue || accountInformation.DeleteAt > _systemClock.UtcNow)
         {
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
+
         await storage.DeleteAccount();
         await _mailService.SendApplicationDeletedAsync(accountInformation, _systemClock.UtcNow.UtcDateTime, "system");
         return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
@@ -218,10 +220,12 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
         }
+
         if (accountInformation.DeleteAt.HasValue)
         {
             throw new ApiException("app_pending_deletion", "App is already pending to be deleted.", 400);
         }
+
         bool canDeleteImmediately = accountInformation.CreatedAt > _systemClock.UtcNow.AddDays(-3);
 
         if (!canDeleteImmediately)
@@ -267,6 +271,7 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException($"'{nameof(appId)}' is required.", 400);
         }
+
         var storage = tenantFactory.Create(appId);
         await storage.SetFeaturesAsync(payload);
     }
