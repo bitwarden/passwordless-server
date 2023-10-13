@@ -6,6 +6,8 @@
 }
 
 <div>
+    <p>See events for this app, such as passkey creation, login events, etc.</p>
+    <br>
     <div class="flow-root" asp-if="Model.Events.Any()">
         <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -73,17 +75,14 @@
 
     <p asp-if="!Model.Events.Any()">This application has no events from the past @Model.RetentionPeriod days.</p>
 
-    @if (Model.PageList.TotalPages > 1)
-    {
-        <div class="flex justify-center">
-            <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
+    <div asp-if="Model.PageList.TotalPages > 1" class="flex justify-center">
+        <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
 
-            @foreach (var page in Model.PageList.Pages)
-            {
-                <a asp-page="./Log" class="px-1 link-blue" asp-route-pageNumber="@(page)">@(page)</a>
-            }
+        @foreach (var page in Model.PageList.Pages)
+        {
+            <a asp-page="./Log" class="px-1 link-blue" asp-route-pageNumber="@(page)">@(page)</a>
+        }
 
-            <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
-        </div>
-    }
+        <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
+    </div>
 </div>
