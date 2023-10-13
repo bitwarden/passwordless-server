@@ -18,7 +18,7 @@ public class SharedManagementServiceTests
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
-    private readonly Mock<IEventLogger> _eventLogger = new();
+    private readonly Mock<UnauthenticatedEventLoggerEfWriteStorage> _eventLogger = new();
 
     private readonly SharedManagementService _sut;
 
