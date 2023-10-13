@@ -17,7 +17,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Api\Api.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="Microsoft.AspNetCore.Mvc.Testing" />
-  </ItemGroup>
+
 </Project>

@@ -12,9 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="7.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="7.0.0" />
     <PackageReference Include="Datadog.Trace" Version="2.30.0" />
@@ -30,4 +27,5 @@
       <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
       <PackageReference Include="UAParser" Version="3.1.47" />
   </ItemGroup>
+
 </Project>
