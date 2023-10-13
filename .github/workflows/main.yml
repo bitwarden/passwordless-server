@@ -77,7 +77,6 @@ jobs:
           --configuration Release
 
       - name: Run tests
-        id: tests
         # The next step will fail if any tests fail, but we still want to publish the results
         continue-on-error: true
         run: >
