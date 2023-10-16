@@ -6,18 +6,18 @@ using Passwordless.AdminConsole.Db;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;
 
-public interface IInternalEventStorage
+public interface IInternalEventLogStorageContext
 {
     Task DeleteExpiredEvents(CancellationToken cancellationToken);
 }
 
-public class InternalEventStorage<TDbContext> : IInternalEventStorage where TDbContext : ConsoleDbContext
+public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStorageContext where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly IOptions<PlansOptions> _planOptionsConfig;
     private readonly ISystemClock _systemClock;
 
-    public InternalEventStorage(IDbContextFactory<TDbContext> dbContextFactory,
+    public InternalEventLogStorageContext(IDbContextFactory<TDbContext> dbContextFactory,
         IOptions<PlansOptions> planOptionsConfig,
         ISystemClock systemClock)
     {

@@ -13,7 +13,7 @@ public static class AddEventLoggingRegistration
             .AddScoped<EventLoggerEfWriteStorage<TDbContext>>()
             .AddScoped<EventLoggerEfUnauthenticatedWriteStorage<TDbContext>>()
             .AddScoped(GetEventLogger<TDbContext>)
-            .AddTransient<IInternalEventStorage, InternalEventStorage<TDbContext>>()
+            .AddTransient<IInternalEventLogStorageContext, InternalEventLogStorageContext<TDbContext>>()
             .AddTransient<IEventLogService, EventLogService>()
             .AddHostedService<EventDeletionBackgroundWorker>();
 
