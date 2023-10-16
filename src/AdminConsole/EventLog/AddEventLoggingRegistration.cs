@@ -13,7 +13,9 @@ public static class AddEventLoggingRegistration
             .AddScoped<EventLoggerEfWriteStorage<TDbContext>>()
             .AddScoped<EventLoggerEfUnauthenticatedWriteStorage<TDbContext>>()
             .AddScoped(GetEventLogger<TDbContext>)
-            .AddTransient<IEventLogService, EventLogService>();
+            .AddTransient<IInternalEventStorage, InternalEventStorage<TDbContext>>()
+            .AddTransient<IEventLogService, EventLogService>()
+            .AddHostedService<EventDeletionBackgroundWorker>();
 
     private static IEventLogger GetEventLogger<TDbContext>(IServiceProvider serviceProvider) where TDbContext : ConsoleDbContext =>
         serviceProvider.GetRequiredService<ICurrentContext>() switch
