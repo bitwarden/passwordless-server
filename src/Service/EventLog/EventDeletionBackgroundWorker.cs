@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Passwordless.Common.EventLog.Models;
 using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -50,13 +49,17 @@ public class EventDeletionBackgroundWorker : BackgroundService
         using var serviceScope = _serviceProvider.CreateScope();
         var dbContext = serviceScope.ServiceProvider.GetRequiredService<DbGlobalContext>();
 
-        var query = from feature in dbContext.AppFeatures.Where(x => x.EventLoggingIsEnabled).AsNoTracking()
-            from @event in dbContext.ApplicationEvents
-                .Where(x => x.TenantId == feature.Tenant
-                            && x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(feature.EventLoggingRetentionPeriod)).AsNoTracking()
-            select new ApplicationEvent { Id = @event.Id };
+        var eventsToDelete = await dbContext.ApplicationEvents
+            .Join(dbContext.AppFeatures,
+                @event => @event.TenantId,
+                feature => feature.Tenant,
+                (@event, feature) => new { @event.Id, @event.PerformedAt, @event.TenantId, feature.EventLoggingRetentionPeriod })
+            .Where(x => x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(-x.EventLoggingRetentionPeriod))
+            .Select(x => new ApplicationEvent { Id = x.Id })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-        dbContext.RemoveRange(await query.ToListAsync(cancellationToken));
+        dbContext.RemoveRange(eventsToDelete);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
