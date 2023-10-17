@@ -10,6 +10,6 @@ public class LocalTime : TagHelper
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        output.Attributes.Add("datetime", DateTime.ToString("O"));
+        output.Attributes.Add("datetime", DateTime.SpecifyKind(DateTime, DateTimeKind.Utc).ToString("O"));
     }
 }
