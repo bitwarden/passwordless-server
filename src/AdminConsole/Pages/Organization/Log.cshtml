@@ -39,9 +39,8 @@
                         @foreach (var logEvent in Model.Events)
                         {
                             <tr>
-                                <td
-                                    class="whitespace-nowrap td-indent td-strong">
-                                    @logEvent.PerformedAt
+                                <td class="whitespace-nowrap td-indent td-strong">
+                                    <asp-local-time datetime="@logEvent.PerformedAt" />
                                 </td>
                                 <td class="whitespace-nowrap">
                                     @logEvent.PerformedBy
