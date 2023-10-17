@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Passwordless.AdminConsole.EventLog.DTOs;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.Common.EventLog.Enums;
@@ -115,6 +117,21 @@ public static class EventLoggerExtensions
                 Severity.Informational,
                 consoleAdmin.OrganizationId.ToString(),
                 consoleAdmin.OrganizationId,
+                performedAt
+            )
+        );
+
+    public static void LogAdminLoginTokenVerifiedEvent(
+        this IEventLogger logger,
+        ClaimsPrincipal claimsPrincipal,
+        DateTime performedAt) =>
+        logger.LogEvent(
+            new(claimsPrincipal.GetId(),
+                EventType.AdminSignInTokenVerified,
+                $"{claimsPrincipal.GetName()} successfully signed-in via passkey.",
+                Severity.Informational,
+                claimsPrincipal.GetOrgId()?.ToString() ?? string.Empty,
+                claimsPrincipal.GetOrgId().GetValueOrDefault(),
                 performedAt
             )
         );

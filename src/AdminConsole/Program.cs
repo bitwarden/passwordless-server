@@ -188,7 +188,8 @@ void RunTheApp()
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseMiddleware<EventLogStorageCommitMiddleware>();
     app.UseAuthorization();
-    app.MapPasswordless();
+    app.MapPasswordless()
+        .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
     app.Run();
 }
