@@ -7,6 +7,7 @@ namespace Passwordless.AdminConsole.EventLog.Loggers;
 public class EventLoggerEfReadStorage<TDbContext> : IEventLoggerStorage where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+
     public EventLoggerEfReadStorage(IDbContextFactory<TDbContext> dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
@@ -25,8 +26,6 @@ public class EventLoggerEfReadStorage<TDbContext> : IEventLoggerStorage where TD
                 .ToListAsync())
             .Select(x => x.ToDto());
     }
-
-
 
     public async Task<int> GetOrganizationEventCount(int organizationId)
     {
