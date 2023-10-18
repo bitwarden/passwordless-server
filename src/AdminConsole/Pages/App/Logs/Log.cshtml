@@ -61,7 +61,7 @@
                                     @logEvent.EventType
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @(string.IsNullOrEmpty(logEvent.ApiKeyAbbreviated) ? "" : string.Concat("***", logEvent.ApiKeyAbbreviated))
+                                    @(string.IsNullOrEmpty(logEvent.ApiKeyId) ? "" : string.Concat("***", logEvent.ApiKeyId))
                                 </td>
                             </tr>
                         }
