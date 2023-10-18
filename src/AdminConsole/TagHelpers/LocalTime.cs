@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Passwordless.AdminConsole.TagHelpers;
@@ -11,6 +12,6 @@ public class LocalTime : TagHelper
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
         output.TagName = "local-time";
-        output.Attributes.Add("datetime", DateTime.SpecifyKind(DateTime, DateTimeKind.Utc).ToString("O"));
+        output.Attributes.Add("datetime", DateTime.SpecifyKind(DateTime, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture));
     }
 }
