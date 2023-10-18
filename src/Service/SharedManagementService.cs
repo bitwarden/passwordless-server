@@ -136,8 +136,12 @@ public class SharedManagementService : ISharedManagementService
         var existingKey = await storage.GetApiKeyAsync(secretKey);
         if (existingKey != null)
         {
-            existingKey.CheckLocked();
-
+            if (existingKey.IsLocked)
+            {
+                _eventLogger.LogDisabledApiKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
+                throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
+            }
+            
             if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
             {
                 return appId;
@@ -157,8 +161,13 @@ public class SharedManagementService : ISharedManagementService
         var existingKey = await storage.GetApiKeyAsync(publicKey);
         if (existingKey != null && existingKey.ApiKey == publicKey)
         {
-            existingKey.CheckLocked();
-            return appId;
+            if (!existingKey.IsLocked)
+            {
+                return appId;
+            }
+
+            _eventLogger.LogDisabledPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
+            throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
         }
 
         _eventLogger.LogInvalidPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));

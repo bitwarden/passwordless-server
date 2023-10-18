@@ -207,4 +207,30 @@ public static class EventLoggerExtensions
             Subject = tenantId,
             ApiKeyId = publicKey.AbbreviatedValue
         });
+
+    public static void LogDisabledApiKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationSecretKey secretKey) =>
+        logger.LogEvent(new EventDto
+        {
+            PerformedAt = performedAt,
+            Message = "Disabled Api Key used.",
+            PerformedBy = "Unknown User",
+            TenantId = tenantId,
+            EventType = EventType.ApiAuthDisabledSecretKeyUsed,
+            Severity = Severity.Alert,
+            Subject = tenantId,
+            ApiKeyId = secretKey.AbbreviatedValue
+        });
+    
+    public static void LogDisabledPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
+        logger.LogEvent(new EventDto
+        {
+            PerformedAt = performedAt,
+            Message = "Disabled Public Key used.",
+            PerformedBy = "Unknown User",
+            TenantId = tenantId,
+            EventType = EventType.ApiAuthDisabledPublicKeyUsed,
+            Severity = Severity.Alert,
+            Subject = tenantId,
+            ApiKeyId = publicKey.AbbreviatedValue
+        });
 }
