@@ -27,5 +27,6 @@ public enum EventType
     AdminDeleteAdmin = 7003,
     AdminCancelAdminInvite = 7004,
     AdminInvalidInviteUsed = 7005,
-    AdminAcceptedInvite = 7006
+    AdminAcceptedInvite = 7006,
+    AdminSignInTokenVerified = 7007
 }

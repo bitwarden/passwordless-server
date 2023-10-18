@@ -12,7 +12,8 @@ public static class AddEventLoggingRegistration
             .AddScoped<UnauthenticatedEventLoggerEfWriteStorage>()
             .AddScoped<IEventLogStorage, EventLoggerEfReadStorage>()
             .AddScoped<IEventLogContext, EventLogContext>()
-            .AddScoped(GetEventLogger);
+            .AddScoped(GetEventLogger)
+            .AddHostedService<EventDeletionBackgroundWorker>();
 
     private static IEventLogger GetEventLogger(IServiceProvider serviceProvider) =>
         serviceProvider.GetRequiredService<IEventLogContext>() switch
