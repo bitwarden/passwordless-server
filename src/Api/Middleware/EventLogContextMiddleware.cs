@@ -15,19 +15,20 @@ public class EventLogContextMiddleware
     {
         var tenantId = context.Request.GetTenantName();
         var requestKey = context.Request.GetPublicApiKey() ?? context.Request.GetApiSecret();
+        var authenticated = context.User.Identity?.IsAuthenticated ?? false;
 
         var featuresContext = await featureContextProvider.UseContext();
 
         switch (requestKey)
         {
             case not null when requestKey.Contains(ApplicationPublicKey.KeyIdentifier):
-                eventLogContext.SetContext(tenantId, featuresContext, new ApplicationPublicKey(requestKey));
+                eventLogContext.SetContext(tenantId, featuresContext, new ApplicationPublicKey(requestKey), authenticated);
                 break;
             case not null when requestKey.Contains(ApplicationSecretKey.KeyIdentifier):
-                eventLogContext.SetContext(tenantId, featuresContext, new ApplicationSecretKey(requestKey));
+                eventLogContext.SetContext(tenantId, featuresContext, new ApplicationSecretKey(requestKey), authenticated);
                 break;
             default:
-                eventLogContext.SetContext(tenantId, featuresContext);
+                eventLogContext.SetContext(tenantId, featuresContext, authenticated);
                 break;
         }
 

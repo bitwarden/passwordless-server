@@ -220,7 +220,7 @@ public static class EventLoggerExtensions
             Subject = tenantId,
             ApiKeyId = secretKey.AbbreviatedValue
         });
-    
+
     public static void LogDisabledPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
         logger.LogEvent(new EventDto
         {

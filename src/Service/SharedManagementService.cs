@@ -45,7 +45,7 @@ public class SharedManagementService : ISharedManagementService
         IConfiguration config,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
-        UnauthenticatedEventLoggerEfWriteStorage eventLogger)
+        IEventLogger eventLogger)
     {
         this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
@@ -141,7 +141,7 @@ public class SharedManagementService : ISharedManagementService
                 _eventLogger.LogDisabledApiKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
                 throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
             }
-            
+
             if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
             {
                 return appId;

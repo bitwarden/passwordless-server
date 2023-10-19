@@ -8,7 +8,7 @@ public class EventLogStorageCommitMiddleware
 
     public EventLogStorageCommitMiddleware(RequestDelegate next) => _next = next;
 
-    public async Task InvokeAsync(HttpContext context, IEventLogger eventLogger)
+    public async Task InvokeAsync(HttpContext context, IServiceProvider provider)
     {
         try
         {
@@ -16,7 +16,8 @@ public class EventLogStorageCommitMiddleware
         }
         finally
         {
-            await eventLogger.FlushAsync();
+
+            await provider.GetRequiredService<IEventLogger>().FlushAsync();
         }
     }
 }

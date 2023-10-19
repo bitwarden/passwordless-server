@@ -1,27 +1,34 @@
-using Passwordless.Service.EventLog.Mappings;
 using Passwordless.Service.EventLog.Models;
+using Passwordless.Service.Features;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.EventLog.Loggers;
 
 public class UnauthenticatedEventLoggerEfWriteStorage : EventLoggerEfWriteStorage
 {
-    public UnauthenticatedEventLoggerEfWriteStorage(DbGlobalContext storage,
-        IEventLogContext eventLogContext)
-        : base(storage, eventLogContext)
+    private readonly IFeatureContextProvider _featureContextProvider;
+
+    public UnauthenticatedEventLoggerEfWriteStorage(
+        DbGlobalContext storage,
+        IEventLogContext eventLogContext,
+        IFeatureContextProvider featureContextProvider,
+        EventCache eventCache) : base(storage, eventLogContext, eventCache)
     {
+        _featureContextProvider = featureContextProvider;
     }
 
-    public override void LogEvent(EventDto @event)
+    public async override Task FlushAsync()
     {
-        if (!HasEventLoggingFeature(@event.TenantId)) return;
-
-        _storage.Add(@event.ToEvent());
-        _storage.SaveChanges();
+        if (await HasFeature())
+        {
+            await base.FlushAsync();
+        }
     }
 
-    public override Task FlushAsync() => Task.CompletedTask;
+    private async Task<bool> HasFeature()
+    {
+        var appId = _eventCache.GetEvents().FirstOrDefault()?.TenantId ?? string.Empty;
 
-    private bool HasEventLoggingFeature(string appId) =>
-        _storage.AppFeatures.Any(x => x.Tenant == appId && x.EventLoggingIsEnabled);
+        return (await _featureContextProvider.UseContext(appId)).EventLoggingIsEnabled;
+    }
 }
