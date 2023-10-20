@@ -123,7 +123,7 @@ public class Admins : PageModel
         Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
 
         var inviteToCancel = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
-        
+
         await _invitationService.CancelInviteAsync(hashedCode);
 
         var performedBy = await _dataService.GetUserAsync();
