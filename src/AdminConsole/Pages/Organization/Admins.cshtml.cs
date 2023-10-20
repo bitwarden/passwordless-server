@@ -120,16 +120,19 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnPostCancel(string hashedCode)
     {
+        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
+
+        var inviteToCancel = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
+        
         await _invitationService.CancelInviteAsync(hashedCode);
 
         var performedBy = await _dataService.GetUserAsync();
 
-        var invitationCancelled = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
-        if (invitationCancelled is not null)
+        if (inviteToCancel is not null)
         {
             _eventLogger.LogCancelAdminInviteEvent(
                 performedBy,
-                invitationCancelled.ToEmail,
+                inviteToCancel.ToEmail,
                 _systemClock.UtcNow.UtcDateTime
             );
         }
