@@ -181,6 +181,8 @@ jobs:
         with:
           name: AdminConsole
 
+      - run: ls -la
+
       - name: Archive API
         run: zip -r Api.zip publish/Api/
 
