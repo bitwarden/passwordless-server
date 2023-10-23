@@ -69,7 +69,7 @@ jobs:
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # v3.0.3
 
       - name: Run restore
-        run: dotnet restore --locked-mode
+        run: dotnet restore
 
       - name: Run build
         run: >
@@ -82,8 +82,6 @@ jobs:
         continue-on-error: true
         run: >
           dotnet test
-          --no-restore
-          --no-build
           --configuration Release
           --logger "trx;LogFileName=pw-test-results.trx"
 
