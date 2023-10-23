@@ -56,7 +56,7 @@ jobs:
 
   # Run tests
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
@@ -67,6 +67,9 @@ jobs:
 
       - name: Install .NET
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # v3.0.3
+
+      - name: Display dotnet version
+        run: dotnet --version
 
       - name: Run restore
         run: dotnet restore
