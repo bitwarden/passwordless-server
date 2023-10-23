@@ -10,8 +10,6 @@ public class FeatureContextProvider : IFeatureContextProvider
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ITenantStorageFactory _storageFactory;
 
-    private string AppId { get; set; }
-
     public FeatureContextProvider(
         IHttpContextAccessor httpContextAccessor,
         ITenantStorageFactory storageFactory)
@@ -23,7 +21,7 @@ public class FeatureContextProvider : IFeatureContextProvider
             var httpContext = _httpContextAccessor?.HttpContext;
             if (httpContext == null) return new NullFeaturesContext();
 
-            string appId = AppId;
+            string appId = null;
             if (httpContext.Request.RouteValues.ContainsKey("appId"))
             {
                 appId = httpContext.Request.RouteValues["appId"].ToString();
@@ -51,13 +49,6 @@ public class FeatureContextProvider : IFeatureContextProvider
 
     public async Task<IFeaturesContext> UseContext()
     {
-        return await _lazyContext.Value;
-    }
-
-    public async Task<IFeaturesContext> UseContext(string appId)
-    {
-        AppId = appId;
-
         return await _lazyContext.Value;
     }
 }
