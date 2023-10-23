@@ -106,7 +106,15 @@ public class Fido2ServiceEndpoints : IFido2Service
 
             var attestation = token.Attestation.ToEnum<AttestationConveyancePreference>();
 
-            var options = _fido2.RequestNewCredential(user, keyIds, authenticatorSelection, attestation);
+            var options = _fido2.RequestNewCredential(
+                user,
+                keyIds,
+                authenticatorSelection,
+                attestation,
+                new AuthenticationExtensionsClientInputs
+                {
+                    CredProps = true
+                });
 
             var session = _tokenService.EncodeToken(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
 
