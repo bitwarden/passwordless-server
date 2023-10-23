@@ -50,16 +50,9 @@ public class EventDeletionBackgroundWorker : BackgroundService
         var dbContext = serviceScope.ServiceProvider.GetRequiredService<DbGlobalContext>();
 
         var eventsToDelete = await dbContext.ApplicationEvents
-            .Join(dbContext.AppFeatures,
-                @event => @event.TenantId,
-                feature => feature.Tenant,
-                (@event, feature) => new { @event.Id, @event.PerformedAt, @event.TenantId, feature.EventLoggingRetentionPeriod })
-            .Where(x => x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(-x.EventLoggingRetentionPeriod))
-            .Select(x => new ApplicationEvent { Id = x.Id })
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-
-        dbContext.RemoveRange(eventsToDelete);
-        await dbContext.SaveChangesAsync(cancellationToken);
+            .Where(x => x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(-x.Application.Features.EventLoggingRetentionPeriod))
+            .ExecuteDeleteAsync(cancellationToken);
+        
+        _logger.LogInformation("{eventsDeleted} events deleted from EventLogging", eventsToDelete);
     }
 }
