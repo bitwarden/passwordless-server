@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.EventLog;
@@ -52,7 +51,7 @@ public class EventDeletionBackgroundWorker : BackgroundService
         var eventsToDelete = await dbContext.ApplicationEvents
             .Where(x => x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(-x.Application.Features.EventLoggingRetentionPeriod))
             .ExecuteDeleteAsync(cancellationToken);
-        
+
         _logger.LogInformation("{eventsDeleted} events deleted from EventLogging", eventsToDelete);
     }
 }
