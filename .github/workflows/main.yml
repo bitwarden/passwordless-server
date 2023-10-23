@@ -82,6 +82,8 @@ jobs:
         continue-on-error: true
         run: >
           dotnet test
+          --no-restore
+          --no-build
           --configuration Release
           --logger "trx;LogFileName=pw-test-results.trx"
 
