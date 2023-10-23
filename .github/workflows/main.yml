@@ -175,19 +175,19 @@ jobs:
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: Api
+          path: Api/
 
       - name: Download AdminConsole artifacts
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: AdminConsole
-
-      - run: ls -la
+          path: AdminConsole/
 
       - name: Archive API
-        run: zip -r Api.zip publish/Api/
+        run: zip -r Api.zip Api/
 
       - name: Archive AdminConsole
-        run: zip -r AdminConsole.zip publish/AdminConsole/
+        run: zip -r AdminConsole.zip AdminConsole/
 
       - name: Login to Azure
         uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
