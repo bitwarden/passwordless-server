@@ -117,9 +117,12 @@ jobs:
         run: |
           time=$(date +%s)
           ref="${{ github.head_ref || github.ref_name }}"
-          ref_clean="${ref/\//-}"
-          suffix="ci-$time-$ref_clean-${{ github.run_id }}"
-          echo "version=0.0.0-$suffix" >> $GITHUB_OUTPUT
+          
+          ref_clean=$ref
+          ref_clean="${ref_clean/\//-}"
+          ref_clean="${ref_clean/_/-}"
+          
+          echo "version=0.0.0-ci-$time-$ref_clean" >> $GITHUB_OUTPUT
 
       - name: Publish API
         run: >
