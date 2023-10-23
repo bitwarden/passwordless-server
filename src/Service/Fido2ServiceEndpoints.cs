@@ -92,7 +92,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             // Selection
             var authenticatorSelection = new AuthenticatorSelection
             {
-                RequireResidentKey = token.Discoverable,
+                ResidentKey = token.Discoverable ? ResidentKeyRequirement.Required : ResidentKeyRequirement.Discouraged,
                 UserVerification = token.UserVerification.ToEnum<UserVerificationRequirement>(),
                 AuthenticatorAttachment = token.AuthenticatorType?.ToEnum<AuthenticatorAttachment>()
             };
@@ -121,7 +121,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             _eventLogger.LogRegistrationBeganEvent(userId);
 
             // return options to client
-            return new SessionResponse<CredentialCreateOptions>() { Data = options, Session = session };
+            return new SessionResponse<CredentialCreateOptions> { Data = options, Session = session };
         }
         catch (ArgumentException e)
         {
