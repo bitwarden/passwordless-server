@@ -166,9 +166,10 @@ jobs:
       - pack
     runs-on: ubuntu-latest
     environment: devtest
+    concurrency: devtest
     permissions:
       actions: read
-      packages: write
+      deployments: write
 
     steps:
       - name: Download API artifacts
