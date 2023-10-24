@@ -150,13 +150,15 @@ jobs:
         matrix:
           app: [Api, AdminConsole]
 
+    environment: devtest-${{ matrix.app }}
+    concurrency: devtest-${{ matrix.app }}
+
     needs:
       - format
       - test
       - pack
+
     runs-on: ubuntu-latest
-    environment: devtest-${{ matrix.app }}
-    concurrency: devtest-${{ matrix.app }}
     permissions:
       actions: read
       deployments: write
