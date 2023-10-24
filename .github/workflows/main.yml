@@ -135,7 +135,6 @@ jobs:
           --runtime win-x86
           --no-self-contained
           --output publish/${{ matrix.app }}/
-          -p:ContinuousIntegrationBuild=true
           ${{ steps.prerelease-version.outputs.version && format('-p:Version={0}', steps.prerelease-version.outputs.version) || '' }}
 
       - name: Upload artifacts
@@ -179,8 +178,6 @@ jobs:
           creds: ${{ secrets.APP_SERVICE_SP }}
 
       - name: Configure app settings
-        # Temporary
-        if: ${{ false }}
         run: >
           az webapp config appsettings set
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
@@ -189,8 +186,6 @@ jobs:
           > /dev/null
 
       - name: Push the app
-        # Temporary
-        if: ${{ false }}
         run: >
           az webapp deployment source config-zip
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
