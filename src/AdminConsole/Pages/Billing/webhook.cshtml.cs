@@ -51,8 +51,8 @@ public class Webhook : PageModel
                     await _sharedBillingService.ConvertFromFreeToPaidAsync(session.CustomerId, session.ClientReferenceId, session.SubscriptionId);
                 }
                 break;
-            case "invoice.paid":
-            case "invoice.payment_failed":
+            case Events.InvoicePaid:
+            case Events.InvoicePaymentFailed:
                 if (stripeEvent.Data.Object is Invoice invoice)
                 {
                     await _sharedBillingService.UpdateSubscriptionStatusAsync(invoice);

@@ -1,14 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Stripe;
-using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -23,7 +20,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     public SharedBillingService(
         IDbContextFactory<TDbContext> dbContextFactory,
         IPasswordlessManagementClient passwordlessClient,
-        IOptionsSnapshot<PlansOptions> plansOptions,
+        IOptions<PlansOptions> plansOptions,
         ILogger<SharedBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions)
     {
@@ -37,43 +34,29 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     public async Task UpdateUsageAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        List<Application> apps = await db.Applications.Where(x => x.BillingPriceId != null)
+        
+        var organizations = await db.Organizations
+            .Where(x => x.BillingSubscriptionItemId != null)
+            .Select(o => new
+            {
+                o.Id,
+                o.BillingSubscriptionItemId,
+                CurrentUserCount = o.Applications.Sum(a => a.CurrentUserCount)
+            })
             .ToListAsync();
 
-        // update usage in stripe
-        foreach (Application app in apps)
+        foreach (var organization in organizations)
         {
             try
             {
-                if (app.BillingSubscriptionItemId == null)
-                {
-                    await AddBillingSubscriptionItemId(app);
-                }
-
-                var users = app.CurrentUserCount;
-                await UpdateStripeAsync(app.BillingSubscriptionItemId, users);
+                await UpdateStripeAsync(organization.BillingSubscriptionItemId, organization.CurrentUserCount);
             }
             catch (Exception e)
             {
-                _logger.LogError("Failed to update usage for app {appId}: {error}", app.Id, e.Message);
+                _logger.LogError(e, "Failed to update usage for organization {orgId}: {error}", organization.Id, e.Message);
             }
+            
         }
-    }
-
-    private async Task AddBillingSubscriptionItemId(Application app)
-    {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == app.OrganizationId);
-        Subscription subscription = await GetSubscription(org.BillingSubscriptionId);
-
-        // Increase the limits
-        org.MaxAdmins = 1000;
-        org.MaxApplications = 1000;
-
-        // get the lineItem from the subscription
-        SubscriptionItem? lineItem = subscription.Items.Data.FirstOrDefault(i => i.Price.Id == app.BillingPriceId);
-        app.BillingSubscriptionItemId = lineItem.Id;
-        await db.SaveChangesAsync();
     }
 
     public async Task UpdateStripeAsync(string subscriptionItemId, int users)
@@ -102,8 +85,6 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     {
         // todo: Add extra error handling, if we already have a customerId on Org, throw.
 
-        var priceId = _stripeOptions.Plans[PlanConstants.Pro].PriceId;
-        var planName = PlanConstants.Pro;
         var orgId = int.Parse(clientReferenceId);
 
         // SetCustomerId on the Org
@@ -115,8 +96,8 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
         org.BillingCustomerId = customerId;
 
-        // Create a new Subscription
-        Subscription subscription = await GetSubscription(subscriptionId);
+        var subscriptionService = new SubscriptionService();
+        var subscription = await subscriptionService.GetAsync(subscriptionId);
 
         // If subscription is not set, it means we were using a free plan.
         if (org.BillingSubscriptionId == null)
@@ -132,31 +113,37 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         org.MaxAdmins = 1000;
         org.MaxApplications = 1000;
 
-        // get the lineItem from the subscription
-        SubscriptionItem? lineItem = subscription.Items.Data.FirstOrDefault(i => i.Price.Id == priceId);
+        // we only have one item per subscription
+        SubscriptionItem lineItem = subscription.Items.Data.Single();
+        var planName = lineItem.Plan.Product.Name;
 
-        // set the new plans on each app
-        List<Application> apps = await db.Applications.Where(a => a.OrganizationId == orgId).ToListAsync();
-        var features = _plansOptions[planName];
-        var setFeaturesRequest = new SetApplicationFeaturesRequest();
-        setFeaturesRequest.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
-        setFeaturesRequest.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
-        foreach (Application app in apps)
+        if (_stripeOptions.Plans.All(x => x.Value.PriceId != lineItem.Price.Id))
         {
-            app.BillingSubscriptionItemId = lineItem.Id;
-            app.BillingPriceId = priceId;
-            app.BillingPlan = planName;
-            await _passwordlessClient.SetFeaturesAsync(app.Id, setFeaturesRequest);
+            throw new InvalidOperationException("Received a subscription for a product that is not configured.");
+        }
+        
+        org.BillingPlan = planName;
+        org.BillingSubscriptionItemId = lineItem.Id;
+
+        var applications = await db.Applications
+            .Where(a => a.OrganizationId == orgId)
+            .Select(x => x.Id)
+            .ToListAsync();
+        
+        var features = _plansOptions[planName];
+        var setFeaturesRequest = new SetApplicationFeaturesRequest
+        {
+            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
+        };
+        
+        // set the plans on each app
+        foreach (var applicationId in applications)
+        {
+            await _passwordlessClient.SetFeaturesAsync(applicationId, setFeaturesRequest);
         }
 
         await db.SaveChangesAsync();
-    }
-
-    private async Task<Subscription> GetSubscription(string subscriptionId)
-    {
-        var service = new SubscriptionService();
-        var sub = await service.GetAsync(subscriptionId);
-        return sub;
     }
 
     public async Task UpdateSubscriptionStatusAsync(Invoice? dataObject)
