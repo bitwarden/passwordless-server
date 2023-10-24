@@ -26,4 +26,11 @@ public interface ISharedBillingService
     /// <param name="organizationId"></param>
     /// <returns></returns>
     Task<string?> GetCustomerIdAsync(int organizationId);
+
+    /// <summary>
+    /// Invoked when a subscription is canceled/deleted.
+    /// </summary>
+    /// <param name="subscriptionId"></param>
+    /// <returns></returns>
+    Task OnSubscriptionDeletedAsync(string subscriptionId);
 }

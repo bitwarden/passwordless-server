@@ -58,6 +58,12 @@ public class Webhook : PageModel
                     await _sharedBillingService.UpdateSubscriptionStatusAsync(invoice);
                 }
                 break;
+            case Events.CustomerSubscriptionDeleted:
+                if (stripeEvent.Data.Object is Subscription subscription)
+                {
+                    await _sharedBillingService.OnSubscriptionDeletedAsync(subscription.Id);
+                }
+                break;
             default:
                 break;
                 // Unhandled event type

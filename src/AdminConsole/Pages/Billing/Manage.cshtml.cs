@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -43,9 +44,14 @@ public class Manage : PageModel
         Organization = await _dataService.GetOrganizationAsync();
         await OnLoadAsync();
     }
-
-    public async Task<IActionResult> OnPost()
+    
+    public async Task<IActionResult> OnPostSubscribe(string planName)
     {
+        if (_stripeOptions.Value.Plans.All(x => x.Key != planName))
+        {
+            throw new ArgumentException("Invalid plan name");
+        }
+        
         var orgId = User.GetOrgId();
 
         var customerEmail = User.GetEmail();
@@ -60,7 +66,8 @@ public class Manage : PageModel
             Metadata =
                 new Dictionary<string, string>
                 {
-                    { "orgId", orgId.ToString() }, { "passwordless", "passwordless" }
+                    { "orgId", orgId.ToString() },
+                    { "passwordless", "passwordless" }
                 },
             TaxIdCollection = new SessionTaxIdCollectionOptions
             {
@@ -74,7 +81,7 @@ public class Manage : PageModel
             {
                 new()
                 {
-                    Price = _stripeOptions.Value.Plans[PlanConstants.Pro].PriceId,
+                    Price = _stripeOptions.Value.Plans[planName].PriceId,
                 }
             }
         };
@@ -85,7 +92,7 @@ public class Manage : PageModel
         return Redirect(session.Url);
     }
 
-    public async Task<IActionResult> OnPostPortal()
+    public async Task<IActionResult> OnPostManage()
     {
         var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);
         var returnUrl = Url.PageLink("/Billing/Manage");
@@ -108,4 +115,24 @@ public class Manage : PageModel
         Plans.Single(x => x.Name == activePlan).IsActive = true;
     }
 
+    public class PricingCardModel
+    {
+        private static readonly CultureInfo PriceFormat = new("en-US");
+
+        public PricingCardModel(
+            string name,
+            StripePlanOptions plan)
+        {
+            Name = name;
+            Plan = plan;
+        }
+    
+        public string Name { get; }
+    
+        public StripePlanOptions Plan { get; }
+    
+        public bool IsActive { get; set; }
+
+        public string GetPrice() => $"{Plan.Price.ToString("C", PriceFormat)}";
+    }
 }

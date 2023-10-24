@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
@@ -115,9 +116,9 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
 
         // we only have one item per subscription
         SubscriptionItem lineItem = subscription.Items.Data.Single();
-        var planName = lineItem.Plan.Product.Name;
+        var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
 
-        if (_stripeOptions.Plans.All(x => x.Value.PriceId != lineItem.Price.Id))
+        if (planName == null)
         {
             throw new InvalidOperationException("Received a subscription for a product that is not configured.");
         }
@@ -174,5 +175,18 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             .Select(o => o.BillingCustomerId)
             .FirstOrDefaultAsync();
         return customerId;
+    }
+
+    public async Task OnSubscriptionDeletedAsync(string subscriptionId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var organization = await db.Organizations.SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+        if (organization == null) return;
+        organization.BillingPlan = PlanConstants.Free;
+        organization.BillingSubscriptionId = null;
+        organization.BillingSubscriptionItemId = null;
+        organization.BillingCustomerId = null;
+        organization.BecamePaidAt = null;
+        await db.SaveChangesAsync();
     }
 }

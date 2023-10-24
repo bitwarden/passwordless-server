@@ -129,9 +129,4 @@
         <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
         <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
     </ItemGroup>
-    <ItemGroup>
-      <Compile Update="Pages\Billing\PricingCard.cs">
-        <DependentUpon>PricingCard.cshtml</DependentUpon>
-      </Compile>
-    </ItemGroup>
 </Project>

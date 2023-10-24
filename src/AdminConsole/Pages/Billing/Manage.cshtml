@@ -1,4 +1,5 @@
 @page
+@using Passwordless.AdminConsole.Billing.Constants
 @using Passwordless.AdminConsole.Helpers
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
@@ -6,70 +7,81 @@
 
 }
 
-<h2>Plans</h2>
-<div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 md:grid md:grid-cols-1 lg:grid-cols-3">
-    @foreach (var plan in @Model.Plans)
-    {
-        <partial name="PricingCard" model=plan></partial>
-    }
+<div id="plan-selection">
+    <h2>Plans</h2>
+    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 md:grid md:grid-cols-1 lg:grid-cols-3">
+        @foreach (var plan in @Model.Plans)
+        {
+            <div class="bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4">
+                <h3 class="text-center">@plan.Name</h3>
+                <div class="space-y-0">
+                    <p class="text-lg font-black text-center">@plan.GetPrice()</p>
+                    <p class="text-sm text-gray-600 text-center">per user per month</p>
+                </div>
+                <div class="flex-1">
+                    <ul class="mt-4 space-y-2">
+                        @foreach (var feature in @plan.Plan.Features)
+                        {
+                            <li class="flex items-start">
+                                <feature-list-item-icon class="flex-shrink-0 w-5 h-5 mr-2"></feature-list-item-icon>
+                                @feature
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="mt-auto text-center">
+                    @if (!plan.IsActive)
+                    {
+                        <form method="post">
+                            <input type="hidden" name="planName" value="@plan.Name" />
+                            <button asp-page-handler="Subscribe" type="submit" class="btn-primary">Subscribe</button>
+                        </form>
+                    }
+                    @if (plan.IsActive && !string.IsNullOrWhiteSpace(plan.Plan.PriceId))
+                    {
+                        <form method="post">
+                            <button asp-page-handler="Manage" type="submit" class="btn-primary">Manage</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 </div>
-
-@if (Model.Organization.HasSubscription)
-{
-    <div>
-        <h2>Manage your billing</h2>
-        <p>To retrieve your invoices or change payment method, please visit the Stripe Portal below.</p>
-        <form asp-page-handler="Portal" method="post" class="mt-3">
-            <button class="btn-secondary" type="submit">Manage billing details in Stripe Portal</button>
-        </form>
-    </div>
-} else {
-    <h2>Upgrade your organization</h2>
-    <div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
-        <div class="px-4 py-5 sm:p-6">
-             <p>To enable more features, please upgrade to a paid organization</p>
-                <form action="" method="post">
-                    <button class="btn-primary my-3 textbase" type="submit">Upgrade to a Paid Organization</button>
-                    <p class="text-xs">Note: Please see our <a target="_blank" href="https://bitwarden.com/products/passwordless/#pricing" class="text-blue-600 underline">pricing page</a> for details. Your spend varies on usage, but is estimated at $@( Math.Round(Model.Applications.Select(a => a.CurrentUserCount).Sum() * 0.05,2))/month</p>
-                </form>
-        </div>
-    </div>
-   
-} 
-
-
-<h2>
-    Your Applications
-</h2>
-<div class="overflow-hidden bg-white shadow sm:rounded-md">
-    <ul role="list" class="divide-y divide-gray-200">
-        @foreach(var app in Model.Applications) {
-            <li>
-                <a href="@Url.AppPage("/App/Settings/Settings", app.Id)" class="block hover:bg-gray-50">
-                    <div class="flex items-center px-4 py-4 sm:px-6">
-                        <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div class="truncate">
-                                <div class="flex text-sm">
-                                    <p class="truncate font-medium text-blue-600">@app.Name</p>
-                                    <p class="ml-1 flex-shrink-0 font-normal text-gray-500">with plan @Model.Organization.BillingPlan</p>
-                                </div>
-                                <div class="mt-2 flex">
-                                    <div class="flex items-center text-sm text-gray-500">
-                                        <p>
-                                            @app.Description
-                                        </p>
+<div id="applications-list">
+    <h2>
+        Your Applications
+    </h2>
+    <div class="overflow-hidden bg-white shadow sm:rounded-md">
+        <ul role="list" class="divide-y divide-gray-200">
+            @foreach(var app in Model.Applications) {
+                <li>
+                    <a href="@Url.AppPage("/App/Settings/Settings", app.Id)" class="block hover:bg-gray-50">
+                        <div class="flex items-center px-4 py-4 sm:px-6">
+                            <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div class="truncate">
+                                    <div class="flex text-sm">
+                                        <p class="truncate font-medium text-blue-600">@app.Name</p>
+                                        <p class="ml-1 flex-shrink-0 font-normal text-gray-500">with plan @Model.Organization.BillingPlan</p>
+                                    </div>
+                                    <div class="mt-2 flex">
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <p>
+                                                @app.Description
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="ml-5 flex-shrink-0">
+                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="ml-5 flex-shrink-0">
-                            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-            </li>
-        }
-    </ul>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
 </div>
