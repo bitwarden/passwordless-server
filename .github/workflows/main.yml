@@ -182,8 +182,7 @@ jobs:
           az webapp config appsettings set
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           --name ${{ secrets.AZURE_APP_NAME }}
-          --slot staging
-          > /dev/null
+          --slot staging > /dev/null
 
       - name: Push the app
         run: >
