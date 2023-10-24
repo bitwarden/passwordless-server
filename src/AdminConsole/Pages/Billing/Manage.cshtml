@@ -6,17 +6,25 @@
 
 }
 
+<h2>Plans</h2>
+<div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 md:grid md:grid-cols-1 lg:grid-cols-3">
+    @foreach (var plan in @Model.Plans)
+    {
+        <partial name="PricingCard" model=plan></partial>
+    }
+</div>
+
 @if (Model.Organization.HasSubscription)
 {
     <div>
-        <h2 class="h2">Manage your billing</h2>
+        <h2>Manage your billing</h2>
         <p>To retrieve your invoices or change payment method, please visit the Stripe Portal below.</p>
         <form asp-page-handler="Portal" method="post" class="mt-3">
             <button class="btn-secondary" type="submit">Manage billing details in Stripe Portal</button>
         </form>
     </div>
 } else {
-    <h2 class="h2">Upgrade your organization</h2>
+    <h2>Upgrade your organization</h2>
     <div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
         <div class="px-4 py-5 sm:p-6">
              <p>To enable more features, please upgrade to a paid organization</p>
@@ -30,7 +38,7 @@
 } 
 
 
-<h2 class="h2">
+<h2>
     Your Applications
 </h2>
 <div class="overflow-hidden bg-white shadow sm:rounded-md">

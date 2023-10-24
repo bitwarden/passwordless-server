@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -23,7 +22,6 @@ public class CreateApplicationModel : PageModel
     private readonly IApplicationService _applicationService;
     private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
-    private readonly StripeOptions _stripeOptions;
     private readonly PlansOptions _plansOptions;
 
     public CreateApplicationModel(
@@ -31,7 +29,6 @@ public class CreateApplicationModel : PageModel
         SignInManager<ConsoleAdmin> signInManager,
         IApplicationService applicationService,
         IDataService dataService,
-        IOptions<StripeOptions> stripeOptions,
         IPasswordlessManagementClient managementClient,
         IOptionsSnapshot<PlansOptions> plansOptions)
     {
@@ -40,7 +37,6 @@ public class CreateApplicationModel : PageModel
         _managementClient = managementClient;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
-        _stripeOptions = stripeOptions.Value;
         _plansOptions = plansOptions.Value;
     }
 
@@ -80,18 +76,11 @@ public class CreateApplicationModel : PageModel
 
         // Attach a plan
         var org = await _dataService.GetOrganizationAsync();
-        if (org.HasSubscription)
-        {
-            var priceId = _stripeOptions.UsersProPriceId;
-            var planName = _stripeOptions.UsersProPlanName;
-            app.BillingPlan = planName;
-            app.BillingPriceId = priceId;
-        }
 
         NewAppResponse res;
         try
         {
-            var plan = _plansOptions[app.BillingPlan];
+            var plan = _plansOptions[org.BillingPlan];
             var newAppOptions = new NewAppOptions
             {
                 AdminEmail = email,

@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
@@ -20,15 +22,27 @@ public class Manage : PageModel
         _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
+        
+        
+        Plans = new List<PricingCardModel>
+        {
+            new(PlanConstants.Free, stripeOptions.Value.Plans[PlanConstants.Free]),
+            new(PlanConstants.Pro, stripeOptions.Value.Plans[PlanConstants.Pro]),
+            new(PlanConstants.Enterprise, stripeOptions.Value.Plans[PlanConstants.Enterprise])
+        };
     }
-
+    
     public List<Application> Applications { get; set; }
+    
     public Models.Organization Organization { get; set; }
+    
+    public IReadOnlyCollection<PricingCardModel> Plans { get; init; }
 
     public async Task OnGet()
     {
         Applications = await _dataService.GetApplicationsAsync();
         Organization = await _dataService.GetOrganizationAsync();
+        await OnLoadAsync();
     }
 
     public async Task<IActionResult> OnPost()
@@ -61,7 +75,7 @@ public class Manage : PageModel
             {
                 new()
                 {
-                    Price = _stripeOptions.Value.UsersProPriceId,
+                    Price = _stripeOptions.Value.Plans[PlanConstants.Pro].PriceId,
                 }
             }
         };
@@ -87,4 +101,12 @@ public class Manage : PageModel
 
         return Redirect(session.Url);
     }
+    
+    private async Task OnLoadAsync()
+    {
+        // Set the active plan
+        var activePlan = Organization.BillingPlan;
+        Plans.Single(x => x.Name == activePlan).IsActive = true;
+    }
+
 }

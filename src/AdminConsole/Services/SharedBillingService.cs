@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
@@ -100,8 +102,8 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     {
         // todo: Add extra error handling, if we already have a customerId on Org, throw.
 
-        var priceId = _stripeOptions.UsersProPriceId;
-        var planName = _stripeOptions.UsersProPlanName;
+        var priceId = _stripeOptions.Plans[PlanConstants.Pro].PriceId;
+        var planName = PlanConstants.Pro;
         var orgId = int.Parse(clientReferenceId);
 
         // SetCustomerId on the Org

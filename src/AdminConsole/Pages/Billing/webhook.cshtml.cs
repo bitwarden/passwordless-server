@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Services;
 using Stripe;
 using Session = Stripe.Checkout.Session;
