@@ -134,14 +134,14 @@ jobs:
           --configuration Release
           --runtime win-x86
           --no-self-contained
-          --output publish/${{ matrix.app }}/
+          --output src/${{ matrix.app }}/publish/
           ${{ steps.prerelease-version.outputs.version && format('-p:Version={0}', steps.prerelease-version.outputs.version) || '' }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: ${{ matrix.app }}
-          path: publish/${{ matrix.app }}/
+          path: src/${{ matrix.app }}/publish/
 
   # Deploy the apps
   deploy:
@@ -167,10 +167,10 @@ jobs:
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: ${{ matrix.app }}
-          path: publish/${{ matrix.app }}/
+          path: ${{ matrix.app }}/
 
       - name: Create archive
-        run: zip -r app.zip publish/${{ matrix.app }}/
+        run: zip -r app.zip ${{ matrix.app }}/
 
       - name: Login to Azure
         uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
