@@ -177,16 +177,6 @@ jobs:
         with:
           creds: ${{ secrets.APP_SERVICE_SP }}
 
-      - run: az --version
-
-      - name: Configure app settings
-        run: >
-          az webapp config appsettings set
-          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          --name ${{ secrets.AZURE_APP_NAME }}
-          --slot staging
-          > /dev/null
-
       - name: Push the app
         run: >
           az webapp deployment source config-zip
