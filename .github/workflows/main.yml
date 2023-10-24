@@ -177,7 +177,7 @@ jobs:
         with:
           creds: ${{ secrets.APP_SERVICE_SP }}
 
-      - name: Push the app
+      - name: Push app
         run: >
           az webapp deployment source config-zip
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
