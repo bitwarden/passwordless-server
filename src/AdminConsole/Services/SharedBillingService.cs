@@ -35,7 +35,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     public async Task UpdateUsageAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        
+
         var organizations = await db.Organizations
             .Where(x => x.BillingSubscriptionItemId != null)
             .Select(o => new
@@ -56,7 +56,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             {
                 _logger.LogError(e, "Failed to update usage for organization {orgId}: {error}", organization.Id, e.Message);
             }
-            
+
         }
     }
 
@@ -82,7 +82,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
     }
 
-    public async Task ConvertFromFreeToPaidAsync(string customerId, string clientReferenceId, string subscriptionId)
+    public async Task OnPaidSubscriptionChangedAsync(string customerId, string clientReferenceId, string subscriptionId)
     {
         // todo: Add extra error handling, if we already have a customerId on Org, throw.
 
@@ -108,6 +108,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
 
         // set the subscriptionId on the Org
+        var existingSubscriptionId = org.BillingSubscriptionId;
         org.BillingSubscriptionId = subscription.Id;
 
         // Increase the limits
@@ -122,7 +123,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         {
             throw new InvalidOperationException("Received a subscription for a product that is not configured.");
         }
-        
+
         org.BillingPlan = planName;
         org.BillingSubscriptionItemId = lineItem.Id;
 
@@ -130,14 +131,24 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             .Where(a => a.OrganizationId == orgId)
             .Select(x => x.Id)
             .ToListAsync();
-        
+
         var features = _plansOptions[planName];
         var setFeaturesRequest = new SetApplicationFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
         };
-        
+
+        if (existingSubscriptionId != null && existingSubscriptionId != subscription.Id)
+        {
+            var cancelOptions = new SubscriptionCancelOptions
+            {
+                InvoiceNow = true,
+                Prorate = true
+            };
+            await subscriptionService.CancelAsync(existingSubscriptionId, cancelOptions);
+        }
+
         // set the plans on each app
         foreach (var applicationId in applications)
         {
@@ -185,7 +196,6 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.BillingPlan = PlanConstants.Free;
         organization.BillingSubscriptionId = null;
         organization.BillingSubscriptionItemId = null;
-        organization.BillingCustomerId = null;
         organization.BecamePaidAt = null;
         await db.SaveChangesAsync();
     }

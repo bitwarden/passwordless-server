@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
@@ -30,6 +29,6 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
             options.EventLoggingIsEnabled,
             options.EventLoggingRetentionPeriod,
             null);
-        
+
     }
 }

@@ -22,8 +22,8 @@ public class Manage : PageModel
         _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
-        
-        
+
+
         Plans = new List<PricingCardModel>
         {
             new(PlanConstants.Free, stripeOptions.Value.Plans[PlanConstants.Free]),
@@ -31,11 +31,11 @@ public class Manage : PageModel
             new(PlanConstants.Enterprise, stripeOptions.Value.Plans[PlanConstants.Enterprise])
         };
     }
-    
+
     public List<Application> Applications { get; set; }
-    
+
     public Models.Organization Organization { get; set; }
-    
+
     public IReadOnlyCollection<PricingCardModel> Plans { get; init; }
 
     public async Task OnGet()
@@ -44,17 +44,16 @@ public class Manage : PageModel
         Organization = await _dataService.GetOrganizationAsync();
         await OnLoadAsync();
     }
-    
+
     public async Task<IActionResult> OnPostSubscribe(string planName)
     {
         if (_stripeOptions.Value.Plans.All(x => x.Key != planName))
         {
             throw new ArgumentException("Invalid plan name");
         }
-        
-        var orgId = User.GetOrgId();
 
-        var customerEmail = User.GetEmail();
+        var orgId = User.GetOrgId();
+        var organization = await _dataService.GetOrganizationAsync();
 
         var successUrl = Url.PageLink("/Billing/Success");
         successUrl += "?session_id={CHECKOUT_SESSION_ID}";
@@ -62,17 +61,12 @@ public class Manage : PageModel
         var cancelUrl = Url.PageLink("/Billing/Cancelled");
         var options = new SessionCreateOptions
         {
-            CustomerEmail = customerEmail,
             Metadata =
                 new Dictionary<string, string>
                 {
                     { "orgId", orgId.ToString() },
                     { "passwordless", "passwordless" }
                 },
-            TaxIdCollection = new SessionTaxIdCollectionOptions
-            {
-                Enabled = true,
-            },
             ClientReferenceId = orgId.ToString(),
             SuccessUrl = successUrl,
             CancelUrl = cancelUrl,
@@ -85,6 +79,16 @@ public class Manage : PageModel
                 }
             }
         };
+
+        if (organization.BillingCustomerId != null)
+        {
+            options.Customer = organization.BillingCustomerId;
+        }
+        else
+        {
+            options.TaxIdCollection = new SessionTaxIdCollectionOptions { Enabled = true, };
+            options.CustomerEmail = User.GetEmail();
+        }
 
         var service = new SessionService();
         Session? session = await service.CreateAsync(options);
@@ -107,7 +111,7 @@ public class Manage : PageModel
 
         return Redirect(session.Url);
     }
-    
+
     private async Task OnLoadAsync()
     {
         // Set the active plan
@@ -126,11 +130,11 @@ public class Manage : PageModel
             Name = name;
             Plan = plan;
         }
-    
+
         public string Name { get; }
-    
+
         public StripePlanOptions Plan { get; }
-    
+
         public bool IsActive { get; set; }
 
         public string GetPrice() => $"{Plan.Price.ToString("C", PriceFormat)}";

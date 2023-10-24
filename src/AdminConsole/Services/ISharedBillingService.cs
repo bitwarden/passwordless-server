@@ -8,7 +8,7 @@ public interface ISharedBillingService
 
     Task UpdateStripeAsync(string subscriptionItemId, int users);
 
-    Task ConvertFromFreeToPaidAsync(string customerId, string clientReferenceId, string subscriptionId);
+    Task OnPaidSubscriptionChangedAsync(string customerId, string clientReferenceId, string subscriptionId);
 
     Task UpdateSubscriptionStatusAsync(Invoice? dataObject);
 

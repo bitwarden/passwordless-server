@@ -2,46 +2,45 @@
 
 #nullable disable
 
-namespace Passwordless.AdminConsole.Migrations.Sqlite
+namespace Passwordless.AdminConsole.Migrations.Sqlite;
+
+/// <inheritdoc />
+public partial class BillingRefactoring : Migration
 {
     /// <inheritdoc />
-    public partial class BillingRefactoring : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string>(
-                name: "BillingPlan",
-                table: "Organizations",
-                type: "TEXT",
-                nullable: false,
-                defaultValue: "");
+        migrationBuilder.AddColumn<string>(
+            name: "BillingPlan",
+            table: "Organizations",
+            type: "TEXT",
+            nullable: false,
+            defaultValue: "");
 
-            migrationBuilder.AddColumn<string>(
-                name: "BillingSubscriptionItemId",
-                table: "Organizations",
-                type: "TEXT",
-                nullable: true);
+        migrationBuilder.AddColumn<string>(
+            name: "BillingSubscriptionItemId",
+            table: "Organizations",
+            type: "TEXT",
+            nullable: true);
 
-            migrationBuilder.Sql("UPDATE Organizations SET BillingPlan = a.BillingPlan, BillingSubscriptionItemId = a.BillingSubscriptionItemId FROM Organizations o INNER JOIN Applications a ON o.Id = a.OrganizationId;");
-            
-            migrationBuilder.DropColumn(
-                name: "BillingPlan",
-                table: "Applications");
+        migrationBuilder.Sql("UPDATE Organizations SET BillingPlan = a.BillingPlan, BillingSubscriptionItemId = a.BillingSubscriptionItemId FROM Organizations o INNER JOIN Applications a ON o.Id = a.OrganizationId;");
 
-            migrationBuilder.DropColumn(
-                name: "BillingPriceId",
-                table: "Applications");
+        migrationBuilder.DropColumn(
+            name: "BillingPlan",
+            table: "Applications");
 
-            migrationBuilder.DropColumn(
-                name: "BillingSubscriptionItemId",
-                table: "Applications");
-        }
+        migrationBuilder.DropColumn(
+            name: "BillingPriceId",
+            table: "Applications");
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            throw new InvalidOperationException("Cannot revert this migration.");
-        }
+        migrationBuilder.DropColumn(
+            name: "BillingSubscriptionItemId",
+            table: "Applications");
+    }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        throw new InvalidOperationException("Cannot revert this migration.");
     }
 }
