@@ -9,18 +9,23 @@
 
 <div id="plan-selection">
     <h2>Plans</h2>
-    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 md:grid md:grid-cols-1 lg:grid-cols-3">
+    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
         @foreach (var plan in @Model.Plans)
         {
-            <div class="bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4">
-                <h3 class="text-center">@plan.Name</h3>
+            <div class="@(plan.IsActive ? "pricing-card-active": "pricing-card")">
+                <h3 class="flex flex-col items-center">
+                    <div class="flex items-start space-x-1">
+                        <span>@plan.Name</span>
+                        <span asp-if="plan.IsActive" class="rounded-md bg-blue-600 px-1 py-0.5 text-xs font-semibold text-white">Active</span>
+                    </div>
+                </h3>
                 <div class="space-y-0">
                     <p class="text-lg font-black text-center">@plan.GetPrice()</p>
-                    <p class="text-sm text-gray-600 text-center">per user per month</p>
+                    <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.Plan.PriceHint) ? "*" : string.Empty)</p>
                 </div>
                 <div class="flex-1">
                     <ul class="mt-4 space-y-2">
-                        @foreach (var feature in @plan.Plan.Features)
+                        @foreach (var feature in plan.Plan.Features)
                         {
                             <li class="flex items-start">
                                 <feature-list-item-icon class="flex-shrink-0 w-5 h-5 mr-2"></feature-list-item-icon>
@@ -29,11 +34,12 @@
                         }
                     </ul>
                 </div>
-                <div class="mt-auto text-center">
+                <div asp-if="!string.IsNullOrEmpty(plan.Plan.PriceId)" class="mt-auto text-center space-y-4">
+                    <p asp-if="!string.IsNullOrEmpty(plan.Plan.PriceHint)" class="text-xs text-gray-600 text-center">* @(plan.Plan.PriceHint)</p>
                     @if (!plan.IsActive)
                     {
                         <form method="post">
-                            <input type="hidden" name="planName" value="@plan.Name" />
+                            <input type="hidden" name="planName" value="@plan.Name"/>
                             <button asp-page-handler="Subscribe" type="submit" class="btn-primary">Subscribe</button>
                         </form>
                     }

@@ -6,5 +6,7 @@ public class StripePlanOptions
 
     public decimal Price { get; set; }
 
+    public string? PriceHint { get; set; }
+
     public ICollection<string> Features { get; set; }
 }

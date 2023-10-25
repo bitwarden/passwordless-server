@@ -87,6 +87,14 @@
 
         text-decoration: none;
     }
+    
+    .pricing-card {
+        @apply bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4;
+    }
+    
+    .pricing-card-active {
+        @apply pricing-card border-2 border-blue-600;
+    }
 }
 
 :root {
