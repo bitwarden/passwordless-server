@@ -22,6 +22,12 @@ using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
+// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
+Environment.SetEnvironmentVariable(
+    "DD_VERSION",
+    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
+);
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
