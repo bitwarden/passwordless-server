@@ -118,15 +118,7 @@ jobs:
       - name: Generate prerelease version
         id: prerelease-version
         if: ${{ github.event_name != 'release' }}
-        run: |
-          time=$(date +%s)
-          ref="${{ github.head_ref || github.ref_name }}"
-          
-          ref_clean="$ref"
-          ref_clean="${ref_clean/\//-}"
-          ref_clean="${ref_clean/_/-}"
-          
-          echo "version=0.0.0-ci-$time-$ref_clean" >> $GITHUB_OUTPUT
+        run: echo "version=0.0.0-ci-#{{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Publish app
         run: >
