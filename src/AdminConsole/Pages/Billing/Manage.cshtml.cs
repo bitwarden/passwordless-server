@@ -142,11 +142,5 @@ public class Manage : PageModel
         /// Indicates if the plan is the active plan for the organization.
         /// </summary>
         public bool IsActive { get; set; }
-
-        /// <summary>
-        /// Retrieves the price formatted as a string.
-        /// </summary>
-        /// <returns></returns>
-        public string GetPrice() => $"{Plan.Price.ToString("C", PriceFormat)}";
     }
 }

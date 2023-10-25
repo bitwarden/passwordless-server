@@ -1,5 +1,4 @@
 @page
-@using Passwordless.AdminConsole.Billing.Constants
 @using Passwordless.AdminConsole.Helpers
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
@@ -13,14 +12,12 @@
         @foreach (var plan in @Model.Plans)
         {
             <div class="@(plan.IsActive ? "pricing-card-active": "pricing-card")">
-                <h3 class="flex flex-col items-center">
-                    <div class="flex items-start space-x-1">
-                        <span>@plan.Name</span>
-                        <span asp-if="plan.IsActive" class="rounded-md bg-blue-600 px-1 py-0.5 text-xs font-semibold text-white">Active</span>
-                    </div>
-                </h3>
+                <div class="flex flex-wrap items-center justify-center">
+                    <badge class="@(plan.IsActive ? string.Empty : "invisible")" text="Active"></badge>
+                </div>
+                <h3 class="text-center">@plan.Name</h3>
                 <div class="space-y-0">
-                    <p class="text-lg font-black text-center">@plan.GetPrice()</p>
+                    <p class="text-lg font-black text-center">@plan.Plan.Price</p>
                     <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.Plan.PriceHint) ? "*" : string.Empty)</p>
                 </div>
                 <div class="flex-1">

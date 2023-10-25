@@ -192,7 +192,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var organization = await db.Organizations.SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+        var organization = await db.Organizations.Include(x => x.Applications).SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
         if (organization == null) return;
         organization.BillingPlan = PlanConstants.Free;
         organization.BillingSubscriptionId = null;
@@ -203,5 +203,15 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
         await db.SaveChangesAsync();
+
+        var setFeaturesRequest = new SetApplicationFeaturesRequest
+        {
+            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
+        };
+        foreach (var application in organization.Applications)
+        {
+            await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
+        }
     }
 }

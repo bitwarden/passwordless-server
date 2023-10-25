@@ -10,7 +10,7 @@ public class StripePlanOptions
     /// <summary>
     /// Price per user per month
     /// </summary>
-    public decimal Price { get; set; }
+    public string Price { get; set; }
 
     /// <summary>
     /// If you want to display a price hint at the bottom of a price card, for example related to tiered pricing.
