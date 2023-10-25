@@ -99,7 +99,9 @@ jobs:
   pack:
     strategy:
       matrix:
-        app: [Api, AdminConsole]
+        app:
+          - Api
+          - AdminConsole
 
     runs-on: ubuntu-latest
     permissions:
@@ -139,7 +141,9 @@ jobs:
   deploy:
     strategy:
         matrix:
-          app: [Api, AdminConsole]
+          app:
+            - Api
+            - AdminConsole
 
     environment: devtest-${{ matrix.app }}
     concurrency: devtest-${{ matrix.app }}
