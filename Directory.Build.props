@@ -1,9 +1,17 @@
 <Project>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <BaseVersion>1.0</BaseVersion>
+    <Version>1.0</Version>
     <RootNamespace Condition="$(RootNamespace) == ''">Passwordless.$(MSBuildProjectName)</RootNamespace>
     <AssemblyName Condition="$(AssemblyName) == ''">Passwordless.$(MSBuildProjectName)</AssemblyName>
-    <ImplicitUsings>true</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- We need to enable this eventually -->
+    <!-- <WarningsAsErrors>nullable</WarningsAsErrors> -->
   </PropertyGroup>
 </Project>
