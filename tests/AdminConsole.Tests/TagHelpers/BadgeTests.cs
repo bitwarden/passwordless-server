@@ -28,7 +28,7 @@ public class BadgeTests
         var expected = "<span class=\"rounded-md px-2 py-1 text-xs font-semibold bg-red-600 text-white invisible\">Inactive</span>";
         Assert.Equal(expected, actual);
     }
-    
+
     [Fact]
     public void RenderHtml_Renders_PrimaryBadge_AsExpected()
     {
@@ -49,7 +49,7 @@ public class BadgeTests
         var expected = "<span class=\"rounded-md px-2 py-1 text-xs font-semibold bg-blue-600 text-white invisible\">Active</span>";
         Assert.Equal(expected, actual);
     }
-    
+
     [Fact]
     public void RenderHtml_Renders_PrimaryBadge_WhenClassIsNull()
     {
@@ -70,7 +70,7 @@ public class BadgeTests
         var expected = "<span class=\"rounded-md px-2 py-1 text-xs font-semibold bg-blue-600 text-white\">Active</span>";
         Assert.Equal(expected, actual);
     }
-    
+
     [Fact]
     public void RenderHtml_Renders_PrimaryBadge_ByDefaultWhenVariantIsNotSpecified()
     {
@@ -89,7 +89,7 @@ public class BadgeTests
         var expected = "<span class=\"rounded-md px-2 py-1 text-xs font-semibold bg-blue-600 text-white\">Active</span>";
         Assert.Equal(expected, actual);
     }
-    
+
     [Fact]
     public void RenderHtml_Throws_ArgumentNullException_WhenTextIsNull()
     {
