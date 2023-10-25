@@ -32,6 +32,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         _stripeOptions = stripeOptions.Value;
     }
 
+    /// <inheritdoc />
     public async Task UpdateUsageAsync()
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
@@ -48,40 +49,33 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
 
         foreach (var organization in organizations)
         {
+            var idempotencyKey = Guid.NewGuid().ToString();
+            var service = new UsageRecordService();
             try
             {
-                await UpdateStripeAsync(organization.BillingSubscriptionItemId, organization.CurrentUserCount);
+                await service.CreateAsync(
+                    organization.BillingSubscriptionItemId,
+                    new UsageRecordCreateOptions
+                    {
+                        Quantity = organization.CurrentUserCount,
+                        Timestamp = DateTime.UtcNow,
+                        Action = "set"
+                    },
+                    new RequestOptions
+                    {
+                        IdempotencyKey = idempotencyKey
+                    }
+                );
             }
-            catch (Exception e)
+            catch (StripeException e)
             {
-                _logger.LogError(e, "Failed to update usage for organization {orgId}: {error}", organization.Id, e.Message);
+                _logger.LogError("Usage report failed for item {BillingSubscriptionItemId}:", organization.BillingSubscriptionItemId);
+                _logger.LogError(e, "Idempotency key: {IdempotencyKey}.", idempotencyKey);
             }
-
         }
     }
 
-    public async Task UpdateStripeAsync(string subscriptionItemId, int users)
-    {
-        // The idempotency key allows you to retry this usage record call if it fails.
-        var idempotencyKey = Guid.NewGuid().ToString();
-
-        DateTime timestamp = DateTime.UtcNow;
-        var service = new UsageRecordService();
-        try
-        {
-            UsageRecord? usageRecord = await service.CreateAsync(
-                subscriptionItemId,
-                new UsageRecordCreateOptions { Quantity = users, Timestamp = timestamp, Action = "set" },
-                new RequestOptions { IdempotencyKey = idempotencyKey }
-            );
-        }
-        catch (StripeException e)
-        {
-            Console.WriteLine($"Usage report failed for item {subscriptionItemId}:");
-            Console.WriteLine($"{e} (idempotency key: {idempotencyKey})");
-        }
-    }
-
+    /// <inheritdoc />
     public async Task OnPaidSubscriptionChangedAsync(string customerId, string clientReferenceId, string subscriptionId)
     {
         // todo: Add extra error handling, if we already have a customerId on Org, throw.
@@ -111,13 +105,15 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         var existingSubscriptionId = org.BillingSubscriptionId;
         org.BillingSubscriptionId = subscription.Id;
 
-        // Increase the limits
-        org.MaxAdmins = 1000;
-        org.MaxApplications = 1000;
-
         // we only have one item per subscription
         SubscriptionItem lineItem = subscription.Items.Data.Single();
         var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
+
+        var features = _plansOptions[planName];
+
+        // Increase the limits
+        org.MaxAdmins = features.MaxAdmins;
+        org.MaxApplications = features.MaxApplications;
 
         if (planName == null)
         {
@@ -132,15 +128,16 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             .Select(x => x.Id)
             .ToListAsync();
 
-        var features = _plansOptions[planName];
         var setFeaturesRequest = new SetApplicationFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
         };
 
+        // If we had a subscription before, cancel it now as we've successfully subscribed to the new plan.
         if (existingSubscriptionId != null && existingSubscriptionId != subscription.Id)
         {
+            // Issue prorated invoice.
             var cancelOptions = new SubscriptionCancelOptions
             {
                 InvoiceNow = true,
@@ -158,6 +155,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         await db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task UpdateSubscriptionStatusAsync(Invoice? dataObject)
     {
         // todo: Handled paid or unpaid events
@@ -178,6 +176,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
                || subscription.Status == "canceled";
     }
 
+    /// <inheritdoc />
     public async Task<string?> GetCustomerIdAsync(int organizationId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
@@ -188,6 +187,8 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         return customerId;
     }
 
+
+    /// <inheritdoc />
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
@@ -197,6 +198,10 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.BillingSubscriptionId = null;
         organization.BillingSubscriptionItemId = null;
         organization.BecamePaidAt = null;
+
+        var features = _plansOptions[PlanConstants.Free];
+        organization.MaxAdmins = features.MaxAdmins;
+        organization.MaxApplications = features.MaxApplications;
         await db.SaveChangesAsync();
     }
 }

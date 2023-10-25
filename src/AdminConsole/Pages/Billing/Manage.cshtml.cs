@@ -121,6 +121,9 @@ public class Manage : PageModel
 
     public class PricingCardModel
     {
+        /// <summary>
+        /// We want to display the price in US dollars.
+        /// </summary>
         private static readonly CultureInfo PriceFormat = new("en-US");
 
         public PricingCardModel(
@@ -135,8 +138,15 @@ public class Manage : PageModel
 
         public StripePlanOptions Plan { get; }
 
+        /// <summary>
+        /// Indicates if the plan is the active plan for the organization.
+        /// </summary>
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Retrieves the price formatted as a string.
+        /// </summary>
+        /// <returns></returns>
         public string GetPrice() => $"{Plan.Price.ToString("C", PriceFormat)}";
     }
 }
