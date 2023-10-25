@@ -1,5 +1,8 @@
 @page
+@using System.Globalization
+@using Passwordless.AdminConsole.Billing.Constants
 @using Passwordless.AdminConsole.Helpers
+@using Passwordless.AdminConsole.TagHelpers
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
 @{
@@ -51,40 +54,36 @@
         }
     </div>
 </div>
-<div id="applications-list">
-    <h2>
-        Your Applications
-    </h2>
-    <div class="overflow-hidden bg-white shadow sm:rounded-md">
-        <ul role="list" class="divide-y divide-gray-200">
-            @foreach(var app in Model.Applications) {
-                <li>
-                    <a href="@Url.AppPage("/App/Settings/Settings", app.Id)" class="block hover:bg-gray-50">
-                        <div class="flex items-center px-4 py-4 sm:px-6">
-                            <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
-                                <div class="truncate">
-                                    <div class="flex text-sm">
-                                        <p class="truncate font-medium text-blue-600">@app.Name</p>
-                                        <p class="ml-1 flex-shrink-0 font-normal text-gray-500">with plan @Model.Organization.BillingPlan</p>
-                                    </div>
-                                    <div class="mt-2 flex">
-                                        <div class="flex items-center text-sm text-gray-500">
-                                            <p>
-                                                @app.Description
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ml-5 flex-shrink-0">
-                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </a>
-                </li>
+<div id="invoices-list" asp-if="Model.Invoices != null && Model.Invoices.Any()">
+    <h2>Invoices</h2>
+    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+        <table id="invoices-table" class="tbl-default min-w-full">
+            <thead>
+            <tr>
+                <th>Invoice Number</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Download Link</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var invoice in Model.Invoices)
+            {
+                <tr>
+                    <td>@invoice.Number</td>
+                    <td>@invoice.Date</td>
+                    <td>@invoice.Amount</td>
+                    <td>
+                        <a href="@invoice.Pdf" target="_blank">download PDF</a>
+                    </td>
+                    <td>
+                        <badge asp-if="invoice.Paid" variant="ColorVariant.Success" text="Paid"></badge>
+                        <badge asp-if="!invoice.Paid" variant="ColorVariant.Danger" text="Pending"></badge>
+                    </td>
+                </tr>
             }
-        </ul>
+            </tbody>
+        </table>
     </div>
 </div>

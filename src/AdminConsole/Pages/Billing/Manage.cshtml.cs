@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -5,9 +6,10 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
-using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
+using Stripe;
 using Stripe.Checkout;
+using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
 
@@ -36,6 +38,8 @@ public class Manage : PageModel
 
     public Models.Organization Organization { get; set; }
 
+    public IReadOnlyCollection<InvoiceModel> Invoices { get; set; }
+
     public IReadOnlyCollection<PricingCardModel> Plans { get; init; }
 
     public async Task OnGet()
@@ -43,6 +47,24 @@ public class Manage : PageModel
         Applications = await _dataService.GetApplicationsAsync();
         Organization = await _dataService.GetOrganizationAsync();
         await OnLoadAsync();
+        if (!string.IsNullOrEmpty(Organization.BillingCustomerId))
+        {
+            var invoiceService = new InvoiceService();
+            var listRequest = new InvoiceListOptions();
+            listRequest.Customer = Organization.BillingCustomerId;
+            listRequest.Limit = 100;
+            var invoicesResult = await invoiceService.ListAsync();
+            Invoices = invoicesResult.Data
+                .Where(x => x.InvoicePdf != null)
+                .Select(x => new InvoiceModel
+                {
+                    Number = x.Number,
+                    Date = x.Created,
+                    Amount = $"{(x.Total / 100.0M):N2} {x.Currency.ToUpperInvariant()}",
+                    Pdf = x.InvoicePdf,
+                    Paid = x.Paid
+                }).ToImmutableList();
+        }
     }
 
     public async Task<IActionResult> OnPostSubscribe(string planName)
@@ -142,5 +164,27 @@ public class Manage : PageModel
         /// Indicates if the plan is the active plan for the organization.
         /// </summary>
         public bool IsActive { get; set; }
+    }
+
+    public class InvoiceModel
+    {
+        /// <summary>
+        /// The invoice number
+        /// </summary>
+        public string Number { get; set; }
+
+        /// <summary>
+        /// The invoice date
+        /// </summary>
+        public DateTime Date { get; set; }
+
+        /// <summary>
+        /// The download link for the invoice
+        /// </summary>
+        public string Pdf { get; set; }
+
+        public string Amount { get; set; }
+
+        public bool Paid { get; set; }
     }
 }
