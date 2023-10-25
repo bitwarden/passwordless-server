@@ -118,7 +118,7 @@ jobs:
       - name: Generate prerelease version
         id: prerelease-version
         if: ${{ github.event_name != 'release' }}
-        run: echo "version=0.0.0-ci-#{{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "version=0.0.0-ci-${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Publish app
         run: >
