@@ -23,6 +23,12 @@ using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
+// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
+Environment.SetEnvironmentVariable(
+    "DD_VERSION",
+    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
+);
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
