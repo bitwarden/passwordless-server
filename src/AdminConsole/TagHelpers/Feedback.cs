@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace AdminConsole.TagHelpers;
+namespace Passwordless.AdminConsole.TagHelpers;
 
 
 

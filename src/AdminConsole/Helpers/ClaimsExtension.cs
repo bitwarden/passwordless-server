@@ -1,12 +1,15 @@
+using System.Globalization;
 using System.Security.Claims;
 
-namespace AdminConsole.Helpers;
+namespace Passwordless.AdminConsole.Helpers;
 
 public static class ClaimsExtension
 {
-    public static int GetOrgId(this ClaimsPrincipal user)
+    public static int? GetOrgId(this ClaimsPrincipal user)
     {
-        int orgId = int.Parse(user.FindFirstValue("OrgId"));
+        var orgIdStr = user.FindFirstValue("OrgId");
+        if (orgIdStr == null) return null;
+        var orgId = int.Parse(orgIdStr, CultureInfo.InvariantCulture);
         return orgId;
     }
 
@@ -14,4 +17,10 @@ public static class ClaimsExtension
     {
         return user.FindFirstValue(ClaimTypes.Email);
     }
+
+    public static string GetId(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
+    public static string GetName(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
 }

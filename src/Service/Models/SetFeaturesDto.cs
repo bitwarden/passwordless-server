@@ -5,5 +5,5 @@ namespace Passwordless.Service.Models;
 public class SetFeaturesDto
 {
     [Range(0, 90)]
-    public int AuditLoggingRetentionPeriod { get; set; }
+    public int EventLoggingRetentionPeriod { get; set; }
 }

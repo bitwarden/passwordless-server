@@ -1,9 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Passwordless;
 
-namespace AdminConsole.Pages.Components.ManagePasskeys;
+namespace Passwordless.AdminConsole.Pages.Components.ManagePasskeys;
 
 public class ManagePasskeys : ViewComponent
 {
@@ -33,4 +32,5 @@ public class PasskeysModel
     public IReadOnlyCollection<Credential> Credentials { get; set; } = new List<Credential>();
     public string? ApiKey { get; set; }
     public string? ApiUrl { get; set; }
+    public bool HideDetails { get; set; }
 }

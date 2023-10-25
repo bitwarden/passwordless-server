@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace AdminConsole.TagHelpers.Icons;
+namespace Passwordless.AdminConsole.TagHelpers.Icons;
 
 public abstract class BaseAlertIcon : TagHelper
 {
@@ -17,9 +17,9 @@ public abstract class BaseAlertIcon : TagHelper
 
         string colorClass = Variant switch
         {
-            ColorVariant.Danger => "text-red-400",
-            ColorVariant.Info => "text-blue-400",
-            ColorVariant.Success => "text-green-400",
+            ColorVariant.Danger => "fill-red-400",
+            ColorVariant.Info => "fill-blue-400",
+            ColorVariant.Success => "fill-green-400",
             _ => null
         } ?? string.Empty;
 

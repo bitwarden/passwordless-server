@@ -1,6 +1,6 @@
-﻿using AdminConsole.Identity;
+﻿using Passwordless.AdminConsole.Identity;
 
-namespace AdminConsole.Models;
+namespace Passwordless.AdminConsole.Models;
 
 public class Organization
 {

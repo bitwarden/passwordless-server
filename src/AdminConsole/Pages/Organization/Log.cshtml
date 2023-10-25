@@ -1,97 +1,61 @@
 @page
-@model AdminConsole.Pages.Organization.Log
+@model Passwordless.AdminConsole.Pages.Organization.Log
 
 @{
-    ViewBag.Title = "Audit Log";
+    ViewBag.Title = "Organization Events";
 }
 
 <div>
+    <p>See events regarding admins of the organization.</p>
+    <br>
     <div class="flow-root" asp-if="Model.Events.Any()">
         <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                    <table class="table-fixed min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
+                    <table class="tbl-default min-w-full">
+                        <thead>
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                            <th scope="col" class="th-indent">
                                 Performed At
                             </th>
-                            <th scope="col" class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Performed By
                             </th>
-                            <th scope="col" class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Severity
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Message
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Subject
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                  whitespace-nowrap
-                                ">
+                            <th scope="col" class="whitespace-nowrap">
                                 Event Type
                             </th>
                         </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                        @foreach (var auditEvent in Model.Events)
+                        <tbody>
+                        @foreach (var logEvent in Model.Events)
                         {
                             <tr>
-                                <td
-                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                    @auditEvent.PerformedAt
+                                <td class="whitespace-nowrap td-indent td-strong">
+                                    <asp-local-time datetime="@logEvent.PerformedAt" />
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.PerformedBy
+                                <td class="whitespace-nowrap">
+                                    @logEvent.PerformedBy
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Severity
+                                <td class="whitespace-nowrap">
+                                    @logEvent.Severity
                                 </td>
-                                <td class=" px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Message
+                                <td>
+                                    @logEvent.Message
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Subject
+                                <td class="whitespace-nowrap">
+                                    @logEvent.Subject
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.EventType
+                                <td class="whitespace-nowrap">
+                                    @logEvent.EventType
                                 </td>
                             </tr>
                         }
@@ -101,23 +65,17 @@
             </div>
         </div>
     </div>
-    
-    <p asp-if="!Model.Events.Any()">This organization has no events from the past @Model.RetentionPeriod days.</p>
-    
-    @{
-        var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
-        var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";
-    }
 
-    @if (Model.PageList.TotalPages > 1)
-    {
-        <div class="flex justify-center">
-            <a class="px-1" @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex - 1)">Prev</a>
-            @foreach (var page in Model.PageList.Pages)
-            {
-                <a class="px-1 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
-            }
-            <a class="px-1" @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex + 1)">Next</a>
-        </div>
-    }
+    <p asp-if="!Model.Events.Any()">This organization has no events from the past @Model.RetentionPeriod days.</p>
+
+    <div asp-if="Model.PageList.TotalPages > 1" class="flex justify-center">
+        <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
+
+        @foreach (var page in Model.PageList.Pages)
+        {
+            <a asp-page="./Log" class="px-1 link-blue" asp-route-pageNumber="@(page)">@(page)</a>
+        }
+
+        <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
+    </div>
 </div>

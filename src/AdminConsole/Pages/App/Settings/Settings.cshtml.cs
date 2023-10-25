@@ -1,25 +1,24 @@
-﻿using AdminConsole.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Settings;
+namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : PageModel
 {
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
-    private readonly ApplicationService _appService;
+    private readonly IApplicationService _appService;
 
     public Models.Organization Organization { get; set; }
     public string ApplicationId { get; set; }
     public bool PendingDelete { get; set; }
     public DateTime? DeleteAt { get; set; }
 
-    public SettingsModel(ILogger<SettingsModel> logger, DataService dataService, ICurrentContext currentContext, ApplicationService appService)
+    public SettingsModel(ILogger<SettingsModel> logger, IDataService dataService, ICurrentContext currentContext, IApplicationService appService)
     {
         _logger = logger;
         _dataService = dataService;
@@ -29,7 +28,7 @@ public class SettingsModel : PageModel
 
     public async Task OnGet()
     {
-        Organization = await _dataService.GetOrganization();
+        Organization = await _dataService.GetOrganizationWithDataAsync();
         ApplicationId = _currentContext.AppId ?? String.Empty;
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
@@ -49,7 +48,7 @@ public class SettingsModel : PageModel
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected happened. Please try again later." });
         }
 
-        var response = await _appService.MarkApplicationForDeletion(applicationId, userName);
+        var response = await _appService.MarkApplicationForDeletionAsync(applicationId, userName);
 
         return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
     }
@@ -60,7 +59,7 @@ public class SettingsModel : PageModel
 
         try
         {
-            await _appService.CancelDeletionForApplication(applicationId);
+            await _appService.CancelDeletionForApplicationAsync(applicationId);
 
             return RedirectToPage();
         }

@@ -1,9 +1,14 @@
 @page
 @using Microsoft.AspNetCore.Authorization
-@model Verify
+@model Passwordless.AdminConsole.Pages.Organization.Verify
 @attribute [AllowAnonymous]
 @{
     ViewData["Title"] = "Verify your account";
+}
+
+@section Head {
+    @* This to refresh the page to check if the user has verified and logged in *@
+    <meta http-equiv="refresh" content="15" />
 }
 
 <p>We've sent a confirmation link to the email address you provided. Click on the link in the email to verify your account</p>
@@ -12,8 +17,8 @@
     @{
         var mailPath = System.IO.Path.GetFullPath("mail.md");
     }
-    <br />
+    <br>
     <b>Development mode: </b> Please open the the <code>src/AdminConsole/mail.md</code> file.
-    <br />
+    <br>
     <a class="link-blue" href="vscode://file/@mailPath">Open with VS Code: @mailPath</a>
 </environment>

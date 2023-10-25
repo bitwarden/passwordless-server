@@ -1,8 +1,8 @@
-using AdminConsole.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Identity;
 
-namespace AdminConsole.Pages.Account;
+namespace Passwordless.AdminConsole.Pages.Account;
 
 public class AccessDenied : PageModel
 {

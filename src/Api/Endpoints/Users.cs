@@ -1,11 +1,10 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Service;
-using Passwordless.Service.AuditLog.Loggers;
+using Passwordless.Service.EventLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
-using static Passwordless.Service.AuditLog.AuditEventFunctions;
 
-namespace Passwordless.Server.Endpoints;
+namespace Passwordless.Api.Endpoints;
 
 public static class UsersEndpoints
 {
@@ -13,7 +12,7 @@ public static class UsersEndpoints
     {
         app.MapMethods("/users/list", new[] { "get" }, async (UserCredentialsService userService) =>
         {
-            //userId = req.Query["userId"];                
+            //userId = req.Query["userId"];
             // todo: Add Include credentials
             // todo: Add Include Aliases
 
@@ -32,11 +31,11 @@ public static class UsersEndpoints
         })
             .RequireSecretKey();
 
-        app.MapPost("/users/delete", async (UserDeletePayload payload, UserCredentialsService userService, IAuditLogger auditLogger) =>
+        app.MapPost("/users/delete", async (UserDeletePayload payload, UserCredentialsService userService, IEventLogger eventLogger) =>
         {
             await userService.DeleteUser(payload.UserId);
 
-            auditLogger.LogEvent(DeletedUserEvent(payload.UserId));
+            eventLogger.LogDeletedUserEvent(payload.UserId);
 
             return Ok();
         })

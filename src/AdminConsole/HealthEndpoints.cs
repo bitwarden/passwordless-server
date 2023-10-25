@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
-using AdminConsole.Db;
-using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole;
 
@@ -11,10 +10,13 @@ public static class HealthEndpoints
     {
         app.MapGet("health/http", (HttpContext ctx, HttpRequest req) => Results.Text("Ok"));
 
-        app.MapGet("health/storage", async (HttpContext ctx, HttpRequest req, ConsoleDbContext dbContext) =>
+        app.MapGet("health/storage", async (HttpContext ctx, HttpRequest req, IDataService dataService) =>
         {
             var sw = Stopwatch.StartNew();
-            await dbContext.Applications.CountAsync();
+            if (!await dataService.CanConnectAsync())
+            {
+                return Results.StatusCode(503);
+            }
             sw.Stop();
             app.Logger.LogInformation("health_storage took {Latency}", sw.ElapsedMilliseconds);
             return Results.Text("Took: " + sw.ElapsedMilliseconds);

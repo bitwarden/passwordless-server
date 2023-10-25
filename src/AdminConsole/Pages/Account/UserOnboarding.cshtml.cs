@@ -1,8 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless;
 
-namespace AdminConsole.Pages.Account;
+namespace Passwordless.AdminConsole.Pages.Account;
 
 public class UserOnboarding : PageModel
 {

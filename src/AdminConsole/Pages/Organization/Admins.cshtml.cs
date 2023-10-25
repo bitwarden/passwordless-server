@@ -1,33 +1,32 @@
 using System.ComponentModel.DataAnnotations;
-using AdminConsole.Helpers;
-using AdminConsole.Identity;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless;
-using Passwordless.AdminConsole.AuditLog.Loggers;
-using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
+using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Admins : PageModel
 {
-    private readonly DataService _dataService;
-    private readonly InvitationService _invitationService;
+    private readonly IDataService _dataService;
+    private readonly IInvitationService _invitationService;
     private readonly UserManager<ConsoleAdmin> _userManager;
     private readonly SignInManager<ConsoleAdmin> _signinManager;
     private readonly IPasswordlessClient _passwordlessClient;
-    private readonly IAuditLogger _auditLogger;
+    private readonly IEventLogger _eventLogger;
     private readonly ISystemClock _systemClock;
 
-    public Admins(DataService dataService,
-        InvitationService invitationService,
+    public Admins(
+        IDataService dataService,
+        IInvitationService invitationService,
         UserManager<ConsoleAdmin> userManager,
         SignInManager<ConsoleAdmin> signinManager,
         IPasswordlessClient passwordlessClient,
-        IAuditLogger auditLogger,
+        IEventLogger eventLogger,
         ISystemClock systemClock)
     {
         _dataService = dataService;
@@ -35,7 +34,7 @@ public class Admins : PageModel
         _userManager = userManager;
         _signinManager = signinManager;
         _passwordlessClient = passwordlessClient;
-        _auditLogger = auditLogger;
+        _eventLogger = eventLogger;
         _systemClock = systemClock;
     }
 
@@ -47,16 +46,16 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnGet()
     {
-        ConsoleAdmins = await _dataService.GetConsoleAdmins();
-        Invites = await _invitationService.GetInvites(User.GetOrgId());
-        CanInviteAdmin = await _dataService.CanInviteAdmin();
+        ConsoleAdmins = await _dataService.GetConsoleAdminsAsync();
+        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
+        CanInviteAdmin = await _dataService.CanInviteAdminAsync();
 
         return Page();
     }
 
     public async Task<IActionResult> OnPostDelete(string userId)
     {
-        var users = await _dataService.GetConsoleAdmins();
+        var users = await _dataService.GetConsoleAdminsAsync();
         if (users is not { Count: > 1 })
         {
             ModelState.AddModelError("error", "At least one admin is required in an organization.");
@@ -76,7 +75,8 @@ public class Admins : PageModel
         await _userManager.DeleteAsync(user);
 
         var performedBy = users.FirstOrDefault(x => x.Email == User.GetEmail());
-        if (performedBy is not null) _auditLogger.LogEvent(DeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime));
+        if (performedBy is not null)
+            _eventLogger.LogDeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime);
 
         // if user is self
         if (user.Email == User.GetEmail())
@@ -91,7 +91,7 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnPostInvite(InviteForm form)
     {
-        CanInviteAdmin = await _dataService.CanInviteAdmin();
+        CanInviteAdmin = await _dataService.CanInviteAdminAsync();
         if (CanInviteAdmin is false)
         {
             ModelState.AddModelError("error", "You need to upgrade to a paid organization to invite more admins.");
@@ -104,7 +104,7 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        Models.Organization org = await _dataService.GetOrganization();
+        Models.Organization org = await _dataService.GetOrganizationAsync();
         var orgId = org.Id;
         var orgName = org.Name;
         ConsoleAdmin user = await _dataService.GetUserAsync();
@@ -113,18 +113,29 @@ public class Admins : PageModel
 
         await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
 
-        _auditLogger.LogEvent(InviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime));
+        _eventLogger.LogInviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime);
 
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostCancel(string hashedCode)
     {
+        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
+
+        var inviteToCancel = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
+
         await _invitationService.CancelInviteAsync(hashedCode);
 
         var performedBy = await _dataService.GetUserAsync();
-        var invitationCancelled = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
-        if (invitationCancelled is not null) _auditLogger.LogEvent(CancelAdminInviteEvent(performedBy, invitationCancelled.ToEmail, _systemClock.UtcNow.UtcDateTime));
+
+        if (inviteToCancel is not null)
+        {
+            _eventLogger.LogCancelAdminInviteEvent(
+                performedBy,
+                inviteToCancel.ToEmail,
+                _systemClock.UtcNow.UtcDateTime
+            );
+        }
 
         return RedirectToPage();
     }

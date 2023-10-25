@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using Passwordless.Common.Parsers;
+using Passwordless.Common.Utils;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Features;
@@ -28,18 +28,18 @@ public class FeatureContextProvider : IFeatureContextProvider
             }
             if (httpContext.Request.Headers.ContainsKey("ApiKey"))
             {
-                appId = ApiKeyParser.GetAppId(httpContext.Request.Headers["ApiKey"].ToString());
+                appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiKey"].ToString());
             }
             if (httpContext.Request.Headers.ContainsKey("ApiSecret"))
             {
-                appId = ApiKeyParser.GetAppId(httpContext.Request.Headers["ApiSecret"].ToString());
+                appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiSecret"].ToString());
             }
             if (appId == null) return new NullFeaturesContext();
             var storage = _storageFactory.Create(appId);
             var features = await storage.GetAppFeaturesAsync();
             if (features != null)
             {
-                return new FeaturesContext(features.AuditLoggingIsEnabled, features.AuditLoggingRetentionPeriod, features.DeveloperLoggingEndsAt);
+                return new FeaturesContext(features.EventLoggingIsEnabled, features.EventLoggingRetentionPeriod, features.DeveloperLoggingEndsAt);
             }
             return new NullFeaturesContext();
         });

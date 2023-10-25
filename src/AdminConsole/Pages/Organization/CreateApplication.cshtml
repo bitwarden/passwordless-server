@@ -1,7 +1,8 @@
 @page
-@inject IOptions<PasswordlessOptions> options
+@using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
+@inject IOptions<PasswordlessManagementOptions> Options
 @model CreateApplicationModel
-
 
 @{
     ViewData["Title"] = "New App";
@@ -81,7 +82,7 @@
             });
 
             const checkAvailability = async (appId) => {
-                var res = await fetch("@options.Value.ApiUrl/apps/available", {
+                var res = await fetch("@Options.Value.ApiUrl/apps/available", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -1,27 +1,25 @@
-using AdminConsole.Db;
-using AdminConsole.Models;
 using Microsoft.EntityFrameworkCore;
-using Passwordless;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Models;
 
-namespace AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services;
 
-internal class UsageService
+internal class UsageService<TDbContext> : IUsageService where TDbContext : ConsoleDbContext
 {
-    private readonly ConsoleDbContext _db;
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<UsageService> _logger;
+    private readonly ILogger<UsageService<TDbContext>> _logger;
 
-    public UsageService(ConsoleDbContext db, IHttpClientFactory httpClientFactory, ILogger<UsageService> logger)
+    public UsageService(IDbContextFactory<TDbContext> dbContextFactory, IHttpClientFactory httpClientFactory, ILogger<UsageService<TDbContext>> logger)
     {
-        _db = db;
+        _dbContextFactory = dbContextFactory;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
-    public async Task UpdateUsersCount()
+    public async Task UpdateUsersCountAsync()
     {
-
-        // TODO: Improve by using a batch call or parallelism
-        var apps = await _db.Applications.ToListAsync();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var apps = await db.Applications.ToListAsync();
         foreach (var app in apps)
         {
             try
@@ -37,8 +35,7 @@ internal class UsageService
             }
         }
 
-        await _db.SaveChangesAsync();
-
+        await db.SaveChangesAsync();
     }
 
     private async Task<int> GetUsersCounts(Application app)

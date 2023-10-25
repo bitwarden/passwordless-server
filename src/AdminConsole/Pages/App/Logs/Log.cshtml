@@ -1,112 +1,67 @@
 @page "/logs"
-@model AdminConsole.Pages.Logs.Log
+@model Passwordless.AdminConsole.Pages.App.Logs.Log
 
 @{
     ViewBag.Title = "Application Logs";
 }
 
 <div>
+    <p>See events for this app, such as passkey creation, login events, etc.</p>
+    <br>
     <div class="flow-root" asp-if="Model.Events.Any()">
         <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                    <table class="table-fixed min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
+                    <table class="tbl-default min-w-full">
+                        <thead>
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                            <th scope="col" class="th-indent">
                                 Performed At
                             </th>
-                            <th scope="col" class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Performed By
                             </th>
-                            <th scope="col" class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Severity
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Message
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                ">
+                            <th scope="col">
                                 Subject
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                  whitespace-nowrap
-                                ">
+                            <th scope="col" class="whitespace-nowrap">
                                 Event Type
                             </th>
-                            <th
-                                scope="col"
-                                class="
-                                  px-3
-                                  py-3.5
-                                  text-left text-sm
-                                  font-semibold
-                                  text-gray-900
-                                  whitespace-nowrap
-                                ">
+                            <th scope="col" class="whitespace-nowrap">
                                 Api Key
                             </th>
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                        @foreach (var auditEvent in Model.Events)
+                        @foreach (var logEvent in Model.Events)
                         {
                             <tr>
-                                <td
-                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                    @auditEvent.PerformedAt
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                    <asp-local-time datetime="@logEvent.PerformedAt" />
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.PerformedBy
+                                    @logEvent.PerformedBy
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Severity
+                                    @logEvent.Severity
                                 </td>
                                 <td class=" px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Message
+                                    @logEvent.Message
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.Subject
+                                    @logEvent.Subject
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @auditEvent.EventType
+                                    @logEvent.EventType
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @(string.IsNullOrEmpty(auditEvent.ApiKeyAbbreviated) ? "" : string.Concat("***", auditEvent.ApiKeyAbbreviated))
+                                    @(string.IsNullOrEmpty(logEvent.ApiKeyId) ? "" : string.Concat("***", logEvent.ApiKeyId))
                                 </td>
                             </tr>
                         }
@@ -119,20 +74,14 @@
 
     <p asp-if="!Model.Events.Any()">This application has no events from the past @Model.RetentionPeriod days.</p>
 
-    @{
-        var prevDisabled = !Model.PageList.HasPreviousPage ? "disabled" : "";
-        var nextDisabled = !Model.PageList.HasNextPage ? "disabled" : "";
-    }
+    <div asp-if="Model.PageList.TotalPages > 1" class="flex justify-center">
+        <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
 
-    @if (Model.PageList.TotalPages > 1)
-    {
-        <div class="flex justify-center">
-            <a class="px-1" @prevDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex - 1)">Prev</a>
-            @foreach (var page in Model.PageList.Pages)
-            {
-                <a class="px-1 link-blue" asp-page="./Index" asp-route-pageIndex="@(page)">@(page)</a>
-            }
-            <a class="px-1" @nextDisabled asp-route-pageIndex="@(Model.PageList.CurrentIndex + 1)">Next</a>
-        </div>
-    }
+        @foreach (var page in Model.PageList.Pages)
+        {
+            <a asp-page="./Log" class="px-1 link-blue" asp-route-pageNumber="@(page)">@(page)</a>
+        }
+
+        <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
+    </div>
 </div>

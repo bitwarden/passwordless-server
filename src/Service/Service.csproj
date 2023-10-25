@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <IsPackable>false</IsPackable>
+    <!-- TODO: remove this and update EF Core models to properly support NOT NULL constraints -->
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fido2" Version="3.0.1" />
+    <PackageReference Include="Fido2" Version="4.0.0-beta4" />
+    <PackageReference Include="Fido2.Models" Version="4.0.0-beta4" />
     <PackageReference Include="MessagePack" Version="2.5.129" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.5.129">
       <PrivateAssets>all</PrivateAssets>
@@ -19,15 +21,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Microsoft.EntityFrameworkCore.InMemory" />
   </ItemGroup>
 
   <ItemGroup>

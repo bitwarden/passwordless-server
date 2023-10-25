@@ -35,7 +35,7 @@ public class EFStoredCredential : PerTenant
     {
         return new StoredCredential()
         {
-            Descriptor = new PublicKeyCredentialDescriptor() { Id = DescriptorId, Type = DescriptorType, Transports = DescriptorTransports },
+            Descriptor = new PublicKeyCredentialDescriptor(DescriptorType.Value, DescriptorId, DescriptorTransports),
             PublicKey = PublicKey,
             UserHandle = UserHandle,
             SignatureCounter = SignatureCounter,

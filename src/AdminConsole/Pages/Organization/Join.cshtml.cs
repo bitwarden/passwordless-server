@@ -1,36 +1,35 @@
 using System.ComponentModel.DataAnnotations;
-using AdminConsole.Identity;
-using AdminConsole.Services;
-using AdminConsole.Services.Mail;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.AuditLog.Loggers;
-using static Passwordless.AdminConsole.AuditLog.AuditLogEventFunctions;
+using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.Mail;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Join : PageModel
 {
-    private readonly InvitationService _invitationService;
+    private readonly IInvitationService _invitationService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IMailService _mailService;
-    private readonly IAuditLogger _auditLogger;
+    private readonly IEventLogger _eventLogger;
     private readonly ISystemClock _systemClock;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
-    public Join(InvitationService invitationService,
+    public Join(IInvitationService invitationService,
         UserManager<ConsoleAdmin> userManager, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IMailService mailService,
-        IAuditLogger auditLogger,
+        IEventLogger eventLogger,
         ISystemClock systemClock)
     {
         _invitationService = invitationService;
         _userManager = userManager;
         _magicLinkSignInManager = magicLinkSignInManager;
         _mailService = mailService;
-        _auditLogger = auditLogger;
+        _eventLogger = eventLogger;
         _systemClock = systemClock;
     }
 
@@ -79,11 +78,11 @@ public class Join : PageModel
         }
 
         Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
-        var ok = await _invitationService.ConsumeInvite(invite);
+        var ok = await _invitationService.ConsumeInviteAsync(invite);
 
         if (!ok)
         {
-            _auditLogger.LogEvent(AdminInvalidInviteUsedEvent(invite, _systemClock.UtcNow.UtcDateTime));
+            _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _systemClock.UtcNow.UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
 
@@ -105,7 +104,7 @@ public class Join : PageModel
             var url = Url.Page("/Account/useronboarding");
             await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
 
-            _auditLogger.LogEvent(AdminAcceptedInviteEvent(invite, user, _systemClock.UtcNow.UtcDateTime));
+            _eventLogger.LogAdminAcceptedInviteEvent(invite, user, _systemClock.UtcNow.UtcDateTime);
         }
         else
         {

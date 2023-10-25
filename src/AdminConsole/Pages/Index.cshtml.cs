@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace AdminConsole.Pages;
+namespace Passwordless.AdminConsole.Pages;
 
 public class IndexModel : PageModel
 {

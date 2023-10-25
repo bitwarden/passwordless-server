@@ -22,7 +22,7 @@ namespace Passwordless.Service.Migrations.Mssql
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Passwordless.Service.AuditLog.Models.ApplicationAuditEvent", b =>
+            modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,14 +90,14 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<string>("Tenant")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("AuditLoggingIsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("AuditLoggingRetentionPeriod")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("EventLoggingIsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("EventLoggingRetentionPeriod")
+                        .HasColumnType("int");
 
                     b.HasKey("Tenant");
 

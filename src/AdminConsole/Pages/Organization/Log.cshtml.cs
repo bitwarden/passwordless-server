@@ -1,27 +1,26 @@
-using AdminConsole.Pages.Components;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole;
-using Passwordless.AdminConsole.AuditLog.DTOs;
+using Passwordless.AdminConsole.EventLog.DTOs;
+using Passwordless.AdminConsole.Middleware;
+using Passwordless.AdminConsole.Pages.Components;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Log : PageModel
 {
-    private readonly IAuditLogService _auditLogService;
-    private readonly DataService _dataService;
+    private readonly IEventLogService _eventLogService;
+    private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
 
     public Models.Organization Organization { get; set; }
-    public IEnumerable<AuditLogEvent> Events { get; set; }
+    public IEnumerable<EventLogEvent> Events { get; set; }
     public PagedList PageList { get; set; }
     public int RetentionPeriod { get; private set; }
 
-    public Log(IAuditLogService auditLogService, DataService dataService, ICurrentContext currentContext)
+    public Log(IEventLogService eventLogService, IDataService dataService, ICurrentContext currentContext)
     {
-        _auditLogService = auditLogService;
+        _eventLogService = eventLogService;
         _dataService = dataService;
         _currentContext = currentContext;
     }
@@ -30,19 +29,17 @@ public class Log : PageModel
     {
         var features = _currentContext.OrganizationFeatures;
 
-        if (!features.AuditLoggingIsEnabled) return RedirectToPage("Overview");
+        if (!features.EventLoggingIsEnabled) return RedirectToPage("Overview");
 
-        RetentionPeriod = features.AuditLoggingRetentionPeriod;
-        Organization = await _dataService.GetOrganization();
+        RetentionPeriod = features.EventLoggingRetentionPeriod;
+        Organization = await _dataService.GetOrganizationAsync();
 
-        var eventTask = _auditLogService.GetAuditLogs(Organization.Id, pageNumber, numberOfResults);
-        var countTask = _auditLogService.GetAuditLogCount(Organization.Id);
-
-        await Task.WhenAll(eventTask, countTask);
-
-        Events = eventTask.Result.Events;
-
-        var itemCount = countTask.Result;
+        // need to revisit this:
+        // - do not pass around org id
+        // - infinite scroll/paging over current approach?
+        var result = await _eventLogService.GetEventLogs(Organization.Id, pageNumber, numberOfResults);
+        Events = result.Events;
+        var itemCount = await _eventLogService.GetEventLogCount(Organization.Id);
 
         PageList = new PagedList(itemCount, pageNumber, numberOfResults);
 

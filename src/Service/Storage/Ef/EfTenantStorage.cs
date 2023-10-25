@@ -104,7 +104,7 @@ public class EfTenantStorage : ITenantStorage
         // Do we really need these AsNoTracking?
         var descs = await db.Credentials.Where(c => c.UserId == userid).ToListAsync();
 
-        var pkcred = descs.Select(x => new PublicKeyCredentialDescriptor() { Id = x.DescriptorId, Transports = x.DescriptorTransports, Type = x.DescriptorType }).ToList();
+        var pkcred = descs.Select(x => new PublicKeyCredentialDescriptor(x.DescriptorType.Value, x.DescriptorId, x.DescriptorTransports)).ToList();
         return pkcred;
     }
 
@@ -113,7 +113,7 @@ public class EfTenantStorage : ITenantStorage
         // TODO: Returning a c.descriptor does not work.
         var res = await db.Credentials.Where(c => c.UserId == userId).ToListAsync();
 
-        var pkcred = res.Select(x => new PublicKeyCredentialDescriptor() { Id = x.DescriptorId, Transports = x.DescriptorTransports, Type = x.DescriptorType }).ToList();
+        var pkcred = res.Select(x => new PublicKeyCredentialDescriptor(x.DescriptorType.Value, x.DescriptorId, x.DescriptorTransports)).ToList();
 
         return pkcred;
     }
@@ -166,15 +166,15 @@ public class EfTenantStorage : ITenantStorage
     public async Task SetFeaturesAsync(SetFeaturesDto features)
     {
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
-        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         await db.SaveChangesAsync();
     }
 
     public async Task SetFeaturesAsync(ManageFeaturesDto features)
     {
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
-        existingEntity.AuditLoggingIsEnabled = features.AuditLoggingIsEnabled;
-        existingEntity.AuditLoggingRetentionPeriod = features.AuditLoggingRetentionPeriod;
+        existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
+        existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         await db.SaveChangesAsync();
     }
 

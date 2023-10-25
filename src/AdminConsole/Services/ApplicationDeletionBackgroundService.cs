@@ -1,6 +1,4 @@
-using AdminConsole.Db;
-using AdminConsole.Models;
-using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -45,15 +43,18 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
             var client = scope.ServiceProvider.GetRequiredService<IPasswordlessManagementClient>();
-            var db = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
+            var applicationService = scope.ServiceProvider.GetRequiredService<IApplicationService>();
             var applicationIds = await client.ListApplicationsPendingDeletionAsync();
             foreach (var applicationId in applicationIds)
             {
-                await client.DeleteApplicationAsync(applicationId);
-                var application = new Application { Id = applicationId };
-                db.Entry(application).State = EntityState.Deleted;
-                db.Applications.Remove(application);
-                await db.SaveChangesAsync();
+                if (await client.DeleteApplicationAsync(applicationId))
+                {
+                    await applicationService.DeleteAsync(applicationId);
+                }
+                else
+                {
+                    _logger.LogError("Failed to delete application: {appId}", applicationId);
+                }
             }
         }
         catch (Exception e)

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using AdminConsole.Models;
 using Microsoft.AspNetCore.Identity;
+using Passwordless.AdminConsole.Models;
 
-namespace AdminConsole.Identity;
+namespace Passwordless.AdminConsole.Identity;
 
 public class ConsoleAdmin : IdentityUser<string>
 {

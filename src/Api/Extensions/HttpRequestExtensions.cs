@@ -1,6 +1,6 @@
 ﻿using UAParser;
 
-namespace ApiHelpers;
+namespace Passwordless.Api.Extensions;
 
 public static class HttpRequestExtensions
 {

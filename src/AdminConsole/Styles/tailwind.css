@@ -49,6 +49,40 @@
     .link-blue {
         @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
     }
+    
+    table.tbl-default {
+        @apply divide-y divide-gray-300
+    }
+    
+    table.tbl-default thead {
+        @apply bg-gray-200
+    }
+    
+    table.tbl-default tbody {
+        @apply divide-y divide-gray-200 bg-white
+    }
+    
+    table.tbl-default th {
+        @apply px-3 py-3.5 text-left text-sm font-semibold text-gray-900
+    }
+    
+    table.tbl-default td {
+        @apply px-3 py-4 text-sm text-gray-500
+    }
+
+    table.tbl-default td.td-strong {
+        @apply text-gray-900
+    }
+    
+    table.tbl-default td.td-indent, table.tbl-default th.th-indent {
+        @apply pl-4 sm:pl-6
+    }
+
+    table.tbl-default a {
+        @apply link-blue;
+
+        text-decoration: none;
+    }
 }
 
 :root {

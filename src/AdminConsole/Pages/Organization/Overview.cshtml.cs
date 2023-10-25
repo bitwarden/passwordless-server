@@ -1,17 +1,17 @@
-using AdminConsole.Identity;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class OverviewModel : PageModel
 {
-    private readonly DataService _dataService;
+    private readonly IDataService _dataService;
     private readonly UserManager<ConsoleAdmin> userManager;
 
-    public OverviewModel(DataService dataService, UserManager<ConsoleAdmin> userManager)
+    public OverviewModel(IDataService dataService, UserManager<ConsoleAdmin> userManager)
     {
         _dataService = dataService;
         this.userManager = userManager;
@@ -21,8 +21,8 @@ public class OverviewModel : PageModel
     public Models.Organization Org { get; set; }
     public async Task<IActionResult> OnGet()
     {
-        CanCreateApplication = await _dataService.AllowedToCreateApplication();
-        var orgData = await _dataService.GetOrganizationWithData();
+        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
+        var orgData = await _dataService.GetOrganizationWithDataAsync();
 
         if (orgData != null)
         {

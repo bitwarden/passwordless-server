@@ -1,20 +1,25 @@
-using AdminConsole.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class Verify : PageModel
 {
     private readonly MagicLinkSignInManager<ConsoleAdmin> _signInManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public Verify(MagicLinkSignInManager<ConsoleAdmin> signInManager)
+    public Verify(MagicLinkSignInManager<ConsoleAdmin> signInManager, IHttpContextAccessor httpContextAccessor)
     {
         _signInManager = signInManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<IActionResult> OnGet(string token, string email)
+    public IActionResult OnGet()
     {
-        return Page();
+        return _httpContextAccessor.HttpContext != null && _signInManager.IsSignedIn(_httpContextAccessor.HttpContext.User)
+            ? RedirectToPage("/Account/useronboarding")
+            : Page();
     }
 }

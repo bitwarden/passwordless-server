@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using AdminConsole.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Identity;
 
-
-namespace AdminConsole.Pages;
+namespace Passwordless.AdminConsole.Pages.Account;
 
 public class LogoutModel : PageModel
 {

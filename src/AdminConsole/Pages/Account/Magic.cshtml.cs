@@ -1,8 +1,9 @@
-using AdminConsole.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages.Account;
+namespace Passwordless.AdminConsole.Pages.Account;
 
 public class Magic : PageModel
 {

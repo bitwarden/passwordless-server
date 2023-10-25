@@ -1,44 +1,43 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using AdminConsole.Billing;
-using AdminConsole.Db;
-using AdminConsole.Helpers;
-using AdminConsole.Identity;
-using AdminConsole.Models;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless;
-using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
 using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
 
-namespace AdminConsole.Pages.Organization;
+namespace Passwordless.AdminConsole.Pages.Organization;
 
 public class CreateApplicationModel : PageModel
 {
-    private readonly ConsoleDbContext db;
     private readonly SignInManager<ConsoleAdmin> _signInManager;
     private readonly IOptionsSnapshot<PasswordlessOptions> _passwordlessOptions;
-    private readonly DataService _dataService;
+    private readonly IApplicationService _applicationService;
+    private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
     private readonly PlansOptions _plansOptions;
 
-    public CreateApplicationModel(ConsoleDbContext db,
+    public CreateApplicationModel(
         IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
         SignInManager<ConsoleAdmin> signInManager,
-        DataService dataService,
+        IApplicationService applicationService,
+        IDataService dataService,
         IOptions<StripeOptions> stripeOptions,
         IPasswordlessManagementClient managementClient,
         IOptionsSnapshot<PlansOptions> plansOptions)
     {
         _dataService = dataService;
+        _applicationService = applicationService;
         _managementClient = managementClient;
-        this.db = db;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
@@ -49,7 +48,7 @@ public class CreateApplicationModel : PageModel
 
     public async Task OnGet()
     {
-        CanCreateApplication = await _dataService.AllowedToCreateApplication();
+        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
     }
 
     public bool CanCreateApplication { get; set; }
@@ -67,20 +66,20 @@ public class CreateApplicationModel : PageModel
             Name = form.Name,
             Description = form.Description,
             CreatedAt = DateTime.UtcNow,
-            OrganizationId = User.GetOrgId()
+            OrganizationId = User.GetOrgId().Value
         };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
         // validate we're allowed to create more Orgs
-        if (!await _dataService.AllowedToCreateApplication())
+        if (!await _dataService.AllowedToCreateApplicationAsync())
         {
             ModelState.AddModelError("MaxApplications", "You have reached the maximum number of applications for your organization. Please upgrade to a paid organization");
             return Page();
         }
 
         // Attach a plan
-        var org = await _dataService.GetOrganization();
+        var org = await _dataService.GetOrganizationAsync();
         if (org.HasSubscription)
         {
             var priceId = _stripeOptions.UsersProPriceId;
@@ -96,8 +95,8 @@ public class CreateApplicationModel : PageModel
             var newAppOptions = new NewAppOptions
             {
                 AdminEmail = email,
-                AuditLoggingIsEnabled = plan.AuditLoggingIsEnabled,
-                AuditLoggingRetentionPeriod = plan.AuditLoggingRetentionPeriod
+                EventLoggingIsEnabled = plan.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = plan.EventLoggingRetentionPeriod
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
@@ -117,19 +116,14 @@ public class CreateApplicationModel : PageModel
         app.ApiKey = res.ApiKey2;
         app.ApiSecret = res.ApiSecret2;
         app.ApiUrl = _passwordlessOptions.Value.ApiUrl;
-
-
-        db.Applications.Add(app);
-
-        app.Onboarding = new Onboarding()
+        app.Onboarding = new Onboarding
         {
             ApiKey = res.ApiKey1,
             ApiSecret = res.ApiSecret1,
             SensitiveInfoExpireAt = DateTime.UtcNow.AddDays(7)
         };
-        // Add temporary onboarding keys
-        //db.Onboardings.Add();
-        await db.SaveChangesAsync();
+
+        await _applicationService.CreateApplicationAsync(app);
 
         var myUser = await _signInManager.UserManager.GetUserAsync(User);
         await _signInManager.RefreshSignInAsync(myUser);

@@ -330,8 +330,8 @@ public class SharedManagementServiceTests
         const string appId = "myappid";
         var payload = new ManageFeaturesDto
         {
-            AuditLoggingIsEnabled = true,
-            AuditLoggingRetentionPeriod = 7
+            EventLoggingIsEnabled = true,
+            EventLoggingRetentionPeriod = 7
         };
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))

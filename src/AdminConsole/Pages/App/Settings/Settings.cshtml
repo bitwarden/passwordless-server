@@ -1,9 +1,9 @@
 ﻿@page "/settings"
-@model AdminConsole.Pages.Settings.SettingsModel
+@model SettingsModel
+
 @{
     ViewData["Title"] = "Settings";
 }
-
 
 <h2 class="h2">Plan</h2>
 <p class="">The plan you select for this app changes the pricing and features available.</p>
@@ -41,7 +41,7 @@ else
             </ul>
 
             <div id="deleteApplication"></div>
-        
+
     </form>
 }
 </div>
@@ -68,15 +68,15 @@ else
         title: 'Enterprise',
         desc: 'Passkeys for your workforce. Please contact us for more information.',
         disabled: true
-    }];   
-    
+    }];
+
     createApp(RadioBoxes, {
-        items: items  
+        items: items
     } ).mount('#planpicker');
-    
+
     createApp(DeleteApplication, {
         appId: "@(Model.ApplicationId)"
     }).mount('#deleteApplication');
-    
+
     </script>
 }

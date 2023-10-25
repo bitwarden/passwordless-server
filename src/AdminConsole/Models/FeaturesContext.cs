@@ -1,14 +1,14 @@
 using Passwordless.AdminConsole.Models.DTOs;
 
-namespace AdminConsole.Models;
+namespace Passwordless.AdminConsole.Models;
 
 public record FeaturesContext(
-    bool AuditLoggingIsEnabled,
-    int AuditLoggingRetentionPeriod,
+    bool EventLoggingIsEnabled,
+    int EventLoggingRetentionPeriod,
     DateTime? DeveloperLoggingEndsAt)
 {
     public static FeaturesContext FromDto(AppFeatureDto dto)
     {
-        return new FeaturesContext(dto.AuditLoggingIsEnabled, dto.AuditLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt);
+        return new FeaturesContext(dto.EventLoggingIsEnabled, dto.EventLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt);
     }
 }

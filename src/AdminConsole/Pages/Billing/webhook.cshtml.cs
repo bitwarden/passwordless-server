@@ -1,27 +1,24 @@
-using AdminConsole.Billing;
-using AdminConsole.Db;
-using AdminConsole.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Services;
 using Stripe;
 using Session = Stripe.Checkout.Session;
 
-namespace AdminConsole.Pages.Billing;
+namespace Passwordless.AdminConsole.Pages.Billing;
 
 [AllowAnonymous]
 [IgnoreAntiforgeryToken(Order = 2000)]
 public class Webhook : PageModel
 {
-    private readonly SharedBillingService _sharedBillingService;
-    private readonly ConsoleDbContext _dbContext;
+    private readonly ISharedBillingService _sharedBillingService;
     private readonly StripeOptions _stripeOptions;
 
-    public Webhook(SharedBillingService sharedBillingService, ConsoleDbContext dbContext, IOptions<StripeOptions> stripeOptions)
+    public Webhook(ISharedBillingService sharedBillingService, IOptions<StripeOptions> stripeOptions)
     {
         _sharedBillingService = sharedBillingService;
-        _dbContext = dbContext;
         _stripeOptions = stripeOptions.Value;
     }
 
@@ -57,7 +54,7 @@ public class Webhook : PageModel
             case "invoice.payment_failed":
                 if (stripeEvent.Data.Object is Invoice invoice)
                 {
-                    await _sharedBillingService.UpdateSubscriptionStatus(invoice);
+                    await _sharedBillingService.UpdateSubscriptionStatusAsync(invoice);
                 }
                 break;
             default:

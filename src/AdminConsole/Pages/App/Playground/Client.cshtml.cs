@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages;
+namespace Passwordless.AdminConsole.Pages.App.Playground;
 
 public class ClientModel : PageModel
 {

@@ -1,9 +1,12 @@
 ﻿@page "/playground"
 @using Microsoft.AspNetCore.Antiforgery
-@model ClientModel
+@using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Middleware
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessOptions> Options
+@inject IOptions<PasswordlessManagementOptions> Options
 @inject IAntiforgery Antiforgery
+@model ClientModel
 
 @{
     ViewData["Title"] = "Playground";
@@ -95,15 +98,15 @@
         createApp({
             setup() {
                 const signins = ref([]);
-                
+
                 const p = new Passwordless.Client({
                     apiUrl: "@Options.Value.ApiUrl",
                     apiKey: "@CurrentContext.ApiKey"
                 });
-              
+
                 const autoFill = async (retries) => {
                     if (retries <= 0) return;
-                    
+
                     const {token, error} = await p.signinWithAutofill();
                     console.log("Signin with autofill returned with", token, error);
                     if (token) {
@@ -113,15 +116,15 @@
                         if (error.errorCode !== "unknown") {
                             signins.value.push(error);
                             await autoFill(retries - 1);
-                        }                        
+                        }
                     }
                 };
                 autoFill(10);
 
-                
+
                 const loginSubmit = async (e) => {
                     // on form submit
-                    const alias = e.target.alias.value;        
+                    const alias = e.target.alias.value;
                     const {token, error} = await p.signinWithAlias(alias);
                     if (token) {
                         await signin(token);
@@ -134,14 +137,14 @@
 
                 async function signin(verify_token) {
                     if (!verify_token) return;
-                    
+
                     const result = await verifyWithBackend(verify_token);
                     signins.value.push(result);
                     console.log(signins.value);
                 }
 
                 return {
-                    loginSubmit,        
+                    loginSubmit,
                     signins
                 }
             }
@@ -156,13 +159,13 @@
                     RequestVerificationToken: "@requestToken"
                 }
             });
-            
+
             console.log("Result from post", res)
-            
+
             if (res.ok) {
                 return await res.json();
             }
-            
+
             return res;
         }
     </script>

@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless;
-using Passwordless.AdminConsole;
+using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 
-namespace AdminConsole.Pages;
+namespace Passwordless.AdminConsole.Pages.App.Credentials;
 
 public class ListModel : PageModel
 {

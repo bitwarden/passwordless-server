@@ -1,10 +1,8 @@
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Passwordless.Common.Parsers;
+using Passwordless.Common.Utils;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
@@ -110,8 +108,8 @@ public class SharedManagementService : ISharedManagementService
             Features = new AppFeature
             {
                 Tenant = accountName,
-                AuditLoggingIsEnabled = appCreationOptions.AuditLoggingIsEnabled,
-                AuditLoggingRetentionPeriod = appCreationOptions.AuditLoggingRetentionPeriod
+                EventLoggingIsEnabled = appCreationOptions.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod
             }
         };
         await storage.SaveAccountInformation(account);
@@ -135,7 +133,7 @@ public class SharedManagementService : ISharedManagementService
         {
             existingKey.CheckLocked();
 
-            if (CheckApiKeyMatch(existingKey.ApiKey, secretKey))
+            if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
             {
                 return appId;
             }
@@ -165,30 +163,12 @@ public class SharedManagementService : ISharedManagementService
     {
         try
         {
-            return ApiKeyParser.GetAppId(apiKey);
+            return ApiKeyUtils.GetAppId(apiKey);
         }
         catch (Exception)
         {
             _logger.LogError("Could not parse accountname={apikey}", apiKey);
             throw new ApiException("Please supply the apikey or apisecret header with correct value.", 401);
-        }
-    }
-
-    private static bool CheckApiKeyMatch(string hash, string input)
-    {
-        try
-        {
-            var parts = hash.Split(':');
-
-            var salt = Convert.FromBase64String(parts[0]);
-
-            var bytes = KeyDerivation.Pbkdf2(input, salt, KeyDerivationPrf.HMACSHA512, 10000, 16);
-
-            return parts[1].Equals(Convert.ToBase64String(bytes));
-        }
-        catch
-        {
-            return false;
         }
     }
 
@@ -295,60 +275,20 @@ public class SharedManagementService : ISharedManagementService
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
         ITenantStorage storage)
     {
-        var secretKey = GenerateSecretKey(accountName, "secret");
+        var secretKey = ApiKeyUtils.GeneratePrivateApiKey(accountName, "secret");
         // last 4 chars
-        var pk2 = secretKey.original.Substring(secretKey.original.Length - 4);
-        await storage.StoreApiKey(pk2, secretKey.hashed, new string[] { "token_register", "token_verify" });
+        var pk2 = secretKey.originalApiKey.Substring(secretKey.originalApiKey.Length - 4);
+        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, new string[] { "token_register", "token_verify" });
         return secretKey;
     }
 
     private static async Task<string> SetupApiKey(string accountName, ITenantStorage storage)
     {
         // create tenant and store apikey
-        var publicKey = GeneratePublicKey(accountName, "public");
+        var publicKey = ApiKeyUtils.GeneratePublicApiKey(accountName, "public");
         // last 4 chars
         var pk = publicKey.Substring(publicKey.Length - 4);
         await storage.StoreApiKey(pk, publicKey, new string[] { "register", "login" });
         return publicKey;
-    }
-
-    private static string GeneratePublicKey(string accountName, string prefix)
-    {
-        var key = GuidHelper.CreateCryptographicallySecureRandomRFC4122Guid().ToString("N");
-
-        return accountName + ":" + prefix + ":" + key;
-    }
-
-    private static (string original, string hashed) GenerateSecretKey(string accountName, string prefix)
-    {
-        var key = GuidHelper.CreateCryptographicallySecureRandomRFC4122Guid().ToString("N");
-
-
-        var original = accountName + ":" + prefix + ":" + key;
-
-        var hashed = CalculateHash(original);
-
-        return (original, hashed);
-    }
-
-    private static string CalculateHash(string input)
-    {
-        var salt = GenerateSalt(16);
-
-        var bytes = KeyDerivation.Pbkdf2(input, salt, KeyDerivationPrf.HMACSHA512, 10000, 16);
-
-        return $"{Convert.ToBase64String(salt)}:{Convert.ToBase64String(bytes)}";
-    }
-
-    private static byte[] GenerateSalt(int length)
-    {
-        var salt = new byte[length];
-
-        using (var random = RandomNumberGenerator.Create())
-        {
-            random.GetBytes(salt);
-        }
-
-        return salt;
     }
 }
