@@ -54,7 +54,7 @@
         <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
         <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.5.2" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
-        <PackageReference Include="Stripe.net" Version="41.13.0" />
+        <PackageReference Include="Stripe.net" Version="43.0.0" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Identity\" />
