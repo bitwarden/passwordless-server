@@ -170,7 +170,9 @@ jobs:
           path: ${{ matrix.app }}/
 
       - name: Create archive
-        run: zip -r app.zip ${{ matrix.app }}/
+        # Change directory into the app folder, so that the archive doesn't contain the folder itself
+        working-directory: ${{ matrix.app }}/
+        run: zip -r ../app.zip .
 
       - name: Login to Azure
         uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
