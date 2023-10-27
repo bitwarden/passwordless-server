@@ -199,5 +199,5 @@ jobs:
             Content-Type: application/json; charset=UTF-8
           body: |
             {
-              "text": "*Passwordless-server* version `${{ github.event.release.name }}` has been released! 🎉\n[See details](${{ github.event.release.html_url }})"
+              "text": "*Passwordless-server* version `${{ github.event.release.name }}` has been released! 🎉\nDetails: ${{ github.event.release.html_url }}"
             }
