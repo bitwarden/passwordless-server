@@ -161,8 +161,17 @@ void RunTheApp()
     // Plan Features
     services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
 
-    WebApplication app = builder.Build();
-
+    WebApplication app;
+    try
+    {
+        app = builder.Build();
+    }
+    catch (HostAbortedException)
+    {
+        // https://github.com/dotnet/efcore/issues/29809
+        Log.Logger.Information(".NET Migrations: Graceful exit.");
+        return;
+    }
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
