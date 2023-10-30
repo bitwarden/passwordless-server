@@ -1,4 +1,7 @@
+using System.Reflection;
 using System.Text.Json;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
@@ -18,6 +21,12 @@ using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
+
+// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
+Environment.SetEnvironmentVariable(
+    "DD_VERSION",
+    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
+);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -44,15 +53,24 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
+    var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
+        // setup tracing
+        var settings = TracerSettings.FromDefaultSources();
+        settings.ServiceVersion = version;
+        Tracer.Configure(settings);
+
         // setup serilog logging
         var apiKey = ddConfig.GetValue<string>("ApiKey");
         if (!string.IsNullOrEmpty(apiKey))
         {
             config.WriteTo.DatadogLogs(
                 ddConfig.GetValue<string>("ApiKey"),
+                tags: new[] { "version:" + version },
+                service: "pass-api",
                 configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
         }
     }

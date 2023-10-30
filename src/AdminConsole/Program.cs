@@ -1,3 +1,6 @@
+using System.Reflection;
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
@@ -19,6 +22,12 @@ using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
+
+// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
+Environment.SetEnvironmentVariable(
+    "DD_VERSION",
+    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
+);
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -68,11 +77,20 @@ void RunTheApp()
         IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
         if (ddConfig.Exists())
         {
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+
+            // setup tracing
+            var settings = TracerSettings.FromDefaultSources();
+            settings.ServiceVersion = version;
+            Tracer.Configure(settings);
+
             var ddKey = ddConfig.GetValue<string>("ApiKey");
             if (!string.IsNullOrWhiteSpace(ddKey))
             {
                 config.WriteTo.DatadogLogs(
                     apiKey: ddKey,
+                    tags: new[] { "version:" + version },
+                    service: "pass-admin-console",
                     configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
             }
         }
