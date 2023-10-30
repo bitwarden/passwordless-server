@@ -73,8 +73,6 @@ void RunTheApp()
             {
                 config.WriteTo.DatadogLogs(
                     apiKey: ddKey,
-                    tags: new[] { "version:" + version },
-                    service: "pass-admin-console",
                     configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
             }
         }

@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -45,8 +44,6 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
-    var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
@@ -56,8 +53,6 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         {
             config.WriteTo.DatadogLogs(
                 ddConfig.GetValue<string>("ApiKey"),
-                tags: new[] { "version:" + version },
-                service: "pass-api",
                 configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
         }
     }
