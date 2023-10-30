@@ -327,14 +327,14 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
                     b.Property<string>("ApiUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
-                    
+
                     b.Property<string>("BillingPlan")
                         .IsRequired()
                         .HasColumnType("TEXT");
-                    
+
                     b.Property<string>("BillingPriceId")
                         .HasColumnType("TEXT");
-                    
+
                     b.Property<string>("BillingSubscriptionItemId")
                         .HasColumnType("TEXT");
 
