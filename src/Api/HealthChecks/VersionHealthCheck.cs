@@ -11,7 +11,7 @@ public class VersionHealthCheck : IHealthCheck
         var assembly = Assembly.GetExecutingAssembly();
 
         return Task.FromResult(
-            HealthCheckResult.Healthy("version", new Dictionary<string, object>
+            HealthCheckResult.Healthy(data: new Dictionary<string, object>
             {
                 ["version"] = assembly.GetInformationalVersion() ??
                               assembly.GetName().Version?.ToString() ??
