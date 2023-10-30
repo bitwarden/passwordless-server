@@ -23,12 +23,6 @@ using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
-// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
-Environment.SetEnvironmentVariable(
-    "DD_VERSION",
-    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
-);
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
@@ -77,9 +71,15 @@ void RunTheApp()
         IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
         if (ddConfig.Exists())
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+            var version = assembly.GetInformationalVersion() ??
+                              assembly.GetName().Version?.ToString() ??
+                              "unknown version"; // 1.2.3-ci-SHA
+            
+            // TRY TO GET DataDog Azure App Service Extension to use a version configured from code
+            // instead of DD_VERSION environment variable
+            // Doesn't seem to work though? 
 
-            // setup tracing
+            // Configure the DataDog Tracer with version
             var settings = TracerSettings.FromDefaultSources();
             settings.ServiceVersion = version;
             Tracer.Configure(settings);
@@ -90,7 +90,6 @@ void RunTheApp()
                 config.WriteTo.DatadogLogs(
                     apiKey: ddKey,
                     tags: new[] { "version:" + version },
-                    service: "pass-admin-console",
                     configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
             }
         }

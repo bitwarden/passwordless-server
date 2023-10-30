@@ -22,12 +22,6 @@ using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
-// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
-Environment.SetEnvironmentVariable(
-    "DD_VERSION",
-    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
-);
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
@@ -53,12 +47,19 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
-    var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+    
 
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
-        // setup tracing
+
+        var version = assembly.GetInformationalVersion() ??
+                              assembly.GetName().Version?.ToString() ??
+                              "unknown version";
+        // TRY TO GET DataDog Azure App Service Extension to use a version configured from code
+        // instead of DD_VERSION environment variable
+        // Doesn't seem to work though? 
+
         var settings = TracerSettings.FromDefaultSources();
         settings.ServiceVersion = version;
         Tracer.Configure(settings);
@@ -69,8 +70,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         {
             config.WriteTo.DatadogLogs(
                 ddConfig.GetValue<string>("ApiKey"),
-                tags: new[] { "version:" + version },
-                service: "pass-api",
+                tags: new[] { "version:" + version },        
                 configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
         }
     }
