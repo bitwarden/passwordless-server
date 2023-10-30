@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Reflection;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Services;
+using Passwordless.Common.Extensions;
 
 namespace Passwordless.AdminConsole;
 
@@ -8,9 +10,9 @@ public static class HealthEndpoints
 {
     public static void MapHealthEndpoints(this WebApplication app)
     {
-        app.MapGet("health/http", (HttpContext ctx, HttpRequest req) => Results.Text("Ok"));
+        app.MapGet("health/http", () => Results.Text("Ok"));
 
-        app.MapGet("health/storage", async (HttpContext ctx, HttpRequest req, IDataService dataService) =>
+        app.MapGet("health/storage", async (IDataService dataService) =>
         {
             var sw = Stopwatch.StartNew();
             if (!await dataService.CanConnectAsync())
@@ -22,7 +24,7 @@ public static class HealthEndpoints
             return Results.Text("Took: " + sw.ElapsedMilliseconds);
         });
 
-        app.MapGet("health/api", async (HttpContext ctx, HttpRequest req, IPasswordlessClient client) =>
+        app.MapGet("health/api", async (IPasswordlessClient client) =>
         {
             var sw = Stopwatch.StartNew();
             await client.ListUsersAsync();
@@ -31,8 +33,18 @@ public static class HealthEndpoints
             return Results.Text("Took: " + sw.ElapsedMilliseconds);
         });
 
-        app.MapGet("health/throw/exception", (ctx) => throw new Exception("Testing error response", new Exception("Inner exception")));
+        app.MapGet("health/throw/exception", _ =>
+            throw new Exception("Testing error response", new Exception("Inner exception"))
+        );
 
-        app.MapGet("health/version", (HttpContext ctx, HttpRequest req) => Results.Json(Assembly.GetExecutingAssembly().GetName().Version));
+        app.MapGet("health/version", () =>
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            return Results.Json(
+                assembly.GetInformationalVersion() ??
+                assembly.GetName().Version?.ToString()
+            );
+        });
     }
 }
