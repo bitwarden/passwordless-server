@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
@@ -47,7 +46,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
-    
+
 
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
@@ -70,7 +69,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         {
             config.WriteTo.DatadogLogs(
                 ddConfig.GetValue<string>("ApiKey"),
-                tags: new[] { "version:" + version },        
+                tags: new[] { "version:" + version },
                 configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
         }
     }

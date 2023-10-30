@@ -1,4 +1,3 @@
-using System.Reflection;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
@@ -74,7 +73,7 @@ void RunTheApp()
             var version = assembly.GetInformationalVersion() ??
                               assembly.GetName().Version?.ToString() ??
                               "unknown version"; // 1.2.3-ci-SHA
-            
+
             // TRY TO GET DataDog Azure App Service Extension to use a version configured from code
             // instead of DD_VERSION environment variable
             // Doesn't seem to work though? 
