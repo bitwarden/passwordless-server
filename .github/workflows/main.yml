@@ -99,7 +99,9 @@ jobs:
   pack:
     strategy:
       matrix:
-        app: [Api, AdminConsole]
+        app:
+          - Api
+          - AdminConsole
 
     runs-on: ubuntu-latest
     permissions:
@@ -118,15 +120,7 @@ jobs:
       - name: Generate prerelease version
         id: prerelease-version
         if: ${{ github.event_name != 'release' }}
-        run: |
-          time=$(date +%s)
-          ref="${{ github.head_ref || github.ref_name }}"
-          
-          ref_clean="$ref"
-          ref_clean="${ref_clean/\//-}"
-          ref_clean="${ref_clean/_/-}"
-          
-          echo "version=0.0.0-ci-$time-$ref_clean" >> $GITHUB_OUTPUT
+        run: echo "version=0.0.0-ci-${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Publish app
         run: >
@@ -145,17 +139,21 @@ jobs:
 
   # Deploy the apps
   deploy:
-    strategy:
-        matrix:
-          app: [Api, AdminConsole]
-
-    environment: devtest-${{ matrix.app }}
-    concurrency: devtest-${{ matrix.app }}
-
+    # Don't run this job for PRs
+    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - format
       - test
       - pack
+
+    strategy:
+        matrix:
+          app:
+            - Api
+            - AdminConsole
+
+    environment: devtest-${{ matrix.app }}
+    concurrency: devtest-${{ matrix.app }}
 
     runs-on: ubuntu-latest
     permissions:
@@ -170,7 +168,9 @@ jobs:
           path: ${{ matrix.app }}/
 
       - name: Create archive
-        run: zip -r app.zip ${{ matrix.app }}/
+        # Change directory into the app folder, so that the archive doesn't contain the folder itself
+        working-directory: ${{ matrix.app }}/
+        run: zip -r ../app.zip .
 
       - name: Login to Azure
         uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
@@ -201,5 +201,5 @@ jobs:
             Content-Type: application/json; charset=UTF-8
           body: |
             {
-              "text": "**Passwordless-Server**, new version released! 🎉\nVersion: `${{ github.event.release.name }}`\nDetails: ${{ github.event.release.html_url }}"
+              "text": "*Passwordless-server* version `${{ github.event.release.name }}` has been released! 🎉\nDetails: ${{ github.event.release.html_url }}"
             }
