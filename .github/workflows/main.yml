@@ -140,7 +140,7 @@ jobs:
   # Deploy the apps
   deploy:
     # Don't run this job for PRs
-    # if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - format
       - test
@@ -166,17 +166,13 @@ jobs:
         with:
           name: ${{ matrix.app }}
           path: ${{ matrix.app }}/
-
-      - name: Create archive
-        # Change directory into the app folder, so that the archive doesn't contain the folder itself
-        working-directory: ${{ matrix.app }}/
-        run: zip -r ../app.zip .
       
       # This step is ONLY needed when using the Azure CLI to either set app settings or publish
-      - name: Login to Azure
-        uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
-        with:
-          creds: ${{ secrets.APP_SERVICE_SP }}
+      # Might be removed if we don't need to set app settings 
+      # - name: Login to Azure
+      #   uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
+      #   with:
+      #     creds: ${{ secrets.APP_SERVICE_SP }}
 
       - name: Push app
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9
@@ -184,13 +180,6 @@ jobs:
           app-name: ${{ env.AZURE_APP_NAME }} # Replace with your app name
           publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
           package: '${{ matrix.app }}'
-
-        # run: >
-        #   az webapp deployment source config-zip
-        #   --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-        #   --name ${{ secrets.AZURE_APP_NAME }}
-        #   --slot staging
-        #   --src app.zip
 
   # Notify the Slack channel about the release
   notify:
