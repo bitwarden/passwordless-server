@@ -169,11 +169,18 @@ jobs:
       
       # This step is ONLY needed when using the Azure CLI to either set app settings or publish
       # Might be removed if we don't need to set app settings 
-      # - name: Login to Azure
-      #   uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
-      #   with:
-      #     creds: ${{ secrets.APP_SERVICE_SP }}
+      - name: Login to Azure
+        uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
+        with:
+          creds: ${{ secrets.APP_SERVICE_SP }}
 
+      # !! Important to pipe send output to  > /dev/null because otherwise all other AppSettings get printed to logs.
+      - name: Set DD_VERSION in Azure        
+        run: |
+          az webapp config appsettings set -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} \
+          -n ${{ secrets.AZURE_APP_NAME }} --slot staging \
+          --settings DD_VERSION=${{ steps.prerelease-version.outputs.version }} > /dev/null
+    
       - name: Push app
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 # v3.0.0
         with: 
