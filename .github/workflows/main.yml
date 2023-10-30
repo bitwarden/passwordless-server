@@ -171,7 +171,8 @@ jobs:
         # Change directory into the app folder, so that the archive doesn't contain the folder itself
         working-directory: ${{ matrix.app }}/
         run: zip -r ../app.zip .
-
+      
+      # This step is ONLY needed when using the Azure CLI to either set app settings or publish
       - name: Login to Azure
         uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
         with:
