@@ -11,10 +11,12 @@ public class VersionHealthCheck : IHealthCheck
         var assembly = Assembly.GetExecutingAssembly();
 
         return Task.FromResult(
-            HealthCheckResult.Healthy(
-                assembly.GetInformationalVersion() ??
-                assembly.GetName().Version?.ToString()
-            )
+            HealthCheckResult.Healthy("version", new Dictionary<string, object>
+            {
+                ["version"] = assembly.GetInformationalVersion() ??
+                              assembly.GetName().Version?.ToString() ??
+                              "unknown version"
+            })
         );
     }
 }
