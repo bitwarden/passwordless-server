@@ -166,24 +166,20 @@ jobs:
         with:
           name: ${{ matrix.app }}
           path: ${{ matrix.app }}/
-
-      - name: Create archive
-        # Change directory into the app folder, so that the archive doesn't contain the folder itself
-        working-directory: ${{ matrix.app }}/
-        run: zip -r ../app.zip .
-
-      - name: Login to Azure
-        uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
-        with:
-          creds: ${{ secrets.APP_SERVICE_SP }}
+      
+      # This step is ONLY needed when using the Azure CLI to either set app settings or publish
+      # Might be removed if we don't need to set app settings 
+      # - name: Login to Azure
+      #   uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
+      #   with:
+      #     creds: ${{ secrets.APP_SERVICE_SP }}
 
       - name: Push app
-        run: >
-          az webapp deployment source config-zip
-          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          --name ${{ secrets.AZURE_APP_NAME }}
-          --slot staging
-          --src app.zip
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 # v3.0.0
+        with: 
+          app-name: ${{ env.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }}
+          package: '${{ matrix.app }}'
 
   # Notify the Slack channel about the release
   notify:
