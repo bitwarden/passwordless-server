@@ -1,6 +1,3 @@
-using System.Reflection;
-using Datadog.Trace;
-using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
@@ -70,7 +67,7 @@ void RunTheApp()
 
         IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
         if (ddConfig.Exists())
-        {           
+        {
             var ddKey = ddConfig.GetValue<string>("ApiKey");
             if (!string.IsNullOrWhiteSpace(ddKey))
             {

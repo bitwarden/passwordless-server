@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Text.Json;
-using Datadog.Trace;
-using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
