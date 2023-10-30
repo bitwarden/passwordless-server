@@ -140,7 +140,7 @@ jobs:
   # Deploy the apps
   deploy:
     # Don't run this job for PRs
-    if: ${{ github.event_name != 'pull_request' }}
+    # if: ${{ github.event_name != 'pull_request' }}
     needs:
       - format
       - test
@@ -178,12 +178,18 @@ jobs:
           creds: ${{ secrets.APP_SERVICE_SP }}
 
       - name: Push app
-        run: >
-          az webapp deployment source config-zip
-          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          --name ${{ secrets.AZURE_APP_NAME }}
-          --slot staging
-          --src app.zip
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9
+        with: 
+          app-name: ${{ env.AZURE_APP_NAME }} # Replace with your app name
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
+          package: '${{ matrix.app }}'
+
+        # run: >
+        #   az webapp deployment source config-zip
+        #   --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        #   --name ${{ secrets.AZURE_APP_NAME }}
+        #   --slot staging
+        #   --src app.zip
 
   # Notify the Slack channel about the release
   notify:
