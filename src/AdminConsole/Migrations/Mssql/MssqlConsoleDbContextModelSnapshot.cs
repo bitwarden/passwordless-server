@@ -340,6 +340,16 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
                     b.Property<string>("ApiUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+                    
+                    b.Property<string>("BillingPlan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+                    
+                    b.Property<string>("BillingPriceId")
+                        .HasColumnType("nvarchar(max)");
+                    
+                    b.Property<string>("BillingSubscriptionItemId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -403,14 +413,7 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
                     b.Property<string>("BillingCustomerId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BillingPlan")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("BillingSubscriptionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BillingSubscriptionItemId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
