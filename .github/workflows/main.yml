@@ -139,6 +139,13 @@ jobs:
 
   # Deploy the apps
   deploy:
+    # Don't run this job for PRs
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - format
+      - test
+      - pack
+
     strategy:
         matrix:
           app:
@@ -147,11 +154,6 @@ jobs:
 
     environment: devtest-${{ matrix.app }}
     concurrency: devtest-${{ matrix.app }}
-
-    needs:
-      - format
-      - test
-      - pack
 
     runs-on: ubuntu-latest
     permissions:
