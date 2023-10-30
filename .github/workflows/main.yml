@@ -181,7 +181,7 @@ jobs:
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9
         with: 
           app-name: ${{ env.AZURE_APP_NAME }} # Replace with your app name
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
+          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
           package: '${{ matrix.app }}'
 
         # run: >
