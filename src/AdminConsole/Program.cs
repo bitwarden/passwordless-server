@@ -23,12 +23,6 @@ using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
-// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
-Environment.SetEnvironmentVariable(
-    "DD_VERSION",
-    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
-);
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
@@ -76,14 +70,7 @@ void RunTheApp()
 
         IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
         if (ddConfig.Exists())
-        {
-            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-
-            // setup tracing
-            var settings = TracerSettings.FromDefaultSources();
-            settings.ServiceVersion = version;
-            Tracer.Configure(settings);
-
+        {           
             var ddKey = ddConfig.GetValue<string>("ApiKey");
             if (!string.IsNullOrWhiteSpace(ddKey))
             {
