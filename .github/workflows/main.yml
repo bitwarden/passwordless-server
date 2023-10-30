@@ -175,10 +175,10 @@ jobs:
       #     creds: ${{ secrets.APP_SERVICE_SP }}
 
       - name: Push app
-        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 # v3.0.0
         with: 
-          app-name: ${{ env.AZURE_APP_NAME }} # Replace with your app name
-          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
+          app-name: ${{ env.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }}
           package: '${{ matrix.app }}'
 
   # Notify the Slack channel about the release
