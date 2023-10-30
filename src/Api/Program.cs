@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
@@ -10,6 +11,7 @@ using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
@@ -51,7 +53,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
     if (ddConfig.Exists())
     {
-
+        var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetInformationalVersion() ??
                               assembly.GetName().Version?.ToString() ??
                               "unknown version";

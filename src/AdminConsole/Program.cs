@@ -1,3 +1,4 @@
+using System.Reflection;
 using Datadog.Trace;
 using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +18,7 @@ using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
@@ -70,6 +72,7 @@ void RunTheApp()
         IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
         if (ddConfig.Exists())
         {
+            var assembly = Assembly.GetExecutingAssembly();
             var version = assembly.GetInformationalVersion() ??
                               assembly.GetName().Version?.ToString() ??
                               "unknown version"; // 1.2.3-ci-SHA
