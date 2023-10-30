@@ -10,10 +10,10 @@ public interface IEventLogContext
     IFeaturesContext Features { get; }
     string AbbreviatedKey { get; }
     DateTime PerformedAt { get; }
-    bool Authenticated { get; }
-    void SetContext(string tenantId, IFeaturesContext features, ApplicationPublicKey applicationPublicKey, bool authenticated);
-    void SetContext(string tenantId, IFeaturesContext features, ApplicationSecretKey applicationPublicKey, bool authenticated);
-    void SetContext(string tenantId, IFeaturesContext features, bool authenticated);
+    bool IsAuthenticated { get; }
+    void SetContext(string tenantId, IFeaturesContext features, ApplicationPublicKey applicationPublicKey, bool isAuthenticated);
+    void SetContext(string tenantId, IFeaturesContext features, ApplicationSecretKey applicationPublicKey, bool isAuthenticated);
+    void SetContext(string tenantId, IFeaturesContext features, bool isAuthenticated);
 }
 
 public class EventLogContext : IEventLogContext
@@ -27,28 +27,28 @@ public class EventLogContext : IEventLogContext
     public IFeaturesContext Features { get; private set; } = new NullFeaturesContext();
     public string AbbreviatedKey { get; private set; } = string.Empty;
     public DateTime PerformedAt { get; }
-    public bool Authenticated { get; private set; }
+    public bool IsAuthenticated { get; private set; }
 
-    public void SetContext(string tenantId, IFeaturesContext features, ApplicationPublicKey applicationPublicKey, bool authenticated)
+    public void SetContext(string tenantId, IFeaturesContext features, ApplicationPublicKey applicationPublicKey, bool isAuthenticated)
     {
         TenantId = tenantId;
         Features = features;
         AbbreviatedKey = applicationPublicKey.AbbreviatedValue;
-        Authenticated = authenticated;
+        IsAuthenticated = isAuthenticated;
     }
 
-    public void SetContext(string tenantId, IFeaturesContext features, ApplicationSecretKey applicationSecretKey, bool authenticated)
+    public void SetContext(string tenantId, IFeaturesContext features, ApplicationSecretKey applicationSecretKey, bool isAuthenticated)
     {
         TenantId = tenantId;
         Features = features;
         AbbreviatedKey = applicationSecretKey.AbbreviatedValue;
-        Authenticated = authenticated;
+        IsAuthenticated = isAuthenticated;
     }
 
-    public void SetContext(string tenantId, IFeaturesContext features, bool authenticated)
+    public void SetContext(string tenantId, IFeaturesContext features, bool isAuthenticated)
     {
         TenantId = tenantId;
         Features = features;
-        Authenticated = authenticated;
+        IsAuthenticated = isAuthenticated;
     }
 }

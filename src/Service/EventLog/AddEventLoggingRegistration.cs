@@ -19,7 +19,7 @@ public static class AddEventLoggingRegistration
     private static IEventLogger GetEventLogger(IServiceProvider serviceProvider) =>
         serviceProvider.GetRequiredService<IEventLogContext>() switch
         {
-            { Authenticated: false } => serviceProvider.GetRequiredService<UnauthenticatedEventLoggerEfWriteStorage>(),
+            { IsAuthenticated: false } => serviceProvider.GetRequiredService<UnauthenticatedEventLoggerEfWriteStorage>(),
             { Features.EventLoggingIsEnabled: true } => serviceProvider.GetRequiredService<EventLoggerEfWriteStorage>(),
             _ => NoOpEventLogger.Instance
         };
