@@ -8,4 +8,5 @@ public class EventCache
     public IEnumerable<ApplicationEvent> GetEvents() => _events;
     public bool IsEmpty() => !_events.Any();
     public void Add(ApplicationEvent applicationEvent) => _events.Add(applicationEvent);
+    public void Clear() => _events.Clear();
 }

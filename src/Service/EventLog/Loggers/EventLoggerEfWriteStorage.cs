@@ -33,5 +33,7 @@ public class EventLoggerEfWriteStorage : IEventLogger
 
         _storage.ApplicationEvents.AddRange(_eventCache.GetEvents());
         await _storage.SaveChangesAsync();
+        
+        _eventCache.Clear();
     }
 }
