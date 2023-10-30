@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Reflection;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.Common.Extensions;
 
