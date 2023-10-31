@@ -23,4 +23,4 @@ EXPOSE 80
 EXPOSE 443
 
 COPY --from=build /opt/pwdls/src/Api/bin/publish /opt/pwdls
-ENTRYPOINT ["dotnet", "/opt/pwdls/Paswordless.Api.Cli"]
+ENTRYPOINT ["/opt/pwdls/Paswordless.Api"]
