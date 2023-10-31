@@ -37,27 +37,31 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
 
-        var organizations = await db.Organizations
-            .Where(x => x.BillingSubscriptionItemId != null)
-            .Select(o => new
+        var items = await db.Applications
+            .Where(a => a.BillingSubscriptionItemId != null)
+            .GroupBy(a => new
             {
-                o.Id,
-                o.BillingSubscriptionItemId,
-                CurrentUserCount = o.Applications.Sum(a => a.CurrentUserCount)
+                a.OrganizationId,
+                a.BillingSubscriptionItemId
+            })
+            .Select(g => new
+            {
+                g.Key.BillingSubscriptionItemId,
+                Users = g.Sum(x => x.CurrentUserCount)
             })
             .ToListAsync();
 
-        foreach (var organization in organizations)
+        foreach (var item in items)
         {
             var idempotencyKey = Guid.NewGuid().ToString();
             var service = new UsageRecordService();
             try
             {
                 await service.CreateAsync(
-                    organization.BillingSubscriptionItemId,
+                    item.BillingSubscriptionItemId,
                     new UsageRecordCreateOptions
                     {
-                        Quantity = organization.CurrentUserCount,
+                        Quantity = item.Users,
                         Timestamp = DateTime.UtcNow,
                         Action = "set"
                     },
@@ -69,7 +73,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             }
             catch (StripeException e)
             {
-                _logger.LogError("Usage report failed for item {BillingSubscriptionItemId}:", organization.BillingSubscriptionItemId);
+                _logger.LogError("Usage report failed for item {BillingSubscriptionItemId}:", item.BillingSubscriptionItemId);
                 _logger.LogError(e, "Idempotency key: {IdempotencyKey}.", idempotencyKey);
             }
         }
