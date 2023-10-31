@@ -196,16 +196,24 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var organization = await db.Organizations.Include(x => x.Applications).SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+        var organization = await db.Organizations
+            .Include(x => x.Applications)
+            .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
         if (organization == null) return;
-        organization.BillingPlan = PlanConstants.Free;
         organization.BillingSubscriptionId = null;
-        organization.BillingSubscriptionItemId = null;
         organization.BecamePaidAt = null;
 
         var features = _plansOptions[PlanConstants.Free];
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
+
+        foreach (var application in organization.Applications)
+        {
+            application.BillingPriceId = null;
+            application.BillingSubscriptionItemId = null;
+            application.BillingPlan = PlanConstants.Free;
+        }
+
         await db.SaveChangesAsync();
 
         var setFeaturesRequest = new SetApplicationFeaturesRequest
