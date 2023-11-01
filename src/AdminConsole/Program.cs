@@ -1,3 +1,5 @@
+using Datadog.Trace;
+using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
@@ -68,7 +70,7 @@ void RunTheApp()
         var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
         if (!string.IsNullOrEmpty(ddApiKey))
         {
-            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.com";
+            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
             var ddUrl = $"https://http-intake.logs.{ddSite}";
             var ddConfig = new DatadogConfiguration(ddUrl);
 
