@@ -45,7 +45,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Generate version
+      - name: Determine version
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
