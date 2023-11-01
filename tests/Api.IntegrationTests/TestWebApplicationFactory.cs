@@ -9,8 +9,7 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.IntegrationTests;
 
-public class TestWebApplicationFactory<TProgram>
-    : WebApplicationFactory<TProgram> where TProgram : class
+public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
 {
     public string DbName { get; set; } = Guid.NewGuid().ToString();
     public string ApiKey { get; set; } = "test:public:2e728aa5986f4ba8b073a5b28a939795";

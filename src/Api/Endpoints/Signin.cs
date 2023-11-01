@@ -19,7 +19,7 @@ public static class SigninEndpoints
         })
             .RequirePublicKey()
             .RequireCors("default")
-            .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true)); ;
+            .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
 
         app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
