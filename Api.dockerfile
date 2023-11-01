@@ -24,4 +24,4 @@ EXPOSE 80
 EXPOSE 443
 
 COPY --from=build /tmp/pwdls/src/Api/bin/publish ./
-ENTRYPOINT ["Paswordless.Api"]
+ENTRYPOINT ["./Passwordless.Api"]
