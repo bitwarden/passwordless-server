@@ -44,16 +44,18 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
-    IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
-    if (ddConfig.Exists())
+    var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
+    if (!string.IsNullOrEmpty(ddApiKey))
     {
-        // setup serilog logging
-        var apiKey = ddConfig.GetValue<string>("ApiKey");
-        if (!string.IsNullOrEmpty(apiKey))
+        var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.com";
+        var ddUrl = $"https://http-intake.logs.{ddSite}";
+        var ddConfig = new DatadogConfiguration(ddUrl);
+
+        if (!string.IsNullOrEmpty(ddApiKey))
         {
             config.WriteTo.DatadogLogs(
-                ddConfig.GetValue<string>("ApiKey"),
-                configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+                ddApiKey,
+                configuration: ddConfig);
         }
     }
 });
