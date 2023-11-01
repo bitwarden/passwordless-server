@@ -47,7 +47,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
     var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
     if (!string.IsNullOrEmpty(ddApiKey))
     {
-        var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.com";
+        var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
         var ddUrl = $"https://http-intake.logs.{ddSite}";
         var ddConfig = new DatadogConfiguration(ddUrl);
 
