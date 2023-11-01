@@ -139,7 +139,7 @@ jobs:
       - name: Publish app
         run: >
           dotnet publish src/${{ matrix.app }}/
-          -p:Version ${{ needs.version.outputs.version }}
+          -p:Version=${{ needs.version.outputs.version }}
           --configuration Release
           --runtime win-x86
           --no-self-contained
