@@ -13,6 +13,11 @@ public class EventLogStorageCommitMiddleware
         _logger = logger;
     }
 
+    /// <summary>
+    /// This middleware will commit any events that were created in the request to the database via the `IEventLogger`.
+    /// </summary>
+    /// <param name="context">The `HttpContext` from the request.</param>
+    /// <param name="provider">Used to get the `IEventLogger` instance based on the current state of the request.</param>
     public async Task InvokeAsync(HttpContext context, IServiceProvider provider)
     {
         try
