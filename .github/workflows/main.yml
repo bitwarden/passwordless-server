@@ -45,17 +45,17 @@ jobs:
       contents: read
 
     steps:
-      - name: Determine version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=0.0.0-ci-${{ github.sha }}" >> $GITHUB_OUTPUT
-          fi
+      - name: Determine stable version
+        id: stable-version
+        if: ${{ github.event_name == 'release' }}
+        run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+
+      - name: Determine prerelease version
+        id: pre-version
+        run: echo "version=0.0.0-ci-${{ github.sha }}" >> $GITHUB_OUTPUT
 
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
 
   # Check formatting
   format:
