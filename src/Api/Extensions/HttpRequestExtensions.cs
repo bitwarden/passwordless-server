@@ -4,25 +4,23 @@ namespace Passwordless.Api.Extensions;
 
 public static class HttpRequestExtensions
 {
-    public static string GetApiSecret(this HttpRequest req)
+    public static string? GetApiSecret(this HttpRequest req) => req.Headers.GetApiSecret();
+    
+    public static string? GetApiSecret(this IHeaderDictionary headerDictionary) => headerDictionary.GetHeaderValue("ApiSecret");
+
+    public static string? GetPublicApiKey(this HttpRequest req) => req.Headers.GetPublicApiKey();
+
+    public static string? GetPublicApiKey(this IHeaderDictionary headerDictionary) => headerDictionary.GetHeaderValue("ApiKey");
+
+    private static string? GetHeaderValue(this IHeaderDictionary headerDictionary, string key)
     {
-        req.Headers.TryGetValue("ApiSecret", out var value);
+        headerDictionary.TryGetValue(key, out var value);
         return value.SingleOrDefault();
     }
 
-    public static string GetPublicApiKey(this HttpRequest req)
+    public static string? GetTenantNameFromKey(this HttpRequest req)
     {
-        req.Headers.TryGetValue("ApiKey", out var value);
-        return value.SingleOrDefault();
-    }
-
-    public static string GetTenantName(this HttpRequest req)
-    {
-        var key = req.GetPublicApiKey();
-        if (key == null)
-        {
-            key = req.GetApiSecret();
-        }
+        var key = req.GetPublicApiKey() ?? req.GetApiSecret();
 
         if (key == null)
         {
@@ -44,6 +42,10 @@ public static class HttpRequestExtensions
 
         return span.Slice(0, i).ToString();
     }
+
+    public static string? GetTenantName(this HttpRequest httpRequest) =>
+        GetTenantNameFromKey(httpRequest) ?? httpRequest.RouteValues["appId"]?.ToString();
+    
 }
 
 

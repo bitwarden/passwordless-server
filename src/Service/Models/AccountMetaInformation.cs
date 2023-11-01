@@ -25,5 +25,5 @@ public class AccountMetaInformation : PerTenant
     public DateTime? DeleteAt { get; set; }
 
     public AppFeature Features { get; set; }
-    public IEnumerable<ApplicationEvent> Events { get; set; }
+    public IReadOnlyCollection<ApplicationEvent> Events { get; set; }
 }
