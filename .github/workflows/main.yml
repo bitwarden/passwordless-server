@@ -154,8 +154,6 @@ jobs:
 
   # Deploy the apps
   deploy:
-    # Don't run this job for PRs
-    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - version
       - format
