@@ -52,6 +52,7 @@ jobs:
 
       - name: Determine prerelease version
         id: pre-version
+        if: ${{ github.event_name != 'release' }}
         run: echo "version=0.0.0-ci-${{ github.sha }}" >> $GITHUB_OUTPUT
 
     outputs:
@@ -153,6 +154,8 @@ jobs:
 
   # Deploy the apps
   deploy:
+    # Don't run this job for PRs
+    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - version
       - format
