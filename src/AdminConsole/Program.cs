@@ -1,6 +1,4 @@
 using System.Reflection;
-using Datadog.Trace;
-using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
@@ -18,7 +16,6 @@ using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
-using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
@@ -69,30 +66,18 @@ void RunTheApp()
             config.WriteTo.Seq("http://localhost:5341");
         }
 
-        IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
-        if (ddConfig.Exists())
+        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
+        if (!string.IsNullOrEmpty(ddApiKey))
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var version = assembly.GetInformationalVersion() ??
-                              assembly.GetName().Version?.ToString() ??
-                              "unknown version"; // 1.2.3-ci-SHA
+            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.com";
+            var ddUrl = $"https://http-intake.logs.{ddSite}";
+            var ddConfig = new DatadogConfiguration(ddUrl);
 
-            // TRY TO GET DataDog Azure App Service Extension to use a version configured from code
-            // instead of DD_VERSION environment variable
-            // Doesn't seem to work though? 
-
-            // Configure the DataDog Tracer with version
-            var settings = TracerSettings.FromDefaultSources();
-            settings.ServiceVersion = version;
-            Tracer.Configure(settings);
-
-            var ddKey = ddConfig.GetValue<string>("ApiKey");
-            if (!string.IsNullOrWhiteSpace(ddKey))
+            if (!string.IsNullOrEmpty(ddApiKey))
             {
                 config.WriteTo.DatadogLogs(
-                    apiKey: ddKey,
-                    tags: new[] { "version:" + version },
-                    configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+                    ddApiKey,
+                    configuration: ddConfig);
             }
         }
     });

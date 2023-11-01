@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Text.Json;
-using Datadog.Trace;
-using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
@@ -11,7 +9,6 @@ using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Common.Configuration;
-using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
@@ -22,6 +19,12 @@ using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
+
+// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
+Environment.SetEnvironmentVariable(
+    "DD_VERSION",
+    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
+);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -48,31 +51,18 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
-
-
-    IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
-    if (ddConfig.Exists())
+    var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
+    if (!string.IsNullOrEmpty(ddApiKey))
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly.GetInformationalVersion() ??
-                              assembly.GetName().Version?.ToString() ??
-                              "unknown version";
-        // TRY TO GET DataDog Azure App Service Extension to use a version configured from code
-        // instead of DD_VERSION environment variable
-        // Doesn't seem to work though? 
+        var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.com";
+        var ddUrl = $"https://http-intake.logs.{ddSite}";
+        var ddConfig = new DatadogConfiguration(ddUrl);
 
-        var settings = TracerSettings.FromDefaultSources();
-        settings.ServiceVersion = version;
-        Tracer.Configure(settings);
-
-        // setup serilog logging
-        var apiKey = ddConfig.GetValue<string>("ApiKey");
-        if (!string.IsNullOrEmpty(apiKey))
+        if (!string.IsNullOrEmpty(ddApiKey))
         {
             config.WriteTo.DatadogLogs(
-                ddConfig.GetValue<string>("ApiKey"),
-                tags: new[] { "version:" + version },
-                configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+                ddApiKey,
+                configuration: ddConfig);
         }
     }
 });
@@ -166,13 +156,13 @@ if (isSelfHosted)
 app.UseCors("default");
 app.UseSecurityHeaders();
 app.UseStaticFiles();
+app.UseMiddleware<EventLogStorageCommitMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<AcceptHeaderMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<EventLogContextMiddleware>();
-app.UseMiddleware<EventLogStorageCommitMiddleware>();
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
