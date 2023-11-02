@@ -53,7 +53,9 @@ jobs:
       - name: Determine prerelease version
         id: pre-version
         if: ${{ github.event_name != 'release' }}
-        run: echo "version=0.0.0-ci-${{ github.event.pull_request.head.sha || github.sha }}" >> $GITHUB_OUTPUT
+        run: |
+          hash="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT
 
     outputs:
       version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
