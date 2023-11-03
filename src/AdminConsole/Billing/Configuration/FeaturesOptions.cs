@@ -1,4 +1,4 @@
-namespace Passwordless.AdminConsole.Configuration.Plans;
+namespace Passwordless.AdminConsole.Billing.Configuration;
 
 public class FeaturesOptions
 {

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Billing.Constants;
-using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
@@ -14,20 +13,17 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly IPasswordlessManagementClient _passwordlessClient;
-    private readonly PlansOptions _plansOptions;
     private readonly ILogger<SharedBillingService<TDbContext>> _logger;
     private readonly StripeOptions _stripeOptions;
 
     public SharedBillingService(
         IDbContextFactory<TDbContext> dbContextFactory,
         IPasswordlessManagementClient passwordlessClient,
-        IOptions<PlansOptions> plansOptions,
         ILogger<SharedBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions)
     {
         _dbContextFactory = dbContextFactory;
         _passwordlessClient = passwordlessClient;
-        _plansOptions = plansOptions.Value;
         _logger = logger;
         _stripeOptions = stripeOptions.Value;
     }
@@ -106,14 +102,13 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
 
         // set the subscriptionId on the Org
-        var existingSubscriptionId = org.BillingSubscriptionId;
         org.BillingSubscriptionId = subscription.Id;
 
         // we only have one item per subscription
         SubscriptionItem lineItem = subscription.Items.Data.Single();
         var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
 
-        var features = _plansOptions[planName];
+        var features = _stripeOptions.Plans[planName].Features;
 
         // Increase the limits
         org.MaxAdmins = features.MaxAdmins;
@@ -124,12 +119,8 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             throw new InvalidOperationException("Received a subscription for a product that is not configured.");
         }
 
-        org.BillingPlan = planName;
-        org.BillingSubscriptionItemId = lineItem.Id;
-
         var applications = await db.Applications
             .Where(a => a.OrganizationId == orgId)
-            .Select(x => x.Id)
             .ToListAsync();
 
         var setFeaturesRequest = new SetApplicationFeaturesRequest
@@ -139,7 +130,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         };
 
         // If we had a subscription before, cancel it now as we've successfully subscribed to the new plan.
-        if (existingSubscriptionId != null && existingSubscriptionId != subscription.Id)
+        /**if (existingSubscriptionId != null && existingSubscriptionId != subscription.Id)
         {
             // Issue prorated invoice.
             var cancelOptions = new SubscriptionCancelOptions
@@ -148,12 +139,15 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
                 Prorate = true
             };
             await subscriptionService.CancelAsync(existingSubscriptionId, cancelOptions);
-        }
+        }**/
 
         // set the plans on each app
-        foreach (var applicationId in applications)
+        foreach (var application in applications)
         {
-            await _passwordlessClient.SetFeaturesAsync(applicationId, setFeaturesRequest);
+
+            application.BillingPlan = planName;
+            application.BillingSubscriptionItemId = lineItem.Id;
+            await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
 
         await db.SaveChangesAsync();
@@ -203,7 +197,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
-        var features = _plansOptions[PlanConstants.Free];
+        var features = _stripeOptions.Plans[PlanConstants.Free].Features;
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
 

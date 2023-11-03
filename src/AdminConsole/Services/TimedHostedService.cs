@@ -36,37 +36,7 @@ public class TimedHostedService : BackgroundService
     // Could also be a async method, that can be awaited in ExecuteAsync above
     private async Task DoWork()
     {
-        await UpdateUsageStatistics();
-        await UpdateBilling();
         await CleanUpOnboarding();
-    }
-
-    private async Task UpdateUsageStatistics()
-    {
-        try
-        {
-            using IServiceScope scope = _services.CreateScope();
-            var usageService = scope.ServiceProvider.GetRequiredService<IUsageService>();
-            await usageService.UpdateUsersCountAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Failed to update usage statistics: {error}", e.Message);
-        }
-    }
-
-    private async Task UpdateBilling()
-    {
-        try
-        {
-            using IServiceScope scope = _services.CreateScope();
-            var billingService = scope.ServiceProvider.GetRequiredService<ISharedBillingService>();
-            await billingService.UpdateUsageAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Failed to update billing: {error}", e.Message);
-        }
     }
 
     private async Task CleanUpOnboarding()

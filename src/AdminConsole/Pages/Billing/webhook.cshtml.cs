@@ -31,7 +31,8 @@ public class Webhook : PageModel
             stripeEvent = EventUtility.ConstructEvent(
                 json,
                 Request.Headers["Stripe-Signature"],
-                _stripeOptions.WebhookSecret
+                _stripeOptions.WebhookSecret,
+                throwOnApiVersionMismatch: false
             );
             Console.WriteLine($"Webhook notification with type: {stripeEvent.Type} found for {stripeEvent.Id}");
         }

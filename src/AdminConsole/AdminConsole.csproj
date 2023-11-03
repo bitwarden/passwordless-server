@@ -104,5 +104,11 @@
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Pages\Billing\DefaultModel.cs">
+      <DependentUpon>Default.cshtml</DependentUpon>
+    </Compile>
+  </ItemGroup>
    
 </Project>

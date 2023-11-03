@@ -1,0 +1,44 @@
+@page
+@using Passwordless.AdminConsole.TagHelpers
+@model Passwordless.AdminConsole.Pages.Billing.InvoicesModel
+
+<h2>Invoices</h2>
+<div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+    <table id="invoices-table" class="tbl-default min-w-full">
+        <thead>
+        <tr>
+            <th>Invoice Number</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Download Link</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.Invoices.Any())
+        {
+            @foreach (var invoice in Model.Invoices)
+            {
+                <tr>
+                    <td>@invoice.Number</td>
+                    <td>@invoice.Date</td>
+                    <td>@invoice.Amount</td>
+                    <td>
+                        <a href="@invoice.Pdf" target="_blank">download PDF</a>
+                    </td>
+                    <td>
+                        <badge asp-if="invoice.Paid" variant="ColorVariant.Success" text="Paid"></badge>
+                        <badge asp-if="!invoice.Paid" variant="ColorVariant.Danger" text="Pending"></badge>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">No invoices found.</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

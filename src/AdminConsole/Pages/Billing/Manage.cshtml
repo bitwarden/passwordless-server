@@ -1,8 +1,4 @@
 @page
-@using System.Globalization
-@using Passwordless.AdminConsole.Billing.Constants
-@using Passwordless.AdminConsole.Helpers
-@using Passwordless.AdminConsole.TagHelpers
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
 @{
@@ -12,7 +8,7 @@
 <div id="plan-selection">
     <h2>Plans</h2>
     <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
-        @foreach (var plan in @Model.Plans)
+        @foreach (var plan in Model.Plans)
         {
             <div class="@(plan.IsActive ? "pricing-card-active": "pricing-card")">
                 <div class="flex flex-wrap items-center justify-center">
@@ -20,12 +16,12 @@
                 </div>
                 <h3 class="text-center">@plan.Name</h3>
                 <div class="space-y-0">
-                    <p class="text-lg font-black text-center">@plan.Plan.Price</p>
-                    <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.Plan.PriceHint) ? "*" : string.Empty)</p>
+                    <p class="text-lg font-black text-center">@plan.Plan.Ui.Price</p>
+                    <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.Plan.Ui.PriceHint) ? "*" : string.Empty)</p>
                 </div>
                 <div class="flex-1">
                     <ul class="mt-4 space-y-2">
-                        @foreach (var feature in plan.Plan.Features)
+                        @foreach (var feature in plan.Plan.Ui.Features)
                         {
                             <li class="flex items-start">
                                 <feature-list-item-icon class="flex-shrink-0 w-5 h-5 mr-2"></feature-list-item-icon>
@@ -35,7 +31,7 @@
                     </ul>
                 </div>
                 <div asp-if="!string.IsNullOrEmpty(plan.Plan.PriceId)" class="mt-auto text-center space-y-4">
-                    <p asp-if="!string.IsNullOrEmpty(plan.Plan.PriceHint)" class="text-xs text-gray-600 text-center">* @(plan.Plan.PriceHint)</p>
+                    <p asp-if="!string.IsNullOrEmpty(plan.Plan.Ui.PriceHint)" class="text-xs text-gray-600 text-center">* @(plan.Plan.Ui.PriceHint)</p>
                     @if (!plan.IsActive)
                     {
                         <form method="post">
@@ -54,36 +50,6 @@
         }
     </div>
 </div>
-<div id="invoices-list" asp-if="Model.Invoices != null && Model.Invoices.Any()">
-    <h2>Invoices</h2>
-    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-        <table id="invoices-table" class="tbl-default min-w-full">
-            <thead>
-            <tr>
-                <th>Invoice Number</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Download Link</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var invoice in Model.Invoices)
-            {
-                <tr>
-                    <td>@invoice.Number</td>
-                    <td>@invoice.Date</td>
-                    <td>@invoice.Amount</td>
-                    <td>
-                        <a href="@invoice.Pdf" target="_blank">download PDF</a>
-                    </td>
-                    <td>
-                        <badge asp-if="invoice.Paid" variant="ColorVariant.Success" text="Paid"></badge>
-                        <badge asp-if="!invoice.Paid" variant="ColorVariant.Danger" text="Pending"></badge>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
+<div id="plans-list">
+    
 </div>
