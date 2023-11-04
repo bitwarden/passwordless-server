@@ -92,6 +92,10 @@
 
         text-decoration: none;
     }
+    
+    div.table-container {
+        @apply overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg;
+    }
 
     .pricing-card {
         @apply bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4;

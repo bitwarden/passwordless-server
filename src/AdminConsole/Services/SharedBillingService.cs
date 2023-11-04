@@ -76,7 +76,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     }
 
     /// <inheritdoc />
-    public async Task OnPaidSubscriptionChangedAsync(string customerId, string clientReferenceId, string subscriptionId)
+    public async Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId)
     {
         // todo: Add extra error handling, if we already have a customerId on Org, throw.
 
@@ -85,23 +85,22 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         // SetCustomerId on the Org
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
+
         if (org == null)
         {
             throw new InvalidOperationException("Org not found");
         }
-        org.BillingCustomerId = customerId;
+
+        if (org.HasSubscription)
+        {
+            return;
+        }
 
         var subscriptionService = new SubscriptionService();
         var subscription = await subscriptionService.GetAsync(subscriptionId);
 
-        // If subscription is not set, it means we were using a free plan.
-        if (org.BillingSubscriptionId == null)
-        {
-            // Customer started paying for the first time
-            org.BecamePaidAt = subscription.Created;
-        }
-
-        // set the subscriptionId on the Org
+        org.BillingCustomerId = customerId;
+        org.BecamePaidAt = subscription.Created;
         org.BillingSubscriptionId = subscription.Id;
 
         // we only have one item per subscription
@@ -119,6 +118,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             throw new InvalidOperationException("Received a subscription for a product that is not configured.");
         }
 
+
         var applications = await db.Applications
             .Where(a => a.OrganizationId == orgId)
             .ToListAsync();
@@ -129,22 +129,9 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
         };
 
-        // If we had a subscription before, cancel it now as we've successfully subscribed to the new plan.
-        /**if (existingSubscriptionId != null && existingSubscriptionId != subscription.Id)
-        {
-            // Issue prorated invoice.
-            var cancelOptions = new SubscriptionCancelOptions
-            {
-                InvoiceNow = true,
-                Prorate = true
-            };
-            await subscriptionService.CancelAsync(existingSubscriptionId, cancelOptions);
-        }**/
-
         // set the plans on each app
         foreach (var application in applications)
         {
-
             application.BillingPlan = planName;
             application.BillingSubscriptionItemId = lineItem.Id;
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
@@ -184,7 +171,6 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             .FirstOrDefaultAsync();
         return customerId;
     }
-
 
     /// <inheritdoc />
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)

@@ -33,7 +33,6 @@
     <Folder Include="Identity\" />
     <Folder Include="Migrations" />
     <Folder Include="Models\" />
-    <Folder Include="Pages\App\" />
     <Folder Include="Pages\App\Credentials\" />
     <Folder Include="Pages\App\Dashboard\" />
     <Folder Include="Pages\App\Playground\" />

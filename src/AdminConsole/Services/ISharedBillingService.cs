@@ -11,13 +11,13 @@ public interface ISharedBillingService
     Task UpdateUsageAsync();
 
     /// <summary>
-    /// 
+    /// When a customer subscribes for the first time.
     /// </summary>
-    /// <param name="subscriptionItemId"></param>
-    /// <param name="users"></param>
+    /// <param name="customerId"></param>
+    /// <param name="clientReferenceId"></param>
+    /// <param name="subscriptionId"></param>
     /// <returns></returns>
-
-    Task OnPaidSubscriptionChangedAsync(string customerId, string clientReferenceId, string subscriptionId);
+    Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId);
 
     Task UpdateSubscriptionStatusAsync(Invoice? dataObject);
 

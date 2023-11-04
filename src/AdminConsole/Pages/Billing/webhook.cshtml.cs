@@ -48,7 +48,7 @@ public class Webhook : PageModel
             case Events.CheckoutSessionCompleted:
                 if (stripeEvent.Data.Object is Session session)
                 {
-                    await _sharedBillingService.OnPaidSubscriptionChangedAsync(session.CustomerId, session.ClientReferenceId, session.SubscriptionId);
+                    await _sharedBillingService.OnSubscriptionCreatedAsync(session.CustomerId, session.ClientReferenceId, session.SubscriptionId);
                 }
                 break;
             case Events.InvoicePaid:

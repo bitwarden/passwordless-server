@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div>
+            <div asp-if="Model.Organization.HasSubscription">
                 <label asp-for="Form.Plan" class="form-label">Plan</label>
                 <ul class="radio-horizontal mt-2">
                     @foreach (var availablePlan in Model.AvailablePlans)
@@ -51,7 +51,7 @@
                         <li>
                             <div>
                                 <input id="@availablePlan.Id" name="plans-group" type="radio" value="@availablePlan.Value" asp-for="Form.Plan">
-                                <label for="@availablePlan.Id">@availablePlan.Value</label>
+                                <label for="@availablePlan.Id">@availablePlan.Label</label>
                             </div>
                         </li>
                     }

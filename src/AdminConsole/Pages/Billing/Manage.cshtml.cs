@@ -103,11 +103,17 @@ public class Manage : PageModel
         {
             Customer = customerId,
             ReturnUrl = returnUrl,
+
         };
         var service = new Stripe.BillingPortal.SessionService();
         Stripe.BillingPortal.Session? session = await service.CreateAsync(options);
 
         return Redirect(session.Url);
+    }
+
+    public async Task<IActionResult> OnPostChangePlan(string id)
+    {
+        return RedirectToPage("/App/Billing/ChangePlan", new { app = id });
     }
 
     public class PricingCardModel

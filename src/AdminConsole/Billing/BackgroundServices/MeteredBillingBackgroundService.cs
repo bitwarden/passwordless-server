@@ -10,7 +10,7 @@ public sealed class MeteredBillingBackgroundService : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<MeteredBillingBackgroundService> _logger;
 
-    private readonly TimeSpan _interval = TimeSpan.FromDays(7);
+    private readonly TimeSpan _interval = TimeSpan.FromDays(1);
 
     public MeteredBillingBackgroundService(
         IServiceProvider services,

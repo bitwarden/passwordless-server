@@ -10,10 +10,7 @@
     <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
         @foreach (var plan in Model.Plans)
         {
-            <div class="@(plan.IsActive ? "pricing-card-active": "pricing-card")">
-                <div class="flex flex-wrap items-center justify-center">
-                    <badge class="@(plan.IsActive ? string.Empty : "invisible")" text="Active"></badge>
-                </div>
+            <div class="pricing-card">
                 <h3 class="text-center">@plan.Name</h3>
                 <div class="space-y-0">
                     <p class="text-lg font-black text-center">@plan.Plan.Ui.Price</p>
@@ -32,17 +29,11 @@
                 </div>
                 <div asp-if="!string.IsNullOrEmpty(plan.Plan.PriceId)" class="mt-auto text-center space-y-4">
                     <p asp-if="!string.IsNullOrEmpty(plan.Plan.Ui.PriceHint)" class="text-xs text-gray-600 text-center">* @(plan.Plan.Ui.PriceHint)</p>
-                    @if (!plan.IsActive)
+                    @if (!Model.Organization.HasSubscription)
                     {
                         <form method="post">
                             <input type="hidden" name="planName" value="@plan.Name"/>
                             <button asp-page-handler="Subscribe" type="submit" class="btn-primary">Subscribe</button>
-                        </form>
-                    }
-                    @if (plan.IsActive && !string.IsNullOrWhiteSpace(plan.Plan.PriceId))
-                    {
-                        <form method="post">
-                            <button asp-page-handler="Manage" type="submit" class="btn-primary">Manage</button>
                         </form>
                     }
                 </div>
@@ -50,6 +41,46 @@
         }
     </div>
 </div>
-<div id="plans-list">
-    
+<div id="subscription-admin" asp-if="Model.Organization.HasSubscription">
+    <h2>Payment methods</h2>
+    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
+        <form method="post">
+            <button asp-page-handler="Manage" type="submit" class="btn-primary">Update payment methods</button>
+        </form>
+    </div>
+</div>
+<div id="applications-list">
+    <h2>Applications</h2>
+    <div class="table-container">
+        <table class="tbl-default min-w-full">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Description</th>
+                <th>Users</th>
+                <th>Plan</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var app in Model.Applications)
+            {
+                <tr>
+                    <td>@app.Id</td>
+                    <td>@app.Description</td>
+                    <td>@app.CurrentUserCount</td>
+                    <td>@app.BillingPlan</td>
+                    <td>
+                        <form method="post">
+                            <input type="hidden" name="id" value="@app.Id"/>
+                            <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">
+                                <partial name="Shared/Icons/PencilSquare"/>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 </div>
