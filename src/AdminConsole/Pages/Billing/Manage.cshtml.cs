@@ -1,11 +1,13 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
-using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
 using Stripe.Checkout;
+using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
 
@@ -20,10 +22,21 @@ public class Manage : PageModel
         _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
+
+
+        Plans = new List<PricingCardModel>
+        {
+            new(PlanConstants.Free, stripeOptions.Value.Plans[PlanConstants.Free]),
+            new(PlanConstants.Pro, stripeOptions.Value.Plans[PlanConstants.Pro]),
+            new(PlanConstants.Enterprise, stripeOptions.Value.Plans[PlanConstants.Enterprise])
+        };
     }
 
     public List<Application> Applications { get; set; }
+
     public Models.Organization Organization { get; set; }
+
+    public IReadOnlyCollection<PricingCardModel> Plans { get; init; }
 
     public async Task OnGet()
     {
@@ -31,11 +44,14 @@ public class Manage : PageModel
         Organization = await _dataService.GetOrganizationAsync();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostSubscribe(string planName)
     {
-        var orgId = User.GetOrgId();
+        if (_stripeOptions.Value.Plans.All(x => x.Key != planName))
+        {
+            throw new ArgumentException("Invalid plan name");
+        }
 
-        var customerEmail = User.GetEmail();
+        var organization = await _dataService.GetOrganizationAsync();
 
         var successUrl = Url.PageLink("/Billing/Success");
         successUrl += "?session_id={CHECKOUT_SESSION_ID}";
@@ -43,17 +59,13 @@ public class Manage : PageModel
         var cancelUrl = Url.PageLink("/Billing/Cancelled");
         var options = new SessionCreateOptions
         {
-            CustomerEmail = customerEmail,
             Metadata =
                 new Dictionary<string, string>
                 {
-                    { "orgId", orgId.ToString() }, { "passwordless", "passwordless" }
+                    { "orgId", organization.Id.ToString() },
+                    { "passwordless", "passwordless" }
                 },
-            TaxIdCollection = new SessionTaxIdCollectionOptions
-            {
-                Enabled = true,
-            },
-            ClientReferenceId = orgId.ToString(),
+            ClientReferenceId = organization.Id.ToString(),
             SuccessUrl = successUrl,
             CancelUrl = cancelUrl,
             Mode = "subscription",
@@ -61,10 +73,20 @@ public class Manage : PageModel
             {
                 new()
                 {
-                    Price = _stripeOptions.Value.UsersProPriceId,
+                    Price = _stripeOptions.Value.Plans[planName].PriceId,
                 }
             }
         };
+
+        if (organization.BillingCustomerId != null)
+        {
+            options.Customer = organization.BillingCustomerId;
+        }
+        else
+        {
+            options.TaxIdCollection = new SessionTaxIdCollectionOptions { Enabled = true, };
+            options.CustomerEmail = User.GetEmail();
+        }
 
         var service = new SessionService();
         Session? session = await service.CreateAsync(options);
@@ -72,7 +94,7 @@ public class Manage : PageModel
         return Redirect(session.Url);
     }
 
-    public async Task<IActionResult> OnPostPortal()
+    public async Task<IActionResult> OnPostManage()
     {
         var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);
         var returnUrl = Url.PageLink("/Billing/Manage");
@@ -81,10 +103,41 @@ public class Manage : PageModel
         {
             Customer = customerId,
             ReturnUrl = returnUrl,
+
         };
         var service = new Stripe.BillingPortal.SessionService();
         Stripe.BillingPortal.Session? session = await service.CreateAsync(options);
 
         return Redirect(session.Url);
+    }
+
+    public async Task<IActionResult> OnPostChangePlan(string id)
+    {
+        return RedirectToPage("/App/Billing/ChangePlan", new { app = id });
+    }
+
+    public class PricingCardModel
+    {
+        /// <summary>
+        /// We want to display the price in US dollars.
+        /// </summary>
+        private static readonly CultureInfo PriceFormat = new("en-US");
+
+        public PricingCardModel(
+            string name,
+            StripePlanOptions plan)
+        {
+            Name = name;
+            Plan = plan;
+        }
+
+        public string Name { get; }
+
+        public StripePlanOptions Plan { get; }
+
+        /// <summary>
+        /// Indicates if the plan is the active plan for the organization.
+        /// </summary>
+        public bool IsActive { get; set; }
     }
 }

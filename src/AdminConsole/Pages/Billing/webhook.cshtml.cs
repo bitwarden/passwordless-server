@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Services;
 using Stripe;
 using Session = Stripe.Checkout.Session;
@@ -31,7 +31,8 @@ public class Webhook : PageModel
             stripeEvent = EventUtility.ConstructEvent(
                 json,
                 Request.Headers["Stripe-Signature"],
-                _stripeOptions.WebhookSecret
+                _stripeOptions.WebhookSecret,
+                throwOnApiVersionMismatch: false
             );
             Console.WriteLine($"Webhook notification with type: {stripeEvent.Type} found for {stripeEvent.Id}");
         }
@@ -47,14 +48,20 @@ public class Webhook : PageModel
             case Events.CheckoutSessionCompleted:
                 if (stripeEvent.Data.Object is Session session)
                 {
-                    await _sharedBillingService.ConvertFromFreeToPaidAsync(session.CustomerId, session.ClientReferenceId, session.SubscriptionId);
+                    await _sharedBillingService.OnSubscriptionCreatedAsync(session.CustomerId, session.ClientReferenceId, session.SubscriptionId);
                 }
                 break;
-            case "invoice.paid":
-            case "invoice.payment_failed":
+            case Events.InvoicePaid:
+            case Events.InvoicePaymentFailed:
                 if (stripeEvent.Data.Object is Invoice invoice)
                 {
                     await _sharedBillingService.UpdateSubscriptionStatusAsync(invoice);
+                }
+                break;
+            case Events.CustomerSubscriptionDeleted:
+                if (stripeEvent.Data.Object is Subscription subscription)
+                {
+                    await _sharedBillingService.OnSubscriptionDeletedAsync(subscription.Id);
                 }
                 break;
             default:

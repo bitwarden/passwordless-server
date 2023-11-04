@@ -4,11 +4,20 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface ISharedBillingService
 {
+    /// <summary>
+    /// Updates the seats used for every app in the organization which are relevant for metered subscriptions.
+    /// </summary>
+    /// <returns></returns>
     Task UpdateUsageAsync();
 
-    Task UpdateStripeAsync(string subscriptionItemId, int users);
-
-    Task ConvertFromFreeToPaidAsync(string customerId, string clientReferenceId, string subscriptionId);
+    /// <summary>
+    /// When a customer subscribes for the first time.
+    /// </summary>
+    /// <param name="customerId"></param>
+    /// <param name="clientReferenceId"></param>
+    /// <param name="subscriptionId"></param>
+    /// <returns></returns>
+    Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId);
 
     Task UpdateSubscriptionStatusAsync(Invoice? dataObject);
 
@@ -26,4 +35,12 @@ public interface ISharedBillingService
     /// <param name="organizationId"></param>
     /// <returns></returns>
     Task<string?> GetCustomerIdAsync(int organizationId);
+
+    /// <summary>
+    /// Executed when a subscription is deleted in Stripe.
+    /// 1. Retain the Stripe customer id on the Organization.
+    /// 2. Set the plan to Free and reset all other billing/subscription related fields.
+    /// </summary>
+    /// <param name="subscriptionId">Stripe subscription id</param>
+    Task OnSubscriptionDeletedAsync(string subscriptionId);
 }
