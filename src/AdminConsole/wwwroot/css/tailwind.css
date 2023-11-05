@@ -838,6 +838,11 @@ h3 {
   color: rgb(30 64 175 / var(--tw-text-opacity));
 }
 
+.text-danger {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity));
+}
+
 table.tbl-default > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));

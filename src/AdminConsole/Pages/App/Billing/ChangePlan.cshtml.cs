@@ -32,7 +32,6 @@ public class ChangePlanModel : PageModel
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
 
-        AddPlan(PlanConstants.Free, _stripeOptions.Plans[PlanConstants.Free]);
         AddPlan(PlanConstants.Pro, _stripeOptions.Plans[PlanConstants.Pro]);
         AddPlan(PlanConstants.Enterprise, _stripeOptions.Plans[PlanConstants.Enterprise]);
     }

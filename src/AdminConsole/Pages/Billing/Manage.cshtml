@@ -5,7 +5,7 @@
 
 }
 
-<div id="plan-selection">
+<div id="plan-selection" asp-if="!Model.Organization.HasSubscription">
     <h2>Plans</h2>
     <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
         @foreach (var plan in Model.Plans)
@@ -41,14 +41,6 @@
         }
     </div>
 </div>
-<div id="subscription-admin" asp-if="Model.Organization.HasSubscription">
-    <h2>Payment methods</h2>
-    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
-        <form method="post">
-            <button asp-page-handler="Manage" type="submit" class="btn-primary">Update payment methods</button>
-        </form>
-    </div>
-</div>
 <div id="applications-list">
     <h2>Applications</h2>
     <div class="table-container">
@@ -59,7 +51,7 @@
                 <th>Description</th>
                 <th>Users</th>
                 <th>Plan</th>
-                <th>Actions</th>
+                <th asp-if="Model.Organization.HasSubscription">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -70,7 +62,7 @@
                     <td>@app.Description</td>
                     <td>@app.CurrentUserCount</td>
                     <td>@app.BillingPlan</td>
-                    <td>
+                    <td asp-if="Model.Organization.HasSubscription">
                         <form method="post">
                             <input type="hidden" name="id" value="@app.Id"/>
                             <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">
@@ -82,5 +74,40 @@
             }
             </tbody>
         </table>
+    </div>
+</div>
+<div id="subscription-admin" asp-if="Model.Organization.HasSubscription">
+    <h2>Payment methods</h2>
+    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1">
+        <p>Manage &amp; update your payment information and billing details.</p>
+        <form method="post">
+            <button asp-page-handler="Manage" type="submit" class="btn-primary">Update payment methods</button>
+        </form>
+        <table class="tbl-default min-w-full">
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Number</th>
+                        <th>Expiration Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var paymentMethod in Model.PaymentMethods)
+                    {
+                        <tr>
+                            <td class="w-5"><partial name="@paymentMethod.CardIcon" /></td>
+                            <td>@paymentMethod.Number</td>
+                            @if (paymentMethod.ExpirationDate < DateTime.UtcNow.AddMonths(-1))
+                            {
+                                <td>@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
+                            }
+                            else
+                            {
+                                <td class="text-danger">@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
+                            }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
     </div>
 </div>

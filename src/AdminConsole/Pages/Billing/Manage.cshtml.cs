@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using System.Globalization;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -6,6 +8,7 @@ using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Services;
+using Stripe;
 using Stripe.Checkout;
 using Application = Passwordless.AdminConsole.Models.Application;
 
@@ -38,10 +41,25 @@ public class Manage : PageModel
 
     public IReadOnlyCollection<PricingCardModel> Plans { get; init; }
 
+    public IReadOnlyCollection<PaymentMethodModel> PaymentMethods { get; private set; }
+
     public async Task OnGet()
     {
         Applications = await _dataService.GetApplicationsAsync();
         Organization = await _dataService.GetOrganizationAsync();
+        var paymentMethodsService = new CustomerService();
+        var paymentMethods = await paymentMethodsService.ListPaymentMethodsAsync(Organization.BillingCustomerId);
+        if (paymentMethods != null)
+        {
+            PaymentMethods = paymentMethods.Data
+                .Where(x => x.Type == "card")
+                .Select(x =>
+                    new PaymentMethodModel(
+                        x.Card.Brand,
+                        x.Card.Last4,
+                        new DateTime((int)x.Card.ExpYear, (int)x.Card.ExpMonth, 1)))
+                .ToImmutableList();
+        }
     }
 
     public async Task<IActionResult> OnPostSubscribe(string planName)
@@ -139,5 +157,44 @@ public class Manage : PageModel
         /// Indicates if the plan is the active plan for the organization.
         /// </summary>
         public bool IsActive { get; set; }
+    }
+
+    public record PaymentMethodModel(string Brand, string Number, DateTime ExpirationDate)
+    {
+        public string CardIcon
+        {
+            get
+            {
+                var path = new StringBuilder("Shared/Icons/PaymentMethods/");
+                switch (Brand)
+                {
+                    case "amex":
+                        path.Append("Amex");
+                        break;
+                    case "diners":
+                        path.Append("Diners");
+                        break;
+                    case "discover":
+                        path.Append("Discover");
+                        break;
+                    case "jcb":
+                        path.Append("Jcb");
+                        break;
+                    case "mastercard":
+                        path.Append("MasterCard");
+                        break;
+                    case "unionpay":
+                        path.Append("UnionPay");
+                        break;
+                    case "visa":
+                        path.Append("Visa");
+                        break;
+                    default:
+                        path.Append("UnknownCard");
+                        break;
+                }
+                return path.ToString();
+            }
+        }
     }
 }
