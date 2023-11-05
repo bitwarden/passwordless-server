@@ -83,31 +83,35 @@
         <form method="post">
             <button asp-page-handler="Manage" type="submit" class="btn-primary">Update payment methods</button>
         </form>
-        <table class="tbl-default min-w-full">
-                    <thead>
+        <div class="table-container">
+            <table class="tbl-default min-w-full">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Number</th>
+                    <th>Expiration Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var paymentMethod in Model.PaymentMethods)
+                {
                     <tr>
-                        <th>Type</th>
-                        <th>Number</th>
-                        <th>Expiration Date</th>
+                        <td class="w-5">
+                            <partial name="@paymentMethod.CardIcon"/>
+                        </td>
+                        <td>@paymentMethod.Number</td>
+                        @if (paymentMethod.ExpirationDate < DateTime.UtcNow.AddMonths(-1))
+                        {
+                            <td>@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
+                        }
+                        else
+                        {
+                            <td class="text-danger">@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
+                        }
                     </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var paymentMethod in Model.PaymentMethods)
-                    {
-                        <tr>
-                            <td class="w-5"><partial name="@paymentMethod.CardIcon" /></td>
-                            <td>@paymentMethod.Number</td>
-                            @if (paymentMethod.ExpirationDate < DateTime.UtcNow.AddMonths(-1))
-                            {
-                                <td>@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
-                            }
-                            else
-                            {
-                                <td class="text-danger">@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
-                            }
-                        </tr>
-                    }
-                    </tbody>
-                </table>
+                }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

@@ -43,4 +43,6 @@ public interface ISharedBillingService
     /// </summary>
     /// <param name="subscriptionId">Stripe subscription id</param>
     Task OnSubscriptionDeletedAsync(string subscriptionId);
+
+    Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
 }
