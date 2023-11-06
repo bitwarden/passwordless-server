@@ -7,7 +7,7 @@
         @foreach (var plan in Model.Plans)
         {
             <div class="pricing-card">
-                <h3 class="text-center">@plan.Name</h3>
+                <h3 class="text-center">@plan.Plan.Ui.Label</h3>
                 <div class="space-y-0">
                     <p class="text-lg font-black text-center">@plan.Plan.Ui.Price</p>
                     <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.Plan.Ui.PriceHint) ? "*" : string.Empty)</p>
@@ -56,8 +56,8 @@
                 <tr>
                     <td>@app.Id</td>
                     <td>@app.Description</td>
-                    <td>@app.CurrentUserCount</td>
-                    <td>@app.BillingPlan</td>
+                    <td>@app.Users</td>
+                    <td>@app.Plan</td>
                     <td asp-if="Model.Organization.HasSubscription">
                         <form method="post">
                             <input type="hidden" name="id" value="@app.Id"/>

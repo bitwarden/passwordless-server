@@ -64,6 +64,10 @@ public class SettingsModel : PageModel
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
 
+        if (!Organization.HasSubscription)
+        {
+            AddPlan(PlanConstants.Free, _stripeOptions.Plans[PlanConstants.Free]);
+        }
         AddPlan(PlanConstants.Pro, _stripeOptions.Plans[PlanConstants.Pro]);
         AddPlan(PlanConstants.Enterprise, _stripeOptions.Plans[PlanConstants.Enterprise]);
 
@@ -173,7 +177,15 @@ public class SettingsModel : PageModel
     {
         var isActive = Application!.BillingPlan == plan;
 
-        bool canSubscribe = plan != PlanConstants.Free && Application.BillingPriceId != options.PriceId;
+        bool canSubscribe;
+        if (plan == PlanConstants.Free)
+        {
+            canSubscribe = false;
+        }
+        else
+        {
+            canSubscribe = Application.BillingPriceId != options.PriceId;
+        }
 
         var model = new PlanModel(
             plan,

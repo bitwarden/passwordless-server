@@ -35,7 +35,7 @@ public class Manage : BaseExtendedPageModel
         };
     }
 
-    public List<Application> Applications { get; set; }
+    public ICollection<ApplicationModel> Applications { get; set; }
 
     public Models.Organization Organization { get; set; }
 
@@ -45,20 +45,26 @@ public class Manage : BaseExtendedPageModel
 
     public async Task OnGet()
     {
-        Applications = await _dataService.GetApplicationsAsync();
+        var applications = await _dataService.GetApplicationsAsync();
+        Applications = applications
+            .Select(x => ApplicationModel.FromEntity(x, _stripeOptions.Value.Plans[x.BillingPlan]))
+            .ToList();
         Organization = await _dataService.GetOrganizationAsync();
-        var paymentMethodsService = new CustomerService();
-        var paymentMethods = await paymentMethodsService.ListPaymentMethodsAsync(Organization.BillingCustomerId);
-        if (paymentMethods != null)
+        if (Organization.HasSubscription)
         {
-            PaymentMethods = paymentMethods.Data
-                .Where(x => x.Type == "card")
-                .Select(x =>
-                    new PaymentMethodModel(
-                        x.Card.Brand,
-                        x.Card.Last4,
-                        new DateTime((int)x.Card.ExpYear, (int)x.Card.ExpMonth, 1)))
-                .ToImmutableList();
+            var paymentMethodsService = new CustomerService();
+            var paymentMethods = await paymentMethodsService.ListPaymentMethodsAsync(Organization.BillingCustomerId);
+            if (paymentMethods != null)
+            {
+                PaymentMethods = paymentMethods.Data
+                    .Where(x => x.Type == "card")
+                    .Select(x =>
+                        new PaymentMethodModel(
+                            x.Card.Brand,
+                            x.Card.Last4,
+                            new DateTime((int)x.Card.ExpYear, (int)x.Card.ExpMonth, 1)))
+                    .ToImmutableList();
+            }
         }
     }
 
@@ -134,25 +140,31 @@ public class Manage : BaseExtendedPageModel
         return RedirectToApplicationPage("/App/Settings/Settings", new ApplicationPageRoutingContext(id));
     }
 
-    public class PricingCardModel
+    public record ApplicationModel(
+        string Id,
+        string Description,
+        int Users,
+        string Plan)
+    {
+        public static ApplicationModel FromEntity(Application entity, StripePlanOptions options)
+        {
+            return new ApplicationModel(
+                entity.Id,
+                entity.Description,
+                entity.CurrentUserCount,
+                options.Ui.Label);
+        }
+    }
+
+    public record PricingCardModel(
+        string Name,
+        StripePlanOptions Plan)
     {
         /// <summary>
         /// We want to display the price in US dollars.
         /// </summary>
         private static readonly CultureInfo PriceFormat = new("en-US");
-
-        public PricingCardModel(
-            string name,
-            StripePlanOptions plan)
-        {
-            Name = name;
-            Plan = plan;
-        }
-
-        public string Name { get; }
-
-        public StripePlanOptions Plan { get; }
-
+        
         /// <summary>
         /// Indicates if the plan is the active plan for the organization.
         /// </summary>
