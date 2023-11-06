@@ -9,7 +9,6 @@ using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Stripe;
-using Stripe.Checkout;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
@@ -66,56 +65,6 @@ public class Manage : BaseExtendedPageModel
                     .ToImmutableList();
             }
         }
-    }
-
-    public async Task<IActionResult> OnPostSubscribe(string planName)
-    {
-        if (_stripeOptions.Value.Plans.All(x => x.Key != planName))
-        {
-            throw new ArgumentException("Invalid plan name");
-        }
-
-        var organization = await _dataService.GetOrganizationAsync();
-
-        var successUrl = Url.PageLink("/Billing/Success");
-        successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-
-        var cancelUrl = Url.PageLink("/Billing/Cancelled");
-        var options = new SessionCreateOptions
-        {
-            Metadata =
-                new Dictionary<string, string>
-                {
-                    { "orgId", organization.Id.ToString() },
-                    { "passwordless", "passwordless" }
-                },
-            ClientReferenceId = organization.Id.ToString(),
-            SuccessUrl = successUrl,
-            CancelUrl = cancelUrl,
-            Mode = "subscription",
-            LineItems = new List<SessionLineItemOptions>
-            {
-                new()
-                {
-                    Price = _stripeOptions.Value.Plans[planName].PriceId,
-                }
-            }
-        };
-
-        if (organization.BillingCustomerId != null)
-        {
-            options.Customer = organization.BillingCustomerId;
-        }
-        else
-        {
-            options.TaxIdCollection = new SessionTaxIdCollectionOptions { Enabled = true, };
-            options.CustomerEmail = User.GetEmail();
-        }
-
-        var service = new SessionService();
-        Session? session = await service.CreateAsync(options);
-
-        return Redirect(session.Url);
     }
 
     public async Task<IActionResult> OnPostManage()

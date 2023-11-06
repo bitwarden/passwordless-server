@@ -1,42 +1,6 @@
 @page
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
-<div id="plan-selection" asp-if="!Model.Organization.HasSubscription">
-    <h2>Plans</h2>
-    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
-        @foreach (var plan in Model.Plans)
-        {
-            <div class="pricing-card">
-                <h3 class="text-center">@plan.Plan.Ui.Label</h3>
-                <div class="space-y-0">
-                    <p class="text-lg font-black text-center">@plan.Plan.Ui.Price</p>
-                    <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.Plan.Ui.PriceHint) ? "*" : string.Empty)</p>
-                </div>
-                <div class="flex-1">
-                    <ul class="mt-4 space-y-2">
-                        @foreach (var feature in plan.Plan.Ui.Features)
-                        {
-                            <li class="flex items-start">
-                                <feature-list-item-icon class="flex-shrink-0 w-5 h-5 mr-2"></feature-list-item-icon>
-                                @feature
-                            </li>
-                        }
-                    </ul>
-                </div>
-                <div asp-if="!string.IsNullOrEmpty(plan.Plan.PriceId)" class="mt-auto text-center space-y-4">
-                    <p asp-if="!string.IsNullOrEmpty(plan.Plan.Ui.PriceHint)" class="text-xs text-gray-600 text-center">* @(plan.Plan.Ui.PriceHint)</p>
-                    @if (!Model.Organization.HasSubscription)
-                    {
-                        <form method="post">
-                            <input type="hidden" name="planName" value="@plan.Name"/>
-                            <button asp-page-handler="Subscribe" type="submit" class="btn-primary">Subscribe</button>
-                        </form>
-                    }
-                </div>
-            </div>
-        }
-    </div>
-</div>
 <div id="applications-list">
     <h2>Applications</h2>
     <div class="table-container">
