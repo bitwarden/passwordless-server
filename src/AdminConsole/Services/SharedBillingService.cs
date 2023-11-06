@@ -184,6 +184,20 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     }
 
     /// <inheritdoc />
+    public async Task OnApplicationDeletedAsync(
+        string applicationId,
+        string subscriptionItemId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var isSubscriptionItemInUse = await db.Applications.AnyAsync(x => x.BillingSubscriptionItemId == subscriptionItemId && x.Id != applicationId);
+        if (!isSubscriptionItemInUse)
+        {
+            var subscriptionItemService = new SubscriptionItemService();
+            await subscriptionItemService.DeleteAsync(subscriptionItemId);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();

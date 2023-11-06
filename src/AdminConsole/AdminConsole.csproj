@@ -38,7 +38,6 @@
     <Folder Include="Pages\App\Playground\" />
     <Folder Include="Pages\App\Settings\" />
     <Folder Include="Db\" />
-    <Folder Include="RoutingHelpers\" />
     <Folder Include="Pages\Account\" />
     <Folder Include="wwwroot\img" />
   </ItemGroup>
@@ -102,6 +101,7 @@
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ValidationScriptsPartial.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
+    <_ContentIncludedByDefault Remove="Pages\App\Billing\ChangePlan.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

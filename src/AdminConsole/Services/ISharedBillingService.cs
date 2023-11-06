@@ -44,5 +44,12 @@ public interface ISharedBillingService
     /// <param name="subscriptionId">Stripe subscription id</param>
     Task OnSubscriptionDeletedAsync(string subscriptionId);
 
+    /// <summary>
+    /// Deletes the subscription item if it is not in use by any other application.
+    /// </summary>
+    /// <param name="applicationId"></param>
+    /// <param name="subscriptionItemId"></param>
+    Task OnApplicationDeletedAsync(string applicationId, string subscriptionItemId);
+
     Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
 }

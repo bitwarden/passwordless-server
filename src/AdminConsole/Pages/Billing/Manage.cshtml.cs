@@ -2,11 +2,11 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Stripe;
 using Stripe.Checkout;
@@ -14,7 +14,7 @@ using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
 
-public class Manage : PageModel
+public class Manage : BaseExtendedPageModel
 {
     private readonly ISharedBillingService _billingService;
     private readonly IDataService _dataService;
@@ -129,9 +129,9 @@ public class Manage : PageModel
         return Redirect(session.Url);
     }
 
-    public async Task<IActionResult> OnPostChangePlan(string id)
+    public IActionResult OnPostChangePlan(string id)
     {
-        return RedirectToPage("/App/Billing/ChangePlan", new { app = id });
+        return RedirectToApplicationPage("/App/Settings/Settings", new ApplicationPageRoutingContext(id));
     }
 
     public class PricingCardModel
