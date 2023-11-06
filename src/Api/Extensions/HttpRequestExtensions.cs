@@ -5,7 +5,7 @@ namespace Passwordless.Api.Extensions;
 public static class HttpRequestExtensions
 {
     public static string? GetApiSecret(this HttpRequest req) => req.Headers.GetApiSecret();
-    
+
     public static string? GetApiSecret(this IHeaderDictionary headerDictionary) => headerDictionary.GetHeaderValue("ApiSecret");
 
     public static string? GetPublicApiKey(this HttpRequest req) => req.Headers.GetPublicApiKey();
@@ -45,7 +45,7 @@ public static class HttpRequestExtensions
 
     public static string? GetTenantName(this HttpRequest httpRequest) =>
         GetTenantNameFromKey(httpRequest) ?? httpRequest.RouteValues["appId"]?.ToString();
-    
+
 }
 
 
