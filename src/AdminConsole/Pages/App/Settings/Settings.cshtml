@@ -36,7 +36,7 @@
                     @if (plan.CanSubscribe)
                     {
                         <form method="post" asp-page-handler="Cancel">
-                            <input type="hidden" name="plan" value="@plan.Value"/>
+                            <input type="hidden" name="selectedPlan" value="@plan.Value"/>
                             <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">Subscribe</button>
                         </form>
                     }

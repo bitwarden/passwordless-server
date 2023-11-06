@@ -110,18 +110,18 @@ public class SettingsModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostChangePlanAsync(string app, string value)
+    public async Task<IActionResult> OnPostChangePlanAsync(string app, string selectedPlan)
     {
         var organization = await _dataService.GetOrganizationWithDataAsync();
         if (!organization.HasSubscription)
         {
-            return await CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, value);
+            return await CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, selectedPlan);
         }
 
         var application = organization.Applications.SingleOrDefault(x => x.Id == app);
         var existingSubscriptionItemId = application.BillingSubscriptionItemId;
 
-        var plan = _stripeOptions.Plans[value];
+        var plan = _stripeOptions.Plans[selectedPlan];
         var priceId = plan.PriceId!;
         var subscriptionItem = organization.Applications
             .Where(x => x.Id == priceId)
@@ -163,7 +163,7 @@ public class SettingsModel : PageModel
             await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
         }
 
-        await _billingService.UpdateApplicationAsync(app, value, subscriptionItem.Id, priceId);
+        await _billingService.UpdateApplicationAsync(app, selectedPlan, subscriptionItem.Id, priceId);
 
         var updateFeaturesRequest = new SetApplicationFeaturesRequest
         {
