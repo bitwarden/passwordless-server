@@ -51,21 +51,30 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (var app in Model.Applications)
+            @if (Model.Applications.Any())
+            {
+                @foreach (var app in Model.Applications)
+                {
+                    <tr>
+                        <td>@app.Id</td>
+                        <td>@app.Description</td>
+                        <td>@app.Users</td>
+                        <td>@app.Plan</td>
+                        <td asp-if="Model.Organization.HasSubscription">
+                            <form method="post">
+                                <input type="hidden" name="id" value="@app.Id"/>
+                                <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">
+                                    <partial name="Shared/Icons/PencilSquare"/>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>@app.Id</td>
-                    <td>@app.Description</td>
-                    <td>@app.Users</td>
-                    <td>@app.Plan</td>
-                    <td asp-if="Model.Organization.HasSubscription">
-                        <form method="post">
-                            <input type="hidden" name="id" value="@app.Id"/>
-                            <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">
-                                <partial name="Shared/Icons/PencilSquare"/>
-                            </button>
-                        </form>
-                    </td>
+                    <td colspan="5">No applications found.</td>
                 </tr>
             }
             </tbody>

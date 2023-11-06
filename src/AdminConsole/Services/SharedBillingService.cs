@@ -134,6 +134,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         {
             application.BillingPlan = planName;
             application.BillingSubscriptionItemId = lineItem.Id;
+            application.BillingPriceId = lineItem.Price.Id;
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
 

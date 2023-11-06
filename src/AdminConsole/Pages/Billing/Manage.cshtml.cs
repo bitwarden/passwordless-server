@@ -164,7 +164,7 @@ public class Manage : BaseExtendedPageModel
         /// We want to display the price in US dollars.
         /// </summary>
         private static readonly CultureInfo PriceFormat = new("en-US");
-        
+
         /// <summary>
         /// Indicates if the plan is the active plan for the organization.
         /// </summary>

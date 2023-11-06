@@ -119,15 +119,6 @@ public class SettingsModel : PageModel
         var application = organization.Applications.SingleOrDefault(x => x.Id == app);
         var existingSubscriptionItemId = application.BillingSubscriptionItemId;
 
-        var subscriptionItemService = new SubscriptionItemService();
-
-        // Delete subscription item if it's not used by any other application inside this organization.
-        if (!organization.Applications.Any(x => x.Id != app && x.BillingSubscriptionItemId == existingSubscriptionItemId))
-        {
-            var deleteSubscriptionItemOptions = new SubscriptionItemDeleteOptions { ClearUsage = true };
-            await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
-        }
-
         var plan = _stripeOptions.Plans[value];
         var priceId = plan.PriceId!;
         var subscriptionItem = organization.Applications
@@ -142,6 +133,8 @@ public class SettingsModel : PageModel
                 PriceId = x.Key.BillingPriceId!,
                 Id = x.Key.BillingSubscriptionItemId!
             }).SingleOrDefault();
+
+        var subscriptionItemService = new SubscriptionItemService();
 
         // Create subscription item if it doesn't exist.
         if (subscriptionItem == null)
@@ -159,6 +152,13 @@ public class SettingsModel : PageModel
                 PriceId = createSubscriptionItemResult.Price.Id,
                 Id = createSubscriptionItemResult.Id
             };
+        }
+
+        // Delete subscription item if it's not used by any other application inside this organization.
+        if (!organization.Applications.Any(x => x.Id != app && x.BillingSubscriptionItemId == existingSubscriptionItemId))
+        {
+            var deleteSubscriptionItemOptions = new SubscriptionItemDeleteOptions { ClearUsage = true };
+            await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
         }
 
         await _billingService.UpdateApplicationAsync(app, value, subscriptionItem.Id, priceId);
