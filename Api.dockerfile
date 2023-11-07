@@ -1,5 +1,8 @@
-LABEL description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
-LABEL org.opencontainers.image.source=https://github.com/passwordless/passwordless-server
+LABEL org.opencontainers.image.title="Passwordless API Test Server"
+LABEL org.opencontainers.image.description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
+LABEL org.opencontainers.image.authors="Bitwarden"
+LABEL org.opencontainers.image.url="https://github.com/passwordless/passwordless-server"
+LABEL org.opencontainers.image.source="https://github.com/passwordless/passwordless-server/blob/main/Api.dockerfile"
 
 # ** Build
 
