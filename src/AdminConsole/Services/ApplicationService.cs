@@ -74,7 +74,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         var rows = await db.SaveChangesAsync();
         if (rows > 0 && application.BillingSubscriptionItemId != null)
         {
-            await _billingService.OnApplicationDeletedAsync(applicationId, application.BillingSubscriptionItemId);
+            await _billingService.OnPostApplicationDeletedAsync(application.BillingSubscriptionItemId);
         }
     }
 

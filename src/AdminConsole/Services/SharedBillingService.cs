@@ -15,14 +15,17 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     private readonly IPasswordlessManagementClient _passwordlessClient;
     private readonly ILogger<SharedBillingService<TDbContext>> _logger;
     private readonly StripeOptions _stripeOptions;
+    private readonly IDataService _dataService;
 
     public SharedBillingService(
         IDbContextFactory<TDbContext> dbContextFactory,
+        IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions)
     {
         _dbContextFactory = dbContextFactory;
+        _dataService = dataService;
         _passwordlessClient = passwordlessClient;
         _logger = logger;
         _stripeOptions = stripeOptions.Value;
@@ -185,16 +188,29 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     }
 
     /// <inheritdoc />
-    public async Task OnApplicationDeletedAsync(
-        string applicationId,
-        string subscriptionItemId)
+    public async Task OnPostApplicationDeletedAsync(string subscriptionItemId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var isSubscriptionItemInUse = await db.Applications.AnyAsync(x => x.BillingSubscriptionItemId == subscriptionItemId && x.Id != applicationId);
+        var organization = await _dataService.GetOrganizationWithDataAsync();
+        var isSubscriptionItemInUse = organization.Applications.Any(x => x.BillingSubscriptionItemId == subscriptionItemId);
         if (!isSubscriptionItemInUse)
         {
-            var subscriptionItemService = new SubscriptionItemService();
-            await subscriptionItemService.DeleteAsync(subscriptionItemId);
+            if (organization.Applications.Any())
+            {
+                // If we have applications, then we can delete the subscription item,
+                // as Stripe requires at least one active subscription item in a subscription.
+                var service = new SubscriptionItemService();
+                await service.DeleteAsync(subscriptionItemId);
+            }
+            else
+            {
+                var subscriptionItemService = new SubscriptionItemService();
+                var subscriptionItem = await subscriptionItemService.GetAsync(subscriptionItemId);
+                var subscriptionService = new SubscriptionService();
+                var cancelOptions = new SubscriptionCancelOptions();
+                cancelOptions.Prorate = false;
+                cancelOptions.InvoiceNow = true;
+                await subscriptionService.CancelAsync(subscriptionItem.Subscription);
+            }
         }
     }
 

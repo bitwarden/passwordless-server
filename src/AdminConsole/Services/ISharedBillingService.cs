@@ -45,11 +45,12 @@ public interface ISharedBillingService
     Task OnSubscriptionDeletedAsync(string subscriptionId);
 
     /// <summary>
-    /// Deletes the subscription item if it is not in use by any other application.
+    /// Triggered after an application was deleted.
+    /// Responsible for:
+    /// - Deleting the subscription item in Stripe if it's not used by any other application inside this organization.
     /// </summary>
-    /// <param name="applicationId"></param>
     /// <param name="subscriptionItemId"></param>
-    Task OnApplicationDeletedAsync(string applicationId, string subscriptionItemId);
+    Task OnPostApplicationDeletedAsync(string subscriptionItemId);
 
     Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
 }
