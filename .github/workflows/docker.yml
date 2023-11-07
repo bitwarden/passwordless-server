@@ -39,7 +39,7 @@ jobs:
           --file ${{ matrix.app }}.dockerfile
           --platform linux/amd64,linux/arm64
           --push
-          --tag ghcr.io/passwordless/api-test-server:latest
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/api-test-server:$GITHUB_REF_NAME' || '' }}
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/api-test-server:stable' || '' }}
+          --tag ghcr.io/passwordless/passwordless-test-api:latest
+          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/passwordless-test-api:$GITHUB_REF_NAME' || '' }}
+          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/passwordless-test-api:stable' || '' }}
           .
