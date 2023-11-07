@@ -1,9 +1,3 @@
-LABEL org.opencontainers.image.title="Passwordless API Test Server"
-LABEL org.opencontainers.image.description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
-LABEL org.opencontainers.image.authors="Bitwarden"
-LABEL org.opencontainers.image.url="https://github.com/passwordless/passwordless-server"
-LABEL org.opencontainers.image.source="https://github.com/passwordless/passwordless-server/blob/main/Api.dockerfile"
-
 # ** Build
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
@@ -30,6 +24,13 @@ RUN dotnet publish src/Api/ \
 
 # Use `runtime-deps` instead of `runtime` because we have a self-contained assembly
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:7.0-alpine AS run
+
+LABEL org.opencontainers.image.title="Passwordless API Test Server"
+LABEL org.opencontainers.image.description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
+LABEL org.opencontainers.image.authors="Bitwarden"
+LABEL org.opencontainers.image.url="https://github.com/passwordless/passwordless-server"
+LABEL org.opencontainers.image.source="https://github.com/passwordless/passwordless-server/blob/main/Api.dockerfile"
+
 WORKDIR /opt/pwdls/
 
 EXPOSE 80
