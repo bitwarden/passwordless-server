@@ -1,3 +1,5 @@
+LABEL description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
+
 # ** Build
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
