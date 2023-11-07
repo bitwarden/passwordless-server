@@ -45,13 +45,10 @@ public static class HttpRequestExtensions
 
     public static string? GetTenantName(this HttpRequest httpRequest) =>
         GetTenantNameFromKey(httpRequest) ?? httpRequest.RouteValues["appId"]?.ToString();
-
 }
-
 
 public static class Helpers
 {
-
     public static (string deviceInfo, string country) GetDeviceInfo(HttpRequest req)
     {
         var uap = Parser.GetDefault();
