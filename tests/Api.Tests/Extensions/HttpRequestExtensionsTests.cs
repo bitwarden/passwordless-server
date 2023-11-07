@@ -24,17 +24,17 @@ public class HttpRequestExtensionsTests
 
         actual.Should().BeNull();
     }
-    
+
     [Fact]
     public void GetApiSecret_GivenHeaderDictionary_WhenApiSecretIsNotPresent_ThenNullShouldReturn()
     {
         var headers = new HeaderDictionary { { "SomeKey", "SomeValue" } };
-        
+
         var actual = headers.GetApiSecret();
 
         actual.Should().BeNull();
     }
-    
+
     [Fact]
     public void GetPublicApiKey_GivenHeaderDictionary_WhenPublicKeyHeaderExists_ThenTenantSecretValueShouldReturn()
     {
@@ -53,12 +53,12 @@ public class HttpRequestExtensionsTests
 
         actual.Should().BeNull();
     }
-    
+
     [Fact]
     public void GetPublicApiKey_GivenHeaderDictionary_WhenPublicKeyIsNotPresent_ThenNullShouldReturn()
     {
         var headers = new HeaderDictionary { { "SomeKey", "SomeValue" } };
-        
+
         var actual = headers.GetPublicApiKey();
 
         actual.Should().BeNull();
