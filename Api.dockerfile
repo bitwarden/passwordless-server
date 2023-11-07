@@ -1,6 +1,11 @@
 # ** Build
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+
+# Expose the target architecture set by the `docker build --platform` option, so that
+# we can build the assembly for the correct platform.
+ARG TARGETARCH
+
 WORKDIR /tmp/pwdls/
 
 COPY Directory.Build.props ./
@@ -12,12 +17,13 @@ RUN dotnet publish src/Api/ \
     --configuration Release \
     --self-contained \
     --use-current-runtime \
+    --arch $TARGETARCH \
     --output src/Api/bin/publish/
 
 # ** Run
 
 # Use `runtime-deps` instead of `runtime` because we have a self-contained assembly
-FROM mcr.microsoft.com/dotnet/runtime-deps:7.0-alpine AS run
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:7.0-alpine AS run
 WORKDIR /opt/pwdls/
 
 EXPOSE 80
