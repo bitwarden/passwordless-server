@@ -10,8 +10,7 @@
                 <th>Id</th>
                 <th>Description</th>
                 <th>Users</th>
-                <th>Plan</th>
-                <th asp-if="Model.Organization.HasSubscription">Actions</th>
+                <th colspan="2">Plan</th>
             </tr>
             </thead>
             <tbody>
@@ -24,7 +23,7 @@
                         <td>@app.Description</td>
                         <td>@app.Users</td>
                         <td>@app.Plan</td>
-                        <td asp-if="Model.Organization.HasSubscription">
+                        <td>
                             <form method="post">
                                 <input type="hidden" name="id" value="@app.Id"/>
                                 <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">
