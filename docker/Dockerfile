@@ -2,7 +2,7 @@
 ###############################################
 #                 Build stage                 #
 ###############################################
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-bookworm-slim AS dotnet-build
 
 # Docker buildx supplies the value for this arg
 ARG TARGETPLATFORM
@@ -61,7 +61,7 @@ RUN . /tmp/rid.txt && dotnet publish -c release -o /app/Api --no-restore --no-se
 ###############################################
 #                  App stage                  #
 ###############################################
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-bookworm-slim
 ARG TARGETPLATFORM
 LABEL com.bitwarden.product="bitwarden"
 LABEL com.bitwarden.project="passwordless"
