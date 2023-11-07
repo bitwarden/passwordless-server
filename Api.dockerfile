@@ -1,4 +1,5 @@
 LABEL description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
+LABEL org.opencontainers.image.source=https://github.com/passwordless/passwordless-server
 
 # ** Build
 
