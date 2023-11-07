@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   release:
     types:
       - published
@@ -37,7 +40,7 @@ jobs:
         run: >
           docker buildx build
           --file ${{ matrix.app }}.dockerfile
-          --platform linux/amd64,linux/arm64
+          --platform linux/amd64,linux/arm64,windows/amd64
           --push
           --tag ghcr.io/passwordless/api-test-server:latest
           ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/api-test-server:$GITHUB_REF_NAME' || '' }}
