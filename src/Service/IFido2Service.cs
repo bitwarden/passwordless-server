@@ -1,6 +1,5 @@
 using Fido2NetLib;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
 

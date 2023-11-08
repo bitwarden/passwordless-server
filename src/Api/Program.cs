@@ -125,7 +125,7 @@ else
         () =>
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
-
+    
 if (isSelfHosted)
 {
     app.UseMiddleware<HttpOverridesMiddleware>();

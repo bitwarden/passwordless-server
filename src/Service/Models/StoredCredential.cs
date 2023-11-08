@@ -26,4 +26,10 @@ public class StoredCredential
         }
         private set { }
     }
+
+    public bool? BackupState { get; set; }
+
+    public bool? IsBackupEligible { get; set; }
+
+    public Discoverability Discoverability { get; set; }
 }

@@ -1,8 +1,7 @@
 using System.Text;
 using Fido2NetLib.Objects;
-using Passwordless.Service.Models;
 
-namespace Passwordless.Service.Storage.Ef;
+namespace Passwordless.Service.Models;
 
 public class EFStoredCredential : PerTenant
 {
@@ -21,7 +20,6 @@ public class EFStoredCredential : PerTenant
     public string Country { get; set; }
     public string Device { get; set; }
     public string Nickname { get; set; }
-
     public string UserId
     {
         get
@@ -30,6 +28,9 @@ public class EFStoredCredential : PerTenant
         }
         private set { }
     }
+    public bool? BackupState { get; set; }
+    public bool? IsBackupEligible { get; set; }
+    public Discoverability Discoverability { get; set; }
 
     internal StoredCredential ToStoredCredential()
     {
@@ -47,7 +48,10 @@ public class EFStoredCredential : PerTenant
             Origin = Origin,
             Country = Country,
             Device = Device,
-            Nickname = Nickname
+            Nickname = Nickname,
+            BackupState = BackupState,
+            IsBackupEligible = IsBackupEligible,
+            Discoverability = Discoverability
         };
     }
 
@@ -70,13 +74,10 @@ public class EFStoredCredential : PerTenant
             Nickname = s.Nickname,
             DescriptorId = s.Descriptor.Id,
             DescriptorTransports = s.Descriptor.Transports,
-            DescriptorType = s.Descriptor.Type
+            DescriptorType = s.Descriptor.Type,
+            BackupState = s.BackupState,
+            IsBackupEligible = s.IsBackupEligible,
+            Discoverability = s.Discoverability
         };
     }
 }
-
-// StoredCredentials
-// Aliases
-// AdminUsers + roles
-// ApiKeys
-// EpmeralKeys

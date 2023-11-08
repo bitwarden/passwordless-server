@@ -216,6 +216,14 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         var now = DateTime.UtcNow;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
+
+        Discoverability discoverability = request.Response.Extensions.CredProps?.Rk switch
+        {
+            true => Discoverability.Yes,
+            false => Discoverability.No,
+            _ => Discoverability.Unknown
+        };
+
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
             Descriptor = descriptor,
@@ -230,7 +238,10 @@ public class Fido2ServiceEndpoints : IFido2Service
             AaGuid = success.Result.AaGuid,
             RPID = request.RPID,
             Origin = request.Origin,
-            Nickname = request.Nickname
+            Nickname = request.Nickname,
+            BackupState = success.Result.IsBackedUp,
+            IsBackupEligible = success.Result.IsBackupEligible,
+            Discoverability = discoverability,
         });
 
         var tokenData = new VerifySignInToken()
