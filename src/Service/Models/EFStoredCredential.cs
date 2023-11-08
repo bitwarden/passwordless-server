@@ -29,8 +29,10 @@ public class EFStoredCredential : PerTenant
         private set { }
     }
     public bool? BackupState { get; set; }
+    
     public bool? IsBackupEligible { get; set; }
-    public Discoverability Discoverability { get; set; }
+    
+    public bool? IsDiscoverable { get; set; }
 
     internal StoredCredential ToStoredCredential()
     {
@@ -51,7 +53,7 @@ public class EFStoredCredential : PerTenant
             Nickname = Nickname,
             BackupState = BackupState,
             IsBackupEligible = IsBackupEligible,
-            Discoverability = Discoverability
+            IsDiscoverable = IsDiscoverable
         };
     }
 
@@ -77,7 +79,7 @@ public class EFStoredCredential : PerTenant
             DescriptorType = s.Descriptor.Type,
             BackupState = s.BackupState,
             IsBackupEligible = s.IsBackupEligible,
-            Discoverability = s.Discoverability
+            IsDiscoverable = s.IsDiscoverable
         };
     }
 }

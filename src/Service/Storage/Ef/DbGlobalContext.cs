@@ -31,7 +31,6 @@ public abstract class DbGlobalContext : DbContext
             b.Property(x => x.DescriptorTransports).HasConversion(
                 v => JsonSerializer.Serialize(v, jsonOptions),
                 v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions));
-            b.Property(x => x.Discoverability).HasDefaultValue(Discoverability.Unknown);
         });
 
         modelBuilder.Entity<TokenKey>()

@@ -31,5 +31,5 @@ public class StoredCredential
 
     public bool? IsBackupEligible { get; set; }
 
-    public Discoverability Discoverability { get; set; }
+    public bool? IsDiscoverable { get; set; }
 }

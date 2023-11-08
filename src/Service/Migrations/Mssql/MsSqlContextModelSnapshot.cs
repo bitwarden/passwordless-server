@@ -155,12 +155,10 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<string>("Device")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Discoverability")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(-1);
-
                     b.Property<bool?>("IsBackupEligible")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsDiscoverable")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("LastUsedAt")

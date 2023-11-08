@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Passwordless.Service.Migrations.Sqlite
+namespace Passwordless.Service.Migrations.Mssql
 {
     /// <inheritdoc />
     public partial class AddCredProps : Migration
@@ -13,20 +13,19 @@ namespace Passwordless.Service.Migrations.Sqlite
             migrationBuilder.AddColumn<bool>(
                 name: "BackupState",
                 table: "Credentials",
-                type: "INTEGER",
+                type: "bit",
                 nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "Discoverability",
-                table: "Credentials",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: -1);
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsBackupEligible",
                 table: "Credentials",
-                type: "INTEGER",
+                type: "bit",
+                nullable: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "IsDiscoverable",
+                table: "Credentials",
+                type: "bit",
                 nullable: true);
         }
 
@@ -38,11 +37,11 @@ namespace Passwordless.Service.Migrations.Sqlite
                 table: "Credentials");
 
             migrationBuilder.DropColumn(
-                name: "Discoverability",
+                name: "IsBackupEligible",
                 table: "Credentials");
 
             migrationBuilder.DropColumn(
-                name: "IsBackupEligible",
+                name: "IsDiscoverable",
                 table: "Credentials");
         }
     }

@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20231108085421_AddCredProps")]
+    [Migration("20231108124617_AddCredProps")]
     partial class AddCredProps
     {
         /// <inheritdoc />
@@ -153,12 +153,10 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<string>("Device")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Discoverability")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(-1);
-
                     b.Property<bool?>("IsBackupEligible")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("IsDiscoverable")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastUsedAt")
