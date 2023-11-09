@@ -8,76 +8,61 @@
     ViewData["Title"] = "Getting Started";
 }
 
-<p class="mb-3">Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="underline">documentation</a>.</p>
+<p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="underline">documentation</a>.</p>
 
-<div class="bg-white shadow sm:rounded-lg">
-    <div class="px-4 py-5 sm:p-6" id="apikeys">
-        <h3 class="text-base font-semibold leading-6 text-gray-900">1. Your API Keys</h3>
-        <div class="mt-2 max-w-xl text-sm text-gray-500">
-            <p>Here are your API keys. You will use these to access the Passwordless api. The Api Key is used client side and is safe to share, while the ApiSecret is used on your backend and should never be exposed.</p>
-        </div>
-
-        <div class="mt-5 max-w-3xl  rounded-md bg-gray-50 px-6 py-5 sm:flex sm:items-start sm:justify-between">
-            <div class="sm:flex sm:items-start">
-                <div class="mt-3 sm:ml-4 sm:mt-0">
-                    <copy-text title="API Url" value="@Options.Value.ApiUrl"></copy-text>
-                    <copy-text title="Public API Key" value="@Model.Onboarding.ApiKey"></copy-text>
-                    <copy-text title="Private API Key" value="@Model.Onboarding.ApiSecret" type="password"></copy-text>
-                    <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
-                </div>
-            </div>
-            <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
-                <button @@click="onSave" type="button" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">🔒 Download</button>
+<panel header="1. Your API Keys">
+    <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Here are your API keys. You will use these to access the Passwordless api. The Api Key is used client side and is safe to share, while the ApiSecret is used on your backend and should never be exposed.</p>
+    </div>
+    
+    <div class="mt-5 max-w-3xl rounded-md bg-gray-50 px-6 py-5 sm:flex sm:items-start sm:justify-between">
+        <div class="sm:flex sm:items-start">
+            <div class="mt-3 sm:ml-4 sm:mt-0">
+                <copy-text title="API Url" value="@Options.Value.ApiUrl"></copy-text>
+                <copy-text title="Public API Key" value="@Model.Onboarding.ApiKey"></copy-text>
+                <copy-text title="Private API Key" value="@Model.Onboarding.ApiSecret" type="password"></copy-text>
+                <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
             </div>
         </div>
-
-    </div>
-</div>
-
-<div class="mt-5 bg-white shadow sm:rounded-lg">
-    <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-base font-semibold leading-6 text-gray-900">2. Backend language</h3>
-        <div class="mt-2 max-w-xl text-sm text-gray-500">
-            <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we've made official packages, sdks and examples.</p>
-        </div>
-
-        <div id="backend"></div>
-
-        <div class="mt-6 flex gap-10">
-            <a target="_blank" href="https://docs.passwordless.dev/guide/backend.html" class="text-sm font-semibold text-primary-700">View the backend examples <span aria-hidden="true">&rarr;</span></a>
-            <a target="_blank" href="https://docs.passwordless.dev/guide/api.html" class="text-sm font-semibold text-primary-700">Read the API docs <span aria-hidden="true">&rarr;</span></a>
+        <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
+            <button @@click="onSave" type="button" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">🔒 Download</button>
         </div>
     </div>
-</div>
+</panel>
 
-<div class="mt-5 bg-white shadow sm:rounded-lg">
-    <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-base font-semibold leading-6 text-gray-900">3. Frontend framework</h3>
-        <div class="mt-2 max-w-xl text-sm text-gray-500">
-            <p>Passwordless.dev uses a little bit of javascript and html. It works regardless if you're using a framework or not! For some frameworks, we've made official packages, sdks and examples.</p>
-        </div>
-
-        <div id="frontend"></div>
-
-        <div class="mt-6 flex">
-            <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="text-sm font-semibold text-primary-700">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
-        </div>
+<panel header="2. Backend language">
+    <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we've made official packages, sdks and examples.</p>
     </div>
-</div>
-
-<h2 class="mt-16 text-xl font-semibold text-gray-900 mb-8">Let's start coding!</h2>
-
-<div class="mt-5 bg-white shadow sm:rounded-lg">
-    <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-base font-semibold leading-6 text-gray-900">4. Follow our Getting Started guide</h3>
-        <div class="mt-2 max-w-xl text-sm text-gray-500">
-            <p>Please take a look at our Getting Started guide to learn how register your first credential. Or you can use the <a class="link-blue"href="@Url.Page("/app/playground/client")">Playground</a> here in the admin console to experiment.</p>
-        </div>
-        <div class="mt-6 flex">
-            <a target="_blank" href="https://docs.passwordless.dev/guide/get-started.html" class="text-sm font-semibold text-primary-700">View the Getting Started guide <span aria-hidden="true">&rarr;</span></a>
-        </div>
+    
+    <div id="backend"></div>
+    
+    <div class="mt-6 flex gap-10">
+        <a target="_blank" href="https://docs.passwordless.dev/guide/backend.html" class="text-sm font-semibold text-primary-700">View the backend examples <span aria-hidden="true">&rarr;</span></a>
+        <a target="_blank" href="https://docs.passwordless.dev/guide/api.html" class="text-sm font-semibold text-primary-700">Read the API docs <span aria-hidden="true">&rarr;</span></a>
     </div>
-</div>
+</panel>
+
+<panel header="3. Frontend framework">
+    <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Passwordless.dev uses a little bit of javascript and html. It works regardless if you're using a framework or not! For some frameworks, we've made official packages, sdks and examples.</p>
+    </div>
+    
+    <div id="frontend"></div>
+    
+    <div class="mt-6 flex">
+        <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="text-sm font-semibold text-primary-700">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
+    </div>
+</panel>
+
+<panel header="4. Let's start coding!">
+    <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Please take a look at our Getting Started guide to learn how register your first credential. Or you can use the <a class="link-blue"href="@Url.Page("/app/playground/client")">Playground</a> here in the admin console to experiment.</p>
+    </div>
+    <div class="mt-6 flex">
+        <a target="_blank" href="https://docs.passwordless.dev/guide/get-started.html" class="text-sm font-semibold text-primary-700">View the Getting Started guide <span aria-hidden="true">&rarr;</span></a>
+    </div>
+</panel>
 
 @section Scripts
 {
