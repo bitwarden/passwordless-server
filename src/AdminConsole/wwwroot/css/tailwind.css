@@ -589,6 +589,47 @@ video {
   }
 }
 
+.panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
+.panel {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+@media (min-width: 640px) {
+  .panel {
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+}
+
+.panel-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-content > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
 .btn {
   border-radius: 0.25rem;
   padding-top: 0.25rem;
@@ -2017,10 +2058,6 @@ label.form-label {
 
 .pr-3 {
   padding-right: 0.75rem;
-}
-
-.pt-0 {
-  padding-top: 0px;
 }
 
 .pt-1 {

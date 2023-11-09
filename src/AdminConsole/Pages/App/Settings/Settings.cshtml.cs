@@ -115,7 +115,11 @@ public class SettingsModel : PageModel
         var organization = await _dataService.GetOrganizationWithDataAsync();
         if (!organization.HasSubscription)
         {
-            return await CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, selectedPlan);
+            var successUrl = Url.PageLink("/Billing/Success");
+            successUrl += "?session_id={CHECKOUT_SESSION_ID}";
+            var cancelUrl = Url.PageLink("/Billing/Cancelled");
+            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), selectedPlan, successUrl, cancelUrl);
+            return Redirect(sessionUrl);
         }
 
         var application = organization.Applications.SingleOrDefault(x => x.Id == app);

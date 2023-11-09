@@ -67,6 +67,21 @@ public class Manage : BaseExtendedPageModel
         }
     }
 
+    public async Task<IActionResult> OnPostUpgradePro()
+    {
+        var organization = await _dataService.GetOrganizationWithDataAsync();
+        if (!organization.HasSubscription)
+        {
+            var successUrl = Url.PageLink("/Billing/Success");
+            successUrl += "?session_id={CHECKOUT_SESSION_ID}";
+            var cancelUrl = Url.PageLink("/Billing/Cancelled");
+            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), PlanConstants.Pro, successUrl, cancelUrl);
+            return Redirect(sessionUrl);
+        }
+
+        throw new InvalidOperationException("Organization already has a subscription.");
+    }
+
     public async Task<IActionResult> OnPostManage()
     {
         var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);

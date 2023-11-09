@@ -53,4 +53,12 @@ public interface ISharedBillingService
     Task OnPostApplicationDeletedAsync(string subscriptionItemId);
 
     Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
+
+    Task<string> CreateCheckoutSessionAsync(
+        int organizationId,
+        string? billingCustomerId,
+        string email,
+        string planName,
+        string successUrl,
+        string cancelUrl);
 }

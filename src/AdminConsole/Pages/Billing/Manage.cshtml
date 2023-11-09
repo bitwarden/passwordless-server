@@ -1,20 +1,15 @@
 @page
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
-<div id="applications-list">
-    <div class="mb-5 overflow-hidden rounded-lg bg-white shadow">
-        <h3 class="px-4">Upgrade to add multiple applications</h3>
+<panel header="Upgrade to add multiple applications">
+    <p>Your Free Organization includes 1 Trial app (up to 10k users) and 1 console administrator. </p>
+    <form method="post">
+        <button asp-page-handler="UpgradePro" class="btn-primary" type="submit">Upgrade to a Paid Organization</button>
+    </form>
+    <p class="text-xs">Your Trial app will be upgraded to a Pro app. Estimated variable cost $@(Math.Round(Model.Applications.Select(a => a.Users).Sum() * 0.05, 2))/month. See <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing">Pricing page</a> for details.</p>
+</panel>
 
-        <div class="px-4 pt-0 p-5">
-            <p>Your Free Organization includes 1 Trial app (up to 10k users) and 1 console administrator. </p>
-            <p></p>
-            <form action="" method="post">
-                <button class="btn-primary my-3 textbase" type="submit">Upgrade to a Paid Organization</button>
-                <p class="text-xs">Your Trial app will be upgraded to a Pro app. Estimated variable cost $@(Math.Round(Model.Applications.Select(a => a.Users).Sum() * 0.05,2))/month. See <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing">Pricing page</a> for details.</p>
-            </form>
-        </div>
-    </div>
-    <h2>Applications</h2>
+<panel header="Applications">
     <div class="table-container">
         <table class="tbl-default min-w-full">
             <thead>
@@ -55,43 +50,46 @@
             </tbody>
         </table>
     </div>
-</div>
-<div id="subscription-admin" asp-if="Model.Organization.HasSubscription">
-    <h2>Payment methods</h2>
-    <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1">
-        <p>Manage &amp; update your payment information and billing details.</p>
-        <form method="post">
-            <button asp-page-handler="Manage" type="submit" class="btn-primary">Update payment methods</button>
-        </form>
-        <div class="table-container">
-            <table class="tbl-default min-w-full">
-                <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Number</th>
-                    <th>Expiration Date</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var paymentMethod in Model.PaymentMethods)
-                {
+</panel>
+
+@if (Model.Organization.HasSubscription)
+{
+    <panel header="Payment Methods">
+        <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1">
+            <p>Manage &amp; update your payment information and billing details.</p>
+            <form method="post">
+                <button asp-page-handler="Manage" type="submit" class="btn-primary">Update payment methods</button>
+            </form>
+            <div class="table-container">
+                <table class="tbl-default min-w-full">
+                    <thead>
                     <tr>
-                        <td class="w-5">
-                            <partial name="@paymentMethod.CardIcon"/>
-                        </td>
-                        <td>@paymentMethod.Number</td>
-                        @if (paymentMethod.ExpirationDate < DateTime.UtcNow.AddMonths(-1))
-                        {
-                            <td>@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
-                        }
-                        else
-                        {
-                            <td class="text-danger">@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
-                        }
+                        <th>Type</th>
+                        <th>Number</th>
+                        <th>Expiration Date</th>
                     </tr>
-                }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @foreach (var paymentMethod in Model.PaymentMethods)
+                    {
+                        <tr>
+                            <td class="w-5">
+                                <partial name="@paymentMethod.CardIcon"/>
+                            </td>
+                            <td>@paymentMethod.Number</td>
+                            @if (paymentMethod.ExpirationDate < DateTime.UtcNow.AddMonths(-1))
+                            {
+                                <td>@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
+                            }
+                            else
+                            {
+                                <td class="text-danger">@paymentMethod.ExpirationDate.ToString("MM/yyyy")</td>
+                            }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-</div>
+    </panel>
+}

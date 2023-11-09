@@ -6,6 +6,7 @@ using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Stripe;
+using Stripe.Checkout;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -185,6 +186,56 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
                 .SetProperty(p => p.BillingPlan, plan)
                 .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
                 .SetProperty(p => p.BillingPriceId, priceId));
+    }
+
+    public async Task<string> CreateCheckoutSessionAsync(
+        int organizationId,
+        string? billingCustomerId,
+        string email,
+        string planName,
+        string successUrl,
+        string cancelUrl)
+    {
+        if (_stripeOptions.Plans.All(x => x.Key != planName))
+        {
+            throw new ArgumentException("Invalid plan name");
+        }
+
+        var options = new SessionCreateOptions
+        {
+            Metadata =
+                new Dictionary<string, string>
+                {
+                    { "orgId", organizationId.ToString() },
+                    { "passwordless", "passwordless" }
+                },
+            ClientReferenceId = organizationId.ToString(),
+            SuccessUrl = successUrl,
+            CancelUrl = cancelUrl,
+            Mode = "subscription",
+            LineItems = new List<SessionLineItemOptions>
+            {
+                new()
+                {
+                    Price = _stripeOptions.Plans[planName].PriceId,
+                }
+            }
+        };
+
+        if (billingCustomerId != null)
+        {
+            options.Customer = billingCustomerId;
+        }
+        else
+        {
+            options.TaxIdCollection = new SessionTaxIdCollectionOptions { Enabled = true, };
+            options.CustomerEmail = email;
+        }
+
+        var service = new SessionService();
+        Session? session = await service.CreateAsync(options);
+
+        return session.Url;
     }
 
     /// <inheritdoc />
