@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Identity;
-using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.MagicLinks;
 
 namespace Passwordless.AdminConsole.Pages.Account;
 
