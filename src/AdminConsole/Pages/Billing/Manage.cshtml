@@ -2,6 +2,18 @@
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
 <div id="applications-list">
+    <div class="mb-5 overflow-hidden rounded-lg bg-white shadow">
+        <h3 class="px-4">Upgrade to add multiple applications</h3>
+
+        <div class="px-4 pt-0 p-5">
+            <p>Your Free Organization includes 1 Trial app (up to 10k users) and 1 console administrator. </p>
+            <p></p>
+            <form action="" method="post">
+                <button class="btn-primary my-3 textbase" type="submit">Upgrade to a Paid Organization</button>
+                <p class="text-xs">Your Trial app will be upgraded to a Pro app. Estimated variable cost $@(Math.Round(Model.Applications.Select(a => a.Users).Sum() * 0.05,2))/month. See <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing">Pricing page</a> for details.</p>
+            </form>
+        </div>
+    </div>
     <h2>Applications</h2>
     <div class="table-container">
         <table class="tbl-default min-w-full">
