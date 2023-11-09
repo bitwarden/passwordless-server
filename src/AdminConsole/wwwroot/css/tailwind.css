@@ -849,7 +849,7 @@ h3 {
 }
 
 .link-blue:visited {
-  color: rgb(147 51 234 );
+  color: rgb(37 99 235 );
 }
 
 .link-blue:hover {
@@ -929,7 +929,7 @@ table.tbl-default a {
 }
 
 table.tbl-default a:visited {
-  color: rgb(147 51 234 );
+  color: rgb(37 99 235 );
 }
 
 table.tbl-default a:hover {
@@ -1927,11 +1927,6 @@ table.tbl-default a {
 .text-primary-500 {
   --tw-text-opacity: 1;
   color: rgb(var(--color-primary-500) / var(--tw-text-opacity));
-}
-
-.text-primary-700 {
-  --tw-text-opacity: 1;
-  color: rgb(var(--color-primary-700) / var(--tw-text-opacity));
 }
 
 .text-red-700 {
