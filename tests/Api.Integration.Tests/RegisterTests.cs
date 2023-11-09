@@ -77,7 +77,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
     {
         const string originUrl = "https://bitwarden.com/products/passwordless/";
         const string rpId = "bitwarden.com";
-        
+
         var tokenRequest = _tokenGenerator.Generate();
         var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
@@ -91,7 +91,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
         var registrationBeginResponse = await _client
             .AddPublicKey()
             .PostAsJsonAsync("/register/begin", registrationBeginRequest);
-        
+
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
         var virtualAuth = new VirtualAuthenticatorOptions()
@@ -109,7 +109,11 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
 
         var resultString = result?.ToString() ?? string.Empty;
 
-        var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString);
+        var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
         var registerCompleteResponse = await _client.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
             Origin = originUrl,
@@ -120,7 +124,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
 
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var registerCompleteToken = await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
-        registerCompleteToken!.Token.Should().StartWith("register_");
+        registerCompleteToken!.Token.Should().StartWith("verify_");
     }
 
     private static string GetScript(string jsonResponse) => $$"""
