@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 @layer components {
+    .page-header-container {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+    }
+
+    .page-content-container {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col space-y-4;
+    }
+
     .btn {
         @apply rounded py-1 px-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
     }
@@ -36,13 +44,16 @@
     }
 
     .h2, h2 {
-        @apply text-2xl font-semibold text-gray-900 mb-3 mt-3
+        @apply text-2xl font-semibold text-gray-900 leading-6;
+    }
+
+    h3 {
+        @apply text-base font-semibold text-gray-900 leading-6;
     }
 
     h3 {
         @apply text-xl font-semibold text-gray-900 mb-3 mt-3
     }
-
     .input-validation-error {
         @apply text-red-900 focus:outline-none ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6
     }
@@ -56,13 +67,12 @@
     }
 
     .link-blue {
-        @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
+        @apply no-underline text-blue-600 hover:text-blue-800 visited:text-blue-600
     }
     
     .text-danger {
         @apply text-red-600;
     }
-
     table.tbl-default {
         @apply divide-y divide-gray-300
     }
