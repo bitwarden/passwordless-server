@@ -2,6 +2,12 @@
 @using Passwordless.AdminConsole.Helpers
 @inject IOptions<PasswordlessOptions> Options
 
+@{
+    var hasCredentialAddFeedback = Context.Request.Query.ContainsKey("CredentialAddStatus");
+    var credentialAddStatus = Context.Request.Query["CredentialAddStatus"];
+    var credentialAddMessage = Context.Request.Query["CredentialAddMessage"];
+}
+
 <div id="addPasskeysPanel">
     <form v-on:submit="registerCredential">
         <fieldset id="registerCredentialFields">
@@ -18,9 +24,9 @@
         </fieldset>
     </form>
 
-    <div class="status mt-3" v-cloak>
-        <SuccessAlertBox v-if="feedback.status =='completed'" message="{{feedback.message}}"></SuccessAlertBox>
-        <DangerAlertBox v-if="feedback.status == 'error'" message="{{feedback.message}}"></DangerAlertBox>
+    <div asp-if="hasCredentialAddFeedback" class="status mt-3" v-cloak>
+        <success-alert-box asp-if="@(credentialAddStatus == "completed")" message="@credentialAddMessage"></success-alert-box>
+        <danger-alert-box asp-if="@(credentialAddStatus == "error")" message="@credentialAddMessage"></danger-alert-box>
     </div>
 </div>
 
@@ -44,6 +50,30 @@
             });
             
             const working = ref(false);
+            
+            const removeQueryParams = (url, paramsToRemove) => {
+                let urlParts = url.split('?');
+                if (urlParts.length >= 2) {
+                    let baseUrl = urlParts[0];
+                    let queryParams = urlParts[1].split('&');
+            
+                    // Filter out the parameters to remove
+                    queryParams = queryParams.filter(param => {
+                        let key = param.split('=')[0];
+                        return !paramsToRemove.includes(key);
+                    });
+            
+                    // Reconstruct the URL
+                    if (queryParams.length > 0) {
+                        url = baseUrl + '?' + queryParams.join('&');
+                    } else {
+                        url = baseUrl;
+                    }
+                }
+            
+                return url;
+            }
+            
             const registerCredential = async (e) => {
                 e.preventDefault();
                 if (working.value) return;
@@ -71,7 +101,7 @@
                             feedback.message = "Passkey added successfully";
                         } else {
                             feedback.status = "error";
-                            if (error.from == "client" && !error.erroCode) {
+                            if (error.from == "client" && !error.errorCode) {
                                 feedback.message = "No passkey was added. Please try again.";
                             } else {
                                 if (error.errors && error.errors.nickname && error.errors.nickname.length > 0) {
@@ -87,6 +117,15 @@
                     }
                 } finally {
                     working.value = false;
+                    let url = window.location.href;
+                    let paramsToRemove = ['CredentialAddStatus', 'CredentialAddMessage'];
+                    let cleanedUrl = removeQueryParams(url,  paramsToRemove);
+                    if (cleanedUrl.indexOf('?') > -1){
+                        cleanedUrl += `&CredentialAddStatus=${feedback.status}&CredentialAddMessage=${feedback.message}`
+                    } else {
+                        cleanedUrl += `?CredentialAddStatus=${feedback.status}&CredentialAddMessage=${feedback.message}`
+                    }
+                    window.location.href = cleanedUrl;
                 }
             }
             
