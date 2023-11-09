@@ -102,17 +102,16 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
             .SetProtocol(VirtualAuthenticatorOptions.Protocol.CTAP2)
             .SetHasResidentKey(true);
 
-        var driver = new ChromeDriver();
+        var options = new ChromeOptions();
+        options.AddArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless");
+        var driver = new ChromeDriver(options);
         driver.Url = originUrl;
         driver.AddVirtualAuthenticator(virtualAuth);
         var result = driver.ExecuteScript(GetScript(sessionResponse!.Data.ToJson()));
 
         var resultString = result?.ToString() ?? string.Empty;
 
-        var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString);
 
         var registerCompleteResponse = await _client.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
@@ -149,8 +148,8 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
                type: credential.type,
                extensions: result.getClientExtensionResults(),
                response: {
-                   AttestationObject: arrayBufferToBase64Url(attestationResponse.attestationObject),
-                   clientDataJson: arrayBufferToBase64Url(attestationResponse.clientDataJSON),
+                   attestationObject: arrayBufferToBase64Url(attestationResponse.attestationObject),
+                   clientDataJSON: arrayBufferToBase64Url(attestationResponse.clientDataJSON),
                }
            });
        
