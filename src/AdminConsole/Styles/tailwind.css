@@ -46,8 +46,9 @@
     .validation-summary-errors {        
         @apply my-3 text-sm text-red-600 ring-1 ring-red-600 ring-offset-1 ring-offset-red-50 rounded-md p-2
     }
+    
     .link-blue {
-        @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
+        @apply no-underline text-blue-600 hover:text-blue-800 visited:text-purple-600
     }
     
     table.tbl-default {
