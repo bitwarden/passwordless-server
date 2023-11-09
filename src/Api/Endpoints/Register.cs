@@ -30,7 +30,7 @@ public static class RegisterEndpoints
         })
             .RequirePublicKey()
             .RequireCors("default")
-            .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
+            .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
         app.MapPost("/register/complete", async (RegistrationCompleteDTO payload,
                 HttpRequest request,
@@ -46,7 +46,7 @@ public static class RegisterEndpoints
             .WithParameterValidation()
             .RequirePublicKey()
             .RequireCors("default")
-            .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
+            .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
     }
 
     public record RegisterTokenResponse(string Token);
