@@ -784,7 +784,7 @@ video {
 .link-blue {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
-  text-decoration-line: underline;
+  text-decoration-line: none;
 }
 
 .link-blue:visited {
@@ -864,7 +864,7 @@ table.tbl-default td.td-indent, table.tbl-default th.th-indent {
 table.tbl-default a {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
-  text-decoration-line: underline;
+  text-decoration-line: none;
 }
 
 table.tbl-default a:visited {
@@ -1635,11 +1635,6 @@ table.tbl-default a {
 
 .p-6 {
   padding: 1.5rem;
-}
-
-.px-1 {
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
 }
 
 .px-2 {
