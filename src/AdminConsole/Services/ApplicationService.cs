@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.Services.MagicLinks;
+using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Services;
@@ -11,15 +13,21 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
     private readonly IPasswordlessManagementClient _client;
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly ISharedBillingService _billingService;
+    private readonly IMailService _mailService;
+    private readonly IMagicLinkBuilder _magicLinkBuilder;
 
     public ApplicationService(
         IPasswordlessManagementClient client,
         IDbContextFactory<TDbContext> dbContextFactory,
+        IMailService mailService,
+        IMagicLinkBuilder magicLinkBuilder,
         ISharedBillingService billingService)
     {
         _client = client;
         _dbContextFactory = dbContextFactory;
         _billingService = billingService;
+        _mailService = mailService;
+        _magicLinkBuilder = magicLinkBuilder;
     }
 
     public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletionAsync(string applicationId, string userName)
@@ -31,14 +39,17 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 
         if (application == null) return response;
 
-        if (!response.IsDeleted)
+        if (response.IsDeleted)
         {
-            application.DeleteAt = response.DeleteAt;
-            await db.SaveChangesAsync();
+            await DeleteAsync(applicationId);
+            await _mailService.SendApplicationDeletedAsync(application, response.DeleteAt, userName, response.AdminEmails);
         }
         else
         {
-            await DeleteAsync(applicationId);
+            application.DeleteAt = response.DeleteAt;
+            await db.SaveChangesAsync();
+            var magicLink = await _magicLinkBuilder.GetLinkAsync(userName, "/organization/overview");
+            await _mailService.SendApplicationToBeDeletedAsync(application, userName, magicLink, response.AdminEmails);
         }
 
         return response;
