@@ -13,8 +13,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.3" />
@@ -26,20 +26,18 @@
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
     <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.5.2" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
-    <PackageReference Include="Stripe.net" Version="41.13.0" />
+    <PackageReference Include="Stripe.net" Version="41.28.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Identity\" />
     <Folder Include="Migrations" />
     <Folder Include="Models\" />
-    <Folder Include="Pages\App\" />
     <Folder Include="Pages\App\Credentials\" />
     <Folder Include="Pages\App\Dashboard\" />
     <Folder Include="Pages\App\Playground\" />
     <Folder Include="Pages\App\Settings\" />
     <Folder Include="Db\" />
-    <Folder Include="RoutingHelpers\" />
     <Folder Include="Pages\Account\" />
     <Folder Include="wwwroot\img" />
   </ItemGroup>
@@ -103,6 +101,13 @@
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ValidationScriptsPartial.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
+    <_ContentIncludedByDefault Remove="Pages\App\Billing\ChangePlan.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Pages\Billing\DefaultModel.cs">
+      <DependentUpon>Default.cshtml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+   
 </Project>

@@ -24,7 +24,7 @@ public class AccountEndpointsTests
             It.Is<string>(p => p == "demo-application"),
             It.Is<string>(p => p == payload.DeletedBy),
             It.Is<string>(p => p == "http://localhost:7001")))
-            .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
+            .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt, new[] { "jonas@bw.com" }));
         var httpContextAccessorMock = new Mock<IRequestContext>();
         httpContextAccessorMock.Setup(x => x.GetBaseUrl()).Returns("http://localhost:7001");
         var loggerMock = new Mock<ILogger>();
@@ -58,7 +58,7 @@ public class AccountEndpointsTests
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.DeleteApplicationAsync(
                 It.Is<string>(p => p == "demo-application")))
-            .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt));
+            .ReturnsAsync(new AppDeletionResult("Success!", true, deletedAt, new[] { "jonas@bw.com" }));
         var loggerMock = new Mock<ILogger>();
 
         var actual = await AppsEndpoints.DeleteApplicationAsync(appId, sharedManagementServiceMock.Object, loggerMock.Object);

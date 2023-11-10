@@ -41,7 +41,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
 
     public async Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId)
     {
-        var response = await _client.GetAsync($"apps/delete/cancel/{applicationId}");
+        var response = await _client.PostAsync($"admin/apps/{applicationId}/cancel-delete", null);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<CancelApplicationDeletionResponse>();
     }

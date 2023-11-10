@@ -11,7 +11,7 @@ public class Panel : TagHelper
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", "bg-white shadow sm:rounded-lg px-4 py-5 sm:p-6");
+        output.Attributes.SetAttribute("class", "panel");
         output.Content.AppendHtml($"<h2>{Header}</h2>");
 
         var content = await output.GetChildContentAsync();
