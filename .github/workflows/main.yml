@@ -48,7 +48,13 @@ jobs:
       - name: Determine stable version
         id: stable-version
         if: ${{ github.event_name == 'release' }}
-        run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+        run: |
+          if ! [[ "${{ github.event.release.tag_name }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: ${{ github.event.release.tag_name }}"
+              exit 1
+          fi
+          
+          echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
 
       - name: Determine prerelease version
         id: pre-version

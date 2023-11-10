@@ -12,6 +12,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 {
     private readonly IPasswordlessManagementClient _client;
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ISharedBillingService _billingService;
     private readonly IMailService _mailService;
     private readonly IMagicLinkBuilder _magicLinkBuilder;
 
@@ -19,10 +20,12 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         IPasswordlessManagementClient client,
         IDbContextFactory<TDbContext> dbContextFactory,
         IMailService mailService,
-        IMagicLinkBuilder magicLinkBuilder)
+        IMagicLinkBuilder magicLinkBuilder,
+        ISharedBillingService billingService)
     {
         _client = client;
         _dbContextFactory = dbContextFactory;
+        _billingService = billingService;
         _mailService = mailService;
         _magicLinkBuilder = magicLinkBuilder;
     }
@@ -38,6 +41,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 
         if (response.IsDeleted)
         {
+            await DeleteAsync(applicationId);
             db.Applications.Entry(application).State = EntityState.Deleted;
 
             await _mailService.SendApplicationDeletedAsync(application, response.DeleteAt, userName, response.AdminEmails);
@@ -45,12 +49,11 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         else
         {
             application.DeleteAt = response.DeleteAt;
+            await db.SaveChangesAsync();
             var magicLink = await _magicLinkBuilder.GetLinkAsync(userName, "/organization/overview");
             await _mailService.SendApplicationToBeDeletedAsync(application, userName, magicLink, response.AdminEmails);
         }
-
-        await db.SaveChangesAsync();
-
+        
         return response;
     }
 
@@ -78,9 +81,14 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
     public async Task DeleteAsync(string applicationId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var application = new Application { Id = applicationId };
+        var application = await db.Applications.SingleOrDefaultAsync(x => x.Id == applicationId);
+        if (application == null) return;
         db.Applications.Remove(application);
-        await db.SaveChangesAsync();
+        var rows = await db.SaveChangesAsync();
+        if (rows > 0 && application.BillingSubscriptionItemId != null)
+        {
+            await _billingService.OnPostApplicationDeletedAsync(application.BillingSubscriptionItemId);
+        }
     }
 
     public async Task CreateApplicationAsync(Application application)

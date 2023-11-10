@@ -3,69 +3,100 @@
 @tailwind utilities;
 
 @layer components {
-  .btn-primary {
-    @apply rounded bg-blue-600 py-1 px-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600;
-  }
+    .page-header-container {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+    }
 
-  .btn-danger {
-    @apply rounded bg-red-600 py-1 px-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600;
-  }
-
-  .badge-danger {
-    @apply inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800;
-  }
-
-  .badge-info {
-    @apply inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800;
-  }
+    .page-content-container {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col space-y-4;
+    }
     
+    .panel {
+        @apply bg-white shadow sm:rounded-lg px-4 py-5 sm:p-6 flex flex-col space-y-4;
+    }
+    
+    .panel-content {
+        @apply flex flex-col space-y-4;
+    }
+
+    .btn {
+        @apply rounded py-1 px-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    }
+
+    .btn-primary {
+        @apply btn bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600;
+    }
+
+    .btn-danger {
+        @apply btn bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600;
+    }
+
+    .badge-danger {
+        @apply inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800;
+    }
+
+    .badge-info {
+        @apply inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800;
+    }
+
     .btn-secondary {
         @apply relative -ml-px inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 bg-gray-100
     }
-    
+
     .btn-form {
         @apply flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600;
     }
-    
-    .text-input {
+
+    .text-input, input[type=text] {
         @apply px-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6
     }
-    
-    .h2 {
-        @apply text-2xl font-semibold text-gray-900 mb-3 mt-3
+
+    .h2, h2 {
+        @apply text-2xl font-semibold text-gray-900 leading-6;
     }
-    
+
+    h3 {
+        @apply text-base font-semibold text-gray-900 leading-6;
+    }
+
+    h3 {
+        @apply text-xl font-semibold text-gray-900 mb-3 mt-3
+    }
     .input-validation-error {
         @apply text-red-900 focus:outline-none ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6
     }
-    
+
     .field-validation-error {
         @apply text-red-600 text-sm
     }
 
-    .validation-summary-errors {        
+    .validation-summary-errors {
         @apply my-3 text-sm text-red-600 ring-1 ring-red-600 ring-offset-1 ring-offset-red-50 rounded-md p-2
     }
+
     .link-blue {
-        @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
+        @apply no-underline text-blue-600 hover:text-blue-800 visited:text-blue-600
     }
     
+    .text-danger {
+        @apply text-red-600;
+    }
     table.tbl-default {
         @apply divide-y divide-gray-300
     }
-    
+
     table.tbl-default thead {
         @apply bg-gray-200
     }
-    
+
     table.tbl-default tbody {
         @apply divide-y divide-gray-200 bg-white
     }
-    
+
     table.tbl-default th {
         @apply px-3 py-3.5 text-left text-sm font-semibold text-gray-900
     }
-    
+
     table.tbl-default td {
         @apply px-3 py-4 text-sm text-gray-500
     }
@@ -73,7 +104,7 @@
     table.tbl-default td.td-strong {
         @apply text-gray-900
     }
-    
+
     table.tbl-default td.td-indent, table.tbl-default th.th-indent {
         @apply pl-4 sm:pl-6
     }
@@ -83,10 +114,46 @@
 
         text-decoration: none;
     }
+    
+    div.table-container {
+        @apply overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg;
+    }
+
+    .pricing-card {
+        @apply bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4;
+    }
+
+    .pricing-card-active {
+        @apply pricing-card border-2 border-blue-600;
+    }
+    
+    ul.radio-horizontal {
+        @apply items-center w-full bg-white border-0 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:flex;
+    }
+    
+    ul.radio-horizontal > li {
+        @apply w-full border-b border-gray-200 sm:border-b-0 sm:border-r;
+    }
+    
+    ul.radio-horizontal > li > div {
+        @apply flex items-center pl-3;
+    }
+    
+    ul.radio-horizontal > li > div > input {
+        @apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2;
+    }
+    
+    ul.radio-horizontal > li > div > label {
+        @apply w-full py-3 ml-2 text-sm font-medium text-gray-900;
+    }
+    
+    label.form-label {
+        @apply block text-sm font-medium leading-6 text-gray-900;
+    }
 }
 
 :root {
-  --color-primary-300: 103 149 232;
-  --color-primary-500: 23 93 220;
-  --color-primary-700: 18 82 163;
+    --color-primary-300: 103 149 232;
+    --color-primary-500: 23 93 220;
+    --color-primary-700: 18 82 163;
 }
