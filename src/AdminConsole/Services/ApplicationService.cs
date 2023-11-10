@@ -10,11 +10,16 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 {
     private readonly IPasswordlessManagementClient _client;
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ISharedBillingService _billingService;
 
-    public ApplicationService(IPasswordlessManagementClient client, IDbContextFactory<TDbContext> dbContextFactory)
+    public ApplicationService(
+        IPasswordlessManagementClient client,
+        IDbContextFactory<TDbContext> dbContextFactory,
+        ISharedBillingService billingService)
     {
         _client = client;
         _dbContextFactory = dbContextFactory;
+        _billingService = billingService;
     }
 
     public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletionAsync(string applicationId, string userName)
@@ -26,16 +31,15 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 
         if (application == null) return response;
 
-        if (response.IsDeleted)
+        if (!response.IsDeleted)
         {
-            db.Applications.Entry(application).State = EntityState.Deleted;
+            application.DeleteAt = response.DeleteAt;
+            await db.SaveChangesAsync();
         }
         else
         {
-            application.DeleteAt = response.DeleteAt;
+            await DeleteAsync(applicationId);
         }
-
-        await db.SaveChangesAsync();
 
         return response;
     }
@@ -64,9 +68,14 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
     public async Task DeleteAsync(string applicationId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var application = new Application { Id = applicationId };
+        var application = await db.Applications.SingleOrDefaultAsync(x => x.Id == applicationId);
+        if (application == null) return;
         db.Applications.Remove(application);
-        await db.SaveChangesAsync();
+        var rows = await db.SaveChangesAsync();
+        if (rows > 0 && application.BillingSubscriptionItemId != null)
+        {
+            await _billingService.OnPostApplicationDeletedAsync(application.BillingSubscriptionItemId);
+        }
     }
 
     public async Task CreateApplicationAsync(Application application)

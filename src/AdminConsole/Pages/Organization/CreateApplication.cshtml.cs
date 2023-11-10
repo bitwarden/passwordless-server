@@ -4,13 +4,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing;
-using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Stripe;
+using Application = Passwordless.AdminConsole.Models.Application;
 using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
 using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
 
@@ -24,16 +26,14 @@ public class CreateApplicationModel : PageModel
     private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
-    private readonly PlansOptions _plansOptions;
 
     public CreateApplicationModel(
         IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
         SignInManager<ConsoleAdmin> signInManager,
         IApplicationService applicationService,
         IDataService dataService,
-        IOptions<StripeOptions> stripeOptions,
         IPasswordlessManagementClient managementClient,
-        IOptionsSnapshot<PlansOptions> plansOptions)
+        IOptionsSnapshot<StripeOptions> stripeOptions)
     {
         _dataService = dataService;
         _applicationService = applicationService;
@@ -41,14 +41,25 @@ public class CreateApplicationModel : PageModel
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
-        _plansOptions = plansOptions.Value;
     }
 
-    public CreateApplicationForm Form { get; set; }
+    public CreateApplicationForm Form { get; } = new();
 
-    public async Task OnGet()
+    public Models.Organization Organization { get; set; }
+
+    public ICollection<AvailablePlan> AvailablePlans { get; private set; } = new List<AvailablePlan>();
+
+    public async Task<IActionResult> OnGet()
     {
         CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
+        await InitializeAsync();
+
+        if (Organization.Applications.Count >= Organization.MaxApplications)
+        {
+            return RedirectToPage("/billing/manage");
+        }
+
+        return Page();
     }
 
     public bool CanCreateApplication { get; set; }
@@ -79,24 +90,45 @@ public class CreateApplicationModel : PageModel
         }
 
         // Attach a plan
-        var org = await _dataService.GetOrganizationAsync();
-        if (org.HasSubscription)
+        await InitializeAsync();
+
+        app.BillingPlan = form.Plan;
+
+        if (form.Plan != PlanConstants.Free)
         {
-            var priceId = _stripeOptions.UsersProPriceId;
-            var planName = _stripeOptions.UsersProPlanName;
-            app.BillingPlan = planName;
-            app.BillingPriceId = priceId;
+            if (Organization.BillingSubscriptionId == null)
+            {
+                throw new InvalidOperationException("Cannot create a paid application without a subscription");
+            }
+            var subscriptionItemService = new SubscriptionItemService();
+            var listOptions = new SubscriptionItemListOptions { Subscription = Organization.BillingSubscriptionId };
+            var subscriptionItems = await subscriptionItemService.ListAsync(listOptions);
+
+            var subscriptionItem = subscriptionItems.SingleOrDefault(x => x.Price.Id == _stripeOptions.Plans[form.Plan].PriceId);
+            if (subscriptionItem == null)
+            {
+                var createOptions = new SubscriptionItemCreateOptions
+                {
+                    Subscription = Organization.BillingSubscriptionId,
+                    Price = _stripeOptions.Plans[form.Plan].PriceId,
+                    ProrationDate = DateTime.UtcNow,
+                    ProrationBehavior = "create_prorations"
+                };
+                subscriptionItem = await subscriptionItemService.CreateAsync(createOptions);
+            }
+
+            app.BillingSubscriptionItemId = subscriptionItem.Id;
+            app.BillingPriceId = subscriptionItem.Price.Id;
         }
 
         NewAppResponse res;
         try
         {
-            var plan = _plansOptions[app.BillingPlan];
             var newAppOptions = new NewAppOptions
             {
                 AdminEmail = email,
-                EventLoggingIsEnabled = plan.EventLoggingIsEnabled,
-                EventLoggingRetentionPeriod = plan.EventLoggingRetentionPeriod
+                EventLoggingIsEnabled = _stripeOptions.Plans[form.Plan].Features.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = _stripeOptions.Plans[form.Plan].Features.EventLoggingRetentionPeriod
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
@@ -132,13 +164,31 @@ public class CreateApplicationModel : PageModel
         return RedirectToPage("/App/Onboarding/GetStarted", new { app = app.Id });
     }
 
+    private async Task InitializeAsync()
+    {
+        Organization = await _dataService.GetOrganizationWithDataAsync();
+
+        if (Organization.HasSubscription)
+        {
+            AvailablePlans.Add(new AvailablePlan("pro-plan", PlanConstants.Pro, "Pro"));
+            AvailablePlans.Add(new AvailablePlan("enterprise-plan", PlanConstants.Enterprise, "Enterprise"));
+        }
+    }
+
     public class CreateApplicationForm
     {
         [Required, MaxLength(60)]
         public string Name { get; set; }
+
         [Required, MaxLength(62)]
         public string Id { get; set; }
+
         [Required, MaxLength(120)]
         public string Description { get; set; }
+
+        [Required]
+        public string Plan { get; set; } = PlanConstants.Free;
     }
+
+    public record AvailablePlan(string Id, string Value, string Label);
 }

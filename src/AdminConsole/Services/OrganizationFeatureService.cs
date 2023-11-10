@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
 
@@ -9,35 +10,41 @@ namespace Passwordless.AdminConsole.Services;
 public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureService where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-    private readonly IOptions<PlansOptions> _optionsValue;
+    private readonly StripeOptions _options;
 
-    public OrganizationFeatureService(IDbContextFactory<TDbContext> dbContextFactory, IOptions<PlansOptions> optionsValue)
+    public OrganizationFeatureService(IDbContextFactory<TDbContext> dbContextFactory, IOptions<StripeOptions> options)
     {
         _dbContextFactory = dbContextFactory;
-        _optionsValue = optionsValue;
+        _options = options.Value;
     }
 
     public FeaturesContext GetOrganizationFeatures(int orgId)
     {
         using var db = _dbContextFactory.CreateDbContext();
-        if (db.Applications.AsNoTracking().Any(x => x.OrganizationId == orgId && x.BillingPlan.ToLower() == "enterprise")
-            && _optionsValue.Value.TryGetValue("Enterprise", out var enterprisePlan))
-        {
-            return new FeaturesContext(enterprisePlan.EventLoggingIsEnabled, enterprisePlan.EventLoggingRetentionPeriod, null);
-        }
+        var billingPlans = db.Applications
+            .Where(x => x.OrganizationId == orgId)
+            .GroupBy(x => x.BillingPlan)
+            .Select(x => x.Key)
+            .ToList();
 
-        if (db.Applications.AsNoTracking().Any(x => x.OrganizationId == orgId && x.BillingPlan.ToLower() == "pro")
-            && _optionsValue.Value.TryGetValue("Pro", out var proPlan))
+        // we cannot reliably set organization features, as there is no such concept.
+        FeaturesOptions features;
+        if (billingPlans.Contains(PlanConstants.Enterprise))
         {
-            return new FeaturesContext(proPlan.EventLoggingIsEnabled, proPlan.EventLoggingRetentionPeriod, null);
+            features = _options.Plans[PlanConstants.Enterprise].Features;
         }
-
-        if (db.Applications.AsNoTracking().Any(x => x.OrganizationId == orgId && x.BillingPlan.ToLower() == "free")
-            && _optionsValue.Value.TryGetValue("Free", out var freePlan))
+        else if (billingPlans.Contains(PlanConstants.Pro))
         {
-            return new FeaturesContext(freePlan.EventLoggingIsEnabled, freePlan.EventLoggingRetentionPeriod, null);
+            features = _options.Plans[PlanConstants.Pro].Features;
         }
+        else
+        {
+            features = _options.Plans[PlanConstants.Free].Features;
+        }
+        return new FeaturesContext(
+            features.EventLoggingIsEnabled,
+            features.EventLoggingRetentionPeriod,
+            null);
 
-        return new FeaturesContext(false, 0, null);
     }
 }
