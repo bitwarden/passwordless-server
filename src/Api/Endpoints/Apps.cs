@@ -84,7 +84,8 @@ public static class AppsEndpoints
             .RequireCors("default");
 
         // This will be used by an email link to cancel
-        app.MapGet("/apps/delete/cancel/{appId}", CancelDeletionAsync)
+        app.MapPost("/admin/apps/{appId}/cancel-delete", CancelDeletionAsync)
+            .RequireManagementKey()
             .RequireCors("default");
 
         app.MapPost("/admin/apps/{appId}/features", ManageFeaturesAsync)
@@ -164,7 +165,8 @@ public static class AppsEndpoints
         return Ok(result);
     }
 
-    public static async Task<IResult> CancelDeletionAsync(string appId,
+    public static async Task<IResult> CancelDeletionAsync(
+        [FromRoute] string appId,
         ISharedManagementService service,
         IEventLogger eventLogger,
         ISystemClock clock)

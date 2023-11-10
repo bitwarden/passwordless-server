@@ -1,4 +1,6 @@
-﻿namespace Passwordless.AdminConsole.Models;
+﻿using Passwordless.AdminConsole.Billing.Constants;
+
+namespace Passwordless.AdminConsole.Models;
 
 public class Application
 {
@@ -19,7 +21,7 @@ public class Application
     public string ApiUrl { get; set; }
 
     public virtual Onboarding? Onboarding { get; set; }
-    public string BillingPlan { get; set; } = "Free";
+    public string BillingPlan { get; set; } = PlanConstants.Free;
     public string? BillingSubscriptionItemId { get; set; }
     public string? BillingPriceId { get; set; }
 

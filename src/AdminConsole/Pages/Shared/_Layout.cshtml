@@ -53,7 +53,14 @@
                         }
                     </div>
                 }
-                <partial name="_NavLinkPartial" model=@("Billing", "/billing/manage", "Icons/CodeBracketSquare") />
+                <partial name="_NavLinkPartial" model=@("Billing", "/billing/default", "Icons/Dollar") />
+                @if (Context.Request.Path.StartsWithSegments("/billing"))
+                {
+                    <div class="m-2 rounded-md bg-opacity-25 bg-black p-4">
+                        <partial name="_NavLinkPartial" model=@("Manage", "/billing/manage", "Icons/Cog") />
+                        <partial name="_NavLinkPartial" model=@("Invoices", "/billing/invoices", "Icons/DocumentText") />
+                    </div>
+                }
                 <partial name="_NavLinkPartial" model=@("Admins", "/organization/admins", "Icons/Users") />
                 <partial name="_NavLinkPartial" model=@("Settings", "/organization/settings", "Icons/Cog") />
                 @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)

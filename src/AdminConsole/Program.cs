@@ -5,13 +5,13 @@ using Microsoft.Extensions.Options;
 using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
-using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
@@ -133,6 +133,7 @@ void RunTheApp()
     }).AddHttpMessageHandler<PasswordlessDelegatingHandler>();
 
     // Magic link SigninManager
+    services.AddTransient<IMagicLinkBuilder, MagicLinkBuilder>();
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
     // Setup mail service & provider
@@ -146,9 +147,7 @@ void RunTheApp()
 
     // Plan Features
     services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
-
-    services.AddSingleton<IHtmlSanitizer, HtmlSanitizer>();
-
+    
     WebApplication app;
     try
     {
