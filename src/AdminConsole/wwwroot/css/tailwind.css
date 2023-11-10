@@ -534,6 +534,61 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.page-header-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .page-header-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-header-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.page-content-container {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  max-width: 80rem;
+  flex-direction: column;
+}
+
+.page-content-container > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
+.page-content-container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .page-content-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-content-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 .btn-primary {
   border-radius: 0.25rem;
   --tw-bg-opacity: 1;
@@ -707,12 +762,18 @@ video {
   }
 }
 
-.h2 {
-  margin-bottom: 0.75rem;
-  margin-top: 0.75rem;
+.h2, h2 {
   font-size: 1.5rem;
-  line-height: 2rem;
   font-weight: 600;
+  line-height: 1.5rem;
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
 }
@@ -788,7 +849,7 @@ video {
 }
 
 .link-blue:visited {
-  color: rgb(147 51 234 );
+  color: rgb(37 99 235 );
 }
 
 .link-blue:hover {
@@ -868,7 +929,7 @@ table.tbl-default a {
 }
 
 table.tbl-default a:visited {
-  color: rgb(147 51 234 );
+  color: rgb(37 99 235 );
 }
 
 table.tbl-default a:hover {
@@ -1236,10 +1297,6 @@ table.tbl-default a {
 
 .max-w-3xl {
   max-width: 48rem;
-}
-
-.max-w-7xl {
-  max-width: 80rem;
 }
 
 .max-w-fit {
@@ -1870,11 +1927,6 @@ table.tbl-default a {
 .text-primary-500 {
   --tw-text-opacity: 1;
   color: rgb(var(--color-primary-500) / var(--tw-text-opacity));
-}
-
-.text-primary-700 {
-  --tw-text-opacity: 1;
-  color: rgb(var(--color-primary-700) / var(--tw-text-opacity));
 }
 
 .text-red-700 {
