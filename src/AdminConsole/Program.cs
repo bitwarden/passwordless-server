@@ -1,4 +1,3 @@
-using Ganss.Xss;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
@@ -144,9 +143,6 @@ void RunTheApp()
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
-
-    // Plan Features
-    services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
     
     WebApplication app;
     try

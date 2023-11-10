@@ -1,13 +1,11 @@
-@using Ganss.Xss
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Helpers
 @inject IOptions<PasswordlessOptions> Options
-@inject IHtmlSanitizer Sanitizer
 
 @{
     var hasCredentialAddFeedback = Context.Request.Query.ContainsKey("CredentialAddStatus");
-    var credentialAddStatus = hasCredentialAddFeedback ? Sanitizer.Sanitize(Context.Request.Query["CredentialAddStatus"]) : null;
-    var credentialAddMessage = hasCredentialAddFeedback ? Sanitizer.Sanitize(Context.Request.Query["CredentialAddMessage"]) : null;
+    var credentialAddStatus = hasCredentialAddFeedback ? Context.Request.Query["CredentialAddStatus"].ToString() : null;
+    var credentialAddMessage = hasCredentialAddFeedback ? Context.Request.Query["CredentialAddMessage"].ToString() : null;
 }
 
 <div id="addPasskeysPanel">
