@@ -29,7 +29,15 @@ jobs:
           version=$(echo "$props" | grep -oPm1 "(?<=<Version>)[^<]*")
           echo "version=$version" >> $GITHUB_OUTPUT
 
-      - name: Validate new version
+      - name: Validate new version (format)
+        # Use regex to make sure the version is 1.2.3 or 1.2.3-ci-abcdef0
+        run: |
+          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: ${{ inputs.version }}"
+              exit 1
+          fi
+
+      - name: Validate new version (increment)
         run: >
           npx semver@7.5.4 "${{ inputs.version }}"
           --range "> ${{ steps.current-version.outputs.version }}"

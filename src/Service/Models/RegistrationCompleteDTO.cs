@@ -9,6 +9,6 @@ public class RegistrationCompleteDTO : RequestBase
 
     public AuthenticatorAttestationRawResponse Response { get; set; }
 
-    [MaxLength(64)]
+    [MaxLength(64, ErrorMessage = "Nickname cannot be longer than 64 characters.")]
     public string Nickname { get; set; }
 }

@@ -39,13 +39,13 @@ public class TokenService : ITokenService
         // Remove old keys after 30 days (side effect: Tokens maximum life length is 30 days).
         if (alternatives.Count == 0 || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
         {
-            var random32bytes = RandomNumberGenerator.GetBytes(32);
-            var keyinputmaterial = Convert.ToBase64String(random32bytes);
+            var random32Bytes = RandomNumberGenerator.GetBytes(32);
+            var keyInputMaterial = Convert.ToBase64String(random32Bytes);
 
             // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
             var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
-            await _storage.AddTokenKey(new TokenKey() { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyinputmaterial });
-            alternatives.Add(keyId, keyinputmaterial);
+            await _storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
+            alternatives.Add(keyId, keyInputMaterial);
 
             try
             {
@@ -60,7 +60,7 @@ public class TokenService : ITokenService
     }
 
 
-    private Key DeriveKey(string tenant, IConfiguration config, byte[] keybytes)
+    private Key DeriveKey(string tenant, IConfiguration config, byte[] keyBytes)
     {
         var envSaltString = config["SALT_TOKEN"];
         Span<byte> salt = Convert.FromBase64String(envSaltString).AsSpan();
@@ -77,12 +77,19 @@ public class TokenService : ITokenService
         var info = Encoding.UTF8.GetBytes(version + tenant);
 
         // create the key
-        return KeyDerivationAlgorithm.HkdfSha256.DeriveKey(keybytes, salt, info, MacAlgorithm.HmacSha256);
+        return KeyDerivationAlgorithm.HkdfSha256.DeriveKey(keyBytes, salt, info, MacAlgorithm.HmacSha256);
     }
 
     public T DecodeToken<T>(string token, string prefix, bool contractless = false)
     {
-        if (token == null) throw new ApiException("missing_token", $"This operation requires a token that starts with '{prefix}' to be passed.", 400);
+        if (token == null)
+        {
+            throw new ApiException(
+                "missing_token",
+                $"This operation requires a token that starts with '{prefix}' to be passed.",
+                400
+            );
+        }
 
         if (prefix != null)
         {
@@ -93,45 +100,60 @@ public class TokenService : ITokenService
             else
             {
                 var invalidInput = token[..Math.Min(10, token.Length)];
-                _log.LogWarning("Could not remove prefix={prefix}, token started with {InvalidInput}", prefix, invalidInput);
-                throw new ApiException("invalid_token", $"The token you sent was not correct. The token used for this endpoint should start with '{prefix}'. Make sure you are not sending the wrong value. The value you sent started with '{invalidInput}'", 400);
+                _log.LogWarning("Could not remove prefix={prefix}, token started with {InvalidInput}", prefix,
+                    invalidInput);
+                throw new ApiException("invalid_token",
+                    $"The token you sent was not correct. The token used for this endpoint should start with '{prefix}'. Make sure you are not sending the wrong value. The value you sent started with '{invalidInput}'",
+                    400);
             }
         }
 
-        byte[] envelopeBytes;
+        MacEnvelope envelope;
         try
         {
-            envelopeBytes = Base64Url.Decode(token);
+            var envelopeBytes = Base64Url.Decode(token);
+            envelope = MessagePackSerializer.Deserialize<MacEnvelope>(envelopeBytes);
         }
-        catch (Exception)
+        // Can happen if the token starts with the right prefix, but is otherwise syntactically incorrect
+        catch
         {
             _log.LogError("Could not decode token={token}", token);
-            throw new ApiException("invalid_token_format", "The token you supplied was not formatted correctly. It should be valid base64url.", 400);
+
+            throw new ApiException(
+                "invalid_token_format",
+                "The token you supplied was not formatted correctly. It should be valid base64url.",
+                400
+            );
         }
-        var envelope = MessagePackSerializer.Deserialize<MacEnvelope>(envelopeBytes);
 
         _log.LogInformation("Decoding using keyId={keyId}", envelope.KeyId);
-        var key = GetKeyByKeyId(envelope.KeyId);
+        Key key;
+        try
+        {
+            key = GetKeyByKeyId(envelope.KeyId);
+        }
+        // Can happen if the key is syntactically correct, but not issued by us
+        catch
+        {
+            _log.LogError("Could not recognize token={token}", token);
+
+            throw new ApiException(
+                "invalid_token",
+                "The token you supplied was not valid. It could be that the token has expired or that it was not issued for this tenant.",
+                400
+            );
+        }
 
         var isOk = VerifyMac(key, envelope.Token, envelope.Mac);
-
-        if (!isOk) { return default; }
-
-
-        T res;
-        if (contractless)
+        if (!isOk)
         {
-            res = MessagePackSerializer.Deserialize<T>(envelope.Token, ContractlessStandardResolver.Options);
-        }
-        else
-        {
-            res = MessagePackSerializer.Deserialize<T>(envelope.Token);
-
+            return default;
         }
 
-        return res;
+        return contractless
+            ? MessagePackSerializer.Deserialize<T>(envelope.Token, ContractlessStandardResolver.Options)
+            : MessagePackSerializer.Deserialize<T>(envelope.Token);
     }
-
 
     private Key GetKeyByKeyId(int keyId)
     {
