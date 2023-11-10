@@ -42,8 +42,6 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         if (response.IsDeleted)
         {
             await DeleteAsync(applicationId);
-            db.Applications.Entry(application).State = EntityState.Deleted;
-
             await _mailService.SendApplicationDeletedAsync(application, response.DeleteAt, userName, response.AdminEmails);
         }
         else
@@ -53,7 +51,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
             var magicLink = await _magicLinkBuilder.GetLinkAsync(userName, "/organization/overview");
             await _mailService.SendApplicationToBeDeletedAsync(application, userName, magicLink, response.AdminEmails);
         }
-        
+
         return response;
     }
 
