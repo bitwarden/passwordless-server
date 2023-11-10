@@ -7,13 +7,11 @@ namespace Passwordless.AdminConsole.Services;
 internal class UsageService<TDbContext> : IUsageService where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<UsageService<TDbContext>> _logger;
 
-    public UsageService(IDbContextFactory<TDbContext> dbContextFactory, IHttpClientFactory httpClientFactory, ILogger<UsageService<TDbContext>> logger)
+    public UsageService(IDbContextFactory<TDbContext> dbContextFactory, ILogger<UsageService<TDbContext>> logger)
     {
         _dbContextFactory = dbContextFactory;
-        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
     public async Task UpdateUsersCountAsync()
@@ -40,11 +38,11 @@ internal class UsageService<TDbContext> : IUsageService where TDbContext : Conso
 
     private async Task<int> GetUsersCounts(Application app)
     {
-        var api = PasswordlessClient.Create(new PasswordlessOptions
+        var api = new PasswordlessClient(new PasswordlessOptions
         {
             ApiSecret = app.ApiSecret,
             ApiUrl = app.ApiUrl
-        }, _httpClientFactory);
+        });
 
         var countResponse = await api.GetUsersCountAsync();
 
