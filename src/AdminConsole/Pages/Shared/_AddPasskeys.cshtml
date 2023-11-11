@@ -25,7 +25,6 @@
     </form>
 
     <div asp-if="hasCredentialAddFeedback" class="status mt-3" v-cloak>
-        <success-alert-box asp-if="@(credentialAddStatus == "completed")" message="@credentialAddMessage"></success-alert-box>
         <danger-alert-box asp-if="@(credentialAddStatus == "error")" message="@credentialAddMessage"></danger-alert-box>
     </div>
 </div>
