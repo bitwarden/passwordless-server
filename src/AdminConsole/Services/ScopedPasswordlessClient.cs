@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 
@@ -12,12 +13,22 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 {
     private readonly HttpClient _client;
 
-    public ScopedPasswordlessClient(HttpClient httpClient, ICurrentContext context) : base(httpClient)
+    public ScopedPasswordlessClient(
+        HttpClient httpClient,
+        IOptions<PasswordlessOptions> options,
+        ICurrentContext context)
+        : base(new PasswordlessOptions
+        {
+            ApiSecret = context.ApiSecret,
+            ApiUrl = options.Value.ApiUrl,
+            ApiKey = options.Value.ApiKey
+        })
     {
-        httpClient.DefaultRequestHeaders.Remove("ApiSecret");
-        httpClient.DefaultRequestHeaders.Add("ApiSecret", context.ApiSecret);
-
         _client = httpClient;
+
+        // can be dropped
+        _client.DefaultRequestHeaders.Remove("ApiSecret");
+        _client.DefaultRequestHeaders.Add("ApiSecret", context.ApiSecret);
     }
 
     public async Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize)

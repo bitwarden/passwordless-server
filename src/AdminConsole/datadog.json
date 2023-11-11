@@ -1,0 +1,6 @@
+{
+    "DD_SITE": "datadoghq.eu",
+    "DD_ENV": "pass-any",
+    "DD_VERSION": "0.0.0",
+    "DD_LOGS_INJECTION": true
+}

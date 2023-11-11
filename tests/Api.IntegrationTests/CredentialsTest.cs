@@ -3,7 +3,6 @@ using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.IntegrationTests;
 

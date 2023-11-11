@@ -1,5 +1,3 @@
-using Passwordless.Service.Storage.Ef;
-
 namespace Passwordless.Service.Models;
 
 public class AppFeature : PerTenant

@@ -24,5 +24,4 @@ public class Organization
     public bool HasSubscription => !string.IsNullOrEmpty(BillingSubscriptionId);
     public int MaxApplications { get; set; } = 1;
     public int MaxAdmins { get; set; } = 1;
-
 }

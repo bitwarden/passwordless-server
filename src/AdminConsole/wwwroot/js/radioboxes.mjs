@@ -5,7 +5,7 @@ export default {
     template: /*html*/`
   <div>  
   <fieldset>
-<!--  <legend class="text-base font-semibold leading-6 text-gray-900">Select</legend>-->
+<!--  <legend>Select</legend>-->
 
   <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
     <!--

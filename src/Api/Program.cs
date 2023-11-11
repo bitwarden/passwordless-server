@@ -14,7 +14,6 @@ using Passwordless.Common.Utils;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
-using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -44,16 +43,18 @@ builder.Host.UseSerilog((ctx, sp, config) =>
         config.WriteTo.Seq("http://localhost:5341");
     }
 
-    IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
-    if (ddConfig.Exists())
+    var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
+    if (!string.IsNullOrEmpty(ddApiKey))
     {
-        // setup serilog logging
-        var apiKey = ddConfig.GetValue<string>("ApiKey");
-        if (!string.IsNullOrEmpty(apiKey))
+        var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
+        var ddUrl = $"https://http-intake.logs.{ddSite}";
+        var ddConfig = new DatadogConfiguration(ddUrl);
+
+        if (!string.IsNullOrEmpty(ddApiKey))
         {
             config.WriteTo.DatadogLogs(
-                ddConfig.GetValue<string>("ApiKey"),
-                configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+                ddApiKey,
+                configuration: ddConfig);
         }
     }
 });
@@ -92,7 +93,6 @@ services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
 builder.AddMail();
-builder.Services.AddSingleton<IMailService, DefaultMailService>();
 
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>

@@ -85,6 +85,25 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("AccountInfo");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.AliasPointer", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Plaintext")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Tenant", "Alias");
+
+                    b.ToTable("Aliases");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Property<string>("Tenant")
@@ -102,6 +121,73 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.HasKey("Tenant");
 
                     b.ToTable("AppFeatures");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.EFStoredCredential", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<byte[]>("DescriptorId")
+                        .HasColumnType("varbinary(900)");
+
+                    b.Property<Guid>("AaGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AttestationFmt")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("BackupState")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DescriptorTransports")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DescriptorType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Device")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsBackupEligible")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsDiscoverable")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nickname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Origin")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("PublicKey")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("RPID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("SignatureCounter")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("UserHandle")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Tenant", "DescriptorId");
+
+                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
@@ -152,83 +238,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.HasKey("Tenant", "Id");
 
                     b.ToTable("ApiKeys");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Storage.Ef.AliasPointer", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Alias")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Plaintext")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Tenant", "Alias");
-
-                    b.ToTable("Aliases");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Storage.Ef.EFStoredCredential", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<byte[]>("DescriptorId")
-                        .HasColumnType("varbinary(900)");
-
-                    b.Property<Guid>("AaGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AttestationFmt")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DescriptorTransports")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DescriptorType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Device")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("LastUsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Nickname")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("PublicKey")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("RPID")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("SignatureCounter")
-                        .HasColumnType("bigint");
-
-                    b.Property<byte[]>("UserHandle")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Tenant", "DescriptorId");
-
-                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>

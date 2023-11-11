@@ -9,7 +9,6 @@ public static class SigninEndpoints
 {
     public static void MapSigninEndpoints(this WebApplication app)
     {
-
         app.MapPost("/signin/begin", async (SignInBeginDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {
             var fido2Service = await fido2ServiceFactory.CreateAsync();
@@ -19,7 +18,7 @@ public static class SigninEndpoints
         })
             .RequirePublicKey()
             .RequireCors("default")
-            .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
+            .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
         app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
         {
@@ -31,7 +30,7 @@ public static class SigninEndpoints
         })
             .RequirePublicKey()
             .RequireCors("default")
-            .WithMetadata(new HttpMethodMetadata(new string[] { "POST" }, acceptCorsPreflight: true));
+            .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
         app.MapPost("/signin/verify", async (SignInVerifyDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
         {

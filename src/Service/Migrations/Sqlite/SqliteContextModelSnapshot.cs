@@ -80,6 +80,25 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.ToTable("AccountInfo");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.AliasPointer", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Plaintext")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Tenant", "Alias");
+
+                    b.ToTable("Aliases");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Property<string>("Tenant")
@@ -97,6 +116,73 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.HasKey("Tenant");
 
                     b.ToTable("AppFeatures");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.EFStoredCredential", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("DescriptorId")
+                        .HasColumnType("BLOB");
+
+                    b.Property<Guid>("AaGuid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttestationFmt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("BackupState")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DescriptorTransports")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DescriptorType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Device")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("IsBackupEligible")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("IsDiscoverable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nickname")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Origin")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("PublicKey")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("RPID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint>("SignatureCounter")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("UserHandle")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Tenant", "DescriptorId");
+
+                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
@@ -147,83 +233,6 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.HasKey("Tenant", "Id");
 
                     b.ToTable("ApiKeys");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Storage.Ef.AliasPointer", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Alias")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Plaintext")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Tenant", "Alias");
-
-                    b.ToTable("Aliases");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Storage.Ef.EFStoredCredential", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("DescriptorId")
-                        .HasColumnType("BLOB");
-
-                    b.Property<Guid>("AaGuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AttestationFmt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DescriptorTransports")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("DescriptorType")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Device")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastUsedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Nickname")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Origin")
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("PublicKey")
-                        .HasColumnType("BLOB");
-
-                    b.Property<string>("RPID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<uint>("SignatureCounter")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("UserHandle")
-                        .HasColumnType("BLOB");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Tenant", "DescriptorId");
-
-                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
