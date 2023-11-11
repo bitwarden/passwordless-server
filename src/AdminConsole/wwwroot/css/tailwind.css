@@ -1114,6 +1114,50 @@ div.table-container {
   }
 }
 
+.credential-card-summary-footer {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.credential-card .summary-property, .credential-card-new .summary-property {
+  display: flex;
+  align-items: center;
+}
+
+.credential-card .summary-property > :not([hidden]) ~ :not([hidden]), .credential-card-new .summary-property > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.credential-card .details-property, .credential-card-new .details-property {
+  display: flex;
+  flex-direction: column;
+}
+
+.credential-card .details-property > :not([hidden]) ~ :not([hidden]), .credential-card-new .details-property > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
+.credential-card .property-label, .credential-card-new .property-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
+}
+
+.credential-card .property-value, .credential-card-new .property-value {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+
 ul.radio-horizontal {
   width: 100%;
   align-items: center;
@@ -2292,10 +2336,6 @@ label.form-label {
 
 .ring-opacity-5 {
   --tw-ring-opacity: 0.05;
-}
-
-.filter {
-  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
 :root {
