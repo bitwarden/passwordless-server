@@ -16,7 +16,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
 {
     private readonly HttpClient _client;
 
-    private static readonly Faker<RegisterToken> _tokenGenerator = new Faker<RegisterToken>()
+    private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
         .RuleFor(x => x.DisplayName, x => x.Person.FullName)
         .RuleFor(x => x.Username, x => x.Person.Email)
@@ -37,7 +37,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
     [Fact]
     public async Task Server_Can_Successfully_Retrieve_Token_For_Registration()
     {
-        var request = _tokenGenerator.Generate();
+        var request = TokenGenerator.Generate();
 
         var response = await _client.AddSecretKey().PostAsJsonAsync("/register/token", request);
 
@@ -50,7 +50,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
     [Fact]
     public async Task Client_Can_Begin_Registration_Of_User_Credential_With_Server()
     {
-        var tokenRequest = _tokenGenerator.Generate();
+        var tokenRequest = TokenGenerator.Generate();
         var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
@@ -68,8 +68,6 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
         sessionResponse.Should().NotBeNull();
         sessionResponse!.Data.User.DisplayName.Should().Be(tokenRequest.DisplayName);
         sessionResponse.Data.User.Name.Should().Be(tokenRequest.Username);
-
-        //TODO might want to assert more here
     }
 
     [Fact]
@@ -78,7 +76,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>
         const string originUrl = "https://bitwarden.com/products/passwordless/";
         const string rpId = "bitwarden.com";
 
-        var tokenRequest = _tokenGenerator.Generate();
+        var tokenRequest = TokenGenerator.Generate();
         var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
