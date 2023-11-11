@@ -93,6 +93,12 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         });
 
         signInCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var signInTokenResponse = await signInCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
+        signInTokenResponse.Should().NotBeNull();
+        signInTokenResponse!.Token.Should().StartWith("verify_");
+
+        var verifySignInResponse = await _httpClient.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
+        verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     private static string GetSignInScript(string jsonResponse) => $$"""
