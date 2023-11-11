@@ -18,9 +18,8 @@
         </fieldset>
     </form>
 
-    <div class="status mt-3" v-cloak>
-        <SuccessAlertBox v-if="feedback.status =='completed'" message="{{feedback.message}}"></SuccessAlertBox>
-        <DangerAlertBox v-if="feedback.status == 'error'" message="{{feedback.message}}"></DangerAlertBox>
+    <div v-if="feedback.status === 'error'" class="status mt-3" v-cloak>
+        <danger-alert-box message="{{feedback.message}}"></danger-alert-box>
     </div>
 </div>
 
@@ -44,6 +43,7 @@
             });
             
             const working = ref(false);
+                        
             const registerCredential = async (e) => {
                 e.preventDefault();
                 if (working.value) return;
@@ -69,9 +69,11 @@
                         if (token) {
                             feedback.status = "completed";
                             feedback.message = "Passkey added successfully";
+                            const url = window.location.href;
+                            window.location.href = url;
                         } else {
                             feedback.status = "error";
-                            if (error.from == "client" && !error.erroCode) {
+                            if (error.from == "client" && !error.errorCode) {
                                 feedback.message = "No passkey was added. Please try again.";
                             } else {
                                 if (error.errors && error.errors.nickname && error.errors.nickname.length > 0) {

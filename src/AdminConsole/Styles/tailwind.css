@@ -127,6 +127,34 @@
         @apply pricing-card border-2 border-blue-600;
     }
     
+    .credential-card {
+        @apply overflow-hidden bg-white shadow sm:rounded-lg max-w-fit;
+    }
+    
+    .credential-card-new {
+        @apply overflow-hidden shadow sm:rounded-lg max-w-fit border-2 border-green-600;
+    }
+    
+    .credential-card-summary-footer {
+        @apply flex justify-between items-center mt-2;
+    }
+    
+    .credential-card .summary-property, .credential-card-new .summary-property {
+        @apply flex items-center space-x-2;
+    }
+
+    .credential-card .details-property, .credential-card-new .details-property {
+        @apply flex flex-col space-y-1;
+    }
+    
+    .credential-card .property-label, .credential-card-new .property-label {
+        @apply text-sm font-medium text-gray-500;
+    }
+
+    .credential-card .property-value, .credential-card-new .property-value {
+        @apply text-sm text-gray-900;
+    }
+    
     ul.radio-horizontal {
         @apply items-center w-full bg-white border-0 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:flex;
     }
