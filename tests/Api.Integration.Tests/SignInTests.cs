@@ -97,7 +97,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         signInTokenResponse.Should().NotBeNull();
         signInTokenResponse!.Token.Should().StartWith("verify_");
     }
-    
+
     [Fact]
     public async Task Client_can_call_verify_after_signing_in_to_ensure_token_is_valid_from_server()
     {
