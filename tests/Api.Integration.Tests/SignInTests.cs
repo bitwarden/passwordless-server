@@ -96,6 +96,53 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var signInTokenResponse = await signInCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
         signInTokenResponse.Should().NotBeNull();
         signInTokenResponse!.Token.Should().StartWith("verify_");
+    }
+    
+    [Fact]
+    public async Task Client_can_call_verify_after_signing_in_to_ensure_token_is_valid_from_server()
+    {
+        var tokenRequest = TokenGenerator.Generate();
+        var tokenResponse = await _httpClient.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
+        var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
+
+        var registrationBeginRequest = new FidoRegistrationBeginDTO
+        {
+            Token = registerTokenResponse!.Token,
+            Origin = OriginUrl,
+            RPID = RpId
+        };
+        var registrationBeginResponse = await _httpClient.AddPublicKey().PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
+        var driver = WebDriverFactory.GetWebDriver(OriginUrl);
+        var registerResult = driver.ExecuteScript(GetRegisterScript(sessionResponse!.Data.ToJson()))?.ToString() ?? string.Empty;
+        var parsedRegisterResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(registerResult);
+        var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
+        {
+            Origin = OriginUrl,
+            RPID = RpId,
+            Session = sessionResponse.Session,
+            Response = parsedRegisterResult
+        });
+        await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
+
+        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
+        var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
+
+        var signInResult = driver.ExecuteScript(GetSignInScript(signInBegin!.Data.ToJson()))?.ToString() ?? string.Empty;
+        var parsedSignInResult = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(signInResult);
+
+        var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
+        {
+            Origin = OriginUrl,
+            RPID = RpId,
+            Response = parsedSignInResult,
+            Session = signInBegin.Session
+        });
+
+        signInCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var signInTokenResponse = await signInCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
+        signInTokenResponse.Should().NotBeNull();
+        signInTokenResponse!.Token.Should().StartWith("verify_");
 
         var verifySignInResponse = await _httpClient.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
