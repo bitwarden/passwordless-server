@@ -85,7 +85,6 @@ public class Fido2ServiceEndpoints : IFido2Service
         {
             // Clean up default values
             if (string.IsNullOrEmpty(token.UserVerification)) token.UserVerification = "preferred";
-            token.UserVerification = "discouraged";
             if (token.AuthenticatorType?.ToLower() == "any") token.AuthenticatorType = null;
 
             // Selection
