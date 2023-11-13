@@ -6,13 +6,12 @@ using Passwordless.Common.Models;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
 
-public record AppDeletionResult(string Message, bool IsDeleted, DateTime? DeleteAt);
+public record AppDeletionResult(string Message, bool IsDeleted, DateTime? DeleteAt, IReadOnlyCollection<string> AdminEmails);
 
 public interface ISharedManagementService
 {
@@ -37,11 +36,9 @@ public class SharedManagementService : ISharedManagementService
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
     private readonly IGlobalStorageFactory _globalStorageFactory;
-    private readonly IMailService _mailService;
 
     public SharedManagementService(ITenantStorageFactory tenantFactory,
         IGlobalStorageFactory globalStorageFactory,
-        IMailService mailService,
         IConfiguration config,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
@@ -49,7 +46,6 @@ public class SharedManagementService : ISharedManagementService
     {
         this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
-        _mailService = mailService;
         this.config = config;
         _systemClock = systemClock;
         _logger = logger;
@@ -205,6 +201,7 @@ public class SharedManagementService : ISharedManagementService
     {
         var storage = tenantFactory.Create(appId);
         var accountInformation = await storage.GetAccountInformation();
+
         if (accountInformation == null)
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
@@ -216,9 +213,12 @@ public class SharedManagementService : ISharedManagementService
         }
 
         await storage.DeleteAccount();
-        await _mailService.SendApplicationDeletedAsync(accountInformation, _systemClock.UtcNow.UtcDateTime, "system");
-        return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
-            _systemClock.UtcNow.UtcDateTime);
+
+        return new AppDeletionResult(
+            $"The app '{accountInformation.AcountName}' was deleted.",
+            true,
+            _systemClock.UtcNow.UtcDateTime,
+            accountInformation.AdminEmails);
     }
 
     public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
@@ -245,9 +245,11 @@ public class SharedManagementService : ISharedManagementService
         if (canDeleteImmediately)
         {
             await storage.DeleteAccount();
-            await _mailService.SendApplicationDeletedAsync(accountInformation, _systemClock.UtcNow.UtcDateTime, deletedBy);
-            return new AppDeletionResult($"The app '{accountInformation.AcountName}' was deleted.", true,
-                _systemClock.UtcNow.UtcDateTime);
+            return new AppDeletionResult(
+                $"The app '{accountInformation.AcountName}' was deleted.",
+                true,
+                _systemClock.UtcNow.UtcDateTime,
+                accountInformation.AdminEmails);
         }
 
         // Lock/Freeze all API keys that have been issued.
@@ -256,10 +258,11 @@ public class SharedManagementService : ISharedManagementService
         var deleteAt = _systemClock.UtcNow.AddMonths(1).UtcDateTime;
         await storage.SetAppDeletionDate(deleteAt);
 
-        var cancellationLink = $"{baseUrl}/apps/delete/cancel/{appId}";
-        await _mailService.SendApplicationToBeDeletedAsync(accountInformation, deleteAt, deletedBy, cancellationLink);
-
-        return new AppDeletionResult($"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.", false, deleteAt);
+        return new AppDeletionResult(
+            $"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.",
+            false,
+            deleteAt,
+            accountInformation.AdminEmails);
     }
 
     public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()

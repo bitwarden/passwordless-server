@@ -1,19 +1,16 @@
-using System.Reflection;
-using Datadog.Trace;
-using Datadog.Trace.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
-using Passwordless.AdminConsole.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
@@ -22,12 +19,6 @@ using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
-
-// Set Datadog version tag through an environment variable, as it's the only way to set it apparently
-Environment.SetEnvironmentVariable(
-    "DD_VERSION",
-    Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"
-);
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -74,24 +65,18 @@ void RunTheApp()
             config.WriteTo.Seq("http://localhost:5341");
         }
 
-        IConfigurationSection ddConfig = ctx.Configuration.GetSection("Datadog");
-        if (ddConfig.Exists())
+        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
+        if (!string.IsNullOrEmpty(ddApiKey))
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
+            var ddUrl = $"https://http-intake.logs.{ddSite}";
+            var ddConfig = new DatadogConfiguration(ddUrl);
 
-            // setup tracing
-            var settings = TracerSettings.FromDefaultSources();
-            settings.ServiceVersion = version;
-            Tracer.Configure(settings);
-
-            var ddKey = ddConfig.GetValue<string>("ApiKey");
-            if (!string.IsNullOrWhiteSpace(ddKey))
+            if (!string.IsNullOrEmpty(ddApiKey))
             {
                 config.WriteTo.DatadogLogs(
-                    apiKey: ddKey,
-                    tags: new[] { "version:" + version },
-                    service: "pass-admin-console",
-                    configuration: new DatadogConfiguration(ddConfig.GetValue<string>("url")));
+                    ddApiKey,
+                    configuration: ddConfig);
             }
         }
     });
@@ -144,9 +129,10 @@ void RunTheApp()
         var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
 
         client.BaseAddress = new Uri(options.Value.ApiUrl);
-    }).AddHttpMessageHandler<PasswordlessDelegatingHandler>();
+    });
 
     // Magic link SigninManager
+    services.AddTransient<IMagicLinkBuilder, MagicLinkBuilder>();
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
     // Setup mail service & provider
@@ -158,11 +144,17 @@ void RunTheApp()
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
 
-    // Plan Features
-    services.Configure<PlansOptions>(builder.Configuration.GetRequiredSection(PlansOptions.RootKey));
-
-    WebApplication app = builder.Build();
-
+    WebApplication app;
+    try
+    {
+        app = builder.Build();
+    }
+    catch (HostAbortedException)
+    {
+        // https://github.com/dotnet/efcore/issues/29809
+        Log.Logger.Information(".NET Migrations: Graceful exit.");
+        return;
+    }
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

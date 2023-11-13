@@ -1,6 +1,7 @@
 @page
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.AdminConsole.TagHelpers
 @inject IOptions<PasswordlessManagementOptions> Options
 @model CreateApplicationModel
 
@@ -14,14 +15,13 @@
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
         <form class="space-y-6" action="" method="POST">
             <div>
-                <label asp-for="Form.Name" class="block text-sm font-medium leading-6 text-gray-900">Application name</label>
+                <label asp-for="Form.Name" class="form-label">Application name</label>
                 <div class="mt-2">
-                    <input asp-for="Form.Name" v-model="appId" type="text"
-                           class="px-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                    <input asp-for="Form.Name" v-model="appId" type="text">
                     <div v-cloak :class="{ invisible: !appId }" class=" small">
                         <input asp-for="Form.Id" type="hidden" :value="parsedAppId"/>
                         Your app id is:
-                        <span
+                        <span   
                             class="parsed_tenant_name">
                             {{
                             parsedAppId
@@ -34,14 +34,28 @@
                     <span asp-validation-for="Form.Name"></span>
                 </div>
             </div>
-
+    
             <div>
-                <label asp-for="Form.Description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+                <label asp-for="Form.Description" class="form-label">Description</label>
                 <div class="mt-2">
-                    <input type="text" asp-for="Form.Description"
-                           class="px-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                    <input type="text" asp-for="Form.Description">
                     <span asp-validation-for="Form.Description"></span>
                 </div>
+            </div>
+
+            <div asp-if="Model.Organization.HasSubscription">
+                <label asp-for="Form.Plan" class="form-label">Plan</label>
+                <ul class="radio-horizontal mt-2">
+                    @foreach (var availablePlan in Model.AvailablePlans)
+                    {
+                        <li>
+                            <div>
+                                <input id="@availablePlan.Id" name="plans-group" type="radio" value="@availablePlan.Value" asp-for="Form.Plan">
+                                <label for="@availablePlan.Id">@availablePlan.Label</label>
+                            </div>
+                        </li>
+                    }
+                </ul>
             </div>
 
             <div>
@@ -51,6 +65,10 @@
                         class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                     Create
                 </button>
+            </div>
+            
+            <div>
+                <info-alert-box variant="ColorVariant.Info" message="The application can always be assigned to a different plan later in the 'Billing' section."></info-alert-box>
             </div>
         </form>
     </div>

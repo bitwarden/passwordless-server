@@ -1,15 +1,19 @@
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
-using Passwordless.AdminConsole.Models;
+using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
-using Stripe.Checkout;
+using Stripe;
+using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
 
-public class Manage : PageModel
+public class Manage : BaseExtendedPageModel
 {
     private readonly ISharedBillingService _billingService;
     private readonly IDataService _dataService;
@@ -20,59 +24,65 @@ public class Manage : PageModel
         _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
+
+
+        Plans = new List<PricingCardModel>
+        {
+            new(PlanConstants.Free, stripeOptions.Value.Plans[PlanConstants.Free]),
+            new(PlanConstants.Pro, stripeOptions.Value.Plans[PlanConstants.Pro]),
+            new(PlanConstants.Enterprise, stripeOptions.Value.Plans[PlanConstants.Enterprise])
+        };
     }
 
-    public List<Application> Applications { get; set; }
+    public ICollection<ApplicationModel> Applications { get; set; }
+
     public Models.Organization Organization { get; set; }
+
+    public IReadOnlyCollection<PricingCardModel> Plans { get; init; }
+
+    public IReadOnlyCollection<PaymentMethodModel> PaymentMethods { get; private set; }
 
     public async Task OnGet()
     {
-        Applications = await _dataService.GetApplicationsAsync();
+        var applications = await _dataService.GetApplicationsAsync();
+        Applications = applications
+            .Select(x => ApplicationModel.FromEntity(x, _stripeOptions.Value.Plans[x.BillingPlan]))
+            .ToList();
         Organization = await _dataService.GetOrganizationAsync();
-    }
-
-    public async Task<IActionResult> OnPost()
-    {
-        var orgId = User.GetOrgId();
-
-        var customerEmail = User.GetEmail();
-
-        var successUrl = Url.PageLink("/Billing/Success");
-        successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-
-        var cancelUrl = Url.PageLink("/Billing/Cancelled");
-        var options = new SessionCreateOptions
+        if (Organization.HasSubscription)
         {
-            CustomerEmail = customerEmail,
-            Metadata =
-                new Dictionary<string, string>
-                {
-                    { "orgId", orgId.ToString() }, { "passwordless", "passwordless" }
-                },
-            TaxIdCollection = new SessionTaxIdCollectionOptions
+            var paymentMethodsService = new CustomerService();
+            var paymentMethods = await paymentMethodsService.ListPaymentMethodsAsync(Organization.BillingCustomerId);
+            if (paymentMethods != null)
             {
-                Enabled = true,
-            },
-            ClientReferenceId = orgId.ToString(),
-            SuccessUrl = successUrl,
-            CancelUrl = cancelUrl,
-            Mode = "subscription",
-            LineItems = new List<SessionLineItemOptions>
-            {
-                new()
-                {
-                    Price = _stripeOptions.Value.UsersProPriceId,
-                }
+                PaymentMethods = paymentMethods.Data
+                    .Where(x => x.Type == "card")
+                    .Select(x =>
+                        new PaymentMethodModel(
+                            x.Card.Brand,
+                            x.Card.Last4,
+                            new DateTime((int)x.Card.ExpYear, (int)x.Card.ExpMonth, 1)))
+                    .ToImmutableList();
             }
-        };
-
-        var service = new SessionService();
-        Session? session = await service.CreateAsync(options);
-
-        return Redirect(session.Url);
+        }
     }
 
-    public async Task<IActionResult> OnPostPortal()
+    public async Task<IActionResult> OnPostUpgradePro()
+    {
+        var organization = await _dataService.GetOrganizationWithDataAsync();
+        if (!organization.HasSubscription)
+        {
+            var successUrl = Url.PageLink("/Billing/Success");
+            successUrl += "?session_id={CHECKOUT_SESSION_ID}";
+            var cancelUrl = Url.PageLink("/Billing/Cancelled");
+            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), PlanConstants.Pro, successUrl, cancelUrl);
+            return Redirect(sessionUrl);
+        }
+
+        throw new InvalidOperationException("Organization already has a subscription.");
+    }
+
+    public async Task<IActionResult> OnPostManage()
     {
         var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);
         var returnUrl = Url.PageLink("/Billing/Manage");
@@ -81,10 +91,86 @@ public class Manage : PageModel
         {
             Customer = customerId,
             ReturnUrl = returnUrl,
+
         };
         var service = new Stripe.BillingPortal.SessionService();
         Stripe.BillingPortal.Session? session = await service.CreateAsync(options);
 
         return Redirect(session.Url);
+    }
+
+    public IActionResult OnPostChangePlan(string id)
+    {
+        return RedirectToApplicationPage("/App/Settings/Settings", new ApplicationPageRoutingContext(id));
+    }
+
+    public record ApplicationModel(
+        string Id,
+        string Description,
+        int Users,
+        string Plan)
+    {
+        public static ApplicationModel FromEntity(Application entity, StripePlanOptions options)
+        {
+            return new ApplicationModel(
+                entity.Id,
+                entity.Description,
+                entity.CurrentUserCount,
+                options.Ui.Label);
+        }
+    }
+
+    public record PricingCardModel(
+        string Name,
+        StripePlanOptions Plan)
+    {
+        /// <summary>
+        /// We want to display the price in US dollars.
+        /// </summary>
+        private static readonly CultureInfo PriceFormat = new("en-US");
+
+        /// <summary>
+        /// Indicates if the plan is the active plan for the organization.
+        /// </summary>
+        public bool IsActive { get; set; }
+    }
+
+    public record PaymentMethodModel(string Brand, string Number, DateTime ExpirationDate)
+    {
+        public string CardIcon
+        {
+            get
+            {
+                var path = new StringBuilder("Shared/Icons/PaymentMethods/");
+                switch (Brand)
+                {
+                    case "amex":
+                        path.Append("Amex");
+                        break;
+                    case "diners":
+                        path.Append("Diners");
+                        break;
+                    case "discover":
+                        path.Append("Discover");
+                        break;
+                    case "jcb":
+                        path.Append("Jcb");
+                        break;
+                    case "mastercard":
+                        path.Append("MasterCard");
+                        break;
+                    case "unionpay":
+                        path.Append("UnionPay");
+                        break;
+                    case "visa":
+                        path.Append("Visa");
+                        break;
+                    default:
+                        path.Append("UnknownCard");
+                        break;
+                }
+                return path.ToString();
+            }
+        }
     }
 }

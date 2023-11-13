@@ -16,13 +16,11 @@ namespace Passwordless.Service;
 
 using Aliases = HashSet<string>;
 
-
 public class Fido2ServiceEndpoints : IFido2Service
 {
     private readonly ITenantStorage _storage;
-    private Fido2 _fido2;
     private readonly string _tenant;
-    private readonly ILogger log;
+    private readonly ILogger _log;
     private readonly ITokenService _tokenService;
     private readonly IEventLogger _eventLogger;
 
@@ -35,7 +33,7 @@ public class Fido2ServiceEndpoints : IFido2Service
     {
         _storage = storage;
         _tenant = tenant;
-        this.log = log;
+        _log = log;
         _tokenService = tokenService;
         _eventLogger = eventLogger;
     }
@@ -59,11 +57,11 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         var userId = token.UserId;
 
-        _fido2 = new Fido2(new Fido2Configuration()
+        var fido2 = new Fido2(new Fido2Configuration
         {
             ServerDomain = request.RPID,
-            Origins = new HashSet<string>() { request.Origin },
-            ServerName = request.ServerName
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID
         });
 
         if (string.IsNullOrEmpty(userId))
@@ -71,7 +69,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             throw new ApiException("missing_userid", "The token does not contain a valid userId", 400);
         }
 
-        var user = new Fido2User()
+        var user = new Fido2User
         {
             DisplayName = token.DisplayName ?? token.Username,
             Name = token.Username,
@@ -106,7 +104,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
             var attestation = token.Attestation.ToEnum<AttestationConveyancePreference>();
 
-            var options = _fido2.RequestNewCredential(
+            var options = fido2.RequestNewCredential(
                 user,
                 keyIds,
                 authenticatorSelection,
@@ -182,11 +180,11 @@ public class Fido2ServiceEndpoints : IFido2Service
     {
         var session = _tokenService.DecodeToken<RegisterSession>(request.Session, "session_", true);
 
-        _fido2 = new Fido2(new Fido2Configuration()
+        var fido2 = new Fido2(new Fido2Configuration
         {
             ServerDomain = request.RPID,
-            Origins = new HashSet<string>() { request.Origin },
-            ServerName = request.ServerName
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID
         });
 
         // Create callback so that lib can verify credential id is unique to this user
@@ -196,7 +194,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             return !exists;
         };
 
-        var success = await _fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
+        var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
 
         var userId = Encoding.UTF8.GetString(success.Result.User.Id);
 
@@ -205,17 +203,18 @@ public class Fido2ServiceEndpoints : IFido2Service
         {
             if (session.Aliases != null && session.Aliases.Any())
             {
-                await SetAlias(new AliasPayload() { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = userId });
+                await SetAlias(new AliasPayload { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = userId });
             }
         }
         catch (Exception e)
         {
-            log.LogError(e, "Error while saving alias during /register/complete");
+            _log.LogError(e, "Error while saving alias during /register/complete");
             throw;
         }
 
         var now = DateTime.UtcNow;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
+
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
             Descriptor = descriptor,
@@ -230,10 +229,13 @@ public class Fido2ServiceEndpoints : IFido2Service
             AaGuid = success.Result.AaGuid,
             RPID = request.RPID,
             Origin = request.Origin,
-            Nickname = request.Nickname
+            Nickname = request.Nickname,
+            BackupState = success.Result.IsBackedUp,
+            IsBackupEligible = success.Result.IsBackupEligible,
+            IsDiscoverable = request.Response.Extensions.CredProps?.Rk,
         });
 
-        var tokenData = new VerifySignInToken()
+        var tokenData = new VerifySignInToken
         {
             UserId = userId,
             Success = true,
@@ -258,11 +260,11 @@ public class Fido2ServiceEndpoints : IFido2Service
 
     public async Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request)
     {
-        _fido2 = new Fido2(new Fido2Configuration()
+        var fido2 = new Fido2(new Fido2Configuration
         {
             ServerDomain = request.RPID,
-            Origins = new HashSet<string>() { request.Origin },
-            ServerName = request.ServerName
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID
         });
 
         var existingCredentials = new List<PublicKeyCredentialDescriptor>();
@@ -272,23 +274,23 @@ public class Fido2ServiceEndpoints : IFido2Service
         {
             // Get registered credentials from database
             existingCredentials = (await _storage.GetCredentialsByUserIdAsync(userId)).Select(c => c.Descriptor).ToList();
-            log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "userid");
+            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "userid");
         }
         else if (!string.IsNullOrEmpty(request.Alias))
         {
             var hashedAlias = HashAlias(request.Alias, _tenant);
 
             existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
-            log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
+            _log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
         }
         else
         {
-            log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "empty");
+            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "empty");
         }
 
         // Create options
         var uv = string.IsNullOrEmpty(request.UserVerification) ? UserVerificationRequirement.Discouraged : request.UserVerification.ToEnum<UserVerificationRequirement>();
-        var options = _fido2.GetAssertionOptions(
+        var options = fido2.GetAssertionOptions(
             existingCredentials,
             uv
         );
@@ -301,11 +303,11 @@ public class Fido2ServiceEndpoints : IFido2Service
 
     public async Task<TokenResponse> SignInComplete(SignInCompleteDTO request, string device, string country)
     {
-        _fido2 = new Fido2(new Fido2Configuration()
+        var fido2 = new Fido2(new Fido2Configuration
         {
             ServerDomain = request.RPID,
-            Origins = new HashSet<string>() { request.Origin },
-            ServerName = request.ServerName
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID
         });
 
         // Get the assertion options we sent the client
@@ -326,7 +328,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         // Make the assertion
         var storedCredentials = (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList();
-        var res = await _fido2.MakeAssertionAsync(request.Response, options, credential.PublicKey, storedCredentials, storedCounter, callback);
+        var res = await fido2.MakeAssertionAsync(request.Response, options, credential.PublicKey, storedCredentials, storedCounter, callback);
 
         // Store the updated counter
         await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
@@ -375,25 +377,6 @@ public class Fido2ServiceEndpoints : IFido2Service
             throw new ApiException("Alias validation failed: " + ex.Message, 400);
         }
     }
-
-    //public Task SetAlias(string userId, Aliases aliases)
-    //{
-    //    ValidateUserId(userId);
-    //    return SetAlias(Encoding.UTF8.GetBytes(userId), aliases);
-    //}
-
-    //public async Task SetAlias(byte[] userId, Aliases aliases)
-    //{
-    //    if (userId == null || userId.Length == 0) { throw new ApiException("userId most not be null", 400); }
-    //    ValidateAliases(aliases, true);
-    //    var values = new Aliases(aliases.Count);
-    //    foreach (var alias in aliases)
-    //    {
-    //        values.Add(HashAlias(alias, _tenant));
-    //    }
-
-    //    await _storage.StoreAlias(userId, values);
-    //}
 
     public Task<List<AliasPointer>> GetAliases(string userId)
     {
@@ -454,7 +437,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         var sw = Stopwatch.StartNew();
         var hashedUsername = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(tenant + username)));
         sw.Stop();
-        log.LogInformation("SHA256 Hashing username took {duration}ms", sw.ElapsedMilliseconds);
+        _log.LogInformation("SHA256 Hashing username took {duration}ms", sw.ElapsedMilliseconds);
 
         return hashedUsername;
     }

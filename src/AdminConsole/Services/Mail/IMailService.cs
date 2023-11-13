@@ -1,4 +1,5 @@
 using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Services.Mail;
 
@@ -7,8 +8,10 @@ namespace Passwordless.AdminConsole.Services.Mail;
 /// </summary>
 public interface IMailService
 {
-    Task SendPasswordlessSignInAsync(string returnUrl, string token, string email);
+    Task SendPasswordlessSignInAsync(string returnUrl, string email);
     Task SendInviteAsync(Invite inv, string link);
     Task SendEmailIsAlreadyInUseAsync(string email);
     Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt);
+    Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails);
+    Task SendApplicationToBeDeletedAsync(Application application, string deletedBy, string cancellationLink, ICollection<string> emails);
 }

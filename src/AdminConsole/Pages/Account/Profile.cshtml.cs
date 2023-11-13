@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Pages.Shared;
 
 namespace Passwordless.AdminConsole.Pages.Account;
 
@@ -16,7 +17,7 @@ public class Profile : PageModel
         _userManager = userManager;
     }
 
-    public IReadOnlyCollection<Credential> Credentials { get; set; } = new List<Credential>();
+    public CredentialsModel Credentials { get; set; } = new();
 
     public async Task<IActionResult> OnPostRemoveCredential(string credentialId)
     {
@@ -29,7 +30,8 @@ public class Profile : PageModel
         var userId = _userManager.GetUserId(HttpContext.User);
         if (userId != null)
         {
-            Credentials = await _client.ListCredentialsAsync(userId);
+            Credentials.Items = await _client.ListCredentialsAsync(userId);
         }
+        Credentials.HideDetails = false;
     }
 }

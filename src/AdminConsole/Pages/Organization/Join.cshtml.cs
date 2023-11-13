@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Services.Mail;
 
 namespace Passwordless.AdminConsole.Pages.Organization;

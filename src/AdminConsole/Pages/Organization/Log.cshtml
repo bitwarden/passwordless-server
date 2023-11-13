@@ -8,9 +8,9 @@
 <div>
     <p>See events regarding admins of the organization.</p>
     <br>
-    <div class="flow-root" asp-if="Model.Events.Any()">
+    <div class="flow-root">
         <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 flex flex-col space-y-4">
                 <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                     <table class="tbl-default min-w-full">
                         <thead>
@@ -36,46 +36,52 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var logEvent in Model.Events)
+                        @if (Model.Events.Any())
+                        {
+                            @foreach (var logEvent in Model.Events)
+                            {
+                                <tr>
+                                    <td class="whitespace-nowrap td-indent td-strong">
+                                        <asp-local-time datetime="@logEvent.PerformedAt"/>
+                                    </td>
+                                    <td class="whitespace-nowrap">
+                                        @logEvent.PerformedBy
+                                    </td>
+                                    <td class="whitespace-nowrap">
+                                        @logEvent.Severity
+                                    </td>
+                                    <td>
+                                        @logEvent.Message
+                                    </td>
+                                    <td class="whitespace-nowrap">
+                                        @logEvent.Subject
+                                    </td>
+                                    <td class="whitespace-nowrap">
+                                        @logEvent.EventType
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="whitespace-nowrap td-indent td-strong">
-                                    <asp-local-time datetime="@logEvent.PerformedAt" />
-                                </td>
-                                <td class="whitespace-nowrap">
-                                    @logEvent.PerformedBy
-                                </td>
-                                <td class="whitespace-nowrap">
-                                    @logEvent.Severity
-                                </td>
-                                <td>
-                                    @logEvent.Message
-                                </td>
-                                <td class="whitespace-nowrap">
-                                    @logEvent.Subject
-                                </td>
-                                <td class="whitespace-nowrap">
-                                    @logEvent.EventType
-                                </td>
+                                <td colspan="6">This organization has no events from the past @Model.RetentionPeriod days.</td>
                             </tr>
                         }
                         </tbody>
                     </table>
                 </div>
+                <div asp-if="Model.PageList.TotalPages > 1" class="flex justify-center space-x-4">
+                        <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
+                
+                        @foreach (var page in Model.PageList.Pages)
+                        {
+                            <a asp-page="./Log" class="link-blue" asp-route-pageNumber="@(page)">@(page)</a>
+                        }
+                
+                        <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
+                    </div>
             </div>
         </div>
-    </div>
-
-    <p asp-if="!Model.Events.Any()">This organization has no events from the past @Model.RetentionPeriod days.</p>
-
-    <div asp-if="Model.PageList.TotalPages > 1" class="flex justify-center">
-        <a asp-if="Model.PageList.HasPreviousPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex - 1)">Prev</a>
-
-        @foreach (var page in Model.PageList.Pages)
-        {
-            <a asp-page="./Log" class="px-1 link-blue" asp-route-pageNumber="@(page)">@(page)</a>
-        }
-
-        <a asp-if="Model.PageList.HasNextPage" asp-page="./Log" class="px-1 btn btn-primary" asp-route-pageNumber="@(Model.PageList.CurrentIndex + 1)">Next</a>
     </div>
 </div>

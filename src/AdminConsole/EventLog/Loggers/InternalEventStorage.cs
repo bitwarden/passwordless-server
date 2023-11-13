@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Configuration;
+using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Db;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;
@@ -14,23 +15,22 @@ public interface IInternalEventLogStorageContext
 public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStorageContext where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-    private readonly IOptions<PlansOptions> _planOptionsConfig;
+    private readonly StripeOptions _planOptionsConfig;
     private readonly ISystemClock _systemClock;
 
     public InternalEventLogStorageContext(IDbContextFactory<TDbContext> dbContextFactory,
-        IOptions<PlansOptions> planOptionsConfig,
+        IOptions<StripeOptions> planOptionsConfig,
         ISystemClock systemClock)
     {
         _dbContextFactory = dbContextFactory;
-        _planOptionsConfig = planOptionsConfig;
+        _planOptionsConfig = planOptionsConfig.Value;
         _systemClock = systemClock;
     }
 
     public async Task DeleteExpiredEvents(CancellationToken cancellationToken)
     {
-        _planOptionsConfig.Value.TryGetValue("Enterprise", out var enterprisePlan);
-
-        var retentionDays = enterprisePlan?.EventLoggingRetentionPeriod ?? 7;
+        var plan = _planOptionsConfig.Plans[PlanConstants.Enterprise];
+        var retentionDays = plan.Features.EventLoggingRetentionPeriod;
 
         await using var db = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
         var events = await db.OrganizationEvents

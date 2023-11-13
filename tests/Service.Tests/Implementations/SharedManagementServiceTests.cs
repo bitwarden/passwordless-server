@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Mail;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -14,7 +13,6 @@ public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
     private readonly Mock<IGlobalStorageFactory> _storageFactoryMock = new();
-    private readonly Mock<IMailService> _mailServiceMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
@@ -29,7 +27,6 @@ public class SharedManagementServiceTests
         _sut = new SharedManagementService(
             _tenantStorageFactoryMock.Object,
             _storageFactoryMock.Object,
-            _mailServiceMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
             _loggerMock.Object,

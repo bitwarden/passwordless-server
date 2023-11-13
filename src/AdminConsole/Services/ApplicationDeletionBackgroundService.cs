@@ -17,7 +17,7 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Timed Hosted Service running.");
+        _logger.LogInformation($"{nameof(ApplicationDeletionBackgroundService)} is running.");
         using PeriodicTimer timer = new(TimeSpan.FromHours(1));
         try
         {
@@ -29,11 +29,11 @@ public sealed class ApplicationDeletionBackgroundService : BackgroundService
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Timed Hosted Service is stopping.");
+            _logger.LogInformation($"{nameof(ApplicationDeletionBackgroundService)} is stopping.");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Timed Hosted Service failed.");
+            _logger.LogError(e, $"{nameof(ApplicationDeletionBackgroundService)} failed.");
         }
     }
 

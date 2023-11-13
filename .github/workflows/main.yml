@@ -38,6 +38,34 @@ env:
 #   steps to more sensitive access scopes.
 
 jobs:
+  # Determine version
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Determine stable version
+        id: stable-version
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          if ! [[ "${{ github.event.release.tag_name }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: ${{ github.event.release.tag_name }}"
+              exit 1
+          fi
+          
+          echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+
+      - name: Determine prerelease version
+        id: pre-version
+        if: ${{ github.event_name != 'release' }}
+        run: |
+          hash="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT
+
+    outputs:
+      version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
+
   # Check formatting
   format:
     runs-on: ubuntu-latest
@@ -97,9 +125,13 @@ jobs:
 
   # Publish the apps
   pack:
+    needs: version
+
     strategy:
       matrix:
-        app: [Api, AdminConsole]
+        app:
+          - Api
+          - AdminConsole
 
     runs-on: ubuntu-latest
     permissions:
@@ -113,29 +145,14 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # v3.0.3
 
-      # When triggered by `push` or `pull_request` events, generate a prerelease version
-      # for the apps, so as to clearly indicate that it's not a stable version release.
-      - name: Generate prerelease version
-        id: prerelease-version
-        if: ${{ github.event_name != 'release' }}
-        run: |
-          time=$(date +%s)
-          ref="${{ github.head_ref || github.ref_name }}"
-          
-          ref_clean="$ref"
-          ref_clean="${ref_clean/\//-}"
-          ref_clean="${ref_clean/_/-}"
-          
-          echo "version=0.0.0-ci-$time-$ref_clean" >> $GITHUB_OUTPUT
-
       - name: Publish app
         run: >
           dotnet publish src/${{ matrix.app }}/
+          -p:Version=${{ needs.version.outputs.version }}
           --configuration Release
           --runtime win-x86
           --no-self-contained
           --output src/${{ matrix.app }}/publish/
-          ${{ steps.prerelease-version.outputs.version && format('-p:Version={0}', steps.prerelease-version.outputs.version) || '' }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
@@ -145,17 +162,22 @@ jobs:
 
   # Deploy the apps
   deploy:
-    strategy:
-        matrix:
-          app: [Api, AdminConsole]
-
-    environment: devtest-${{ matrix.app }}
-    concurrency: devtest-${{ matrix.app }}
-
+    # Don't run this job for PRs
+    if: ${{ github.event_name != 'pull_request' }}
     needs:
+      - version
       - format
       - test
       - pack
+
+    strategy:
+        matrix:
+          app:
+            - Api
+            - AdminConsole
+
+    environment: devtest-${{ matrix.app }}
+    concurrency: devtest-${{ matrix.app }}
 
     runs-on: ubuntu-latest
     permissions:
@@ -169,21 +191,18 @@ jobs:
           name: ${{ matrix.app }}
           path: ${{ matrix.app }}/
 
-      - name: Create archive
-        run: zip -r app.zip ${{ matrix.app }}/
-
-      - name: Login to Azure
-        uses: Azure/login@1f63701bf3e6892515f1b7ce2d2bf1708b46beaf  # v1.4.3
-        with:
-          creds: ${{ secrets.APP_SERVICE_SP }}
+      - name: Set DataDog version
+        run: >
+          cat <<<
+          $(jq '.DD_VERSION = "${{ needs.version.outputs.version }}"' ${{ matrix.app }}/datadog.json)
+          > ${{ matrix.app }}/datadog.json
 
       - name: Push app
-        run: >
-          az webapp deployment source config-zip
-          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          --name ${{ secrets.AZURE_APP_NAME }}
-          --slot staging
-          --src app.zip
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 # v3.0.0
+        with:
+          app-name: ${{ env.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }}
+          package: '${{ matrix.app }}'
 
   # Notify the Slack channel about the release
   notify:
@@ -201,5 +220,5 @@ jobs:
             Content-Type: application/json; charset=UTF-8
           body: |
             {
-              "text": "**Passwordless-Server**, new version released! 🎉\nVersion: `${{ github.event.release.name }}`\nDetails: ${{ github.event.release.html_url }}"
+              "text": "*Passwordless-server* version `${{ github.event.release.name }}` has been released! 🎉\nDetails: ${{ github.event.release.html_url }}"
             }
