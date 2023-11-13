@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Passwordless.Service.EventLog.Models;
-using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Models;
 
