@@ -1,6 +1,5 @@
-using System.Collections.Specialized;
-using System.Web;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Models;
 using Passwordless.Common.Services.Mail;
 
 namespace Passwordless.AdminConsole.Services.Mail;
@@ -10,27 +9,24 @@ public class DefaultMailService : IMailService
     private readonly string? _fromEmail;
     private readonly IMailProvider _provider;
 
-    public DefaultMailService(IConfiguration configuration, IMailProvider provider)
+    public DefaultMailService(
+        IConfiguration configuration,
+        IMailProvider provider)
     {
         _provider = provider;
         IConfigurationSection mailOptions = configuration.GetSection("Mail");
         _fromEmail = mailOptions.GetValue<string>("From") ?? null;
     }
 
-    public async Task SendPasswordlessSignInAsync(string returnUrl, string token, string email)
+    public async Task SendPasswordlessSignInAsync(string magicLink, string email)
     {
-        UriBuilder uriBuilder = new(returnUrl);
-        NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-        query["token"] = token;
-        query["email"] = email;
-        uriBuilder.Query = query.ToString();
         MailMessage message = new()
         {
             To = new List<string> { email },
             From = _fromEmail,
             Subject = "Verify your passwordless.dev account",
             TextBody =
-                $"Please click the link below to verify your account: {uriBuilder}",
+                $"Please click the link below to verify your account: {magicLink}",
             HtmlBody =
                 $"""
                 <!doctype html>
@@ -40,11 +36,11 @@ public class DefaultMailService : IMailService
                     <title>Verify your Passwordless.dev account</title>
                   </head>
                   <body>
-                    <p>Please click the link below to verify your account: <a href="{uriBuilder}">Verify</a></p>
+                    <p>Please click the link below to verify your account: <a href="{magicLink}">Verify</a></p>
                     <br />
                     <br />
                     <p>In case the link above doesn't work, please copy and paste the link below into your browser's address bar:</p>
-                    <p>{uriBuilder}</p>
+                    <p>{magicLink}</p>
                   </body>
                 </html>
                 """,
@@ -97,5 +93,66 @@ public class DefaultMailService : IMailService
         };
 
         return _provider.SendAsync(message);
+    }
+
+
+
+    public async Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails)
+    {
+        MailMessage message = new()
+        {
+            To = emails,
+            From = _fromEmail,
+            Bcc = new List<string> { "account-deletion@passwordless.dev" },
+            Subject = $"Your app '{application.Name}' has been deleted.",
+            TextBody =
+                $"Your app '{application.Name}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.",
+            HtmlBody =
+                $"""
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <title>Your app '{application.Name}' has been deleted.</title>
+                  </head>
+                  <body>
+                    <p>Your app '{application.Name}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.</p>
+                  </body>
+                </html>
+                """,
+            Tag = "app-deleted"
+        };
+
+        await _provider.SendAsync(message);
+    }
+
+    public async Task SendApplicationToBeDeletedAsync(Application application, string deletedBy, string cancellationLink, ICollection<string> emails)
+    {
+        MailMessage message = new()
+        {
+            To = emails,
+            Bcc = new List<string> { "account-deletion@passwordless.dev" },
+            From = _fromEmail,
+            Subject = $"Your app '{application.Name}' is scheduled for deletion in 30 days.",
+            TextBody =
+                $"Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'. If this was unintentional, please visit the your administration console or click {cancellationLink}.",
+            HtmlBody =
+                $"""
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <title>Your app '{application.Name}' is scheduled for deletion in 30 days.</title>
+                  </head>
+                  <body>
+                    <p>Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.</p>
+                    <p>If this was unintentional, please visit the your administration console or click <a href="{cancellationLink}">this link</a></p>
+                  </body>
+                </html>
+                """,
+            Tag = "app-to-be-deleted"
+        };
+
+        await _provider.SendAsync(message);
     }
 }

@@ -2,7 +2,6 @@
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -21,9 +20,9 @@ public static class CredentialsEndpoints
             .RequireCors("default");
 
 
-        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpContext ctx, HttpRequest req, ITenantStorage storage, UserCredentialsService userCredentialService) =>
+        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpRequest req, UserCredentialsService userCredentialService) =>
         {
-            string userId = "";
+            string userId;
             if (req.Method == "POST")
             {
                 var payload = await req.ReadFromJsonAsync<CredentialsListDTO>();

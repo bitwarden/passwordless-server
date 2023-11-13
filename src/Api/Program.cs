@@ -14,7 +14,6 @@ using Passwordless.Common.Utils;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
-using Passwordless.Service.Mail;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -94,7 +93,6 @@ services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
 builder.AddMail();
-builder.Services.AddSingleton<IMailService, DefaultMailService>();
 
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>

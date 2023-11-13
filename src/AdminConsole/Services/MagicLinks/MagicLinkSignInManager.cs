@@ -1,71 +1,47 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services.Mail;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
-namespace Passwordless.AdminConsole.Services;
+namespace Passwordless.AdminConsole.Services.MagicLinks;
 
 public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : class
 {
-    public const string PasswordlessSignInPurpose = "MagicLinkSignIn";
-
+    private readonly IMagicLinkBuilder _magicLinkBuilder;
     private readonly IMailService _mailService;
-    private readonly IUrlHelperFactory _urlHelperFactory;
-    private readonly IActionContextAccessor _actionContextAccessor;
     private readonly IEventLogger _eventLogger;
 
-    public MagicLinkSignInManager(UserManager<TUser> userManager,
+    public MagicLinkSignInManager(
+        IMagicLinkBuilder magicLinkBuilder,
+        UserManager<TUser> userManager,
         IHttpContextAccessor contextAccessor,
         IUserClaimsPrincipalFactory<TUser> claimsFactory,
         IOptions<IdentityOptions> optionsAccessor,
         ILogger<SignInManager<TUser>> logger,
         IAuthenticationSchemeProvider schemes,
         IUserConfirmation<TUser> confirmation,
-        IMailService mailService, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor,
+        IMailService mailService,
         IEventLogger eventLogger)
         : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
     {
+        _magicLinkBuilder = magicLinkBuilder;
         _mailService = mailService;
-        _urlHelperFactory = urlHelperFactory;
-        _actionContextAccessor = actionContextAccessor;
         _eventLogger = eventLogger;
     }
 
     public async Task<SignInResult> SendEmailForSignInAsync(string email, string? returnUrl)
     {
+        var magicLink = await _magicLinkBuilder.GetLinkAsync(email, returnUrl);
+        await _mailService.SendPasswordlessSignInAsync(magicLink, email);
+
         var user = await UserManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            return SignInResult.Failed;
-        }
-
-        var token = await UserManager.GenerateUserTokenAsync(user, Options.Tokens.PasswordResetTokenProvider, PasswordlessSignInPurpose);
-
-        var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-        var endpoint = urlBuilder.PageLink("/Account/Magic", values: new { returnUrl }) ?? urlBuilder.Content("~/");
-        await _mailService.SendPasswordlessSignInAsync(endpoint, token, email);
-
         if (user is ConsoleAdmin admin)
             _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
 
         return SignInResult.Success;
-    }
-
-    public async Task<string> GenerateToken(TUser user)
-    {
-        var token = await UserManager.GenerateUserTokenAsync(user, Options.Tokens.PasswordResetTokenProvider,
-            PasswordlessSignInPurpose);
-
-        // remove url unsafe chars
-        //token = token.Replace("+", "").Replace("/", "");
-
-        return token;
     }
 
     public async Task<SignInResult> PasswordlessSignInAsync(TUser user, string token, bool isPersistent)
@@ -76,8 +52,9 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         }
 
         var attempt = await CheckPasswordlessSignInAsync(user, token);
-        return attempt.Succeeded ?
-            await SignInOrTwoFactorAsync(user, isPersistent, bypassTwoFactor: true) : attempt;
+        return attempt.Succeeded
+            ? await SignInOrTwoFactorAsync(user, isPersistent, bypassTwoFactor: true)
+            : attempt;
     }
 
     public async Task<SignInResult> PasswordlessSignInAsync(string email, string token, bool isPersistent)
@@ -107,7 +84,7 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         // convert back from url safe
         //token = token.Replace("-", "+").Replace("_", "/");
         if (await UserManager.VerifyUserTokenAsync(user, Options.Tokens.PasswordResetTokenProvider,
-            PasswordlessSignInPurpose, token))
+            SignInPurposes.MagicLink, token))
         {
             return SignInResult.Success;
         }
