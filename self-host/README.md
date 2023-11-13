@@ -11,7 +11,7 @@ Follow these instructions to run Passwordless.dev in a self-hosted environment.
     ```bash
     docker build -t bitwarden/passwordless . -f self-host/Dockerfile
     ```
-   
+
 ## Run the image
 
 1. In your terminal execute:
