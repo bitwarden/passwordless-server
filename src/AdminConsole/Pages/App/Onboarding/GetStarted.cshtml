@@ -8,10 +8,10 @@
     ViewData["Title"] = "Getting Started";
 }
 
-<p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="underline">documentation</a>.</p>
-
 <panel header="1. Your API Keys">
-    <div class="mt-2 max-w-xl text-sm text-gray-500">
+    <div class="flex flex-col space-y-4 mt-2 max-w-xl text-sm text-gray-500">
+        <p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="link-blue">documentation</a>.</p>
+
         <p>Here are your API keys. You will use these to access the Passwordless api. The Api Key is used client side and is safe to share, while the ApiSecret is used on your backend and should never be exposed.</p>
     </div>
     
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
-            <button @@click="onSave" type="button" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">🔒 Download</button>
+            <button @@click="onSave" type="button" class="btn-primary btn-icon"><partial name="Shared/Icons/Download" /> Download</button>
         </div>
     </div>
 </panel>

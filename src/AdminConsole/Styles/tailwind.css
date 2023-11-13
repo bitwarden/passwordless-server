@@ -30,6 +30,14 @@
     .btn-danger {
         @apply btn bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600;
     }
+    
+    .btn-icon {
+        @apply inline-flex items-center;
+    }
+
+    .btn-icon > svg {
+        @apply me-2;
+    }
 
     .badge-danger {
         @apply inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800;
@@ -120,11 +128,11 @@
     }
 
     .pricing-card {
-        @apply bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4;
+        @apply bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4 border-2 border-gray-200;
     }
 
     .pricing-card-active {
-        @apply pricing-card border-2 border-blue-600;
+        @apply pricing-card border-blue-600;
     }
     
     .credential-card {

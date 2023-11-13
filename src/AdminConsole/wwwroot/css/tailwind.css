@@ -702,6 +702,15 @@ video {
   outline-color: #dc2626;
 }
 
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-icon > svg {
+  margin-inline-end: 0.5rem;
+}
+
 .btn-secondary {
   position: relative;
   margin-left: -1px;
@@ -1032,6 +1041,9 @@ div.table-container {
 }
 
 .pricing-card {
+  border-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: rgb(229 231 235 / var(--tw-border-opacity));
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
   padding: 1rem;
@@ -1059,6 +1071,9 @@ div.table-container {
 }
 
 .pricing-card-active {
+  border-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: rgb(229 231 235 / var(--tw-border-opacity));
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
   padding: 1rem;
@@ -1074,7 +1089,6 @@ div.table-container {
 }
 
 .pricing-card-active {
-  border-width: 2px;
   --tw-border-opacity: 1;
   border-color: rgb(37 99 235 / var(--tw-border-opacity));
 }
