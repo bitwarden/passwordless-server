@@ -108,6 +108,9 @@
     <Compile Update="Pages\Billing\DefaultModel.cs">
       <DependentUpon>Default.cshtml</DependentUpon>
     </Compile>
+    <Compile Update="Pages\Shared\CredentialsModel.cs">
+      <DependentUpon>_Credentials.cshtml</DependentUpon>
+    </Compile>
   </ItemGroup>
    
 </Project>
