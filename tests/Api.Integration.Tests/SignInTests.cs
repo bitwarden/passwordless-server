@@ -31,7 +31,9 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
 
     public SignInTests(PasswordlessApiFactory factory)
     {
-        _httpClient = factory.CreateClient();
+        _httpClient = factory.CreateClient()
+            .AddPublicKey()
+            .AddSecretKey();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
     }
 
@@ -40,7 +42,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         var request = new SignInBeginDTO { Origin = OriginUrl, RPID = RpId };
 
-        var response = await _httpClient.AddPublicKey().PostAsJsonAsync("/signin/begin", request);
+        var response = await _httpClient.PostAsJsonAsync("/signin/begin", request);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var signInResponse = await response.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -55,7 +57,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task Client_can_call_sign_in_complete_with_passkey()
     {
         var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _httpClient.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await _httpClient.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
@@ -64,7 +66,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
             Origin = OriginUrl,
             RPID = RpId
         };
-        var registrationBeginResponse = await _httpClient.AddPublicKey().PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
         var driver = WebDriverFactory.GetWebDriver(OriginUrl);
         var registerResult = driver.ExecuteScript(GetRegisterScript(sessionResponse!.Data.ToJson()))?.ToString() ?? string.Empty;
@@ -102,7 +104,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task Client_can_call_verify_after_signing_in_to_ensure_token_is_valid_from_server()
     {
         var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _httpClient.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await _httpClient.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
@@ -111,7 +113,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
             Origin = OriginUrl,
             RPID = RpId
         };
-        var registrationBeginResponse = await _httpClient.AddPublicKey().PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
         var driver = WebDriverFactory.GetWebDriver(OriginUrl);
         var registerResult = driver.ExecuteScript(GetRegisterScript(sessionResponse!.Data.ToJson()))?.ToString() ?? string.Empty;
