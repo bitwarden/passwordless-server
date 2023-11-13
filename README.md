@@ -69,7 +69,7 @@ if (body.success) {
 }
 ```
 
-### Contribute to Passwordless.dev
+## Contribute to Passwordless.dev
 
 We welcome code contributions! Please commit any pull requests against the `main` branch. All changes require tests that prove the intended behavior. Please note that large code changes and units of work are less likely to be merged because of the review burden. 
 
@@ -79,17 +79,9 @@ No grant of any rights in the trademarks, service marks, or logos of Bitwarden i
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## Docker
+## Self-hosting
 
-### How to build the image
-
-1. Clone the repository
-2. Set your working directory to match the root of the cloned files, for example:
-   `~/src/passwordless-server`
-3. In your terminal execute:
-    ```bash
-    docker build -t bitwarden/passwordless . -f docker/Dockerfile
-    ```
+See [the self-hosting directory](self-host) for instructions on how to self-host Passwordless.dev.
 
 ## Need support?
 
