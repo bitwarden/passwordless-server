@@ -1,6 +1,7 @@
 @page
 @using AdminConsole.Pages.Components.ManagePasskeys
 @using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Pages.Shared
 @inject IOptions<PasswordlessOptions> Options
 @model Passwordless.AdminConsole.Pages.Account.UserOnboarding
 
@@ -8,24 +9,20 @@
     ViewBag.Title = "Let's get you set up";
 }
 
-
-<div id="app">
-    <p class="mb-3 v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
-    <p class="mb-3 v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
-
-    <partial name="_Credentials" model="new PasskeysModel { Credentials = Model.Credentials, HideDetails = true }"/>
+<panel header="Passkeys">
+    <p class="v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
+    <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
+    
+    <partial name="_Credentials" model="new CredentialsModel { Items = Model.Credentials, HideDetails = true }"/>
     <partial name="Shared/_PasswordlessClientJs" />
     <partial name="Shared/_AddPasskeys" />
+</panel>
 
-    <div class="bg-white shadow sm:rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-            <h3>Create your first application</h3>
-            <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Get your API keys and use passwordless in your own code by creating a new Passwordless application.</p>
-            </div>
-            <div class="mt-5">
-                <a href="@Url.Page("/Organization/CreateApplication")" class="btn-primary inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Continue and create your first app</a>
-            </div>
-        </div>
+<panel header="Create your first application">
+    <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Get your API keys and use passwordless in your own code by creating a new Passwordless application.</p>
     </div>
-</div>
+    <div class="mt-5">
+        <a href="@Url.Page("/Organization/CreateApplication")" class="btn-primary inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Continue and create your first app</a>
+    </div>
+</panel>
