@@ -81,7 +81,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Self-hosting
 
-See [the self-hosting directory](self-host) for instructions on how to self-host Passwordless.dev.
+See the [self-hosting directory](self-host) for instructions on how to self-host Passwordless.dev.
 
 ## Need support?
 
