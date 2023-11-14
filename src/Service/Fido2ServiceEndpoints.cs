@@ -289,7 +289,10 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
 
         // Create options
-        var uv = string.IsNullOrEmpty(request.UserVerification) ? UserVerificationRequirement.Discouraged : request.UserVerification.ToEnum<UserVerificationRequirement>();
+        UserVerificationRequirement? uv = string.IsNullOrEmpty(request.UserVerification)
+            ? null
+            : request.UserVerification.ToEnum<UserVerificationRequirement>();
+
         var options = fido2.GetAssertionOptions(
             existingCredentials,
             uv
