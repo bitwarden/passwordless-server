@@ -21,13 +21,12 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 # Add packages
 RUN apt-get update && apt-get install -y \
     npm jq \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj files as distinct layers
 WORKDIR /source
 COPY src/AdminConsole/*.csproj ./src/AdminConsole/
 COPY src/Api/*.csproj ./src/Api/
-COPY src/ApiHelpers/*.csproj ./src/ApiHelpers/
 COPY src/Service/*.csproj ./src/Service/
 COPY src/Common/*.csproj ./src/Common/
 COPY Directory.Build.props .
