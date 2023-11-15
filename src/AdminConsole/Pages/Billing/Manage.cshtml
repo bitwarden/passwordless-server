@@ -1,6 +1,10 @@
 @page
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
+@{
+    ViewBag.Title = "Manage Billing";
+}
+
 <panel header="Upgrade to add multiple applications" asp-if="!Model.Organization.HasSubscription">
     <p>Your Free Organization includes 1 Trial app (up to 10k users) and 1 console administrator. </p>
     <form method="post">
