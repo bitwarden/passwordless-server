@@ -1365,6 +1365,11 @@ label.form-label {
   margin-bottom: 0.75rem;
 }
 
+.my-8 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
 .-ml-0 {
   margin-left: -0px;
 }
@@ -1551,6 +1556,10 @@ label.form-label {
 
 .h-full {
   height: 100%;
+}
+
+.h-px {
+  height: 1px;
 }
 
 .min-h-0 {
