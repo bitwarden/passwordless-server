@@ -44,11 +44,10 @@ jobs:
 
       - name: Build image
         run: >
-          docker buildx build
+          docker buildx build .
           --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
           --output type=tar,dest=image.tar
-          .
 
   # Build and deploy the image
   deploy:
@@ -90,11 +89,10 @@ jobs:
 
       - name: Build & push image
         run: >
-          docker buildx build
+          docker buildx build .
           --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
           --push
           --tag ghcr.io/passwordless/${{ matrix.repository }}:latest
           ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/${{ matrix.repository }}:$GITHUB_REF_NAME' || '' }}
           ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/${{ matrix.repository }}:stable' || '' }}
-          .
