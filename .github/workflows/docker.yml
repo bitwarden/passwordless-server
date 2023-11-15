@@ -18,7 +18,7 @@ jobs:
       matrix:
         app:
           - Api
-          # - AdminConsole
+          - AdminConsole
           - Self-Host
         include:
           - app: Api
@@ -27,6 +27,9 @@ jobs:
             dockerfile: AdminConsole.dockerfile
           - app: Self-Host
             dockerfile: self-host/Dockerfile
+        exclude:
+          # AdminConsole is not containerized yet
+          - app: AdminConsole
 
     runs-on: ubuntu-latest
     permissions:
@@ -55,7 +58,7 @@ jobs:
       matrix:
         app:
           - Api
-          # - AdminConsole
+          - AdminConsole
           - Self-Host
         include:
           - app: Api
@@ -67,6 +70,9 @@ jobs:
           - app: Self-Host
             dockerfile: self-host/Dockerfile
             repository: passwordless-self-host
+        exclude:
+          # AdminConsole is not containerized yet
+          - app: AdminConsole
 
     runs-on: ubuntu-latest
     permissions:
