@@ -14,7 +14,7 @@ on:
 jobs:
   # Build the image without deploying just to make sure the dockerfile is valid
   build:
-    name: Deploy (${{ matrix.app }})
+    name: build (${{ matrix.app }})
 
     strategy:
       matrix:
@@ -46,7 +46,7 @@ jobs:
 
   # Build and deploy the image
   deploy:
-    name: Deploy (${{ matrix.app }})
+    name: deploy (${{ matrix.app }})
     if: ${{ github.event_name != 'pull_request' }}
 
     strategy:
