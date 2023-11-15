@@ -19,24 +19,11 @@ public static class HttpRequestExtensions
         return value.SingleOrDefault();
     }
 
-    public static string? GetTenantNameFromKey(this HttpRequest req)
+    public static string? GetTenantNameFromKey(this HttpRequest request)
     {
-        var key = req.GetPublicApiKey() ?? req.GetApiSecret();
+        var key = request.GetPublicApiKey() ?? request.GetApiSecret();
 
-        if (key == null)
-        {
-            return ApiKeyUtils.GetAppId(request.Headers["ApiKey"].ToString());
-        }
-        if (request.Headers.ContainsKey("ApiSecret"))
-        {
-            return ApiKeyUtils.GetAppId(request.Headers["ApiSecret"].ToString());
-        }
-        if (request.RouteValues.ContainsKey("appId"))
-        {
-            return request.RouteValues["appId"].ToString();
-        }
-
-        return null;
+        return key != null ? ApiKeyUtils.GetAppId(key) : null;
     }
 
     public static string? GetTenantName(this HttpRequest httpRequest) =>
