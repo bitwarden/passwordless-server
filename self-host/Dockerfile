@@ -43,8 +43,7 @@ RUN . /tmp/rid.txt && dotnet restore -r $RID
 WORKDIR /source
 COPY src/AdminConsole/. ./src/AdminConsole/
 COPY src/Api/. ./src/Api/
-COPY src/ApiHelpers/. ./src/ApiHelpers/
-COPY src/Service/. ./src/Service/
+COPY src/Service/. ./src /Service/
 COPY src/Common/. ./src/Common/
 COPY .git/. ./.git/
 
