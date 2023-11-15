@@ -250,7 +250,9 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
                 // If we have applications, then we can delete the subscription item,
                 // as Stripe requires at least one active subscription item in a subscription.
                 var service = new SubscriptionItemService();
-                await service.DeleteAsync(subscriptionItemId);
+                var options = new SubscriptionItemDeleteOptions();
+                options.ClearUsage = true;
+                await service.DeleteAsync(subscriptionItemId, options);
             }
             else
             {
