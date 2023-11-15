@@ -50,7 +50,7 @@
                     {
                         <li>
                             <div>
-                                <input id="@availablePlan.Id" name="plans-group" type="radio" value="@availablePlan.Value" asp-for="Form.Plan">
+                                <input id="@availablePlan.Id" name="Form.Plan" type="radio" value="@availablePlan.Value" checked="@(Model.Form.Plan == availablePlan.Value)">
                                 <label for="@availablePlan.Id">@availablePlan.Label</label>
                             </div>
                         </li>

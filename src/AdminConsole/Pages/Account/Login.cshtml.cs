@@ -42,4 +42,9 @@ public class LoginModel : PageModel
         TempData["EmailSent"] = true;
         return RedirectToPage();
     }
+
+    public IActionResult OnPostSignUp()
+    {
+        return RedirectToPage("/Organization/Create");
+    }
 }

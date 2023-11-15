@@ -27,6 +27,10 @@
         @apply btn bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600;
     }
 
+    .btn-secondary {
+        @apply btn bg-gray-100 text-gray-900 hover:bg-gray-50 focus-visible:outline-gray-100;
+    }
+
     .btn-danger {
         @apply btn bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600;
     }
@@ -45,10 +49,6 @@
 
     .badge-info {
         @apply inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800;
-    }
-
-    .btn-secondary {
-        @apply relative -ml-px inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 bg-gray-100
     }
 
     .btn-form {
@@ -128,7 +128,7 @@
     }
 
     .pricing-card {
-        @apply bg-white shadow sm:rounded-lg p-4 flex flex-col h-full space-y-4 border-2 border-gray-200;
+        @apply bg-white shadow sm:rounded-lg p-4 flex flex-col space-y-4 border-2 border-gray-200;
     }
 
     .pricing-card-active {

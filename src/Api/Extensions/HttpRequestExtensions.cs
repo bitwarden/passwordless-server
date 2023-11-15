@@ -1,4 +1,5 @@
-﻿using UAParser;
+﻿using Passwordless.Common.Utils;
+using UAParser;
 
 namespace Passwordless.Api.Extensions;
 
@@ -24,23 +25,18 @@ public static class HttpRequestExtensions
 
         if (key == null)
         {
-            key = req.Query["key"];
+            return ApiKeyUtils.GetAppId(request.Headers["ApiKey"].ToString());
         }
-
-        if (string.IsNullOrEmpty(key))
+        if (request.Headers.ContainsKey("ApiSecret"))
         {
-            return null;
+            return ApiKeyUtils.GetAppId(request.Headers["ApiSecret"].ToString());
         }
-
-        var span = key.AsSpan();
-        var i = span.IndexOf(':');
-
-        if (i == -1)
+        if (request.RouteValues.ContainsKey("appId"))
         {
-            return null;
+            return request.RouteValues["appId"].ToString();
         }
 
-        return span.Slice(0, i).ToString();
+        return null;
     }
 
     public static string? GetTenantName(this HttpRequest httpRequest) =>

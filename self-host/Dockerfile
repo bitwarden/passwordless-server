@@ -105,22 +105,22 @@ WORKDIR /app
 COPY --from=dotnet-build /app ./
 
 # Set up supervisord
-COPY docker/supervisord/*.ini /etc/supervisor.d/
-COPY docker/supervisord/supervisord.conf /etc/supervisor/supervisord.conf
+COPY self-host/supervisord/*.ini /etc/supervisor.d/
+COPY self-host/supervisord/supervisord.conf /etc/supervisor/supervisord.conf
 RUN rm -f /etc/supervisord.conf
 
 # Set up nginx
-COPY docker/nginx/nginx.conf /etc/nginx
-COPY docker/nginx/proxy.conf /etc/nginx
-COPY docker/nginx/mime.types /etc/nginx
-COPY docker/nginx/security-headers.conf /etc/nginx
-COPY docker/nginx/security-headers-ssl.conf /etc/nginx
-COPY docker/nginx/logrotate.sh /
+COPY self-host/nginx/nginx.conf /etc/nginx
+COPY self-host/nginx/proxy.conf /etc/nginx
+COPY self-host/nginx/mime.types /etc/nginx
+COPY self-host/nginx/security-headers.conf /etc/nginx
+COPY self-host/nginx/security-headers-ssl.conf /etc/nginx
+COPY self-host/nginx/logrotate.sh /
 RUN chmod +x /logrotate.sh
 
 # Copy configuration templates
-COPY docker/hbs/nginx-config.hbs /etc/hbs/
-COPY docker/hbs/config.yaml /etc/hbs/
+COPY self-host/hbs/nginx-config.hbs /etc/hbs/
+COPY self-host/hbs/config.yaml /etc/hbs/
 
 # Download hbs tool for generating final configurations
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-x64.zip; fi
@@ -132,7 +132,7 @@ RUN unzip hbs.zip -d /usr/local/bin && rm hbs.zip
 RUN chmod +x /usr/local/bin/hbs
 
 # Copy entrypoint script and make it executable
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY self-host/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 VOLUME ["/etc/bitwarden_passwordless"]

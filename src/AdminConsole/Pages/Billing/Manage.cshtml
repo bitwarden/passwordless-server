@@ -1,6 +1,10 @@
 @page
 @model Passwordless.AdminConsole.Pages.Billing.Manage
 
+@{
+    ViewBag.Title = "Manage Billing";
+}
+
 <panel header="Upgrade to add multiple applications" asp-if="!Model.Organization.HasSubscription">
     <p>Your Free Organization includes 1 Trial app (up to 10k users) and 1 console administrator. </p>
     <form method="post">
@@ -93,3 +97,7 @@
         </div>
     </panel>
 }
+
+<panel header="Subscription Cancellation" asp-if="Model.Organization.HasSubscription">
+    <info-alert-box message="To cancel your active Passwordless.dev 'Pro' or 'Enterprise' subscription, you will have to delete every application in your organization. Your subscription will be cancelled automatically when the last application has been deleted."></info-alert-box>
+</panel>
