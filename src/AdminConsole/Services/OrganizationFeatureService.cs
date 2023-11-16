@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
 
@@ -27,24 +26,23 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
             .Select(x => x.Key)
             .ToList();
 
-        // we cannot reliably set organization features, as there is no such concept.
         FeaturesOptions features;
-        if (billingPlans.Contains(PlanConstants.Enterprise))
+        if (!billingPlans.Any())
         {
-            features = _options.Plans[PlanConstants.Enterprise].Features;
-        }
-        else if (billingPlans.Contains(PlanConstants.Pro))
-        {
-            features = _options.Plans[PlanConstants.Pro].Features;
+            features = _options.Plans[_options.Store.Free].Features;
         }
         else
         {
-            features = _options.Plans[PlanConstants.Free].Features;
+            var plan = _options.Plans
+                .Where(x => billingPlans.Contains(x.Key))
+                .OrderByDescending(x => x.Value.Order)
+                .FirstOrDefault();
+            features = plan.Value.Features;
         }
+
         return new FeaturesContext(
             features.EventLoggingIsEnabled,
             features.EventLoggingRetentionPeriod,
             null);
-
     }
 }
