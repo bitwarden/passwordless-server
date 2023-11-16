@@ -128,7 +128,7 @@ public class SettingsModel : PageModel
         var plan = _stripeOptions.Plans[selectedPlan];
         var priceId = plan.PriceId!;
         var subscriptionItem = organization.Applications
-            .Where(x => x.Id == priceId)
+            .Where(x => x.BillingPriceId == priceId)
             .GroupBy(x => new
             {
                 x.BillingPriceId,
@@ -243,7 +243,7 @@ public class SettingsModel : PageModel
         var isActive = Application!.BillingPlan == plan;
 
         bool canSubscribe;
-        if (plan == PlanConstants.Free)
+        if (plan == PlanConstants.Free || Application.DeleteAt.HasValue)
         {
             canSubscribe = false;
         }
