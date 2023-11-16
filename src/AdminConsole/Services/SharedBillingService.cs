@@ -277,7 +277,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
-        var features = _stripeOptions.Plans[_stripeOptions.OnSale.Free].Features;
+        var features = _stripeOptions.Plans[_stripeOptions.Store.Free].Features;
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
 
@@ -285,7 +285,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         {
             application.BillingPriceId = null;
             application.BillingSubscriptionItemId = null;
-            application.BillingPlan = _stripeOptions.OnSale.Free;
+            application.BillingPlan = _stripeOptions.Store.Free;
         }
 
         await db.SaveChangesAsync();

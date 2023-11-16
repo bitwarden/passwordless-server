@@ -29,7 +29,7 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
         FeaturesOptions features;
         if (!billingPlans.Any())
         {
-            features = _options.Plans[_options.OnSale.Free].Features;
+            features = _options.Plans[_options.Store.Free].Features;
         }
         else
         {

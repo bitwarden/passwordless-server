@@ -67,10 +67,10 @@ public class SettingsModel : PageModel
 
         if (!Organization.HasSubscription)
         {
-            AddPlan(_stripeOptions.OnSale.Free);
+            AddPlan(_stripeOptions.Store.Free);
         }
-        AddPlan(_stripeOptions.OnSale.Pro);
-        AddPlan(_stripeOptions.OnSale.Enterprise);
+        AddPlan(_stripeOptions.Store.Pro);
+        AddPlan(_stripeOptions.Store.Enterprise);
 
         PendingDelete = application?.DeleteAt.HasValue ?? false;
         DeleteAt = application?.DeleteAt;
@@ -244,7 +244,7 @@ public class SettingsModel : PageModel
         var isOutdated = isActive && Application!.BillingPriceId != options.PriceId;
 
         bool canSubscribe;
-        if (plan == _stripeOptions.OnSale.Free || Application.DeleteAt.HasValue)
+        if (plan == _stripeOptions.Store.Free || Application.DeleteAt.HasValue)
         {
             canSubscribe = false;
         }
