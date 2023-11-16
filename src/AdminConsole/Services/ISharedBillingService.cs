@@ -52,7 +52,7 @@ public interface ISharedBillingService
     /// <param name="subscriptionItemId"></param>
     Task OnPostApplicationDeletedAsync(string subscriptionItemId);
 
-    Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
+    Task UpdateApplicationAsync(string applicationId, string plan, string planSku, string subscriptionItemId, string priceId);
 
     Task<string> CreateCheckoutSessionAsync(
         int organizationId,

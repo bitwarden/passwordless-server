@@ -26,6 +26,9 @@ public class Badge : TagHelper
             case ColorVariant.Success:
                 classBuilder.Append(" bg-green-600 text-white");
                 break;
+            case ColorVariant.Warning:
+                classBuilder.Append(" bg-yellow-600 text-white");
+                break;
             default:
                 classBuilder.Append(" bg-blue-600 text-white");
                 break;

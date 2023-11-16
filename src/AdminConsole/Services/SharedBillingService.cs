@@ -177,13 +177,14 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         return customerId;
     }
 
-    public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
+    public async Task UpdateApplicationAsync(string applicationId, string plan, string planSku, string subscriptionItemId, string priceId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         await db.Applications
             .Where(x => x.Id == applicationId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(p => p.BillingPlan, plan)
+                .SetProperty(p => p.BillingPlanSku, planSku)
                 .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
                 .SetProperty(p => p.BillingPriceId, priceId));
     }
@@ -287,6 +288,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             application.BillingPriceId = null;
             application.BillingSubscriptionItemId = null;
             application.BillingPlan = PlanConstants.Free;
+            application.BillingPlanSku = _stripeOptions.Plans[PlanConstants.Free].Sku;
         }
 
         await db.SaveChangesAsync();

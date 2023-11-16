@@ -6,4 +6,5 @@ public enum ColorVariant
     Success,
     Danger,
     Info,
+    Warning
 }

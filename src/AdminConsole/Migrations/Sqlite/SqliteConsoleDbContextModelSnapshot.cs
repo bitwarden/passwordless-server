@@ -332,6 +332,10 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BillingPlanSku")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("BillingPriceId")
                         .HasColumnType("TEXT");
 

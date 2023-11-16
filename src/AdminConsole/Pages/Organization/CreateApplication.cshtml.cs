@@ -93,6 +93,7 @@ public class CreateApplicationModel : PageModel
         await InitializeAsync();
 
         app.BillingPlan = form.Plan;
+        app.BillingPlanSku = _stripeOptions.Plans[form.Plan].Sku;
 
         if (form.Plan != PlanConstants.Free)
         {

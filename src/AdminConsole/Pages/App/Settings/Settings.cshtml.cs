@@ -167,7 +167,7 @@ public class SettingsModel : PageModel
             await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
         }
 
-        await _billingService.UpdateApplicationAsync(app, selectedPlan, subscriptionItem.Id, priceId);
+        await _billingService.UpdateApplicationAsync(app, selectedPlan, plan.Sku, subscriptionItem.Id, priceId);
 
         var updateFeaturesRequest = new SetApplicationFeaturesRequest
         {
@@ -241,6 +241,7 @@ public class SettingsModel : PageModel
     private void AddPlan(string plan, StripePlanOptions options)
     {
         var isActive = Application!.BillingPlan == plan;
+        var isOutdated = isActive && Application!.BillingPriceId != options.PriceId;
 
         bool canSubscribe;
         if (plan == PlanConstants.Free || Application.DeleteAt.HasValue)
@@ -260,7 +261,8 @@ public class SettingsModel : PageModel
             options.Ui.PriceHint,
             options.Ui.Features.ToImmutableList(),
             isActive,
-            canSubscribe);
+            canSubscribe,
+            isOutdated);
         Plans.Add(model);
     }
 
@@ -272,5 +274,6 @@ public class SettingsModel : PageModel
         string? PriceHint,
         IReadOnlyCollection<string> Features,
         bool IsActive,
-        bool CanSubscribe);
+        bool CanSubscribe,
+        bool IsOutdated);
 }

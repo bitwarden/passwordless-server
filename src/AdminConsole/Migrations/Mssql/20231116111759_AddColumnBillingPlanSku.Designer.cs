@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.AdminConsole.Db;
 
@@ -11,9 +12,11 @@ using Passwordless.AdminConsole.Db;
 namespace Passwordless.AdminConsole.Migrations.Mssql
 {
     [DbContext(typeof(MssqlConsoleDbContext))]
-    partial class MssqlConsoleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231116111759_AddColumnBillingPlanSku")]
+    partial class AddColumnBillingPlanSku
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

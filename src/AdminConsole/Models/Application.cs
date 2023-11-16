@@ -4,10 +4,6 @@ namespace Passwordless.AdminConsole.Models;
 
 public class Application
 {
-    public Application()
-    {
-    }
-
     public string Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
@@ -22,6 +18,7 @@ public class Application
 
     public virtual Onboarding? Onboarding { get; set; }
     public string BillingPlan { get; set; } = PlanConstants.Free;
+    public string BillingPlanSku { get; set; }
     public string? BillingSubscriptionItemId { get; set; }
     public string? BillingPriceId { get; set; }
 
