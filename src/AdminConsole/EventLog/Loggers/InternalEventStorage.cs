@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Db;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;

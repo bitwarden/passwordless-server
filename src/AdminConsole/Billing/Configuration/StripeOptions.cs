@@ -6,5 +6,7 @@ public class StripeOptions
 
     public string ApiKey { get; set; }
 
+    public ICollection<string> OnSale { get; set; }
+
     public Dictionary<string, StripePlanOptions> Plans { get; set; }
 }

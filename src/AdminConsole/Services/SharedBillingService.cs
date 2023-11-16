@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
@@ -177,14 +176,13 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         return customerId;
     }
 
-    public async Task UpdateApplicationAsync(string applicationId, string plan, string planSku, string subscriptionItemId, string priceId)
+    public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         await db.Applications
             .Where(x => x.Id == applicationId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(p => p.BillingPlan, plan)
-                .SetProperty(p => p.BillingPlanSku, planSku)
                 .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
                 .SetProperty(p => p.BillingPriceId, priceId));
     }
@@ -279,7 +277,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
-        var features = _stripeOptions.Plans[PlanConstants.Free].Features;
+        var features = _stripeOptions.Plans[_stripeOptions.OnSale.First()].Features;
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
 
@@ -287,8 +285,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         {
             application.BillingPriceId = null;
             application.BillingSubscriptionItemId = null;
-            application.BillingPlan = PlanConstants.Free;
-            application.BillingPlanSku = _stripeOptions.Plans[PlanConstants.Free].Sku;
+            application.BillingPlan = _stripeOptions.OnSale.First();
         }
 
         await db.SaveChangesAsync();

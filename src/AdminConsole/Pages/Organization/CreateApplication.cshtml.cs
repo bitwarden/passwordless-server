@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
@@ -41,9 +40,13 @@ public class CreateApplicationModel : PageModel
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
+        Form = new CreateApplicationForm
+        {
+            Plan = _stripeOptions.OnSale.First()
+        };
     }
 
-    public CreateApplicationForm Form { get; } = new();
+    public CreateApplicationForm Form { get; }
 
     public Models.Organization Organization { get; set; }
 
@@ -93,9 +96,8 @@ public class CreateApplicationModel : PageModel
         await InitializeAsync();
 
         app.BillingPlan = form.Plan;
-        app.BillingPlanSku = _stripeOptions.Plans[form.Plan].Sku;
 
-        if (form.Plan != PlanConstants.Free)
+        if (form.Plan != _stripeOptions.OnSale.First())
         {
             if (Organization.BillingSubscriptionId == null)
             {
@@ -171,8 +173,14 @@ public class CreateApplicationModel : PageModel
 
         if (Organization.HasSubscription)
         {
-            AvailablePlans.Add(new AvailablePlan("pro-plan", PlanConstants.Pro, "Pro"));
-            AvailablePlans.Add(new AvailablePlan("enterprise-plan", PlanConstants.Enterprise, "Enterprise"));
+            for (var i = 1; i < _stripeOptions.OnSale.Count; i++)
+            {
+                AvailablePlans.Add(
+                    new AvailablePlan(
+                        _stripeOptions.OnSale.ElementAt(i),
+                        _stripeOptions.OnSale.ElementAt(i),
+                        _stripeOptions.Plans[_stripeOptions.OnSale.ElementAt(i)].Ui.Label));
+            }
         }
     }
 
@@ -188,7 +196,7 @@ public class CreateApplicationModel : PageModel
         public string Description { get; set; }
 
         [Required]
-        public string Plan { get; set; } = PlanConstants.Free;
+        public string Plan { get; set; }
     }
 
     public record AvailablePlan(string Id, string Value, string Label);

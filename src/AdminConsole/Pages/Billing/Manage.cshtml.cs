@@ -4,7 +4,6 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
@@ -25,13 +24,7 @@ public class Manage : BaseExtendedPageModel
         _dataService = dataService;
         _stripeOptions = stripeOptions;
 
-
-        Plans = new List<PricingCardModel>
-        {
-            new(PlanConstants.Free, stripeOptions.Value.Plans[PlanConstants.Free]),
-            new(PlanConstants.Pro, stripeOptions.Value.Plans[PlanConstants.Pro]),
-            new(PlanConstants.Enterprise, stripeOptions.Value.Plans[PlanConstants.Enterprise])
-        };
+        Plans = _stripeOptions.Value.OnSale.Select(plan => new PricingCardModel(plan, _stripeOptions.Value.Plans[plan])).ToList();
     }
 
     public ICollection<ApplicationModel> Applications { get; set; }
@@ -75,7 +68,7 @@ public class Manage : BaseExtendedPageModel
             var successUrl = Url.PageLink("/Billing/Success");
             successUrl += "?session_id={CHECKOUT_SESSION_ID}";
             var cancelUrl = Url.PageLink("/Billing/Cancelled");
-            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), PlanConstants.Pro, successUrl, cancelUrl);
+            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), _stripeOptions.Value.OnSale.ElementAt(1), successUrl, cancelUrl);
             return Redirect(sessionUrl);
         }
 

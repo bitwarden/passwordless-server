@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Models.DTOs;
@@ -68,10 +67,10 @@ public class SettingsModel : PageModel
 
         if (!Organization.HasSubscription)
         {
-            AddPlan(PlanConstants.Free, _stripeOptions.Plans[PlanConstants.Free]);
+            AddPlan(_stripeOptions.OnSale.First());
         }
-        AddPlan(PlanConstants.Pro, _stripeOptions.Plans[PlanConstants.Pro]);
-        AddPlan(PlanConstants.Enterprise, _stripeOptions.Plans[PlanConstants.Enterprise]);
+        AddPlan(_stripeOptions.OnSale.ElementAt(1));
+        AddPlan(_stripeOptions.OnSale.ElementAt(2));
 
         PendingDelete = application?.DeleteAt.HasValue ?? false;
         DeleteAt = application?.DeleteAt;
@@ -167,7 +166,7 @@ public class SettingsModel : PageModel
             await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
         }
 
-        await _billingService.UpdateApplicationAsync(app, selectedPlan, plan.Sku, subscriptionItem.Id, priceId);
+        await _billingService.UpdateApplicationAsync(app, selectedPlan, subscriptionItem.Id, priceId);
 
         var updateFeaturesRequest = new SetApplicationFeaturesRequest
         {
@@ -238,13 +237,14 @@ public class SettingsModel : PageModel
         return Redirect(session.Url);
     }
 
-    private void AddPlan(string plan, StripePlanOptions options)
+    private void AddPlan(string plan)
     {
+        var options = _stripeOptions.Plans[plan];
         var isActive = Application!.BillingPlan == plan;
         var isOutdated = isActive && Application!.BillingPriceId != options.PriceId;
 
         bool canSubscribe;
-        if (plan == PlanConstants.Free || Application.DeleteAt.HasValue)
+        if (plan == _stripeOptions.OnSale.First() || Application.DeleteAt.HasValue)
         {
             canSubscribe = false;
         }

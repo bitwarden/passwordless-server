@@ -345,10 +345,6 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BillingPlanSku")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("BillingPriceId")
                         .HasColumnType("nvarchar(max)");
 
