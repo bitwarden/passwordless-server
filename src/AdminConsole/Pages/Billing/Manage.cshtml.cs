@@ -109,7 +109,6 @@ public class Manage : BaseExtendedPageModel
         string Description,
         int Users,
         string Plan,
-        string Sku,
         bool CanChangePlan)
     {
         public static ApplicationModel FromEntity(Application entity, StripePlanOptions options)
@@ -120,7 +119,6 @@ public class Manage : BaseExtendedPageModel
                 entity.Description,
                 entity.CurrentUserCount,
                 options.Ui.Label,
-                options.Sku,
                 canChangePlan);
         }
     }

@@ -33,7 +33,7 @@
                         <td>@app.Id</td>
                         <td>@app.Description</td>
                         <td>@app.Users</td>
-                        <td>@app.Plan (@app.Sku)</td>
+                        <td>@app.Plan</td>
                         <td>
                             <form asp-if="app.CanChangePlan" method="post">
                                 <input type="hidden" name="id" value="@app.Id"/>
