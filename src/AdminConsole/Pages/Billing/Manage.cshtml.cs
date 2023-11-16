@@ -108,15 +108,18 @@ public class Manage : BaseExtendedPageModel
         string Id,
         string Description,
         int Users,
-        string Plan)
+        string Plan,
+        bool CanChangePlan)
     {
         public static ApplicationModel FromEntity(Application entity, StripePlanOptions options)
         {
+            var canChangePlan = !entity.DeleteAt.HasValue;
             return new ApplicationModel(
                 entity.Id,
                 entity.Description,
                 entity.CurrentUserCount,
-                options.Ui.Label);
+                options.Ui.Label,
+                canChangePlan);
         }
     }
 
