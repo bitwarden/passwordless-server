@@ -38,7 +38,7 @@ public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStora
                     .Where(app => app.OrganizationId == organization)
                     .GroupBy(app => app.BillingPlan)
                     .Select(group => group.Key)
-                    .FirstOrDefault() ?? _planOptionsConfig.OnSale.First()
+                    .FirstOrDefault() ?? _planOptionsConfig.OnSale.Free
             })
             .ToListAsync(cancellationToken);
 

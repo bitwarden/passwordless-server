@@ -42,7 +42,7 @@ public class CreateApplicationModel : PageModel
         _stripeOptions = stripeOptions.Value;
         Form = new CreateApplicationForm
         {
-            Plan = _stripeOptions.OnSale.First()
+            Plan = _stripeOptions.OnSale.Free
         };
     }
 
@@ -97,7 +97,7 @@ public class CreateApplicationModel : PageModel
 
         app.BillingPlan = form.Plan;
 
-        if (form.Plan != _stripeOptions.OnSale.First())
+        if (form.Plan != _stripeOptions.OnSale.Free)
         {
             if (Organization.BillingSubscriptionId == null)
             {
@@ -173,14 +173,8 @@ public class CreateApplicationModel : PageModel
 
         if (Organization.HasSubscription)
         {
-            for (var i = 1; i < _stripeOptions.OnSale.Count; i++)
-            {
-                AvailablePlans.Add(
-                    new AvailablePlan(
-                        _stripeOptions.OnSale.ElementAt(i),
-                        _stripeOptions.OnSale.ElementAt(i),
-                        _stripeOptions.Plans[_stripeOptions.OnSale.ElementAt(i)].Ui.Label));
-            }
+            AvailablePlans.Add(new AvailablePlan(_stripeOptions.OnSale.Pro, _stripeOptions.Plans[_stripeOptions.OnSale.Pro].Ui.Label));
+            AvailablePlans.Add(new AvailablePlan(_stripeOptions.OnSale.Enterprise, _stripeOptions.Plans[_stripeOptions.OnSale.Enterprise].Ui.Label));
         }
     }
 
@@ -199,5 +193,5 @@ public class CreateApplicationModel : PageModel
         public string Plan { get; set; }
     }
 
-    public record AvailablePlan(string Id, string Value, string Label);
+    public record AvailablePlan(string Id, string Label);
 }

@@ -24,7 +24,11 @@ public class Manage : BaseExtendedPageModel
         _dataService = dataService;
         _stripeOptions = stripeOptions;
 
-        Plans = _stripeOptions.Value.OnSale.Select(plan => new PricingCardModel(plan, _stripeOptions.Value.Plans[plan])).ToList();
+        var plans = new List<PricingCardModel>();
+        plans.Add(new PricingCardModel(_stripeOptions.Value.OnSale.Free, _stripeOptions.Value.Plans[_stripeOptions.Value.OnSale.Free]));
+        plans.Add(new PricingCardModel(_stripeOptions.Value.OnSale.Pro, _stripeOptions.Value.Plans[_stripeOptions.Value.OnSale.Pro]));
+        plans.Add(new PricingCardModel(_stripeOptions.Value.OnSale.Enterprise, _stripeOptions.Value.Plans[_stripeOptions.Value.OnSale.Enterprise]));
+        Plans = plans;
     }
 
     public ICollection<ApplicationModel> Applications { get; set; }
@@ -68,7 +72,7 @@ public class Manage : BaseExtendedPageModel
             var successUrl = Url.PageLink("/Billing/Success");
             successUrl += "?session_id={CHECKOUT_SESSION_ID}";
             var cancelUrl = Url.PageLink("/Billing/Cancelled");
-            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), _stripeOptions.Value.OnSale.ElementAt(1), successUrl, cancelUrl);
+            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), _stripeOptions.Value.OnSale.Pro, successUrl, cancelUrl);
             return Redirect(sessionUrl);
         }
 
