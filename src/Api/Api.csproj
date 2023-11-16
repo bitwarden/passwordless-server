@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="7.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="7.0.0" />
-    <PackageReference Include="Datadog.Trace" Version="2.40.0" />
+    <PackageReference Include="Datadog.Trace" Version="2.41.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
