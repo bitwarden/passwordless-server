@@ -30,6 +30,11 @@ public class ErrorModel : PageModel
         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 
         var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();
+        if (exceptionHandlerPathFeature?.Error is not PasswordlessApiException)
+        {
+            return;
+        }
+
         var exception = (PasswordlessApiException)exceptionHandlerPathFeature?.Error;
         ProblemDetails = exception?.Details;
     }
