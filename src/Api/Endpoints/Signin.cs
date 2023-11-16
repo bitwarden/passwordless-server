@@ -1,4 +1,5 @@
 ﻿using Passwordless.Api.Authorization;
+using Passwordless.Api.Extensions;
 using Passwordless.Service;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -7,38 +8,66 @@ namespace Passwordless.Api.Endpoints;
 
 public static class SigninEndpoints
 {
+    private record SigninTokenResponse(string Token);
+
     public static void MapSigninEndpoints(this WebApplication app)
     {
-        app.MapPost("/signin/begin", async (SignInBeginDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var result = await fido2Service.SignInBegin(payload);
+        app.MapPost("/signin/token", async (
+                SignInToken signinToken,
+                HttpRequest request,
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var (deviceInfo, country) = request.GetDeviceInfo();
 
-            return Ok(result);
-        })
+                var result = await fido2Service.CreateSigninToken(signinToken);
+
+                return Ok(new SigninTokenResponse(result));
+            })
+            .RequireSecretKey()
+            .RequireCors("default");
+
+        app.MapPost("/signin/begin", async (
+                SignInBeginDTO payload,
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var result = await fido2Service.SignInBegin(payload);
+
+                return Ok(result);
+            })
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/signin/complete", async (SignInCompleteDTO payload, HttpRequest request, IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
-            var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
+        app.MapPost("/signin/complete", async (
+                SignInCompleteDTO payload,
+                HttpRequest request,
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var (deviceInfo, country) = request.GetDeviceInfo();
+                var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
 
-            return Ok(result);
-        })
+                return Ok(result);
+            })
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/signin/verify", async (SignInVerifyDTO payload, IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var result = await fido2Service.SignInVerify(payload);
+        app.MapPost("/signin/verify", async (
+                SignInVerifyDTO payload,
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var result = await fido2Service.SignInVerify(payload);
 
-            return Ok(result);
-        })
+                return Ok(result);
+            })
             .RequireSecretKey()
             .RequireCors("default");
     }

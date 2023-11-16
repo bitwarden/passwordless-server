@@ -6,7 +6,6 @@ namespace Passwordless.Service.Models;
 [MessagePackObject]
 public class RegisterToken : Token
 {
-
     [Key(10)]
     public string UserId { get; set; }
     [Key(11)]
@@ -23,12 +22,40 @@ public class RegisterToken : Token
     public string UserVerification { get; set; } = "Preferred";
     [Key(17)]
     public HashSet<string> Aliases { get; set; }
-
-    [Key(18)] public bool AliasHashing { get; set; } = true;
+    [Key(18)]
+    public bool AliasHashing { get; set; } = true;
 }
 
 [MessagePackObject]
-public class VerifySignInToken : Token
+public class VerifySignInToken : SignInToken
+{
+    [Key(11)]
+    public DateTime Timestamp { get; set; }
+
+    [Key(12)]
+    public string RpId { get; set; }
+
+    [Key(13)]
+    public string Origin { get; set; }
+
+    [Key(14)]
+    public bool Success { get; set; }
+
+    [Key(15)]
+    public string Device { get; set; }
+
+    [Key(16)]
+    public string Country { get; set; }
+
+    [Key(17)]
+    public string Nickname { get; set; }
+
+    [Key(18)]
+    public byte[] CredentialId { get; set; }
+}
+
+[MessagePackObject]
+public class SignInToken : Token
 {
     [Key(10)]
     public string UserId { get; set; }

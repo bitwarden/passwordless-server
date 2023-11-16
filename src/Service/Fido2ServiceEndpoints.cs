@@ -43,11 +43,52 @@ public class Fido2ServiceEndpoints : IFido2Service
         await _tokenService.InitAsync();
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage,
+        ITokenService tokenService, IEventLogger eventLogger)
     {
         var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, eventLogger);
         await instance.Init();
         return instance;
+    }
+
+    public async Task<string> CreateRegisterToken(RegisterToken tokenProps)
+    {
+        if (tokenProps.ExpiresAt == default)
+        {
+            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
+        }
+
+        ValidateAliases(tokenProps.Aliases);
+        ValidateUserId(tokenProps.UserId);
+        ValidateUsername(tokenProps.Username);
+
+        // Attestation
+        if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
+        if (!tokenProps.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
+        {
+            throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
+        }
+
+        // check if aliases is available
+        if (tokenProps.Aliases != null)
+        {
+            ValidateAliases(tokenProps.Aliases);
+
+            var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenant));
+
+            // todo: check if alias exists and belongs to different user.
+            var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenProps.UserId);
+            if (!isAvailable)
+            {
+                throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
+            }
+        }
+
+        var token = _tokenService.EncodeToken(tokenProps, "register_");
+
+        _eventLogger.LogRegistrationTokenCreatedEvent(tokenProps.UserId);
+
+        return token;
     }
 
     public async Task<SessionResponse<CredentialCreateOptions>> RegisterBegin(FidoRegistrationBeginDTO request)
@@ -127,55 +168,6 @@ public class Fido2ServiceEndpoints : IFido2Service
         }
     }
 
-    public Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
-    {
-        var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
-
-        _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
-
-        return Task.FromResult(token);
-    }
-
-    public async Task<string> CreateToken(RegisterToken tokenProps)
-    {
-        if (tokenProps.ExpiresAt == default)
-        {
-            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
-        }
-
-        ValidateAliases(tokenProps.Aliases);
-        ValidateUserId(tokenProps.UserId);
-        ValidateUsername(tokenProps.Username);
-
-        // Attestation
-        if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
-        if (tokenProps.Attestation.ToLower() != "none")
-        {
-            throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
-        }
-
-        // check if aliases is available
-        if (tokenProps.Aliases != null)
-        {
-            ValidateAliases(tokenProps.Aliases);
-
-            var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenant));
-
-            // todo: check if alias exists and belongs to different user.
-            var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenProps.UserId);
-            if (!isAvailable)
-            {
-                throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
-            }
-        }
-
-        var token = _tokenService.EncodeToken(tokenProps, "register_");
-
-        _eventLogger.LogRegistrationTokenCreatedEvent(tokenProps.UserId);
-
-        return token;
-    }
-
     public async Task<TokenResponse> RegisterComplete(RegistrationCompleteDTO request, string deviceInfo, string country)
     {
         var session = _tokenService.DecodeToken<RegisterSession>(request.Session, "session_", true);
@@ -187,23 +179,25 @@ public class Fido2ServiceEndpoints : IFido2Service
             ServerName = request.RPID
         });
 
-        // Create callback so that lib can verify credential id is unique to this user
-        IsCredentialIdUniqueToUserAsyncDelegate callback = async (args, token) =>
+        var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
         {
             bool exists = await _storage.ExistsAsync(args.CredentialId);
             return !exists;
-        };
-
-        var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, callback);
+        });
 
         var userId = Encoding.UTF8.GetString(success.Result.User.Id);
 
-        // add aliases
+        // Add aliases
         try
         {
             if (session.Aliases != null && session.Aliases.Any())
             {
-                await SetAlias(new AliasPayload { Aliases = session.Aliases, Hashing = session.AliasHashing, UserId = userId });
+                await SetAlias(new AliasPayload
+                {
+                    Aliases = session.Aliases,
+                    Hashing = session.AliasHashing,
+                    UserId = userId
+                });
             }
         }
         catch (Exception e)
@@ -256,6 +250,22 @@ public class Fido2ServiceEndpoints : IFido2Service
         var token = _tokenService.EncodeToken(tokenData, "verify_");
 
         return new TokenResponse(token);
+    }
+
+    public Task<string> CreateSigninToken(SignInToken tokenProps)
+    {
+        if (tokenProps.ExpiresAt == default)
+        {
+            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
+        }
+
+        ValidateUserId(tokenProps.UserId);
+
+        _eventLogger.LogSigninTokenCreatedEvent(tokenProps.UserId);
+
+        return Task.FromResult(
+            _tokenService.EncodeToken(tokenProps, "verify_")
+        );
     }
 
     public async Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request)
@@ -357,6 +367,15 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         // return OK to client
         return new TokenResponse(token);
+    }
+
+    public Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
+    {
+        var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
+
+        _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
+
+        return Task.FromResult(token);
     }
 
     private static void ValidateAliases(Aliases aliases, bool throwIfNull = false)
