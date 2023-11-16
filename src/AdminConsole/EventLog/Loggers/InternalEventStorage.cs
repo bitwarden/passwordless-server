@@ -45,7 +45,7 @@ public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStora
         foreach (var organization in organizations)
         {
             var features = _planOptionsConfig.Plans[organization.BillingPlan].Features;
-            var now = _timeProvider.GetUtcNow();
+            var now = _timeProvider.GetUtcNow().UtcDateTime;
             await db.OrganizationEvents
                 .Where(x => x.OrganizationId == organization.OrganizationId && x.PerformedAt < now.AddDays(-features.EventLoggingRetentionPeriod))
                 .ExecuteDeleteAsync();
