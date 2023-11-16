@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
@@ -15,29 +14,42 @@ public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStora
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly StripeOptions _planOptionsConfig;
-    private readonly ISystemClock _systemClock;
+    private readonly TimeProvider _timeProvider;
 
     public InternalEventLogStorageContext(IDbContextFactory<TDbContext> dbContextFactory,
         IOptions<StripeOptions> planOptionsConfig,
-        ISystemClock systemClock)
+        TimeProvider timeProvider)
     {
         _dbContextFactory = dbContextFactory;
         _planOptionsConfig = planOptionsConfig.Value;
-        _systemClock = systemClock;
+        _timeProvider = timeProvider;
     }
 
     public async Task DeleteExpiredEvents(CancellationToken cancellationToken)
     {
-        var plan = _planOptionsConfig.Plans[PlanConstants.Enterprise];
-        var retentionDays = plan.Features.EventLoggingRetentionPeriod;
-
         await using var db = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var events = await db.OrganizationEvents
-            .Where(x => x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(-retentionDays))
-            .AsNoTracking()
+        var organizations = await db.OrganizationEvents
+            .Select(x => x.OrganizationId)
+            .Distinct()
+            .Select(organization => new
+            {
+                OrganizationId = organization,
+                BillingPlan = db.Applications
+                    .Where(app => app.OrganizationId == organization)
+                    .GroupBy(app => app.BillingPlan)
+                    .Select(group => group.Key)
+                    .FirstOrDefault() ?? _planOptionsConfig.OnSale.First()
+            })
             .ToListAsync(cancellationToken);
 
-        db.RemoveRange(events);
+        foreach (var organization in organizations)
+        {
+            var features = _planOptionsConfig.Plans[organization.BillingPlan].Features;
+            var now = _timeProvider.GetUtcNow();
+            await db.OrganizationEvents
+                .Where(x => x.OrganizationId == organization.OrganizationId && x.PerformedAt < now.AddDays(-features.EventLoggingRetentionPeriod))
+                .ExecuteDeleteAsync();
+        }
         await db.SaveChangesAsync(cancellationToken);
     }
 }
