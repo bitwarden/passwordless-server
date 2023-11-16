@@ -252,16 +252,21 @@ public class Fido2ServiceEndpoints : IFido2Service
         return new TokenResponse(token);
     }
 
-    public Task<string> CreateSigninToken(SignInToken tokenProps)
+    public Task<string> CreateSigninToken(string userId)
     {
-        if (tokenProps.ExpiresAt == default)
+        ValidateUserId(userId);
+
+        _eventLogger.LogSigninTokenCreatedEvent(userId);
+
+        var tokenProps = new VerifySignInToken
         {
-            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
-        }
-
-        ValidateUserId(tokenProps.UserId);
-
-        _eventLogger.LogSigninTokenCreatedEvent(tokenProps.UserId);
+            Success = true,
+            UserId = userId,
+            Timestamp = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            TokenId = Guid.NewGuid(),
+            Type = "manual_signin"
+        };
 
         return Task.FromResult(
             _tokenService.EncodeToken(tokenProps, "verify_")
