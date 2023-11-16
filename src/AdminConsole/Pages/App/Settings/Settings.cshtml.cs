@@ -243,7 +243,7 @@ public class SettingsModel : PageModel
         var isActive = Application!.BillingPlan == plan;
 
         bool canSubscribe;
-        if (plan == PlanConstants.Free)
+        if (plan == PlanConstants.Free || Application.DeleteAt.HasValue)
         {
             canSubscribe = false;
         }
