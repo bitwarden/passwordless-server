@@ -57,6 +57,7 @@
                     }
                 </ul>
             </div>
+            <input asp-if="!Model.Organization.HasSubscription" type="hidden" asp-for="Form.Plan" />
 
             <div>
                 <div asp-validation-summary="All"></div>
