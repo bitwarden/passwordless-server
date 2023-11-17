@@ -30,7 +30,10 @@ public class PasswordlessApiFactory : WebApplicationFactory<IApiMarker>, IAsyncL
     {
         await _dbContainer.StartAsync();
 
-        await this.CreateClient().GetAsync("/");
+        // Perform migrations and make sure the API is ready to receive requests
+        using var httpClient = this.CreateClient();
+        using var response = await httpClient.GetAsync("/");
+        response.EnsureSuccessStatusCode();
     }
 
     public new async Task DisposeAsync()
