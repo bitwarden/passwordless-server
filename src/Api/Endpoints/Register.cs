@@ -7,47 +7,53 @@ namespace Passwordless.Api.Endpoints;
 
 public static class RegisterEndpoints
 {
+    private record RegisterTokenResponse(string Token);
+
     public static void MapRegisterEndpoints(this WebApplication app)
     {
-        app.MapPost("/register/token", async (RegisterToken registerToken,
-                IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var result = await fido2Service.CreateToken(registerToken);
+        app.MapPost("/register/token", async (
+                RegisterToken registerToken,
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var result = await fido2Service.CreateRegisterToken(registerToken);
 
-            return Ok(new RegisterTokenResponse(result));
-        })
+                return Ok(new RegisterTokenResponse(result));
+            })
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapPost("/register/begin", async (FidoRegistrationBeginDTO payload,
-                IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var result = await fido2Service.RegisterBegin(payload);
+        app.MapPost("/register/begin", async (
+                FidoRegistrationBeginDTO payload,
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var result = await fido2Service.RegisterBegin(payload);
 
-            return Ok(result);
-        })
+                return Ok(result);
+            })
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (RegistrationCompleteDTO payload,
+        app.MapPost("/register/complete", async (
+                RegistrationCompleteDTO payload,
                 HttpRequest request,
-                IFido2ServiceFactory fido2ServiceFactory) =>
-        {
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
-            var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
-            var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
+                IFido2ServiceFactory fido2ServiceFactory
+            ) =>
+            {
+                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
+                var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
 
-            // Avoid serializing the certificate
-            return Ok(result);
-        })
+                // Avoid serializing the certificate
+                return Ok(result);
+            })
             .WithParameterValidation()
             .RequirePublicKey()
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
     }
-
-    public record RegisterTokenResponse(string Token);
 }

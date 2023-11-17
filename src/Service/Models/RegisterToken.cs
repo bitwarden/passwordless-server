@@ -6,7 +6,6 @@ namespace Passwordless.Service.Models;
 [MessagePackObject]
 public class RegisterToken : Token
 {
-
     [Key(10)]
     public string UserId { get; set; }
     [Key(11)]
