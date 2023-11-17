@@ -1,31 +1,30 @@
 @page "/onboarding/get-started"
-@using Microsoft.Extensions.Options
-@using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject IOptions<PasswordlessManagementOptions> Options
 @model Passwordless.AdminConsole.Pages.App.Onboarding.GetStarted
 
 @{
     ViewData["Title"] = "Getting Started";
 }
 
-<p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="underline">documentation</a>.</p>
-
 <panel header="1. Your API Keys">
-    <div class="mt-2 max-w-xl text-sm text-gray-500">
+    <div class="flex flex-col space-y-4 mt-2 max-w-xl text-sm text-gray-500">
+        <p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="link-blue">documentation</a>.</p>
+
         <p>Here are your API keys. You will use these to access the Passwordless api. The Api Key is used client side and is safe to share, while the ApiSecret is used on your backend and should never be exposed.</p>
     </div>
-    
+
     <div class="mt-5 max-w-3xl rounded-md bg-gray-50 px-6 py-5 sm:flex sm:items-start sm:justify-between">
         <div class="sm:flex sm:items-start">
             <div class="mt-3 sm:ml-4 sm:mt-0">
-                <copy-text title="API Url" value="@Options.Value.ApiUrl"></copy-text>
+                <copy-text title="API Url" value="@Model.ApiUrl"></copy-text>
                 <copy-text title="Public API Key" value="@Model.Onboarding.ApiKey"></copy-text>
                 <copy-text title="Private API Key" value="@Model.Onboarding.ApiSecret" type="password"></copy-text>
                 <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
             </div>
         </div>
         <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
-            <button @@click="onSave" type="button" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">🔒 Download</button>
+            <form method="post" asp-page-handler="DownloadApiKeys">
+                <button type="submit" class="btn-primary btn-icon"><partial name="Shared/Icons/Download"/> Download</button>
+            </form>
         </div>
     </div>
 </panel>
@@ -34,11 +33,17 @@
     <div class="mt-2 max-w-xl text-sm text-gray-500">
         <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we've made official packages, sdks and examples.</p>
     </div>
-    
-    <div id="backend"></div>
-    
+
+    <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
+        <link-card title="REST API" description="Use our simple REST API" link="https://docs.passwordless.dev/guide/api.html"></link-card>
+        <link-card title=".NET" description="Docs + Examples" link="https://docs.passwordless.dev/guide/backend/dotnet.html"></link-card>
+        <link-card title="Java" description="Docs + Examples" link="https://docs.passwordless.dev/guide/backend/java.html"></link-card>
+        <link-card title="Node.js" description="Docs + Examples" link="https://docs.passwordless.dev/guide/backend/nodejs.html"></link-card>
+        <link-card title="Python 3+" description="Docs + Examples" link="https://docs.passwordless.dev/guide/backend/python3.html"></link-card>
+    </div>
+
     <div class="mt-6 flex gap-10">
-        <a target="_blank" href="https://docs.passwordless.dev/guide/backend.html" class="link-blue">View the backend examples <span aria-hidden="true">&rarr;</span></a>
+        <a target="_blank" href="https://docs.passwordless.dev/guide/backend/" class="link-blue">View the backend examples <span aria-hidden="true">&rarr;</span></a>
         <a target="_blank" href="https://docs.passwordless.dev/guide/api.html" class="link-blue">Read the API docs <span aria-hidden="true">&rarr;</span></a>
     </div>
 </panel>
@@ -47,9 +52,14 @@
     <div class="mt-2 max-w-xl text-sm text-gray-500">
         <p>Passwordless.dev uses a little bit of javascript and html. It works regardless if you're using a framework or not! For some frameworks, we've made official packages, sdks and examples.</p>
     </div>
-    
-    <div id="frontend"></div>
-    
+
+    <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
+        <link-card title="Javascript" description="Docs + Examples" link="https://docs.passwordless.dev/guide/backend/dotnet.html"></link-card>
+        <link-card title="React" description="Docs + Examples" link="https://docs.passwordless.dev/guide/frontend/react.html"></link-card>
+        <link-card title="ASP.NET Identity" description="Docs + Examples" link="https://docs.passwordless.dev/guide/frontend/aspnet.html"></link-card>
+        <card title="Vue" description="Coming Soon"></card>
+    </div>
+
     <panel-footer>
         <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="link-blue">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
     </panel-footer>
@@ -63,91 +73,3 @@
         <a target="_blank" href="https://docs.passwordless.dev/guide/get-started.html" class="link-blue">View the Getting Started guide <span aria-hidden="true">&rarr;</span></a>
     </panel-footer>
 </panel>
-
-@section Scripts
-{
-    <script type="module" src="@Url.Content("~/js/elements/copy-text.mjs")"></script>
-    <script type="module">
-    import { createApp } from 'vue';
-    import RadioBoxes from '@Url.Content("~/js/radioboxes.mjs")'
-    createApp(RadioBoxes, {
-        items: [{
-            title: 'No Framework',
-            desc: 'Just vanilla JS. Docs + Example'
-        },
-        {
-            title: 'Vue',
-            desc: 'Docs'
-        },
-        {
-            title: 'React',
-            desc: 'Docs'
-        }]
-    } ).mount('#frontend');
-    createApp(RadioBoxes, {
-            items: [
-            {
-                title: 'Other',
-                desc: 'Use our simple HTTP Rest API'
-            },
-            {
-                title: 'ASP.NET Core',
-                desc: 'Docs + Examples'
-            },
-            {
-                title: 'Node.js',
-                desc: 'Docs + Examples'
-            },
-            {
-                title: 'PHP',
-                desc: 'Docs'
-            },
-            {
-                title: 'Python',
-                desc: 'Docs'
-            },
-
-            ]
-        } ).mount('#backend')
-        </script>
-
-<script type="module">
-    import { createApp, ref } from 'vue';
-    createApp({
-        setup() {
-            const onSave = () => {
-                let fileContents = "This is your API key and secret. Please save them to a safe place. \n"
-                fileContents += "Read the docs at https://docs.passwordless.dev";
-                //fileContents += "Email: " + email.value + "\n";
-                // store apikey on first line and apisecret on second line
-                fileContents += "\nAPI Url: @Options.Value.ApiUrl";
-                fileContents += "\nPublic ApiKey: @Model.Onboarding.ApiKey";
-                fileContents += "\nPrivate ApiSecret: @Model.Onboarding.ApiSecret";
-
-                save("passwordless-apikeys-@Model.Onboarding.ApplicationId\.txt", fileContents);
-                }
-
-            return {
-                onSave
-            }
-        }
-
-
-    }).mount('#apikeys');
-
-    const save = (filename, data) => {
-        const blob = new Blob([data], { type: "text/csv" });
-        const nav = window.navigator;
-        if (nav.msSaveOrOpenBlob) {
-            nav.msSaveBlob(blob, filename);
-        } else {
-            const elem = window.document.createElement("a");
-            elem.href = window.URL.createObjectURL(blob);
-            elem.download = filename;
-            document.body.appendChild(elem);
-            elem.click();
-            document.body.removeChild(elem);
-        }
-    }
-</script>
-}

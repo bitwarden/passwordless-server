@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,21 +16,21 @@ public class Join : PageModel
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IMailService _mailService;
     private readonly IEventLogger _eventLogger;
-    private readonly ISystemClock _systemClock;
+    private readonly TimeProvider _timeProvider;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
     public Join(IInvitationService invitationService,
         UserManager<ConsoleAdmin> userManager, MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IMailService mailService,
         IEventLogger eventLogger,
-        ISystemClock systemClock)
+        TimeProvider timeProvider)
     {
         _invitationService = invitationService;
         _userManager = userManager;
         _magicLinkSignInManager = magicLinkSignInManager;
         _mailService = mailService;
         _eventLogger = eventLogger;
-        _systemClock = systemClock;
+        _timeProvider = timeProvider;
     }
 
     public Invite Invite { get; set; }
@@ -83,7 +82,7 @@ public class Join : PageModel
 
         if (!ok)
         {
-            _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _systemClock.UtcNow.UtcDateTime);
+            _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
         }
 
@@ -105,7 +104,7 @@ public class Join : PageModel
             var url = Url.Page("/Account/useronboarding");
             await _magicLinkSignInManager.SendEmailForSignInAsync(user.Email, url);
 
-            _eventLogger.LogAdminAcceptedInviteEvent(invite, user, _systemClock.UtcNow.UtcDateTime);
+            _eventLogger.LogAdminAcceptedInviteEvent(invite, user, _timeProvider.GetUtcNow().UtcDateTime);
         }
         else
         {

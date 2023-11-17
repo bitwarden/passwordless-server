@@ -27,8 +27,8 @@
         {
             <info-alert-box message="@TempData["Message"]"></info-alert-box>
         }
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form class="space-y-6" method="POST" v-on:submit.prevent="onSubmit">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 flex flex-col space-y-4">
+            <form class="space-y-4 flex flex-col" method="POST" v-on:submit.prevent="onSubmit">
                 <div>
                     <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
                     <div class="mt-2">
@@ -40,15 +40,17 @@
                     <success-alert-box message="We've sent you a magic link to automatically sign you in (if we recognized the email)"></success-alert-box>
                 }
                 <div class="feedback__unknown_credential hidden">
-                <Feedback name="_error" message="Sorry, we don't recognize that passkey. Do you have another one?" />
+                    <Feedback name="_error" message="Sorry, we don't recognize that passkey. Do you have another one?" />
                 </div>
-                <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
+                <button type="submit" class="btn-primary">Sign in</button>
                 <div id="webauthn-unsupported-alert" class="hidden">
                     <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
                 </div>
             </form>
-
-            <a href="@Url.Page("/Organization/Create")" class="btn-secondary mt-3">Sign up</a>
+            <hr class="h-px my-8 bg-gray-200 border-0">
+            <form class="flex flex-col" method="post" asp-page-handler="SignUp">
+                <button class="btn-secondary">Sign up</button>
+            </form>
         </div>
     </div>
 </div>

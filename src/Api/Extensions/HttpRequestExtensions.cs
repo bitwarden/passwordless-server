@@ -1,4 +1,5 @@
-﻿using UAParser;
+﻿using Passwordless.Common.Utils;
+using UAParser;
 
 namespace Passwordless.Api.Extensions;
 
@@ -16,33 +17,22 @@ public static class HttpRequestExtensions
         return value.SingleOrDefault();
     }
 
-    public static string GetTenantName(this HttpRequest req)
+    public static string? GetTenantName(this HttpRequest request)
     {
-        var key = req.GetPublicApiKey();
-        if (key == null)
+        if (request.RouteValues.ContainsKey("appId"))
         {
-            key = req.GetApiSecret();
+            return request.RouteValues["appId"].ToString();
+        }
+        if (request.Headers.ContainsKey("ApiKey"))
+        {
+            return ApiKeyUtils.GetAppId(request.Headers["ApiKey"].ToString());
+        }
+        if (request.Headers.ContainsKey("ApiSecret"))
+        {
+            return ApiKeyUtils.GetAppId(request.Headers["ApiSecret"].ToString());
         }
 
-        if (key == null)
-        {
-            key = req.Query["key"];
-        }
-
-        if (string.IsNullOrEmpty(key))
-        {
-            return null;
-        }
-
-        var span = key.AsSpan();
-        var i = span.IndexOf(':');
-
-        if (i == -1)
-        {
-            return null;
-        }
-
-        return span.Slice(0, i).ToString();
+        return null;
     }
 }
 
@@ -50,7 +40,7 @@ public static class HttpRequestExtensions
 public static class Helpers
 {
 
-    public static (string deviceInfo, string country) GetDeviceInfo(HttpRequest req)
+    public static (string deviceInfo, string country) GetDeviceInfo(this HttpRequest req)
     {
         var uap = Parser.GetDefault();
         var d = uap.Parse(req.Headers["User-Agent"]);

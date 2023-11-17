@@ -17,7 +17,7 @@
             <div>
                 <label asp-for="Form.Name" class="form-label">Application name</label>
                 <div class="mt-2">
-                    <input asp-for="Form.Name" v-model="appId" type="text">
+                    <input asp-for="Form.Name" v-model="appId" type="text" class="text-input">
                     <div v-cloak :class="{ invisible: !appId }" class=" small">
                         <input asp-for="Form.Id" type="hidden" :value="parsedAppId"/>
                         Your app id is:
@@ -38,7 +38,7 @@
             <div>
                 <label asp-for="Form.Description" class="form-label">Description</label>
                 <div class="mt-2">
-                    <input type="text" asp-for="Form.Description">
+                    <input type="text" asp-for="Form.Description" class="text-input">
                     <span asp-validation-for="Form.Description"></span>
                 </div>
             </div>
@@ -50,13 +50,14 @@
                     {
                         <li>
                             <div>
-                                <input id="@availablePlan.Id" name="plans-group" type="radio" value="@availablePlan.Value" asp-for="Form.Plan">
+                                <input id="@availablePlan.Id" name="Form.Plan" type="radio" value="@availablePlan.Id" checked="@(Model.Form.Plan == availablePlan.Id)">
                                 <label for="@availablePlan.Id">@availablePlan.Label</label>
                             </div>
                         </li>
                     }
                 </ul>
             </div>
+            <input asp-if="!Model.Organization.HasSubscription" type="hidden" asp-for="Form.Plan" />
 
             <div>
                 <div asp-validation-summary="All"></div>

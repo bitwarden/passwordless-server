@@ -1,19 +1,33 @@
 ﻿@page "/settings"
+@using Passwordless.AdminConsole.TagHelpers
 @model SettingsModel
 
 @{
     ViewData["Title"] = "Settings";
 }
 
-<a id="plans-selection-header"><h2 class="h2">Plan</h2></a>
-<div id="plans-selection" class="flex flex-col space-y-4">
+<panel header="Plan">
     <p>The plan you select for this app changes the pricing and features available.</p>
     <div class="gap-4 grid sm:grid-cols-1 md:grid-cols-3">
         @foreach (var plan in Model.Plans)
         {
             <div class="@(plan.IsActive ? "pricing-card-active" : "pricing-card")">
                 <div class="flex flex-wrap items-center justify-center">
-                    <badge class="@(plan.IsActive ? string.Empty : "invisible")" text="Active"></badge>
+                    @if (plan.IsActive)
+                    {
+                        if (plan.IsOutdated)
+                        {
+                            <badge variant="ColorVariant.Warning" text="New Available"></badge>
+                        }
+                        else
+                        {
+                            <badge variant="ColorVariant.Primary" text="Active"></badge>
+                        }
+                    }
+                    else
+                    {
+                        <badge class="invisible" text="Inactive"></badge>
+                    }
                 </div>
                 <h3 class="text-center">@plan.Label</h3>
                 <div class="space-y-0">
@@ -44,37 +58,36 @@
             </div>
         }
     </div>
-</div>
+</panel>
 
-<h2 class="h2">Delete Application</h2>
-<div class="bg-white shadow sm:rounded-lg px-4 py-5 sm:p-6">
-@if (Model.PendingDelete)
-{
-    <form method="post" asp-page-handler="Cancel">
-        <danger-alert-box message="'@Model.ApplicationId' will be deleted on '@Model.DeleteAt?.ToString("g") UTC'. If you would like to cancel this action, click 'Cancel'."></danger-alert-box>
-        <button id="btn-cancel-delete" class="btn-secondary mt-3" type="submit">Cancel</button>
-    </form>
-}
-else
-{
-    <form method="post" asp-page-handler="Delete">
-        <p>
+<panel header="Delete Application">
+    @if (Model.PendingDelete)
+    {
+        <form method="post" asp-page-handler="Cancel">
+            <danger-alert-box message="'@Model.ApplicationId' will be deleted on '@Model.DeleteAt?.ToString("g") UTC'. If you would like to cancel this action, click 'Cancel'."></danger-alert-box>
+            <button id="btn-cancel-delete" class="btn-secondary mt-3" type="submit">Cancel</button>
+        </form>
+    }
+    else
+    {
+        <form method="post" asp-page-handler="Delete">
+            <p>
                 If your app contains no credentials or was newly created, <strong>the app will be deleted immediately</strong>.
             </p>
             <p class="">If your app <strong>does contain credentials</strong>, the following will happen once you choose to delete the application:</p>
-
+    
             <ul role="list" class="list-decimal list-inside my-2">
                 <li class="">No data will be deleted immediately.</li>
                 <li>Your API Keys will be frozen - meaning no authentication calls can be made.</li>
                 <li>Admins can cancel the process at any time. The API will return to normal behavior.</li>
                 <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
             </ul>
-
+    
             <div id="deleteApplication"></div>
-
-    </form>
-}
-</div>
+    
+        </form>
+    }
+</panel>
 
 @section Scripts
 {

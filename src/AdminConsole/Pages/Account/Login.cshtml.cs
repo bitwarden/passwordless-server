@@ -37,9 +37,23 @@ public class LoginModel : PageModel
     {
         returnUrl = Url.Page("/Organization/Overview");
 
-        // send magic link if we have a user like it
-        var res = await signInManager.SendEmailForSignInAsync(email, returnUrl);
+        try
+        {
+            // send magic link if we have a user like it
+            await signInManager.SendEmailForSignInAsync(email, returnUrl);
+        }
+        catch (ArgumentException)
+        {
+            // swallow
+        }
+
         TempData["EmailSent"] = true;
+
         return RedirectToPage();
+    }
+
+    public IActionResult OnPostSignUp()
+    {
+        return RedirectToPage("/Organization/Create");
     }
 }

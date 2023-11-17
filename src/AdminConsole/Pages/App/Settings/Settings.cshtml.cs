@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Models.DTOs;
@@ -68,10 +67,10 @@ public class SettingsModel : PageModel
 
         if (!Organization.HasSubscription)
         {
-            AddPlan(PlanConstants.Free, _stripeOptions.Plans[PlanConstants.Free]);
+            AddPlan(_stripeOptions.Store.Free);
         }
-        AddPlan(PlanConstants.Pro, _stripeOptions.Plans[PlanConstants.Pro]);
-        AddPlan(PlanConstants.Enterprise, _stripeOptions.Plans[PlanConstants.Enterprise]);
+        AddPlan(_stripeOptions.Store.Pro);
+        AddPlan(_stripeOptions.Store.Enterprise);
 
         PendingDelete = application?.DeleteAt.HasValue ?? false;
         DeleteAt = application?.DeleteAt;
@@ -128,7 +127,7 @@ public class SettingsModel : PageModel
         var plan = _stripeOptions.Plans[selectedPlan];
         var priceId = plan.PriceId!;
         var subscriptionItem = organization.Applications
-            .Where(x => x.Id == priceId)
+            .Where(x => x.BillingPriceId == priceId)
             .GroupBy(x => new
             {
                 x.BillingPriceId,
@@ -238,12 +237,14 @@ public class SettingsModel : PageModel
         return Redirect(session.Url);
     }
 
-    private void AddPlan(string plan, StripePlanOptions options)
+    private void AddPlan(string plan)
     {
+        var options = _stripeOptions.Plans[plan];
         var isActive = Application!.BillingPlan == plan;
+        var isOutdated = isActive && Application!.BillingPriceId != options.PriceId;
 
         bool canSubscribe;
-        if (plan == PlanConstants.Free)
+        if (plan == _stripeOptions.Store.Free || Application.DeleteAt.HasValue)
         {
             canSubscribe = false;
         }
@@ -260,7 +261,8 @@ public class SettingsModel : PageModel
             options.Ui.PriceHint,
             options.Ui.Features.ToImmutableList(),
             isActive,
-            canSubscribe);
+            canSubscribe,
+            isOutdated);
         Plans.Add(model);
     }
 
@@ -272,5 +274,6 @@ public class SettingsModel : PageModel
         string? PriceHint,
         IReadOnlyCollection<string> Features,
         bool IsActive,
-        bool CanSubscribe);
+        bool CanSubscribe,
+        bool IsOutdated);
 }

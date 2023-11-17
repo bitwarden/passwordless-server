@@ -6,7 +6,6 @@ namespace Passwordless.Service.Models;
 [MessagePackObject]
 public class RegisterToken : Token
 {
-
     [Key(10)]
     public string UserId { get; set; }
     [Key(11)]
@@ -62,13 +61,13 @@ public class VerifySignInToken : Token
 public class Token
 {
     [Key(0)]
-    public required DateTime ExpiresAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
     [Key(1)]
-    public required Guid TokenId { get; set; }
+    public Guid TokenId { get; set; }
 
     [Key(2)]
-    public required string Type { get; set; }
+    public string Type { get; set; }
 
     public void Validate()
     {
