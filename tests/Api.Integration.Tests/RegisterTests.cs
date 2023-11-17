@@ -60,9 +60,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
-            Token = registerTokenResponse!.Token,
-            Origin = "https://integration-tests.passwordless.dev",
-            RPID = Environment.MachineName
+            Token = registerTokenResponse!.Token, Origin = "https://integration-tests.passwordless.dev", RPID = Environment.MachineName
         };
 
         // Act
@@ -84,11 +82,11 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const string rpId = "bitwarden.com";
 
         var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
+        using var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
-        var registrationBeginResponse = await _client
+        using var registrationBeginResponse = await _client
             .AddPublicKey()
             .PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
@@ -114,7 +112,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString);
 
         // Act
-        var registerCompleteResponse = await _client.PostAsJsonAsync("/register/complete",
+        using var registerCompleteResponse = await _client.PostAsJsonAsync("/register/complete",
             new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = parsedResult });
 
         // Assert
