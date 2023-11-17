@@ -4,7 +4,7 @@ using Passwordless.Api.Extensions;
 
 namespace Passwordless.Api.Tests.Extensions;
 
-public class HttpRequestExtensionsTests
+public class HeaderDictionaryExtensionsTests
 {
     [Fact]
     public void GetApiSecret_GivenHeaderDictionary_WhenApiSecretHeaderExists_ThenTenantSecretValueShouldReturn()
