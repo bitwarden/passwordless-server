@@ -35,7 +35,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     }
 
     [Fact]
-    public async Task Server_can_successfully_retrieve_token_for_registration()
+    public async Task I_can_retrieve_token_to_start_registration_on_my_client()
     {
         // Arrange
         var request = TokenGenerator.Generate();
@@ -51,7 +51,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     }
 
     [Fact]
-    public async Task Client_Can_Begin_Registration_Of_User_Credential_With_Server()
+    public async Task I_can_retrieve_the_credential_create_options_and_session_token_for_creating_a_new_user()
     {
         // Arrange
         var tokenRequest = TokenGenerator.Generate();
@@ -60,9 +60,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
-            Token = registerTokenResponse!.Token,
-            Origin = "https://integration-tests.passwordless.dev",
-            RPID = Environment.MachineName
+            Token = registerTokenResponse!.Token, Origin = "https://integration-tests.passwordless.dev", RPID = Environment.MachineName
         };
 
         // Act
@@ -77,7 +75,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     }
 
     [Fact]
-    public async Task Client_Can_Complete_Registration_Of_User_Credential_With_Passkey_To_Server()
+    public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
         const string originUrl = "https://bitwarden.com/products/passwordless/";
