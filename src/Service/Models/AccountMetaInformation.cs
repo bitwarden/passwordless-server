@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Passwordless.Service.EventLog.Models;
 
 namespace Passwordless.Service.Models;
 
@@ -23,4 +24,5 @@ public class AccountMetaInformation : PerTenant
     public DateTime? DeleteAt { get; set; }
 
     public AppFeature Features { get; set; }
+    public virtual IReadOnlyCollection<ApplicationEvent> Events { get; set; }
 }

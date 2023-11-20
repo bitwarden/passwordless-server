@@ -5,41 +5,23 @@ namespace Passwordless.Api.Extensions;
 
 public static class HttpRequestExtensions
 {
-    public static string GetApiSecret(this HttpRequest req)
+    public static string? GetApiSecret(this HttpRequest req) => req.Headers.GetApiSecret();
+
+    public static string? GetPublicApiKey(this HttpRequest req) => req.Headers.GetPublicApiKey();
+
+    public static string? GetTenantNameFromKey(this HttpRequest request)
     {
-        req.Headers.TryGetValue("ApiSecret", out var value);
-        return value.SingleOrDefault();
+        var key = request.GetPublicApiKey() ?? request.GetApiSecret();
+
+        return key != null ? ApiKeyUtils.GetAppId(key) : null;
     }
 
-    public static string GetPublicApiKey(this HttpRequest req)
-    {
-        req.Headers.TryGetValue("ApiKey", out var value);
-        return value.SingleOrDefault();
-    }
-
-    public static string? GetTenantName(this HttpRequest request)
-    {
-        if (request.RouteValues.ContainsKey("appId"))
-        {
-            return request.RouteValues["appId"].ToString();
-        }
-        if (request.Headers.ContainsKey("ApiKey"))
-        {
-            return ApiKeyUtils.GetAppId(request.Headers["ApiKey"].ToString());
-        }
-        if (request.Headers.ContainsKey("ApiSecret"))
-        {
-            return ApiKeyUtils.GetAppId(request.Headers["ApiSecret"].ToString());
-        }
-
-        return null;
-    }
+    public static string? GetTenantName(this HttpRequest httpRequest) =>
+        GetTenantNameFromKey(httpRequest) ?? httpRequest.RouteValues["appId"]?.ToString();
 }
-
 
 public static class Helpers
 {
-
     public static (string deviceInfo, string country) GetDeviceInfo(this HttpRequest req)
     {
         var uap = Parser.GetDefault();

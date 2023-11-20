@@ -2,7 +2,9 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Passwordless.Common.Models;
 using Passwordless.Common.Utils;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -29,6 +31,7 @@ public interface ISharedManagementService
 public class SharedManagementService : ISharedManagementService
 {
     private readonly ILogger _logger;
+    private readonly IEventLogger _eventLogger;
     private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
@@ -38,13 +41,15 @@ public class SharedManagementService : ISharedManagementService
         IGlobalStorageFactory globalStorageFactory,
         IConfiguration config,
         ISystemClock systemClock,
-        ILogger<SharedManagementService> logger)
+        ILogger<SharedManagementService> logger,
+        IEventLogger eventLogger)
     {
         this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
         this.config = config;
         _systemClock = systemClock;
         _logger = logger;
+        _eventLogger = eventLogger;
     }
 
 
@@ -127,7 +132,11 @@ public class SharedManagementService : ISharedManagementService
         var existingKey = await storage.GetApiKeyAsync(secretKey);
         if (existingKey != null)
         {
-            existingKey.CheckLocked();
+            if (existingKey.IsLocked)
+            {
+                _eventLogger.LogDisabledApiKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
+                throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
+            }
 
             if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
             {
@@ -135,6 +144,7 @@ public class SharedManagementService : ISharedManagementService
             }
         }
 
+        _eventLogger.LogInvalidApiSecretUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
         _logger.LogInformation("ApiSecret was not valid. {AppId} {ApiKey}", appId, secretKey?[..20]);
         throw new ApiException("ApiSecret was not valid", 401);
     }
@@ -147,10 +157,16 @@ public class SharedManagementService : ISharedManagementService
         var existingKey = await storage.GetApiKeyAsync(publicKey);
         if (existingKey != null && existingKey.ApiKey == publicKey)
         {
-            existingKey.CheckLocked();
-            return appId;
+            if (!existingKey.IsLocked)
+            {
+                return appId;
+            }
+
+            _eventLogger.LogDisabledPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
+            throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
         }
 
+        _eventLogger.LogInvalidPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
         _logger.LogWarning("Apikey was not valid. {AppId} {ApiKey}", appId, publicKey);
         throw new ApiException("Apikey was not valid", 401);
     }
@@ -213,10 +229,12 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
         }
+
         if (accountInformation.DeleteAt.HasValue)
         {
             throw new ApiException("app_pending_deletion", "App is already pending to be deleted.", 400);
         }
+
         bool canDeleteImmediately = accountInformation.CreatedAt > _systemClock.UtcNow.AddDays(-3);
 
         if (!canDeleteImmediately)
@@ -265,6 +283,7 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException($"'{nameof(appId)}' is required.", 400);
         }
+
         var storage = tenantFactory.Create(appId);
         await storage.SetFeaturesAsync(payload);
     }

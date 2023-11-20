@@ -34,7 +34,9 @@ public class FeatureContextProvider : IFeatureContextProvider
             {
                 appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiSecret"].ToString());
             }
-            if (appId == null) return new NullFeaturesContext();
+
+            if (string.IsNullOrWhiteSpace(appId)) return new NullFeaturesContext();
+
             var storage = _storageFactory.Create(appId);
             var features = await storage.GetAppFeaturesAsync();
             if (features != null)
