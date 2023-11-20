@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.Azure.KeyVault.Models
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Helpers
 @using Passwordless.AdminConsole.Identity
@@ -71,9 +72,9 @@
             </nav>
         </div>
         <div class="flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black space-y-4">
-            <div asp-if="@(CurrentContext.Organization != null && !CurrentContext.Organization.HasSubscription)">
-                <badge variant="ColorVariant.Warning" text="Trial"></badge>
-            </div>
+            <a class="block" href="@Url.Page("/Billing/Manage")" asp-if="@(CurrentContext.Organization != null && !CurrentContext.Organization.HasSubscription)">
+                <badge variant="ColorVariant.Warning" text="Free organization"></badge>
+            </a>
             <div class="flex flex-col space-y-2">
                 <span class="text-xs font-medium text-blue-200 group-hover:text-white">Logged in as:</span>
                 <span class="text-sm font-medium text-white truncate">@UserManager.GetUserName(User)</span>
