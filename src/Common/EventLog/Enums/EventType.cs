@@ -12,6 +12,7 @@ public enum EventType
     ApiAuthDisabledPublicKeyUsed = 1006,
     ApiUserSetAliases = 1100,
     ApiUserDeleteCredential = 1101,
+    ApiUserSigninTokenCreated = 1106,
     ApiUserSignInBegan = 1102,
     ApiUserSignInCompleted = 1103,
     ApiUserSignInVerified = 1104,

@@ -28,7 +28,7 @@
             <info-alert-box message="@TempData["Message"]"></info-alert-box>
         }
         <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 flex flex-col space-y-4">
-            <form class="space-y-4" method="POST" v-on:submit.prevent="onSubmit">
+            <form class="space-y-4 flex flex-col" method="POST" v-on:submit.prevent="onSubmit">
                 <div>
                     <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
                     <div class="mt-2">
@@ -48,7 +48,7 @@
                 </div>
             </form>
             <hr class="h-px my-8 bg-gray-200 border-0">
-            <form method="post" asp-page-handler="SignUp">
+            <form class="flex flex-col" method="post" asp-page-handler="SignUp">
                 <button class="btn-secondary">Sign up</button>
             </form>
         </div>

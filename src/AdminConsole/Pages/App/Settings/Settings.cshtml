@@ -1,4 +1,5 @@
 ﻿@page "/settings"
+@using Passwordless.AdminConsole.TagHelpers
 @model SettingsModel
 
 @{
@@ -12,7 +13,21 @@
         {
             <div class="@(plan.IsActive ? "pricing-card-active" : "pricing-card")">
                 <div class="flex flex-wrap items-center justify-center">
-                    <badge class="@(plan.IsActive ? string.Empty : "invisible")" text="Active"></badge>
+                    @if (plan.IsActive)
+                    {
+                        if (plan.IsOutdated)
+                        {
+                            <badge variant="ColorVariant.Warning" text="New Available"></badge>
+                        }
+                        else
+                        {
+                            <badge variant="ColorVariant.Primary" text="Active"></badge>
+                        }
+                    }
+                    else
+                    {
+                        <badge class="invisible" text="Inactive"></badge>
+                    }
                 </div>
                 <h3 class="text-center">@plan.Label</h3>
                 <div class="space-y-0">

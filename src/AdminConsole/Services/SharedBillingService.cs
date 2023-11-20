@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
@@ -278,7 +277,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
-        var features = _stripeOptions.Plans[PlanConstants.Free].Features;
+        var features = _stripeOptions.Plans[_stripeOptions.Store.Free].Features;
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
 
@@ -286,7 +285,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         {
             application.BillingPriceId = null;
             application.BillingSubscriptionItemId = null;
-            application.BillingPlan = PlanConstants.Free;
+            application.BillingPlan = _stripeOptions.Store.Free;
         }
 
         await db.SaveChangesAsync();

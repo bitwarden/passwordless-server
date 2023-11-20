@@ -2,7 +2,7 @@
 ###############################################
 #                 Build stage                 #
 ###############################################
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-bookworm-slim AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS dotnet-build
 
 # Docker buildx supplies the value for this arg
 ARG TARGETPLATFORM
@@ -21,13 +21,12 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 # Add packages
 RUN apt-get update && apt-get install -y \
     npm jq \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj files as distinct layers
 WORKDIR /source
 COPY src/AdminConsole/*.csproj ./src/AdminConsole/
 COPY src/Api/*.csproj ./src/Api/
-COPY src/ApiHelpers/*.csproj ./src/ApiHelpers/
 COPY src/Service/*.csproj ./src/Service/
 COPY src/Common/*.csproj ./src/Common/
 COPY Directory.Build.props .
@@ -44,7 +43,6 @@ RUN . /tmp/rid.txt && dotnet restore -r $RID
 WORKDIR /source
 COPY src/AdminConsole/. ./src/AdminConsole/
 COPY src/Api/. ./src/Api/
-COPY src/ApiHelpers/. ./src/ApiHelpers/
 COPY src/Service/. ./src/Service/
 COPY src/Common/. ./src/Common/
 COPY .git/. ./.git/
@@ -61,7 +59,7 @@ RUN . /tmp/rid.txt && dotnet publish -c release -o /app/Api --no-restore --no-se
 ###############################################
 #                  App stage                  #
 ###############################################
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-bookworm-slim
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim
 ARG TARGETPLATFORM
 LABEL com.bitwarden.product="bitwarden"
 LABEL com.bitwarden.project="passwordless"

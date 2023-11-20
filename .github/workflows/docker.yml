@@ -13,12 +13,20 @@ on:
 
 jobs:
   # Build the image without deploying just to make sure the dockerfile is valid
-  build:
+  pack:
     strategy:
       matrix:
         app:
           - Api
-          # - AdminConsole
+          #- AdminConsole
+          - Self-Host
+        include:
+          - app: Api
+            dockerfile: Api.dockerfile
+          #- app: AdminConsole
+          #  dockerfile: AdminConsole.dockerfile
+          - app: Self-Host
+            dockerfile: self-host/Dockerfile
 
     runs-on: ubuntu-latest
     permissions:
@@ -31,13 +39,12 @@ jobs:
       - name: Install Docker Buildx
         uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # 3.0.0
 
-      - name: Build & push image
+      - name: Build image
         run: >
-          docker buildx build
-          --file ${{ matrix.app }}.dockerfile
+          docker buildx build .
+          --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
           --output type=tar,dest=image.tar
-          .
 
   # Build and deploy the image
   deploy:
@@ -47,7 +54,18 @@ jobs:
       matrix:
         app:
           - Api
-          # - AdminConsole
+          #- AdminConsole
+          - Self-Host
+        include:
+          - app: Api
+            dockerfile: Api.dockerfile
+            name: passwordless-test-api
+          #- app: AdminConsole
+          #  dockerfile: AdminConsole.dockerfile
+          #  repository: passwordless-test-admin-console
+          - app: Self-Host
+            dockerfile: self-host/Dockerfile
+            name: passwordless-self-host
 
     runs-on: ubuntu-latest
     permissions:
@@ -68,11 +86,10 @@ jobs:
 
       - name: Build & push image
         run: >
-          docker buildx build
-          --file ${{ matrix.app }}.dockerfile
+          docker buildx build .
+          --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
           --push
-          --tag ghcr.io/passwordless/passwordless-test-api:latest
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/passwordless-test-api:$GITHUB_REF_NAME' || '' }}
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/passwordless-test-api:stable' || '' }}
-          .
+          --tag ghcr.io/passwordless/${{ matrix.name }}:latest
+          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/${{ matrix.name }}:$GITHUB_REF_NAME' || '' }}
+          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/${{ matrix.name }}:stable' || '' }}
