@@ -71,8 +71,8 @@
             </nav>
         </div>
         <div class="flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black space-y-4">
-            <div asp-if="@(CurrentContext.Organization != null && !CurrentContext.Organization.HasSubscription)" class="items-center">
-                <badge variant="ColorVariant.Danger" text="Trial"></badge>
+            <div asp-if="@(CurrentContext.Organization != null && !CurrentContext.Organization.HasSubscription)">
+                <badge variant="ColorVariant.Warning" text="Trial"></badge>
             </div>
             <div class="flex flex-col space-y-2">
                 <span class="text-xs font-medium text-blue-200 group-hover:text-white">Logged in as:</span>
