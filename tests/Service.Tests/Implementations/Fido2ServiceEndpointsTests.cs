@@ -35,7 +35,7 @@ public class Fido2ServiceEndpointsTests
             .Setup(t => t.EncodeToken(It.IsAny<RegisterToken>(), "register_", false))
             .Returns("test_token");
 
-        var token = await _sut.CreateToken(new RegisterToken
+        var token = await _sut.CreateRegisterToken(new RegisterToken
         {
             UserId = "test",
             ExpiresAt = default,

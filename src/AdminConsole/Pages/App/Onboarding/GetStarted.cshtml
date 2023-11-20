@@ -1,7 +1,4 @@
 @page "/onboarding/get-started"
-@using Microsoft.Extensions.Options
-@using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject IOptions<PasswordlessManagementOptions> Options
 @model Passwordless.AdminConsole.Pages.App.Onboarding.GetStarted
 
 @{
@@ -18,14 +15,16 @@
     <div class="mt-5 max-w-3xl rounded-md bg-gray-50 px-6 py-5 sm:flex sm:items-start sm:justify-between">
         <div class="sm:flex sm:items-start">
             <div class="mt-3 sm:ml-4 sm:mt-0">
-                <copy-text title="API Url" value="@Options.Value.ApiUrl"></copy-text>
+                <copy-text title="API Url" value="@Model.ApiUrl"></copy-text>
                 <copy-text title="Public API Key" value="@Model.Onboarding.ApiKey"></copy-text>
                 <copy-text title="Private API Key" value="@Model.Onboarding.ApiSecret" type="password"></copy-text>
                 <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
             </div>
         </div>
         <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
-            <button @@click="onSave" type="button" class="btn-primary btn-icon"><partial name="Shared/Icons/Download" /> Download</button>
+            <form method="post" asp-page-handler="DownloadApiKeys">
+                <button type="submit" class="btn-primary btn-icon"><partial name="Shared/Icons/Download"/> Download</button>
+            </form>
         </div>
     </div>
 </panel>
@@ -44,7 +43,7 @@
     </div>
 
     <div class="mt-6 flex gap-10">
-        <a target="_blank" href="https://docs.passwordless.dev/guide/backend.html" class="link-blue">View the backend examples <span aria-hidden="true">&rarr;</span></a>
+        <a target="_blank" href="https://docs.passwordless.dev/guide/backend/" class="link-blue">View the backend examples <span aria-hidden="true">&rarr;</span></a>
         <a target="_blank" href="https://docs.passwordless.dev/guide/api.html" class="link-blue">Read the API docs <span aria-hidden="true">&rarr;</span></a>
     </div>
 </panel>
@@ -74,48 +73,3 @@
         <a target="_blank" href="https://docs.passwordless.dev/guide/get-started.html" class="link-blue">View the Getting Started guide <span aria-hidden="true">&rarr;</span></a>
     </panel-footer>
 </panel>
-
-@section Scripts
-{
-    <script type="module" src="@Url.Content("~/js/elements/copy-text.mjs")"></script>
-
-    <script type="module">
-    import { createApp, ref } from 'vue';
-    createApp({
-        setup() {
-            const onSave = () => {
-                let fileContents = "This is your API key and secret. Please save them to a safe place. \n"
-                fileContents += "Read the docs at https://docs.passwordless.dev";
-                //fileContents += "Email: " + email.value + "\n";
-                // store apikey on first line and apisecret on second line
-                fileContents += "\nAPI Url: @Options.Value.ApiUrl";
-                fileContents += "\nPublic ApiKey: @Model.Onboarding.ApiKey";
-                fileContents += "\nPrivate ApiSecret: @Model.Onboarding.ApiSecret";
-
-                save("passwordless-apikeys-@Model.Onboarding.ApplicationId\.txt", fileContents);
-                }
-
-            return {
-                onSave
-            }
-        }
-
-
-    }).mount('#apikeys');
-
-    const save = (filename, data) => {
-        const blob = new Blob([data], { type: "text/csv" });
-        const nav = window.navigator;
-        if (nav.msSaveOrOpenBlob) {
-            nav.msSaveBlob(blob, filename);
-        } else {
-            const elem = window.document.createElement("a");
-            elem.href = window.URL.createObjectURL(blob);
-            elem.download = filename;
-            document.body.appendChild(elem);
-            elem.click();
-            document.body.removeChild(elem);
-        }
-    }
-</script>
-}

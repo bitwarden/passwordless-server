@@ -29,7 +29,7 @@ public static class UseCspExtensions
                 $"connect-src 'self' {passConfig.Value.ApiUrl};" +
                 "style-src 'self' 'unsafe-inline';";
 
-            context.Response.Headers.Add(
+            context.Response.Headers.Append(
                 "Content-Security-Policy",
                 new[] { csp }
             );
@@ -44,8 +44,8 @@ public static class UseCspExtensions
     {
         app.Use((context, next) =>
         {
-            context.Response.Headers.Add("X-Content-Type-Options", new[] { "nosniff" });
-            context.Response.Headers.Add("Referrer-Policy", new[] { "no-referrer" });
+            context.Response.Headers.Append("X-Content-Type-Options", new[] { "nosniff" });
+            context.Response.Headers.Append("Referrer-Policy", new[] { "no-referrer" });
             return next();
         });
 
