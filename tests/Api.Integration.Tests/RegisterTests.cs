@@ -35,7 +35,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     }
 
     [Fact]
-    public async Task I_can_retrieve_token_to_start_registration_on_my_client()
+    public async Task I_can_retrieve_token_to_start_registration()
     {
         // Arrange
         var request = TokenGenerator.Generate();
@@ -60,9 +60,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
-            Token = registerTokenResponse!.Token,
-            Origin = "https://integration-tests.passwordless.dev",
-            RPID = Environment.MachineName
+            Token = registerTokenResponse!.Token, Origin = "https://integration-tests.passwordless.dev", RPID = Environment.MachineName
         };
 
         // Act
