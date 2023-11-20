@@ -40,7 +40,7 @@ public static class HttpRequestExtensions
 public static class Helpers
 {
 
-    public static (string deviceInfo, string country) GetDeviceInfo(HttpRequest req)
+    public static (string deviceInfo, string country) GetDeviceInfo(this HttpRequest req)
     {
         var uap = Parser.GetDefault();
         var d = uap.Parse(req.Headers["User-Agent"]);

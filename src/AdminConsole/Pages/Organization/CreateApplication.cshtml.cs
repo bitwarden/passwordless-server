@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Billing.Constants;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
@@ -41,9 +40,13 @@ public class CreateApplicationModel : PageModel
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
+        Form = new CreateApplicationForm
+        {
+            Plan = _stripeOptions.Store.Free
+        };
     }
 
-    public CreateApplicationForm Form { get; } = new();
+    public CreateApplicationForm Form { get; }
 
     public Models.Organization Organization { get; set; }
 
@@ -94,7 +97,7 @@ public class CreateApplicationModel : PageModel
 
         app.BillingPlan = form.Plan;
 
-        if (form.Plan != PlanConstants.Free)
+        if (form.Plan != _stripeOptions.Store.Free)
         {
             if (Organization.BillingSubscriptionId == null)
             {
@@ -170,8 +173,8 @@ public class CreateApplicationModel : PageModel
 
         if (Organization.HasSubscription)
         {
-            AvailablePlans.Add(new AvailablePlan("pro-plan", PlanConstants.Pro, "Pro"));
-            AvailablePlans.Add(new AvailablePlan("enterprise-plan", PlanConstants.Enterprise, "Enterprise"));
+            AvailablePlans.Add(new AvailablePlan(_stripeOptions.Store.Pro, _stripeOptions.Plans[_stripeOptions.Store.Pro].Ui.Label));
+            AvailablePlans.Add(new AvailablePlan(_stripeOptions.Store.Enterprise, _stripeOptions.Plans[_stripeOptions.Store.Enterprise].Ui.Label));
         }
     }
 
@@ -187,8 +190,8 @@ public class CreateApplicationModel : PageModel
         public string Description { get; set; }
 
         [Required]
-        public string Plan { get; set; } = PlanConstants.Free;
+        public string Plan { get; set; }
     }
 
-    public record AvailablePlan(string Id, string Value, string Label);
+    public record AvailablePlan(string Id, string Label);
 }
