@@ -1394,10 +1394,6 @@ label.form-label {
   margin-top: -0.125rem;
 }
 
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
 .mb-3 {
   margin-bottom: 0.75rem;
 }
@@ -1518,10 +1514,6 @@ label.form-label {
   display: grid;
 }
 
-.contents {
-  display: contents;
-}
-
 .\!hidden {
   display: none !important;
 }
@@ -1592,6 +1584,10 @@ label.form-label {
 
 .w-6 {
   width: 1.5rem;
+}
+
+.w-8 {
+  width: 2rem;
 }
 
 .w-auto {
@@ -1677,6 +1673,10 @@ label.form-label {
 
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {

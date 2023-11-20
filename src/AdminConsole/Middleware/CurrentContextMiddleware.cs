@@ -43,9 +43,10 @@ public class CurrentContextMiddleware
     {
         var orgId = httpContext.User.GetOrgId();
         var orgFeatures = organizationFeatureService.GetOrganizationFeatures(orgId.Value);
+        var organization = await dataService.GetOrganizationAsync();
 
 #pragma warning disable CS0618 // I am the one valid caller of this method
-        currentContext.SetOrganization(orgId.Value, orgFeatures);
+        currentContext.SetOrganization(orgId.Value, orgFeatures, organization);
 #pragma warning restore CS0618
 
         if (string.IsNullOrWhiteSpace(appId))
