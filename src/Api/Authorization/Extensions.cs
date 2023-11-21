@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Passwordless.Api.Authorization;
@@ -18,12 +17,6 @@ public static class GeneralExtensions
     public static RouteHandlerBuilder RequirePublicKey(this RouteHandlerBuilder builder)
     {
         return builder.RequireAuthorization(Constants.PublicKeyPolicy);
-    }
-
-    public static string GetAccountName(this ClaimsPrincipal user)
-    {
-        return user.FindFirstValue(CustomClaimTypes.AccountName)
-            ?? throw new InvalidOperationException($"{nameof(GetAccountName)} should only called in an authenticated endpoint.");
     }
 
     public static void AddPasswordlessPolicies(this AuthorizationOptions options)
