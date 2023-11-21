@@ -1,5 +1,3 @@
-using Passwordless.Api.Helpers;
-
 namespace Passwordless.Api.Authorization;
 
 public class DefaultProblemDetailWriter : IProblemDetailWriter
@@ -12,8 +10,6 @@ public class DefaultProblemDetailWriter : IProblemDetailWriter
     }
     public IEnumerable<string> GetDetails(HttpContext context, string headerName)
     {
-        context.AddProblemDetailsMissingAcceptHeader();
-
         // Did they even supply the needed header?
         if (context.Request.Headers.TryGetValue(headerName, out var headerValues))
         {

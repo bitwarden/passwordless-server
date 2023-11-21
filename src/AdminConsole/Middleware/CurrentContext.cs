@@ -18,6 +18,7 @@ public class CurrentContext : ICurrentContext
     public string? ApiKey { get; private set; }
     public bool IsFrozen { get; private set; }
     public FeaturesContext Features { get; private set; }
+    public Organization? Organization { get; private set; }
     public int? OrgId { get; private set; }
     public FeaturesContext OrganizationFeatures { get; private set; } = new(false, 0, null);
 
@@ -39,9 +40,10 @@ public class CurrentContext : ICurrentContext
         Features = context;
     }
 
-    public void SetOrganization(int organizationId, FeaturesContext featuresContext)
+    public void SetOrganization(int organizationId, FeaturesContext featuresContext, Organization organization)
     {
         OrgId = organizationId;
         OrganizationFeatures = featuresContext;
+        Organization = organization;
     }
 }

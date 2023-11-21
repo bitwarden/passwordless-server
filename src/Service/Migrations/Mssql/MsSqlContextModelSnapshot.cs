@@ -53,9 +53,12 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenantId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("ApplicationEvents");
                 });
@@ -240,6 +243,17 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("ApiKeys");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("Events")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -253,6 +267,8 @@ namespace Passwordless.Service.Migrations.Mssql
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
+                    b.Navigation("Events");
+
                     b.Navigation("Features");
                 });
 #pragma warning restore 612, 618

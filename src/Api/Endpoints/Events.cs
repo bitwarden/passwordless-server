@@ -31,7 +31,7 @@ public static class EventLog
             return Results.ValidationProblem(errors);
         }
 
-        var tenantId = request.GetTenantName();
+        var tenantId = request.GetTenantNameFromKey();
 
         var events = await storage.GetEventLogAsync(getEventLogEventsRequest.PageNumber, getEventLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
 

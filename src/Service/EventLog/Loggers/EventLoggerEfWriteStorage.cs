@@ -8,17 +8,18 @@ public class EventLoggerEfWriteStorage : IEventLogger
 {
     private readonly DbGlobalContext _storage;
     private readonly IEventLogContext _eventLogContext;
-    private readonly List<ApplicationEvent> _items = new();
+    protected readonly EventCache _eventCache;
 
-    public EventLoggerEfWriteStorage(DbGlobalContext storage, IEventLogContext eventLogContext)
+    public EventLoggerEfWriteStorage(DbGlobalContext storage, IEventLogContext eventLogContext, EventCache eventCache)
     {
         _storage = storage;
         _eventLogContext = eventLogContext;
+        _eventCache = eventCache;
     }
 
-    public void LogEvent(EventDto @event)
+    public virtual void LogEvent(EventDto @event)
     {
-        _items.Add(@event.ToEvent());
+        _eventCache.Add(@event.ToEvent());
     }
 
     public void LogEvent(Func<IEventLogContext, EventDto> eventFunc)
@@ -26,9 +27,13 @@ public class EventLoggerEfWriteStorage : IEventLogger
         LogEvent(eventFunc(_eventLogContext));
     }
 
-    public async Task FlushAsync()
+    public virtual async Task FlushAsync()
     {
-        _storage.ApplicationEvents.AddRange(_items);
+        if (_eventCache.IsEmpty()) return;
+
+        _storage.ApplicationEvents.AddRange(_eventCache.GetEvents());
         await _storage.SaveChangesAsync();
+
+        _eventCache.Clear();
     }
 }

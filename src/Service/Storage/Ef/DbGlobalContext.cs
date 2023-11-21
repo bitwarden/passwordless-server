@@ -62,8 +62,14 @@ public abstract class DbGlobalContext : DbContext
                 .IsRequired();
         });
 
-        modelBuilder.Entity<ApplicationEvent>()
-            .HasKey(x => x.Id);
+        modelBuilder.Entity<ApplicationEvent>(builder =>
+        {
+            builder.HasKey(x => x.Id);
+            builder.HasOne(x => x.Application)
+                .WithMany(x => x.Events)
+                .HasForeignKey(x => x.TenantId)
+                .IsRequired();
+        });
 
         base.OnModelCreating(modelBuilder);
     }

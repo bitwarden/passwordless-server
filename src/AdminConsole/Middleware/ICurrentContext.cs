@@ -15,6 +15,7 @@ public interface ICurrentContext
     string? ApiKey { get; }
     bool IsFrozen { get; }
     FeaturesContext Features { get; }
+    Organization? Organization { get; }
     int? OrgId { get; }
     FeaturesContext OrganizationFeatures { get; }
 
@@ -28,5 +29,5 @@ public interface ICurrentContext
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
-    void SetOrganization(int organizationId, FeaturesContext context);
+    void SetOrganization(int organizationId, FeaturesContext context, Organization organization);
 }

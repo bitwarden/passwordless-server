@@ -8,14 +8,19 @@ public static class AddEventLoggingRegistration
 {
     public static IServiceCollection AddEventLogging(this IServiceCollection services) =>
         services
-            .AddScoped<EventLoggerEfWriteStorage>()
+            .AddTransient<EventLoggerEfWriteStorage>()
+            .AddTransient<UnauthenticatedEventLoggerEfWriteStorage>()
+            .AddTransient(GetEventLogger)
+            .AddScoped<EventCache>()
             .AddScoped<IEventLogStorage, EventLoggerEfReadStorage>()
             .AddScoped<IEventLogContext, EventLogContext>()
-            .AddScoped(GetEventLogger)
             .AddHostedService<EventDeletionBackgroundWorker>();
 
     private static IEventLogger GetEventLogger(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<IEventLogContext>().Features.EventLoggingIsEnabled
-            ? serviceProvider.GetRequiredService<EventLoggerEfWriteStorage>()
-            : NoOpEventLogger.Instance;
+        serviceProvider.GetRequiredService<IEventLogContext>() switch
+        {
+            { IsAuthenticated: false } => serviceProvider.GetRequiredService<UnauthenticatedEventLoggerEfWriteStorage>(),
+            { Features.EventLoggingIsEnabled: true } => serviceProvider.GetRequiredService<EventLoggerEfWriteStorage>(),
+            _ => NoOpEventLogger.Instance
+        };
 }
