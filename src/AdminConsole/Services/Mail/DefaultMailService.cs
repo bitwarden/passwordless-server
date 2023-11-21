@@ -135,7 +135,7 @@ public class DefaultMailService : IMailService
             From = _fromEmail,
             Subject = $"Your app '{application.Name}' is scheduled for deletion in 30 days.",
             TextBody =
-                $"Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'. If this was unintentional, please visit the your administration console or click {cancellationLink}.",
+                $"Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'. If this was unintentional, please visit the your administration console: {cancellationLink}.",
             HtmlBody =
                 $"""
                 <!doctype html>
@@ -146,7 +146,7 @@ public class DefaultMailService : IMailService
                   </head>
                   <body>
                     <p>Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.</p>
-                    <p>If this was unintentional, please visit the your administration console or click <a href="{cancellationLink}">this link</a></p>
+                    <p>If this was unintentional, please visit the your administration console <a href="{cancellationLink}">this link</a></p>
                   </body>
                 </html>
                 """,
