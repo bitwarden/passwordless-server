@@ -150,7 +150,6 @@ app.UseStaticFiles();
 app.UseMiddleware<EventLogStorageCommitMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<AcceptHeaderMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<EventLogContextMiddleware>();
