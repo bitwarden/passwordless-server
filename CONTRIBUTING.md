@@ -91,3 +91,14 @@ database definitions are stored in `Service`.
 
 If you need to undo a migration you just applied, you can run `dotnet ef migrations remove` to undo the last migration 
 applied.
+
+## Testing
+
+There is a suite of unit and integration tests provided in the `./tests` directory.
+
+### Prerequisites
+
+- Container Manager ([Docker](https://docs.docker.com/get-docker/), [Podman](http://podman.io/get-started), etc.)
+- [Chrome](https://www.google.com/chrome/) - for the selenium web driver
+
+Feel free to add to these as you contribute!
