@@ -101,4 +101,5 @@ There is a suite of unit and integration tests provided in the `./tests` directo
 - Container Manager ([Docker](https://docs.docker.com/get-docker/), [Podman](http://podman.io/get-started), etc.)
 - [Chrome](https://www.google.com/chrome/) - for the selenium web driver
 
-Feel free to add to these as you contribute!
+To run the tests, you can either use the integrated tooling in your IDE of choice or run `dotnet test` from the root
+directory of the project. Feel free to add to these tests as you contribute!
