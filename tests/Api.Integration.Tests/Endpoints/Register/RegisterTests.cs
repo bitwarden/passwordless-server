@@ -29,8 +29,10 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
     public RegisterTests(PasswordlessApiFactory apiFactory)
     {
-        _client = apiFactory.CreateClient();
-        _client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
+        _client = apiFactory.CreateClient()
+            .AddPublicKey()
+            .AddSecretKey()
+            .AddUserAgent();
     }
 
     [Fact]
@@ -40,7 +42,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var request = TokenGenerator.Generate();
 
         // Act
-        var response = await _client.AddSecretKey().PostAsJsonAsync("/register/token", request);
+        var response = await _client.PostAsJsonAsync("/register/token", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -54,7 +56,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
@@ -65,7 +67,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         };
 
         // Act
-        using var registrationBeginResponse = await _client.AddPublicKey().PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
         // Assert
         registrationBeginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -83,13 +85,11 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const string rpId = "bitwarden.com";
 
         var tokenRequest = TokenGenerator.Generate();
-        using var tokenResponse = await _client.AddSecretKey().PostAsJsonAsync("/register/token", tokenRequest);
+        using var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
-        using var registrationBeginResponse = await _client
-            .AddPublicKey()
-            .PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 

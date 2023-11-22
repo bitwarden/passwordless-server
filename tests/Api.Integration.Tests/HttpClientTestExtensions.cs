@@ -13,4 +13,10 @@ public static class HttpClientTestExtensions
         client.DefaultRequestHeaders.Add("ApiSecret", "test:secret:a679563b331846c79c20b114a4f56d02");
         return client;
     }
+
+    public static HttpClient AddUserAgent(this HttpClient client)
+    {
+        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
+        return client;
+    }
 }
