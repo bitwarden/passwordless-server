@@ -147,7 +147,7 @@ void RunTheApp()
 
     builder.Services.AddRazorComponents();
     builder.Services.AddAntiforgery();
-    
+
     WebApplication app;
     try
     {
