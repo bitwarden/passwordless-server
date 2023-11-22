@@ -39,7 +39,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task Server_returns_encoded_assertion_options_to_be_used_for_sign_in()
+    public async Task I_can_retrieve_assertion_options_to_begin_sign_in()
     {
         var request = new SignInBeginDTO { Origin = OriginUrl, RPID = RpId };
 
@@ -55,7 +55,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task Client_can_call_sign_in_complete_with_passkey()
+    public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         var tokenRequest = TokenGenerator.Generate();
         var tokenResponse = await _httpClient.PostAsJsonAsync("/register/token", tokenRequest);
@@ -106,7 +106,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task Client_can_call_verify_after_signing_in_to_ensure_token_is_valid_from_server()
+    public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         var tokenRequest = TokenGenerator.Generate();
         var tokenResponse = await _httpClient.PostAsJsonAsync("/register/token", tokenRequest);
