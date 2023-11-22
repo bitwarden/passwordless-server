@@ -34,7 +34,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var request = AppCreateGenerator.Generate();
-        
+
         // Act
         var response = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", request);
 
@@ -46,7 +46,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         content.Should().NotBeNull();
         content!.Title.Should().Be("accountName needs to be alphanumeric and start with a letter");
     }
-    
+
     [Fact]
     public async Task I_can_create_an_account_with_a_valid_name()
     {
@@ -56,7 +56,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Act
         var response = await _client.PostAsJsonAsync($"/admin/apps/{accountName}/create", request);
-        
+
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -75,7 +75,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var name = $"app{Guid.NewGuid():N}";
         var request = AppCreateGenerator.Generate();
-        
+
         // Act
         var res = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", request);
 
@@ -83,7 +83,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         res.StatusCode.Should().Be(HttpStatusCode.OK);
 
         using var scope = _factory.Services.CreateScope();
-        
+
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>()
             .Create(name)
             .GetAppFeaturesAsync();
@@ -94,7 +94,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         appFeature.EventLoggingRetentionPeriod.Should().Be(365);
         appFeature.DeveloperLoggingEndsAt.Should().BeNull();
     }
-    
+
     public void Dispose()
     {
         _client.Dispose();
