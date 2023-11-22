@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -144,6 +145,9 @@ void RunTheApp()
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
 
+    builder.Services.AddRazorComponents();
+    builder.Services.AddAntiforgery();
+    
     WebApplication app;
     try
     {
@@ -181,6 +185,7 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
+    app.UseAntiforgery();
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
@@ -189,5 +194,6 @@ void RunTheApp()
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
+    app.MapRazorComponents<App>();
     app.Run();
 }
