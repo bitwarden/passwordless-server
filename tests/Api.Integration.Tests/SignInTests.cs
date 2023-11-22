@@ -5,6 +5,7 @@ using Bogus;
 using Fido2NetLib;
 using FluentAssertions;
 using Passwordless.Api.Endpoints;
+using Passwordless.Api.Integration.Tests.Helpers;
 using Passwordless.Service.Models;
 using Xunit;
 

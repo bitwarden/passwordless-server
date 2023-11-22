@@ -4,8 +4,6 @@ using System.Text.Json;
 using Bogus;
 using Fido2NetLib;
 using FluentAssertions;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.VirtualAuth;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Integration.Tests.Helpers;
 using Passwordless.Service.Models;
@@ -95,22 +93,9 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
-        var virtualAuth = new VirtualAuthenticatorOptions()
-            .SetIsUserVerified(true)
-            .SetHasUserVerification(true)
-            .SetIsUserConsenting(true)
-            .SetTransport(VirtualAuthenticatorOptions.Transport.INTERNAL)
-            .SetProtocol(VirtualAuthenticatorOptions.Protocol.CTAP2)
-            .SetHasResidentKey(true);
-
-        var options = new ChromeOptions();
-        options.AddArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless");
-        var driver = new ChromeDriver(options);
-        driver.Url = originUrl;
-        driver.AddVirtualAuthenticator(virtualAuth);
-
-        var result = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
-                                          $"return await createCredential({sessionResponse!.Data.ToJson()});");
+        var result = WebDriverFactory.GetWebDriver(originUrl)
+            .ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
+                           $"return await createCredential({sessionResponse!.Data.ToJson()});");
 
         var resultString = result?.ToString() ?? string.Empty;
 

@@ -2,7 +2,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.VirtualAuth;
 
-namespace Passwordless.Api.Integration.Tests;
+namespace Passwordless.Api.Integration.Tests.Helpers;
 
 public static class WebDriverFactory
 {
