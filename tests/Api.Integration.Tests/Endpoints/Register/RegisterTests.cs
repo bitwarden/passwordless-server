@@ -114,6 +114,5 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public void Dispose()
     {
         _client.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

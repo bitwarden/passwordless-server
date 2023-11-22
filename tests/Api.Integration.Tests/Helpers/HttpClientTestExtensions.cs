@@ -22,7 +22,7 @@ public static class HttpClientTestExtensions
 
     public static HttpClient AddManagementKey(this HttpClient client)
     {
-        client.DefaultRequestHeaders.Add("ManagementKey", "dev_test_key");
+        client.DefaultRequestHeaders.Add("ManagementKey", "shared_dev_key");
         return client;
     }
 
