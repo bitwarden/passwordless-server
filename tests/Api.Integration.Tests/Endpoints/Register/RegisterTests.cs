@@ -108,7 +108,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var driver = new ChromeDriver(options);
         driver.Url = originUrl;
         driver.AddVirtualAuthenticator(virtualAuth);
-        
+
         var result = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
                                           $"return await createCredential({sessionResponse!.Data.ToJson()});");
 
