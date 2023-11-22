@@ -26,4 +26,16 @@
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Helpers\Js\converters.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Helpers\Js\createCredential.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Helpers\Js\getCredential.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
