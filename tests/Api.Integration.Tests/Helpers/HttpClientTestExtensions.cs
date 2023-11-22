@@ -1,4 +1,4 @@
-namespace Passwordless.Api.Integration.Tests;
+namespace Passwordless.Api.Integration.Tests.Helpers;
 
 public static class HttpClientTestExtensions
 {
@@ -19,4 +19,11 @@ public static class HttpClientTestExtensions
         client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
         return client;
     }
+
+    public static HttpClient AddManagementKey(this HttpClient client)
+    {
+        client.DefaultRequestHeaders.Add("ManagementKey", "dev_test_key");
+        return client;
+    }
+
 }
