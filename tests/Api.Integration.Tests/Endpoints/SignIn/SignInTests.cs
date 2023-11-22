@@ -69,8 +69,11 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         };
         var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
+
         var driver = WebDriverFactory.GetWebDriver(OriginUrl);
-        var registerResult = driver.ExecuteScript(GetRegisterScript(sessionResponse!.Data.ToJson()))?.ToString() ?? string.Empty;
+        var registerResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
+                                                  $"return await createCredential({sessionResponse!.Data.ToJson()});")?.ToString() ?? string.Empty;
+
         var parsedRegisterResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(registerResult);
         var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
@@ -84,7 +87,8 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
 
-        var signInResult = driver.ExecuteScript(GetSignInScript(signInBegin!.Data.ToJson()))?.ToString() ?? string.Empty;
+        var signInResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetGetCredentialFunctions()} " +
+                                                $"return await getCredential({signInBegin!.Data.ToJson()});")?.ToString() ?? string.Empty;
         var parsedSignInResult = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(signInResult);
 
         var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
@@ -116,8 +120,12 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         };
         var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
+
         var driver = WebDriverFactory.GetWebDriver(OriginUrl);
-        var registerResult = driver.ExecuteScript(GetRegisterScript(sessionResponse!.Data.ToJson()))?.ToString() ?? string.Empty;
+
+        var registerResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
+                                                  $"return await createCredential({sessionResponse!.Data.ToJson()});")?.ToString() ?? string.Empty;
+
         var parsedRegisterResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(registerResult);
         var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
@@ -131,7 +139,8 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
 
-        var signInResult = driver.ExecuteScript(GetSignInScript(signInBegin!.Data.ToJson()))?.ToString() ?? string.Empty;
+        var signInResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetGetCredentialFunctions()} " +
+                                                $"return await getCredential({signInBegin!.Data.ToJson()});")?.ToString() ?? string.Empty;
         var parsedSignInResult = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(signInResult);
 
         var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
@@ -150,155 +159,4 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var verifySignInResponse = await _httpClient.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-
-    private static string GetSignInScript(string jsonResponse) => $$"""
-        let signin = {{jsonResponse}};
-        
-        signin.challenge = base64UrlToArrayBuffer(signin.challenge);
-        signin.allowCredentials?.forEach((cred) => {
-            cred.id = base64UrlToArrayBuffer(cred.id);
-        });
-        
-        const credential = await navigator.credentials.get({
-            publicKey: signin
-        });
-        
-        return JSON.stringify({
-            id: credential.id,
-            rawId: arrayBufferToBase64Url(new Uint8Array(credential.rawId)),
-            type: credential.type,
-            extensions: credential.getClientExtensionResults(),
-            response: {
-                authenticatorData: arrayBufferToBase64Url(credential.response.authenticatorData),
-                clientDataJSON: arrayBufferToBase64Url(credential.response.clientDataJSON),
-                signature: arrayBufferToBase64Url(credential.response.signature)
-            }
-        });
-        
-        function base64UrlToArrayBuffer(base64UrlString) {
-            // improvement: Remove BufferSource-type and add proper types upstream
-            if (typeof base64UrlString !== 'string') {
-                const msg = "Cannot convert from Base64Url to ArrayBuffer: Input was not of type string";
-                console.error(msg, base64UrlString);
-                throw new TypeError(msg);
-            }
-        
-            const base64Unpadded = base64UrlToBase64(base64UrlString);
-            const paddingNeeded = (4 - (base64Unpadded.length % 4)) % 4;
-            const base64Padded = base64Unpadded.padEnd(base64Unpadded.length + paddingNeeded, "=");
-        
-            const binary = window.atob(base64Padded);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-        
-            return bytes;
-        }
-        
-        function base64UrlToBase64(base64Url) {
-            return base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        }
-        
-        function base64ToBase64Url(base64) {
-            return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=*$/g, '');
-        }
-        
-        function arrayBufferToBase64Url(buffer) {
-            const uint8Array = (() => {
-                if (Array.isArray(buffer)) return Uint8Array.from(buffer);
-                if (buffer instanceof ArrayBuffer) return new Uint8Array(buffer);
-                if (buffer instanceof Uint8Array) return buffer;
-        
-                const msg = "Cannot convert from ArrayBuffer to Base64Url. Input was not of type ArrayBuffer, Uint8Array or Array";
-                console.error(msg, buffer);
-                throw new Error(msg);
-            })();
-        
-            let string = '';
-            for (let i = 0; i < uint8Array.byteLength; i++) {
-                string += String.fromCharCode(uint8Array[i]);
-            }
-        
-            const base64String = window.btoa(string);
-            return base64ToBase64Url(base64String);
-        }
-        """;
-
-    private static string GetRegisterScript(string jsonResponse) => $$"""
-       let registration = {{jsonResponse}};
-       
-       registration.challenge = base64UrlToArrayBuffer(registration.challenge);
-       registration.user.id = base64UrlToArrayBuffer(registration.user.id);
-       registration.excludeCredentials?.forEach((cred) => {
-           cred.id = base64UrlToArrayBuffer(cred.id);
-       });
-       
-       const result = await navigator.credentials.create({
-           publicKey: registration,
-       });
-       
-       const credential = result;
-       const attestationResponse = credential.response;
-       
-       return JSON.stringify({
-               id: credential.id,
-               rawId: arrayBufferToBase64Url(credential.rawId),
-               type: credential.type,
-               extensions: result.getClientExtensionResults(),
-               response: {
-                   attestationObject: arrayBufferToBase64Url(attestationResponse.attestationObject),
-                   clientDataJSON: arrayBufferToBase64Url(attestationResponse.clientDataJSON),
-               }
-           });
-       
-       function base64UrlToArrayBuffer(base64UrlString) {
-           // improvement: Remove BufferSource-type and add proper types upstream
-           if (typeof base64UrlString !== 'string') {
-               const msg = "Cannot convert from Base64Url to ArrayBuffer: Input was not of type string";
-               console.error(msg, base64UrlString);
-               throw new TypeError(msg);
-           }
-       
-           const base64Unpadded = base64UrlToBase64(base64UrlString);
-           const paddingNeeded = (4 - (base64Unpadded.length % 4)) % 4;
-           const base64Padded = base64Unpadded.padEnd(base64Unpadded.length + paddingNeeded, "=");
-       
-           const binary = window.atob(base64Padded);
-           const bytes = new Uint8Array(binary.length);
-           for (let i = 0; i < binary.length; i++) {
-               bytes[i] = binary.charCodeAt(i);
-           }
-       
-           return bytes;
-       }
-       
-       function base64UrlToBase64(base64Url) {
-           return base64Url.replace(/-/g, '+').replace(/_/g, '/');
-       }
-       
-       function base64ToBase64Url(base64) {
-           return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=*$/g, '');
-       }
-       
-       function arrayBufferToBase64Url(buffer) {
-           const uint8Array = (() => {
-               if (Array.isArray(buffer)) return Uint8Array.from(buffer);
-               if (buffer instanceof ArrayBuffer) return new Uint8Array(buffer);
-               if (buffer instanceof Uint8Array) return buffer;
-       
-               const msg = "Cannot convert from ArrayBuffer to Base64Url. Input was not of type ArrayBuffer, Uint8Array or Array";
-               console.error(msg, buffer);
-               throw new Error(msg);
-           })();
-       
-           let string = '';
-           for (let i = 0; i < uint8Array.byteLength; i++) {
-               string += String.fromCharCode(uint8Array[i]);
-           }
-       
-           const base64String = window.btoa(string);
-           return base64ToBase64Url(base64String);
-       }
-       """;
 }
