@@ -23,7 +23,7 @@ public class SettingsModel : PageModel
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
     private readonly IPasswordlessManagementClient _managementClient;
-    private readonly BillingHelper _billingHelper;
+    private readonly IBillingHelper _billingHelper;
     private readonly StripeOptions _stripeOptions;
 
     public SettingsModel(
@@ -34,7 +34,7 @@ public class SettingsModel : PageModel
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
         IOptions<StripeOptions> stripeOptions,
-        BillingHelper billingHelper
+        IBillingHelper billingHelper
         )
     {
         _logger = logger;

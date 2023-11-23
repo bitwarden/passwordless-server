@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Billing.BackgroundServices;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
@@ -16,11 +17,12 @@ public static class BillingBootstrap
             .BindConfiguration("Stripe");
 
         // TODO: Introduce an interface and replace it with Noop.
-        builder.Services.AddScoped<BillingHelper>();
+        builder.Services.AddScoped<IBillingHelper, NoopBillingHelper>();
+        
         // Todo: Improve this self-hosting story.
         if (builder.Configuration.IsSelfHosted())
         {
-            builder.Services.AddScoped<ISharedBillingService, NoOpBillingService>();
+            builder.Services.AddScoped<ISharedBillingService, NoOpBillingService<TDbContext>>();
         }
         else
         {
@@ -33,8 +35,17 @@ public static class BillingBootstrap
     }
 }
 
-public class NoOpBillingService : ISharedBillingService
+public class NoOpBillingService<TDbContext> :  ISharedBillingService where TDbContext : ConsoleDbContext
 {
+    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+
+    public NoOpBillingService(
+        IDbContextFactory<TDbContext> dbContextFactory
+        )
+    {
+        _dbContextFactory = dbContextFactory;
+    }
+    
     public Task UpdateUsageAsync()
     {
         throw new NotImplementedException();
@@ -70,9 +81,15 @@ public class NoOpBillingService : ISharedBillingService
         throw new NotImplementedException();
     }
 
-    public Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
+    public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
     {
-        throw new NotImplementedException();
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await db.Applications
+            .Where(x => x.Id == applicationId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(p => p.BillingPlan, plan)
+                .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
+                .SetProperty(p => p.BillingPriceId, priceId));
     }
 
     public Task<string> CreateCheckoutSessionAsync(int organizationId, string? billingCustomerId, string email, string planName,

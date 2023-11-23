@@ -17,10 +17,10 @@ public class BillingHelper : IBillingHelper
     private readonly ISharedBillingService _billingService;
     private readonly UrlHelperFactory _urlHelperFactory;
     private readonly IActionContextAccessor _actionContextAccessor;
-    private readonly PasswordlessManagementClient _managementClient;
+    private readonly IPasswordlessManagementClient _managementClient;
     private readonly StripeOptions _stripeOptions;
 
-    public BillingHelper(IDataService dataService, ISharedBillingService billingService, UrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, IOptions<StripeOptions> stripeOptions, PasswordlessManagementClient managementClient)
+    public BillingHelper(IDataService dataService, ISharedBillingService billingService, UrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, IOptions<StripeOptions> stripeOptions, IPasswordlessManagementClient managementClient)
     {
         _dataService = dataService;
         _billingService = billingService;
@@ -108,12 +108,14 @@ public class BillingHelper : IBillingHelper
 
 public class NoopBillingHelper : IBillingHelper
 {
-    private readonly PasswordlessManagementClient _managementClient;
+    private readonly IPasswordlessManagementClient _managementClient;
+    private readonly ISharedBillingService _sharedBillingService;
     private readonly StripeOptions _stripeOptions;
 
-    public NoopBillingHelper(PasswordlessManagementClient managementClient, IOptions<StripeOptions> stripeOptions)
+    public NoopBillingHelper(IPasswordlessManagementClient managementClient, IOptions<StripeOptions> stripeOptions, ISharedBillingService sharedBillingService)
     {
         _managementClient = managementClient;
+        _sharedBillingService = sharedBillingService;
         _stripeOptions = stripeOptions.Value;
     }
     
@@ -126,6 +128,8 @@ public class NoopBillingHelper : IBillingHelper
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod
         };
+        
+        await _sharedBillingService.UpdateApplicationAsync(app, selectedPlan, "simple", "simple");
         
         await _managementClient.SetFeaturesAsync(app, updateFeaturesRequest);
 

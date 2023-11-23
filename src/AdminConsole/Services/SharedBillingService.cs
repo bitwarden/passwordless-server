@@ -10,8 +10,8 @@ using Stripe.Checkout;
 namespace Passwordless.AdminConsole.Services;
 
 public class SharedBillingService<TDbContext> : ISharedBillingService where TDbContext : ConsoleDbContext
-{
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+{    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+
     private readonly IPasswordlessManagementClient _passwordlessClient;
     private readonly ILogger<SharedBillingService<TDbContext>> _logger;
     private readonly StripeOptions _stripeOptions;
