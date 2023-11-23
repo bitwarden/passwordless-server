@@ -41,7 +41,7 @@ void RunTheApp()
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    bool isSelfHosted = builder.Configuration.IsSelfHosted();
+    bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
 
     if (isSelfHosted)
     {

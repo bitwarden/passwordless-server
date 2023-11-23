@@ -20,15 +20,11 @@ using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-bool isSelfHosted = builder.Configuration.IsSelfHosted();
+bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
 
 if (isSelfHosted)
 {
     builder.AddSelfHostingConfiguration();
-}
-else
-{
-    builder.AddCloudConfiguration();
 }
 
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
