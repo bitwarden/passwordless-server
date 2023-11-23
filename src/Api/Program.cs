@@ -26,6 +26,10 @@ if (isSelfHosted)
 {
     builder.AddSelfHostingConfiguration();
 }
+else
+{
+    builder.AddCloudConfiguration();
+}
 
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 builder.Host.UseSerilog((ctx, sp, config) =>
