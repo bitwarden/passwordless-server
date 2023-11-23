@@ -23,6 +23,7 @@ public class SettingsModel : PageModel
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
     private readonly IPasswordlessManagementClient _managementClient;
+    private readonly BillingHelper _billingHelper;
     private readonly StripeOptions _stripeOptions;
 
     public SettingsModel(
@@ -32,7 +33,9 @@ public class SettingsModel : PageModel
         IApplicationService appService,
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
-        IOptions<StripeOptions> stripeOptions)
+        IOptions<StripeOptions> stripeOptions,
+        BillingHelper billingHelper
+        )
     {
         _logger = logger;
         _dataService = dataService;
@@ -40,6 +43,7 @@ public class SettingsModel : PageModel
         _appService = appService;
         _billingService = billingService;
         _managementClient = managementClient;
+        _billingHelper = billingHelper;
         _stripeOptions = stripeOptions.Value;
     }
 
@@ -111,71 +115,10 @@ public class SettingsModel : PageModel
 
     public async Task<IActionResult> OnPostChangePlanAsync(string app, string selectedPlan)
     {
-        var organization = await _dataService.GetOrganizationWithDataAsync();
-        if (!organization.HasSubscription)
-        {
-            var successUrl = Url.PageLink("/Billing/Success");
-            successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-            var cancelUrl = Url.PageLink("/Billing/Cancelled");
-            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), selectedPlan, successUrl, cancelUrl);
-            return Redirect(sessionUrl);
-        }
 
-        var application = organization.Applications.SingleOrDefault(x => x.Id == app);
-        var existingSubscriptionItemId = application.BillingSubscriptionItemId;
+        var redirectUrl = await _billingHelper.ChangePlanASync(app, selectedPlan);
 
-        var plan = _stripeOptions.Plans[selectedPlan];
-        var priceId = plan.PriceId!;
-        var subscriptionItem = organization.Applications
-            .Where(x => x.BillingPriceId == priceId)
-            .GroupBy(x => new
-            {
-                x.BillingPriceId,
-                x.BillingSubscriptionItemId
-            })
-            .Select(x => new
-            {
-                PriceId = x.Key.BillingPriceId!,
-                Id = x.Key.BillingSubscriptionItemId!
-            }).SingleOrDefault();
-
-        var subscriptionItemService = new SubscriptionItemService();
-
-        // Create subscription item if it doesn't exist.
-        if (subscriptionItem == null)
-        {
-            var createSubscriptionItemOptions = new SubscriptionItemCreateOptions
-            {
-                Price = priceId,
-                ProrationDate = DateTime.UtcNow,
-                ProrationBehavior = "create_prorations",
-                Subscription = organization.BillingSubscriptionId
-            };
-            var createSubscriptionItemResult = await subscriptionItemService.CreateAsync(createSubscriptionItemOptions);
-            subscriptionItem = new
-            {
-                PriceId = createSubscriptionItemResult.Price.Id,
-                Id = createSubscriptionItemResult.Id
-            };
-        }
-
-        // Delete subscription item if it's not used by any other application inside this organization.
-        if (!organization.Applications.Any(x => x.Id != app && x.BillingSubscriptionItemId == existingSubscriptionItemId))
-        {
-            var deleteSubscriptionItemOptions = new SubscriptionItemDeleteOptions { ClearUsage = true };
-            await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
-        }
-
-        await _billingService.UpdateApplicationAsync(app, selectedPlan, subscriptionItem.Id, priceId);
-
-        var updateFeaturesRequest = new SetApplicationFeaturesRequest
-        {
-            EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod
-        };
-        await _managementClient.SetFeaturesAsync(app, updateFeaturesRequest);
-
-        return RedirectToPage("/billing/manage");
+        return RedirectToPage(redirectUrl);
     }
 
     /// <summary>
