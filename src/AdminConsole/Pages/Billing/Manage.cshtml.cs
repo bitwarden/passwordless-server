@@ -17,12 +17,14 @@ public class Manage : BaseExtendedPageModel
     private readonly ISharedBillingService _billingService;
     private readonly IDataService _dataService;
     private readonly IOptions<StripeOptions> _stripeOptions;
+    private readonly IBillingHelper _billingHelper;
 
-    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<StripeOptions> stripeOptions)
+    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<StripeOptions> stripeOptions, IBillingHelper billingHelper)
     {
         _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
+        _billingHelper = billingHelper;
 
         var plans = new List<PricingCardModel>();
         plans.Add(new PricingCardModel(_stripeOptions.Value.Store.Free, _stripeOptions.Value.Plans[_stripeOptions.Value.Store.Free]));
@@ -46,37 +48,17 @@ public class Manage : BaseExtendedPageModel
             .Select(x => ApplicationModel.FromEntity(x, _stripeOptions.Value.Plans[x.BillingPlan]))
             .ToList();
         Organization = await _dataService.GetOrganizationAsync();
+        
         if (Organization.HasSubscription)
         {
-            var paymentMethodsService = new CustomerService();
-            var paymentMethods = await paymentMethodsService.ListPaymentMethodsAsync(Organization.BillingCustomerId);
-            if (paymentMethods != null)
-            {
-                PaymentMethods = paymentMethods.Data
-                    .Where(x => x.Type == "card")
-                    .Select(x =>
-                        new PaymentMethodModel(
-                            x.Card.Brand,
-                            x.Card.Last4,
-                            new DateTime((int)x.Card.ExpYear, (int)x.Card.ExpMonth, 1)))
-                    .ToImmutableList();
-            }
+            PaymentMethods = await _billingHelper.GetPaymentMethods(Organization.BillingCustomerId);
         }
     }
 
     public async Task<IActionResult> OnPostUpgradePro()
     {
-        var organization = await _dataService.GetOrganizationWithDataAsync();
-        if (!organization.HasSubscription)
-        {
-            var successUrl = Url.PageLink("/Billing/Success");
-            successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-            var cancelUrl = Url.PageLink("/Billing/Cancelled");
-            var sessionUrl = await _billingService.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, User.GetEmail(), _stripeOptions.Value.Store.Pro, successUrl, cancelUrl);
-            return Redirect(sessionUrl);
-        }
-
-        throw new InvalidOperationException("Organization already has a subscription.");
+        var redirect = await _billingHelper.UpgradeOrganization();
+        return Redirect(redirect);
     }
 
     public async Task<IActionResult> OnPostManage()

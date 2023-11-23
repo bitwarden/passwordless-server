@@ -17,7 +17,7 @@ public static class BillingBootstrap
             .BindConfiguration("Stripe");
 
         // TODO: Introduce an interface and replace it with Noop.
-        builder.Services.AddScoped<IBillingHelper, NoopBillingHelper>();
+        builder.Services.AddScoped<IBillingHelper, NoopBillingHelper<TDbContext>>();
         
         // Todo: Improve this self-hosting story.
         if (builder.Configuration.IsSelfHosted())
