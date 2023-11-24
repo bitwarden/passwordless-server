@@ -57,6 +57,7 @@ public class Manage : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostManage()
     {
+        // TODO: Move to service
         var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);
         var returnUrl = Url.PageLink("/Billing/Manage");
 
