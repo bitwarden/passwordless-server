@@ -80,8 +80,8 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         var organization = await _dataService.GetOrganizationWithDataAsync();
 
         // Todo: this should be called something better
-        await SetFeatures("simple", selectedPlan, organization.Id, "simple", DateTime.UtcNow, "simple","simple");
-        
+        await SetFeatures("simple", selectedPlan, organization.Id, "simple", DateTime.UtcNow, "simple", "simple");
+
         // I don't link to return these strings
         return "/billing/manage";
     }
