@@ -18,7 +18,7 @@ public static class BillingBootstrap
         builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();
 
         // Todo: Improve this self-hosting story.
-        if (builder.Configuration.IsSelfHosted())
+        if (builder.Configuration.GetValue("SelfHosted", false))
         {
             builder.Services.AddScoped<ISharedBillingService, NoOpBillingService<TDbContext>>();
         }
