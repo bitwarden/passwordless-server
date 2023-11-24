@@ -1,13 +1,9 @@
-using System.Collections.Immutable;
-using System.Globalization;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
-using Stripe;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
@@ -46,7 +42,7 @@ public class Manage : BaseExtendedPageModel
             .Select(x => ApplicationModel.FromEntity(x, _stripeOptions.Value.Plans[x.BillingPlan]))
             .ToList();
         Organization = await _dataService.GetOrganizationAsync();
-        
+
         if (Organization.HasSubscription)
         {
             PaymentMethods = await _billingService.GetPaymentMethods(Organization.BillingCustomerId);
@@ -99,5 +95,5 @@ public class Manage : BaseExtendedPageModel
                 canChangePlan);
         }
     }
-    
+
 }

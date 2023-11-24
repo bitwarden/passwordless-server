@@ -8,8 +8,6 @@ using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
-using Passwordless.AdminConsole.Models.DTOs;
-using Passwordless.AdminConsole.Pages.Billing;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Stripe;
 using Stripe.Checkout;
@@ -17,7 +15,7 @@ using Stripe.Checkout;
 namespace Passwordless.AdminConsole.Services;
 
 public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbContext>, ISharedBillingService where TDbContext : ConsoleDbContext
-{   
+{
     public SharedStripeBillingService(
         IDbContextFactory<TDbContext> dbContextFactory,
         IDataService dataService,
@@ -55,11 +53,11 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
 
         return (subscriptionItem.Id, subscriptionItem.Price.Id);
     }
-    
+
     public async Task<string?> GetRedirectToUpgradeOrganization(string? selectedPlan = null)
     {
         selectedPlan ??= _stripeOptions.Store.Pro;
-        
+
         var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
 
         var organization = await _dataService.GetOrganizationWithDataAsync();
@@ -74,16 +72,16 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
 
         return null;
     }
-    
-      public async Task<string> ChangePlanAsync(string app, string selectedPlan)
+
+    public async Task<string> ChangePlanAsync(string app, string selectedPlan)
     {
         var redirectToUpgrade = await this.GetRedirectToUpgradeOrganization(selectedPlan);
         if (redirectToUpgrade != null) return redirectToUpgrade;
-        
+
         var organization = await _dataService.GetOrganizationWithDataAsync();
 
         // Org has Subscription
-        
+
 
         var application = organization.Applications.SingleOrDefault(x => x.Id == app);
         var existingSubscriptionItemId = application.BillingSubscriptionItemId;
@@ -134,7 +132,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
 
         return "/billing/manage";
     }
-    
+
     public async Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId)
     {
         var paymentMethodsService = new CustomerService();
@@ -303,4 +301,3 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         }
     }
 }
-

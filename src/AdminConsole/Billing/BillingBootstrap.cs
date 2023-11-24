@@ -21,7 +21,7 @@ public static class BillingBootstrap
     {
         builder.Services.AddOptions<StripeOptions>()
             .BindConfiguration("Stripe");
-        
+
         // Todo: Improve this self-hosting story.
         if (builder.Configuration.IsSelfHosted())
         {
@@ -51,7 +51,7 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
     ) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions, actionContextAccessor, urlHelperFactory)
     {
     }
-    
+
     public Task UpdateUsageAsync()
     {
         // This can be a no-op.

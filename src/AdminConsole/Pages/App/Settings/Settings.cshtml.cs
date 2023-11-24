@@ -5,10 +5,8 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
-using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Stripe;
 using Stripe.Checkout;
 using Application = Passwordless.AdminConsole.Models.Application;
 

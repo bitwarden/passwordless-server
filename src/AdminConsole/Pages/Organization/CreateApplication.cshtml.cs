@@ -10,7 +10,6 @@ using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Stripe;
 using Application = Passwordless.AdminConsole.Models.Application;
 using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
 using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
