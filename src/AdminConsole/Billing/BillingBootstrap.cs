@@ -2,7 +2,6 @@ using Passwordless.AdminConsole.Billing.BackgroundServices;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Services;
-using Passwordless.Common.Configuration;
 using Stripe;
 
 namespace Passwordless.AdminConsole.Billing;
