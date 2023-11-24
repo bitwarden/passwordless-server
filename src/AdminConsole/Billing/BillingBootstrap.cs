@@ -27,7 +27,7 @@ public static class BillingBootstrap
         else
         {
             StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
-            builder.Services.AddScoped<ISharedBillingService, SharedBillingService<TDbContext>>();
+            builder.Services.AddScoped<ISharedBillingService, SharedStripeBillingService<TDbContext>>();
             builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();
             builder.Services.AddHostedService<MeteredBillingBackgroundService>();
         }

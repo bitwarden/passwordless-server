@@ -15,7 +15,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     protected readonly IDbContextFactory<TDbContext> _dbContextFactory;
 
     protected readonly IPasswordlessManagementClient _passwordlessClient;
-    protected readonly ILogger<SharedBillingService<TDbContext>> _logger;
+    protected readonly ILogger<SharedStripeBillingService<TDbContext>> _logger;
     protected readonly StripeOptions _stripeOptions;
     protected readonly IDataService _dataService;
 
@@ -23,7 +23,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         IDbContextFactory<TDbContext> dbContextFactory,
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
-        ILogger<SharedBillingService<TDbContext>> logger,
+        ILogger<SharedStripeBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions)
     {
         _dbContextFactory = dbContextFactory;
