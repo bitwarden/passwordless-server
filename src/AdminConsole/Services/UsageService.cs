@@ -27,6 +27,7 @@ internal class UsageService<TDbContext> : IUsageService where TDbContext : Conso
         {
             if (app.DeleteAt.HasValue)
             {
+                _logger.LogWarning("Skipped updating usage for app pending deletion {appId}.", app.Id);
                 continue;
             }
             try
