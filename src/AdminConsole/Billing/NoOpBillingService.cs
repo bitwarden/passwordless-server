@@ -91,6 +91,7 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         await this.SetPlanOnApp(app, selectedPlan, "simple", "simple");
 
         // TODO: returning this string is a bit werid
+        // It's also sending us to the wrong place!
         return "/billing/manage";
     }
 
