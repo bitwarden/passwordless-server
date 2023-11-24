@@ -22,6 +22,7 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
     public DbSet<Invite> Invites { get; set; }
     public DbSet<OrganizationEvent> OrganizationEvents => Set<OrganizationEvent>();
     public DbSet<DataProtectionKey> DataProtectionKeys { set; get; }
+    public DbSet<Authenticator> Authenticators { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -40,6 +41,8 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
 
         builder.Entity<OrganizationEvent>()
             .HasKey(x => x.Id);
+
+        builder.Entity<Authenticator>().HasKey(x => x.AaGuid);
 
         base.OnModelCreating(builder);
     }

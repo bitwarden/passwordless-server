@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.AdminConsole.Db;
 
@@ -10,9 +11,11 @@ using Passwordless.AdminConsole.Db;
 namespace Passwordless.AdminConsole.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteConsoleDbContext))]
-    partial class SqliteConsoleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231124083729_AddAuthenticatorData")]
+    partial class AddAuthenticatorData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");

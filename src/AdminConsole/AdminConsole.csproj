@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="Identity\" />
     <Folder Include="Migrations" />
-    <Folder Include="Models\" />
     <Folder Include="Pages\App\Credentials\" />
     <Folder Include="Pages\App\Dashboard\" />
     <Folder Include="Pages\App\Playground\" />
@@ -111,6 +110,13 @@
     <Compile Update="Pages\Shared\CredentialsModel.cs">
       <DependentUpon>_Credentials.cshtml</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Services\AuthenticatorData\authenticator-data.json" />
+    <None Include="Services\AuthenticatorData\authenticator-data.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
    
 </Project>

@@ -10,6 +10,7 @@ using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.AuthenticatorData;
 using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
@@ -120,6 +121,7 @@ void RunTheApp()
         });
     });
 
+    services.AddHostedService<AuthenticatorDataUpdaterBackgroundService>();
     services.AddHostedService<TimedHostedService>();
     services.AddHostedService<ApplicationDeletionBackgroundService>();
 
