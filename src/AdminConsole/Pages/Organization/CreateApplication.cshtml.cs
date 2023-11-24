@@ -97,7 +97,6 @@ public class CreateApplicationModel : PageModel
         // Attach a plan
         app.BillingPlan = form.Plan;
 
-        // TODO: Move to a service
         if (form.Plan != _stripeOptions.Store.Free)
         {
             var subItem = await _billingService.CreateSubscriptionItem(Organization, form.Plan);
