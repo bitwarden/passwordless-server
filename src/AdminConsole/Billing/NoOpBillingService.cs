@@ -74,9 +74,16 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         return Task.CompletedTask;
     }
 
-    public Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan)
+    public async Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan)
     {
-        return Task.FromResult("/billing/manage");
+        // Upgrade org
+        var organization = await _dataService.GetOrganizationWithDataAsync();
+
+        // Todo: this should be called something better
+        await SetFeatures("simple", selectedPlan, organization.Id, "simple", DateTime.UtcNow, "simple","simple");
+        
+        // I don't link to return these strings
+        return "/billing/manage";
     }
 
     public async Task<string?> ChangePlanAsync(string app, string selectedPlan)

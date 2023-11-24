@@ -51,7 +51,7 @@ public class Manage : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostUpgradePro()
     {
-        var redirect = await _billingService.GetRedirectToUpgradeOrganization();
+        var redirect = await _billingService.GetRedirectToUpgradeOrganization(_stripeOptions.Value.Store.Pro);
         return Redirect(redirect);
     }
 
