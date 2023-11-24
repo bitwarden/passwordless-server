@@ -32,8 +32,7 @@ public class AuthenticatorDataUpdaterBackgroundService : BackgroundService
 
             try
             {
-                await _service.AddOrUpdateAuthenticatorDataAsync(authenticator.Key, authenticator.Value.Name,
-                    authenticator.Value.IconLight);
+                await _service.AddOrUpdateAuthenticatorDataAsync(authenticator.Key, authenticator.Value.Name);
             }
             catch (Exception e)
             {

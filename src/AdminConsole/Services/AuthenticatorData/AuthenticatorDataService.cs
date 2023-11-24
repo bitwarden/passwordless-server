@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
@@ -14,19 +13,18 @@ public class AuthenticatorDataService<TDbContext> : IAuthenticatorDataService wh
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task AddOrUpdateAuthenticatorDataAsync(Guid aaGuid, string name, string icon)
+    public async Task AddOrUpdateAuthenticatorDataAsync(Guid aaGuid, string name)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var authenticator = await db.Authenticators.SingleOrDefaultAsync(x => x.AaGuid == aaGuid);
         if (authenticator == null)
         {
-            authenticator = new Authenticator { AaGuid = aaGuid, Name = name, Icon = icon };
+            authenticator = new Authenticator { AaGuid = aaGuid, Name = name };
             db.Authenticators.Add(authenticator);
         }
         else
         {
             authenticator.Name = name;
-            authenticator.Icon = icon;
         }
         await db.SaveChangesAsync();
     }

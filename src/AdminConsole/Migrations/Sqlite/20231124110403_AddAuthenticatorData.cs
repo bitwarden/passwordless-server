@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Passwordless.AdminConsole.Migrations.Mssql;
+namespace Passwordless.AdminConsole.Migrations.Sqlite;
 
 /// <inheritdoc />
 public partial class AddAuthenticatorData : Migration
@@ -14,9 +14,8 @@ public partial class AddAuthenticatorData : Migration
             name: "Authenticators",
             columns: table => new
             {
-                AaGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                Icon = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                AaGuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                Name = table.Column<string>(type: "TEXT", nullable: false)
             },
             constraints: table =>
             {

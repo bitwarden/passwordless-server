@@ -31,7 +31,6 @@ public sealed class CredentialsModel
                 if (authenticator != null)
                 {
                     viewModel.AuthenticatorName = authenticator.Name;
-                    viewModel.Icon = authenticator.Icon;
                 }
 
                 return viewModel;
@@ -78,16 +77,12 @@ public sealed class CredentialsModel
 
         public string AuthenticatorName { get; set; }
 
-        public string? Icon { get; set; }
-
         public bool IsNew()
         {
             return CreatedAt > DateTime.UtcNow.AddMinutes(-1);
         }
 
         public bool IsAuthenticatorKnown => AaGuid != Guid.Empty;
-
-        public bool HasIcon => !string.IsNullOrEmpty(Icon);
 
         public CredentialModel(byte[] descriptorId, byte[] publicKey, uint signatureCounter, string attestationFmt, DateTime createdAt, Guid aaGuid, DateTime lastUsedAt, string rpid, string origin, string device, string nickname)
         {
