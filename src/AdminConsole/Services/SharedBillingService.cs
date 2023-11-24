@@ -2,33 +2,24 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Stripe;
 using Stripe.Checkout;
+using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class SharedBillingService<TDbContext> : ISharedBillingService where TDbContext : ConsoleDbContext
-{    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-
-    private readonly IPasswordlessManagementClient _passwordlessClient;
-    private readonly ILogger<SharedBillingService<TDbContext>> _logger;
-    private readonly StripeOptions _stripeOptions;
-    private readonly IDataService _dataService;
-
+public class SharedBillingService<TDbContext> : BaseBillingService<TDbContext>, ISharedBillingService where TDbContext : ConsoleDbContext
+{   
     public SharedBillingService(
         IDbContextFactory<TDbContext> dbContextFactory,
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedBillingService<TDbContext>> logger,
-        IOptions<StripeOptions> stripeOptions)
+        IOptions<StripeOptions> stripeOptions) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions)
     {
-        _dbContextFactory = dbContextFactory;
-        _dataService = dataService;
-        _passwordlessClient = passwordlessClient;
-        _logger = logger;
-        _stripeOptions = stripeOptions.Value;
     }
 
     /// <inheritdoc />
@@ -64,23 +55,6 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
     }
 
-    private async Task<List<UsageItem>> GetUsageItems()
-    {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-
-        var items = await db.Applications
-            .Where(a => a.BillingSubscriptionItemId != null)
-            .GroupBy(a => new
-            {
-                a.OrganizationId,
-                a.BillingSubscriptionItemId
-            })
-            .Select(g => new
-                UsageItem(g.Key.BillingSubscriptionItemId, g.Sum(x => x.CurrentUserCount)))
-            .ToListAsync();
-        return items;
-    }
-
     /// <inheritdoc />
     public async Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId)
     {
@@ -95,63 +69,6 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
 
         await SetFeatures(customerId, planName, orgId, subscription.Id, subscription.Created, lineItem.Id, lineItem.Price.Id);
-    }
-
-    private async Task SetFeatures(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
-    {
-        var features = _stripeOptions.Plans[planName].Features;
-
-
-        // SetCustomerId on the Org
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
-
-        if (org == null)
-        {
-            throw new InvalidOperationException("Org not found");
-        }
-
-        if (org.HasSubscription)
-        {
-            return;
-        }
-
-
-        org.BillingCustomerId = customerId;
-        org.BecamePaidAt = subscriptionCreatedAt;
-        org.BillingSubscriptionId = subscriptionId;
-
-
-        // Increase the limits
-        org.MaxAdmins = features.MaxAdmins;
-        org.MaxApplications = features.MaxApplications;
-
-        if (planName == null)
-        {
-            throw new InvalidOperationException("Received a subscription for a product that is not configured.");
-        }
-
-
-        var applications = await db.Applications
-            .Where(a => a.OrganizationId == orgId)
-            .ToListAsync();
-
-        var setFeaturesRequest = new SetApplicationFeaturesRequest
-        {
-            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
-        };
-
-        // set the plans on each app
-        foreach (var application in applications)
-        {
-            application.BillingPlan = planName;
-            application.BillingSubscriptionItemId = subscriptionItemId;
-            application.BillingPriceId = subscriptionItemPriceId;
-            await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
-        }
-
-        await db.SaveChangesAsync();
     }
 
     /// <inheritdoc />
@@ -309,6 +226,104 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         {
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
+    }
+}
+
+public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
+{
+    protected readonly IDbContextFactory<TDbContext> _dbContextFactory;
+
+    protected readonly IPasswordlessManagementClient _passwordlessClient;
+    protected readonly ILogger<SharedBillingService<TDbContext>> _logger;
+    protected readonly StripeOptions _stripeOptions;
+    protected readonly IDataService _dataService;
+
+    public BaseBillingService(
+        IDbContextFactory<TDbContext> dbContextFactory,
+        IDataService dataService,
+        IPasswordlessManagementClient passwordlessClient,
+        ILogger<SharedBillingService<TDbContext>> logger,
+        IOptions<StripeOptions> stripeOptions)
+    {
+        _dbContextFactory = dbContextFactory;
+        _dataService = dataService;
+        _passwordlessClient = passwordlessClient;
+        _logger = logger;
+        _stripeOptions = stripeOptions.Value;
+    }
+    
+    protected async Task SetFeatures(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
+    {
+        var features = _stripeOptions.Plans[planName].Features;
+
+
+        // SetCustomerId on the Org
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var org = await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync<Organization>(db.Organizations, x => x.Id == orgId);
+
+        if (org == null)
+        {
+            throw new InvalidOperationException("Org not found");
+        }
+
+        if (org.HasSubscription)
+        {
+            return;
+        }
+
+
+        org.BillingCustomerId = customerId;
+        org.BecamePaidAt = subscriptionCreatedAt;
+        org.BillingSubscriptionId = subscriptionId;
+
+
+        // Increase the limits
+        org.MaxAdmins = features.MaxAdmins;
+        org.MaxApplications = features.MaxApplications;
+
+        if (planName == null)
+        {
+            throw new InvalidOperationException("Received a subscription for a product that is not configured.");
+        }
+
+
+        var applications = await Queryable
+            .Where<Application>(db.Applications, a => a.OrganizationId == orgId)
+            .ToListAsync();
+
+        var setFeaturesRequest = new SetApplicationFeaturesRequest
+        {
+            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
+        };
+
+        // set the plans on each app
+        foreach (var application in applications)
+        {
+            application.BillingPlan = planName;
+            application.BillingSubscriptionItemId = subscriptionItemId;
+            application.BillingPriceId = subscriptionItemPriceId;
+            await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    protected async Task<List<UsageItem>> GetUsageItems()
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await db.Applications
+            .Where(a => a.BillingSubscriptionItemId != null)
+            .GroupBy(a => new
+            {
+                a.OrganizationId,
+                a.BillingSubscriptionItemId
+            })
+            .Select(g => new
+                UsageItem(g.Key.BillingSubscriptionItemId, g.Sum(x => x.CurrentUserCount)))
+            .ToListAsync();
+        return items;
     }
 }
 
