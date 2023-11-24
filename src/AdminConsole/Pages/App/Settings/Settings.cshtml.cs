@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Stripe.Checkout;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -114,65 +112,6 @@ public class SettingsModel : PageModel
         var redirectUrl = await _billingService.ChangePlanAsync(app, selectedPlan);
 
         return RedirectToPage(redirectUrl);
-    }
-
-    /// <summary>
-    /// Creates a new checkout session in Stripe's payment portal.
-    /// </summary>
-    /// <param name="organizationId"></param>
-    /// <param name="billingCustomerId"></param>
-    /// <param name="planName"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
-    private async Task<IActionResult> CreateCheckoutSessionAsync(
-        int organizationId,
-        string? billingCustomerId,
-        string planName)
-    {
-        if (_stripeOptions.Plans.All(x => x.Key != planName))
-        {
-            throw new ArgumentException("Invalid plan name");
-        }
-
-        var successUrl = Url.PageLink("/Billing/Success");
-        successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-
-        var cancelUrl = Url.PageLink("/Billing/Cancelled");
-        var options = new SessionCreateOptions
-        {
-            Metadata =
-                new Dictionary<string, string>
-                {
-                    { "orgId", organizationId.ToString() },
-                    { "passwordless", "passwordless" }
-                },
-            ClientReferenceId = organizationId.ToString(),
-            SuccessUrl = successUrl,
-            CancelUrl = cancelUrl,
-            Mode = "subscription",
-            LineItems = new List<SessionLineItemOptions>
-            {
-                new()
-                {
-                    Price = _stripeOptions.Plans[planName].PriceId,
-                }
-            }
-        };
-
-        if (billingCustomerId != null)
-        {
-            options.Customer = billingCustomerId;
-        }
-        else
-        {
-            options.TaxIdCollection = new SessionTaxIdCollectionOptions { Enabled = true, };
-            options.CustomerEmail = User.GetEmail();
-        }
-
-        var service = new SessionService();
-        Session? session = await service.CreateAsync(options);
-
-        return Redirect(session.Url);
     }
 
     private void AddPlan(string plan)
