@@ -92,28 +92,6 @@ public class SharedBillingService<TDbContext> : BaseBillingService<TDbContext>, 
                || subscription.Status == "canceled";
     }
 
-    /// <inheritdoc />
-    public async Task<string?> GetCustomerIdAsync(int organizationId)
-    {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var customerId = await db.Organizations
-            .Where(o => o.Id == organizationId)
-            .Select(o => o.BillingCustomerId)
-            .FirstOrDefaultAsync();
-        return customerId;
-    }
-
-    public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
-    {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        await db.Applications
-            .Where(x => x.Id == applicationId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(p => p.BillingPlan, plan)
-                .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
-                .SetProperty(p => p.BillingPriceId, priceId));
-    }
-
     public async Task<string> CreateCheckoutSessionAsync(
         int organizationId,
         string? billingCustomerId,
@@ -190,41 +168,6 @@ public class SharedBillingService<TDbContext> : BaseBillingService<TDbContext>, 
                 cancelOptions.InvoiceNow = true;
                 await subscriptionService.CancelAsync(subscriptionItem.Subscription);
             }
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task OnSubscriptionDeletedAsync(string subscriptionId)
-    {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var organization = await db.Organizations
-            .Include(x => x.Applications)
-            .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
-        if (organization == null) return;
-        organization.BillingSubscriptionId = null;
-        organization.BecamePaidAt = null;
-
-        var features = _stripeOptions.Plans[_stripeOptions.Store.Free].Features;
-        organization.MaxAdmins = features.MaxAdmins;
-        organization.MaxApplications = features.MaxApplications;
-
-        foreach (var application in organization.Applications)
-        {
-            application.BillingPriceId = null;
-            application.BillingSubscriptionItemId = null;
-            application.BillingPlan = _stripeOptions.Store.Free;
-        }
-
-        await db.SaveChangesAsync();
-
-        var setFeaturesRequest = new SetApplicationFeaturesRequest
-        {
-            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
-        };
-        foreach (var application in organization.Applications)
-        {
-            await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
     }
 }
@@ -324,6 +267,63 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
                 UsageItem(g.Key.BillingSubscriptionItemId, g.Sum(x => x.CurrentUserCount)))
             .ToListAsync();
         return items;
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> GetCustomerIdAsync(int organizationId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var customerId = await db.Organizations
+            .Where(o => o.Id == organizationId)
+            .Select(o => o.BillingCustomerId)
+            .FirstOrDefaultAsync();
+        return customerId;
+    }
+
+    public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        await db.Applications
+            .Where(x => x.Id == applicationId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(p => p.BillingPlan, plan)
+                .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
+                .SetProperty(p => p.BillingPriceId, priceId));
+    }
+
+    /// <inheritdoc />
+    public async Task OnSubscriptionDeletedAsync(string subscriptionId)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var organization = await db.Organizations
+            .Include(x => x.Applications)
+            .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+        if (organization == null) return;
+        organization.BillingSubscriptionId = null;
+        organization.BecamePaidAt = null;
+
+        var features = _stripeOptions.Plans[_stripeOptions.Store.Free].Features;
+        organization.MaxAdmins = features.MaxAdmins;
+        organization.MaxApplications = features.MaxApplications;
+
+        foreach (var application in organization.Applications)
+        {
+            application.BillingPriceId = null;
+            application.BillingSubscriptionItemId = null;
+            application.BillingPlan = _stripeOptions.Store.Free;
+        }
+
+        await db.SaveChangesAsync();
+
+        var setFeaturesRequest = new SetApplicationFeaturesRequest
+        {
+            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
+        };
+        foreach (var application in organization.Applications)
+        {
+            await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
+        }
     }
 }
 
