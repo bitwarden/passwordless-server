@@ -1,8 +1,14 @@
+using System.Collections.Immutable;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.BackgroundServices;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Configuration;
 using Stripe;
 
@@ -15,9 +21,6 @@ public static class BillingBootstrap
     {
         builder.Services.AddOptions<StripeOptions>()
             .BindConfiguration("Stripe");
-
-        // TODO: Introduce an interface and replace it with Noop.
-        builder.Services.AddScoped<IBillingHelper, NoopBillingHelper<TDbContext>>();
         
         // Todo: Improve this self-hosting story.
         if (builder.Configuration.IsSelfHosted())
@@ -35,66 +38,83 @@ public static class BillingBootstrap
     }
 }
 
-public class NoOpBillingService<TDbContext> :  ISharedBillingService where TDbContext : ConsoleDbContext
+public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, ISharedBillingService where TDbContext : ConsoleDbContext
 {
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-
     public NoOpBillingService(
-        IDbContextFactory<TDbContext> dbContextFactory
-        )
+        IDbContextFactory<TDbContext> dbContextFactory,
+        IDataService dataService,
+        IPasswordlessManagementClient passwordlessClient,
+        ILogger<SharedStripeBillingService<TDbContext>> logger,
+        IOptions<StripeOptions> stripeOptions,
+        IActionContextAccessor actionContextAccessor,
+        UrlHelperFactory urlHelperFactory
+    ) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions, actionContextAccessor, urlHelperFactory)
     {
-        _dbContextFactory = dbContextFactory;
     }
     
     public Task UpdateUsageAsync()
     {
-        throw new NotImplementedException();
+        // This can be a no-op.
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId)
+    {
+        return Task.FromResult<IReadOnlyCollection<PaymentMethodModel>>(Array.Empty<PaymentMethodModel>().ToImmutableList());
     }
 
     public Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId)
     {
+        // only used in webhook
         throw new NotImplementedException();
     }
 
     public Task UpdateSubscriptionStatusAsync(Invoice? dataObject)
     {
+        // Only used in webhook
         throw new NotImplementedException();
     }
 
     public Task<bool> CancelSubscriptionAsync(string subscriptionId)
     {
-        throw new NotImplementedException();
+        // Deleting org
+        // noop
+        return Task.FromResult(true);
     }
 
     public Task<string?> GetCustomerIdAsync(int organizationId)
     {
+        // can be noop, only used to open stripe to manage billing
         throw new NotImplementedException();
     }
 
     public Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
+        // only used in webhook
         throw new NotImplementedException();
     }
 
     public Task OnPostApplicationDeletedAsync(string subscriptionItemId)
     {
-        throw new NotImplementedException();
+        // can be noop
+        return Task.CompletedTask;
     }
 
-    public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
+    public Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        await db.Applications
-            .Where(x => x.Id == applicationId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(p => p.BillingPlan, plan)
-                .SetProperty(p => p.BillingSubscriptionItemId, subscriptionItemId)
-                .SetProperty(p => p.BillingPriceId, priceId));
+        return Task.FromResult("/billing/manage");
     }
 
-    public Task<string> CreateCheckoutSessionAsync(int organizationId, string? billingCustomerId, string email, string planName,
-        string successUrl, string cancelUrl)
+    public async Task<string?> ChangePlanAsync(string app, string selectedPlan)
     {
-        throw new NotImplementedException();
+        await this.SetPlanOnApp(app, selectedPlan, "simple", "simple");
+
+        // TODO: returning this string is a bit werid
+        return "/billing/manage";
+    }
+
+    public Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU)
+    {
+        return Task.FromResult(new ValueTuple<string, string>("asd", "asd"));
     }
 }

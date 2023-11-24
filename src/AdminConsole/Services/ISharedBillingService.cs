@@ -55,17 +55,7 @@ public interface ISharedBillingService
     /// <param name="subscriptionItemId"></param>
     Task OnPostApplicationDeletedAsync(string subscriptionItemId);
 
-    Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
-
-    Task<string> CreateCheckoutSessionAsync(
-        int organizationId,
-        string? billingCustomerId,
-        string email,
-        string planName,
-        string successUrl,
-        string cancelUrl);
-
-    Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan);
+    Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan = null);
     Task<string?> ChangePlanAsync(string app, string selectedPlan);
     Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU);
 }

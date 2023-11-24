@@ -45,7 +45,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         {
             var createOptions = new SubscriptionItemCreateOptions
             {
-                Subscription = Organization.BillingSubscriptionId,
+                Subscription = org.BillingSubscriptionId,
                 Price = _stripeOptions.Plans[planSKU].PriceId,
                 ProrationDate = DateTime.UtcNow,
                 ProrationBehavior = "create_prorations"
@@ -224,7 +224,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
                || subscription.Status == "canceled";
     }
 
-    public async Task<string> CreateCheckoutSessionAsync(
+    private async Task<string> CreateCheckoutSessionAsync(
         int organizationId,
         string? billingCustomerId,
         string email,

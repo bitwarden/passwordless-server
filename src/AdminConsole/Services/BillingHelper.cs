@@ -47,7 +47,7 @@ public class NoopBillingHelper<TDbContext> where TDbContext : ConsoleDbContext
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod
         };
         
-        await _sharedBillingService.UpdateApplicationAsync(app, selectedPlan, "simple", "simple");
+        //await _sharedBillingService.UpdateApplicationAsync(app, selectedPlan, "simple", "simple");
         
         await _managementClient.SetFeaturesAsync(app, updateFeaturesRequest);
 
