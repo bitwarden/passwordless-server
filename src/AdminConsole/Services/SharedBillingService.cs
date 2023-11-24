@@ -34,21 +34,7 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
     /// <inheritdoc />
     public async Task UpdateUsageAsync()
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-
-        var items = await db.Applications
-            .Where(a => a.BillingSubscriptionItemId != null)
-            .GroupBy(a => new
-            {
-                a.OrganizationId,
-                a.BillingSubscriptionItemId
-            })
-            .Select(g => new
-            {
-                g.Key.BillingSubscriptionItemId,
-                Users = g.Sum(x => x.CurrentUserCount)
-            })
-            .ToListAsync();
+        List<UsageItem> items = await GetUsageItems();
 
         foreach (var item in items)
         {
@@ -78,12 +64,43 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
     }
 
+    private async Task<List<UsageItem>> GetUsageItems()
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await db.Applications
+            .Where(a => a.BillingSubscriptionItemId != null)
+            .GroupBy(a => new
+            {
+                a.OrganizationId,
+                a.BillingSubscriptionItemId
+            })
+            .Select(g => new
+                UsageItem(g.Key.BillingSubscriptionItemId, g.Sum(x => x.CurrentUserCount)))
+            .ToListAsync();
+        return items;
+    }
+
     /// <inheritdoc />
     public async Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId)
     {
         // todo: Add extra error handling, if we already have a customerId on Org, throw.
 
         var orgId = int.Parse(clientReferenceId);
+
+        // we only have one item per subscription
+        var subscriptionService = new SubscriptionService();
+        var subscription = await subscriptionService.GetAsync(subscriptionId);
+        SubscriptionItem lineItem = subscription.Items.Data.Single();
+        var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
+
+        await SetFeatures(customerId, planName, orgId, subscription.Id, subscription.Created, lineItem.Id, lineItem.Price.Id);
+    }
+
+    private async Task SetFeatures(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
+    {
+        var features = _stripeOptions.Plans[planName].Features;
+
 
         // SetCustomerId on the Org
         await using var db = await _dbContextFactory.CreateDbContextAsync();
@@ -99,18 +116,11 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
             return;
         }
 
-        var subscriptionService = new SubscriptionService();
-        var subscription = await subscriptionService.GetAsync(subscriptionId);
 
         org.BillingCustomerId = customerId;
-        org.BecamePaidAt = subscription.Created;
-        org.BillingSubscriptionId = subscription.Id;
+        org.BecamePaidAt = subscriptionCreatedAt;
+        org.BillingSubscriptionId = subscriptionId;
 
-        // we only have one item per subscription
-        SubscriptionItem lineItem = subscription.Items.Data.Single();
-        var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
-
-        var features = _stripeOptions.Plans[planName].Features;
 
         // Increase the limits
         org.MaxAdmins = features.MaxAdmins;
@@ -136,8 +146,8 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         foreach (var application in applications)
         {
             application.BillingPlan = planName;
-            application.BillingSubscriptionItemId = lineItem.Id;
-            application.BillingPriceId = lineItem.Price.Id;
+            application.BillingSubscriptionItemId = subscriptionItemId;
+            application.BillingPriceId = subscriptionItemPriceId;
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
 
@@ -301,3 +311,5 @@ public class SharedBillingService<TDbContext> : ISharedBillingService where TDbC
         }
     }
 }
+
+public record UsageItem(string BillingSubscriptionItemId, int Users);
