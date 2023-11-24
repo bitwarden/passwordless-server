@@ -1,8 +1,15 @@
+@using Microsoft.AspNetCore.Authorization
+
 @page "/welcome"
 
-<PageTitle>Welcome!</PageTitle>
+// if not authenticated this will redirect to /account/login (defined in routes.razor)
+@attribute [Authorize]
 
-<h1>Welcome to Blazor!</h1>
+<PageTitle>Welcome friend!</PageTitle>
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+    <h1>Welcome @context.User.Identity!.Name</h1>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
 
 <p>@message</p>
 

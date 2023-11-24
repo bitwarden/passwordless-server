@@ -1,6 +1,12 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Passwordless.AdminConsole.Components.Shared
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-    <RouteView RouteData="@routeData" />
-    <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layouts.MainLayout)">
+            <NotAuthorized>
+                    <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>
