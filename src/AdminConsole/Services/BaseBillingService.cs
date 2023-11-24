@@ -58,7 +58,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         await _passwordlessClient.SetFeaturesAsync(app, updateFeaturesRequest);
     }
 
-    protected async Task SetFeatures(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
+    protected async Task UpgradeToPaidOrganization(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
     {
         var features = _stripeOptions.Plans[planName].Features;
 

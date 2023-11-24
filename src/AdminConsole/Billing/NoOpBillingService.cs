@@ -80,7 +80,7 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         var organization = await _dataService.GetOrganizationWithDataAsync();
 
         // Todo: this should be called something better
-        await SetFeatures("simple", selectedPlan, organization.Id, "simple", DateTime.UtcNow, "simple", "simple");
+        await UpgradeToPaidOrganization("simple", selectedPlan, organization.Id, "simple", DateTime.UtcNow, "simple", "simple");
 
         // I don't link to return these strings
         return "/billing/manage";
@@ -97,6 +97,6 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
 
     public Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU)
     {
-        return Task.FromResult(new ValueTuple<string, string>("asd", "asd"));
+        return Task.FromResult(new ValueTuple<string, string>("simple", "simple"));
     }
 }

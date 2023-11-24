@@ -198,7 +198,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         SubscriptionItem lineItem = subscription.Items.Data.Single();
         var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
 
-        await SetFeatures(customerId, planName, orgId, subscription.Id, subscription.Created, lineItem.Id, lineItem.Price.Id);
+        await UpgradeToPaidOrganization(customerId, planName, orgId, subscription.Id, subscription.Created, lineItem.Id, lineItem.Price.Id);
     }
 
     /// <inheritdoc />
