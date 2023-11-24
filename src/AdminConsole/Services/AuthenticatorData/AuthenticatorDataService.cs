@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
@@ -28,5 +29,11 @@ public class AuthenticatorDataService<TDbContext> : IAuthenticatorDataService wh
             authenticator.Icon = icon;
         }
         await db.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<Authenticator>> GetAsync(IEnumerable<Guid> aaGuids)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        return await db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid)).ToListAsync();
     }
 }
