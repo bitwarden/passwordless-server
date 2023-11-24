@@ -23,7 +23,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         ILogger<SharedStripeBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions,
         IActionContextAccessor actionContextAccessor,
-        UrlHelperFactory urlHelperFactory
+        IUrlHelperFactory urlHelperFactory
         ) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions, actionContextAccessor, urlHelperFactory)
     {
     }

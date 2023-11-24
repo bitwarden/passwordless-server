@@ -28,6 +28,5 @@ public static class BillingBootstrap
             builder.Services.AddScoped<ISharedBillingService, SharedStripeBillingService<TDbContext>>();
             builder.Services.AddHostedService<MeteredBillingBackgroundService>();
         }
-
     }
 }

@@ -22,7 +22,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     protected readonly ILogger<BaseBillingService<TDbContext>> _logger;
     protected readonly StripeOptions _stripeOptions;
     protected readonly IDataService _dataService;
-    protected readonly UrlHelperFactory _urlHelperFactory;
+    protected readonly IUrlHelperFactory _urlHelperFactory;
     protected readonly IActionContextAccessor _actionContextAccessor;
 
     public BaseBillingService(
@@ -32,7 +32,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         ILogger<BaseBillingService<TDbContext>> logger,
         IOptions<StripeOptions> stripeOptions,
         IActionContextAccessor actionContextAccessor,
-        UrlHelperFactory urlHelperFactory
+        IUrlHelperFactory urlHelperFactory
 
         )
     {
