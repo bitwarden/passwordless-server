@@ -1,7 +1,15 @@
+using System.Collections.Immutable;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Models;
+using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.AdminConsole.Pages.Billing;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Stripe;
 using Stripe.Checkout;
@@ -15,8 +23,135 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedStripeBillingService<TDbContext>> logger,
-        IOptions<StripeOptions> stripeOptions) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions)
+        IOptions<StripeOptions> stripeOptions,
+        IActionContextAccessor actionContextAccessor,
+        UrlHelperFactory urlHelperFactory
+        ) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions, actionContextAccessor, urlHelperFactory)
     {
+    }
+
+    public async Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU)
+    {
+        if (org.BillingSubscriptionId == null)
+        {
+            throw new InvalidOperationException("Cannot create a paid application without a subscription");
+        }
+        var subscriptionItemService = new SubscriptionItemService();
+        var listOptions = new SubscriptionItemListOptions { Subscription = org.BillingSubscriptionId };
+        var subscriptionItems = await subscriptionItemService.ListAsync(listOptions);
+
+        var subscriptionItem = subscriptionItems.SingleOrDefault(x => x.Price.Id == _stripeOptions.Plans[planSKU].PriceId);
+        if (subscriptionItem == null)
+        {
+            var createOptions = new SubscriptionItemCreateOptions
+            {
+                Subscription = Organization.BillingSubscriptionId,
+                Price = _stripeOptions.Plans[planSKU].PriceId,
+                ProrationDate = DateTime.UtcNow,
+                ProrationBehavior = "create_prorations"
+            };
+            subscriptionItem = await subscriptionItemService.CreateAsync(createOptions);
+        }
+
+        return (subscriptionItem.Id, subscriptionItem.Price.Id);
+    }
+    
+    public async Task<string?> GetRedirectToUpgradeOrganization(string? selectedPlan = null)
+    {
+        selectedPlan ??= _stripeOptions.Store.Pro;
+        
+        var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+
+        var organization = await _dataService.GetOrganizationWithDataAsync();
+        if (!organization.HasSubscription)
+        {
+            var successUrl = urlBuilder.PageLink("/Billing/Success");
+            successUrl += "?session_id={CHECKOUT_SESSION_ID}";
+            var cancelUrl = urlBuilder.PageLink("/Billing/Cancelled");
+            var sessionUrl = await this.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, _actionContextAccessor.ActionContext.HttpContext.User.GetEmail(), selectedPlan, successUrl, cancelUrl);
+            return sessionUrl;
+        }
+
+        return null;
+    }
+    
+      public async Task<string> ChangePlanAsync(string app, string selectedPlan)
+    {
+        var redirectToUpgrade = await this.GetRedirectToUpgradeOrganization(selectedPlan);
+        if (redirectToUpgrade != null) return redirectToUpgrade;
+        
+        var organization = await _dataService.GetOrganizationWithDataAsync();
+
+        // Org has Subscription
+        
+
+        var application = organization.Applications.SingleOrDefault(x => x.Id == app);
+        var existingSubscriptionItemId = application.BillingSubscriptionItemId;
+
+        var plan = _stripeOptions.Plans[selectedPlan];
+        var priceId = plan.PriceId!;
+        var subscriptionItem = organization.Applications
+            .Where(x => x.BillingPriceId == priceId)
+            .GroupBy(x => new
+            {
+                x.BillingPriceId,
+                x.BillingSubscriptionItemId
+            })
+            .Select(x => new
+            {
+                PriceId = x.Key.BillingPriceId!,
+                Id = x.Key.BillingSubscriptionItemId!
+            }).SingleOrDefault();
+
+        var subscriptionItemService = new SubscriptionItemService();
+
+        // Create subscription item if it doesn't exist.
+        if (subscriptionItem == null)
+        {
+            var createSubscriptionItemOptions = new SubscriptionItemCreateOptions
+            {
+                Price = priceId,
+                ProrationDate = DateTime.UtcNow,
+                ProrationBehavior = "create_prorations",
+                Subscription = organization.BillingSubscriptionId
+            };
+            var createSubscriptionItemResult = await subscriptionItemService.CreateAsync(createSubscriptionItemOptions);
+            subscriptionItem = new
+            {
+                PriceId = createSubscriptionItemResult.Price.Id,
+                Id = createSubscriptionItemResult.Id
+            };
+        }
+
+        // Delete subscription item if it's not used by any other application inside this organization.
+        if (!organization.Applications.Any(x => x.Id != app && x.BillingSubscriptionItemId == existingSubscriptionItemId))
+        {
+            var deleteSubscriptionItemOptions = new SubscriptionItemDeleteOptions { ClearUsage = true };
+            await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
+        }
+
+        await this.SetPlanOnApp(app, selectedPlan, subscriptionItem.Id, subscriptionItem.PriceId);
+
+        return "/billing/manage";
+    }
+    
+    public async Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId)
+    {
+        var paymentMethodsService = new CustomerService();
+        var paymentMethods = await paymentMethodsService.ListPaymentMethodsAsync(organizationBillingCustomerId);
+        if (paymentMethods != null)
+        {
+            return paymentMethods.Data
+                .Where(x => x.Type == "card")
+                .Select(x =>
+                    new PaymentMethodModel(
+                        x.Card.Brand,
+                        x.Card.Last4,
+                        new DateTime((int)x.Card.ExpYear, (int)x.Card.ExpMonth, 1)))
+                .ToImmutableList();
+        }
+
+        return Array.Empty<PaymentMethodModel>().ToImmutableList();
     }
 
     /// <inheritdoc />

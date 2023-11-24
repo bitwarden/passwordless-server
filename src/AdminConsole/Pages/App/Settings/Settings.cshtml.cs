@@ -23,7 +23,6 @@ public class SettingsModel : PageModel
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
     private readonly IPasswordlessManagementClient _managementClient;
-    private readonly IBillingHelper _billingHelper;
     private readonly StripeOptions _stripeOptions;
 
     public SettingsModel(
@@ -33,8 +32,7 @@ public class SettingsModel : PageModel
         IApplicationService appService,
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
-        IOptions<StripeOptions> stripeOptions,
-        IBillingHelper billingHelper
+        IOptions<StripeOptions> stripeOptions
         )
     {
         _logger = logger;
@@ -43,7 +41,6 @@ public class SettingsModel : PageModel
         _appService = appService;
         _billingService = billingService;
         _managementClient = managementClient;
-        _billingHelper = billingHelper;
         _stripeOptions = stripeOptions.Value;
     }
 
@@ -116,7 +113,7 @@ public class SettingsModel : PageModel
     public async Task<IActionResult> OnPostChangePlanAsync(string app, string selectedPlan)
     {
 
-        var redirectUrl = await _billingHelper.ChangePlanASync(app, selectedPlan);
+        var redirectUrl = await _billingService.ChangePlanAsync(app, selectedPlan);
 
         return RedirectToPage(redirectUrl);
     }

@@ -17,14 +17,12 @@ public class Manage : BaseExtendedPageModel
     private readonly ISharedBillingService _billingService;
     private readonly IDataService _dataService;
     private readonly IOptions<StripeOptions> _stripeOptions;
-    private readonly IBillingHelper _billingHelper;
 
-    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<StripeOptions> stripeOptions, IBillingHelper billingHelper)
+    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<StripeOptions> stripeOptions)
     {
         _billingService = billingService;
         _dataService = dataService;
         _stripeOptions = stripeOptions;
-        _billingHelper = billingHelper;
 
         var plans = new List<PricingCardModel>();
         plans.Add(new PricingCardModel(_stripeOptions.Value.Store.Free, _stripeOptions.Value.Plans[_stripeOptions.Value.Store.Free]));
@@ -51,13 +49,13 @@ public class Manage : BaseExtendedPageModel
         
         if (Organization.HasSubscription)
         {
-            PaymentMethods = await _billingHelper.GetPaymentMethods(Organization.BillingCustomerId);
+            PaymentMethods = await _billingService.GetPaymentMethods(Organization.BillingCustomerId);
         }
     }
 
     public async Task<IActionResult> OnPostUpgradePro()
     {
-        var redirect = await _billingHelper.UpgradeOrganization();
+        var redirect = await _billingService.GetRedirectToUpgradeOrganization();
         return Redirect(redirect);
     }
 
@@ -99,60 +97,6 @@ public class Manage : BaseExtendedPageModel
                 entity.CurrentUserCount,
                 options.Ui.Label,
                 canChangePlan);
-        }
-    }
-
-    public record PricingCardModel(
-        string Name,
-        StripePlanOptions Plan)
-    {
-        /// <summary>
-        /// We want to display the price in US dollars.
-        /// </summary>
-        private static readonly CultureInfo PriceFormat = new("en-US");
-
-        /// <summary>
-        /// Indicates if the plan is the active plan for the organization.
-        /// </summary>
-        public bool IsActive { get; set; }
-    }
-
-    public record PaymentMethodModel(string Brand, string Number, DateTime ExpirationDate)
-    {
-        public string CardIcon
-        {
-            get
-            {
-                var path = new StringBuilder("Shared/Icons/PaymentMethods/");
-                switch (Brand)
-                {
-                    case "amex":
-                        path.Append("Amex");
-                        break;
-                    case "diners":
-                        path.Append("Diners");
-                        break;
-                    case "discover":
-                        path.Append("Discover");
-                        break;
-                    case "jcb":
-                        path.Append("Jcb");
-                        break;
-                    case "mastercard":
-                        path.Append("MasterCard");
-                        break;
-                    case "unionpay":
-                        path.Append("UnionPay");
-                        break;
-                    case "visa":
-                        path.Append("Visa");
-                        break;
-                    default:
-                        path.Append("UnknownCard");
-                        break;
-                }
-                return path.ToString();
-            }
         }
     }
 }

@@ -24,8 +24,8 @@ public class CreateApplicationModel : PageModel
     private readonly IApplicationService _applicationService;
     private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
-    private readonly IBillingHelper _billingHelper;
     private readonly StripeOptions _stripeOptions;
+    private readonly ISharedBillingService _billingService;
 
     public CreateApplicationModel(
         IOptionsSnapshot<PasswordlessOptions> passwordlessOptions,
@@ -33,12 +33,12 @@ public class CreateApplicationModel : PageModel
         IApplicationService applicationService,
         IDataService dataService,
         IPasswordlessManagementClient managementClient,
-        IOptionsSnapshot<StripeOptions> stripeOptions, IBillingHelper billingHelper)
+        IOptionsSnapshot<StripeOptions> stripeOptions, ISharedBillingService billingService)
     {
         _dataService = dataService;
         _applicationService = applicationService;
         _managementClient = managementClient;
-        _billingHelper = billingHelper;
+        _billingService = billingService;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
@@ -99,33 +99,12 @@ public class CreateApplicationModel : PageModel
         app.BillingPlan = form.Plan;
 
         // TODO: Move to a service
-        if (form.Plan != _stripeOptions.Store.Free && _billingHelper.IsBillingEnabled)
+        if (form.Plan != _stripeOptions.Store.Free)
         {
-            
-            
-            if (Organization.BillingSubscriptionId == null)
-            {
-                throw new InvalidOperationException("Cannot create a paid application without a subscription");
-            }
-            var subscriptionItemService = new SubscriptionItemService();
-            var listOptions = new SubscriptionItemListOptions { Subscription = Organization.BillingSubscriptionId };
-            var subscriptionItems = await subscriptionItemService.ListAsync(listOptions);
+            var subItem = await _billingService.CreateSubscriptionItem(Organization, form.Plan);
 
-            var subscriptionItem = subscriptionItems.SingleOrDefault(x => x.Price.Id == _stripeOptions.Plans[form.Plan].PriceId);
-            if (subscriptionItem == null)
-            {
-                var createOptions = new SubscriptionItemCreateOptions
-                {
-                    Subscription = Organization.BillingSubscriptionId,
-                    Price = _stripeOptions.Plans[form.Plan].PriceId,
-                    ProrationDate = DateTime.UtcNow,
-                    ProrationBehavior = "create_prorations"
-                };
-                subscriptionItem = await subscriptionItemService.CreateAsync(createOptions);
-            }
-
-            app.BillingSubscriptionItemId = subscriptionItem.Id;
-            app.BillingPriceId = subscriptionItem.Price.Id;
+            app.BillingSubscriptionItemId = subItem.subscriptionItemId;
+            app.BillingPriceId = subItem.priceId;
         }
 
         NewAppResponse res;

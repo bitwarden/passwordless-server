@@ -1,3 +1,7 @@
+using System.Globalization;
+using System.Text;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
@@ -18,22 +22,41 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     protected readonly ILogger<BaseBillingService<TDbContext>> _logger;
     protected readonly StripeOptions _stripeOptions;
     protected readonly IDataService _dataService;
+    protected readonly UrlHelperFactory _urlHelperFactory;
+    protected readonly IActionContextAccessor _actionContextAccessor;
 
     public BaseBillingService(
         IDbContextFactory<TDbContext> dbContextFactory,
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<BaseBillingService<TDbContext>> logger,
-        IOptions<StripeOptions> stripeOptions)
+        IOptions<StripeOptions> stripeOptions,
+        IActionContextAccessor actionContextAccessor,
+        UrlHelperFactory urlHelperFactory
+        
+        )
     {
         _dbContextFactory = dbContextFactory;
         _dataService = dataService;
         _passwordlessClient = passwordlessClient;
         _logger = logger;
         _stripeOptions = stripeOptions.Value;
+        _urlHelperFactory = urlHelperFactory;
+        _actionContextAccessor = actionContextAccessor;
     }
-    
-    
+
+    protected async Task SetPlanOnApp(string app, string selectedPlan, string subscriptionItemId, string priceId)
+    {
+        var plan = _stripeOptions.Plans[selectedPlan];
+        await this.UpdateApplicationAsync(app, selectedPlan, subscriptionItemId, priceId);
+
+        var updateFeaturesRequest = new SetApplicationFeaturesRequest
+        {
+            EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
+            EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod
+        };
+        await _passwordlessClient.SetFeaturesAsync(app, updateFeaturesRequest);
+    }
     
     protected async Task SetFeatures(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
     {
@@ -163,6 +186,62 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         foreach (var application in organization.Applications)
         {
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
+        }
+    }
+    
+    
+}
+
+public record PricingCardModel(
+    string Name,
+    StripePlanOptions Plan)
+{
+    /// <summary>
+    /// We want to display the price in US dollars.
+    /// </summary>
+    private static readonly CultureInfo PriceFormat = new("en-US");
+
+    /// <summary>
+    /// Indicates if the plan is the active plan for the organization.
+    /// </summary>
+    public bool IsActive { get; set; }
+}
+    
+public record PaymentMethodModel(string Brand, string Number, DateTime ExpirationDate)
+{
+    public string CardIcon
+    {
+        get
+        {
+            var path = new StringBuilder("Shared/Icons/PaymentMethods/");
+            switch (Brand)
+            {
+                case "amex":
+                    path.Append("Amex");
+                    break;
+                case "diners":
+                    path.Append("Diners");
+                    break;
+                case "discover":
+                    path.Append("Discover");
+                    break;
+                case "jcb":
+                    path.Append("Jcb");
+                    break;
+                case "mastercard":
+                    path.Append("MasterCard");
+                    break;
+                case "unionpay":
+                    path.Append("UnionPay");
+                    break;
+                case "visa":
+                    path.Append("Visa");
+                    break;
+                default:
+                    path.Append("UnknownCard");
+                    break;
+            }
+            return path.ToString();
         }
     }
 }
