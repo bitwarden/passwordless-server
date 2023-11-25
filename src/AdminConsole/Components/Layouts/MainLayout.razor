@@ -1,27 +1,33 @@
-﻿@using Microsoft.AspNetCore.Authorization
+﻿@using Microsoft.AspNetCore.Components.Authorization;
 @inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
-            <!-- Render menu when authenticated -->
-            <Authorized>
-                <NavMenu />
-            </Authorized>
-            <!-- Don't show menu in anonymous state -->
-            <NotAuthorized>
-                Anonymous view
-            </NotAuthorized>
-        </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
-    </div>
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar-authorized">
+                <NavMenu/>
+            </div>
+            <main class="blazor">
+                <div class="top-row px-4">
+                    <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <div class="sidebar-anonymous">
+                <a href="">
+                    <img class="block h-8 w-auto" src="icon.svg" height="20"/>
+                </a>
+            </div>
+            <div class="content-container-anonymous">
+                <main class="blazor">
+                    @Body
+                </main>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>

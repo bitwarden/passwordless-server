@@ -186,6 +186,26 @@
     label.form-label {
         @apply block text-sm font-medium leading-6 text-gray-900;
     }
+    
+    .sidebar {
+        @apply hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-primary-500;
+    }
+    
+    .sidebar-anonymous {
+        @apply sidebar lg:w-16 items-center pt-5 pb-4;
+    }
+    
+    .sidebar-authorized {
+        @apply sidebar lg:w-64;
+    }
+    
+    main.blazor {
+        @apply py-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col space-y-4 min-h-full;
+    }
+    
+    .content-container-anonymous {
+        @apply flex-1 lg:pl-16;
+    }
 }
 
 :root {
