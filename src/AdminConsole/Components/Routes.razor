@@ -3,8 +3,9 @@
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layouts.MainLayout)">
+            <!-- When visiting a page that requires authorization, but the user isn't authorized, redirect to the login page -->
             <NotAuthorized>
-                    <RedirectToLogin />
+                <RedirectToLogin/>
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />

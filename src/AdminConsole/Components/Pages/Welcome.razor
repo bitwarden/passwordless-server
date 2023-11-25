@@ -2,9 +2,6 @@
 
 @page "/welcome"
 
-// if not authenticated this will redirect to /account/login (defined in routes.razor)
-@attribute [Authorize]
-
 <PageTitle>Welcome friend!</PageTitle>
 
 <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
