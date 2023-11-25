@@ -114,10 +114,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="Services\AuthenticatorData\authenticator-data.json" />
-    <None Include="Services\AuthenticatorData\authenticator-data.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="Services\AuthenticatorData\authenticator-data.json" CopyToOutputDirectory="always" />
   </ItemGroup>
+
    
 </Project>
