@@ -5,11 +5,11 @@ namespace Passwordless.AdminConsole.Pages.Shared;
 
 public sealed class CredentialsModel
 {
-    private readonly IAuthenticatorDataService _authenticatorDataService;
+    private readonly IAuthenticatorDataProvider _authenticatorDataProvider;
 
-    public CredentialsModel(IAuthenticatorDataService authenticatorDataService)
+    public CredentialsModel(IAuthenticatorDataProvider authenticatorDataProvider)
     {
-        _authenticatorDataService = authenticatorDataService;
+        _authenticatorDataProvider = authenticatorDataProvider;
     }
 
     /// <summary>
@@ -17,22 +17,14 @@ public sealed class CredentialsModel
     /// </summary>
     public IReadOnlyCollection<CredentialModel> Items { get; private set; } = new List<CredentialModel>();
 
-    public async Task SetItemsAsync(IReadOnlyCollection<Credential> items)
+    public void SetItems(IReadOnlyCollection<Credential> items)
     {
-        var aaGuids = items.Select(x => x.AaGuid).ToList();
-        var authenticators = await _authenticatorDataService.GetAsync(aaGuids);
         Items = items
             .Select(x =>
             {
                 var viewModel = new CredentialModel(x.Descriptor.Id, x.PublicKey, x.SignatureCounter,
                     x.AttestationFmt, x.CreatedAt, x.AaGuid, x.LastUsedAt, x.RPID, x.Origin, x.Device, x.Nickname);
-                var authenticator = authenticators.SingleOrDefault(a => a.AaGuid == x.AaGuid);
-
-                if (authenticator != null)
-                {
-                    viewModel.AuthenticatorName = authenticator.Name;
-                }
-
+                viewModel.AuthenticatorName = _authenticatorDataProvider.GetName(x.AaGuid);
                 return viewModel;
             }).ToList();
     }

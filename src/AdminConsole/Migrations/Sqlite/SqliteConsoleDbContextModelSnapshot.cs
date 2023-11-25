@@ -15,7 +15,7 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
 
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
@@ -363,21 +363,6 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("Applications");
-                });
-
-            modelBuilder.Entity("Passwordless.AdminConsole.Models.Authenticator", b =>
-                {
-                    b.Property<Guid>("AaGuid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("AaGuid");
-
-                    b.ToTable("Authenticators");
                 });
 
             modelBuilder.Entity("Passwordless.AdminConsole.Models.Onboarding", b =>

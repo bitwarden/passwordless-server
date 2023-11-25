@@ -6,7 +6,6 @@ using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
-using Passwordless.AdminConsole.Services.AuthenticatorData;
 
 namespace Passwordless.AdminConsole.Db;
 
@@ -68,7 +67,6 @@ public static class DatabaseBootstrap
         builder.Services.AddScoped<IApplicationService, ApplicationService<TDbContext>>();
         builder.Services.AddScoped<IOrganizationFeatureService, OrganizationFeatureService<TDbContext>>();
         builder.AddBilling<TDbContext>();
-        builder.Services.AddSingleton<IAuthenticatorDataService, AuthenticatorDataService<TDbContext>>();
         builder.Services.AddEventLogging<TDbContext>();
 
         builder.Services.AddScoped<TDbContext>(sp =>

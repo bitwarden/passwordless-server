@@ -18,11 +18,11 @@ public class UserModel : PageModel
     public string UserId { get; set; }
 
     public UserModel(
-        IAuthenticatorDataService authenticatorDataService,
+        IAuthenticatorDataProvider authenticatorDataProvider,
         ILogger<IndexModel> logger,
         IScopedPasswordlessClient api)
     {
-        Credentials = new CredentialsModel(authenticatorDataService);
+        Credentials = new CredentialsModel(authenticatorDataProvider);
         _logger = logger;
         _passwordlessClient = api;
     }
@@ -30,7 +30,7 @@ public class UserModel : PageModel
     public async Task OnGet()
     {
         var items = await _passwordlessClient.ListCredentialsAsync(UserId);
-        Credentials.SetItemsAsync(items);
+        Credentials.SetItems(items);
         Aliases = await _passwordlessClient.ListAliasesAsync(UserId);
     }
 

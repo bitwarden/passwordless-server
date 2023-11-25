@@ -15,11 +15,11 @@ public class Profile : PageModel
     public Profile(
         IPasswordlessClient client,
         UserManager<ConsoleAdmin> userManager,
-        IAuthenticatorDataService authenticatorDataService)
+        IAuthenticatorDataProvider authenticatorDataProvider)
     {
         _client = client;
         _userManager = userManager;
-        Credentials = new CredentialsModel(authenticatorDataService);
+        Credentials = new CredentialsModel(authenticatorDataProvider);
     }
 
     public CredentialsModel Credentials { get; }
@@ -36,7 +36,7 @@ public class Profile : PageModel
         if (userId != null)
         {
             var items = await _client.ListCredentialsAsync(userId);
-            Credentials.SetItemsAsync(items);
+            Credentials.SetItems(items);
         }
         Credentials.HideDetails = false;
     }

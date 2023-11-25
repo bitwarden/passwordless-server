@@ -11,10 +11,10 @@ public class UserOnboarding : PageModel
 
     public UserOnboarding(
         IPasswordlessClient passwordlessClient,
-        IAuthenticatorDataService authenticatorDataService)
+        IAuthenticatorDataProvider authenticatorDataProvider)
     {
         _passwordlessClient = passwordlessClient;
-        Credentials = new CredentialsModel(authenticatorDataService)
+        Credentials = new CredentialsModel(authenticatorDataProvider)
         {
             HideDetails = true
         };
@@ -26,6 +26,6 @@ public class UserOnboarding : PageModel
     {
         var items = await _passwordlessClient.ListCredentialsAsync(HttpContext.User.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-        Credentials.SetItemsAsync(items);
+        Credentials.SetItems(items);
     }
 }

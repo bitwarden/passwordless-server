@@ -103,6 +103,7 @@ void RunTheApp()
     services.AddHttpClient();
     builder.AddManagementApi();
 
+    builder.Services.AddSingleton<IAuthenticatorDataProvider, AuthenticatorDataProvider>();
     builder.AddDatabase();
 
     services.ConfigureApplicationCookie(o =>
@@ -121,7 +122,6 @@ void RunTheApp()
         });
     });
 
-    services.AddHostedService<AuthenticatorDataUpdaterBackgroundService>();
     services.AddHostedService<TimedHostedService>();
     services.AddHostedService<ApplicationDeletionBackgroundService>();
 

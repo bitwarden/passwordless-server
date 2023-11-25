@@ -17,7 +17,7 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -376,21 +376,6 @@ namespace Passwordless.AdminConsole.Migrations.Mssql
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("Applications");
-                });
-
-            modelBuilder.Entity("Passwordless.AdminConsole.Models.Authenticator", b =>
-                {
-                    b.Property<Guid>("AaGuid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AaGuid");
-
-                    b.ToTable("Authenticators");
                 });
 
             modelBuilder.Entity("Passwordless.AdminConsole.Models.Onboarding", b =>
