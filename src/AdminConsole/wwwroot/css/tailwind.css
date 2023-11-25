@@ -2138,6 +2138,14 @@ main.blazor {
   fill: #f87171;
 }
 
+.fill-transparent {
+  fill: transparent;
+}
+
+.fill-white {
+  fill: #fff;
+}
+
 .p-12 {
   padding: 3rem;
 }
