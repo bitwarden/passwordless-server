@@ -199,6 +199,14 @@
         @apply sidebar lg:w-64;
     }
     
+    .sidebar-content {
+        @apply flex flex-col flex-1 space-y-1;
+    }
+    
+    .sidebar-footer {
+        @apply flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black space-y-4;
+    }
+    
     .navbar-mobile {
         @apply sticky top-0 z-10 bg-gray-100 p-1 lg:hidden;
     }

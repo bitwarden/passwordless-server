@@ -1311,6 +1311,37 @@ label.form-label {
   }
 }
 
+.sidebar-content {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+}
+
+.sidebar-content > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-direction: column;
+}
+
+.sidebar-footer > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
+.sidebar-footer {
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+  --tw-bg-opacity: 0.25;
+  padding: 1rem;
+}
+
 .navbar-mobile {
   position: sticky;
   top: 0px;
@@ -1873,6 +1904,10 @@ main.blazor {
 
 .flex-wrap {
   flex-wrap: wrap;
+}
+
+.content-between {
+  align-content: space-between;
 }
 
 .items-start {

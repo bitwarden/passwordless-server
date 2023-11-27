@@ -7,6 +7,7 @@ using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
+using Passwordless.AdminConsole.Controller;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -197,6 +198,7 @@ void RunTheApp()
     app.UseAuthorization();
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
+    app.MapAccountEndpoints();
     app.MapRazorPages();
     app.MapRazorComponents<App>();
     app.Run();
