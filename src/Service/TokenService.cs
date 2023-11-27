@@ -49,7 +49,7 @@ public class TokenService : ITokenService
 
             try
             {
-                await _storage.RemoveExpiredKeys(cancellationToken);
+                await _storage.RemoveExpiredTokenKeys(cancellationToken);
             }
             catch (Exception)
             {
