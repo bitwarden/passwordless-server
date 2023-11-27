@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
-using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
 
