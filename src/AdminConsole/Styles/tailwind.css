@@ -222,6 +222,18 @@
     .nav-link-active {
         @apply bg-black bg-opacity-50 text-white;
     }
+    
+    .nav-link-icon {
+        @apply w-6 h-6 mr-3 text-blue-300;
+    }
+    
+    .nav-link-submenu {
+        @apply m-2 rounded-md bg-opacity-25 bg-black p-4;
+    }
+    
+    .nav-link-submenu-title {
+        @apply text-xs font-semibold text-blue-200 ml-3 mb-3 truncate;
+    }
 }
 
 :root {

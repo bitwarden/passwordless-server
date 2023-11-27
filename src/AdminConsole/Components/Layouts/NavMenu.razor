@@ -1,43 +1,77 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Passwordless.AdminConsole.Components.Shared.Icons
+@using Passwordless.AdminConsole.Middleware
 @implements IDisposable
 
 @inject NavigationManager NavigationManager
-@attribute [Authorize]
+@inject ICurrentContext CurrentContext
+@inject IHttpContextAccessor HttpContextAccessor
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="welcome">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Welcome
+<nav class="space-y-1">
+    <AuthorizeView>
+        <Authorized>
+            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/Organization/Overview">
+                <CodeBracketSquareIcon Class="nav-link-icon" /> Applications
+            </NavLink>
+            @if (CurrentContext.InAppContext)
+            {
+                <div class="nav-link-submenu">
+                    <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
+                    @if (!CurrentContext.IsFrozen)
+                    {
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/onboarding/getstarted">
+                            <UsersIcon Class="nav-link-icon" /> Getting Started
+                        </NavLink>
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/playground/client">
+                            <BeakerIcon Class="nav-link-icon" /> Playground
+                        </NavLink>
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/credentials/list">
+                            <UsersIcon Class="nav-link-icon" /> Users
+                        </NavLink>
+                    }
+                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/settings/settings">
+                        <CogIcon Class="nav-link-icon" /> Settings
+                    </NavLink>
+                    @if (CurrentContext.Features.EventLoggingIsEnabled)
+                    {
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/logs/logs">
+                            <CodeBracketSquareIcon Class="nav-link-icon" /> App Logs
+                        </NavLink>
+                    }
+                </div>
+            }
+            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/default">
+                <DollarIcon Class="nav-link-icon" /> Billing
+            </NavLink>
+            @if (HttpContextAccessor!.HttpContext.Request.Path.StartsWithSegments("/billing"))
+            {
+                <div class="nav-link-submenu">
+                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/manage">
+                        <CogIcon Class="nav-link-icon"/> Manage
+                    </NavLink>
+                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/invoices">
+                        <DocumentTextIcon Class="nav-link-icon"/> Invoices
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </nav>
-</div>
+            }
+            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/admins">
+                <UsersIcon Class="nav-link-icon"/> Admins
+            </NavLink>
+            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/settings">
+                <CogIcon Class="nav-link-icon"/> Settings
+            </NavLink>
+            @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
+            {
+                <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/log">
+                    <CogIcon Class="nav-link-icon"/> Settings
+                </NavLink>
+            }     
+        </Authorized>
+        <NotAuthorized>
+            <!-- Empty -->
+        </NotAuthorized>
+    </AuthorizeView>
+</nav>
 
 @code {
     private string? currentUrl;
@@ -59,4 +93,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-
