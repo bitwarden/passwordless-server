@@ -24,7 +24,6 @@ public class InvoicesModel : PageModel
             var invoiceService = new InvoiceService();
             var listRequest = new InvoiceListOptions();
             listRequest.Customer = organization.BillingCustomerId;
-            listRequest.Subscription = organization.BillingSubscriptionId;
             listRequest.Limit = 100;
             var invoicesResult = await invoiceService.ListAsync(listRequest);
             if (invoicesResult?.Data == null)
