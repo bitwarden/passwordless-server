@@ -2,13 +2,16 @@ namespace Passwordless.Api.Integration.Tests.Helpers;
 
 public static class HttpClientTestExtensions
 {
+    public const string ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795";
+    public const string ApiSecret = "test:secret:a679563b331846c79c20b114a4f56d02";
+
     public static HttpClient AddPublicKey(this HttpClient client)
     {
-        client.DefaultRequestHeaders.Add("ApiKey", "test:public:2e728aa5986f4ba8b073a5b28a939795");
+        client.DefaultRequestHeaders.Add("ApiKey", ApiKey);
         return client;
     }
 
-    public static HttpClient AddSecretKey(this HttpClient client) => client.AddSecretKey("test:secret:a679563b331846c79c20b114a4f56d02");
+    public static HttpClient AddSecretKey(this HttpClient client) => client.AddSecretKey(ApiSecret);
 
     public static HttpClient AddSecretKey(this HttpClient client, string secretKey)
     {
@@ -28,4 +31,9 @@ public static class HttpClientTestExtensions
         return client;
     }
 
+    public static HttpClient AddAcceptApplicationJson(this HttpClient client)
+    {
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+        return client;
+    }
 }
