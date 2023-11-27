@@ -20,12 +20,13 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         : base(new PasswordlessOptions
         {
             ApiSecret = context.ApiSecret,
-            ApiUrl = options.Value.ApiUrl,
+            ApiUrl = "http://localhost:5000",
             ApiKey = options.Value.ApiKey
         })
     {
         _client = httpClient;
 
+        
         // can be dropped
         _client.DefaultRequestHeaders.Remove("ApiSecret");
         _client.DefaultRequestHeaders.Add("ApiSecret", context.ApiSecret);

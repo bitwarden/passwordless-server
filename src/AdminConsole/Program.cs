@@ -129,8 +129,14 @@ void RunTheApp()
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
         var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
-
         client.BaseAddress = new Uri(options.Value.ApiUrl);
+        
+        if (builder.Configuration.GetValue<bool>("SelfHosted"))
+        {
+            // Self hosted, use internal API in the container
+            var mgmtOptions = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
+            client.BaseAddress = new Uri(mgmtOptions.Value.InternalApiUrl);
+        }
     });
 
     // Magic link SigninManager
@@ -183,6 +189,7 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
+
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
@@ -191,5 +198,13 @@ void RunTheApp()
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
+    app.UseEndpoints((endpoints) =>
+    {
+        endpoints.MapGet("/debug-config", ctx =>
+        {
+            var config = (builder.Configuration as IConfigurationRoot).GetDebugView();
+            return ctx.Response.WriteAsync(config);
+        });
+    });
     app.Run();
 }

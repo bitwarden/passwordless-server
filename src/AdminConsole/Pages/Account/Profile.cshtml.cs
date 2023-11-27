@@ -3,17 +3,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Pages.Shared;
+using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.AuthenticatorData;
 
 namespace Passwordless.AdminConsole.Pages.Account;
 
 public class Profile : PageModel
 {
-    private readonly IPasswordlessClient _client;
+    private readonly IScopedPasswordlessClient _client;
     private readonly UserManager<ConsoleAdmin> _userManager;
 
     public Profile(
-        IPasswordlessClient client,
+        IScopedPasswordlessClient client,
         UserManager<ConsoleAdmin> userManager,
         IAuthenticatorDataProvider authenticatorDataProvider)
     {
