@@ -104,4 +104,10 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
     {
         return Task.FromResult(new ValueTuple<string, string>("simple", "simple"));
     }
+
+    public Task<string> GetManagementUrl(int orgId)
+    {
+        // can be noop
+        return Task.FromResult("/");
+    }
 }

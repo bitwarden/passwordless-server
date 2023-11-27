@@ -59,4 +59,5 @@ public interface ISharedBillingService
     Task<string?> ChangePlanAsync(string app, string selectedPlan);
     Task<IReadOnlyCollection<InvoiceModel>> GetInvoicesAsync();
     Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU);
+    Task<string> GetManagementUrl(int orgId);
 }

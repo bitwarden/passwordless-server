@@ -4,7 +4,7 @@ using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
-using Application = Passwordless.AdminConsole.Models.Application;
+using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Pages.Billing;
 
@@ -20,10 +20,12 @@ public class Manage : BaseExtendedPageModel
         _dataService = dataService;
         _billingOptions = billingOptions;
 
-        var plans = new List<PricingCardModel>();
-        plans.Add(new PricingCardModel(_billingOptions.Value.Store.Free, _billingOptions.Value.Plans[_billingOptions.Value.Store.Free]));
-        plans.Add(new PricingCardModel(_billingOptions.Value.Store.Pro, _billingOptions.Value.Plans[_billingOptions.Value.Store.Pro]));
-        plans.Add(new PricingCardModel(_billingOptions.Value.Store.Enterprise, _billingOptions.Value.Plans[_billingOptions.Value.Store.Enterprise]));
+        var plans = new List<PricingCardModel>
+        {
+            new PricingCardModel(_billingOptions.Value.Store.Free, _billingOptions.Value.Plans[_billingOptions.Value.Store.Free]),
+            new PricingCardModel(_billingOptions.Value.Store.Pro, _billingOptions.Value.Plans[_billingOptions.Value.Store.Pro]),
+            new PricingCardModel(_billingOptions.Value.Store.Enterprise, _billingOptions.Value.Plans[_billingOptions.Value.Store.Enterprise])
+        };
         Plans = plans;
     }
 
@@ -57,20 +59,8 @@ public class Manage : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostManage()
     {
-        // TODO: Move to service
-        var customerId = await _billingService.GetCustomerIdAsync(User.GetOrgId().Value);
-        var returnUrl = Url.PageLink("/Billing/Manage");
-
-        var options = new Stripe.BillingPortal.SessionCreateOptions
-        {
-            Customer = customerId,
-            ReturnUrl = returnUrl,
-
-        };
-        var service = new Stripe.BillingPortal.SessionService();
-        Stripe.BillingPortal.Session? session = await service.CreateAsync(options);
-
-        return Redirect(session.Url);
+        var manageUrl = await _billingService.GetManagementUrl(User.GetOrgId().Value);
+        return Redirect(manageUrl);
     }
 
     public IActionResult OnPostChangePlan(string id)

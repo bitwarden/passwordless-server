@@ -54,6 +54,23 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         return (subscriptionItem.Id, subscriptionItem.Price.Id);
     }
 
+    public async Task<string> GetManagementUrl(int orgId)
+    {
+        var customerId = await this.GetCustomerIdAsync(orgId);
+        var returnUrl = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext).PageLink("/Billing/Manage");
+
+        var options = new Stripe.BillingPortal.SessionCreateOptions
+        {
+            Customer = customerId,
+            ReturnUrl = returnUrl,
+
+        };
+        var service = new Stripe.BillingPortal.SessionService();
+        Stripe.BillingPortal.Session? session = await service.CreateAsync(options);
+
+        return session.Url;
+    }
+
     public async Task<string?> GetRedirectToUpgradeOrganization(string? selectedPlan = null)
     {
         selectedPlan ??= _billingOptions.Store.Pro;
