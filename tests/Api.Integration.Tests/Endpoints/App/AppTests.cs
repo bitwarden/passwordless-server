@@ -142,6 +142,57 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         problemDetails!.Title.Should().Be("One or more validation errors occurred.");
     }
 
+    [Fact]
+    public async Task I_can_manage_an_apps_features()
+    {
+        // Arrange
+        const int expectedEventLoggingRetentionPeriod = 30;
+        
+        var name = $"app{Guid.NewGuid():N}";
+        var appCreateRequest = AppCreateGenerator.Generate();
+        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
+        _ = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var manageFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
+        
+        // Act
+        var manageFeatureResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageFeatureRequest);
+        
+        // Assert
+        manageFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        using var scope = _factory.Services.CreateScope();
+
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
+        appFeature.Should().NotBeNull();
+        appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
+        appFeature.EventLoggingIsEnabled.Should().BeTrue();
+        appFeature.DeveloperLoggingEndsAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task I_can_get_an_apps_features()
+    {
+        // Arrange
+        const int expectedEventLoggingRetentionPeriod = 30;
+        
+        var name = $"app{Guid.NewGuid():N}";
+        var appCreateRequest = AppCreateGenerator.Generate();
+        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
+        _ = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var manageAppFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
+        _ = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
+        
+        // Act
+        var getAppFeatureResponse = await _client.GetAsync($"/admin/apps/{name}/features");
+        
+        //Assert
+        getAppFeatureResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var appFeature = await getAppFeatureResponse.Content.ReadFromJsonAsync<AppFeatureDto>();
+        appFeature.Should().NotBeNull();
+        appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
+        appFeature.EventLoggingIsEnabled.Should().BeTrue();
+        appFeature.DeveloperLoggingEndsAt.Should().BeNull();
+    }
+
     public void Dispose()
     {
         _client.Dispose();
