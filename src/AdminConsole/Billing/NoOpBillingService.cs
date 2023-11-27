@@ -95,6 +95,11 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         return "/billing/manage";
     }
 
+    public Task<List<InvoiceModel>> GetInvoicesAsync()
+    {
+        return Task.FromResult(new List<InvoiceModel>());
+    }
+
     public Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU)
     {
         return Task.FromResult(new ValueTuple<string, string>("simple", "simple"));

@@ -222,6 +222,41 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
                || subscription.Status == "canceled";
     }
 
+    public async Task<IReadOnlyCollection<InvoiceModel>> GetInvoicesAsync()
+    {
+        var organization = await _dataService.GetOrganizationAsync();
+        if (string.IsNullOrEmpty(organization.BillingCustomerId))
+        {
+            return new List<InvoiceModel>(0);
+        }
+
+        var listRequest = new InvoiceListOptions
+        {
+            Customer = organization.BillingCustomerId,
+            Subscription = organization.BillingSubscriptionId,
+            Limit = 100
+        };
+
+        var invoiceService = new InvoiceService();
+        var invoicesResult = await invoiceService.ListAsync(listRequest);
+
+        if (invoicesResult?.Data == null)
+        {
+            return new List<InvoiceModel>(0);
+        }
+
+        return invoicesResult.Data
+            .Where(x => x.InvoicePdf != null)
+            .Select(x => new InvoiceModel
+            {
+                Number = x.Number,
+                Date = x.Created,
+                Amount = $"{(x.Total / 100.0M):N2} {x.Currency.ToUpperInvariant()}",
+                Pdf = x.InvoicePdf,
+                Paid = x.Paid
+            }).ToImmutableList();
+    }
+
     private async Task<string> CreateCheckoutSessionAsync(
         int organizationId,
         string? billingCustomerId,

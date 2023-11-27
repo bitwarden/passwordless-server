@@ -57,5 +57,6 @@ public interface ISharedBillingService
 
     Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan = null);
     Task<string?> ChangePlanAsync(string app, string selectedPlan);
+    Task<IReadOnlyCollection<InvoiceModel>> GetInvoicesAsync();
     Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU);
 }
