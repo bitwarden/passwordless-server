@@ -3,7 +3,6 @@
 @using Passwordless.AdminConsole.Components.Shared.Icons
 @using Passwordless.AdminConsole.Middleware
 @using System.Security.Policy
-@implements IDisposable
 
 @inject NavigationManager NavigationManager
 @inject ICurrentContext CurrentContext
@@ -14,61 +13,61 @@
         <Authorized>
             <div class="sidebar-content">
                 <NavLink class="nav-link" ActiveClass="nav-link-active" href="/Organization/Overview">
-                                <CodeBracketSquareIcon Class="nav-link-icon" /> Applications
+                    <CodeBracketSquareIcon Class="nav-link-icon" /> Applications
+                </NavLink>
+                @if (CurrentContext.InAppContext)
+                {
+                    <div class="nav-link-submenu">
+                        <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
+                        @if (!CurrentContext.IsFrozen)
+                        {
+                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/onboarding/getstarted">
+                                <UsersIcon Class="nav-link-icon" /> Getting Started
                             </NavLink>
-                            @if (CurrentContext.InAppContext)
-                            {
-                                <div class="nav-link-submenu">
-                                    <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
-                                    @if (!CurrentContext.IsFrozen)
-                                    {
-                                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/onboarding/getstarted">
-                                            <UsersIcon Class="nav-link-icon" /> Getting Started
-                                        </NavLink>
-                                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/playground/client">
-                                            <BeakerIcon Class="nav-link-icon" /> Playground
-                                        </NavLink>
-                                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/credentials/list">
-                                            <UsersIcon Class="nav-link-icon" /> Users
-                                        </NavLink>
-                                    }
-                                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/settings/settings">
-                                        <CogIcon Class="nav-link-icon" /> Settings
-                                    </NavLink>
-                                    @if (CurrentContext.Features.EventLoggingIsEnabled)
-                                    {
-                                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/logs/logs">
-                                            <CodeBracketSquareIcon Class="nav-link-icon" /> App Logs
-                                        </NavLink>
-                                    }
-                                </div>
-                            }
-                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/default">
-                                <DollarIcon Class="nav-link-icon" /> Billing
+                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/playground/client">
+                                <BeakerIcon Class="nav-link-icon" /> Playground
                             </NavLink>
-                            @if (HttpContextAccessor!.HttpContext.Request.Path.StartsWithSegments("/billing"))
-                            {
-                                <div class="nav-link-submenu">
-                                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/manage">
-                                        <CogIcon Class="nav-link-icon"/> Manage
-                                    </NavLink>
-                                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/invoices">
-                                        <DocumentTextIcon Class="nav-link-icon"/> Invoices
-                                    </NavLink>
-                                </div>
-                            }
-                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/admins">
-                                <UsersIcon Class="nav-link-icon"/> Admins
+                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/credentials/list">
+                                <UsersIcon Class="nav-link-icon" /> Users
                             </NavLink>
-                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/settings">
-                                <CogIcon Class="nav-link-icon"/> Settings
+                        }
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/settings/settings">
+                            <CogIcon Class="nav-link-icon" /> Settings
+                        </NavLink>
+                        @if (CurrentContext.Features.EventLoggingIsEnabled)
+                        {
+                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/logs/logs">
+                                <CodeBracketSquareIcon Class="nav-link-icon" /> App Logs
                             </NavLink>
-                            @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
-                            {
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/log">
-                                    <CogIcon Class="nav-link-icon"/> Settings
-                                </NavLink>
-                            }
+                        }
+                    </div>
+                }
+                <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/default">
+                    <DollarIcon Class="nav-link-icon" /> Billing
+                </NavLink>
+                @if (HttpContextAccessor!.HttpContext.Request.Path.StartsWithSegments("/billing"))
+                {
+                    <div class="nav-link-submenu">
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/manage">
+                            <CogIcon Class="nav-link-icon"/> Manage
+                        </NavLink>
+                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/invoices">
+                            <DocumentTextIcon Class="nav-link-icon"/> Invoices
+                        </NavLink>
+                    </div>
+                }
+                <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/admins">
+                    <UsersIcon Class="nav-link-icon"/> Admins
+                </NavLink>
+                <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/settings">
+                    <CogIcon Class="nav-link-icon"/> Settings
+                </NavLink>
+                @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
+                {
+                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/log">
+                        <CogIcon Class="nav-link-icon"/> Settings
+                    </NavLink>
+                }
                 
             </div>
             <div class="sidebar-footer">
@@ -101,24 +100,3 @@
         </NotAuthorized>
     </AuthorizeView>
 </nav>
-
-@code {
-    private string? currentUrl;
-
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
-}
