@@ -40,13 +40,9 @@ public class CreateApplicationModel : PageModel
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
         _stripeOptions = stripeOptions.Value;
-        Form = new CreateApplicationForm
-        {
-            Plan = _stripeOptions.Store.Free
-        };
     }
 
-    public CreateApplicationForm Form { get; }
+    public CreateApplicationForm Form { get; } = new();
 
     public Models.Organization Organization { get; set; }
 
@@ -54,8 +50,11 @@ public class CreateApplicationModel : PageModel
 
     public async Task<IActionResult> OnGet()
     {
-        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
         await InitializeAsync();
+        if (!Organization.HasSubscription)
+        {
+            Form.Plan = _stripeOptions.Store.Free;
+        }
 
         if (Organization.Applications.Count >= Organization.MaxApplications)
         {
@@ -69,6 +68,8 @@ public class CreateApplicationModel : PageModel
 
     public async Task<IActionResult> OnPost(CreateApplicationForm form)
     {
+        await InitializeAsync();
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -93,8 +94,6 @@ public class CreateApplicationModel : PageModel
         }
 
         // Attach a plan
-        await InitializeAsync();
-
         app.BillingPlan = form.Plan;
 
         if (form.Plan != _stripeOptions.Store.Free)
@@ -169,6 +168,7 @@ public class CreateApplicationModel : PageModel
 
     private async Task InitializeAsync()
     {
+        CanCreateApplication = await _dataService.AllowedToCreateApplicationAsync();
         Organization = await _dataService.GetOrganizationWithDataAsync();
 
         if (Organization.HasSubscription)

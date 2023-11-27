@@ -90,6 +90,6 @@ jobs:
           --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
           --push
-          --tag ghcr.io/passwordless/${{ matrix.name }}:latest
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/${{ matrix.name }}:$GITHUB_REF_NAME' || '' }}
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/${{ matrix.name }}:stable' || '' }}
+          --tag ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:latest
+          ${{ github.event_name == 'release' && format('--tag ghcr.io/{0}/{1}:{2}', github.repository_owner, matrix.name, github.ref_name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag ghcr.io/{0}/{1}:stable', github.repository_owner, matrix.name) || '' }}
