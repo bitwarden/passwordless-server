@@ -10,11 +10,13 @@ public class EfTenantStorage : ITenantStorage
     private readonly DbTenantContext db;
 
     public string Tenant { get; }
+    public TimeProvider TimeProvider { get; }
 
     public EfTenantStorage(DbTenantContext db)
     {
         this.db = db;
         Tenant = db.Tenant;
+        TimeProvider = db.TimeProvider;
     }
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
@@ -198,7 +200,7 @@ public class EfTenantStorage : ITenantStorage
 
     public Task RemoveExpiredKeys(CancellationToken cancellationToken)
     {
-        return db.TokenKeys.Where(x => (TimeProvider.System.GetUtcNow().DateTime - x.CreatedAt).TotalDays > 30)
+        return db.TokenKeys.Where(x => (TimeProvider.GetUtcNow().DateTime - x.CreatedAt).TotalDays > 30)
             .ExecuteDeleteAsync(cancellationToken);
     }
 
