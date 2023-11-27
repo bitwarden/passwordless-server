@@ -1343,7 +1343,7 @@ label.form-label {
 .sidebar-footer {
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
   --tw-bg-opacity: 0.25;
-  padding: 0.5rem;
+  padding: 1rem;
 }
 
 .navbar-mobile {
