@@ -1323,6 +1323,10 @@ label.form-label {
   margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
 }
 
+.sidebar-content {
+  padding: 0.5rem;
+}
+
 .sidebar-footer {
   display: flex;
   flex-shrink: 0;
@@ -1339,7 +1343,7 @@ label.form-label {
 .sidebar-footer {
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
   --tw-bg-opacity: 0.25;
-  padding: 1rem;
+  padding: 0.5rem;
 }
 
 .navbar-mobile {
