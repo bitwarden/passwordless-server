@@ -12,7 +12,7 @@ public static class AccountEndpoints
         {
             await signInManager.SignOutAsync();
             return TypedResults.LocalRedirect($"~/");
-        });
+        }).RequireAuthorization();
         return endpoints;
     }
 }
