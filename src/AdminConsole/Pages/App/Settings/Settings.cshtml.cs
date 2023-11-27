@@ -111,7 +111,7 @@ public class SettingsModel : PageModel
 
         var redirectUrl = await _billingService.ChangePlanAsync(app, selectedPlan);
 
-        return RedirectToPage(redirectUrl);
+        return Redirect(redirectUrl);
     }
 
     private void AddPlan(string plan)
