@@ -1,10 +1,10 @@
+#nullable enable
+
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Storage.Ef;
-
-#nullable enable
 
 namespace Passwordless.Api.Helpers;
 
@@ -57,7 +57,7 @@ public static class AddDatabaseExtensionMethod
             var accountName = context?.User.FindFirstValue(CustomClaimTypes.AccountName);
 
             return !string.IsNullOrEmpty(accountName)
-                ? new ManualTenantProvider(accountName)
+                ? new ManualTenantProvider(accountName, TimeProvider.System)
                 : throw new InvalidOperationException("You should only request ITenantProvider from within an authenticated context");
         });
 

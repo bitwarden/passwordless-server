@@ -28,7 +28,7 @@ public class TokenService : ITokenService
         _storage = storage;
     }
 
-    public async Task InitAsync()
+    public async Task InitAsync(CancellationToken cancellationToken)
     {
         var keys = await _storage.GetTokenKeys();
 
@@ -49,8 +49,7 @@ public class TokenService : ITokenService
 
             try
             {
-                var oldKeys = keys.Where(x => (DateTime.UtcNow - x.CreatedAt).TotalDays > 30);
-                await Task.WhenAll(oldKeys.Select(k => _storage.RemoveTokenKey(k.KeyId)));
+                await _storage.RemoveExpiredKeys(cancellationToken);
             }
             catch (Exception)
             {

@@ -6,7 +6,7 @@ namespace Passwordless.Service;
 
 public interface IFido2ServiceFactory
 {
-    Task<IFido2Service> CreateAsync();
+    Task<IFido2Service> CreateAsync(CancellationToken cancellationToken);
 }
 
 public class DefaultFido2ServiceFactory : IFido2ServiceFactory
@@ -28,14 +28,15 @@ public class DefaultFido2ServiceFactory : IFido2ServiceFactory
         _eventLogger = eventLogger;
     }
 
-    public async Task<IFido2Service> CreateAsync()
+    public async Task<IFido2Service> CreateAsync(CancellationToken cancellationToken)
     {
         var fidoService = await Fido2ServiceEndpoints.Create(
             _tenantStorage.Tenant,
             _loggerFactory.CreateLogger<Fido2ServiceEndpoints>(),
             _tenantStorage,
             _tokenService,
-            _eventLogger);
+            _eventLogger,
+            cancellationToken);
         return fidoService;
     }
 }

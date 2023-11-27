@@ -196,6 +196,12 @@ public class EfTenantStorage : ITenantStorage
         return db.TokenKeys.Where(k => k.KeyId == keyId).ExecuteDeleteAsync();
     }
 
+    public Task RemoveExpiredKeys(CancellationToken cancellationToken)
+    {
+        return db.TokenKeys.Where(x => (TimeProvider.System.GetUtcNow().DateTime - x.CreatedAt).TotalDays > 30)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
     public async Task SaveAccountInformation(AccountMetaInformation info)
     {
         db.AccountInfo.Add(info);

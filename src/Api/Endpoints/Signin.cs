@@ -16,10 +16,11 @@ public static class SigninEndpoints
     {
         app.MapPost("/signin/token", async (
                 SigninTokenRequest signinToken,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2ServiceFactory fido2ServiceFactory,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var fido2Service = await fido2ServiceFactory.CreateAsync(token);
                 var result = await fido2Service.CreateSigninToken(signinToken.UserId);
 
                 return Ok(new SigninTokenResponse(result));
@@ -29,10 +30,11 @@ public static class SigninEndpoints
 
         app.MapPost("/signin/begin", async (
                 SignInBeginDTO payload,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2ServiceFactory fido2ServiceFactory,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var fido2Service = await fido2ServiceFactory.CreateAsync(token);
                 var result = await fido2Service.SignInBegin(payload);
 
                 return Ok(result);
@@ -44,10 +46,11 @@ public static class SigninEndpoints
         app.MapPost("/signin/complete", async (
                 SignInCompleteDTO payload,
                 HttpRequest request,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2ServiceFactory fido2ServiceFactory,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var fido2Service = await fido2ServiceFactory.CreateAsync(token);
                 var (deviceInfo, country) = request.GetDeviceInfo();
                 var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
 
@@ -59,10 +62,11 @@ public static class SigninEndpoints
 
         app.MapPost("/signin/verify", async (
                 SignInVerifyDTO payload,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2ServiceFactory fido2ServiceFactory,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
+                var fido2Service = await fido2ServiceFactory.CreateAsync(token);
                 var result = await fido2Service.SignInVerify(payload);
 
                 return Ok(result);
