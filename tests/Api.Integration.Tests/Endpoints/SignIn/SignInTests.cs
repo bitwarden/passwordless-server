@@ -168,7 +168,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var verifySignInResponse = await _httpClient.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-    
+
     [Fact]
     public async Task UnknownCredentialThrows()
     {
