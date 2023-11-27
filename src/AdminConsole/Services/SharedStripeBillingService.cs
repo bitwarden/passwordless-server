@@ -250,7 +250,6 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         var listRequest = new InvoiceListOptions
         {
             Customer = organization.BillingCustomerId,
-            Subscription = organization.BillingSubscriptionId,
             Limit = 100
         };
 
