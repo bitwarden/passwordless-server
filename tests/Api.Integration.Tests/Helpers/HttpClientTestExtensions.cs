@@ -8,9 +8,11 @@ public static class HttpClientTestExtensions
         return client;
     }
 
-    public static HttpClient AddSecretKey(this HttpClient client)
+    public static HttpClient AddSecretKey(this HttpClient client) => client.AddSecretKey("test:secret:a679563b331846c79c20b114a4f56d02");
+
+    public static HttpClient AddSecretKey(this HttpClient client, string secretKey)
     {
-        client.DefaultRequestHeaders.Add("ApiSecret", "test:secret:a679563b331846c79c20b114a4f56d02");
+        client.DefaultRequestHeaders.Add("ApiSecret", secretKey);
         return client;
     }
 

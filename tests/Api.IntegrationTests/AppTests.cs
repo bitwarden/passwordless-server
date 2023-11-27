@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Service.Models;
-using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.IntegrationTests;
 
@@ -15,52 +13,7 @@ public class AppTests : BackendTests
     {
         _client = factory.CreateClient();
     }
-
-    [Fact]
-    public async Task SetFeaturesAsync_Modifies_Features()
-    {
-        var app = await CreateAppAsync();
-        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/features")
-        {
-            Content = JsonContent.Create(new SetFeaturesDto
-            {
-                EventLoggingRetentionPeriod = 30
-            })
-        };
-        request.Headers.Add("ApiSecret", app.Result.ApiSecret1);
-        var res = await _client.SendAsync(request);
-
-        Assert.True(res.IsSuccessStatusCode);
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var factory = scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>();
-            var storage = factory.Create(app.AppId);
-            var info = await storage.GetAppFeaturesAsync();
-            Assert.Equal(info.Tenant, app.AppId);
-            Assert.True(info.EventLoggingIsEnabled);
-            Assert.Equal(30, info.EventLoggingRetentionPeriod);
-            Assert.Null(info.DeveloperLoggingEndsAt);
-        }
-        Assert.Equal(HttpStatusCode.NoContent, res.StatusCode);
-    }
-
-    [Fact]
-    public async Task SetFeaturesAsync_Returns_BadRequest_WhenEventLoggingRetentionPeriodIsNegative()
-    {
-        var app = await CreateAppAsync();
-        var request = new HttpRequestMessage(HttpMethod.Post, "/apps/features")
-        {
-            Content = JsonContent.Create(new SetFeaturesDto
-            {
-                EventLoggingRetentionPeriod = -1
-            })
-        };
-        request.Headers.Add("ApiSecret", app.Result.ApiSecret1);
-        var res = await _client.SendAsync(request);
-
-        Assert.False(res.IsSuccessStatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
-    }
+    
 
     [Fact]
     public async Task GetFeaturesAsync_Returns_ExpectedResult()

@@ -19,7 +19,6 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     private static readonly Faker<AppCreateDTO> AppCreateGenerator = new Faker<AppCreateDTO>()
         .RuleFor(x => x.AdminEmail, x => x.Person.Email);
 
-
     public AppTests(PasswordlessApiFactory apiFactory)
     {
         _factory = apiFactory;
@@ -93,6 +92,54 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         appFeature.EventLoggingIsEnabled.Should().BeFalse();
         appFeature.EventLoggingRetentionPeriod.Should().Be(365);
         appFeature.DeveloperLoggingEndsAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task I_can_set_event_logging_retention_period()
+    {
+        // Arrange
+        const int expectedEventLoggingRetentionPeriod = 30;
+        
+        var name = $"app{Guid.NewGuid():N}";
+        var appCreateRequest = AppCreateGenerator.Generate();
+        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
+        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
+        using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        
+        // Act
+        var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
+        
+        // Assert
+        setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        using var scope = _factory.Services.CreateScope();
+
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
+        appFeature.Should().NotBeNull();
+        appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(91)]
+    public async Task I_can_not_set_the_event_logging_retention_period_to_an_invalid_value(int invalidRetentionPeriod)
+    {
+        // Arrange
+        var name = $"app{Guid.NewGuid():N}";
+        var appCreateRequest = AppCreateGenerator.Generate();
+        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
+        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
+        using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+
+        // Act
+        var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
+
+        // Assert
+        setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var problemDetails = await setFeatureResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Title.Should().Be("One or more validation errors occurred.");
     }
 
     public void Dispose()
