@@ -19,10 +19,10 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedStripeBillingService<TDbContext>> logger,
-        IOptions<StripeOptions> stripeOptions,
+        IOptions<BillingOptions> billingOptions,
         IActionContextAccessor actionContextAccessor,
         IUrlHelperFactory urlHelperFactory
-    ) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions, actionContextAccessor, urlHelperFactory)
+    ) : base(dbContextFactory, dataService, passwordlessClient, logger, billingOptions, actionContextAccessor, urlHelperFactory)
     {
     }
 
@@ -95,9 +95,9 @@ public class NoOpBillingService<TDbContext> : BaseBillingService<TDbContext>, IS
         return "/billing/manage";
     }
 
-    public Task<List<InvoiceModel>> GetInvoicesAsync()
+    public Task<IReadOnlyCollection<InvoiceModel>> GetInvoicesAsync()
     {
-        return Task.FromResult(new List<InvoiceModel>());
+        return Task.FromResult<IReadOnlyCollection<InvoiceModel>>(new List<InvoiceModel>(0).ToImmutableList());
     }
 
     public Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU)

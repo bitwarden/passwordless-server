@@ -11,7 +11,8 @@ public static class BillingBootstrap
     public static void AddBilling<TDbContext>(this WebApplicationBuilder builder)
         where TDbContext : ConsoleDbContext
     {
-        builder.Services.AddOptions<StripeOptions>()
+        // TODO: Change name of this configuration path away from Stripe at some point
+        builder.Services.AddOptions<BillingOptions>()
             .BindConfiguration("Stripe");
 
         builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();

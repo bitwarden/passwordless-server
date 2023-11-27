@@ -21,10 +21,10 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedStripeBillingService<TDbContext>> logger,
-        IOptions<StripeOptions> stripeOptions,
+        IOptions<BillingOptions> billingOptions,
         IActionContextAccessor actionContextAccessor,
         IUrlHelperFactory urlHelperFactory
-        ) : base(dbContextFactory, dataService, passwordlessClient, logger, stripeOptions, actionContextAccessor, urlHelperFactory)
+        ) : base(dbContextFactory, dataService, passwordlessClient, logger, billingOptions, actionContextAccessor, urlHelperFactory)
     {
     }
 
@@ -38,13 +38,13 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         var listOptions = new SubscriptionItemListOptions { Subscription = org.BillingSubscriptionId };
         var subscriptionItems = await subscriptionItemService.ListAsync(listOptions);
 
-        var subscriptionItem = subscriptionItems.SingleOrDefault(x => x.Price.Id == _stripeOptions.Plans[planSKU].PriceId);
+        var subscriptionItem = subscriptionItems.SingleOrDefault(x => x.Price.Id == _billingOptions.Plans[planSKU].PriceId);
         if (subscriptionItem == null)
         {
             var createOptions = new SubscriptionItemCreateOptions
             {
                 Subscription = org.BillingSubscriptionId,
-                Price = _stripeOptions.Plans[planSKU].PriceId,
+                Price = _billingOptions.Plans[planSKU].PriceId,
                 ProrationDate = DateTime.UtcNow,
                 ProrationBehavior = "create_prorations"
             };
@@ -56,7 +56,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
 
     public async Task<string?> GetRedirectToUpgradeOrganization(string? selectedPlan = null)
     {
-        selectedPlan ??= _stripeOptions.Store.Pro;
+        selectedPlan ??= _billingOptions.Store.Pro;
 
         var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
 
@@ -86,7 +86,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         var application = organization.Applications.SingleOrDefault(x => x.Id == app);
         var existingSubscriptionItemId = application.BillingSubscriptionItemId;
 
-        var plan = _stripeOptions.Plans[selectedPlan];
+        var plan = _billingOptions.Plans[selectedPlan];
         var priceId = plan.PriceId!;
         var subscriptionItem = organization.Applications
             .Where(x => x.BillingPriceId == priceId)
@@ -196,7 +196,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         var subscriptionService = new SubscriptionService();
         var subscription = await subscriptionService.GetAsync(subscriptionId);
         SubscriptionItem lineItem = subscription.Items.Data.Single();
-        var planName = _stripeOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
+        var planName = _billingOptions.Plans.Single(x => x.Value.PriceId == lineItem.Price.Id).Key;
 
         await UpgradeToPaidOrganization(customerId, planName, orgId, subscription.Id, subscription.Created, lineItem.Id, lineItem.Price.Id);
     }
@@ -265,7 +265,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
         string successUrl,
         string cancelUrl)
     {
-        if (_stripeOptions.Plans.All(x => x.Key != planName))
+        if (_billingOptions.Plans.All(x => x.Key != planName))
         {
             throw new ArgumentException("Invalid plan name");
         }
@@ -286,7 +286,7 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
             {
                 new()
                 {
-                    Price = _stripeOptions.Plans[planName].PriceId,
+                    Price = _billingOptions.Plans[planName].PriceId,
                 }
             }
         };

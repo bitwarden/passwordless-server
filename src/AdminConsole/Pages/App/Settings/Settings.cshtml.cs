@@ -19,7 +19,7 @@ public class SettingsModel : PageModel
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
     private readonly IPasswordlessManagementClient _managementClient;
-    private readonly StripeOptions _stripeOptions;
+    private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
         ILogger<SettingsModel> logger,
@@ -28,7 +28,7 @@ public class SettingsModel : PageModel
         IApplicationService appService,
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
-        IOptions<StripeOptions> stripeOptions
+        IOptions<BillingOptions> billingOptions
         )
     {
         _logger = logger;
@@ -37,7 +37,7 @@ public class SettingsModel : PageModel
         _appService = appService;
         _billingService = billingService;
         _managementClient = managementClient;
-        _stripeOptions = stripeOptions.Value;
+        _billingOptions = billingOptions.Value;
     }
 
     public Models.Organization Organization { get; set; }
@@ -64,10 +64,10 @@ public class SettingsModel : PageModel
 
         if (!Organization.HasSubscription)
         {
-            AddPlan(_stripeOptions.Store.Free);
+            AddPlan(_billingOptions.Store.Free);
         }
-        AddPlan(_stripeOptions.Store.Pro);
-        AddPlan(_stripeOptions.Store.Enterprise);
+        AddPlan(_billingOptions.Store.Pro);
+        AddPlan(_billingOptions.Store.Enterprise);
 
         PendingDelete = application?.DeleteAt.HasValue ?? false;
         DeleteAt = application?.DeleteAt;
@@ -116,12 +116,12 @@ public class SettingsModel : PageModel
 
     private void AddPlan(string plan)
     {
-        var options = _stripeOptions.Plans[plan];
+        var options = _billingOptions.Plans[plan];
         var isActive = Application!.BillingPlan == plan;
         var isOutdated = isActive && Application!.BillingPriceId != options.PriceId;
 
         bool canSubscribe;
-        if (plan == _stripeOptions.Store.Free || Application.DeleteAt.HasValue)
+        if (plan == _billingOptions.Store.Free || Application.DeleteAt.HasValue)
         {
             canSubscribe = false;
         }

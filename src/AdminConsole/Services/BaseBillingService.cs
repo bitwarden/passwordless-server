@@ -20,7 +20,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
 
     protected readonly IPasswordlessManagementClient _passwordlessClient;
     protected readonly ILogger<BaseBillingService<TDbContext>> _logger;
-    protected readonly StripeOptions _stripeOptions;
+    protected readonly BillingOptions _billingOptions;
     protected readonly IDataService _dataService;
     protected readonly IUrlHelperFactory _urlHelperFactory;
     protected readonly IActionContextAccessor _actionContextAccessor;
@@ -30,7 +30,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
         ILogger<BaseBillingService<TDbContext>> logger,
-        IOptions<StripeOptions> stripeOptions,
+        IOptions<BillingOptions> billingOptions,
         IActionContextAccessor actionContextAccessor,
         IUrlHelperFactory urlHelperFactory
 
@@ -40,14 +40,14 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         _dataService = dataService;
         _passwordlessClient = passwordlessClient;
         _logger = logger;
-        _stripeOptions = stripeOptions.Value;
+        _billingOptions = billingOptions.Value;
         _urlHelperFactory = urlHelperFactory;
         _actionContextAccessor = actionContextAccessor;
     }
 
     protected async Task SetPlanOnApp(string app, string selectedPlan, string subscriptionItemId, string priceId)
     {
-        var plan = _stripeOptions.Plans[selectedPlan];
+        var plan = _billingOptions.Plans[selectedPlan];
         await this.UpdateApplicationAsync(app, selectedPlan, subscriptionItemId, priceId);
 
         var updateFeaturesRequest = new SetApplicationFeaturesRequest
@@ -60,7 +60,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
 
     protected async Task UpgradeToPaidOrganization(string customerId, string planName, int orgId, string subscriptionId, DateTime subscriptionCreatedAt, string subscriptionItemId, string subscriptionItemPriceId)
     {
-        var features = _stripeOptions.Plans[planName].Features;
+        var features = _billingOptions.Plans[planName].Features;
 
 
         // SetCustomerId on the Org
@@ -165,7 +165,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
-        var features = _stripeOptions.Plans[_stripeOptions.Store.Free].Features;
+        var features = _billingOptions.Plans[_billingOptions.Store.Free].Features;
         organization.MaxAdmins = features.MaxAdmins;
         organization.MaxApplications = features.MaxApplications;
 
@@ -173,7 +173,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         {
             application.BillingPriceId = null;
             application.BillingSubscriptionItemId = null;
-            application.BillingPlan = _stripeOptions.Store.Free;
+            application.BillingPlan = _billingOptions.Store.Free;
         }
 
         await db.SaveChangesAsync();
@@ -194,7 +194,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
 
 public record PricingCardModel(
     string Name,
-    StripePlanOptions Plan)
+    BillingPlanOptions Plan)
 {
     /// <summary>
     /// We want to display the price in US dollars.

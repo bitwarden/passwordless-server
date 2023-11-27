@@ -23,7 +23,7 @@ public class CreateApplicationModel : PageModel
     private readonly IApplicationService _applicationService;
     private readonly IDataService _dataService;
     private readonly IPasswordlessManagementClient _managementClient;
-    private readonly StripeOptions _stripeOptions;
+    private readonly BillingOptions _billingOptions;
     private readonly ISharedBillingService _billingService;
 
     public CreateApplicationModel(
@@ -32,7 +32,7 @@ public class CreateApplicationModel : PageModel
         IApplicationService applicationService,
         IDataService dataService,
         IPasswordlessManagementClient managementClient,
-        IOptionsSnapshot<StripeOptions> stripeOptions, ISharedBillingService billingService)
+        IOptionsSnapshot<BillingOptions> billingOptions, ISharedBillingService billingService)
     {
         _dataService = dataService;
         _applicationService = applicationService;
@@ -40,7 +40,7 @@ public class CreateApplicationModel : PageModel
         _billingService = billingService;
         _passwordlessOptions = passwordlessOptions;
         _signInManager = signInManager;
-        _stripeOptions = stripeOptions.Value;
+        _billingOptions = billingOptions.Value;
     }
 
     public CreateApplicationForm Form { get; } = new();
@@ -54,7 +54,7 @@ public class CreateApplicationModel : PageModel
         await InitializeAsync();
         if (!Organization.HasSubscription)
         {
-            Form.Plan = _stripeOptions.Store.Free;
+            Form.Plan = _billingOptions.Store.Free;
         }
 
         if (Organization.Applications.Count >= Organization.MaxApplications)
@@ -97,7 +97,7 @@ public class CreateApplicationModel : PageModel
         // Attach a plan
         app.BillingPlan = form.Plan;
 
-        if (form.Plan != _stripeOptions.Store.Free)
+        if (form.Plan != _billingOptions.Store.Free)
         {
             var subItem = await _billingService.CreateSubscriptionItem(Organization, form.Plan);
 
@@ -111,8 +111,8 @@ public class CreateApplicationModel : PageModel
             var newAppOptions = new NewAppOptions
             {
                 AdminEmail = email,
-                EventLoggingIsEnabled = _stripeOptions.Plans[form.Plan].Features.EventLoggingIsEnabled,
-                EventLoggingRetentionPeriod = _stripeOptions.Plans[form.Plan].Features.EventLoggingRetentionPeriod
+                EventLoggingIsEnabled = _billingOptions.Plans[form.Plan].Features.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = _billingOptions.Plans[form.Plan].Features.EventLoggingRetentionPeriod
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
@@ -155,8 +155,8 @@ public class CreateApplicationModel : PageModel
 
         if (Organization.HasSubscription)
         {
-            AvailablePlans.Add(new AvailablePlan(_stripeOptions.Store.Pro, _stripeOptions.Plans[_stripeOptions.Store.Pro].Ui.Label));
-            AvailablePlans.Add(new AvailablePlan(_stripeOptions.Store.Enterprise, _stripeOptions.Plans[_stripeOptions.Store.Enterprise].Ui.Label));
+            AvailablePlans.Add(new AvailablePlan(_billingOptions.Store.Pro, _billingOptions.Plans[_billingOptions.Store.Pro].Ui.Label));
+            AvailablePlans.Add(new AvailablePlan(_billingOptions.Store.Enterprise, _billingOptions.Plans[_billingOptions.Store.Enterprise].Ui.Label));
         }
     }
 

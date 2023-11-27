@@ -1,6 +1,6 @@
 namespace Passwordless.AdminConsole.Billing.Configuration;
 
-public class StripeOptions
+public class BillingOptions
 {
     public string WebhookSecret { get; set; }
 
@@ -8,5 +8,5 @@ public class StripeOptions
 
     public StoreOptions Store { get; set; }
 
-    public Dictionary<string, StripePlanOptions> Plans { get; set; }
+    public Dictionary<string, BillingPlanOptions> Plans { get; set; }
 }

@@ -12,18 +12,18 @@ public class Manage : BaseExtendedPageModel
 {
     private readonly ISharedBillingService _billingService;
     private readonly IDataService _dataService;
-    private readonly IOptions<StripeOptions> _stripeOptions;
+    private readonly IOptions<BillingOptions> _billingOptions;
 
-    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<StripeOptions> stripeOptions)
+    public Manage(ISharedBillingService billingService, IDataService dataService, IOptions<BillingOptions> billingOptions)
     {
         _billingService = billingService;
         _dataService = dataService;
-        _stripeOptions = stripeOptions;
+        _billingOptions = billingOptions;
 
         var plans = new List<PricingCardModel>();
-        plans.Add(new PricingCardModel(_stripeOptions.Value.Store.Free, _stripeOptions.Value.Plans[_stripeOptions.Value.Store.Free]));
-        plans.Add(new PricingCardModel(_stripeOptions.Value.Store.Pro, _stripeOptions.Value.Plans[_stripeOptions.Value.Store.Pro]));
-        plans.Add(new PricingCardModel(_stripeOptions.Value.Store.Enterprise, _stripeOptions.Value.Plans[_stripeOptions.Value.Store.Enterprise]));
+        plans.Add(new PricingCardModel(_billingOptions.Value.Store.Free, _billingOptions.Value.Plans[_billingOptions.Value.Store.Free]));
+        plans.Add(new PricingCardModel(_billingOptions.Value.Store.Pro, _billingOptions.Value.Plans[_billingOptions.Value.Store.Pro]));
+        plans.Add(new PricingCardModel(_billingOptions.Value.Store.Enterprise, _billingOptions.Value.Plans[_billingOptions.Value.Store.Enterprise]));
         Plans = plans;
     }
 
@@ -39,7 +39,7 @@ public class Manage : BaseExtendedPageModel
     {
         var applications = await _dataService.GetApplicationsAsync();
         Applications = applications
-            .Select(x => ApplicationModel.FromEntity(x, _stripeOptions.Value.Plans[x.BillingPlan]))
+            .Select(x => ApplicationModel.FromEntity(x, _billingOptions.Value.Plans[x.BillingPlan]))
             .ToList();
         Organization = await _dataService.GetOrganizationAsync();
 
@@ -51,7 +51,7 @@ public class Manage : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostUpgradePro()
     {
-        var redirect = await _billingService.GetRedirectToUpgradeOrganization(_stripeOptions.Value.Store.Pro);
+        var redirect = await _billingService.GetRedirectToUpgradeOrganization(_billingOptions.Value.Store.Pro);
         return Redirect(redirect);
     }
 
@@ -85,7 +85,7 @@ public class Manage : BaseExtendedPageModel
         string Plan,
         bool CanChangePlan)
     {
-        public static ApplicationModel FromEntity(Application entity, StripePlanOptions options)
+        public static ApplicationModel FromEntity(Application entity, BillingPlanOptions options)
         {
             var canChangePlan = !entity.DeleteAt.HasValue;
             return new ApplicationModel(
