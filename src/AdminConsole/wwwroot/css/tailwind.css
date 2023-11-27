@@ -1311,23 +1311,6 @@ label.form-label {
   }
 }
 
-.sidebar-authorized {
-  display: none;
-  --tw-bg-opacity: 1;
-  background-color: rgb(var(--color-primary-700) / var(--tw-bg-opacity));
-}
-
-@media (min-width: 1024px) {
-  .sidebar-authorized {
-    position: fixed;
-    top: 0px;
-    bottom: 0px;
-    display: flex;
-    flex-direction: column;
-    width: 16rem;
-  }
-}
-
 .navbar-mobile {
   position: sticky;
   top: 0px;
@@ -1470,6 +1453,11 @@ main.blazor {
   inset: 0px;
 }
 
+.inset-y-0 {
+  top: 0px;
+  bottom: 0px;
+}
+
 .right-0 {
   right: 0px;
 }
@@ -1484,6 +1472,10 @@ main.blazor {
 
 .z-40 {
   z-index: 40;
+}
+
+.z-50 {
+  z-index: 50;
 }
 
 .m-2 {
@@ -1743,6 +1735,10 @@ main.blazor {
 
 .w-6 {
   width: 1.5rem;
+}
+
+.w-64 {
+  width: 16rem;
 }
 
 .w-8 {
@@ -2286,10 +2282,6 @@ main.blazor {
   padding-right: 0.75rem;
 }
 
-.ps-3 {
-  padding-inline-start: 0.75rem;
-}
-
 .pt-1 {
   padding-top: 0.25rem;
 }
@@ -2463,6 +2455,10 @@ main.blazor {
 
 .opacity-30 {
   opacity: 0.3;
+}
+
+.opacity-50 {
+  opacity: 0.5;
 }
 
 .shadow {
