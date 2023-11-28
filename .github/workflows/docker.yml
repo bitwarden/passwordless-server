@@ -10,10 +10,49 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Application version to use when publishing the project
+        required: false
+      image-tag:
+        description: Additional Docker image tag to apply on deployment
+        required: false
 
 jobs:
+  # Determine version
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Determine stable version
+        id: stable-version
+        if: ${{ github.event_name == 'release' || inputs.version }}
+        run: |
+          version="${{ inputs.version || github.event.release.tag_name }}"
+
+          if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: $version"
+              exit 1
+          fi
+
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Determine prerelease version
+        id: pre-version
+        run: |
+          hash="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT
+
+    outputs:
+      version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
+
   # Build the image without deploying just to make sure the dockerfile is valid
   pack:
+    needs: version
+
     strategy:
       matrix:
         app:
@@ -44,11 +83,13 @@ jobs:
           docker buildx build .
           --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
+          --build-arg VERSION=${{ needs.version.outputs.version }}
           --output type=tar,dest=image.tar
 
   # Build and deploy the image
   deploy:
     if: ${{ github.event_name != 'pull_request' }}
+    needs: version
 
     strategy:
       matrix:
@@ -89,7 +130,9 @@ jobs:
           docker buildx build .
           --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
+          --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
           --tag ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:latest
           ${{ github.event_name == 'release' && format('--tag ghcr.io/{0}/{1}:{2}', github.repository_owner, matrix.name, github.ref_name) || '' }}
           ${{ github.event_name == 'release' && format('--tag ghcr.io/{0}/{1}:stable', github.repository_owner, matrix.name) || '' }}
+          ${{ inputs.image-tag && format('--tag ghcr.io/{0}/{1}:{2}', github.repository_owner, matrix.name, inputs.image-tag) || '' }}
