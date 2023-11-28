@@ -78,8 +78,6 @@ jobs:
 
       - name: Install .NET
         uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # 3.2.0
-        with:
-          dotnet-version: 8.0.x
 
       - name: Validate format
         run: dotnet format --verify-no-changes
@@ -97,8 +95,6 @@ jobs:
 
       - name: Install .NET
         uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # 3.2.0
-        with:
-          dotnet-version: 8.0.x
 
       - name: Run restore
         run: dotnet restore
@@ -155,8 +151,6 @@ jobs:
 
       - name: Install .NET
         uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # 3.2.0
-        with:
-          dotnet-version: 8.0.x
 
       - name: Publish app
         run: >
