@@ -52,7 +52,7 @@ jobs:
     steps:
       - name: Determine stable version
         id: stable-version
-        if: ${{ github.event_name == 'release' || inputs.version }}
+        if: ${{ inputs.version || github.event_name == 'release' }}
         run: |
           version="${{ inputs.version || github.event.release.tag_name }}"
           
