@@ -6,6 +6,7 @@ using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 namespace Passwordless.AdminConsole.Db;
 
@@ -81,7 +82,13 @@ public static class DatabaseBootstrap
             .AddEntityFrameworkStores<TDbContext>()
             .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory<TDbContext>>()
             .AddDefaultTokenProviders()
-            .AddPasswordless(builder.Configuration.GetSection("Passwordless"));
+            .AddPasswordless(o =>
+            {
+                var managementOptions = builder.Configuration.GetSection("PasswordlessManagement").Get<PasswordlessManagementOptions>();
+                var options = builder.Configuration.GetSection("Passwordless").Get<PasswordlessOptions>();
+                o.ApiSecret = options.ApiSecret;
+                o.ApiUrl = managementOptions.InternalApiUrl;
+            });
 
         if (!builder.Environment.IsDevelopment())
         {

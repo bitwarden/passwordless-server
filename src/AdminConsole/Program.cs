@@ -100,7 +100,6 @@ void RunTheApp()
     services.AddScoped<ICurrentContext, CurrentContext>();
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
-    services.AddHttpClient();
     builder.AddManagementApi();
 
     builder.Services.AddSingleton<IAuthenticatorDataProvider, AuthenticatorDataProvider>();
