@@ -87,6 +87,8 @@ public static class DatabaseBootstrap
                 var managementOptions = builder.Configuration.GetSection("PasswordlessManagement").Get<PasswordlessManagementOptions>();
                 var options = builder.Configuration.GetSection("Passwordless").Get<PasswordlessOptions>();
                 o.ApiSecret = options.ApiSecret;
+                o.ApiKey = options.ApiKey;
+                o.ApiUrl = options.ApiUrl;
 
                 if (builder.Configuration.GetValue("SelfHosted", false))
                 {
