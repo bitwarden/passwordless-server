@@ -1,8 +1,4 @@
 @page
-@using AdminConsole.Pages.Components.ManagePasskeys
-@using Microsoft.Extensions.Options
-@using Passwordless.AdminConsole.Pages.Shared
-@inject IOptions<PasswordlessOptions> Options
 @model Passwordless.AdminConsole.Pages.Account.UserOnboarding
 
 @{
@@ -13,7 +9,7 @@
     <p class="v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
     <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
     
-    <partial name="_Credentials" model="new CredentialsModel { Items = Model.Credentials, HideDetails = true }"/>
+    <partial name="_Credentials" model="Model.Credentials"/>
     <partial name="Shared/_PasswordlessClientJs" />
     <partial name="Shared/_AddPasskeys" />
 </panel>

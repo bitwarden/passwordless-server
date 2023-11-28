@@ -1,6 +1,6 @@
 namespace Passwordless.AdminConsole.Billing.Configuration;
 
-public class StripePlanOptions
+public class BillingPlanOptions
 {
     public ushort Order { get; set; }
     public string? PriceId { get; set; }

@@ -25,7 +25,7 @@
                 {
                     <tr>
                         <td>@invoice.Number</td>
-                        <td>@invoice.Date</td>
+                        <td><asp-local-time datetime="@invoice.Date"/></td>
                         <td>@invoice.Amount</td>
                         <td>
                             <badge asp-if="invoice.Paid" variant="ColorVariant.Success" text="Paid"></badge>

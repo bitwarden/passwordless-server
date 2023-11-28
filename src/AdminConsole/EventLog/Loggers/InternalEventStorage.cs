@@ -13,11 +13,11 @@ public interface IInternalEventLogStorageContext
 public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStorageContext where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-    private readonly StripeOptions _planOptionsConfig;
+    private readonly BillingOptions _planOptionsConfig;
     private readonly TimeProvider _timeProvider;
 
     public InternalEventLogStorageContext(IDbContextFactory<TDbContext> dbContextFactory,
-        IOptions<StripeOptions> planOptionsConfig,
+        IOptions<BillingOptions> planOptionsConfig,
         TimeProvider timeProvider)
     {
         _dbContextFactory = dbContextFactory;

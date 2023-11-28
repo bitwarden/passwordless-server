@@ -112,5 +112,10 @@
       <DependentUpon>_Credentials.cshtml</DependentUpon>
     </Compile>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Services\AuthenticatorData\authenticator-data.json" CopyToOutputDirectory="always" />
+  </ItemGroup>
+
    
 </Project>
