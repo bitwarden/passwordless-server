@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Passwordless.Api.Integration.Tests;
 
-public class PasswordlessApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
+public class PasswordlessApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly MsSqlContainer _dbContainer = new MsSqlBuilder().Build();
 
