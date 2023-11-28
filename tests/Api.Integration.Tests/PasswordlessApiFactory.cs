@@ -22,8 +22,7 @@ public class PasswordlessApiFactory : WebApplicationFactory<IApiMarker>, IAsyncL
             .UseSetting("ConnectionStrings:mssql:api", _dbContainer.GetConnectionString())
             .ConfigureLogging(loggingBuilder => loggingBuilder.ClearProviders())
             .ConfigureTestServices(services =>
-                services
-                    .RemoveAll(typeof(IHostedService)));
+                services.RemoveAll(typeof(IHostedService)));
     }
 
     public async Task InitializeAsync()
