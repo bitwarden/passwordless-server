@@ -17,7 +17,7 @@ COPY src/Service src/Service
 COPY src/Api src/Api
 
 RUN dotnet publish src/Api/ \
-    /p:Version=$VERSION \
+    -p:Version=$VERSION \
     --configuration Release \
     --self-contained \
     --use-current-runtime \
