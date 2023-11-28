@@ -21,7 +21,7 @@ public class EfTenantStorageFactory<TContext> : ITenantStorageFactory
 
     public ITenantStorage Create(string appId)
     {
-        var context = ActivatorUtilities.CreateInstance<TContext>(_services, new ManualTenantProvider(appId, _timeProvider));
-        return new EfTenantStorage(context);
+        var context = ActivatorUtilities.CreateInstance<TContext>(_services, new ManualTenantProvider(appId));
+        return new EfTenantStorage(context, _timeProvider);
     }
 }

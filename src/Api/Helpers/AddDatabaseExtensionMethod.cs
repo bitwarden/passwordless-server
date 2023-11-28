@@ -57,7 +57,7 @@ public static class AddDatabaseExtensionMethod
             var accountName = context?.User.FindFirstValue(CustomClaimTypes.AccountName);
 
             return !string.IsNullOrEmpty(accountName)
-                ? new ManualTenantProvider(accountName, TimeProvider.System)
+                ? new ManualTenantProvider(accountName)
                 : throw new InvalidOperationException("You should only request ITenantProvider from within an authenticated context");
         });
 

@@ -8,7 +8,6 @@ namespace Passwordless.Service.Storage.Ef;
 public abstract class DbTenantContext : DbGlobalContext
 {
     public string Tenant { get; }
-    public TimeProvider TimeProvider { get; }
 
     public DbTenantContext(
         DbContextOptions options,
@@ -16,7 +15,6 @@ public abstract class DbTenantContext : DbGlobalContext
     ) : base(options)
     {
         Tenant = tenantProvider.Tenant;
-        TimeProvider = tenantProvider.TimeProvider;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
