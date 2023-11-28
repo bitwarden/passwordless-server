@@ -81,9 +81,6 @@ fi
 #########################
 # Internal & Public Url #
 #########################
-export Passwordless__ApiUrl=$PasswordlessManagement_ApiUrl
-export PasswordlessManagement__ApiUrl=$PasswordlessManagement_ApiUrl
-
 if [ "$BWP_DOMAIN" = "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
   echo "[Configuration] ERROR: Set environment variable 'BWP_ENABLE_SSL' to 'true' when 'BWP_DOMAIN' is not 'localhost'.";
   echo "[Configuration] ERROR: WebAuthn requires SSL when not running on 'localhost'.";
@@ -102,9 +99,11 @@ if [ "$BWP_PORT" == "null" ]; then
   exit 1; 
 fi
 
-export PasswordlessManagement__InternalApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api";
-echo "[Configuration] API private: $PasswordlessManagement__ApiUrl";
-echo "[Configuration] API public: $PasswordlessManagement__InternalApiUrl";
+export Passwordless__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
+export PasswordlessManagement__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
+export PasswordlessManagement__InternalApiUrl="http://localhost:5000";
+echo "[Configuration] API public: $PasswordlessManagement__ApiUrl";
+echo "[Configuration] API private: $PasswordlessManagement__InternalApiUrl";
 
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
-using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Db;
@@ -100,7 +99,6 @@ void RunTheApp()
     services.AddScoped<ICurrentContext, CurrentContext>();
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
-    services.AddHttpClient();
     builder.AddManagementApi();
 
     builder.Services.AddSingleton<IAuthenticatorDataProvider, AuthenticatorDataProvider>();
@@ -128,9 +126,9 @@ void RunTheApp()
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
-        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
+        var options = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
 
-        client.BaseAddress = new Uri(options.Value.ApiUrl);
+        client.BaseAddress = new Uri(options.Value.InternalApiUrl);
     });
 
     // Magic link SigninManager
@@ -191,5 +189,6 @@ void RunTheApp()
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
+
     app.Run();
 }
