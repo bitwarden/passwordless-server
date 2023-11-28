@@ -11,9 +11,7 @@ namespace Passwordless.Api.Integration.Tests;
 
 public class PasswordlessApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 {
-    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
-        .WithPassword("P455w0rd1355!")
-        .Build();
+    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder().Build();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
