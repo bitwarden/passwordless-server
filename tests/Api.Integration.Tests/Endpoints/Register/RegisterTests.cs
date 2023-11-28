@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Bogus;
 using Fido2NetLib;
 using FluentAssertions;
@@ -93,17 +92,11 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
-        var result = WebDriverFactory.GetWebDriver(originUrl)
-            .ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
-                           $"return await createCredential({sessionResponse!.Data.ToJson()});");
-
-        var resultString = result?.ToString() ?? string.Empty;
-
-        var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString);
+        var authenticatorAttestationRawResponse = await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
 
         // Act
         using var registerCompleteResponse = await _client.PostAsJsonAsync("/register/complete",
-            new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = parsedResult });
+            new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = authenticatorAttestationRawResponse });
 
         // Assert
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Bogus;
 using Fido2NetLib;
 using FluentAssertions;
@@ -49,13 +48,10 @@ public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposab
         using var registrationBeginResponse = await _client.PostAsJsonAsync("register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
-        var result = WebDriverFactory.GetWebDriver(originUrl)
-            .ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
-                           $"return await createCredential({sessionResponse!.Data.ToJson()});");
-        var resultString = result?.ToString() ?? string.Empty;
-        var parsedResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(resultString);
+        var authenticatorAttestationRawResponse = await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
+
         _ = await _client.PostAsJsonAsync("register/complete",
-            new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = parsedResult });
+            new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = authenticatorAttestationRawResponse });
 
         // Act
         using var credentialsResponse = await _client.GetAsync($"credentials/list?userId={tokenRequest.UserId}");

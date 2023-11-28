@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Bogus;
 using Fido2NetLib;
 using FluentAssertions;
@@ -73,34 +72,26 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         };
         var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
-
         var driver = WebDriverFactory.GetWebDriver(OriginUrl);
-        var registerResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
-                                                  $"return await createCredential({sessionResponse!.Data.ToJson()});")?.ToString() ?? string.Empty;
-
-        var parsedRegisterResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(registerResult);
+        var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
         var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
             Origin = OriginUrl,
             RPID = RpId,
             Session = sessionResponse.Session,
-            Response = parsedRegisterResult
+            Response = authenticatorAttestationRawResponse
         });
         await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
-
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
-
-        var signInResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetGetCredentialFunctions()} " +
-                                                $"return await getCredential({signInBegin!.Data.ToJson()});")?.ToString() ?? string.Empty;
-        var parsedSignInResult = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(signInResult);
+        var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
         var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
             Origin = OriginUrl,
             RPID = RpId,
-            Response = parsedSignInResult,
+            Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });
 
@@ -130,32 +121,29 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
 
         var driver = WebDriverFactory.GetWebDriver(OriginUrl);
 
-        var registerResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetCreateCredentialFunctions()} " +
-                                                  $"return await createCredential({sessionResponse!.Data.ToJson()});")?.ToString() ?? string.Empty;
+        var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
 
-        var parsedRegisterResult = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(registerResult);
         var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
             Origin = OriginUrl,
             RPID = RpId,
             Session = sessionResponse.Session,
-            Response = parsedRegisterResult
+            Response = authenticatorAttestationRawResponse
         });
+
         await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
 
-        var signInResult = driver.ExecuteScript($"{await BrowserCredentialsHelper.GetGetCredentialFunctions()} " +
-                                                $"return await getCredential({signInBegin!.Data.ToJson()});")?.ToString() ?? string.Empty;
-        var parsedSignInResult = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(signInResult);
+        var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
         var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
             Origin = OriginUrl,
             RPID = RpId,
-            Response = parsedSignInResult,
+            Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });
 
@@ -201,14 +189,16 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var body = await result.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
-        AssertHelper.AssertEqualJson("""
-                                     {
-                                       "type": "https://docs.passwordless.dev/guide/errors.html#unknown_credential",
-                                       "title": "We don't recognize the passkey you sent us.",
-                                       "status": 400,
-                                       "credentialId": "LcVLKA2QkfwzvuSTxIIyFVTJ9IopE57xTYvJ_0Nx9nk",
-                                       "errorCode": "unknown_credential"
-                                     }
-                                     """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#unknown_credential",
+               "title": "We don't recognize the passkey you sent us.",
+               "status": 400,
+               "credentialId": "LcVLKA2QkfwzvuSTxIIyFVTJ9IopE57xTYvJ_0Nx9nk",
+               "errorCode": "unknown_credential"
+             }
+             """, body);
     }
 }
