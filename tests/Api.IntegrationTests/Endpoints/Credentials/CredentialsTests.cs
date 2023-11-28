@@ -5,12 +5,12 @@ using Fido2NetLib;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Endpoints;
-using Passwordless.Api.Integration.Tests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service.Models;
 using Xunit;
 
-namespace Passwordless.Api.Integration.Tests.Endpoints.Credentials;
+namespace Passwordless.Api.IntegrationTests.Endpoints.Credentials;
 
 public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {

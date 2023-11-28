@@ -2,10 +2,10 @@ using System.Net;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
-using Passwordless.Api.Integration.Tests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers;
 using Xunit;
 
-namespace Passwordless.Api.Integration.Tests;
+namespace Passwordless.Api.IntegrationTests;
 
 public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
 {

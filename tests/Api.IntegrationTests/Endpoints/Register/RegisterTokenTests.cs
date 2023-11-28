@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using Passwordless.Api.Integration.Tests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers;
 using Xunit;
 
-namespace Passwordless.Api.Integration.Tests.Endpoints.Register;
+namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
 public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {

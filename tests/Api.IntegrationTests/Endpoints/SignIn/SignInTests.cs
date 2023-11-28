@@ -4,11 +4,11 @@ using Bogus;
 using Fido2NetLib;
 using FluentAssertions;
 using Passwordless.Api.Endpoints;
-using Passwordless.Api.Integration.Tests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Service.Models;
 using Xunit;
 
-namespace Passwordless.Api.Integration.Tests.Endpoints.SignIn;
+namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
 
 public class SignInTests : IClassFixture<PasswordlessApiFactory>
 {

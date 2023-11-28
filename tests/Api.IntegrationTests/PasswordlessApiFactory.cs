@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Testcontainers.MsSql;
 using Xunit;
 
-namespace Passwordless.Api.Integration.Tests;
+namespace Passwordless.Api.IntegrationTests;
 
 public class PasswordlessApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {

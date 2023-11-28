@@ -1,4 +1,4 @@
-namespace Passwordless.Api.Integration.Tests.Helpers;
+namespace Passwordless.Api.IntegrationTests.Helpers;
 
 public static class HttpClientTestExtensions
 {

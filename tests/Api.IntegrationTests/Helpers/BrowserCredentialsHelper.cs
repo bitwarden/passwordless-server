@@ -2,7 +2,7 @@ using System.Text.Json;
 using Fido2NetLib;
 using OpenQA.Selenium;
 
-namespace Passwordless.Api.Integration.Tests.Helpers;
+namespace Passwordless.Api.IntegrationTests.Helpers;
 
 public static class BrowserCredentialsHelper
 {

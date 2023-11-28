@@ -4,12 +4,12 @@ using Bogus;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Passwordless.Api.Integration.Tests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
 
-namespace Passwordless.Api.Integration.Tests.Endpoints.App;
+namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
 public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
