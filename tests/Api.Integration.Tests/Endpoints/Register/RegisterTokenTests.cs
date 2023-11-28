@@ -46,14 +46,16 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
 
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        AssertHelper.AssertEqualJson("""
-                                     {
-                                       "type": "https://docs.passwordless.dev/guide/errors.html#",
-                                       "title": "Invalid UserId: UserId cannot be null or empty",
-                                       "status": 400,
-                                       "errorCode": null
-                                     }
-                                     """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#",
+               "title": "Invalid UserId: UserId cannot be null or empty",
+               "status": 400,
+               "errorCode": null
+             }
+             """, body);
     }
 
     [Theory]
@@ -78,14 +80,16 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
 
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        AssertHelper.AssertEqualJson("""
-                                     {
-                                       "type": "https://docs.passwordless.dev/guide/errors.html#",
-                                       "title": "Invalid Username: Username cannot be null or empty",
-                                       "status": 400,
-                                       "errorCode": null
-                                     }
-                                     """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#",
+               "title": "Invalid Username: Username cannot be null or empty",
+               "status": 400,
+               "errorCode": null
+             }
+             """, body);
     }
 
     [Theory]
@@ -101,14 +105,16 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        AssertHelper.AssertEqualJson("""
-                                     {
-                                       "type": "https://docs.passwordless.dev/guide/errors.html#invalid_attestation",
-                                       "title": "Attestation type not supported",
-                                       "status": 400,
-                                       "errorCode": "invalid_attestation"
-                                     }
-                                     """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#invalid_attestation",
+               "title": "Attestation type not supported",
+               "status": 400,
+               "errorCode": "invalid_attestation"
+             }
+             """, body);
     }
 
     [Theory]
