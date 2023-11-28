@@ -87,7 +87,16 @@ public static class DatabaseBootstrap
                 var managementOptions = builder.Configuration.GetSection("PasswordlessManagement").Get<PasswordlessManagementOptions>();
                 var options = builder.Configuration.GetSection("Passwordless").Get<PasswordlessOptions>();
                 o.ApiSecret = options.ApiSecret;
-                o.ApiUrl = managementOptions.InternalApiUrl;
+
+                if (builder.Configuration.GetValue("SelfHosted", false))
+                {
+                    // This will overwrite ApiUrl with the internal url for self-hosting, this is intentional.
+                    if (string.IsNullOrEmpty(managementOptions.InternalApiUrl))
+                    {
+                        throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
+                    }
+                    o.ApiUrl = managementOptions.InternalApiUrl;
+                }
             });
 
         if (!builder.Environment.IsDevelopment())

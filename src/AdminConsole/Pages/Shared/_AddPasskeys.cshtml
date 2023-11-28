@@ -1,6 +1,8 @@
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Helpers
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @inject IOptions<PasswordlessOptions> Options
+@inject IOptions<PasswordlessManagementOptions> ManagementOptions
 
 <div id="addPasskeysPanel">
     <form v-on:submit="registerCredential">
@@ -26,7 +28,7 @@
     createApp({
         setup() {            
             const p = new Passwordless.Client({
-                apiUrl: "@Options.Value.ApiUrl",
+                apiUrl: "@ManagementOptions.Value.ApiUrl",
                 apiKey: "@Options.Value.ApiKey"
             });
             
