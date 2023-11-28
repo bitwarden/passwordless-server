@@ -190,14 +190,5 @@ void RunTheApp()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
 
-    app.UseEndpoints((endpoints) =>
-    {
-        endpoints.MapGet("/debug-config", ctx =>
-        {
-            var config = (builder.Configuration as IConfigurationRoot).GetDebugView();
-            return ctx.Response.WriteAsync(config);
-        });
-    });
-
     app.Run();
 }
