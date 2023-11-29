@@ -88,7 +88,6 @@ jobs:
 
   # Build and deploy the image
   deploy:
-    if: ${{ github.event_name != 'pull_request' }}
     needs: version
 
     strategy:
@@ -133,6 +132,6 @@ jobs:
           --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
           ${{ format('--tag {0}/{1}:latest', secrets.AZURE_ACR_SERVER, matrix.name) }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', secrets.AZURE_ACR_SERVER, matrix.name, github.ref_name) || '' }}
           ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', secrets.AZURE_ACR_SERVER, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', secrets.AZURE_ACR_SERVER, matrix.name, github.ref_name) || '' }}
           ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', secrets.AZURE_ACR_SERVER, matrix.name, inputs.image-tag) || '' }}
