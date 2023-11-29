@@ -41,6 +41,7 @@ public class DeleteExpiredTokenKeysTests : IClassFixture<PasswordlessApiFactory>
         var storage = scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create("test");
         await storage.AddTokenKey(new TokenKey { Tenant = "test", KeyMaterial = "randomKeyMaterial", KeyId = 0, CreatedAt = new DateTime(2022, 1, 1) });
         await storage.AddTokenKey(new TokenKey { Tenant = "test", KeyMaterial = "randomKeyMaterial", KeyId = 1, CreatedAt = new DateTime(2022, 2, 1) });
+        await storage.AddTokenKey(new TokenKey { Tenant = "test", KeyMaterial = "randomKeyMaterial", KeyId = 2, CreatedAt = DateTime.UtcNow });
 
         // Act
         _ = await _client.PostAsJsonAsync("register/token", tokenGenerator.Generate());
@@ -49,6 +50,7 @@ public class DeleteExpiredTokenKeysTests : IClassFixture<PasswordlessApiFactory>
         var tokenKeys = await storage.GetTokenKeys();
         tokenKeys.Should().NotBeNull();
         tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
+        tokenKeys.Any(x => x.CreatedAt >= (DateTime.UtcNow.AddDays(-30))).Should().BeTrue();
     }
 
     public void Dispose()
