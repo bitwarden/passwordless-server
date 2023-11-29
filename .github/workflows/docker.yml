@@ -122,7 +122,9 @@ jobs:
       - name: Login to Azure Container Registry
         run: >
           echo ${{ secrets.AZURE_ACR_CLIENT_SECRET }} |
-          docker login ghcr.io --username ${{ secrets.AZURE_ACR_CLIENT_ID }} --password-stdin
+          docker login ${{ secrets.AZURE_ACR_SERVER }}
+          --username ${{ secrets.AZURE_ACR_CLIENT_ID }}
+          --password-stdin
 
       - name: Build & push image
         run: >
