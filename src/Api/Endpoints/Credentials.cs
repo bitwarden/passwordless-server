@@ -22,7 +22,7 @@ public static class CredentialsEndpoints
 
         app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpRequest req, UserCredentialsService userCredentialService) =>
         {
-            string userId;
+            string? userId;
             if (req.Method == "POST")
             {
                 var payload = await req.ReadFromJsonAsync<CredentialsListDTO>();
@@ -37,13 +37,13 @@ public static class CredentialsEndpoints
             }
             else
             {
-                userId = req.Query["userId"].SingleOrDefault() ?? throw new Exception("userId should have been supplied in a query string value");
+                userId = req.Query["userId"].SingleOrDefault();
             }
 
             // if payload is empty, throw exception
             if (userId == null)
             {
-                throw new ApiException("Please supply UserId", 400);
+                throw new ApiException("Please supply UserId in the query string value", 400);
             }
 
             var result = await userCredentialService.GetAllCredentials(userId);

@@ -2,10 +2,12 @@ using System.Net;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
+using Passwordless.Api.IntegrationTests.Helpers;
+using Xunit;
 
 namespace Passwordless.Api.IntegrationTests;
 
-public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Program>>
+public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
 {
     // Manual opt out for endpoints that allow anonymous access, all other endpoints are considered to require
     // some kind of authentication
@@ -22,14 +24,13 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     };
 
 
-    private readonly TestWebApplicationFactory<Program> _factory;
+    private readonly PasswordlessApiFactory _factory;
     private readonly HttpClient _client;
 
-    public AuthorizationTests(TestWebApplicationFactory<Program> factory)
+    public AuthorizationTests(PasswordlessApiFactory factory)
     {
         _factory = factory;
-        _client = factory.CreateClient();
-        _client.DefaultRequestHeaders.Add("Accept", "application/json");
+        _client = factory.CreateClient().AddAcceptApplicationJson();
     }
 
     [Fact]
@@ -63,9 +64,9 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     [Fact]
     public async Task ValidateThatMissingApiSecretThrows()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        var httpResponse = await _client
+            .GetAsync("/credentials/list?userId=1");
 
-        var httpResponse = await _client.SendAsync(request);
         var body = await httpResponse.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
 
@@ -82,10 +83,10 @@ public class AuthorizationTests : IClassFixture<TestWebApplicationFactory<Progra
     [Fact]
     public async Task ValidateThatInvalidApiSecretThrows()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
-        request.Headers.Add("ApiSecret", _factory.ApiSecret + "invalid");
+        var httpResponse = await _client
+            .AddSecretKey(HttpClientTestExtensions.ApiSecret + "invalid")
+            .GetAsync("/credentials/list?userId=1");
 
-        var httpResponse = await _client.SendAsync(request);
         var body = await httpResponse.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
 
