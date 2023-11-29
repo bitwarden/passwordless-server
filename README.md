@@ -1,5 +1,9 @@
 # Bitwarden Passwordless.dev Server
 
+[![Build](https://img.shields.io/github/actions/workflow/status/bitwarden/passwordless-server/main.yml?branch=main)](https://github.com/bitwarden/passwordless-server/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/bitwarden/passwordless-server/main)](https://codecov.io/gh/bitwarden/passwordless-server)
+[![Release](https://img.shields.io/github/release/bitwarden/passwordless-server.svg)](https://github.com/bitwarden/passwordless-server/releases)
+
 Bitwarden Passwordless.dev is a software toolkit that helps developers build FIDO2 WebAuthn passkeys features for seamless authentication flows.
 
 Using Passwordless.dev means there's no need to read extensive W3C specification documentation, determine what cryptography to implement, or worry about managing stored public keys. The team behind Bitwarden will take care of that for you.
