@@ -10,6 +10,11 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Application version to use when publishing the project
+        required: false
 
 env:
   # Setting these variables allows .NET CLI to use rich color codes in console output
@@ -47,18 +52,19 @@ jobs:
     steps:
       - name: Determine stable version
         id: stable-version
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ inputs.version || github.event_name == 'release' }}
         run: |
-          if ! [[ "${{ github.event.release.tag_name }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
-              echo "Invalid version: ${{ github.event.release.tag_name }}"
+          version="${{ inputs.version || github.event.release.tag_name }}"
+          
+          if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: $version"
               exit 1
           fi
           
-          echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Determine prerelease version
         id: pre-version
-        if: ${{ github.event_name != 'release' }}
         run: |
           hash="${{ github.event.pull_request.head.sha || github.sha }}"
           echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT

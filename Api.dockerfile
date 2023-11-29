@@ -6,6 +6,9 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 # we can build the assembly for the correct platform.
 ARG TARGETARCH
 
+# Allow setting the assembly version from the build command
+ARG VERSION=0.0.0
+
 WORKDIR /tmp/app/
 
 COPY Directory.Build.props ./
@@ -14,6 +17,7 @@ COPY src/Service src/Service
 COPY src/Api src/Api
 
 RUN dotnet publish src/Api/ \
+    -p:Version=$VERSION \
     --configuration Release \
     --self-contained \
     --use-current-runtime \
