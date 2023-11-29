@@ -7,7 +7,7 @@ namespace Passwordless.Api.Endpoints;
 
 public static class RegisterEndpoints
 {
-    private record RegisterTokenResponse(string Token);
+    public record RegisterTokenResponse(string Token);
 
     public static void MapRegisterEndpoints(this WebApplication app)
     {

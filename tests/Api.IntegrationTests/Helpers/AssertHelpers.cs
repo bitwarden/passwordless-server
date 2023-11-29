@@ -5,9 +5,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using Xunit;
 using Xunit.Sdk;
 
-namespace Passwordless.Api.IntegrationTests;
+namespace Passwordless.Api.IntegrationTests.Helpers;
 
 public static class AssertHelper
 {

@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @inject IOptions<PasswordlessOptions> PasswordlessOptions
+@inject IOptions<PasswordlessManagementOptions> ManagementOptions
 @inject IAntiforgery Antiforgery
 @attribute [AllowAnonymous]
 @model LoginModel
@@ -80,7 +82,7 @@
                 }
 
                 const p = new Passwordless.Client({
-                    apiUrl: "@PasswordlessOptions.Value.ApiUrl",
+                    apiUrl: "@ManagementOptions.Value.ApiUrl",
                     apiKey: "@PasswordlessOptions.Value.ApiKey"
                 });
 
