@@ -202,7 +202,7 @@ public class EfTenantStorage : ITenantStorage
 
     public Task RemoveExpiredTokenKeys(CancellationToken cancellationToken)
     {
-        return db.TokenKeys.Where(x => (_timeProvider.GetUtcNow().DateTime - x.CreatedAt).TotalDays > 30)
+        return db.TokenKeys.Where(x => x.CreatedAt.AddDays(-30) < _timeProvider.GetUtcNow().DateTime)
             .ExecuteDeleteAsync(cancellationToken);
     }
 
