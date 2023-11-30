@@ -8,13 +8,17 @@ namespace Passwordless.Service.Storage.Ef;
 public class EfTenantStorage : ITenantStorage
 {
     private readonly DbTenantContext db;
+    private readonly TimeProvider _timeProvider;
 
     public string Tenant { get; }
 
-    public EfTenantStorage(DbTenantContext db)
+    public EfTenantStorage(
+        DbTenantContext db,
+        TimeProvider timeProvider)
     {
         this.db = db;
         Tenant = db.Tenant;
+        _timeProvider = timeProvider;
     }
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
@@ -194,6 +198,12 @@ public class EfTenantStorage : ITenantStorage
     public Task RemoveTokenKey(int keyId)
     {
         return db.TokenKeys.Where(k => k.KeyId == keyId).ExecuteDeleteAsync();
+    }
+
+    public Task RemoveExpiredTokenKeys(CancellationToken cancellationToken)
+    {
+        return db.TokenKeys.Where(x => x.CreatedAt < _timeProvider.GetUtcNow().AddDays(-30).DateTime)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task SaveAccountInformation(AccountMetaInformation info)
