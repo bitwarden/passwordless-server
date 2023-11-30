@@ -10,6 +10,11 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Application version to use when publishing the project
+        required: false
 
 env:
   # Setting these variables allows .NET CLI to use rich color codes in console output
@@ -47,18 +52,19 @@ jobs:
     steps:
       - name: Determine stable version
         id: stable-version
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ inputs.version || github.event_name == 'release' }}
         run: |
-          if ! [[ "${{ github.event.release.tag_name }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
-              echo "Invalid version: ${{ github.event.release.tag_name }}"
+          version="${{ inputs.version || github.event.release.tag_name }}"
+          
+          if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: $version"
               exit 1
           fi
           
-          echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Determine prerelease version
         id: pre-version
-        if: ${{ github.event_name != 'release' }}
         run: |
           hash="${{ github.event.pull_request.head.sha || github.sha }}"
           echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT
@@ -74,10 +80,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install .NET
-        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # 3.2.0
+        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
 
       - name: Validate format
         run: dotnet format --verify-no-changes
@@ -91,10 +97,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install .NET
-        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # 3.2.0
+        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
 
       - name: Run restore
         run: dotnet restore
@@ -120,7 +126,7 @@ jobs:
           DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: Report test results
-        uses: dorny/test-reporter@c9b3d0e2bd2a4e96aaf424dbaa31c46b42318226  # v1.6.0
+        uses: dorny/test-reporter@afe6793191b75b608954023a46831a3fe10048d4 # v1.7.0
         with:
           name: Test Results
           path: "**/*-test-results.trx"
@@ -128,7 +134,7 @@ jobs:
           fail-on-error: true
 
       - name: Upload coverage
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # 3.1.4
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
 
   # Publish the apps
   pack:
@@ -147,10 +153,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install .NET
-        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # 3.2.0
+        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
 
       - name: Publish app
         run: >
@@ -219,7 +225,7 @@ jobs:
 
     steps:
       - name: Send Slack message
-        uses: tyrrrz/action-http-request@1a42bf56d02fa6428321c64f9488a3c4b5c8c745 # 1.1.2
+        uses: tyrrrz/action-http-request@64c70c67f5ebc54d4c7ea09cbe3553322778afd5 # v1.1.2
         with:
           url: ${{ secrets.SLACK_WEBHOOK_URL }}
           method: POST

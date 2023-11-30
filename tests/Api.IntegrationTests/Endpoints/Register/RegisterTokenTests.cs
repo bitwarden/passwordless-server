@@ -1,11 +1,17 @@
 using System.Net;
+using System.Net.Http.Json;
+using Passwordless.Api.IntegrationTests.Helpers;
+using Xunit;
 
-namespace Passwordless.Api.IntegrationTests;
+namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
-public class RegisterTokenTests : BackendTests
+public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
-    public RegisterTokenTests(TestWebApplicationFactory<Program> factory) : base(factory)
+    private readonly HttpClient _client;
+
+    public RegisterTokenTests(PasswordlessApiFactory factory)
     {
+        _client = factory.CreateClient().AddSecretKey();
     }
 
     [Fact]
@@ -13,7 +19,7 @@ public class RegisterTokenTests : BackendTests
     {
         var payload = new { UserId = "1", Username = "test" };
 
-        var httpResponse = await PostAsync("/register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
     }
@@ -34,20 +40,22 @@ public class RegisterTokenTests : BackendTests
             payload = new { UserId = userid };
         }
 
-        var httpResponse = await PostAsync("/register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
 
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        AssertHelper.AssertEqualJson("""
-        {
-          "type": "https://docs.passwordless.dev/guide/errors.html#",
-          "title": "Invalid UserId: UserId cannot be null or empty",
-          "status": 400,
-          "errorCode": null
-        }
-        """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#",
+               "title": "Invalid UserId: UserId cannot be null or empty",
+               "status": 400,
+               "errorCode": null
+             }
+             """, body);
     }
 
     [Theory]
@@ -66,20 +74,22 @@ public class RegisterTokenTests : BackendTests
             payload = new { UserId = "1", Username = input };
         }
 
-        var httpResponse = await PostAsync("/register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
 
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        AssertHelper.AssertEqualJson("""
-        {
-          "type": "https://docs.passwordless.dev/guide/errors.html#",
-          "title": "Invalid Username: Username cannot be null or empty",
-          "status": 400,
-          "errorCode": null
-        }
-        """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#",
+               "title": "Invalid Username: Username cannot be null or empty",
+               "status": 400,
+               "errorCode": null
+             }
+             """, body);
     }
 
     [Theory]
@@ -90,19 +100,21 @@ public class RegisterTokenTests : BackendTests
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        var httpResponse = await PostAsync("/register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        AssertHelper.AssertEqualJson("""
-        {
-          "type": "https://docs.passwordless.dev/guide/errors.html#invalid_attestation",
-          "title": "Attestation type not supported",
-          "status": 400,
-          "errorCode": "invalid_attestation"
-        }
-        """, body);
+        AssertHelper.AssertEqualJson(
+            // lang=json
+            """
+             {
+               "type": "https://docs.passwordless.dev/guide/errors.html#invalid_attestation",
+               "title": "Attestation type not supported",
+               "status": 400,
+               "errorCode": "invalid_attestation"
+             }
+             """, body);
     }
 
     [Theory]
@@ -113,8 +125,13 @@ public class RegisterTokenTests : BackendTests
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        var httpResponse = await PostAsync("/register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+    }
+
+    public void Dispose()
+    {
+        _client.Dispose();
     }
 }
