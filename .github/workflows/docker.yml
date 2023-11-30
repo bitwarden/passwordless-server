@@ -113,7 +113,7 @@ jobs:
       packages: write
 
     env:
-      CONTAINER_REGISTRY: ghcr.io
+      CONTAINER_REGISTRY: ghcr.io/passwordless
 
     steps:
       - name: Checkout
