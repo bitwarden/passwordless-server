@@ -74,6 +74,56 @@ public sealed class CredentialsModel
             return CreatedAt > DateTime.UtcNow.AddMinutes(-1);
         }
 
+        /// <summary>
+        /// The title of the credential card.
+        /// </summary>
+        public string Title
+        {
+            get
+            {
+                if (IsAuthenticatorKnown)
+                {
+                    return AuthenticatorName;
+                }
+                return string.IsNullOrEmpty(Device) ? "Passkey" : Device;
+            }
+        }
+
+        private string? _subtitle;
+
+        /// <summary>
+        /// The sub title of the credential card.
+        /// </summary>
+        public string? SubTitle
+        {
+            get
+            {
+                if (_subtitle != null)
+                {
+                    return _subtitle;
+                }
+
+                if (IsAuthenticatorKnown)
+                {
+                    if (string.IsNullOrEmpty(Nickname))
+                    {
+                        _subtitle = Device;
+                    }
+                    else
+                    {
+                        var nickname = string.IsNullOrEmpty(Nickname) ? "No nickname" : Nickname;
+                        _subtitle = $"{nickname} on {Device}";
+                    }
+                }
+                else
+                {
+                    _subtitle = Nickname;
+                }
+
+                return _subtitle;
+            }
+        }
+
         public bool IsAuthenticatorKnown => AaGuid != Guid.Empty;
 
         public CredentialModel(byte[] descriptorId, byte[] publicKey, uint signatureCounter, string attestationFmt, DateTime createdAt, Guid aaGuid, DateTime lastUsedAt, string rpid, string origin, string device, string nickname)
