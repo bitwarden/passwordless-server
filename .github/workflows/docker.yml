@@ -126,7 +126,7 @@ jobs:
         run: >
           echo ${{ secrets.GHCR_TOKEN }} |
           docker login ${{ env.CONTAINER_REGISTRY }}
-          --username ${{ github.actor }}
+          --username abergs
           --password-stdin
 
       - name: Build & push image
