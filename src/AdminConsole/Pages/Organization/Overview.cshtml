@@ -1,12 +1,9 @@
 @page
-@using Passwordless.AdminConsole.Components
 @model OverviewModel
 
 @{
     ViewData["Title"] = Model.Org.Name + " Applications";
 }
-
-<component type="typeof(ReleaseNotes)" render-mode="ServerPrerendered" />
 
 <div class="overflow-hidden bg-white shadow sm:rounded-md">
   <ul role="list" class="divide-y divide-gray-200">

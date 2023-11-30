@@ -106,6 +106,7 @@ void RunTheApp()
     builder.AddManagementApi();
 
     builder.Services.AddSingleton<IAuthenticatorDataProvider, AuthenticatorDataProvider>();
+
     builder.AddDatabase();
 
     services.ConfigureApplicationCookie(o =>
@@ -198,9 +199,14 @@ void RunTheApp()
     app.UseAuthorization();
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
-    app.MapAccountEndpoints();
     app.MapRazorPages();
-    app.MapRazorComponents<App>();
+
+    if (app.Environment.IsDevelopment())
+    {
+        // Scan the App component for Blazor page components and map the routes.
+        app.MapRazorComponents<App>();
+        app.MapAccountEndpoints();
+    }
 
     app.Run();
 }
