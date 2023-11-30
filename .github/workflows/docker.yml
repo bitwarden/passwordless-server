@@ -88,6 +88,7 @@ jobs:
 
   # Build and deploy the image
   deploy:
+    if: ${{ github.event_name != 'pull_request' }}
     needs: version
 
     strategy:
@@ -113,7 +114,7 @@ jobs:
       packages: write
 
     env:
-      CONTAINER_REGISTRY: ghcr.io/passwordless
+      CONTAINER_NAMESPACE: ghcr.io/passwordless
 
     steps:
       - name: Checkout
@@ -125,7 +126,7 @@ jobs:
       - name: Login to the registry
         run: >
           echo ${{ secrets.GHCR_TOKEN }} |
-          docker login ${{ env.CONTAINER_REGISTRY }}
+          docker login ${{ env.CONTAINER_NAMESPACE }}
           --username abergs
           --password-stdin
 
@@ -136,7 +137,7 @@ jobs:
           --platform linux/amd64,linux/arm64
           --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
-          ${{ format('--tag {0}/{1}:latest', env.CONTAINER_REGISTRY, matrix.name) }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', env.CONTAINER_REGISTRY, matrix.name) || '' }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.CONTAINER_REGISTRY, matrix.name, github.ref_name) || '' }}
-          ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', env.CONTAINER_REGISTRY, matrix.name, inputs.image-tag) || '' }}
+          ${{ format('--tag {0}/{1}:latest', env.CONTAINER_NAMESPACE, matrix.name) }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', env.CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.CONTAINER_NAMESPACE, matrix.name, github.ref_name) || '' }}
+          ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', env.CONTAINER_NAMESPACE, matrix.name, inputs.image-tag) || '' }}
