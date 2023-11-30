@@ -38,16 +38,15 @@ public class Fido2ServiceEndpoints : IFido2Service
         _eventLogger = eventLogger;
     }
 
-    private async Task Init()
+    private async Task Init(CancellationToken cancellationToken)
     {
-        await _tokenService.InitAsync();
+        await _tokenService.InitAsync(cancellationToken);
     }
 
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage,
-        ITokenService tokenService, IEventLogger eventLogger)
+    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger, CancellationToken cancellationToken)
     {
         var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, eventLogger);
-        await instance.Init();
+        await instance.Init(cancellationToken);
         return instance;
     }
 

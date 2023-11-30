@@ -1,10 +1,10 @@
+#nullable enable
+
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Storage.Ef;
-
-#nullable enable
 
 namespace Passwordless.Api.Helpers;
 
