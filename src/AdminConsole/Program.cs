@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.Components;
+using Passwordless.AdminConsole.Components.Account;
+using Passwordless.AdminConsole.Controller;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -102,6 +106,7 @@ void RunTheApp()
     builder.AddManagementApi();
 
     builder.Services.AddSingleton<IAuthenticatorDataProvider, AuthenticatorDataProvider>();
+
     builder.AddDatabase();
 
     services.ConfigureApplicationCookie(o =>
@@ -144,6 +149,12 @@ void RunTheApp()
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
 
+// Used for Razor/Blazor experiment
+    builder.Services.AddRazorComponents();
+    builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+    builder.Services.AddAntiforgery();
+
     WebApplication app;
     try
     {
@@ -181,6 +192,7 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
+    app.UseAntiforgery();
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
@@ -189,6 +201,13 @@ void RunTheApp()
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
+
+    if (app.Environment.IsDevelopment())
+    {
+        // Scan the App component for Blazor page components and map the routes.
+        app.MapRazorComponents<App>();
+        app.MapAccountEndpoints();
+    }
 
     app.Run();
 }
