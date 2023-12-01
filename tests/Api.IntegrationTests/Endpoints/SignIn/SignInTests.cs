@@ -158,17 +158,16 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task UnknownCredentialThrows()
+    public async Task I_receive_an_error_message_when_sending_an_unrecognized_passkey()
     {
-        var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = "https://localhost", RPID = "localhost" });
-
+        // Arrange
+        using var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = "https://localhost", RPID = "localhost" });
         var response = await options.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
-
-        var payload = new
+        var payloadWithUnrecognizedPasskey = new
         {
             Origin = "https://localhost",
             RPID = "localhost",
-            Session = response.Session,
+            Session = response!.Session,
             Response = new
             {
                 Id = "LcVLKA2QkfwzvuSTxIIyFVTJ9IopE57xTYvJ_0Nx9nk",
@@ -185,10 +184,12 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
             }
         };
 
-        var result = await _httpClient.PostAsJsonAsync("/signin/complete", payload);
+        // Act
+        using var result = await _httpClient.PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
+        
+        // Assert
+        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var body = await result.Content.ReadAsStringAsync();
-
-        Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         AssertHelper.AssertEqualJson(
             // lang=json
             """
