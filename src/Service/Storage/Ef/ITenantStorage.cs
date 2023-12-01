@@ -22,6 +22,7 @@ public interface ITenantStorage
     Task<List<TokenKey>> GetTokenKeys();
     Task LockAllApiKeys(bool isLocked);
     Task RemoveTokenKey(int keyId);
+    Task RemoveExpiredTokenKeys(CancellationToken cancellationToken);
     Task SaveAccountInformation(AccountMetaInformation info);
     Task StoreApiKey(string pkpart, string apikey, string[] scopes);
     Task<bool> TenantExists();
