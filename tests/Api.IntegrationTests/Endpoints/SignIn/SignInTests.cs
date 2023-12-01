@@ -72,7 +72,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         };
         var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
-        var driver = WebDriverFactory.GetWebDriver(OriginUrl);
+        using var driver = WebDriverFactory.GetWebDriver(OriginUrl);
         var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
         var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
@@ -119,7 +119,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
-        var driver = WebDriverFactory.GetWebDriver(OriginUrl);
+        using var driver = WebDriverFactory.GetWebDriver(OriginUrl);
 
         var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
 
