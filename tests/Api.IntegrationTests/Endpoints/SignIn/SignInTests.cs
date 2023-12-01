@@ -186,7 +186,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
 
         // Act
         using var result = await _httpClient.PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
-        
+
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var body = await result.Content.ReadAsStringAsync();
