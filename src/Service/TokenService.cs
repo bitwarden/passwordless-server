@@ -17,47 +17,46 @@ public class TokenService : ITokenService
     private readonly string _tenant;
     private readonly ILogger _log;
     private readonly IConfiguration _config;
-    private readonly ITenantStorage _storage;
-    private Dictionary<int, string> alternatives;
+
+    private readonly Lazy<Task<Dictionary<int, string>>> _alternatives;
 
     public TokenService(ILogger log, IConfiguration config, ITenantStorage storage)
     {
         _tenant = storage.Tenant;
         _log = log;
         _config = config;
-        _storage = storage;
-    }
-
-    public async Task InitAsync(CancellationToken cancellationToken)
-    {
-        var keys = await _storage.GetTokenKeys();
-
-        // transform our list to a dictionary
-        alternatives = keys.OrderByDescending(x => x.CreatedAt).ToDictionary(k => k.KeyId, k => k.KeyMaterial);
-
-        // Rotate keys every 7 day
-        // Remove old keys after 30 days (side effect: Tokens maximum life length is 30 days).
-        if (alternatives.Count == 0 || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
+        _alternatives = new Lazy<Task<Dictionary<int, string>>>(async () =>
         {
-            var random32Bytes = RandomNumberGenerator.GetBytes(32);
-            var keyInputMaterial = Convert.ToBase64String(random32Bytes);
+            var keys = await storage.GetTokenKeys();
 
-            // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
-            var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
-            await _storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
-            alternatives.Add(keyId, keyInputMaterial);
+            // transform our list to a dictionary
+            var alternatives = keys.OrderByDescending(x => x.CreatedAt).ToDictionary(k => k.KeyId, k => k.KeyMaterial);
 
-            try
+            // Rotate keys every 7 day
+            // Remove old keys after 30 days (side effect: Tokens maximum life length is 30 days).
+            if (alternatives.Count == 0 || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
             {
-                await _storage.RemoveExpiredTokenKeys(cancellationToken);
+                var random32Bytes = RandomNumberGenerator.GetBytes(32);
+                var keyInputMaterial = Convert.ToBase64String(random32Bytes);
+
+                // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
+                var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
+                await storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
+                alternatives.Add(keyId, keyInputMaterial);
+
+                try
+                {
+                    await storage.RemoveExpiredTokenKeys(CancellationToken.None);
+                }
+                catch (Exception)
+                {
+                    _log.LogError("Failed to remove old key, account={accountName}", _tenant);
+                }
             }
-            catch (Exception)
-            {
-                _log.LogError("Failed to remove old key, account={accountName}", _tenant);
-            }
-        }
+
+            return alternatives;
+        });
     }
-
 
     private Key DeriveKey(string tenant, IConfiguration config, byte[] keyBytes)
     {
@@ -79,7 +78,7 @@ public class TokenService : ITokenService
         return KeyDerivationAlgorithm.HkdfSha256.DeriveKey(keyBytes, salt, info, MacAlgorithm.HmacSha256);
     }
 
-    public T DecodeToken<T>(string token, string prefix, bool contractless = false)
+    public async Task<T> DecodeTokenAsync<T>(string token, string prefix, bool contractless = false)
     {
         if (token == null)
         {
@@ -129,7 +128,7 @@ public class TokenService : ITokenService
         Key key;
         try
         {
-            key = GetKeyByKeyId(envelope.KeyId);
+            key = await GetKeyByKeyIdAsync(envelope.KeyId);
         }
         // Can happen if the key is syntactically correct, but not issued by us
         catch
@@ -154,9 +153,9 @@ public class TokenService : ITokenService
             : MessagePackSerializer.Deserialize<T>(envelope.Token);
     }
 
-    private Key GetKeyByKeyId(int keyId)
+    private async Task<Key> GetKeyByKeyIdAsync(int keyId)
     {
-        var keyinput = alternatives[keyId];
+        var keyinput = (await _alternatives.Value)[keyId];
 
         var keybytes = Convert.FromBase64String(keyinput);
         var key = DeriveKey(_tenant, _config, keybytes);
@@ -164,12 +163,12 @@ public class TokenService : ITokenService
         return key;
     }
 
-    private Tuple<Key, int> GetRandomKey()
+    private async Task<Tuple<Key, int>> GetRandomKeyAsync()
     {
         // Key used to sign tokens
         // get newest key from alternatives (it's sorted desc)
-        var kvp = alternatives.First();
-        var keyinput = alternatives[kvp.Key];
+        var kvp = (await GetAlternativesAsync()).First();
+        var keyinput = (await GetAlternativesAsync())[kvp.Key];
 
         var keybytes = Convert.FromBase64String(keyinput);
 
@@ -177,7 +176,7 @@ public class TokenService : ITokenService
         return new Tuple<Key, int>(key, kvp.Key);
     }
 
-    public string EncodeToken<T>(T token, string prefix, bool contractless = false)
+    public async Task<string> EncodeTokenAsync<T>(T token, string prefix, bool contractless = false)
     {
         byte[] msgpack;
         if (contractless)
@@ -189,7 +188,7 @@ public class TokenService : ITokenService
             msgpack = MessagePackSerializer.Serialize<T>(token);
         }
 
-        (Key key, int keyId) = GetRandomKey();
+        (Key key, int keyId) = await GetRandomKeyAsync();
 
         _log.LogInformation("Encoding using keyId={keyId}", keyId);
         var mac = CreateMac(key, msgpack);
@@ -205,7 +204,6 @@ public class TokenService : ITokenService
 
         return envelop_binary_b64;
     }
-
 
     /// <summary>
     /// MacEnvelope - must be public to allow serialization
@@ -226,6 +224,7 @@ public class TokenService : ITokenService
         var mac = MacAlgorithm.HmacSha256.Mac(key, data);
         return mac;
     }
+
     private bool VerifyMac(Key key, byte[] data, byte[] mac)
     {
         var result = MacAlgorithm.HmacSha256.Verify(key, data, mac);
@@ -236,5 +235,10 @@ public class TokenService : ITokenService
         }
 
         return result;
+    }
+
+    private Task<Dictionary<int, string>> GetAlternativesAsync()
+    {
+        return _alternatives.Value;
     }
 }
