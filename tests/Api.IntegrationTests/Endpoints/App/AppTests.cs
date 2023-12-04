@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Bogus;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +7,7 @@ using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
+using static Passwordless.Api.IntegrationTests.Helpers.App.CreateAppFunctions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
@@ -16,8 +16,6 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     private readonly HttpClient _client;
     private readonly PasswordlessApiFactory _factory;
 
-    private static readonly Faker<AppCreateDTO> AppCreateGenerator = new Faker<AppCreateDTO>()
-        .RuleFor(x => x.AdminEmail, x => x.Person.Email);
 
     public AppTests(PasswordlessApiFactory apiFactory)
     {
@@ -31,11 +29,8 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     [InlineData("1")]
     public async Task I_cannot_create_an_account_with_an_invalid_name(string name)
     {
-        // Arrange
-        var request = AppCreateGenerator.Generate();
-
         // Act
-        var response = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", request);
+        using var response = await CreateApplication(_client, name);
 
         // Assert
         response.Should().NotBeNull();
@@ -46,15 +41,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         content!.Title.Should().Be("accountName needs to be alphanumeric and start with a letter");
     }
 
-    [Fact]
+    [Fact]new 
     public async Task I_can_create_an_account_with_a_valid_name()
     {
         // Arrange
         const string accountName = "anders";
-        var request = AppCreateGenerator.Generate();
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/admin/apps/{accountName}/create", request);
+        using var response = await CreateApplication(_client, accountName);
 
         // Assert
         response.Should().NotBeNull();
@@ -73,10 +67,9 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var name = $"app{Guid.NewGuid():N}";
-        var request = AppCreateGenerator.Generate();
 
         // Act
-        var res = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", request);
+        using var res = await CreateApplication(_client, name);
 
         // Assert
         res.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -99,16 +92,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         const int expectedEventLoggingRetentionPeriod = 30;
-
         var name = $"app{Guid.NewGuid():N}";
-        var appCreateRequest = AppCreateGenerator.Generate();
-        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
+        using var appCreateResponse = await CreateApplication(_client, name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
-        var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
+        using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
 
         // Assert
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -126,14 +117,13 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var name = $"app{Guid.NewGuid():N}";
-        var appCreateRequest = AppCreateGenerator.Generate();
-        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
+        using var appCreateResponse = await CreateApplication(_client, name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
-        var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
+        using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
 
         // Assert
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -149,9 +139,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = $"app{Guid.NewGuid():N}";
-        var appCreateRequest = AppCreateGenerator.Generate();
-        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
-        _ = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        _ = await CreateApplication(_client, name);
         var manageFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
 
         // Act
@@ -175,9 +163,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = $"app{Guid.NewGuid():N}";
-        var appCreateRequest = AppCreateGenerator.Generate();
-        var appCreateResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/create", appCreateRequest);
-        _ = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        _ = await CreateApplication(_client, name);
         var manageAppFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
         _ = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
 
