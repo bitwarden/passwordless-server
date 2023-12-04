@@ -5,6 +5,11 @@ public class AppFeatureDto
     public bool EventLoggingIsEnabled { get; set; }
     public int EventLoggingRetentionPeriod { get; set; }
     public DateTime? DeveloperLoggingEndsAt { get; set; }
+    
+    /// <summary>
+    /// Maximum number of individual users allowed to use the application
+    /// </summary>
+    public long? MaxUsers { get; set; }
 
     public static AppFeatureDto FromEntity(AppFeature entity)
     {

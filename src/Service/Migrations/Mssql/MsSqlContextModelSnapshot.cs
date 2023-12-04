@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -120,6 +120,9 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<int>("EventLoggingRetentionPeriod")
                         .HasColumnType("int");
+
+                    b.Property<long?>("MaxUsers")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Tenant");
 

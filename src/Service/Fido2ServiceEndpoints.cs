@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -23,19 +24,22 @@ public class Fido2ServiceEndpoints : IFido2Service
     private readonly ILogger _log;
     private readonly ITokenService _tokenService;
     private readonly IEventLogger _eventLogger;
+    private readonly IFeatureContextProvider _featureContextProvider;
 
     // Internal for testing
     internal Fido2ServiceEndpoints(string tenant,
         ILogger log,
         ITenantStorage storage,
         ITokenService tokenService,
-        IEventLogger eventLogger)
+        IEventLogger eventLogger,
+        IFeatureContextProvider featureContextProvider)
     {
         _storage = storage;
         _tenant = tenant;
         _log = log;
         _tokenService = tokenService;
         _eventLogger = eventLogger;
+        _featureContextProvider = featureContextProvider;
     }
 
     private async Task Init(CancellationToken cancellationToken)
@@ -60,6 +64,20 @@ public class Fido2ServiceEndpoints : IFido2Service
         ValidateAliases(tokenProps.Aliases);
         ValidateUserId(tokenProps.UserId);
         ValidateUsername(tokenProps.Username);
+
+        var features = await _featureContextProvider.UseContext();
+        if (features.MaxUsers.HasValue)
+        {
+            var credentials = await _storage.GetCredentialsByUserIdAsync(tokenProps.UserId);
+            if (!credentials.Any())
+            {
+                var users = await _storage.GetUsersCount();
+                if (users >= features.MaxUsers)
+                {
+                    throw new ApiException("max_users_reached", "Maximum number of users reached", 400);
+                }
+            }
+        }
 
         // Attestation
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";

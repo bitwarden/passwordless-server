@@ -53,7 +53,8 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         var updateFeaturesRequest = new SetApplicationFeaturesRequest
         {
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod
+            EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod,
+            MaxUsers = plan.Features.MaxUsers
         };
         await _passwordlessClient.SetFeaturesAsync(app, updateFeaturesRequest);
     }
@@ -100,7 +101,8 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         var setFeaturesRequest = new SetApplicationFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MaxUsers = features.MaxUsers
         };
 
         // set the plans on each app
@@ -181,7 +183,8 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         var setFeaturesRequest = new SetApplicationFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MaxUsers = features.MaxUsers
         };
         foreach (var application in organization.Applications)
         {
