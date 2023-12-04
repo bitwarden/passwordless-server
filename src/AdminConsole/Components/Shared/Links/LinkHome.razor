@@ -1,9 +1,10 @@
+@inherits BaseRazorComponent 
+
 <a class="@Class" href="">
     @ChildContent
 </a>
 
 @code
 {
-    [Parameter] public string Class { get; set; }
     [Parameter] public RenderFragment ChildContent { get; set; }
 }
