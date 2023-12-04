@@ -17,45 +17,16 @@ public class TokenService : ITokenService
     private readonly string _tenant;
     private readonly ILogger _log;
     private readonly IConfiguration _config;
+    private readonly ITenantStorage _storage;
 
-    private readonly Lazy<Task<Dictionary<int, string>>> _alternatives;
+    private Dictionary<int, string>? _alternatives;
 
     public TokenService(ILogger log, IConfiguration config, ITenantStorage storage)
     {
         _tenant = storage.Tenant;
         _log = log;
         _config = config;
-        _alternatives = new Lazy<Task<Dictionary<int, string>>>(async () =>
-        {
-            var keys = await storage.GetTokenKeys();
-
-            // transform our list to a dictionary
-            var alternatives = keys.OrderByDescending(x => x.CreatedAt).ToDictionary(k => k.KeyId, k => k.KeyMaterial);
-
-            // Rotate keys every 7 day
-            // Remove old keys after 30 days (side effect: Tokens maximum life length is 30 days).
-            if (alternatives.Count == 0 || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
-            {
-                var random32Bytes = RandomNumberGenerator.GetBytes(32);
-                var keyInputMaterial = Convert.ToBase64String(random32Bytes);
-
-                // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
-                var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
-                await storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
-                alternatives.Add(keyId, keyInputMaterial);
-
-                try
-                {
-                    await storage.RemoveExpiredTokenKeys(CancellationToken.None);
-                }
-                catch (Exception)
-                {
-                    _log.LogError("Failed to remove old key, account={accountName}", _tenant);
-                }
-            }
-
-            return alternatives;
-        });
+        _storage = storage;
     }
 
     private Key DeriveKey(string tenant, IConfiguration config, byte[] keyBytes)
@@ -155,7 +126,7 @@ public class TokenService : ITokenService
 
     private async Task<Key> GetKeyByKeyIdAsync(int keyId)
     {
-        var keyinput = (await _alternatives.Value)[keyId];
+        var keyinput = (await GetAlternativesAsync())[keyId];
 
         var keybytes = Convert.FromBase64String(keyinput);
         var key = DeriveKey(_tenant, _config, keybytes);
@@ -237,8 +208,38 @@ public class TokenService : ITokenService
         return result;
     }
 
-    private Task<Dictionary<int, string>> GetAlternativesAsync()
+    private async Task<Dictionary<int, string>> GetAlternativesAsync()
     {
-        return _alternatives.Value;
+        if (_alternatives == null)
+        {
+            var keys = await _storage.GetTokenKeys();
+
+            // transform our list to a dictionary
+            _alternatives = keys.OrderByDescending(x => x.CreatedAt).ToDictionary(k => k.KeyId, k => k.KeyMaterial);
+
+            // Rotate keys every 7 day
+            // Remove old keys after 30 days (side effect: Tokens maximum life length is 30 days).
+            if (!_alternatives.Any() || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
+            {
+                var random32Bytes = RandomNumberGenerator.GetBytes(32);
+                var keyInputMaterial = Convert.ToBase64String(random32Bytes);
+
+                // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
+                var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
+                await _storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
+                _alternatives.Add(keyId, keyInputMaterial);
+
+                try
+                {
+                    await _storage.RemoveExpiredTokenKeys(CancellationToken.None);
+                }
+                catch (Exception)
+                {
+                    _log.LogError("Failed to remove old key, account={accountName}", _tenant);
+                }
+            }
+        }
+
+        return _alternatives;
     }
 }
