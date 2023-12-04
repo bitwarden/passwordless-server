@@ -13,6 +13,9 @@ namespace Passwordless.Api.IntegrationTests;
 
 public class PasswordlessApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    public const string OriginUrl = "https://bitwarden.com/products/passwordless/";
+    public const string RpId = "bitwarden.com";
+
     private readonly MsSqlContainer _dbContainer = new MsSqlBuilder().Build();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

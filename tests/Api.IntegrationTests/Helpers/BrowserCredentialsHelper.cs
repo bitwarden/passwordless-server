@@ -26,7 +26,7 @@ public static class BrowserCredentialsHelper
     public async static Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl)
     {
         using var driver = WebDriverFactory.GetWebDriver(originUrl);
-            
+
         return await driver.CreateCredentialsAsync(options);
     }
 

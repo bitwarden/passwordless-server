@@ -41,7 +41,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         content!.Title.Should().Be("accountName needs to be alphanumeric and start with a letter");
     }
 
-    [Fact]new 
+    [Fact]
     public async Task I_can_create_an_account_with_a_valid_name()
     {
         // Arrange

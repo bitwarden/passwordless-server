@@ -15,7 +15,7 @@ public static class CreateAppFunctions
         {
             client.AddManagementKey();
         }
-        
+
         return await client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", AppCreateGenerator.Generate());
     }
 }

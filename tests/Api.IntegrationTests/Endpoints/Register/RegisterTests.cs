@@ -63,7 +63,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         {
             Token = registerTokenResponse!.Token,
             Origin = "https://integration-tests.passwordless.dev",
-            RPID = Environment.MachineName
+            RPID = PasswordlessApiFactory.RpId
         };
 
         // Act
@@ -81,9 +81,10 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
 
         // Act
-        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client);
+        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);
 
         // Assert
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
