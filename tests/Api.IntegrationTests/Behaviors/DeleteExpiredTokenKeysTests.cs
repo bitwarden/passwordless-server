@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -24,6 +25,9 @@ public class DeleteExpiredTokenKeysTests : IClassFixture<PasswordlessApiFactory>
     public async Task An_expired_apps_token_keys_should_be_removed_when_a_request_is_made()
     {
         // Arrange
+        var timeProvider = _factory.Services.GetRequiredService<FakeTimeProvider>();
+        timeProvider.SetUtcNow(new DateTimeOffset(new DateTime(2023, 1, 1)));
+        
         var tokenGenerator = new Faker<RegisterToken>()
             .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
             .RuleFor(x => x.DisplayName, x => x.Person.FullName)

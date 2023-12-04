@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using Testcontainers.MsSql;
 using Xunit;
 
@@ -20,7 +22,14 @@ public class PasswordlessApiFactory : WebApplicationFactory<Program>, IAsyncLife
             .UseSetting("ConnectionStrings:mssql:api", _dbContainer.GetConnectionString())
             .ConfigureLogging(loggingBuilder => loggingBuilder.ClearProviders())
             .ConfigureTestServices(services =>
-                services.RemoveAll(typeof(IHostedService)));
+            {
+                services.RemoveAll(typeof(IHostedService));
+                services.RemoveAll(typeof(TimeProvider));
+
+                var fakeTimeProvider = new FakeTimeProvider();
+                fakeTimeProvider.SetUtcNow(DateTimeOffset.UtcNow);
+                services.AddSingleton<TimeProvider>(new FakeTimeProvider());
+            });
     }
 
     public async Task InitializeAsync()
