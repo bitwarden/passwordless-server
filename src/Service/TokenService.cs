@@ -215,11 +215,11 @@ public class TokenService : ITokenService
             var keys = await _storage.GetTokenKeys();
 
             // transform our list to a dictionary
-            _alternatives = keys.OrderByDescending(x => x.CreatedAt).ToDictionary(k => k.KeyId, k => k.KeyMaterial);
+            var alternatives = keys.OrderByDescending(x => x.CreatedAt).ToDictionary(k => k.KeyId, k => k.KeyMaterial);
 
             // Rotate keys every 7 day
             // Remove old keys after 30 days (side effect: Tokens maximum life length is 30 days).
-            if (!_alternatives.Any() || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
+            if (!alternatives.Any() || (DateTime.UtcNow - keys.First().CreatedAt).TotalDays > 7)
             {
                 var random32Bytes = RandomNumberGenerator.GetBytes(32);
                 var keyInputMaterial = Convert.ToBase64String(random32Bytes);
@@ -227,7 +227,7 @@ public class TokenService : ITokenService
                 // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
                 var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
                 await _storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
-                _alternatives.Add(keyId, keyInputMaterial);
+                alternatives.Add(keyId, keyInputMaterial);
 
                 try
                 {
@@ -238,6 +238,8 @@ public class TokenService : ITokenService
                     _log.LogError("Failed to remove old key, account={accountName}", _tenant);
                 }
             }
+
+            _alternatives = alternatives;
         }
 
         return _alternatives;
