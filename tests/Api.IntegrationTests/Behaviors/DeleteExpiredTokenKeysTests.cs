@@ -25,7 +25,7 @@ public class DeleteExpiredTokenKeysTests : IClassFixture<PasswordlessApiFactory>
     public async Task An_expired_apps_token_keys_should_be_removed_when_a_request_is_made()
     {
         // Arrange
-        var timeProvider = _factory.Services.GetRequiredService<FakeTimeProvider>();
+        var timeProvider = (FakeTimeProvider)_factory.Services.GetRequiredService<TimeProvider>();
         timeProvider.SetUtcNow(new DateTimeOffset(new DateTime(2023, 1, 1)));
         
         var tokenGenerator = new Faker<RegisterToken>()
