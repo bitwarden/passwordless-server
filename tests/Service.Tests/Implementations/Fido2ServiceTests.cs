@@ -6,21 +6,21 @@ using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Tests.Implementations;
 
-public class Fido2ServiceEndpointsTests
+public class Fido2ServiceTests
 {
     private readonly Mock<ITenantStorage> _mockTenantStorage;
     private readonly Mock<ITokenService> _mockTokenService;
     private readonly Mock<IEventLogger> _mockEventLogger;
 
-    private readonly Fido2ServiceEndpoints _sut;
+    private readonly Fido2Service _sut;
 
-    public Fido2ServiceEndpointsTests()
+    public Fido2ServiceTests()
     {
         _mockTenantStorage = new Mock<ITenantStorage>();
         _mockTokenService = new Mock<ITokenService>();
         _mockEventLogger = new Mock<IEventLogger>();
 
-        _sut = new Fido2ServiceEndpoints("test",
+        _sut = new Fido2Service(new ManualTenantProvider("test"),
             NullLogger.Instance,
             _mockTenantStorage.Object,
             _mockTokenService.Object,
@@ -32,8 +32,8 @@ public class Fido2ServiceEndpointsTests
     {
         _mockTokenService
             // TODO: Assert more details about the register token passed in
-            .Setup(t => t.EncodeToken(It.IsAny<RegisterToken>(), "register_", false))
-            .Returns("test_token");
+            .Setup(t => t.EncodeTokenAsync(It.IsAny<RegisterToken>(), "register_", false))
+            .ReturnsAsync("test_token");
 
         var token = await _sut.CreateRegisterToken(new RegisterToken
         {

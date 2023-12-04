@@ -17,17 +17,17 @@ namespace Passwordless.Service;
 
 using Aliases = HashSet<string>;
 
-public class Fido2ServiceEndpoints : IFido2Service
+public class Fido2Service : IFido2Service
 {
     private readonly ITenantStorage _storage;
-    private readonly string _tenant;
+    private readonly ITenantProvider _tenantProvider;
     private readonly ILogger _log;
     private readonly ITokenService _tokenService;
     private readonly IEventLogger _eventLogger;
     private readonly IFeatureContextProvider _featureContextProvider;
 
     // Internal for testing
-    internal Fido2ServiceEndpoints(string tenant,
+    public Fido2Service(ITenantProvider tenantProvider,
         ILogger log,
         ITenantStorage storage,
         ITokenService tokenService,
@@ -35,23 +35,11 @@ public class Fido2ServiceEndpoints : IFido2Service
         IFeatureContextProvider featureContextProvider)
     {
         _storage = storage;
-        _tenant = tenant;
+        _tenantProvider = tenantProvider;
         _log = log;
         _tokenService = tokenService;
         _eventLogger = eventLogger;
         _featureContextProvider = featureContextProvider;
-    }
-
-    private async Task Init(CancellationToken cancellationToken)
-    {
-        await _tokenService.InitAsync(cancellationToken);
-    }
-
-    public static async Task<Fido2ServiceEndpoints> Create(string tenant, ILogger log, ITenantStorage storage, ITokenService tokenService, IEventLogger eventLogger, CancellationToken cancellationToken)
-    {
-        var instance = new Fido2ServiceEndpoints(tenant, log, storage, tokenService, eventLogger);
-        await instance.Init(cancellationToken);
-        return instance;
     }
 
     public async Task<string> CreateRegisterToken(RegisterToken tokenProps)
@@ -91,7 +79,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         {
             ValidateAliases(tokenProps.Aliases);
 
-            var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenant));
+            var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenantProvider.Tenant));
 
             // todo: check if alias exists and belongs to different user.
             var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenProps.UserId);
@@ -101,7 +89,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             }
         }
 
-        var token = _tokenService.EncodeToken(tokenProps, "register_");
+        var token = await _tokenService.EncodeTokenAsync(tokenProps, "register_");
 
         _eventLogger.LogRegistrationTokenCreatedEvent(tokenProps.UserId);
 
@@ -110,7 +98,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
     public async Task<SessionResponse<CredentialCreateOptions>> RegisterBegin(FidoRegistrationBeginDTO request)
     {
-        var token = _tokenService.DecodeToken<RegisterToken>(request.Token, "register_");
+        var token = await _tokenService.DecodeTokenAsync<RegisterToken>(request.Token, "register_");
         token.Validate();
 
         var userId = token.UserId;
@@ -172,7 +160,7 @@ public class Fido2ServiceEndpoints : IFido2Service
                     CredProps = true
                 });
 
-            var session = _tokenService.EncodeToken(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
+            var session = await _tokenService.EncodeTokenAsync(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
 
             _eventLogger.LogRegistrationBeganEvent(userId);
 
@@ -187,7 +175,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
     public async Task<TokenResponse> RegisterComplete(RegistrationCompleteDTO request, string deviceInfo, string country)
     {
-        var session = _tokenService.DecodeToken<RegisterSession>(request.Session, "session_", true);
+        var session = await _tokenService.DecodeTokenAsync<RegisterSession>(request.Session, "session_", true);
 
         var fido2 = new Fido2(new Fido2Configuration
         {
@@ -264,7 +252,7 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         _eventLogger.LogRegistrationCompletedEvent(userId);
 
-        var token = _tokenService.EncodeToken(tokenData, "verify_");
+        var token = await _tokenService.EncodeTokenAsync(tokenData, "verify_");
 
         return new TokenResponse(token);
     }
@@ -285,9 +273,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             Type = "manual_signin"
         };
 
-        return Task.FromResult(
-            _tokenService.EncodeToken(tokenProps, "verify_")
-        );
+        return _tokenService.EncodeTokenAsync(tokenProps, "verify_");
     }
 
     public async Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request)
@@ -306,18 +292,18 @@ public class Fido2ServiceEndpoints : IFido2Service
         {
             // Get registered credentials from database
             existingCredentials = (await _storage.GetCredentialsByUserIdAsync(userId)).Select(c => c.Descriptor).ToList();
-            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "userid");
+            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenantProvider, "userid");
         }
         else if (!string.IsNullOrEmpty(request.Alias))
         {
-            var hashedAlias = HashAlias(request.Alias, _tenant);
+            var hashedAlias = HashAlias(request.Alias, _tenantProvider.Tenant);
 
             existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
-            _log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenant, "alias", existingCredentials.Count);
+            _log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenantProvider, "alias", existingCredentials.Count);
         }
         else
         {
-            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenant, "empty");
+            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenantProvider, "empty");
         }
 
         // Create options
@@ -327,7 +313,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             uv
         );
 
-        var session = _tokenService.EncodeToken(options, "session_", true);
+        var session = await _tokenService.EncodeTokenAsync(options, "session_", true);
 
         // Return options to client
         return new SessionResponse<AssertionOptions> { Data = options, Session = session };
@@ -343,7 +329,7 @@ public class Fido2ServiceEndpoints : IFido2Service
         });
 
         // Get the assertion options we sent the client
-        var options = _tokenService.DecodeToken<AssertionOptions>(request.Session, "session_", true);
+        var options = await _tokenService.DecodeTokenAsync<AssertionOptions>(request.Session, "session_", true);
 
         // Get registered credential from database
         var credential = await _storage.GetCredential(request.Response.Id);
@@ -385,19 +371,19 @@ public class Fido2ServiceEndpoints : IFido2Service
 
         _eventLogger.LogUserSignInCompletedEvent(userId);
 
-        var token = _tokenService.EncodeToken(tokenData, "verify_");
+        var token = await _tokenService.EncodeTokenAsync(tokenData, "verify_");
 
         // return OK to client
         return new TokenResponse(token);
     }
 
-    public Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
+    public async Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
     {
-        var token = _tokenService.DecodeToken<VerifySignInToken>(payload.Token, "verify_");
+        var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
 
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
-        return Task.FromResult(token);
+        return token;
     }
 
     private static void ValidateAliases(Aliases aliases, bool throwIfNull = false)
@@ -441,7 +427,7 @@ public class Fido2ServiceEndpoints : IFido2Service
             {
                 plaintext = alias;
             }
-            values.Add(HashAlias(alias, _tenant), plaintext);
+            values.Add(HashAlias(alias, _tenantProvider.Tenant), plaintext);
         }
 
         try
