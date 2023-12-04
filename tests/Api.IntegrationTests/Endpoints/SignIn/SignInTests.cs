@@ -82,6 +82,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
             Response = authenticatorAttestationRawResponse
         });
         await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
+
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
