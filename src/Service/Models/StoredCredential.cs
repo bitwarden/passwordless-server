@@ -5,7 +5,7 @@ namespace Passwordless.Service.Models;
 
 public class StoredCredential
 {
-    public required PublicKeyCredentialDescriptor Descriptor { get; set; }
+    public PublicKeyCredentialDescriptor? Descriptor { get; set; }
     public byte[]? PublicKey { get; set; }
     public required byte[] UserHandle { get; set; }
     public uint SignatureCounter { get; set; }
