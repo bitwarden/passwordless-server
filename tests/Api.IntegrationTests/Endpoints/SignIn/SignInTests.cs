@@ -63,7 +63,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserHelpers.RegisterNewUser(_httpClient, driver);
+        await UserFunctions.RegisterNewUser(_httpClient, driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -90,7 +90,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserHelpers.RegisterNewUser(_httpClient, driver);
+        await UserFunctions.RegisterNewUser(_httpClient, driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -175,11 +175,11 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserHelpers.RegisterNewUser(client, driver);
+        await UserFunctions.RegisterNewUser(client, driver);
         _factory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
 
         // Act
-        await UserHelpers.SignInUser(client, driver);
+        await UserFunctions.SignInUser(client, driver);
 
         // Assert
         using var scope = _factory.Services.CreateScope();

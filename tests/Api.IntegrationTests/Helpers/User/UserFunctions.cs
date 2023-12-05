@@ -7,7 +7,7 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.User;
 
-public static class UserHelpers
+public static class UserFunctions
 {
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
