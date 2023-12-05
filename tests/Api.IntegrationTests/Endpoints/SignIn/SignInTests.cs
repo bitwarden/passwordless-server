@@ -63,7 +63,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserFunctions.RegisterNewUser(_httpClient, driver);
+        await UserHelpers.RegisterNewUser(_httpClient, driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -90,7 +90,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserFunctions.RegisterNewUser(_httpClient, driver);
+        await UserHelpers.RegisterNewUser(_httpClient, driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -170,16 +170,16 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
         _factory.TimeProvider.SetUtcNow(serverTime);
         using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await CreateAppFunctions.CreateApplication(client, applicationName);
+        using var createApplicationMessage = await client.CreateApplication(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserFunctions.RegisterNewUser(client, driver);
+        await client.RegisterNewUser(driver);
         _factory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
 
         // Act
-        await UserFunctions.SignInUser(client, driver);
+        await client.SignInUser(driver);
 
         // Assert
         using var scope = _factory.Services.CreateScope();

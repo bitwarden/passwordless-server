@@ -7,7 +7,7 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.User;
 
-public static class UserFunctions
+public static class UserHelpers
 {
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
@@ -21,7 +21,7 @@ public static class UserFunctions
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-    public static async Task<HttpResponseMessage> RegisterNewUser(HttpClient httpClient, WebDriver driver)
+    public static async Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver)
     {
         if (!httpClient.HasPublicKey()) throw new Exception("ApiKey was not provided. Please add ApiKey to headers.");
         if (!httpClient.HasSecretKey()) throw new Exception("ApiSecret was not provided. Please add ApiSecret to headers.");
@@ -49,7 +49,7 @@ public static class UserFunctions
         });
     }
 
-    public static async Task<HttpResponseMessage> SignInUser(HttpClient httpClient, WebDriver driver)
+    public static async Task<HttpResponseMessage> SignInUser(this HttpClient httpClient, WebDriver driver)
     {
         if (!httpClient.HasPublicKey()) throw new Exception("ApiKey was not provided. Please add ApiKey to headers.");
         if (!httpClient.HasSecretKey()) throw new Exception("ApiSecret was not provided. Please add ApiSecret to headers.");

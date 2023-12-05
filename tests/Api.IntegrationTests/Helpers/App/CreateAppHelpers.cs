@@ -4,12 +4,12 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.App;
 
-public static class CreateAppFunctions
+public static class CreateAppHelpers
 {
     public static readonly Faker<AppCreateDTO> AppCreateGenerator = new Faker<AppCreateDTO>()
         .RuleFor(x => x.AdminEmail, x => x.Person.Email);
 
-    public static async Task<HttpResponseMessage> CreateApplication(HttpClient client, string applicationName)
+    public static async Task<HttpResponseMessage> CreateApplication(this HttpClient client, string applicationName)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
         {

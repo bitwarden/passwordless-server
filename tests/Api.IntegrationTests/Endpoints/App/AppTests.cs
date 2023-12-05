@@ -7,7 +7,7 @@ using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
-using static Passwordless.Api.IntegrationTests.Helpers.App.CreateAppFunctions;
+using static Passwordless.Api.IntegrationTests.Helpers.App.CreateAppHelpers;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
@@ -30,7 +30,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_cannot_create_an_account_with_an_invalid_name(string name)
     {
         // Act
-        using var response = await CreateApplication(_client, name);
+        using var response = await _client.CreateApplication(name);
 
         // Assert
         response.Should().NotBeNull();
@@ -48,7 +48,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const string accountName = "anders";
 
         // Act
-        using var response = await CreateApplication(_client, accountName);
+        using var response = await _client.CreateApplication(accountName);
 
         // Assert
         response.Should().NotBeNull();
@@ -69,7 +69,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var name = $"app{Guid.NewGuid():N}";
 
         // Act
-        using var res = await CreateApplication(_client, name);
+        using var res = await _client.CreateApplication(name);
 
         // Assert
         res.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -93,7 +93,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         const int expectedEventLoggingRetentionPeriod = 30;
         var name = $"app{Guid.NewGuid():N}";
-        using var appCreateResponse = await CreateApplication(_client, name);
+        using var appCreateResponse = await _client.CreateApplication(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
@@ -117,7 +117,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var name = $"app{Guid.NewGuid():N}";
-        using var appCreateResponse = await CreateApplication(_client, name);
+        using var appCreateResponse = await _client.CreateApplication(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
@@ -139,7 +139,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = $"app{Guid.NewGuid():N}";
-        _ = await CreateApplication(_client, name);
+        _ = await _client.CreateApplication(name);
         var manageFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
 
         // Act
@@ -163,7 +163,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = $"app{Guid.NewGuid():N}";
-        _ = await CreateApplication(_client, name);
+        _ = await _client.CreateApplication(name);
         var manageAppFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
         _ = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
 
