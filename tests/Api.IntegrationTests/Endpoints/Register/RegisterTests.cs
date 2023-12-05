@@ -62,7 +62,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = "https://integration-tests.passwordless.dev",
+            Origin = PasswordlessApiFactory.OriginUrl,
             RPID = PasswordlessApiFactory.RpId
         };
 
