@@ -1,0 +1,18 @@
+@using Microsoft.AspNetCore.Authorization
+
+@page "/welcome"
+
+<PageTitle>Welcome friend!</PageTitle>
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+    <h1>Welcome @context.User.Identity!.Name</h1>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+
+<p>@message</p>
+
+<ReleaseNotes />
+
+@code {
+    private string message = 
+        "Hello from a Razor component and welcome to Blazor!";
+}

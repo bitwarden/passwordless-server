@@ -7,16 +7,16 @@ namespace Passwordless.Api.Endpoints;
 
 public static class RegisterEndpoints
 {
-    private record RegisterTokenResponse(string Token);
+    public record RegisterTokenResponse(string Token);
 
     public static void MapRegisterEndpoints(this WebApplication app)
     {
         app.MapPost("/register/token", async (
                 RegisterToken registerToken,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2Service fido2Service,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
                 var result = await fido2Service.CreateRegisterToken(registerToken);
 
                 return Ok(new RegisterTokenResponse(result));
@@ -26,10 +26,10 @@ public static class RegisterEndpoints
 
         app.MapPost("/register/begin", async (
                 FidoRegistrationBeginDTO payload,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2Service fido2Service,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
                 var result = await fido2Service.RegisterBegin(payload);
 
                 return Ok(result);
@@ -41,10 +41,10 @@ public static class RegisterEndpoints
         app.MapPost("/register/complete", async (
                 RegistrationCompleteDTO payload,
                 HttpRequest request,
-                IFido2ServiceFactory fido2ServiceFactory
+                IFido2Service fido2Service,
+                CancellationToken token
             ) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
                 var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
                 var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
 

@@ -11,15 +11,22 @@ public static class BillingBootstrap
     public static void AddBilling<TDbContext>(this WebApplicationBuilder builder)
         where TDbContext : ConsoleDbContext
     {
-        builder.Services.AddOptions<StripeOptions>()
+        // TODO: Change name of this configuration path away from Stripe at some point
+        builder.Services.AddOptions<BillingOptions>()
             .BindConfiguration("Stripe");
 
-        StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
-
-        builder.Services.AddScoped<ISharedBillingService, SharedBillingService<TDbContext>>();
-
         builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();
-        builder.Services.AddHostedService<MeteredBillingBackgroundService>();
 
+        // Todo: Improve this self-hosting story.
+        if (builder.Configuration.GetValue("SelfHosted", false))
+        {
+            builder.Services.AddScoped<ISharedBillingService, NoOpBillingService<TDbContext>>();
+        }
+        else
+        {
+            StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
+            builder.Services.AddScoped<ISharedBillingService, SharedStripeBillingService<TDbContext>>();
+            builder.Services.AddHostedService<MeteredBillingBackgroundService>();
+        }
     }
 }

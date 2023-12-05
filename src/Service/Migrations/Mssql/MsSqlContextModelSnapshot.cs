@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -53,9 +53,12 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenantId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("ApplicationEvents");
                 });
@@ -117,6 +120,9 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<int>("EventLoggingRetentionPeriod")
                         .HasColumnType("int");
+
+                    b.Property<long?>("MaxUsers")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Tenant");
 
@@ -240,6 +246,17 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("ApiKeys");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("Events")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -253,6 +270,8 @@ namespace Passwordless.Service.Migrations.Mssql
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
+                    b.Navigation("Events");
+
                     b.Navigation("Features");
                 });
 #pragma warning restore 612, 618

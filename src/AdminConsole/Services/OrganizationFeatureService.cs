@@ -9,9 +9,9 @@ namespace Passwordless.AdminConsole.Services;
 public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureService where TDbContext : ConsoleDbContext
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-    private readonly StripeOptions _options;
+    private readonly BillingOptions _options;
 
-    public OrganizationFeatureService(IDbContextFactory<TDbContext> dbContextFactory, IOptions<StripeOptions> options)
+    public OrganizationFeatureService(IDbContextFactory<TDbContext> dbContextFactory, IOptions<BillingOptions> options)
     {
         _dbContextFactory = dbContextFactory;
         _options = options.Value;
@@ -43,6 +43,7 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
         return new FeaturesContext(
             features.EventLoggingIsEnabled,
             features.EventLoggingRetentionPeriod,
-            null);
+            null,
+            features.MaxUsers);
     }
 }

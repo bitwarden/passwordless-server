@@ -15,7 +15,7 @@ public class TenantProviderMiddleware
     // IMessageWriter is injected into InvokeAsync
     public async Task InvokeAsync(HttpContext httpContext, ITenantProvider tenantProvider)
     {
-        var name = httpContext.Request.GetTenantName();
+        var name = httpContext.Request.GetTenantNameFromKey();
 
         tenantProvider.Tenant = name;
         await _next(httpContext);

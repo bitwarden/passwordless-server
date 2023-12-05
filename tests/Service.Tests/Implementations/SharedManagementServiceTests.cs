@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -15,6 +16,7 @@ public class SharedManagementServiceTests
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
+    private readonly Mock<IEventLogger> _eventLogger = new();
 
     private readonly SharedManagementService _sut;
 
@@ -27,7 +29,8 @@ public class SharedManagementServiceTests
             _storageFactoryMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object,
+            _eventLogger.Object);
         _systemClockMock.Setup(x => x.UtcNow)
             .Returns(new DateTimeOffset(_now));
     }
@@ -328,7 +331,8 @@ public class SharedManagementServiceTests
         var payload = new ManageFeaturesDto
         {
             EventLoggingIsEnabled = true,
-            EventLoggingRetentionPeriod = 7
+            EventLoggingRetentionPeriod = 7,
+            MaxUsers = 69L
         };
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))

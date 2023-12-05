@@ -23,16 +23,22 @@ public class NewAccountModel : PageModel
 
     public async Task<IActionResult> OnPostToken(string name, string email)
     {
-        // Create new account
-        var userId = Guid.NewGuid().ToString();
-        var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions(userId, $"Playground: {email}")
+        try
         {
-            DisplayName = name,
-            Aliases = new HashSet<string>(1) { email },
-            AliasHashing = false
-        });
+            var userId = Guid.NewGuid().ToString();
+            var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions(userId, $"Playground: {email}")
+            {
+                DisplayName = name,
+                Aliases = new HashSet<string>(1) { email },
+                AliasHashing = false
+            });
 
-        return new JsonResult(token);
+            return new JsonResult(token);
+        }
+        catch (PasswordlessApiException e)
+        {
+            return StatusCode(e.Details.Status, e.Details);
+        }
     }
 
     public async Task<IActionResult> OnPost(string token)

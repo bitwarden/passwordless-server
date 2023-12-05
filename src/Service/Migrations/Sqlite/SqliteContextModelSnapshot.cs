@@ -15,7 +15,7 @@ namespace Passwordless.Service.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
 
             modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
                 {
@@ -48,9 +48,12 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TenantId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("ApplicationEvents");
                 });
@@ -111,6 +114,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("EventLoggingRetentionPeriod")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("MaxUsers")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Tenant");
@@ -235,6 +241,17 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.ToTable("ApiKeys");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("Events")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -248,6 +265,8 @@ namespace Passwordless.Service.Migrations.Sqlite
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
+                    b.Navigation("Events");
+
                     b.Navigation("Features");
                 });
 #pragma warning restore 612, 618

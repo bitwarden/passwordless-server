@@ -8,10 +8,15 @@ internal class UsageService<TDbContext> : IUsageService where TDbContext : Conso
 {
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly ILogger<UsageService<TDbContext>> _logger;
+    private readonly TimeProvider _timeProvider;
 
-    public UsageService(IDbContextFactory<TDbContext> dbContextFactory, ILogger<UsageService<TDbContext>> logger)
+    public UsageService(
+        IDbContextFactory<TDbContext> dbContextFactory,
+        TimeProvider timeProvider,
+        ILogger<UsageService<TDbContext>> logger)
     {
         _dbContextFactory = dbContextFactory;
+        _timeProvider = timeProvider;
         _logger = logger;
     }
     public async Task UpdateUsersCountAsync()
@@ -20,12 +25,15 @@ internal class UsageService<TDbContext> : IUsageService where TDbContext : Conso
         var apps = await db.Applications.ToListAsync();
         foreach (var app in apps)
         {
+            if (app.DeleteAt.HasValue)
+            {
+                _logger.LogWarning("Skipped updating usage for app pending deletion {appId}.", app.Id);
+                continue;
+            }
             try
             {
                 var users = await GetUsersCounts(app);
                 app.CurrentUserCount = users;
-                // todo: Add a LastUpdated field
-                _logger.LogInformation("Updated usage for app {appId} to {count}", app.Id, users);
             }
             catch (Exception e)
             {

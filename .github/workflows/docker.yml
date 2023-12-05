@@ -10,15 +10,62 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Application version to use when publishing the project
+        required: false
+      image-tag:
+        description: Additional Docker image tag to apply on deployment
+        required: false
 
 jobs:
+  # Determine version
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Determine stable version
+        id: stable-version
+        if: ${{ inputs.version || github.event_name == 'release' }}
+        run: |
+          version="${{ inputs.version || github.event.release.tag_name }}"
+
+          if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: $version"
+              exit 1
+          fi
+
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Determine prerelease version
+        id: pre-version
+        run: |
+          hash="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT
+
+    outputs:
+      version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
+
   # Build the image without deploying just to make sure the dockerfile is valid
-  build:
+  pack:
+    needs: version
+
     strategy:
       matrix:
         app:
           - Api
-          # - AdminConsole
+          #- AdminConsole
+          - Self-Host
+        include:
+          - app: Api
+            dockerfile: Api.dockerfile
+          #- app: AdminConsole
+          #  dockerfile: AdminConsole.dockerfile
+          - app: Self-Host
+            dockerfile: self-host/Dockerfile
 
     runs-on: ubuntu-latest
     permissions:
@@ -26,53 +73,71 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Docker Buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # 3.0.0
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
 
-      - name: Build & push image
+      - name: Build image
         run: >
-          docker buildx build
-          --file ${{ matrix.app }}.dockerfile
+          docker buildx build .
+          --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
+          --build-arg VERSION=${{ needs.version.outputs.version }}
           --output type=tar,dest=image.tar
-          .
 
   # Build and deploy the image
   deploy:
     if: ${{ github.event_name != 'pull_request' }}
+    needs: version
 
     strategy:
       matrix:
         app:
           - Api
-          # - AdminConsole
+          #- AdminConsole
+          - Self-Host
+        include:
+          - app: Api
+            dockerfile: Api.dockerfile
+            name: passwordless-test-api
+          #- app: AdminConsole
+          #  dockerfile: AdminConsole.dockerfile
+          #  repository: passwordless-test-admin-console
+          - app: Self-Host
+            dockerfile: self-host/Dockerfile
+            name: passwordless-self-host
 
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
+    env:
+      CONTAINER_NAMESPACE: ghcr.io/passwordless
+
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Docker Buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # 3.0.0
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
 
-      - name: Login to GitHub Container Registry
+      - name: Login to the registry
         run: >
-          echo ${{ secrets.GITHUB_TOKEN }} |
-          docker login ghcr.io --username ${{ github.actor }} --password-stdin
+          echo ${{ secrets.GHCR_TOKEN }} |
+          docker login ${{ env.CONTAINER_NAMESPACE }}
+          --username abergs
+          --password-stdin
 
       - name: Build & push image
         run: >
-          docker buildx build
-          --file ${{ matrix.app }}.dockerfile
+          docker buildx build .
+          --file ${{ matrix.dockerfile }}
           --platform linux/amd64,linux/arm64
+          --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
-          --tag ghcr.io/passwordless/passwordless-test-api:latest
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/passwordless-test-api:$GITHUB_REF_NAME' || '' }}
-          ${{ github.event_name == 'release' && '--tag ghcr.io/passwordless/passwordless-test-api:stable' || '' }}
-          .
+          ${{ format('--tag {0}/{1}:latest', env.CONTAINER_NAMESPACE, matrix.name) }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', env.CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.CONTAINER_NAMESPACE, matrix.name, github.ref_name) || '' }}
+          ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', env.CONTAINER_NAMESPACE, matrix.name, inputs.image-tag) || '' }}

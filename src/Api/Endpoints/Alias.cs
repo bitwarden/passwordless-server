@@ -12,10 +12,9 @@ public static class AliasEndpoints
     public static void MapAliasEndpoints(this WebApplication app)
     {
         app.MapPost("/alias", async (AliasPayload payload,
-                IFido2ServiceFactory fido2ServiceFactory,
+                IFido2Service fido2Service,
                 IEventLogger eventLogger) =>
             {
-                var fido2Service = await fido2ServiceFactory.CreateAsync();
                 await fido2Service.SetAlias(payload);
 
                 eventLogger.LogUserAliasSetEvent(payload.UserId);
@@ -25,7 +24,7 @@ public static class AliasEndpoints
             .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapGet("/alias/list", async (string userId, IFido2ServiceFactory fido2ServiceFactory) =>
+        app.MapGet("/alias/list", async (string userId, IFido2Service fido2Service) =>
         {
             // if payload is empty, throw exception
             if (string.IsNullOrEmpty(userId))
@@ -33,7 +32,6 @@ public static class AliasEndpoints
                 throw new ApiException("UserId is empty", 400);
             }
 
-            var fido2Service = await fido2ServiceFactory.CreateAsync();
             var aliases = await fido2Service.GetAliases(userId);
 
             var res = ListResponse.Create(aliases);

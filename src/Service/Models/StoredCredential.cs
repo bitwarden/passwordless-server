@@ -18,14 +18,8 @@ public class StoredCredential
     public string? Country { get; set; }
     public string? Device { get; set; }
     public string? Nickname { get; set; }
-    public string UserId
-    {
-        get
-        {
-            return Encoding.UTF8.GetString(UserHandle);
-        }
-        private set { }
-    }
+
+    public string UserId => Encoding.UTF8.GetString(UserHandle);
 
     public bool? BackupState { get; set; }
 

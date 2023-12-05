@@ -21,13 +21,12 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 # Add packages
 RUN apt-get update && apt-get install -y \
     npm jq \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj files as distinct layers
 WORKDIR /source
 COPY src/AdminConsole/*.csproj ./src/AdminConsole/
 COPY src/Api/*.csproj ./src/Api/
-COPY src/ApiHelpers/*.csproj ./src/ApiHelpers/
 COPY src/Service/*.csproj ./src/Service/
 COPY src/Common/*.csproj ./src/Common/
 COPY Directory.Build.props .
@@ -44,7 +43,6 @@ RUN . /tmp/rid.txt && dotnet restore -r $RID
 WORKDIR /source
 COPY src/AdminConsole/. ./src/AdminConsole/
 COPY src/Api/. ./src/Api/
-COPY src/ApiHelpers/. ./src/ApiHelpers/
 COPY src/Service/. ./src/Service/
 COPY src/Common/. ./src/Common/
 COPY .git/. ./.git/
@@ -71,8 +69,9 @@ ENV BWP_ENABLE_API=true
 ENV BWP_DB_FILE_API="/etc/bitwarden_passwordless/api.db"
 ENV BWP_DB_FILE_ADMIN="/etc/bitwarden_passwordless/admin.db"
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-ENV Passwordless_ApiUrl="http://localhost:5000"
-ENV PasswordlessManagement_ApiUrl="http://localhost:5000"
+ENV Passwordless_ApiUrl="http://localhost:5701/api"
+ENV PasswordlessManagement_ApiUrl="http://localhost:5701/api"
+ENV PasswordlessManagement_InternalApiUrl="http://localhost:5000"
 ENV SelfHosted=true
 
 # Add packages

@@ -5,4 +5,5 @@ public class AppFeatureDto
     public bool EventLoggingIsEnabled { get; set; }
     public int EventLoggingRetentionPeriod { get; set; }
     public DateTime? DeveloperLoggingEndsAt { get; set; }
+    public long? MaxUsers { get; set; }
 }

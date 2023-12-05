@@ -1,15 +1,19 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
-using Passwordless;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.Components;
+using Passwordless.AdminConsole.Components.Account;
+using Passwordless.AdminConsole.Controller;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Services.AuthenticatorData;
 using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
@@ -99,8 +103,9 @@ void RunTheApp()
     services.AddScoped<ICurrentContext, CurrentContext>();
     services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
 
-    services.AddHttpClient();
     builder.AddManagementApi();
+
+    builder.Services.AddSingleton<IAuthenticatorDataProvider, AuthenticatorDataProvider>();
 
     builder.AddDatabase();
 
@@ -126,9 +131,9 @@ void RunTheApp()
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
-        var options = provider.GetRequiredService<IOptions<PasswordlessOptions>>();
+        var options = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
 
-        client.BaseAddress = new Uri(options.Value.ApiUrl);
+        client.BaseAddress = new Uri(options.Value.InternalApiUrl);
     });
 
     // Magic link SigninManager
@@ -143,6 +148,12 @@ void RunTheApp()
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
     services.Remove(defaultLinkGeneratorDescriptor);
     services.AddSingleton<LinkGenerator>(serviceProvider => new LinkGeneratorDecorator(serviceProvider, defaultLinkGeneratorDescriptor.ImplementationType!));
+
+    // Used for Razor/Blazor experiment
+    builder.Services.AddRazorComponents();
+    builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+    builder.Services.AddAntiforgery();
 
     WebApplication app;
     try
@@ -181,6 +192,7 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
+    app.UseAntiforgery();
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
@@ -189,5 +201,13 @@ void RunTheApp()
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
+
+    if (app.Environment.IsDevelopment())
+    {
+        // Scan the App component for Blazor page components and map the routes.
+        app.MapRazorComponents<App>();
+        app.MapAccountEndpoints();
+    }
+
     app.Run();
 }

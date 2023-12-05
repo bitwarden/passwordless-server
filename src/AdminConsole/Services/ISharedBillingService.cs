@@ -1,3 +1,4 @@
+using Passwordless.AdminConsole.Models;
 using Stripe;
 
 namespace Passwordless.AdminConsole.Services;
@@ -9,6 +10,8 @@ public interface ISharedBillingService
     /// </summary>
     /// <returns></returns>
     Task UpdateUsageAsync();
+
+    Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId);
 
     /// <summary>
     /// When a customer subscribes for the first time.
@@ -52,13 +55,9 @@ public interface ISharedBillingService
     /// <param name="subscriptionItemId"></param>
     Task OnPostApplicationDeletedAsync(string subscriptionItemId);
 
-    Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId);
-
-    Task<string> CreateCheckoutSessionAsync(
-        int organizationId,
-        string? billingCustomerId,
-        string email,
-        string planName,
-        string successUrl,
-        string cancelUrl);
+    Task<string?> GetRedirectToUpgradeOrganization(string selectedPlan = null);
+    Task<string?> ChangePlanAsync(string app, string selectedPlan);
+    Task<IReadOnlyCollection<InvoiceModel>> GetInvoicesAsync();
+    Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU);
+    Task<string> GetManagementUrl(int orgId);
 }
