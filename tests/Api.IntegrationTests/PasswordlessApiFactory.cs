@@ -18,6 +18,8 @@ public class PasswordlessApiFactory : WebApplicationFactory<Program>, IAsyncLife
 
     private readonly MsSqlContainer _dbContainer = new MsSqlBuilder().Build();
 
+    public FakeTimeProvider TimeProvider { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder
@@ -28,10 +30,7 @@ public class PasswordlessApiFactory : WebApplicationFactory<Program>, IAsyncLife
             {
                 services.RemoveAll(typeof(IHostedService));
                 services.RemoveAll(typeof(TimeProvider));
-
-                var fakeTimeProvider = new FakeTimeProvider();
-                fakeTimeProvider.SetUtcNow(DateTimeOffset.UtcNow);
-                services.AddSingleton<TimeProvider>(new FakeTimeProvider());
+                services.AddSingleton<TimeProvider>(TimeProvider);
             });
     }
 

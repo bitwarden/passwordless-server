@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Time.Testing;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.IntegrationTests.Helpers.User;
@@ -169,8 +168,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         // Arrange
         const string applicationName = "testRemoveToken";
         var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
-        var timeProvider = (FakeTimeProvider)_factory.Services.GetRequiredService<TimeProvider>();
-        timeProvider.SetUtcNow(serverTime);
+        _factory.TimeProvider.SetUtcNow(serverTime);
         using var client = _factory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await CreateAppFunctions.CreateApplication(client, applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
@@ -178,7 +176,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
         await UserHelpers.RegisterNewUser(client, driver);
-        timeProvider.SetUtcNow(serverTime.AddDays(31));
+        _factory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
 
         // Act
         await UserHelpers.SignInUser(client, driver);
