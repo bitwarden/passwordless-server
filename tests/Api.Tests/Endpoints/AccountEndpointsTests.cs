@@ -96,12 +96,18 @@ public class AccountEndpointsTests
         var payload = new ManageFeaturesDto
         {
             EventLoggingRetentionPeriod = 14,
-            EventLoggingIsEnabled = true
+            EventLoggingIsEnabled = true,
+            MaxUsers = 69L
         };
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
 
         var actual = await AppsEndpoints.ManageFeaturesAsync(appId, payload, sharedManagementServiceMock.Object);
 
+        sharedManagementServiceMock.Verify(x =>
+            x.SetFeaturesAsync(
+                It.Is<string>(p => p == appId),
+                It.Is<ManageFeaturesDto>(p => p == payload)),
+            Times.Once);
         Assert.Equal(typeof(NoContent), actual.GetType());
     }
     #endregion

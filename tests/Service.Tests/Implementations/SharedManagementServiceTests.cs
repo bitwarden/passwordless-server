@@ -331,7 +331,8 @@ public class SharedManagementServiceTests
         var payload = new ManageFeaturesDto
         {
             EventLoggingIsEnabled = true,
-            EventLoggingRetentionPeriod = 7
+            EventLoggingRetentionPeriod = 7,
+            MaxUsers = 69L
         };
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))

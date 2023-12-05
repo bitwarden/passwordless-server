@@ -97,9 +97,6 @@ public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbCont
 
         var organization = await _dataService.GetOrganizationWithDataAsync();
 
-        // Org has Subscription
-
-
         var application = organization.Applications.SingleOrDefault(x => x.Id == app);
         var existingSubscriptionItemId = application.BillingSubscriptionItemId;
 

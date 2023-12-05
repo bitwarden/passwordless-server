@@ -89,6 +89,11 @@
     .text-danger {
         @apply text-red-600;
     }
+    
+    .alert-box-message {
+        @apply text-sm font-medium
+    }
+    
     table.tbl-default {
         @apply divide-y divide-gray-300
     }

@@ -108,11 +108,13 @@ public class CreateApplicationModel : PageModel
         NewAppResponse res;
         try
         {
+            var features = _billingOptions.Plans[form.Plan].Features;
             var newAppOptions = new NewAppOptions
             {
                 AdminEmail = email,
-                EventLoggingIsEnabled = _billingOptions.Plans[form.Plan].Features.EventLoggingIsEnabled,
-                EventLoggingRetentionPeriod = _billingOptions.Plans[form.Plan].Features.EventLoggingRetentionPeriod
+                EventLoggingIsEnabled = features.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+                MaxUsers = features.MaxUsers
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
