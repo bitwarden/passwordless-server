@@ -43,6 +43,7 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
         return new FeaturesContext(
             features.EventLoggingIsEnabled,
             features.EventLoggingRetentionPeriod,
-            null);
+            null,
+            features.MaxUsers);
     }
 }

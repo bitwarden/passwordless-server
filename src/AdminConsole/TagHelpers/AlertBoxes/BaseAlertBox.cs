@@ -30,7 +30,7 @@ public abstract class BaseAlertBox : TagHelper
                                    <div class="flex">
                                        {iconContainer}
                                        <div class="ml-3 {GetTextColorClass()} flex justify-between">
-                                           <p class="text-sm font-medium">{Message}</p>
+                                           <p class="alert-box-message">{Message}</p>
                                        </div>
                                    </div>
                                    """);

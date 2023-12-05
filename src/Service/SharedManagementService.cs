@@ -110,7 +110,8 @@ public class SharedManagementService : ISharedManagementService
             {
                 Tenant = accountName,
                 EventLoggingIsEnabled = appCreationOptions.EventLoggingIsEnabled,
-                EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod
+                EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod,
+                MaxUsers = appCreationOptions.MaxUsers
             }
         };
         await storage.SaveAccountInformation(account);

@@ -14,5 +14,10 @@ public class AppFeature : PerTenant
     /// </summary>
     public DateTime? DeveloperLoggingEndsAt { get; set; }
 
+    /// <summary>
+    /// Maximum number of individual users allowed to use the application
+    /// </summary>
+    public long? MaxUsers { get; set; }
+
     public AccountMetaInformation Application { get; set; }
 }

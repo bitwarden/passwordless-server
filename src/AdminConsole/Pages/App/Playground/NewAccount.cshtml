@@ -51,9 +51,9 @@
                             <div>
                                 <button type="submit" btn-primary>Register</button>
                             </div>
-
-                            <div id="webauthn-unsupported-alert" class="hidden">
-                                <danger-alert-box message="WebAuthn is not supported in this browser."></danger-alert-box>
+                            
+                            <div id="error-message-summary-container" class="hidden">
+                                <danger-alert-box></danger-alert-box>
                             </div>
                         </fieldset>
                     </form>
@@ -63,31 +63,12 @@
     </div>
 </div>
 
-
-<style>
-    .signin-item {
-        padding: 10px;
-        display: flex;
-        background-color: #eee;
-        border-radius: 5px;
-        gap: 5px;
-        flex-wrap: wrap;
-    }
-
-    .item-pair {
-        padding: 5px;
-        background: #c2d5dd;
-        border-radius: 3px;
-    }
-</style>
-
 <partial name="Shared/_PasswordlessClientJs" />
 @section Scripts {
     <script type="module">
     import { createApp, ref } from 'vue';
     createApp({
         setup() {
-
             const p = new Passwordless.Client({
                 apiUrl: "@Options.Value.ApiUrl",
                 apiKey: "@CurrentContext.ApiKey"
@@ -116,6 +97,13 @@
                         alert(error.title);
                     }
                     window.location.href = "../playground";
+                } else {
+                    const container = document.getElementById("error-message-summary-container");
+                    const field = container.getElementsByClassName("alert-box-message")[0];
+                    const body = await req.text();
+                    const problemDetails = JSON.parse(body);
+                    field.textContent = problemDetails.title;
+                    container.classList.remove("hidden");
                 }
             }
 
@@ -161,8 +149,11 @@
         if (!isSupported) {
             const registerCredentialFields = document.getElementById("registerCredentialFields");
             registerCredentialFields.disabled = true;
-            const alert = document.getElementById("webauthn-unsupported-alert");
-            alert.classList.remove("hidden");
+            
+            const container = document.getElementById("error-message-summary-container");
+            const field = container.getElementsByClassName("alert-box-message")[0];
+            field.textContent = "WebAuthn is not supported in this browser.";
+            container.classList.remove("hidden");
         }
     </script>
 }
