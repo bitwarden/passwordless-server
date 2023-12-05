@@ -2,9 +2,9 @@
 
 public class AccountKeysCreation
 {
-    public string Message { get; set; }
-    public string ApiKey1 { get; set; }
-    public string ApiKey2 { get; set; }
-    public string ApiSecret1 { get; set; }
-    public string ApiSecret2 { get; set; }
+    public string? Message { get; set; }
+    public required string ApiKey1 { get; set; }
+    public required string ApiKey2 { get; set; }
+    public required string ApiSecret1 { get; set; }
+    public required string ApiSecret2 { get; set; }
 }

@@ -4,5 +4,5 @@ namespace Passwordless.Service.Models;
 
 public class KeyDescriptorEntity : TableEntity
 {
-    public string Descriptor { get; set; }
+    public required string Descriptor { get; set; }
 }

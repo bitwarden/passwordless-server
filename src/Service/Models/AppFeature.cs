@@ -14,5 +14,5 @@ public class AppFeature : PerTenant
     /// </summary>
     public DateTime? DeveloperLoggingEndsAt { get; set; }
 
-    public AccountMetaInformation Application { get; set; }
+    public AccountMetaInformation? Application { get; set; }
 }

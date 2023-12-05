@@ -26,7 +26,7 @@ public class InvitationService<TDbContext> : IInvitationService where TDbContext
 
     public async Task SendInviteAsync(string toEmail, int TargetOrgId, string TargetOrgName, string fromEmail, string fromName)
     {
-        var inv = new Invite()
+        var inv = new Invite
         {
             ToEmail = toEmail,
             TargetOrgId = TargetOrgId,

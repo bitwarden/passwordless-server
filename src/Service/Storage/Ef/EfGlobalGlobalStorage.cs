@@ -19,7 +19,7 @@ public class EfGlobalGlobalStorage : IGlobalStorage
     {
         // Will replace IgnoreQueryFilters at a later stage. To possibly use different db contexts.
         var tenants = await _db.AccountInfo
-            .Where(x => x.DeleteAt <= _systemClock.UtcNow.UtcDateTime)
+            .Where(x => x.DeletedAt <= _systemClock.UtcNow.UtcDateTime)
             .Select(x => x.Tenant)
             .ToListAsync();
         return tenants;

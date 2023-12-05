@@ -2,5 +2,5 @@ namespace Passwordless.Service.Models;
 
 public record AppIdDTO
 {
-    public string AppId { get; set; }
+    public required string AppId { get; set; }
 }

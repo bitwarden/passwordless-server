@@ -2,5 +2,5 @@
 
 public abstract class PerTenant
 {
-    public string Tenant { get; set; }
+    public string? Tenant { get; set; }
 }

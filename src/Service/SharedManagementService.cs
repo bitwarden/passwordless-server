@@ -95,9 +95,9 @@ public class SharedManagementService : ISharedManagementService
         (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, storage);
         (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage);
 
-        var account = new AccountMetaInformation()
+        var account = new AccountMetaInformation
         {
-            AcountName = accountName,
+            AccountName = accountName,
             AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
             SubscriptionTier = "Free",
@@ -191,7 +191,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_not_found", "App was not found.", 400);
         }
 
-        if (!accountInformation.DeleteAt.HasValue || accountInformation.DeleteAt > _systemClock.UtcNow)
+        if (!accountInformation.DeletedAt.HasValue || accountInformation.DeletedAt > _systemClock.UtcNow)
         {
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
@@ -199,7 +199,7 @@ public class SharedManagementService : ISharedManagementService
         await storage.DeleteAccount();
 
         return new AppDeletionResult(
-            $"The app '{accountInformation.AcountName}' was deleted.",
+            $"The app '{accountInformation.AccountName}' was deleted.",
             true,
             _systemClock.UtcNow.UtcDateTime,
             accountInformation.AdminEmails);
@@ -213,7 +213,7 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
         }
-        if (accountInformation.DeleteAt.HasValue)
+        if (accountInformation.DeletedAt.HasValue)
         {
             throw new ApiException("app_pending_deletion", "App is already pending to be deleted.", 400);
         }
@@ -228,7 +228,7 @@ public class SharedManagementService : ISharedManagementService
         {
             await storage.DeleteAccount();
             return new AppDeletionResult(
-                $"The app '{accountInformation.AcountName}' was deleted.",
+                $"The app '{accountInformation.AccountName}' was deleted.",
                 true,
                 _systemClock.UtcNow.UtcDateTime,
                 accountInformation.AdminEmails);
@@ -241,7 +241,7 @@ public class SharedManagementService : ISharedManagementService
         await storage.SetAppDeletionDate(deleteAt);
 
         return new AppDeletionResult(
-            $"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.",
+            $"The app '{accountInformation.AccountName}' will be deleted at '{deleteAt}'.",
             false,
             deleteAt,
             accountInformation.AdminEmails);

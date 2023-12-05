@@ -6,7 +6,7 @@ public class AppFeatureDto
     public int EventLoggingRetentionPeriod { get; set; }
     public DateTime? DeveloperLoggingEndsAt { get; set; }
 
-    public static AppFeatureDto FromEntity(AppFeature entity)
+    public static AppFeatureDto? FromEntity(AppFeature? entity)
     {
         if (entity == null) return null;
         var dto = new AppFeatureDto

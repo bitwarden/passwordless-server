@@ -155,7 +155,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task SetAppDeletionDate(DateTime? deletionAt)
     {
-        await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));
+        await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeletedAt, deletionAt));
     }
 
     public async Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId)
@@ -180,7 +180,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task SetAppDeletionDate(DateTime deletionAt)
     {
-        await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));
+        await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeletedAt, deletionAt));
     }
 
     public async Task LockAllApiKeys(bool isLocked)
@@ -204,7 +204,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task StoreAlias(string userid, Dictionary<string, string> aliases)
     {
-        var pointers = aliases.Select(a => new AliasPointer() { Tenant = Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
+        var pointers = aliases.Select(a => new AliasPointer { Tenant = Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
         db.Aliases.RemoveRange(db.Aliases.Where(ap => ap.UserId == userid));
         db.Aliases.AddRange(pointers);
         await db.SaveChangesAsync();

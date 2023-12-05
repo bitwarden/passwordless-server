@@ -2,8 +2,8 @@
 
 public class EmailAboutAccountDeletion
 {
-    public string CancelLink { get; set; } = "";
-    public string[] Emails { get; set; } = Array.Empty<string>();
-    public string AccountName { get; set; } = "";
-    public string Message { get; set; } = "";
+    public required string CancelLink { get; set; }
+    public required string[] Emails { get; set; }
+    public required string AccountName { get; set; }
+    public required string Message { get; set; }
 }

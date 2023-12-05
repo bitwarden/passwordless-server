@@ -4,7 +4,7 @@ using Aliases = HashSet<string>;
 
 public class AliasPayload
 {
-    public string UserId { get; set; }
-    public Aliases Aliases { get; set; }
-    public bool Hashing { get; set; } = true;
+    public required string UserId { get; set; }
+    public required Aliases Aliases { get; set; }
+    public required bool Hashing { get; set; } = true;
 }

@@ -2,5 +2,5 @@
 
 public class FidoRegistrationBeginDTO : RequestBase
 {
-    public string Token { get; set; }
+    public required string Token { get; set; }
 }

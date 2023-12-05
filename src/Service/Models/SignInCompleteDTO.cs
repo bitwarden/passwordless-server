@@ -4,6 +4,6 @@ namespace Passwordless.Service.Models;
 
 public class SignInCompleteDTO : RequestBase
 {
-    public AuthenticatorAssertionRawResponse Response { get; set; }
-    public string Session { get; set; }
+    public required AuthenticatorAssertionRawResponse Response { get; set; }
+    public required string Session { get; set; }
 }

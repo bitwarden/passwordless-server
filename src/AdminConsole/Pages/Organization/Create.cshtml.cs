@@ -71,7 +71,7 @@ public class Create : PageModel
         await _dataService.CreateOrganizationAsync(org);
 
         // Create user
-        var user = new ConsoleAdmin()
+        var user = new ConsoleAdmin
         {
             UserName = form.AdminEmail,
             Email = form.AdminEmail,

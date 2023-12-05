@@ -21,7 +21,7 @@ public class CredentialsTests : BackendTests
         using var scope = _factory.Services.CreateScope();
         var context = _factory.CreateDbContext(scope, "test");
 
-        context.Credentials.Add(new EFStoredCredential()
+        context.Credentials.Add(new EFStoredCredential
         {
             DescriptorId = "test"u8.ToArray(),
             DescriptorType = PublicKeyCredentialType.PublicKey,
