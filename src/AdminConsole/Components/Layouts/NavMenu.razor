@@ -47,7 +47,7 @@
                     <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/default">
                         <DollarIcon Class="nav-link-icon"/> Billing
                     </NavLink>
-                    @if (HttpContextAccessor!.HttpContext.Request.Path.StartsWithSegments("/billing"))
+                    @if (HttpContextAccessor.HttpContext!.Request.Path.StartsWithSegments("/billing"))
                     {
                         <div class="nav-link-submenu">
                             <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/manage">
@@ -67,7 +67,7 @@
                     @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
                     {
                         <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/log">
-                            <CogIcon Class="nav-link-icon"/> Settings
+                            <CodeBracketSquareIcon Class="nav-link-icon"/> Organization Logs
                         </NavLink>
                     }
         
