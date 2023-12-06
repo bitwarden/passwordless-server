@@ -1,5 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.CodeAnalysis.Classification
 @using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Components.Layouts
+@using Passwordless.AdminConsole.Components.Shared.Icons
+@using Passwordless.AdminConsole.Components.Shared.Links
 @using Passwordless.AdminConsole.Helpers
 @using Passwordless.AdminConsole.Identity
 @using Passwordless.AdminConsole.Middleware
@@ -28,122 +33,25 @@
 </head>
 
 <body class="h-full bg-gray-50">
-    <if asp-if="signedIn">
-    <template id="sidenav">
-        <div class="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-            <a asp-page="/organization/overview" title="Home" class="flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1">
-                <partial name="_Logo" />
-            </a>
-            <nav class="mt-5 flex-1 space-y-1 px-2">
-                <partial name="_NavLinkPartial" model=@("Applications", "/organization/overview", "Icons/CodeBracketSquare") />
-
-                @if (CurrentContext.InAppContext)
-                {
-                    <div class="m-2 rounded-md bg-opacity-25 bg-black p-4">
-                        <div class="text-xs font-semibold text-blue-200 ml-3 mb-3 truncate">App: @CurrentContext.AppId</div>
-                        @if (!CurrentContext.IsFrozen)
-                        {
-                            <partial name="_NavLinkPartial" model=@("Getting Started", "/app/onboarding/getstarted", "Icons/Users") />
-                            <partial name="_NavLinkPartial" model=@("Playground", "/app/Playground/Client", "Icons/Beaker") />
-                            <partial name="_NavLinkPartial" model=@("Users", "/app/credentials/list", "Icons/Users") />
-                        }
-                        <partial name="_NavLinkPartial" model=@("Settings", "/app/Settings/Settings", "Icons/Cog") />
-                        @if (CurrentContext.Features.EventLoggingIsEnabled)
-                        {
-                            <partial name="_NavLinkPartial" model=@("App Logs", "/app/logs/log", "Icons/CodeBracketSquare") />
-                        }
-                    </div>
-                }
-                <partial name="_NavLinkPartial" model=@("Billing", "/billing/default", "Icons/Dollar") />
-                @if (Context.Request.Path.StartsWithSegments("/billing"))
-                {
-                    <div class="m-2 rounded-md bg-opacity-25 bg-black p-4">
-                        <partial name="_NavLinkPartial" model=@("Manage", "/billing/manage", "Icons/Cog") />
-                        <partial name="_NavLinkPartial" model=@("Invoices", "/billing/invoices", "Icons/DocumentText") />
-                    </div>
-                }
-                <partial name="_NavLinkPartial" model=@("Admins", "/organization/admins", "Icons/Users") />
-                <partial name="_NavLinkPartial" model=@("Settings", "/organization/settings", "Icons/Cog") />
-                @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
-                {
-                    <partial name="_NavLinkPartial" model=@("Organization Logs", "/organization/log", "Icons/CodeBracketSquare") />
-                }
-            </nav>
+<div class="page">
+    @if (signedIn)
+    {
+        <div id="sidebar" class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-primary-700 w-64">
+            <component type="typeof(LinkHome)" param-Class="@("flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1")" param-IsDesktop="true" render-mode="Static" />
+            <component type="typeof(NavMenu)" render-mode="ServerPrerendered" />
         </div>
-        <div class="flex flex-col flex-shrink-0 flex-grow-0 p-4 bg-opacity-25 bg-black space-y-4">
-            <a class="block" href="@Url.Page("/Billing/Manage")" asp-if="@(CurrentContext.Organization != null && !CurrentContext.Organization.HasSubscription)">
-                <badge variant="ColorVariant.Warning" text="Free organization"></badge>
-            </a>
-            <div class="flex flex-col space-y-2">
-                
-                <a href="@(Url.Page("/Account/Profile"))" class="text-sm font-medium text-white truncate flex">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span class="truncate">
-                    @UserManager.GetUserName(User)
-                    </span>
-                </a>
-            </div>
-            <hr class="opacity-30"/>
-            <div class="flex flex-row space-x-4">
-                <form asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-                    <button id="logout-button" type="submit" class="text-white flex font-medium text-sm">
-                        <svg class="h-5 w-5 mr-2" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z"/>
-                            <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/>
-                            <path d="M7 12h14l-3 -3m0 6l3 -3"/>
-                        </svg>
-                        
-                        Sign out
-                    </button>
-                </form>
-            </div>
-        </div>
-    </template>
-
-    @* Off-canvas menu for mobile *@
-    <div data-menu class="relative z-40 hidden" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
-
-        <div class="fixed inset-0 z-40 flex">
-            <div class="relative flex w-full max-w-xs flex-1 flex-col bg-primary-700">
-                <div class="absolute top-0 right-0 -mr-12 pt-2">
-                    <button data-menu-button type="button"
-                            class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                        <span class="sr-only">Close sidebar</span>
-                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                             aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                <div data-sidenav></div>
-            </div>
-            <div class="w-14 flex-shrink-0" aria-hidden="true"></div>
-        </div>
-    </div>
-
-    @* Static sidebar for desktop *@
-    <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div class="flex min-h-0 flex-1 flex-col bg-primary-700">
-            <div data-sidenav></div>
-        </div>
-    </div>
-    <div class="flex flex-1 flex-col lg:pl-64 min-h-full">
-        <div class="sticky top-0 z-10 bg-gray-100 pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden">
-            <button data-menu-button type="button"
-                    class="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+        <div id="navbar-mobile" class="navbar-mobile">
+            <button id="btn-sidebar-open" type="button" class="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
                 <span class="sr-only">Open sidebar</span>
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                     aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-                </svg>
+                <component type="typeof(HamburgerIcon)" render-mode="Static" />
             </button>
         </div>
-        <main class="flex-1">
-            <div class="py-6">
+
+        <!-- Close button for the sidebar -->
+        <div class="hidden absolute inset-0 bg-black opacity-50 z-40" id="sidebar-overlay"></div>
+
+        <div class="content-container-authorized">
+            <main>
                 <div class="page-header-container">
                     @if (ViewData["HideTitle"] == null)
                     {
@@ -153,104 +61,26 @@
                 <div class="page-content-container">
                     @RenderBody()
                 </div>
-            </div>
-        </main>
-        <environment include="Development">
-            <footer class="flex gap-4 p-4 m-4 text-sm bg-black rounded-md bg-opacity-10 flex-wrap max-w-fit">
-                <div>
-                    <span class="font-semibold">ApiUrl: </span>@Options.Value.ApiUrl
-                </div>
-                <div>
-                    @if (CurrentContext.InAppContext)
-                    {
-                        <span class="font-semibold">ApiKey: </span>@CurrentContext.ApiKey
-                    }
-                    else
-                    {
-                        <span class="font-semibold">ApiKey: </span>@Options.Value.ApiKey
-                    }
-                </div>
-            </footer>
-        </environment>
-    </div>
-</if>
-    <div asp-if="!signedIn" class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-16 lg:flex-col">
-        <div class="flex min-h-0 flex-1 flex-col bg-primary-500">
-            <div class="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-                <div class="flex flex-shrink-0 items-center px-4">
-                    <a asp-area="" asp-page="/Index">
-                        <img class="block h-8 w-auto" src="@Url.Content("~/icon.svg")"
-                             height=20 class="mx-2"/>
-                    </a>
-                </div>
-            </div>
+            </main>
         </div>
-    </div>
-    <div asp-if="!signedIn" class="flex flex-1 flex-col lg:pl-16 min-h-full">
-        <main class="flex-1">
-            <div class="py-6">
-                <div class="page-header-container">
-                    @if (ViewData["HideTitle"] == null)
-                    {
-                        <h1 class="text-2xl font-semibold text-gray-900 mb-8">@ViewData["Title"]</h1>
-                    }
-                </div>
-                <div class="page-content-container">
-                    @RenderBody()
-                </div>
-            </div>
-        </main>
-    </div>
-    <script async src="@Url.Content("~/lib/es-module-shims.js")"></script>
-@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue.esm-browser.js","/lib/vue.esm-browser.prod.js") });
-<script>
-    const sideNavTemplate = document.querySelector('#sidenav');
-    document.querySelectorAll('[data-sidenav]').forEach(el => {
-        const clone = sideNavTemplate.content.cloneNode(true);
-        el.replaceWith(clone);
-    });
+    }
+    else
+    {
+        <div class="sidebar-anonymous">
+            <component type="typeof(LinkHome)" param-IsDesktop="false" render-mode="Static" />
+        </div>
+        <div class="content-container-anonymous">
+            <main>
+                @RenderBody()
+            </main>
+        </div>
+    }
+</div>
+    
 
-    document.querySelectorAll('[data-menu-button]').forEach(button => {
-      button.addEventListener('click', _click => {
-        document.querySelectorAll('[data-menu]').forEach(menu => menu.classList.toggle('hidden'));
-      })
-    })
-
-    document.querySelectorAll('a[data-route-active]').forEach(el => {
-      if (document.location.href.indexOf(el.href) >= 0) {
-        el.classList.add(...el.dataset.routeActive?.split(' '));
-      } else {
-        el.classList.add(...el.dataset.routeInactive?.split(' '));
-      }
-    })
-  </script>
-<script>
-    const forms = document.querySelectorAll('form[only-once]');
-    forms.forEach(function (form) {
-        form.addEventListener('submit', function (e) {
-            // check if disabled, if not, disable and submit
-            if (!form.classList.contains('disabled')) {
-                form.classList.add('disabled');
-                form.submit();
-            } else {
-                e.preventDefault();                                
-            }                            
-            return false;
-        });
-    });
-    // const els = document.querySelectorAll('[click-debounce]');
-    // els.forEach(e =>{
-    //     console.log("click debounce",e)
-    //     e.addEventListener('click', (e2) => {
-    //         console.log("listened");
-    //         e2.disabled = true;
-    //         const timeout = e.attributes.getNamedItem("click-debounce").value || 1000;
-    //         setTimeout(() => {
-    //             e2.disabled = false;
-    //         },timeout);
-    //     });
-    // });
-</script>
+<script async src="@Url.Content("~/lib/es-module-shims.js")"></script>
+@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue.esm-browser.js", "/lib/vue.esm-browser.prod.js") });
+<script type="text/javascript" src="~/js/core.js" asp-append-version="true"></script>
 <script type="module" src="@Url.Content("~/js/elements/copy-text.mjs")"></script>
 <script type="module" src="@Url.Content("~/js/elements/local-time.mjs")"></script>
 @await RenderSectionAsync("Scripts", false)

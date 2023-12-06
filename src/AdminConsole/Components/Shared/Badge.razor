@@ -1,0 +1,32 @@
+@using Passwordless.AdminConsole.TagHelpers
+@inherits BaseRazorComponent
+
+<span class="@GetClass()">@Message</span>
+
+@code {
+    [Parameter]
+    public ColorVariant? Variant { get; set; }
+    
+    [Parameter]
+    public string? Message { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        Class = "rounded-md px-2 py-1 text-xs font-semibold";
+        return base.OnInitializedAsync();
+    }
+    
+    private string ClassVariant =>
+        Variant switch
+        {
+            ColorVariant.Danger => "bg-red-600 text-white",
+            ColorVariant.Success => "bg-green-600 text-white",
+            ColorVariant.Warning => "bg-yellow-600 text-white",
+            _ => "bg-blue-600 text-white"
+        };
+    
+    private string GetClass()
+    {
+        return string.Join(' ', Class, ClassVariant);
+    }
+}

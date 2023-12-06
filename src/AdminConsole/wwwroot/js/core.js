@@ -21,3 +21,19 @@ const closeSidebar = () => {
 
 sidebarOverlay.addEventListener('click', closeSidebar);
 window.addEventListener('resize', closeSidebar);
+
+// START Form submit only once
+const forms = document.querySelectorAll('form[only-once]');
+forms.forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        // check if disabled, if not, disable and submit
+        if (!form.classList.contains('disabled')) {
+            form.classList.add('disabled');
+            form.submit();
+        } else {
+            e.preventDefault();
+        }
+        return false;
+    });
+});
+// END Form submit only once
