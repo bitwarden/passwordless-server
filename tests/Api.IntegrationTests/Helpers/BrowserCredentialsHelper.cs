@@ -23,8 +23,12 @@ public static class BrowserCredentialsHelper
         return result;
     }
 
-    public static Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl) =>
-        WebDriverFactory.GetWebDriver(originUrl).CreateCredentialsAsync(options);
+    public async static Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl)
+    {
+        using var driver = WebDriverFactory.GetWebDriver(originUrl);
+
+        return await driver.CreateCredentialsAsync(options);
+    }
 
     public async static Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(this IJavaScriptExecutor webDriver, CredentialCreateOptions options) =>
         JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(
