@@ -30,7 +30,7 @@ public class FileMailProvider : IMailProvider
         
         """;
         File.AppendAllText(_path, msg);
-        _logger.LogInformation("Sent email to mail.md");
+        _logger.LogInformation("Sent email to '{0}', _path");
         return Task.CompletedTask;
     }
 }
