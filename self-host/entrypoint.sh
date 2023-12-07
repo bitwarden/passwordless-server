@@ -8,6 +8,8 @@ addgroup --gid $PGID bitwarden
 PUID="${PUID:-1000}"
 adduser --no-create-home --shell /bin/bash --disabled-password --uid $PUID --gid $PGID --gecos "" bitwarden
 
+mounted_dir='/etc/bitwarden_passwordless';
+
 ############
 # Database #
 ############
@@ -39,7 +41,8 @@ fi
 # E-mail / SMTP #
 #################
 if [ -z "$BWP_SMTP_FROM" ] || [ "$BWP_SMTP_HOST" == "null" ]; then
-  echo "[Configuration] SMTP E-mail configuration not set. Writing to a local file instead in '/app/Admin/mail.md' or '/app/Api/mail.md'. See 'https://docs.passwordless.dev/guide/self-hosting/configuration.html'.";
+  export Mail__File__Path="$mounted_dir"
+  echo "[Configuration] SMTP E-mail configuration not set. Writing to a local file instead in '/etc/bitwarden_passwordless/mail.md' or your mounted volume. See 'https://docs.passwordless.dev/guide/self-hosting/configuration.html'.";
 else
   if [ -n "$BWP_SMTP_FROM" ] && [ "$BWP_SMTP_FROM" != "null" ]; then
     export Mail__Smtp__From=$BWP_SMTP_FROM
@@ -114,7 +117,6 @@ generate_random_hex() {
   echo $(openssl rand -hex 16)
 }
 
-mounted_dir='/etc/bitwarden_passwordless';
 mounted_config="$mounted_dir/config.json";
 
 if [ ! -d "$mounted_dir" ]; then
