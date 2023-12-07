@@ -534,9 +534,41 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.container {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
 .page-header-container {
-  margin-left: auto;
-  margin-right: auto;
   max-width: 80rem;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -557,8 +589,6 @@ video {
 }
 
 .page-content-container {
-  margin-left: auto;
-  margin-right: auto;
   display: flex;
   max-width: 80rem;
   flex-direction: column;
@@ -928,6 +958,12 @@ h3 {
 .text-danger {
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity));
+}
+
+.alert-box-message {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
 }
 
 table.tbl-default > :not([hidden]) ~ :not([hidden]) {
@@ -1361,7 +1397,7 @@ label.form-label {
   }
 }
 
-main.blazor {
+main {
   margin-left: auto;
   margin-right: auto;
   display: flex;
@@ -1370,13 +1406,13 @@ main.blazor {
   flex-direction: column;
 }
 
-main.blazor > :not([hidden]) ~ :not([hidden]) {
+main > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1rem * var(--tw-space-y-reverse));
 }
 
-main.blazor {
+main {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
   padding-left: 1rem;
@@ -1384,14 +1420,14 @@ main.blazor {
 }
 
 @media (min-width: 640px) {
-  main.blazor {
+  main {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
-  main.blazor {
+  main {
     padding-left: 2rem;
     padding-right: 2rem;
   }
@@ -1497,20 +1533,12 @@ main.blazor {
   position: static;
 }
 
-.fixed {
-  position: fixed;
-}
-
 .absolute {
   position: absolute;
 }
 
 .relative {
   position: relative;
-}
-
-.sticky {
-  position: sticky;
 }
 
 .inset-0 {
@@ -1522,32 +1550,12 @@ main.blazor {
   bottom: 0px;
 }
 
-.right-0 {
-  right: 0px;
-}
-
-.top-0 {
-  top: 0px;
-}
-
-.z-10 {
-  z-index: 10;
-}
-
 .z-40 {
   z-index: 40;
 }
 
 .z-50 {
   z-index: 50;
-}
-
-.m-2 {
-  margin: 0.5rem;
-}
-
-.m-4 {
-  margin: 1rem;
 }
 
 .-mx-4 {
@@ -1558,11 +1566,6 @@ main.blazor {
 .-my-2 {
   margin-top: -0.5rem;
   margin-bottom: -0.5rem;
-}
-
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
 }
 
 .mx-auto {
@@ -1597,10 +1600,6 @@ main.blazor {
   margin-left: -1px;
 }
 
-.-mr-12 {
-  margin-right: -3rem;
-}
-
 .-mt-0 {
   margin-top: -0px;
 }
@@ -1619,10 +1618,6 @@ main.blazor {
 
 .mb-8 {
   margin-bottom: 2rem;
-}
-
-.ml-1 {
-  margin-left: 0.25rem;
 }
 
 .ml-3 {
@@ -1737,10 +1732,6 @@ main.blazor {
   display: none;
 }
 
-.h-10 {
-  height: 2.5rem;
-}
-
 .h-12 {
   height: 3rem;
 }
@@ -1769,24 +1760,12 @@ main.blazor {
   height: 1px;
 }
 
-.min-h-0 {
-  min-height: 0px;
-}
-
 .min-h-full {
   min-height: 100%;
 }
 
-.w-10 {
-  width: 2.5rem;
-}
-
 .w-12 {
   width: 3rem;
-}
-
-.w-14 {
-  width: 3.5rem;
 }
 
 .w-4 {
@@ -1807,10 +1786,6 @@ main.blazor {
 
 .w-8 {
   width: 2rem;
-}
-
-.w-auto {
-  width: auto;
 }
 
 .w-full {
@@ -1854,10 +1829,6 @@ main.blazor {
   max-width: 36rem;
 }
 
-.max-w-xs {
-  max-width: 20rem;
-}
-
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -1872,10 +1843,6 @@ main.blazor {
 
 .flex-grow {
   flex-grow: 1;
-}
-
-.flex-grow-0 {
-  flex-grow: 0;
 }
 
 .resize {
@@ -2054,10 +2021,6 @@ main.blazor {
   border-radius: 0.25rem;
 }
 
-.rounded-full {
-  border-radius: 9999px;
-}
-
 .rounded-lg {
   border-radius: 0.5rem;
 }
@@ -2078,11 +2041,6 @@ main.blazor {
 .rounded-l-none {
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
-}
-
-.rounded-r-md {
-  border-top-right-radius: 0.375rem;
-  border-bottom-right-radius: 0.375rem;
 }
 
 .rounded-r-none {
@@ -2145,11 +2103,6 @@ main.blazor {
   background-color: rgb(37 99 235 / var(--tw-bg-opacity));
 }
 
-.bg-gray-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
-}
-
 .bg-gray-200 {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity));
@@ -2158,11 +2111,6 @@ main.blazor {
 .bg-gray-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
-}
-
-.bg-gray-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(75 85 99 / var(--tw-bg-opacity));
 }
 
 .bg-green-50 {
@@ -2205,20 +2153,8 @@ main.blazor {
   background-color: rgb(202 138 4 / var(--tw-bg-opacity));
 }
 
-.bg-opacity-10 {
-  --tw-bg-opacity: 0.1;
-}
-
-.bg-opacity-25 {
-  --tw-bg-opacity: 0.25;
-}
-
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
-}
-
-.bg-opacity-75 {
-  --tw-bg-opacity: 0.75;
 }
 
 .fill-blue-400 {
@@ -2316,11 +2252,6 @@ main.blazor {
   padding-bottom: 1.25rem;
 }
 
-.py-6 {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -2328,14 +2259,6 @@ main.blazor {
 
 .pb-3 {
   padding-bottom: 0.75rem;
-}
-
-.pb-4 {
-  padding-bottom: 1rem;
-}
-
-.pl-1 {
-  padding-left: 0.25rem;
 }
 
 .pl-2 {
@@ -2352,18 +2275,6 @@ main.blazor {
 
 .pr-3 {
   padding-right: 0.75rem;
-}
-
-.pt-1 {
-  padding-top: 0.25rem;
-}
-
-.pt-2 {
-  padding-top: 0.5rem;
-}
-
-.pt-5 {
-  padding-top: 1.25rem;
 }
 
 .text-center {
@@ -2434,11 +2345,6 @@ main.blazor {
 
 .tracking-tight {
   letter-spacing: -0.025em;
-}
-
-.text-blue-200 {
-  --tw-text-opacity: 1;
-  color: rgb(191 219 254 / var(--tw-text-opacity));
 }
 
 .text-blue-300 {
@@ -2672,11 +2578,6 @@ main.blazor {
   --tw-ring-color: rgb(var(--color-primary-500) / var(--tw-ring-opacity));
 }
 
-.focus\:ring-white:focus {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(255 255 255 / var(--tw-ring-opacity));
-}
-
 .focus-visible\:outline:focus-visible {
   outline-style: solid;
 }
@@ -2830,16 +2731,8 @@ main.blazor {
     padding-right: 1.5rem;
   }
 
-  .sm\:pl-3 {
-    padding-left: 0.75rem;
-  }
-
   .sm\:pl-6 {
     padding-left: 1.5rem;
-  }
-
-  .sm\:pt-3 {
-    padding-top: 0.75rem;
   }
 
   .sm\:text-6xl {
@@ -2906,18 +2799,6 @@ main.blazor {
     display: flex;
   }
 
-  .lg\:hidden {
-    display: none;
-  }
-
-  .lg\:w-16 {
-    width: 4rem;
-  }
-
-  .lg\:w-64 {
-    width: 16rem;
-  }
-
   .lg\:w-96 {
     width: 24rem;
   }
@@ -2933,13 +2814,5 @@ main.blazor {
   .lg\:px-8 {
     padding-left: 2rem;
     padding-right: 2rem;
-  }
-
-  .lg\:pl-16 {
-    padding-left: 4rem;
-  }
-
-  .lg\:pl-64 {
-    padding-left: 16rem;
   }
 }

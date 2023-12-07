@@ -41,7 +41,11 @@ public class FeatureContextProvider : IFeatureContextProvider
             var features = await storage.GetAppFeaturesAsync();
             if (features != null)
             {
-                return new FeaturesContext(features.EventLoggingIsEnabled, features.EventLoggingRetentionPeriod, features.DeveloperLoggingEndsAt);
+                return new FeaturesContext(
+                    features.EventLoggingIsEnabled,
+                    features.EventLoggingRetentionPeriod,
+                    features.DeveloperLoggingEndsAt,
+                    features.MaxUsers);
             }
             return new NullFeaturesContext();
         });
