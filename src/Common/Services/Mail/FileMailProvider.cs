@@ -22,7 +22,13 @@ public class FileMailProvider : IMailProvider
     public Task SendAsync(MailMessage message)
     {
         string msg = message.TextBody;
-        msg = "# New message " + _timeProvider.GetLocalNow() + Environment.NewLine + Environment.NewLine + msg + Environment.NewLine + Environment.NewLine;
+        msg =
+        $"""
+        # New message {_timeProvider.GetLocalNow()}
+        
+        {msg}
+        
+        """;
         File.AppendAllText(_path, msg);
         _logger.LogInformation("Sent email to mail.md");
         return Task.CompletedTask;
