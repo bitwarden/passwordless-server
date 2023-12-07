@@ -5,6 +5,7 @@ using Fido2NetLib;
 using FluentAssertions;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.User;
 using Passwordless.Service.Models;
 using Xunit;
 
@@ -61,8 +62,8 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = "https://integration-tests.passwordless.dev",
-            RPID = Environment.MachineName
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId
         };
 
         // Act
@@ -80,23 +81,10 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        const string originUrl = "https://bitwarden.com/products/passwordless/";
-        const string rpId = "bitwarden.com";
-
-        var tokenRequest = TokenGenerator.Generate();
-        using var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
-        var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
-
-        var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
-        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
-
-        var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
-
-        var authenticatorAttestationRawResponse = await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
 
         // Act
-        using var registerCompleteResponse = await _client.PostAsJsonAsync("/register/complete",
-            new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = authenticatorAttestationRawResponse });
+        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);
 
         // Assert
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -1,11 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using Bogus;
-using Fido2NetLib;
 using FluentAssertions;
-using Passwordless.Api.Endpoints;
+using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
+using Passwordless.Api.IntegrationTests.Helpers.User;
 using Passwordless.Service.Models;
+using Passwordless.Service.Storage.Ef;
 using Xunit;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
@@ -13,9 +15,7 @@ namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
 public class SignInTests : IClassFixture<PasswordlessApiFactory>
 {
     private readonly HttpClient _httpClient;
-
-    const string OriginUrl = "https://bitwarden.com/products/passwordless/";
-    const string RpId = "bitwarden.com";
+    private readonly PasswordlessApiFactory _factory;
 
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
@@ -29,8 +29,10 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
+
     public SignInTests(PasswordlessApiFactory factory)
     {
+        _factory = factory;
         _httpClient = factory.CreateClient()
             .AddPublicKey()
             .AddSecretKey()
@@ -41,7 +43,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task I_can_retrieve_assertion_options_to_begin_sign_in()
     {
         // Arrange
-        var request = new SignInBeginDTO { Origin = OriginUrl, RPID = RpId };
+        var request = new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId };
 
         // Act
         var response = await _httpClient.PostAsJsonAsync("/signin/begin", request);
@@ -60,37 +62,18 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
-        var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _httpClient.PostAsJsonAsync("/register/token", tokenRequest);
-        var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        await UserHelpers.RegisterNewUser(_httpClient, driver);
 
-        var registrationBeginRequest = new FidoRegistrationBeginDTO
-        {
-            Token = registerTokenResponse!.Token,
-            Origin = OriginUrl,
-            RPID = RpId
-        };
-        var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
-        var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
-        var driver = WebDriverFactory.GetWebDriver(OriginUrl);
-        var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
-        var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
-        {
-            Origin = OriginUrl,
-            RPID = RpId,
-            Session = sessionResponse.Session,
-            Response = authenticatorAttestationRawResponse
-        });
-        await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
-        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
+        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
         var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
-            Origin = OriginUrl,
-            RPID = RpId,
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId,
             Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });
@@ -106,34 +89,10 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         // Arrange
-        var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _httpClient.PostAsJsonAsync("/register/token", tokenRequest);
-        var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        await UserHelpers.RegisterNewUser(_httpClient, driver);
 
-        var registrationBeginRequest = new FidoRegistrationBeginDTO
-        {
-            Token = registerTokenResponse!.Token,
-            Origin = OriginUrl,
-            RPID = RpId
-        };
-        var registrationBeginResponse = await _httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
-        var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
-
-        var driver = WebDriverFactory.GetWebDriver(OriginUrl);
-
-        var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
-
-        var registerCompleteResponse = await _httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
-        {
-            Origin = OriginUrl,
-            RPID = RpId,
-            Session = sessionResponse.Session,
-            Response = authenticatorAttestationRawResponse
-        });
-
-        await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
-
-        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = OriginUrl, RPID = RpId });
+        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
 
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
@@ -141,8 +100,8 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         // Act
         var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
-            Origin = OriginUrl,
-            RPID = RpId,
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId,
             Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });
@@ -158,17 +117,16 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task UnknownCredentialThrows()
+    public async Task I_receive_an_error_message_when_sending_an_unrecognized_passkey()
     {
-        var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = "https://localhost", RPID = "localhost" });
-
+        // Arrange
+        using var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var response = await options.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
-
-        var payload = new
+        var payloadWithUnrecognizedPasskey = new
         {
-            Origin = "https://localhost",
-            RPID = "localhost",
-            Session = response.Session,
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId,
+            Session = response!.Session,
             Response = new
             {
                 Id = "LcVLKA2QkfwzvuSTxIIyFVTJ9IopE57xTYvJ_0Nx9nk",
@@ -185,10 +143,12 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
             }
         };
 
-        var result = await _httpClient.PostAsJsonAsync("/signin/complete", payload);
-        var body = await result.Content.ReadAsStringAsync();
+        // Act
+        using var result = await _httpClient.PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
 
-        Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
+        // Assert
+        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await result.Content.ReadAsStringAsync();
         AssertHelper.AssertEqualJson(
             // lang=json
             """
@@ -200,5 +160,32 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
                "errorCode": "unknown_credential"
              }
              """, body);
+    }
+
+    [Fact]
+    public async Task An_expired_apps_token_keys_should_be_removed_when_a_request_is_made()
+    {
+        // Arrange
+        const string applicationName = "testRemoveToken";
+        var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
+        _factory.TimeProvider.SetUtcNow(serverTime);
+        using var client = _factory.CreateClient().AddManagementKey();
+        using var createApplicationMessage = await client.CreateApplication(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        client.AddSecretKey(accountKeysCreation.ApiSecret1);
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        await client.RegisterNewUser(driver);
+        _factory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
+
+        // Act
+        await client.SignInUser(driver);
+
+        // Assert
+        using var scope = _factory.Services.CreateScope();
+        var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(applicationName).GetTokenKeys();
+        tokenKeys.Should().NotBeNull();
+        tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
+        tokenKeys.Any(x => x.CreatedAt >= (DateTime.UtcNow.AddDays(-30))).Should().BeTrue();
     }
 }
