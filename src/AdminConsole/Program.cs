@@ -206,8 +206,9 @@ void RunTheApp()
     {
         // Scan the App component for Blazor page components and map the routes.
         app.MapRazorComponents<App>();
-        app.MapAccountEndpoints();
     }
+
+    app.MapAccountEndpoints();
 
     app.Run();
 }
