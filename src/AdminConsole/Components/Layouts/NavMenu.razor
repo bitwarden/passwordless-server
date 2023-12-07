@@ -38,7 +38,7 @@
                             </NavLink>
                             @if (CurrentContext.Features.EventLoggingIsEnabled)
                             {
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="/app/logs/logs">
+                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="@AppLogsUrl">
                                     <CodeBracketSquareIcon Class="nav-link-icon"/> App Logs
                                 </NavLink>
                             }
@@ -110,4 +110,5 @@
     private string PlaygroundUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/playground/" : OrganizationOverviewUrl;
     private string UsersUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/credentials/list" : OrganizationOverviewUrl;
     private string SettingsUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/settings" : OrganizationOverviewUrl;
+    private string AppLogsUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/logs" : OrganizationOverviewUrl;
 }
