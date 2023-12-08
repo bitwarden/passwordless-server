@@ -24,7 +24,7 @@ public static class EventLog
         [AsParameters] GetEventLogEventsRequest getEventLogEventsRequest,
         CancellationToken cancellationToken)
     {
-        if (!(await provider.UseContext()).EventLoggingIsEnabled) return Results.Unauthorized();
+        if (!(await provider.UseContext()).EventLoggingIsEnabled) return Results.Forbid();
 
         if (!MiniValidator.TryValidate(getEventLogEventsRequest, out var errors))
         {
