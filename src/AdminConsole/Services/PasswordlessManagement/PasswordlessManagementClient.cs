@@ -59,4 +59,18 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var result = await response.Content.ReadFromJsonAsync<AppFeatureDto>();
         return result;
     }
+
+    public async Task<ICollection<ApiKeyResponse>> GetApiKeysAsync(string appId)
+    {
+        var response = await _client.GetAsync($"admin/apps/{appId}/api-keys");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ICollection<ApiKeyResponse>>();
+        return result;
+    }
+
+    public async Task CreateApiKeyAsync(string appId, CreateApiKeyRequest request)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/api-keys", request);
+        response.EnsureSuccessStatusCode();
+    }
 }

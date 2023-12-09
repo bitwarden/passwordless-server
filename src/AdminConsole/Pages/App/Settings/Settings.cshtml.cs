@@ -6,6 +6,7 @@ using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -42,7 +43,7 @@ public class SettingsModel : PageModel
 
     public Models.Organization Organization { get; set; }
 
-    public string ApplicationId { get; set; }
+    public string ApplicationId { get; private set; }
 
     public bool PendingDelete { get; set; }
 
@@ -51,6 +52,8 @@ public class SettingsModel : PageModel
     public Application? Application { get; private set; }
 
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
+
+    public IReadOnlyCollection<ApiKey> ApiKeys { get; private set; }
 
     public async Task OnGet()
     {
@@ -61,6 +64,9 @@ public class SettingsModel : PageModel
 
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
+
+        var apiKeys = await _managementClient.GetApiKeysAsync(ApplicationId);
+        ApiKeys = apiKeys.Select(ApiKey.FromDto).ToImmutableList();
 
         if (!Organization.HasSubscription)
         {
@@ -153,4 +159,22 @@ public class SettingsModel : PageModel
         bool IsActive,
         bool CanSubscribe,
         bool IsOutdated);
+
+    public record ApiKey(
+        string Id,
+        string Type,
+        string Scopes,
+        bool IsLocked,
+        DateTime? LastLockedAt)
+    {
+        public static ApiKey FromDto(ApiKeyResponse dto)
+        {
+            return new ApiKey(
+                dto.ApiKey,
+                dto.Type.ToString(),
+                string.Join(", ", dto.Scopes),
+                dto.IsLocked,
+                dto.LastLockedAt);
+        }
+    }
 }

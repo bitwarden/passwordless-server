@@ -60,6 +60,48 @@
     </div>
 </panel>
 
+<panel header="Api Keys">
+    <div class="table-container">
+        <table class="tbl-default min-w-full">
+            <thead>
+            <tr>
+                <th>Api Key</th>
+                <th>Type</th>
+                <th>Locked</th>
+                <th>Scopes</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (!Model.ApiKeys.Any())
+            {
+                <tr>
+                    <td colspan="4">This application has no API Keys or API Secrets.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var apiKey in Model.ApiKeys)
+                {
+                    <tr>
+                        <td>@apiKey.Id</td>
+                        <td>@apiKey.Type</td>
+                        @if (apiKey.IsLocked)
+                        {
+                            <td>Yes (<asp-local-time datetime="apiKey.LastLockedAt!.Value"></asp-local-time>)</td>
+                        }
+                        else
+                        {
+                            <td>No</td>
+                        }
+                        <td>@apiKey.Scopes</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</panel>
+
 <panel header="Delete Application">
     @if (Model.PendingDelete)
     {
