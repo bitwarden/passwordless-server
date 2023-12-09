@@ -12,4 +12,6 @@ public interface IPasswordlessManagementClient
     Task<ICollection<string>> ListApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
+    Task<ICollection<ApiKeyResponse>> GetApiKeysAsync(string appId);
+    Task CreateApiKeyAsync(string appId, CreateApiKeyRequest request);
 }
