@@ -5,6 +5,8 @@ public class ApiKeyDto
     /// <summary>
     /// Last 4 digits of the API key
     /// </summary>
+    public string Id { get; set; }
+
     public string ApiKey { get; set; }
 
     /// <summary>

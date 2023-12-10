@@ -73,4 +73,22 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/api-keys", request);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task LockApiKeyAsync(string appId, object apiKeyId)
+    {
+        var response = await _client.PostAsync($"admin/apps/{appId}/api-keys/{apiKeyId}/lock", null);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UnlockApiKeyAsync(string appId, object apiKeyId)
+    {
+        var response = await _client.PostAsync($"admin/apps/{appId}/api-keys/{apiKeyId}/unlock", null);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteApiKeyAsync(string appId, object apiKeyId)
+    {
+        var response = await _client.DeleteAsync($"admin/apps/{appId}/api-keys/{apiKeyId}");
+        response.EnsureSuccessStatusCode();
+    }
 }

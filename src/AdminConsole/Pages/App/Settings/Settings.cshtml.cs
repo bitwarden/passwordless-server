@@ -13,6 +13,8 @@ namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : PageModel
 {
+    public const string SelectedApiKeyIdField = "SelectedApiKeyId";
+
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
     private readonly IDataService _dataService;
@@ -79,6 +81,10 @@ public class SettingsModel : PageModel
         DeleteAt = application?.DeleteAt;
     }
 
+    /// <summary>
+    /// Deletes the application.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostDeleteAsync()
     {
         var userName = User.Identity?.Name ?? Unknown;
@@ -95,6 +101,10 @@ public class SettingsModel : PageModel
         return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
     }
 
+    /// <summary>
+    /// Cancels the deletion of the application.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostCancelAsync()
     {
         var applicationId = _currentContext.AppId ?? Unknown;
@@ -112,12 +122,84 @@ public class SettingsModel : PageModel
         }
     }
 
+    /// <summary>
+    /// Handles the plan change.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <param name="selectedPlan"></param>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostChangePlanAsync(string app, string selectedPlan)
     {
 
         var redirectUrl = await _billingService.ChangePlanAsync(app, selectedPlan);
 
         return Redirect(redirectUrl);
+    }
+
+    public async Task<IActionResult> OnPostLockApiKeyAsync()
+    {
+        var applicationId = _currentContext.AppId ?? throw new ArgumentNullException(nameof(_currentContext.AppId));
+        var selectedApiKeyId = Request.Form[SelectedApiKeyIdField].ToString();
+        if (string.IsNullOrEmpty(selectedApiKeyId))
+        {
+            throw new ArgumentNullException(nameof(selectedApiKeyId));
+        }
+
+        try
+        {
+            await _managementClient.LockApiKeyAsync(applicationId, selectedApiKeyId);
+
+            return RedirectToPage();
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Failed to lock api key for application: {appId}", applicationId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
+    }
+
+    public async Task<IActionResult> OnPostUnlockApiKeyAsync()
+    {
+        var applicationId = _currentContext.AppId ?? throw new ArgumentNullException(nameof(_currentContext.AppId));
+        var selectedApiKeyId = Request.Form["SelectedApiKeyId"].ToString();
+        if (string.IsNullOrEmpty(selectedApiKeyId))
+        {
+            throw new ArgumentNullException(nameof(selectedApiKeyId));
+        }
+
+        try
+        {
+            await _managementClient.UnlockApiKeyAsync(applicationId, selectedApiKeyId);
+
+            return RedirectToPage();
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Failed to unlock api key for application: {appId}", applicationId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
+    }
+
+    public async Task<IActionResult> OnPostDeleteApiKeyAsync()
+    {
+        var applicationId = _currentContext.AppId ?? throw new ArgumentNullException(nameof(_currentContext.AppId));
+        var selectedApiKeyId = Request.Form["SelectedApiKeyId"].ToString();
+        if (string.IsNullOrEmpty(selectedApiKeyId))
+        {
+            throw new ArgumentNullException(nameof(selectedApiKeyId));
+        }
+
+        try
+        {
+            await _managementClient.DeleteApiKeyAsync(applicationId, selectedApiKeyId);
+
+            return RedirectToPage();
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Failed to delete api key for application: {appId}", applicationId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
     }
 
     private void AddPlan(string plan)
@@ -162,6 +244,7 @@ public class SettingsModel : PageModel
 
     public record ApiKey(
         string Id,
+        string Value,
         string Type,
         string Scopes,
         bool IsLocked,
@@ -170,6 +253,7 @@ public class SettingsModel : PageModel
         public static ApiKey FromDto(ApiKeyResponse dto)
         {
             return new ApiKey(
+                dto.Id,
                 dto.ApiKey,
                 dto.Type.ToString(),
                 string.Join(", ", dto.Scopes),
