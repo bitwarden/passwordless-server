@@ -126,25 +126,19 @@
                                 }
                                 else
                                 {
-                                    if (apiKey.CanLock)
-                                    {
-                                        <form method="post" asp-page-handler="LockApiKey">
-                                            @Html.Hidden(SettingsModel.SelectedApiKeyIdField, apiKey.Id)
-                                            <button class="btn-warning">
-                                                <component type="typeof(LockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
-                                            </button>
-                                        </form>
-                                    }
-                                }
-                                @if (apiKey.CanDelete)
-                                {
-                                    <form method="post" asp-page-handler="DeleteApiKey">
+                                    <form method="post" asp-page-handler="LockApiKey">
                                         @Html.Hidden(SettingsModel.SelectedApiKeyIdField, apiKey.Id)
-                                        <button class="btn-danger">
-                                            <component type="typeof(DeleteIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
+                                        <button class="btn-warning">
+                                            <component type="typeof(LockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
                                         </button>
                                     </form>
                                 }
+                                <form method="post" asp-page-handler="DeleteApiKey">
+                                    @Html.Hidden(SettingsModel.SelectedApiKeyIdField, apiKey.Id)
+                                    <button class="btn-danger">
+                                        <component type="typeof(DeleteIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     }

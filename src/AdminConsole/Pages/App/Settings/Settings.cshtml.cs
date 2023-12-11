@@ -72,7 +72,10 @@ public class SettingsModel : BaseExtendedPageModel
         await InitializeAsync();
 
         var apiKeys = await _managementClient.GetApiKeysAsync(ApplicationId);
-        ApiKeys = apiKeys.Select(x => ApiKey.FromDto(x, Application!.ApiSecret)).ToImmutableList();
+        ApiKeys = apiKeys
+            .Select(x => ApiKey.FromDto(x, Application!))
+            .Where(x => x.AllowDestructiveAction)
+            .ToImmutableList();
 
         if (!Organization.HasSubscription)
         {
@@ -253,10 +256,9 @@ public class SettingsModel : BaseExtendedPageModel
         string Scopes,
         bool IsLocked,
         DateTime? LastLockedAt,
-        bool CanLock,
-        bool CanDelete)
+        bool AllowDestructiveAction)
     {
-        public static ApiKey FromDto(ApiKeyResponse dto, string managementSecret)
+        public static ApiKey FromDto(ApiKeyResponse dto, Application application)
         {
             return new ApiKey(
                 dto.Id,
@@ -265,8 +267,7 @@ public class SettingsModel : BaseExtendedPageModel
                 string.Join(", ", dto.Scopes),
                 dto.IsLocked,
                 dto.LastLockedAt,
-                !managementSecret.EndsWith(dto.Id),
-                !managementSecret.EndsWith(dto.Id));
+                dto.Type == ApiKeyTypes.Public ? application.ApiKey.EndsWith(dto.Id) : !application.ApiSecret.EndsWith(dto.Id));
         }
     }
 }

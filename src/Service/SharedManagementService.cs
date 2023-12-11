@@ -105,9 +105,11 @@ public class SharedManagementService : ISharedManagementService
         string apiKey2 = await SetupApiKey(accountName, storage);
 
         (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, storage);
-        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage);
 
-        var account = new AccountMetaInformation()
+        var managementSecretScopes = new[] { ApiKeyScopes.Login, ApiKeyScopes.Register, ApiKeyScopes.Management };
+        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage, managementSecretScopes);
+
+        var account = new AccountMetaInformation
         {
             AcountName = accountName,
             AdminEmails = new[] { adminEmail },
