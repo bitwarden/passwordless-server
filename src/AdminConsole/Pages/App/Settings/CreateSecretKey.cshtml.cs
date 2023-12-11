@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
-using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Passwordless.Common.Constants;
@@ -49,8 +49,8 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
 
         try
         {
-            var request = new CreateApiKeyRequest(ApiKeyTypes.Public, selectedScopes);
-            await _managementClient.CreateApiKeyAsync(_currentContext.AppId!, request);
+            var request = new CreateApiKeyRequest(ApiKeyTypes.Secret, selectedScopes);
+            var apiKey = await _managementClient.CreateApiKeyAsync(_currentContext.AppId!, request);
 
             _eventLogger.LogEvent(
                 Request.HttpContext.User.GetId(),
@@ -61,7 +61,10 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
                 _currentContext.OrgId!.Value,
                 DateTime.UtcNow);
 
-            return RedirectToApplicationPage("/App/Settings/Settings", new ApplicationPageRoutingContext(_currentContext.AppId!));
+            var encodedApiKey = Base64Url.Encode(Encoding.UTF8.GetBytes(apiKey.ApiKey));
+            return RedirectToPage(
+                "/App/Settings/SecretKeyCreated",
+                new { App = _currentContext.AppId, EncodedApiKey = encodedApiKey });
         }
         catch (Exception)
         {

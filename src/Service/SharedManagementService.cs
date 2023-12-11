@@ -318,13 +318,13 @@ public class SharedManagementService : ISharedManagementService
             case ApiKeyTypes.Public:
                 if (!payload.Scopes.All(x => ApiKeyScopes.PublicScopes.Contains(x)))
                 {
-                    throw new ApiException("create_api_key_scopes_invalid", "The request contains invalid scopes.", 400);
+                    throw new ApiException("create_public_key_scopes_invalid", "The request contains invalid scopes.", 400);
                 }
                 break;
             case ApiKeyTypes.Secret:
                 if (!payload.Scopes.All(x => ApiKeyScopes.SecretScopes.Contains(x)))
                 {
-                    throw new ApiException("create_api_key_scopes_invalid", "The request contains invalid scopes.", 400);
+                    throw new ApiException("create_secret_key_scopes_invalid", "The request contains invalid scopes.", 400);
                 }
                 break;
         }
