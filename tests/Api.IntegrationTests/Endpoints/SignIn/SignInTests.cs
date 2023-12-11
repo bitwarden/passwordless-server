@@ -2,7 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.IntegrationTests.Helpers.User;
@@ -63,7 +65,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserHelpers.RegisterNewUser(_httpClient, driver);
+        await _httpClient.RegisterNewUser(driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -90,7 +92,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await UserHelpers.RegisterNewUser(_httpClient, driver);
+        await _httpClient.RegisterNewUser(driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
@@ -187,5 +189,63 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         tokenKeys.Should().NotBeNull();
         tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
         tokenKeys.Any(x => x.CreatedAt >= (DateTime.UtcNow.AddDays(-30))).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task I_receive_an_error_when_I_request_a_sign_in_token_for_a_user_that_does_not_exist()
+    {
+        // Arrange
+        const string applicationName = "testNonUserTokenRequest";
+        var unknownUserId = $"user{Guid.NewGuid():N}";
+        using var client = _factory.CreateClient().AddManagementKey();
+        using var createApplicationMessage = await client.CreateApplication(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        client.AddPublicKey(accountKeysCreation!.ApiKey1)
+            .AddSecretKey(accountKeysCreation.ApiSecret1);
+
+        // Act
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SignInTokenRequest(unknownUserId)
+        {
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId
+        });
+
+        // Assert
+        signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var problemDetails = await signInGenerateTokenResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Title.Should().Be($"{unknownUserId} is not recognized.");
+    }
+
+    [Fact]
+    public async Task I_receive_a_sign_in_token_for_an_existing_user()
+    {
+        // Arrange
+        const string applicationName = "testUserRequest";
+        using var client = _factory.CreateClient().AddManagementKey();
+        using var createApplicationMessage = await client.CreateApplication(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        client.AddPublicKey(accountKeysCreation!.ApiKey1)
+            .AddSecretKey(accountKeysCreation.ApiSecret1)
+            .AddUserAgent();
+        var registerToken = UserHelpers.TokenGenerator.Generate();
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        await client.RegisterNewUser(driver, registerToken);
+
+        // Act
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SignInTokenRequest(registerToken.UserId)
+        {
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId
+        });
+
+        // Assert
+        signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var generateToken = await signInGenerateTokenResponse.Content.ReadFromJsonAsync<SigninEndpoints.SigninTokenResponse>();
+        generateToken.Should().NotBeNull();
+        generateToken!.Token.Should().StartWith("verify_");
+
+        var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

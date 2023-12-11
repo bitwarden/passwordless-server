@@ -41,7 +41,6 @@ public class EfTenantStorage : ITenantStorage
         await db.TokenKeys.ExecuteDeleteAsync();
         await db.Credentials.ExecuteDeleteAsync();
         await db.AccountInfo.ExecuteDeleteAsync();
-
     }
 
     public Task DeleteCredential(byte[] id)
@@ -104,6 +103,7 @@ public class EfTenantStorage : ITenantStorage
         {
             return new List<PublicKeyCredentialDescriptor>();
         }
+
         var userid = aliases.UserId;
         // Do we really need these AsNoTracking?
         var descs = await db.Credentials.Where(c => c.UserId == userid).ToListAsync();
@@ -251,31 +251,25 @@ public class EfTenantStorage : ITenantStorage
         await db.SaveChangesAsync();
     }
 
+    public Task<bool> UserExists(string userId) =>
+        db.Credentials.Where(x => x.UserId == userId).Select(x => x.UserId)
+            .Union(db.Aliases.Where(x => x.UserId == userId).Select(x => x.UserId))
+            .AnyAsync();
+
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {
-
         var credentialsPerUser = await db.Credentials
             .OrderBy(c => c.CreatedAt)
             .GroupBy(c => c.UserId)
             .Select((g) =>
-            new
-            {
-                UserId = g.Key,
-                LastUsedAt = g.Max(c => c.LastUsedAt),
-                Count = g.Count()
-            })
+                new { UserId = g.Key, LastUsedAt = g.Max(c => c.LastUsedAt), Count = g.Count() })
             .Take(1000)
             .ToListAsync();
 
         var aliasesPerUser = await db.Aliases
             .GroupBy(a => a.UserId)
             .Select((g) =>
-            new
-            {
-                UserId = g.Key,
-                Count = g.Count(),
-                Aliases = g.Select(a => a.Plaintext)
-            })
+                new { UserId = g.Key, Count = g.Count(), Aliases = g.Select(a => a.Plaintext) })
             .Take(1000)
             .ToListAsync();
 

@@ -9,7 +9,7 @@ namespace Passwordless.Api.IntegrationTests.Helpers.User;
 
 public static class UserHelpers
 {
-    private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
+    public static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
         .RuleFor(x => x.DisplayName, x => x.Person.FullName)
         .RuleFor(x => x.Username, x => x.Person.Email)
@@ -21,13 +21,15 @@ public static class UserHelpers
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-    public static async Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver)
+    public static Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver) =>
+        httpClient.RegisterNewUser(driver, TokenGenerator.Generate());
+
+    public static async Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver, RegisterToken registerToken)
     {
         if (!httpClient.HasPublicKey()) throw new Exception("ApiKey was not provided. Please add ApiKey to headers.");
         if (!httpClient.HasSecretKey()) throw new Exception("ApiSecret was not provided. Please add ApiSecret to headers.");
 
-        var tokenRequest = TokenGenerator.Generate();
-        using var tokenResponse = await httpClient.PostAsJsonAsync("/register/token", tokenRequest);
+        using var tokenResponse = await httpClient.PostAsJsonAsync("/register/token", registerToken);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
@@ -36,7 +38,7 @@ public static class UserHelpers
             Origin = PasswordlessApiFactory.OriginUrl,
             RPID = PasswordlessApiFactory.RpId
         };
-        var registrationBeginResponse = await httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
         var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
@@ -54,7 +56,7 @@ public static class UserHelpers
         if (!httpClient.HasPublicKey()) throw new Exception("ApiKey was not provided. Please add ApiKey to headers.");
         if (!httpClient.HasSecretKey()) throw new Exception("ApiSecret was not provided. Please add ApiSecret to headers.");
 
-        var signInBeginResponse = await httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        using var signInBeginResponse = await httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<AssertionOptions>>();
 
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);

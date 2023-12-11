@@ -8,18 +8,16 @@ namespace Passwordless.Api.Endpoints;
 
 public static class SigninEndpoints
 {
-    private record SigninTokenRequest(string UserId);
-
-    private record SigninTokenResponse(string Token);
+    public record SigninTokenResponse(string Token);
 
     public static void MapSigninEndpoints(this WebApplication app)
     {
         app.MapPost("/signin/generate-token", async (
-                SigninTokenRequest signinToken,
+                SignInTokenRequest signinToken,
                 IFido2Service fido2Service
             ) =>
             {
-                var result = await fido2Service.CreateSigninToken(signinToken.UserId);
+                var result = await fido2Service.CreateSigninToken(signinToken);
 
                 return Ok(new SigninTokenResponse(result));
             })
