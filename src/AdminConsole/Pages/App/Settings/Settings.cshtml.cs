@@ -285,7 +285,7 @@ public class SettingsModel : BaseExtendedPageModel
         string Id,
         string Value,
         string Type,
-        string Scopes,
+        IReadOnlySet<string> Scopes,
         bool IsLocked,
         DateTime? LastLockedAt,
         bool AllowDestructiveAction)
@@ -296,7 +296,7 @@ public class SettingsModel : BaseExtendedPageModel
                 dto.Id,
                 dto.ApiKey,
                 dto.Type.ToString(),
-                string.Join(", ", dto.Scopes),
+                dto.Scopes,
                 dto.IsLocked,
                 dto.LastLockedAt,
                 dto.Type == ApiKeyTypes.Public ? !application.ApiKey.EndsWith(dto.Id) : !application.ApiSecret.EndsWith(dto.Id));

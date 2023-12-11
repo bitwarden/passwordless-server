@@ -353,7 +353,7 @@ public class SharedManagementService : ISharedManagementService
             Id = x.Id,
             ApiKey = x.ApiKey.Contains("public") ? x.ApiKey : x.Id,
             Type = x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
-            Scopes = x.Scopes.ToHashSet(),
+            Scopes = x.Scopes.Order().ToHashSet(),
             IsLocked = x.IsLocked,
             LastLockedAt = x.LastLockedAt,
             LastUnlockedAt = x.LastUnlockedAt

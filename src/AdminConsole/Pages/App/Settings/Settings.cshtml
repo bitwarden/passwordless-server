@@ -112,7 +112,14 @@
                             {
                                 <td>No</td>
                             }
-                            <td>@apiKey.Scopes</td>
+                            <td>
+                                <ul>
+                                    @foreach(var scope in apiKey.Scopes)
+                                    {
+                                        <li>@scope</li>
+                                    }
+                                </ul>
+                            </td>
                             <td class="flex space-x-2">
                                 @if (apiKey.IsLocked)
                                 {
