@@ -162,12 +162,12 @@ public class AccountEndpointsTests
         var payload = _fixture.Create<CreateApiKeyDto>();
 
         // Act
-        var actual = await AppsEndpoints.CreateApiKeysAsync("myapp1", payload, sharedManagementServiceMock.Object);
+        var actual = await AppsEndpoints.CreateApiKeyAsync("myapp1", payload, sharedManagementServiceMock.Object);
 
         // Assert
-        Assert.Equal(typeof(NoContent), actual.GetType());
+        Assert.Equal(typeof(Ok), actual.GetType());
         sharedManagementServiceMock.Verify(x =>
-                x.CreateApiKeysAsync(
+                x.CreateApiKeyAsync(
                     It.Is<string>(p => p == "myapp1"),
                     It.Is<CreateApiKeyDto>(p => p == payload)), Times.Once);
     }

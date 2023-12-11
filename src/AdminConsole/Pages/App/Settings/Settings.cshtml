@@ -1,5 +1,4 @@
 ﻿@page "/settings"
-@using Passwordless.AdminConsole.TagHelpers
 @model SettingsModel
 
 @{
@@ -62,6 +61,23 @@
 
 <div class="panel">
     <h2>Api Keys</h2>
+    <div class="flex space-x-4">
+        <a
+            id="create-public-key-btn"
+            class="btn-primary"
+            asp-page="/App/Settings/CreatePublicKey"
+            asp-route-app="@Model.ApplicationId">
+            Create Public Key
+        </a>
+        <a
+            id="create-secret-key-btn"
+            class="btn-primary"
+            asp-page="/App/Settings/CreateSecretKey"
+            asp-route-app="@Model.ApplicationId">
+            Create Secret Key
+        </a>
+    </div>
+
     <div class="panel-content">
         <div class="table-container">
             <table class="tbl-default min-w-full">

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Middleware;
@@ -11,7 +10,7 @@ using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
 
-public class SettingsModel : PageModel
+public class SettingsModel : BaseExtendedPageModel
 {
     public const string SelectedApiKeyIdField = "SelectedApiKeyId";
 

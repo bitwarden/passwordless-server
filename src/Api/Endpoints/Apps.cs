@@ -71,7 +71,7 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/admin/apps/{appId}/api-keys", CreateApiKeysAsync)
+        app.MapPost("/admin/apps/{appId}/api-keys", CreateApiKeyAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -123,13 +123,13 @@ public static class AppsEndpoints
             .RequireCors("default");
     }
 
-    public static async Task<IResult> CreateApiKeysAsync(
+    public static async Task<IResult> CreateApiKeyAsync(
         [FromRoute] string appId,
         [FromBody] CreateApiKeyDto payload,
         ISharedManagementService service)
     {
-        await service.CreateApiKeysAsync(appId, payload);
-        return NoContent();
+        var result = await service.CreateApiKeyAsync(appId, payload);
+        return Ok(result);
     }
 
     public static async Task<IResult> ListApiKeysAsync(
