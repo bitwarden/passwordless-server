@@ -56,7 +56,7 @@ public class SettingsModel : BaseExtendedPageModel
 
     public IReadOnlyCollection<ApiKey> ApiKeys { get; private set; }
 
-    public async Task OnGet()
+    private async Task InitializeAsync()
     {
         Organization = await _dataService.GetOrganizationWithDataAsync();
         ApplicationId = _currentContext.AppId ?? String.Empty;
@@ -65,9 +65,14 @@ public class SettingsModel : BaseExtendedPageModel
 
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
+    }
+
+    public async Task OnGet()
+    {
+        await InitializeAsync();
 
         var apiKeys = await _managementClient.GetApiKeysAsync(ApplicationId);
-        ApiKeys = apiKeys.Select(ApiKey.FromDto).ToImmutableList();
+        ApiKeys = apiKeys.Select(x => ApiKey.FromDto(x, Application!.ApiSecret)).ToImmutableList();
 
         if (!Organization.HasSubscription)
         {
@@ -76,8 +81,8 @@ public class SettingsModel : BaseExtendedPageModel
         AddPlan(_billingOptions.Store.Pro);
         AddPlan(_billingOptions.Store.Enterprise);
 
-        PendingDelete = application?.DeleteAt.HasValue ?? false;
-        DeleteAt = application?.DeleteAt;
+        PendingDelete = Application?.DeleteAt.HasValue ?? false;
+        DeleteAt = Application?.DeleteAt;
     }
 
     /// <summary>
@@ -247,9 +252,11 @@ public class SettingsModel : BaseExtendedPageModel
         string Type,
         string Scopes,
         bool IsLocked,
-        DateTime? LastLockedAt)
+        DateTime? LastLockedAt,
+        bool CanLock,
+        bool CanDelete)
     {
-        public static ApiKey FromDto(ApiKeyResponse dto)
+        public static ApiKey FromDto(ApiKeyResponse dto, string managementSecret)
         {
             return new ApiKey(
                 dto.Id,
@@ -257,7 +264,9 @@ public class SettingsModel : BaseExtendedPageModel
                 dto.Type.ToString(),
                 string.Join(", ", dto.Scopes),
                 dto.IsLocked,
-                dto.LastLockedAt);
+                dto.LastLockedAt,
+                !managementSecret.EndsWith(dto.Id),
+                !managementSecret.EndsWith(dto.Id));
         }
     }
 }
