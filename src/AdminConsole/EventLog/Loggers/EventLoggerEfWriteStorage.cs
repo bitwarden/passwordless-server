@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Models;
+using Passwordless.Common.EventLog.Enums;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;
 
@@ -18,6 +19,12 @@ public class EventLoggerEfWriteStorage<TDbContext> : IEventLogger where TDbConte
     public virtual void LogEvent(OrganizationEventDto @event)
     {
         _events.Add(@event.ToNewEvent());
+    }
+
+    public void LogEvent(string performedBy, EventType eventType, string message, Severity severity, string subject,
+        int organizationId, DateTime performedAt)
+    {
+        _events.Add(new OrganizationEventDto(performedBy, eventType, message, severity, subject, organizationId, performedAt).ToNewEvent());
     }
 
     public async Task FlushAsync()

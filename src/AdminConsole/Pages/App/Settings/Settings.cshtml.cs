@@ -2,10 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
+using Passwordless.Common.EventLog.Enums;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -22,6 +25,7 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly ISharedBillingService _billingService;
     private readonly IPasswordlessManagementClient _managementClient;
     private readonly BillingOptions _billingOptions;
+    private readonly IEventLogger _eventLogger;
 
     public SettingsModel(
         ILogger<SettingsModel> logger,
@@ -30,8 +34,8 @@ public class SettingsModel : BaseExtendedPageModel
         IApplicationService appService,
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
-        IOptions<BillingOptions> billingOptions
-        )
+        IOptions<BillingOptions> billingOptions,
+        IEventLogger eventLogger)
     {
         _logger = logger;
         _dataService = dataService;
@@ -40,6 +44,7 @@ public class SettingsModel : BaseExtendedPageModel
         _billingService = billingService;
         _managementClient = managementClient;
         _billingOptions = billingOptions.Value;
+        _eventLogger = eventLogger;
     }
 
     public Models.Organization Organization { get; set; }
@@ -156,6 +161,15 @@ public class SettingsModel : BaseExtendedPageModel
         {
             await _managementClient.LockApiKeyAsync(applicationId, selectedApiKeyId);
 
+            _eventLogger.LogEvent(
+                Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyLocked,
+                $"Locked API key '{selectedApiKeyId}' for application {applicationId}.",
+                Severity.Informational,
+                _currentContext.AppId!,
+                _currentContext.OrgId!.Value,
+                DateTime.UtcNow);
+
             return RedirectToPage();
         }
         catch (Exception)
@@ -178,6 +192,15 @@ public class SettingsModel : BaseExtendedPageModel
         {
             await _managementClient.UnlockApiKeyAsync(applicationId, selectedApiKeyId);
 
+            _eventLogger.LogEvent(
+                Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyUnlocked,
+                $"Unlocked API key '{selectedApiKeyId}' for application {applicationId}.",
+                Severity.Informational,
+                _currentContext.AppId!,
+                _currentContext.OrgId!.Value,
+                DateTime.UtcNow);
+
             return RedirectToPage();
         }
         catch (Exception)
@@ -199,6 +222,15 @@ public class SettingsModel : BaseExtendedPageModel
         try
         {
             await _managementClient.DeleteApiKeyAsync(applicationId, selectedApiKeyId);
+
+            _eventLogger.LogEvent(
+                Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyDeleted,
+                $"Deleted API key '{selectedApiKeyId}' for application {applicationId}.",
+                Severity.Informational,
+                _currentContext.AppId!,
+                _currentContext.OrgId!.Value,
+                DateTime.UtcNow);
 
             return RedirectToPage();
         }
@@ -267,7 +299,7 @@ public class SettingsModel : BaseExtendedPageModel
                 string.Join(", ", dto.Scopes),
                 dto.IsLocked,
                 dto.LastLockedAt,
-                dto.Type == ApiKeyTypes.Public ? application.ApiKey.EndsWith(dto.Id) : !application.ApiSecret.EndsWith(dto.Id));
+                dto.Type == ApiKeyTypes.Public ? !application.ApiKey.EndsWith(dto.Id) : !application.ApiSecret.EndsWith(dto.Id));
         }
     }
 }

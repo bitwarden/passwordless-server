@@ -29,5 +29,9 @@ public enum EventType
     AdminCancelAdminInvite = 7004,
     AdminInvalidInviteUsed = 7005,
     AdminAcceptedInvite = 7006,
-    AdminSignInTokenVerified = 7007
+    AdminSignInTokenVerified = 7007,
+    AdminApiKeyCreated = 7008,
+    AdminApiKeyDeleted = 7009,
+    AdminApiKeyLocked = 7010,
+    AdminApiKeyUnlocked = 7011
 }

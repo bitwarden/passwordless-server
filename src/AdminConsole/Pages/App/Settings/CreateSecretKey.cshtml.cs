@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Passwordless.Common.Constants;
+using Passwordless.Common.EventLog.Enums;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
 
@@ -11,16 +14,19 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
 {
     private readonly IPasswordlessManagementClient _managementClient;
     private readonly ICurrentContext _currentContext;
+    private readonly IEventLogger _eventLogger;
     private readonly ILogger<SettingsModel> _logger;
 
     public CreateSecretKeyModel(
         IPasswordlessManagementClient managementClient,
         ICurrentContext currentContext,
+        IEventLogger eventLogger,
         ILogger<SettingsModel> logger
         )
     {
         _managementClient = managementClient;
         _currentContext = currentContext;
+        _eventLogger = eventLogger;
         _logger = logger;
     }
 
@@ -45,6 +51,15 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
         {
             var request = new CreateApiKeyRequest(ApiKeyTypes.Public, selectedScopes);
             await _managementClient.CreateApiKeyAsync(_currentContext.AppId!, request);
+
+            _eventLogger.LogEvent(
+                Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyCreated,
+                $"Created secret key for application {_currentContext.AppId}.",
+                Severity.Informational,
+                _currentContext.AppId!,
+                _currentContext.OrgId!.Value,
+                DateTime.UtcNow);
 
             return RedirectToApplicationPage("/App/Settings/Settings", new ApplicationPageRoutingContext(_currentContext.AppId!));
         }
