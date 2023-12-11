@@ -13,7 +13,7 @@ public static class SigninEndpoints
     public static void MapSigninEndpoints(this WebApplication app)
     {
         app.MapPost("/signin/generate-token", async (
-                SignInTokenRequest signinToken,
+                SigninTokenRequest signinToken,
                 IFido2Service fido2Service
             ) =>
             {

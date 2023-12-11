@@ -204,7 +204,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
             .AddSecretKey(accountKeysCreation.ApiSecret1);
 
         // Act
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SignInTokenRequest(unknownUserId)
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(unknownUserId)
         {
             Origin = PasswordlessApiFactory.OriginUrl,
             RPID = PasswordlessApiFactory.RpId
@@ -233,7 +233,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
         await client.RegisterNewUser(driver, registerToken);
 
         // Act
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SignInTokenRequest(registerToken.UserId)
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(registerToken.UserId)
         {
             Origin = PasswordlessApiFactory.OriginUrl,
             RPID = PasswordlessApiFactory.RpId

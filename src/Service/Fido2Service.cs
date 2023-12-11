@@ -257,7 +257,7 @@ public class Fido2Service : IFido2Service
         return new TokenResponse(token);
     }
 
-    public async Task<string> CreateSigninToken(SignInTokenRequest request)
+    public async Task<string> CreateSigninToken(SigninTokenRequest request)
     {
         ValidateUserId(request.UserId);
 

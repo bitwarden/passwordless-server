@@ -1,6 +1,6 @@
 namespace Passwordless.Service.Models;
 
-public class SignInTokenRequest(string userId) : RequestBase
+public class SigninTokenRequest(string userId) : RequestBase
 {
     public string UserId { get; } = userId;
 };
