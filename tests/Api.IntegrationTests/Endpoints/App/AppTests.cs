@@ -4,6 +4,8 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Common.Constants;
+using Passwordless.Common.Extensions;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
@@ -182,7 +184,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_get_all_api_keys_for_my_application()
     {
         // Arrange
-        var applicationName = $"test{Guid.NewGuid():N}";
+        var applicationName = GetApplicationName();
         using var client = _factory.CreateClient().AddManagementKey();
         _ = await client.CreateApplication(applicationName);
 
@@ -195,6 +197,52 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         apiKeys.Should().NotBeNullOrEmpty();
         apiKeys!.Where(x => x.Type == ApiKeyTypes.Public).Should().HaveCount(2);
         apiKeys!.Where(x => x.Type == ApiKeyTypes.Secret).Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task I_can_create_a_new_public_key()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+
+        _ = await _client.CreateApplication(applicationName);
+
+        // Act
+        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/api-keys",
+            new CreateApiKeyDto(ApiKeyTypes.Public, ApiKeyScopes.PublicScopes.ToHashSet()));
+
+        // Assert
+        createApiKeyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var apiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResultDto>();
+
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+
+        apiKeys.Should().NotBeNullOrEmpty();
+        apiKeys.Should().Contain(x => x.ApiKey == apiKey!.ApiKey);
+    }
+
+    [Fact]
+    public async Task I_can_create_a_new_secret_key()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+
+        _ = await _client.CreateApplication(applicationName);
+
+        // Act
+        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/api-keys",
+            new CreateApiKeyDto(ApiKeyTypes.Secret, ApiKeyScopes.SecretScopes.ToHashSet()));
+
+        // Assert
+        createApiKeyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var apiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResultDto>();
+
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+
+        apiKeys.Should().NotBeNullOrEmpty();
+        apiKeys.Should().Contain(x => x.ApiKey == apiKey!.ApiKey.GetLast(4));
     }
 
     public void Dispose()

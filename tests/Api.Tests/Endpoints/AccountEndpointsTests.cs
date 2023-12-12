@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using AutoFixture;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -130,68 +129,6 @@ public class AccountEndpointsTests
         var actual = await AppsEndpoints.SetFeaturesAsync(payload, applicationServiceMock.Object);
 
         Assert.Equal(typeof(NoContent), actual.GetType());
-    }
-    #endregion
-
-    #region ListApiKeysAsync
-
-    [Fact]
-    public async Task ListApiKeysAsync_Logs_CorrectEvent()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-        var expectedResult = _fixture.CreateMany<ApiKeyDto>().ToImmutableList();
-        sharedManagementServiceMock.Setup(x => x.ListApiKeysAsync(It.Is<string>(p => p == "myapp1")))
-            .ReturnsAsync(expectedResult);
-
-        // Act
-        _ = await AppsEndpoints.ListApiKeysAsync("myapp1", sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
-    }
-    #endregion
-
-    #region CreateApiKeyAsync
-    [Fact]
-    public async Task CreateApiKeyAsync_Returns_Ok_WhenSuccessful()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-        var payload = _fixture.Create<CreateApiKeyDto>();
-        sharedManagementServiceMock.Setup(x => x.CreateApiKeyAsync("myapp1", payload))
-            .ReturnsAsync(new CreateApiKeyResultDto("myapp1:public:12345678"));
-
-        // Act
-        var actual = await AppsEndpoints.CreateApiKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        Assert.Equal(typeof(Ok<CreateApiKeyResultDto>), actual.GetType());
-        var actualResult = ((Ok<CreateApiKeyResultDto>)actual).Value;
-        Assert.Equal("myapp1:public:12345678", actualResult!.ApiKey);
-        sharedManagementServiceMock.Verify(x =>
-                x.CreateApiKeyAsync(
-                    It.Is<string>(p => p == "myapp1"),
-                    It.Is<CreateApiKeyDto>(p => p == payload)), Times.Once);
-    }
-
-    [Fact]
-    public async Task CreateApiKeyAsync_Logs_CorrectEvent()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-        var payload = _fixture.Create<CreateApiKeyDto>();
-        sharedManagementServiceMock.Setup(x => x.CreateApiKeyAsync("myapp1", payload))
-            .ReturnsAsync(new CreateApiKeyResultDto("myapp1:public:12345678"));
-
-        // Act
-        _ = await AppsEndpoints.CreateApiKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
     }
     #endregion
 
