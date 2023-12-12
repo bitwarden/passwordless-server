@@ -126,44 +126,54 @@ public static class AppsEndpoints
     public static async Task<IResult> CreateApiKeyAsync(
         [FromRoute] string appId,
         [FromBody] CreateApiKeyDto payload,
-        ISharedManagementService service)
+        ISharedManagementService service,
+        IEventLogger eventLogger)
     {
         var result = await service.CreateApiKeyAsync(appId, payload);
+        eventLogger.LogApiKeyCreatedEvent(result.ApiKey);
         return Ok(result);
     }
 
     public static async Task<IResult> ListApiKeysAsync(
         [FromRoute] string appId,
-        ISharedManagementService service)
+        ISharedManagementService service,
+        IEventLogger eventLogger)
     {
         var apiKeys = await service.ListApiKeysAsync(appId);
+        eventLogger.LogApiKeysEnumeratedEvent();
         return Ok(apiKeys);
     }
 
     public static async Task<IResult> LockApiKeyAsync(
         [FromRoute] string appId,
         [FromRoute] string apiKeyId,
-        ISharedManagementService service)
+        ISharedManagementService service,
+        IEventLogger eventLogger)
     {
         await service.LockApiKeyAsync(appId, apiKeyId);
+        eventLogger.LogApiKeyLockedEvent(apiKeyId);
         return NoContent();
     }
 
     public static async Task<IResult> UnlockApiKeyAsync(
         [FromRoute] string appId,
         [FromRoute] string apiKeyId,
-        ISharedManagementService service)
+        ISharedManagementService service,
+        IEventLogger eventLogger)
     {
         await service.UnlockApiKeyAsync(appId, apiKeyId);
+        eventLogger.LogApiKeyUnlockedEvent(apiKeyId);
         return NoContent();
     }
 
     public static async Task<IResult> DeleteApiKeyAsync(
         [FromRoute] string appId,
         [FromRoute] string apiKeyId,
-        ISharedManagementService service)
+        ISharedManagementService service,
+        IEventLogger eventLogger)
     {
         await service.DeleteApiKeyAsync(appId, apiKeyId);
+        eventLogger.LogApiKeyDeletedEvent(apiKeyId);
         return NoContent();
     }
 

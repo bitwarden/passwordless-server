@@ -33,5 +33,6 @@ public enum EventType
     AdminApiKeyCreated = 7008,
     AdminApiKeyDeleted = 7009,
     AdminApiKeyLocked = 7010,
-    AdminApiKeyUnlocked = 7011
+    AdminApiKeyUnlocked = 7011,
+    AdminApiKeysEnumerated = 7012
 }
