@@ -114,7 +114,7 @@ jobs:
       packages: write
 
     env:
-      CONTAINER_NAMESPACE: hub.docker.com/bitwarden
+      CONTAINER_NAMESPACE: bitwarden
 
     steps:
       - name: Checkout
