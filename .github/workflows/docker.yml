@@ -140,7 +140,7 @@ jobs:
         id: get-secrets
         uses: bitwarden/gh-actions/get-keyvault-secrets@main
         with:
-          keyvault: "${{ inputs.azure-keyvault-name }}"
+          keyvault: "bitwarden-ci"
           secrets: "docker-password,
             docker-username"
 
