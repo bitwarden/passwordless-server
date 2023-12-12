@@ -47,7 +47,7 @@
                             <td>@apiKey.Type</td>
                             @if (apiKey.IsLocked)
                             {
-                                <td>Yes (<asp-local-time datetime="apiKey.LastLockedAt!.Value"></asp-local-time>)</td>
+                                <td class="bg-red-50">Yes (<asp-local-time datetime="apiKey.LastLockedAt!.Value"></asp-local-time>)</td>
                             }
                             else
                             {
