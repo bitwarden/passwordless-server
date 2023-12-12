@@ -2,36 +2,29 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Loggers;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
-using Passwordless.Common.EventLog.Enums;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : BaseExtendedPageModel
 {
-    public const string SelectedApiKeyIdField = "SelectedApiKeyId";
-
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
     private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
-    private readonly IPasswordlessManagementClient _managementClient;
     private readonly BillingOptions _billingOptions;
-    private readonly IEventLogger _eventLogger;
 
     public SettingsModel(
         ILogger<SettingsModel> logger,
         IDataService dataService,
         ICurrentContext currentContext,
+        IHttpContextAccessor httpContextAccessor,
         IApplicationService appService,
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
@@ -43,9 +36,8 @@ public class SettingsModel : BaseExtendedPageModel
         _currentContext = currentContext;
         _appService = appService;
         _billingService = billingService;
-        _managementClient = managementClient;
         _billingOptions = billingOptions.Value;
-        _eventLogger = eventLogger;
+        ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
 
     public Models.Organization Organization { get; set; }
@@ -60,7 +52,7 @@ public class SettingsModel : BaseExtendedPageModel
 
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
-    public IReadOnlyCollection<ApiKey> ApiKeys { get; private set; }
+    public ApiKeysModel ApiKeysModel { get; }
 
     private async Task InitializeAsync()
     {
@@ -77,11 +69,7 @@ public class SettingsModel : BaseExtendedPageModel
     {
         await InitializeAsync();
 
-        var apiKeys = await _managementClient.GetApiKeysAsync(ApplicationId);
-        ApiKeys = apiKeys
-            .Select(x => ApiKey.FromDto(x, Application!))
-            .Where(x => x.AllowDestructiveAction)
-            .ToImmutableList();
+        await ApiKeysModel.OnInitializeAsync();
 
         if (!Organization.HasSubscription)
         {
@@ -151,93 +139,39 @@ public class SettingsModel : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostLockApiKeyAsync()
     {
-        var applicationId = _currentContext.AppId ?? throw new ArgumentNullException(nameof(_currentContext.AppId));
-        var selectedApiKeyId = Request.Form[SelectedApiKeyIdField].ToString();
-        if (string.IsNullOrEmpty(selectedApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(selectedApiKeyId));
-        }
-
         try
         {
-            await _managementClient.LockApiKeyAsync(applicationId, selectedApiKeyId);
-
-            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
-                EventType.AdminApiKeyLocked,
-                $"Locked API key '{selectedApiKeyId}' for application {applicationId}.",
-                Severity.Informational,
-                _currentContext.AppId!,
-                _currentContext.OrgId!.Value,
-                DateTime.UtcNow);
-            _eventLogger.LogEvent(eventDto);
-
+            await ApiKeysModel.OnLockAsync();
             return RedirectToPage();
         }
-        catch (Exception)
+        catch
         {
-            _logger.LogError("Failed to lock api key for application: {appId}", applicationId);
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
         }
     }
 
     public async Task<IActionResult> OnPostUnlockApiKeyAsync()
     {
-        var applicationId = _currentContext.AppId ?? throw new ArgumentNullException(nameof(_currentContext.AppId));
-        var selectedApiKeyId = Request.Form["SelectedApiKeyId"].ToString();
-        if (string.IsNullOrEmpty(selectedApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(selectedApiKeyId));
-        }
-
         try
         {
-            await _managementClient.UnlockApiKeyAsync(applicationId, selectedApiKeyId);
-
-            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
-                EventType.AdminApiKeyUnlocked,
-                $"Unlocked API key '{selectedApiKeyId}' for application {applicationId}.",
-                Severity.Informational,
-                _currentContext.AppId!,
-                _currentContext.OrgId!.Value,
-                DateTime.UtcNow);
-            _eventLogger.LogEvent(eventDto);
-
+            await ApiKeysModel.OnUnlockAsync();
             return RedirectToPage();
         }
-        catch (Exception)
+        catch
         {
-            _logger.LogError("Failed to unlock api key for application: {appId}", applicationId);
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
         }
     }
 
     public async Task<IActionResult> OnPostDeleteApiKeyAsync()
     {
-        var applicationId = _currentContext.AppId ?? throw new ArgumentNullException(nameof(_currentContext.AppId));
-        var selectedApiKeyId = Request.Form["SelectedApiKeyId"].ToString();
-        if (string.IsNullOrEmpty(selectedApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(selectedApiKeyId));
-        }
-
         try
         {
-            await _managementClient.DeleteApiKeyAsync(applicationId, selectedApiKeyId);
-
-            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
-                EventType.AdminApiKeyDeleted,
-                $"Deleted API key '{selectedApiKeyId}' for application {applicationId}.",
-                Severity.Informational,
-                _currentContext.AppId!,
-                _currentContext.OrgId!.Value,
-                DateTime.UtcNow);
-            _eventLogger.LogEvent(eventDto);
-
+            await ApiKeysModel.OnDeleteAsync();
             return RedirectToPage();
         }
-        catch (Exception)
+        catch
         {
-            _logger.LogError("Failed to delete api key for application: {appId}", applicationId);
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
         }
     }
@@ -281,26 +215,4 @@ public class SettingsModel : BaseExtendedPageModel
         bool IsActive,
         bool CanSubscribe,
         bool IsOutdated);
-
-    public record ApiKey(
-        string Id,
-        string Value,
-        string Type,
-        IReadOnlySet<string> Scopes,
-        bool IsLocked,
-        DateTime? LastLockedAt,
-        bool AllowDestructiveAction)
-    {
-        public static ApiKey FromDto(ApiKeyResponse dto, Application application)
-        {
-            return new ApiKey(
-                dto.Id,
-                dto.ApiKey,
-                dto.Type.ToString(),
-                dto.Scopes,
-                dto.IsLocked,
-                dto.LastLockedAt,
-                dto.Type == ApiKeyTypes.Public ? !application.ApiKey.EndsWith(dto.Id) : !application.ApiSecret.EndsWith(dto.Id));
-        }
-    }
 }

@@ -43,6 +43,9 @@
     <Compile Update="Pages\App\Settings\SecretKeyCreated.cshtml.cs">
       <DependentUpon>SecretKeyCreated.cshtml</DependentUpon>
     </Compile>
+    <Compile Update="Pages\App\Settings\ApiKeysModel.cshtml.cs">
+      <DependentUpon>_ApiKeys.cshtml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

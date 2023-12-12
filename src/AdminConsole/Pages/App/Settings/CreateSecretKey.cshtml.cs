@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -52,7 +53,7 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
             var request = new CreateApiKeyRequest(ApiKeyTypes.Secret, selectedScopes);
             var apiKey = await _managementClient.CreateApiKeyAsync(_currentContext.AppId!, request);
 
-            _eventLogger.LogEvent(
+            var eventDto = new OrganizationEventDto(
                 Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyCreated,
                 $"Created secret key for application {_currentContext.AppId}.",
@@ -60,6 +61,7 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
                 _currentContext.AppId!,
                 _currentContext.OrgId!.Value,
                 DateTime.UtcNow);
+            _eventLogger.LogEvent(eventDto);
 
             var encodedApiKey = Base64Url.Encode(Encoding.UTF8.GetBytes(apiKey.ApiKey));
             return RedirectToPage(

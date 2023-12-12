@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -51,14 +52,14 @@ public class CreatePublicKeyModel : BaseExtendedPageModel
             var request = new CreateApiKeyRequest(ApiKeyTypes.Public, selectedScopes);
             await _managementClient.CreateApiKeyAsync(_currentContext.AppId!, request);
 
-            _eventLogger.LogEvent(
-                Request.HttpContext.User.GetId(),
+            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyCreated,
                 $"Created public key for application {_currentContext.AppId}.",
                 Severity.Informational,
                 _currentContext.AppId!,
                 _currentContext.OrgId!.Value,
                 DateTime.UtcNow);
+            _eventLogger.LogEvent(eventDto);
 
             return RedirectToApplicationPage("/App/Settings/Settings", new ApplicationPageRoutingContext(_currentContext.AppId!));
         }
