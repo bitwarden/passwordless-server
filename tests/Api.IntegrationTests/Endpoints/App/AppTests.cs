@@ -16,7 +16,6 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     private readonly HttpClient _client;
     private readonly PasswordlessApiFactory _factory;
 
-
     public AppTests(PasswordlessApiFactory apiFactory)
     {
         _factory = apiFactory;
@@ -66,7 +65,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_create_an_app_and_its_features_will_be_set_correctly()
     {
         // Arrange
-        var name = $"app{Guid.NewGuid():N}";
+        var name = GetApplicationName();
 
         // Act
         using var res = await _client.CreateApplication(name);
@@ -92,7 +91,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         const int expectedEventLoggingRetentionPeriod = 30;
-        var name = $"app{Guid.NewGuid():N}";
+        var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplication(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
@@ -116,7 +115,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_not_set_the_event_logging_retention_period_to_an_invalid_value(int invalidRetentionPeriod)
     {
         // Arrange
-        var name = $"app{Guid.NewGuid():N}";
+        var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplication(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
@@ -138,7 +137,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         const int expectedEventLoggingRetentionPeriod = 30;
 
-        var name = $"app{Guid.NewGuid():N}";
+        var name = GetApplicationName();
         _ = await _client.CreateApplication(name);
         var manageFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
 
@@ -162,7 +161,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         const int expectedEventLoggingRetentionPeriod = 30;
 
-        var name = $"app{Guid.NewGuid():N}";
+        var name = GetApplicationName();
         _ = await _client.CreateApplication(name);
         var manageAppFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
         _ = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
@@ -177,6 +176,25 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
         appFeature.EventLoggingIsEnabled.Should().BeTrue();
         appFeature.DeveloperLoggingEndsAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task I_can_get_all_api_keys_for_my_application()
+    {
+        // Arrange
+        var applicationName = $"test{Guid.NewGuid():N}";
+        using var client = _factory.CreateClient().AddManagementKey();
+        _ = await client.CreateApplication(applicationName);
+
+        // Act
+        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+
+        // Assert
+        getApiKeysResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        apiKeys.Should().NotBeNullOrEmpty();
+        apiKeys!.Where(x => x.Type == ApiKeyTypes.Public).Should().HaveCount(2);
+        apiKeys!.Where(x => x.Type == ApiKeyTypes.Secret).Should().HaveCount(2);
     }
 
     public void Dispose()

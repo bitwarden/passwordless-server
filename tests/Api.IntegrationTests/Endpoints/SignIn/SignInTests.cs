@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
 
-public class SignInTests : IClassFixture<PasswordlessApiFactory>
+public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly PasswordlessApiFactory _factory;
@@ -168,7 +168,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task An_expired_apps_token_keys_should_be_removed_when_a_request_is_made()
     {
         // Arrange
-        const string applicationName = "testRemoveToken";
+        var applicationName = $"test{Guid.NewGuid():N}";
         var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
         _factory.TimeProvider.SetUtcNow(serverTime);
         using var client = _factory.CreateClient().AddManagementKey();
@@ -195,10 +195,9 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task I_receive_an_error_when_I_request_a_sign_in_token_for_a_user_that_does_not_exist()
     {
         // Arrange
-        const string applicationName = "testNonUserTokenRequest";
         var unknownUserId = $"user{Guid.NewGuid():N}";
         using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplication(applicationName);
+        using var createApplicationMessage = await client.CreateApplication();
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1);
@@ -221,9 +220,8 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
     public async Task I_receive_a_sign_in_token_for_an_existing_user()
     {
         // Arrange
-        const string applicationName = "testUserRequest";
         using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplication(applicationName);
+        using var createApplicationMessage = await client.CreateApplication();
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1)
@@ -247,5 +245,10 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>
 
         var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
     }
 }

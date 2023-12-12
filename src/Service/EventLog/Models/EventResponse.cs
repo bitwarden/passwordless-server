@@ -4,6 +4,8 @@ namespace Passwordless.Service.EventLog.Models;
 
 public class EventResponse
 {
+    public EventResponse() { }
+
     public EventResponse(DateTime performedAt, string message, string performedBy, string applicationId, EventType eventType, Severity severity, string subject, string apiKeyId)
     {
         PerformedAt = performedAt;
@@ -16,12 +18,12 @@ public class EventResponse
         ApiKeyId = apiKeyId;
     }
 
-    public DateTime PerformedAt { get; }
-    public string Message { get; }
-    public string PerformedBy { get; }
-    public string TenantId { get; }
-    public string EventType { get; }
-    public string Severity { get; }
-    public string Subject { get; }
-    public string ApiKeyId { get; }
+    public DateTime PerformedAt { get; init; }
+    public string Message { get; init; }
+    public string PerformedBy { get; init; }
+    public string TenantId { get; init; }
+    public string EventType { get; init; }
+    public string Severity { get; init; }
+    public string Subject { get; init; }
+    public string ApiKeyId { get; init; }
 }

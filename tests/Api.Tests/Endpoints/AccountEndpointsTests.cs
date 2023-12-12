@@ -134,25 +134,6 @@ public class AccountEndpointsTests
     #endregion
 
     #region ListApiKeysAsync
-    [Fact]
-    public async Task ListApiKeysAsync_Returns_Ok_WhenSuccessful()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-        var expectedResult = _fixture.CreateMany<ApiKeyDto>().ToImmutableList();
-        sharedManagementServiceMock.Setup(x => x.ListApiKeysAsync(It.Is<string>(p => p == "myapp1")))
-            .ReturnsAsync(expectedResult);
-
-        // Act
-        var actual = await AppsEndpoints.ListApiKeysAsync("myapp1", sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        Assert.Equal(typeof(Ok<IReadOnlyCollection<ApiKeyDto>>), actual.GetType());
-        sharedManagementServiceMock.Verify(x => x.ListApiKeysAsync("myapp1"), Times.Once);
-        var actualResult = (actual as Ok<IReadOnlyCollection<ApiKeyDto>>)?.Value;
-        Assert.Equal(expectedResult, actualResult);
-    }
 
     [Fact]
     public async Task ListApiKeysAsync_Logs_CorrectEvent()
