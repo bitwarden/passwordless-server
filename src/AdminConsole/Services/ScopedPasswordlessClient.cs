@@ -20,11 +20,15 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         ICurrentContext context)
         : base(new PasswordlessOptions
         {
-            ApiSecret = context.ApiSecret,
+            ApiSecret = context.ApiSecret!,
             ApiUrl = options.Value.InternalApiUrl,
         })
     {
         _client = httpClient;
+
+        // can be dropped when call below is moved to the SDK.
+        _client.DefaultRequestHeaders.Remove("ApiSecret");
+        _client.DefaultRequestHeaders.Add("ApiSecret", context.ApiSecret);
     }
 
     public async Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize)
@@ -32,6 +36,6 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         var response = await _client.GetAsync($"events?pageNumber={pageNumber}&numberOfResults={pageSize}");
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<ApplicationEventLogResponse>();
+        return (await response.Content.ReadFromJsonAsync<ApplicationEventLogResponse>())!;
     }
 }
