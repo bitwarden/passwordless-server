@@ -183,9 +183,43 @@ public class EfTenantStorage : ITenantStorage
         await db.SaveChangesAsync();
     }
 
-    public async Task SetAppDeletionDate(DateTime deletionAt)
+    public async Task LockApiKeyAsync(string apiKeyId)
     {
-        await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));
+        var rows = await db.ApiKeys
+            .Where(x => x.Id == apiKeyId)
+            .ExecuteUpdateAsync(apiKey => apiKey
+                .SetProperty(x => x.IsLocked, true)
+                .SetProperty(x => x.LastLockedAt, _timeProvider.GetUtcNow().UtcDateTime)
+        );
+        if (rows == 0)
+        {
+            throw new ArgumentException("ApiKey not found");
+        }
+    }
+
+    public async Task UnlockApiKeyAsync(string apiKeyId)
+    {
+        var rows = await db.ApiKeys
+            .Where(x => x.Id == apiKeyId)
+            .ExecuteUpdateAsync(apiKey => apiKey
+                .SetProperty(x => x.IsLocked, false)
+                .SetProperty(x => x.LastUnlockedAt, _timeProvider.GetUtcNow().UtcDateTime)
+            );
+        if (rows == 0)
+        {
+            throw new ArgumentException("ApiKey not found");
+        }
+    }
+
+    public async Task DeleteApiKeyAsync(string apiKeyId)
+    {
+        var rows = await db.ApiKeys
+            .Where(x => x.Id == apiKeyId)
+            .ExecuteDeleteAsync();
+        if (rows == 0)
+        {
+            throw new ArgumentException("ApiKey not found");
+        }
     }
 
     public async Task LockAllApiKeys(bool isLocked)

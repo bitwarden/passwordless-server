@@ -71,6 +71,26 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        app.MapPost("/admin/apps/{appId}/api-keys", CreateApiKeyAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapGet("/admin/apps/{appId}/api-keys", ListApiKeysAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("/admin/apps/{appId}/api-keys/{apiKeyId}/lock", LockApiKeyAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("/admin/apps/{appId}/api-keys/{apiKeyId}/unlock", UnlockApiKeyAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapDelete("/admin/apps/{appId}/api-keys/{apiKeyId}", DeleteApiKeyAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
         app.MapGet("/apps/list-pending-deletion", GetApplicationsPendingDeletionAsync)
             .RequireManagementKey()
             .RequireCors("default");
@@ -101,6 +121,50 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors("default");
+    }
+
+    public static async Task<IResult> CreateApiKeyAsync(
+        [FromRoute] string appId,
+        [FromBody] CreateApiKeyDto payload,
+        ISharedManagementService service)
+    {
+        var result = await service.CreateApiKeyAsync(appId, payload);
+        return Ok(result);
+    }
+
+    public static async Task<IResult> ListApiKeysAsync(
+        [FromRoute] string appId,
+        ISharedManagementService service)
+    {
+        var apiKeys = await service.ListApiKeysAsync(appId);
+        return Ok(apiKeys);
+    }
+
+    public static async Task<IResult> LockApiKeyAsync(
+        [FromRoute] string appId,
+        [FromRoute] string apiKeyId,
+        ISharedManagementService service)
+    {
+        await service.LockApiKeyAsync(appId, apiKeyId);
+        return NoContent();
+    }
+
+    public static async Task<IResult> UnlockApiKeyAsync(
+        [FromRoute] string appId,
+        [FromRoute] string apiKeyId,
+        ISharedManagementService service)
+    {
+        await service.UnlockApiKeyAsync(appId, apiKeyId);
+        return NoContent();
+    }
+
+    public static async Task<IResult> DeleteApiKeyAsync(
+        [FromRoute] string appId,
+        [FromRoute] string apiKeyId,
+        ISharedManagementService service)
+    {
+        await service.DeleteApiKeyAsync(appId, apiKeyId);
+        return NoContent();
     }
 
     public static async Task<IResult> ManageFeaturesAsync(

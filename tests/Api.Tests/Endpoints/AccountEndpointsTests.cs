@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using AutoFixture;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Passwordless.Api.Endpoints;
@@ -12,6 +14,8 @@ namespace Passwordless.Api.Tests.Endpoints;
 
 public class AccountEndpointsTests
 {
+    private readonly Fixture _fixture = new();
+
     #region MarkDeleteApplicationAsync
     [Fact]
     public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()
@@ -125,6 +129,95 @@ public class AccountEndpointsTests
         var actual = await AppsEndpoints.SetFeaturesAsync(payload, applicationServiceMock.Object);
 
         Assert.Equal(typeof(NoContent), actual.GetType());
+    }
+    #endregion
+
+    #region ListApiKeysAsync
+    [Fact]
+    public async Task ListApiKeysAsync_Returns_Ok_WhenSuccessful()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var expectedResult = _fixture.CreateMany<ApiKeyDto>().ToImmutableList();
+        sharedManagementServiceMock.Setup(x => x.ListApiKeysAsync(It.Is<string>(p => p == "myapp1")))
+            .ReturnsAsync(expectedResult);
+
+        // Act
+        var actual = await AppsEndpoints.ListApiKeysAsync("myapp1", sharedManagementServiceMock.Object);
+
+        // Assert
+        Assert.Equal(typeof(Ok<IReadOnlyCollection<ApiKeyDto>>), actual.GetType());
+        sharedManagementServiceMock.Verify(x => x.ListApiKeysAsync("myapp1"), Times.Once);
+        var actualResult = (actual as Ok<IReadOnlyCollection<ApiKeyDto>>)?.Value;
+        Assert.Equal(expectedResult, actualResult);
+    }
+    #endregion
+
+    #region CreateApiKeyAsync
+    [Fact]
+    public async Task CreateApiKeyAsync_Returns_Ok_WhenSuccessful()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var payload = _fixture.Create<CreateApiKeyDto>();
+
+        // Act
+        var actual = await AppsEndpoints.CreateApiKeyAsync("myapp1", payload, sharedManagementServiceMock.Object);
+
+        // Assert
+        Assert.Equal(typeof(Ok), actual.GetType());
+        sharedManagementServiceMock.Verify(x =>
+                x.CreateApiKeyAsync(
+                    It.Is<string>(p => p == "myapp1"),
+                    It.Is<CreateApiKeyDto>(p => p == payload)), Times.Once);
+    }
+    #endregion
+
+    #region LockApiKeyAsync
+    [Fact]
+    public async Task LockApiKeyAsync_Returns_NoContent_WhenSuccessful()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+
+        // Act
+        var actual = await AppsEndpoints.LockApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object);
+
+        // Assert
+        Assert.Equal(typeof(NoContent), actual.GetType());
+        sharedManagementServiceMock.Verify(x => x.LockApiKeyAsync("myapp1", "1234"), Times.Once);
+    }
+    #endregion
+
+    #region UnlockApiKeyAsync
+    [Fact]
+    public async Task UnlockApiKeyAsync_Returns_NoContent_WhenSuccessful()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+
+        // Act
+        var actual = await AppsEndpoints.UnlockApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object);
+
+        // Assert
+        Assert.Equal(typeof(NoContent), actual.GetType());
+        sharedManagementServiceMock.Verify(x => x.UnlockApiKeyAsync("myapp1", "1234"), Times.Once);
+    }
+    #endregion
+
+    #region UnlockApiKeyAsync
+    [Fact]
+    public async Task DeleteApiKeyAsync_Returns_NoContent_WhenSuccessful()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+
+        // Act
+        var actual = await AppsEndpoints.DeleteApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object);
+
+        // Assert
+        Assert.Equal(typeof(NoContent), actual.GetType());
+        sharedManagementServiceMock.Verify(x => x.DeleteApiKeyAsync("myapp1", "1234"), Times.Once);
     }
     #endregion
 }

@@ -1,7 +1,9 @@
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Passwordless.Common.Constants;
 using Passwordless.Common.Models;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
@@ -26,6 +28,11 @@ public interface ISharedManagementService
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
+    Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreateApiKeyDto payload);
+    Task<IReadOnlyCollection<ApiKeyDto>> ListApiKeysAsync(string appId);
+    Task LockApiKeyAsync(string appId, string apiKeyId);
+    Task UnlockApiKeyAsync(string appId, string apiKeyId);
+    Task DeleteApiKeyAsync(string appId, string apiKeyId);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -98,9 +105,11 @@ public class SharedManagementService : ISharedManagementService
         string apiKey2 = await SetupApiKey(accountName, storage);
 
         (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, storage);
-        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage);
 
-        var account = new AccountMetaInformation()
+        var managementSecretScopes = new[] { ApiKeyScopes.Login, ApiKeyScopes.Register, ApiKeyScopes.Management };
+        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage, managementSecretScopes);
+
+        var account = new AccountMetaInformation
         {
             AcountName = accountName,
             AdminEmails = new[] { adminEmail },
@@ -297,8 +306,109 @@ public class SharedManagementService : ISharedManagementService
         return dto;
     }
 
-    private static async Task<(string original, string hashed)> SetupApiSecret(string accountName,
-        ITenantStorage storage)
+    public async Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreateApiKeyDto payload)
+    {
+        if (payload.Scopes == null || !payload.Scopes.Any())
+        {
+            throw new ApiException("create_api_key_scopes_required", "Please select at least one scope.", 400);
+        }
+
+        switch (payload.Type)
+        {
+            case ApiKeyTypes.Public:
+                if (!payload.Scopes.All(x => ApiKeyScopes.PublicScopes.Contains(x)))
+                {
+                    throw new ApiException("create_public_key_scopes_invalid", "The request contains invalid scopes.", 400);
+                }
+                break;
+            case ApiKeyTypes.Secret:
+                if (!payload.Scopes.All(x => ApiKeyScopes.SecretScopes.Contains(x)))
+                {
+                    throw new ApiException("create_secret_key_scopes_invalid", "The request contains invalid scopes.", 400);
+                }
+                break;
+        }
+
+        var storage = tenantFactory.Create(appId);
+
+        // We will clean this up later
+        if (payload.Type == ApiKeyTypes.Public)
+        {
+            var publicKeyResult = await SetupApiKey(appId, storage, payload.Scopes.ToArray());
+            return new CreateApiKeyResultDto(publicKeyResult);
+        }
+        else
+        {
+            var secretKeyResult = await SetupApiSecret(appId, storage, payload.Scopes.ToArray());
+            return new CreateApiKeyResultDto(secretKeyResult.original);
+        }
+    }
+
+    public async Task<IReadOnlyCollection<ApiKeyDto>> ListApiKeysAsync(string appId)
+    {
+        var storage = tenantFactory.Create(appId);
+        var keys = await storage.GetAllApiKeys();
+        var dtos = keys.Select(x => new ApiKeyDto
+        {
+            Id = x.Id,
+            ApiKey = x.ApiKey.Contains("public") ? x.ApiKey : x.Id,
+            Type = x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
+            Scopes = x.Scopes.Order().ToHashSet(),
+            IsLocked = x.IsLocked,
+            LastLockedAt = x.LastLockedAt,
+            LastUnlockedAt = x.LastUnlockedAt
+        }).ToImmutableList();
+        return dtos;
+    }
+
+    public async Task LockApiKeyAsync(string appId, string apiKeyId)
+    {
+        var storage = tenantFactory.Create(appId);
+        try
+        {
+            await storage.LockApiKeyAsync(apiKeyId);
+        }
+        catch (ArgumentException)
+        {
+            _logger.LogWarning("Apikey was not found. {AppId} {ApiKey}", appId, apiKeyId);
+            throw new ApiException("api_key_not_found", "Apikey was not found", 404);
+        }
+    }
+
+    public async Task UnlockApiKeyAsync(string appId, string apiKeyId)
+    {
+        var storage = tenantFactory.Create(appId);
+        try
+        {
+            await storage.UnlockApiKeyAsync(apiKeyId);
+        }
+        catch (ArgumentException)
+        {
+            _logger.LogWarning("Apikey was not found. {AppId} {ApiKey}", appId, apiKeyId);
+            throw new ApiException("api_key_not_found", "Apikey was not found", 404);
+        }
+    }
+
+    public async Task DeleteApiKeyAsync(string appId, string apiKeyId)
+    {
+        var storage = tenantFactory.Create(appId);
+        try
+        {
+            await storage.DeleteApiKeyAsync(apiKeyId);
+        }
+        catch (ArgumentException)
+        {
+            _logger.LogWarning("Apikey was not found. {AppId} {ApiKey}", appId, apiKeyId);
+            throw new ApiException("api_key_not_found", "Apikey was not found", 404);
+        }
+    }
+
+    private static Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage)
+    {
+        return SetupApiSecret(accountName, storage, new[] { "token_register", "token_verify" });
+    }
+
+    private static async Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage, string[] scopes)
     {
         var secretKey = ApiKeyUtils.GeneratePrivateApiKey(accountName, "secret");
         // last 4 chars
@@ -307,13 +417,18 @@ public class SharedManagementService : ISharedManagementService
         return secretKey;
     }
 
-    private static async Task<string> SetupApiKey(string accountName, ITenantStorage storage)
+    private static Task<string> SetupApiKey(string accountName, ITenantStorage storage)
+    {
+        return SetupApiKey(accountName, storage, new[] { "register", "login" });
+    }
+
+    private static async Task<string> SetupApiKey(string accountName, ITenantStorage storage, string[] scopes)
     {
         // create tenant and store apikey
         var publicKey = ApiKeyUtils.GeneratePublicApiKey(accountName, "public");
         // last 4 chars
         var pk = publicKey.Substring(publicKey.Length - 4);
-        await storage.StoreApiKey(pk, publicKey, new string[] { "register", "login" });
+        await storage.StoreApiKey(pk, publicKey, scopes);
         return publicKey;
     }
 }

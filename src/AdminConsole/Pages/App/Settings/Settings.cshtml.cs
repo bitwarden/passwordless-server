@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
@@ -10,7 +10,7 @@ using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
 
-public class SettingsModel : PageModel
+public class SettingsModel : BaseExtendedPageModel
 {
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
@@ -18,31 +18,31 @@ public class SettingsModel : PageModel
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
-    private readonly IPasswordlessManagementClient _managementClient;
     private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
         ILogger<SettingsModel> logger,
         IDataService dataService,
         ICurrentContext currentContext,
+        IHttpContextAccessor httpContextAccessor,
         IApplicationService appService,
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
-        IOptions<BillingOptions> billingOptions
-        )
+        IOptions<BillingOptions> billingOptions,
+        IEventLogger eventLogger)
     {
         _logger = logger;
         _dataService = dataService;
         _currentContext = currentContext;
         _appService = appService;
         _billingService = billingService;
-        _managementClient = managementClient;
         _billingOptions = billingOptions.Value;
+        ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
 
     public Models.Organization Organization { get; set; }
 
-    public string ApplicationId { get; set; }
+    public string ApplicationId { get; private set; }
 
     public bool PendingDelete { get; set; }
 
@@ -52,7 +52,9 @@ public class SettingsModel : PageModel
 
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
-    public async Task OnGet()
+    public ApiKeysModel ApiKeysModel { get; }
+
+    private async Task InitializeAsync()
     {
         Organization = await _dataService.GetOrganizationWithDataAsync();
         ApplicationId = _currentContext.AppId ?? String.Empty;
@@ -61,6 +63,13 @@ public class SettingsModel : PageModel
 
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
+    }
+
+    public async Task OnGet()
+    {
+        await InitializeAsync();
+
+        await ApiKeysModel.OnInitializeAsync();
 
         if (!Organization.HasSubscription)
         {
@@ -69,10 +78,14 @@ public class SettingsModel : PageModel
         AddPlan(_billingOptions.Store.Pro);
         AddPlan(_billingOptions.Store.Enterprise);
 
-        PendingDelete = application?.DeleteAt.HasValue ?? false;
-        DeleteAt = application?.DeleteAt;
+        PendingDelete = Application?.DeleteAt.HasValue ?? false;
+        DeleteAt = Application?.DeleteAt;
     }
 
+    /// <summary>
+    /// Deletes the application.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostDeleteAsync()
     {
         var userName = User.Identity?.Name ?? Unknown;
@@ -89,6 +102,10 @@ public class SettingsModel : PageModel
         return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
     }
 
+    /// <summary>
+    /// Cancels the deletion of the application.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostCancelAsync()
     {
         var applicationId = _currentContext.AppId ?? Unknown;
@@ -106,12 +123,57 @@ public class SettingsModel : PageModel
         }
     }
 
+    /// <summary>
+    /// Handles the plan change.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <param name="selectedPlan"></param>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostChangePlanAsync(string app, string selectedPlan)
     {
 
         var redirectUrl = await _billingService.ChangePlanAsync(app, selectedPlan);
 
         return Redirect(redirectUrl);
+    }
+
+    public async Task<IActionResult> OnPostLockApiKeyAsync()
+    {
+        try
+        {
+            await ApiKeysModel.OnLockAsync();
+            return RedirectToPage();
+        }
+        catch
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
+    }
+
+    public async Task<IActionResult> OnPostUnlockApiKeyAsync()
+    {
+        try
+        {
+            await ApiKeysModel.OnUnlockAsync();
+            return RedirectToPage();
+        }
+        catch
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
+    }
+
+    public async Task<IActionResult> OnPostDeleteApiKeyAsync()
+    {
+        try
+        {
+            await ApiKeysModel.OnDeleteAsync();
+            return RedirectToPage();
+        }
+        catch
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
     }
 
     private void AddPlan(string plan)

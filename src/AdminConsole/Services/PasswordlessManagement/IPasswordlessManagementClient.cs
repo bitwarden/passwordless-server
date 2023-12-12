@@ -12,4 +12,9 @@ public interface IPasswordlessManagementClient
     Task<ICollection<string>> ListApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
+    Task<ICollection<ApiKeyResponse>> GetApiKeysAsync(string appId);
+    Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateApiKeyRequest request);
+    Task LockApiKeyAsync(string appId, object apiKeyId);
+    Task UnlockApiKeyAsync(string appId, object apiKeyId);
+    Task DeleteApiKeyAsync(string appId, object apiKeyId);
 }

@@ -34,6 +34,10 @@
     .btn-danger {
         @apply btn bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600;
     }
+
+    .btn-warning {
+        @apply btn bg-yellow-600 text-white hover:bg-yellow-500 focus-visible:outline-yellow-600;
+    }
     
     .btn-icon {
         @apply inline-flex items-center;

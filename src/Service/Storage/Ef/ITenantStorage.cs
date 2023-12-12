@@ -44,4 +44,8 @@ public interface ITenantStorage
     Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId);
     Task SetFeaturesAsync(SetFeaturesDto features);
     Task SetFeaturesAsync(ManageFeaturesDto features);
+
+    Task LockApiKeyAsync(string apiKeyId);
+    Task UnlockApiKeyAsync(string apiKeyId);
+    Task DeleteApiKeyAsync(string apiKeyId);
 }
