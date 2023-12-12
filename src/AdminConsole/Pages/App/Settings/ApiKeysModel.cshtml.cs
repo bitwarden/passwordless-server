@@ -44,10 +44,14 @@ public class ApiKeysModel
         IReadOnlySet<string> Scopes,
         bool IsLocked,
         DateTime? LastLockedAt,
-        bool AllowDestructiveAction)
+        bool IsActiveManagementKey,
+        bool CanDelete)
     {
         public static ApiKey FromDto(ApiKeyResponse dto, ICurrentContext currentContext)
         {
+            bool isActiveManagementKey = dto.Type == ApiKeyTypes.Public
+                ? currentContext.ApiKey!.EndsWith(dto.Id)
+                : currentContext.ApiSecret!.EndsWith(dto.Id);
             return new ApiKey(
                 dto.Id,
                 dto.ApiKey,
@@ -55,7 +59,8 @@ public class ApiKeysModel
                 dto.Scopes,
                 dto.IsLocked,
                 dto.LastLockedAt,
-                dto.Type == ApiKeyTypes.Public ? !currentContext.ApiKey!.EndsWith(dto.Id) : !currentContext.ApiSecret!.EndsWith(dto.Id));
+                isActiveManagementKey,
+                dto.IsLocked);
         }
     }
 
@@ -64,7 +69,7 @@ public class ApiKeysModel
         var apiKeys = await _managementClient.GetApiKeysAsync(ApplicationId);
         ApiKeys = apiKeys
             .Select(x => ApiKey.FromDto(x, _currentContext))
-            .Where(x => x.AllowDestructiveAction)
+            .Where(x => !x.IsActiveManagementKey)
             .ToImmutableList();
     }
 

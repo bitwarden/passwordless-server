@@ -81,12 +81,15 @@
                                         </button>
                                     </form>
                                 }
-                                <form method="post" asp-page-handler="DeleteApiKey">
-                                    @Html.Hidden(ApiKeysModel.SelectedApiKeyIdField, apiKey.Id)
-                                    <button class="btn-danger">
-                                        <component type="typeof(DeleteIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
-                                    </button>
-                                </form>
+                                @if (apiKey.CanDelete)
+                                {
+                                    <form method="post" asp-page-handler="DeleteApiKey">
+                                        @Html.Hidden(ApiKeysModel.SelectedApiKeyIdField, apiKey.Id)
+                                        <button class="btn-danger">
+                                            <component type="typeof(DeleteIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
+                                        </button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }
@@ -94,5 +97,6 @@
                 </tbody>
             </table>
         </div>
+        <info-alert-box message="To delete an API key, first lock the API key."></info-alert-box>
     </div>
 </div>
