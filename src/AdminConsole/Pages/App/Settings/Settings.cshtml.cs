@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -161,14 +162,14 @@ public class SettingsModel : BaseExtendedPageModel
         {
             await _managementClient.LockApiKeyAsync(applicationId, selectedApiKeyId);
 
-            _eventLogger.LogEvent(
-                Request.HttpContext.User.GetId(),
+            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyLocked,
                 $"Locked API key '{selectedApiKeyId}' for application {applicationId}.",
                 Severity.Informational,
                 _currentContext.AppId!,
                 _currentContext.OrgId!.Value,
                 DateTime.UtcNow);
+            _eventLogger.LogEvent(eventDto);
 
             return RedirectToPage();
         }
@@ -192,14 +193,14 @@ public class SettingsModel : BaseExtendedPageModel
         {
             await _managementClient.UnlockApiKeyAsync(applicationId, selectedApiKeyId);
 
-            _eventLogger.LogEvent(
-                Request.HttpContext.User.GetId(),
+            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyUnlocked,
                 $"Unlocked API key '{selectedApiKeyId}' for application {applicationId}.",
                 Severity.Informational,
                 _currentContext.AppId!,
                 _currentContext.OrgId!.Value,
                 DateTime.UtcNow);
+            _eventLogger.LogEvent(eventDto);
 
             return RedirectToPage();
         }
@@ -223,14 +224,14 @@ public class SettingsModel : BaseExtendedPageModel
         {
             await _managementClient.DeleteApiKeyAsync(applicationId, selectedApiKeyId);
 
-            _eventLogger.LogEvent(
-                Request.HttpContext.User.GetId(),
+            var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyDeleted,
                 $"Deleted API key '{selectedApiKeyId}' for application {applicationId}.",
                 Severity.Informational,
                 _currentContext.AppId!,
                 _currentContext.OrgId!.Value,
                 DateTime.UtcNow);
+            _eventLogger.LogEvent(eventDto);
 
             return RedirectToPage();
         }

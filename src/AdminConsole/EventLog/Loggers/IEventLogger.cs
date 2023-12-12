@@ -10,7 +10,6 @@ namespace Passwordless.AdminConsole.EventLog.Loggers;
 public interface IEventLogger
 {
     void LogEvent(OrganizationEventDto @event);
-    void LogEvent(string performedBy, EventType eventType, string message, Severity severity, string subject, int organizationId, DateTime performedAt);
     Task FlushAsync();
 }
 

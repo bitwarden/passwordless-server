@@ -2,6 +2,6 @@ namespace Passwordless.Service.Models;
 
 public enum ApiKeyTypes
 {
-    Public = 0,
-    Secret = 1
+    Public = 1,
+    Secret = 2
 }
