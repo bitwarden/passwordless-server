@@ -1,6 +1,6 @@
 ﻿@model ApiKeysModel
 
-<div asp-if="!Model.PendingDelete" class="panel">
+<div class="panel">
     <h2>Api Keys</h2>
     <div class="flex space-x-4">
         <a
@@ -55,7 +55,7 @@
                             }
                             <td>
                                 <ul>
-                                    @foreach(var scope in apiKey.Scopes)
+                                    @foreach (var scope in apiKey.Scopes)
                                     {
                                         <li>@scope</li>
                                     }

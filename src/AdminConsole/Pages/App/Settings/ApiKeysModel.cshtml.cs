@@ -35,8 +35,6 @@ public class ApiKeysModel
 
     public string ApplicationId => _currentContext.AppId!;
 
-    public bool PendingDelete { get; set; }
-
     public IReadOnlyCollection<ApiKey> ApiKeys { get; private set; }
 
     public record ApiKey(

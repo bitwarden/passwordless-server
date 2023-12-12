@@ -59,7 +59,10 @@
     </div>
 </panel>
 
-<partial name="_ApiKeys" model="Model.ApiKeysModel" />
+@if (!Model.PendingDelete)
+{
+    <partial name="_ApiKeys" model="Model.ApiKeysModel" />
+}
 
 <panel header="Delete Application">
     @if (Model.PendingDelete)
