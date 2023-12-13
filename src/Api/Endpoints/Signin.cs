@@ -49,7 +49,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
+            .RequireAuthorization(PublicKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -62,7 +62,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Login)
+            .RequireAuthorization(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
     }
 }
