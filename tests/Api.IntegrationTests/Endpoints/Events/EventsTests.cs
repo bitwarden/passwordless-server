@@ -84,6 +84,31 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyLocked.ToString());
     }
 
+    [Fact]
+    public async Task I_can_view_the_event_for_unlocking_an_api_key()
+    {
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplication(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        await _client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyUnlocked.ToString());
+    }
+
     public void Dispose()
     {
         _client.Dispose();

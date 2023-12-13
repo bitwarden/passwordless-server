@@ -272,6 +272,34 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         unauthorizedResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
+    [Fact]
+    public async Task I_can_unlock_a_locked_api_key()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        _ = await _client.CreateApplication(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var key = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{key.Id}/lock", null);
+
+        // Act
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{key.Id}/unlock", null);
+
+        // Assert
+        using var authorizedResponse = await _client
+            .AddPublicKey(key.ApiKey)
+            .PostAsJsonAsync($"signin/begin",
+                new SignInBeginDTO
+                {
+                    Origin = PasswordlessApiFactory.OriginUrl,
+                    RPID = PasswordlessApiFactory.RpId,
+                    UserId = "a_user"
+                });
+
+        authorizedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
     public void Dispose()
     {
         _client.Dispose();
