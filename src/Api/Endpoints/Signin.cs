@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
+using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -23,7 +24,7 @@ public static class SigninEndpoints
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireSecretKey()
+            .RequireAuthorization(ApiKeyTypes.Secret, ApiKeyScopes.TokenVerify)
             .RequireCors("default");
 
         app.MapPost("/signin/begin", async (
@@ -35,7 +36,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequirePublicKey()
+            .RequireAuthorization(ApiKeyTypes.Public, ApiKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -50,7 +51,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequirePublicKey()
+            .RequireAuthorization(ApiKeyTypes.Public, ApiKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -63,7 +64,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireSecretKey()
+            .RequireAuthorization(ApiKeyTypes.Secret, ApiKeyScopes.TokenVerify)
             .RequireCors("default");
     }
 }

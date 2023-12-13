@@ -1,4 +1,5 @@
 using Passwordless.Api.Authorization;
+using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -21,7 +22,7 @@ public static class RegisterEndpoints
 
                 return Ok(new RegisterTokenResponse(result));
             })
-            .RequireSecretKey()
+            .RequireAuthorization(ApiKeyTypes.Secret, ApiKeyScopes.TokenRegister)
             .RequireCors("default");
 
         app.MapPost("/register/begin", async (
@@ -34,7 +35,7 @@ public static class RegisterEndpoints
 
                 return Ok(result);
             })
-            .RequirePublicKey()
+            .RequireAuthorization(ApiKeyTypes.Public, ApiKeyScopes.Register)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -52,7 +53,7 @@ public static class RegisterEndpoints
                 return Ok(result);
             })
             .WithParameterValidation()
-            .RequirePublicKey()
+            .RequireAuthorization(ApiKeyTypes.Public, ApiKeyScopes.Register)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
     }

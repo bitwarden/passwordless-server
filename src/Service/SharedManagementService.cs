@@ -19,8 +19,8 @@ public interface ISharedManagementService
 {
     Task<bool> IsAvailable(string appId);
     Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions);
-    Task<string> ValidateSecretKey(string secretKey);
-    Task<string> ValidatePublicKey(string publicKey);
+    Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey);
+    Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
     Task UnFreezeAccount(string accountName);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
@@ -134,7 +134,7 @@ public class SharedManagementService : ISharedManagementService
         };
     }
 
-    public async Task<string> ValidateSecretKey(string secretKey)
+    public async Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey)
     {
         var appId = GetAppId(secretKey);
         var storage = tenantFactory.Create(appId);
@@ -150,7 +150,7 @@ public class SharedManagementService : ISharedManagementService
 
             if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
             {
-                return appId;
+                return new ValidateSecretKeyDto(appId, existingKey.Scopes);
             }
         }
 
@@ -159,7 +159,7 @@ public class SharedManagementService : ISharedManagementService
         throw new ApiException("ApiSecret was not valid", 401);
     }
 
-    public async Task<string> ValidatePublicKey(string publicKey)
+    public async Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey)
     {
         var appId = GetAppId(publicKey);
         var storage = tenantFactory.Create(appId);
@@ -169,7 +169,7 @@ public class SharedManagementService : ISharedManagementService
         {
             if (!existingKey.IsLocked)
             {
-                return appId;
+                return new ValidatePublicKeyDto(appId, existingKey.Scopes);
             }
 
             _eventLogger.LogDisabledPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
