@@ -27,6 +27,7 @@ public interface ITenantStorage
     Task StoreApiKey(string pkpart, string apikey, string[] scopes);
     Task<bool> TenantExists();
     Task UpdateCredential(byte[] credentialId, uint counter, string country, string device);
+    Task<bool> UserExists(string userId);
     Task<List<UserSummary>> GetUsers(string lastUserId);
 
     // Aliases
