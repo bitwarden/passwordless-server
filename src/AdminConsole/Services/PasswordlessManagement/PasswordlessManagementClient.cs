@@ -68,13 +68,20 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         return result;
     }
 
-    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateApiKeyRequest request)
+    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest request)
     {
-        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/api-keys", request);
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/public-keys", request);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
         return result!;
+    }
 
+    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest request)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/secret-keys", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
+        return result!;
     }
 
     public async Task LockApiKeyAsync(string appId, object apiKeyId)

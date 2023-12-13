@@ -12,4 +12,5 @@ public static class CustomClaimTypes
 {
     public const string AccountName = "accountName";
     public const string KeyType = "keyType";
+    public const string Scopes = "scopes";
 }
