@@ -132,37 +132,6 @@ public class AccountEndpointsTests
     }
     #endregion
 
-    #region LockApiKeyAsync
-    [Fact]
-    public async Task LockApiKeyAsync_Returns_NoContent_WhenSuccessful()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-
-        // Act
-        var actual = await AppsEndpoints.LockApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        Assert.Equal(typeof(NoContent), actual.GetType());
-        sharedManagementServiceMock.Verify(x => x.LockApiKeyAsync("myapp1", "1234"), Times.Once);
-    }
-
-    [Fact]
-    public async Task LockApiKeyAsync_Logs_CorrectEvent()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-
-        // Act
-        _ = await AppsEndpoints.LockApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
-    }
-    #endregion
-
     #region UnlockApiKeyAsync
     [Fact]
     public async Task UnlockApiKeyAsync_Returns_NoContent_WhenSuccessful()

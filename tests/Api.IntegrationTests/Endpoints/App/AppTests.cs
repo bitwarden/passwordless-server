@@ -245,6 +245,33 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         apiKeys.Should().Contain(x => x.ApiKey == apiKey!.ApiKey.GetLast(4));
     }
 
+    [Fact]
+    public async Task I_can_lock_an_api_key()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        _ = await _client.CreateApplication(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
+
+        // Act
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+
+        // Assert
+        using var unauthorizedResponse = await _client
+            .AddPublicKey(keyToLock.ApiKey)
+            .PostAsJsonAsync($"register/begin",
+                new FidoRegistrationBeginDTO
+                {
+                    Origin = PasswordlessApiFactory.OriginUrl,
+                    RPID = PasswordlessApiFactory.RpId,
+                    Token = "a_bad_token"
+                });
+
+        unauthorizedResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     public void Dispose()
     {
         _client.Dispose();
