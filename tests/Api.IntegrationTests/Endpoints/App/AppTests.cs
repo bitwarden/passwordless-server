@@ -31,7 +31,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_cannot_create_an_account_with_an_invalid_name(string name)
     {
         // Act
-        using var response = await _client.CreateApplication(name);
+        using var response = await _client.CreateApplicationAsync(name);
 
         // Assert
         response.Should().NotBeNull();
@@ -49,7 +49,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const string accountName = "anders";
 
         // Act
-        using var response = await _client.CreateApplication(accountName);
+        using var response = await _client.CreateApplicationAsync(accountName);
 
         // Assert
         response.Should().NotBeNull();
@@ -70,7 +70,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var name = GetApplicationName();
 
         // Act
-        using var res = await _client.CreateApplication(name);
+        using var res = await _client.CreateApplicationAsync(name);
 
         // Assert
         res.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -94,7 +94,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         const int expectedEventLoggingRetentionPeriod = 30;
         var name = GetApplicationName();
-        using var appCreateResponse = await _client.CreateApplication(name);
+        using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
@@ -118,7 +118,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var name = GetApplicationName();
-        using var appCreateResponse = await _client.CreateApplication(name);
+        using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
@@ -140,7 +140,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = GetApplicationName();
-        _ = await _client.CreateApplication(name);
+        _ = await _client.CreateApplicationAsync(name);
         var manageFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
 
         // Act
@@ -164,7 +164,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = GetApplicationName();
-        _ = await _client.CreateApplication(name);
+        _ = await _client.CreateApplicationAsync(name);
         var manageAppFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
         _ = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
 
@@ -186,7 +186,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = GetApplicationName();
         using var client = _factory.CreateClient().AddManagementKey();
-        _ = await client.CreateApplication(applicationName);
+        _ = await client.CreateApplicationAsync(applicationName);
 
         // Act
         using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
@@ -205,7 +205,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = GetApplicationName();
 
-        _ = await _client.CreateApplication(applicationName);
+        _ = await _client.CreateApplicationAsync(applicationName);
 
         // Act
         using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/public-keys",
@@ -228,7 +228,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = GetApplicationName();
 
-        _ = await _client.CreateApplication(applicationName);
+        _ = await _client.CreateApplicationAsync(applicationName);
 
         // Act
         using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
@@ -250,7 +250,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = GetApplicationName();
-        _ = await _client.CreateApplication(applicationName);
+        _ = await _client.CreateApplicationAsync(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
@@ -278,7 +278,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = GetApplicationName();
-        _ = await _client.CreateApplication(applicationName);
+        _ = await _client.CreateApplicationAsync(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
         var key = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
@@ -307,7 +307,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = GetApplicationName();
-        _ = await _client.CreateApplication(applicationName);
+        _ = await _client.CreateApplicationAsync(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
         var keyToDelete = apiKeys!.First();

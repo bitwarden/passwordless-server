@@ -172,7 +172,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
         _factory.TimeProvider.SetUtcNow(serverTime);
         using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplication(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
@@ -197,7 +197,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var unknownUserId = $"user{Guid.NewGuid():N}";
         using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplication();
+        using var createApplicationMessage = await client.CreateApplicationAsync();
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1);
@@ -221,7 +221,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplication();
+        using var createApplicationMessage = await client.CreateApplicationAsync();
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1)

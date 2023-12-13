@@ -20,7 +20,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplication(applicationName);
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         await _client.EnableEventLogging(applicationName);
@@ -42,7 +42,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await _client.CreateApplication(applicationName);
+        _ = await _client.CreateApplicationAsync(applicationName);
         await _client.EnableEventLogging(applicationName);
         using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
             new CreateSecretKeyDto([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
@@ -64,7 +64,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
     public async Task I_can_view_the_event_for_locking_an_api_key()
     {
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplication(applicationName);
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         await _client.EnableEventLogging(applicationName);
@@ -88,7 +88,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
     public async Task I_can_view_the_event_for_unlocking_an_api_key()
     {
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplication(applicationName);
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         await _client.EnableEventLogging(applicationName);
@@ -114,7 +114,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplication(applicationName);
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
