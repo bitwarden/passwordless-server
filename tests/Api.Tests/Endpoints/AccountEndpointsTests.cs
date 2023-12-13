@@ -6,7 +6,6 @@ using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
-using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 
@@ -129,37 +128,6 @@ public class AccountEndpointsTests
         var actual = await AppsEndpoints.SetFeaturesAsync(payload, applicationServiceMock.Object);
 
         Assert.Equal(typeof(NoContent), actual.GetType());
-    }
-    #endregion
-
-    #region UnlockApiKeyAsync
-    [Fact]
-    public async Task DeleteApiKeyAsync_Returns_NoContent_WhenSuccessful()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-
-        // Act
-        var actual = await AppsEndpoints.DeleteApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        Assert.Equal(typeof(NoContent), actual.GetType());
-        sharedManagementServiceMock.Verify(x => x.DeleteApiKeyAsync("myapp1", "1234"), Times.Once);
-    }
-
-    [Fact]
-    public async Task DeleteApiKeyAsync_Logs_CorrectEvent()
-    {
-        // Arrange
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        var eventLoggerMock = new Mock<IEventLogger>();
-
-        // Act
-        _ = await AppsEndpoints.DeleteApiKeyAsync("myapp1", "1234", sharedManagementServiceMock.Object, eventLoggerMock.Object);
-
-        // Assert
-        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
     }
     #endregion
 }

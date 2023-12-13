@@ -44,8 +44,8 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         var applicationName = CreateAppHelpers.GetApplicationName();
         _ = await _client.CreateApplication(applicationName);
         await _client.EnableEventLogging(applicationName);
-        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/api-keys",
-            new CreateApiKeyDto(ApiKeyTypes.Secret, ApiKeyScopes.SecretScopes.ToHashSet()));
+        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
+            new CreateSecretKeyDto([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
         var createApiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResultDto>();
         _client.AddSecretKey(createApiKey!.ApiKey);
 
@@ -107,6 +107,31 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyUnlocked.ToString());
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_deleting_an_api_key()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplication(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var keyToDelete = apiKeys!.First();
+        _ = await _client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyDeleted.ToString());
     }
 
     public void Dispose()

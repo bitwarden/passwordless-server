@@ -208,8 +208,8 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         _ = await _client.CreateApplication(applicationName);
 
         // Act
-        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/api-keys",
-            new CreateApiKeyDto(ApiKeyTypes.Public, ApiKeyScopes.PublicScopes.ToHashSet()));
+        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/public-keys",
+            new CreatePublicKeyDto([PublicKeyScopes.Login, PublicKeyScopes.Register]));
 
         // Assert
         createApiKeyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -231,8 +231,8 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         _ = await _client.CreateApplication(applicationName);
 
         // Act
-        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/api-keys",
-            new CreateApiKeyDto(ApiKeyTypes.Secret, ApiKeyScopes.SecretScopes.ToHashSet()));
+        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
+            new CreateSecretKeyDto([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
 
         // Assert
         createApiKeyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -256,9 +256,10 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
 
         // Act
-        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        using var response = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
 
         // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var unauthorizedResponse = await _client
             .AddPublicKey(keyToLock.ApiKey)
             .PostAsJsonAsync($"register/begin",
@@ -284,9 +285,10 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{key.Id}/lock", null);
 
         // Act
-        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{key.Id}/unlock", null);
+        using var response = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{key.Id}/unlock", null);
 
         // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var authorizedResponse = await _client
             .AddPublicKey(key.ApiKey)
             .PostAsJsonAsync($"signin/begin",
@@ -300,6 +302,26 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         authorizedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task I_can_delete_an_api_key()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        _ = await _client.CreateApplication(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var keyToDelete = apiKeys!.First();
+
+        // Act
+        using var responseMessage = await _client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
+
+        // Assert
+        responseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        using var assertKeyIsDeletedResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var assertKeyIsDeleted = await assertKeyIsDeletedResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+
+        assertKeyIsDeleted.Should().NotContain(x => x.Id == keyToDelete.Id);
+    }
     public void Dispose()
     {
         _client.Dispose();
