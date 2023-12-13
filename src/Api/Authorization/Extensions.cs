@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Passwordless.Common.Constants;
+using Passwordless.Common.Extensions;
 
 namespace Passwordless.Api.Authorization;
 
@@ -15,9 +16,14 @@ public static class GeneralExtensions
         return builder.RequireAuthorization(Constants.ManagementKeyPolicy);
     }
 
-    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, string scope)
+    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, PublicKeyScopes scope)
     {
-        return builder.RequireAuthorization(scope);
+        return builder.RequireAuthorization(scope.GetValue());
+    }
+
+    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, SecretKeyScopes scope)
+    {
+        return builder.RequireAuthorization(scope.GetValue());
     }
 
     public static void AddPasswordlessPolicies(this AuthorizationOptions options)
@@ -41,20 +47,22 @@ public static class GeneralExtensions
             .RequireAuthenticatedUser()
             .RequireClaim(CustomClaimTypes.KeyType, "management"));
 
-        foreach (var scope in ApiKeyScopes.PublicScopes)
+        foreach (PublicKeyScopes scope in Enum.GetValues(typeof(PublicKeyScopes)))
         {
-            options.AddPolicy(scope, policy => policy
+            var scopeValue = scope.GetValue();
+            options.AddPolicy(scopeValue, policy => policy
                 .AddAuthenticationSchemes("ApiKey")
                 .RequireAuthenticatedUser()
-                .RequireClaim(CustomClaimTypes.Scopes, scope));
+                .RequireClaim(CustomClaimTypes.Scopes, scopeValue));
         }
 
-        foreach (var scope in ApiKeyScopes.SecretScopes)
+        foreach (SecretKeyScopes scope in Enum.GetValues(typeof(SecretKeyScopes)))
         {
-            options.AddPolicy(scope, policy => policy
+            var scopeValue = scope.GetValue();
+            options.AddPolicy(scopeValue, policy => policy
                 .AddAuthenticationSchemes("ApiSecret")
                 .RequireAuthenticatedUser()
-                .RequireClaim(CustomClaimTypes.Scopes, scope));
+                .RequireClaim(CustomClaimTypes.Scopes, scopeValue));
         }
     }
 }
