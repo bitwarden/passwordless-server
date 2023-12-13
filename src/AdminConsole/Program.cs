@@ -20,6 +20,7 @@ using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
+using Passwordless.Common.Services.Licensing;
 using Passwordless.Common.Services.Mail;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -84,6 +85,9 @@ void RunTheApp()
             }
         }
     });
+    
+    builder.AddLicensingWriter();
+    builder.AddLicensingReader();
 
     IServiceCollection services = builder.Services;
 

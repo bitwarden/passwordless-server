@@ -1,10 +1,10 @@
-using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Passwordless.Common.Services.Licensing;
 
 public interface ISignatureProvider
 {
-    byte[] Sign(RSAParameters privateKey, string json);
+    X509Certificate2 PrivateKey { get; }
     
-    bool Verify(RSAParameters publicKey, string json, byte[] signature);
+    X509Certificate2 PublicKey { get; }
 }
