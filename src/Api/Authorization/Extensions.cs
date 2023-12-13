@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
+using Passwordless.Common.Constants;
+using Passwordless.Common.Extensions;
 
 namespace Passwordless.Api.Authorization;
 
@@ -14,9 +16,14 @@ public static class GeneralExtensions
         return builder.RequireAuthorization(Constants.ManagementKeyPolicy);
     }
 
-    public static RouteHandlerBuilder RequirePublicKey(this RouteHandlerBuilder builder)
+    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, PublicKeyScopes scope)
     {
-        return builder.RequireAuthorization(Constants.PublicKeyPolicy);
+        return builder.RequireAuthorization(scope.GetValue());
+    }
+
+    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, SecretKeyScopes scope)
+    {
+        return builder.RequireAuthorization(scope.GetValue());
     }
 
     public static void AddPasswordlessPolicies(this AuthorizationOptions options)
@@ -39,5 +46,23 @@ public static class GeneralExtensions
             .AddAuthenticationSchemes("ManagementKey")
             .RequireAuthenticatedUser()
             .RequireClaim(CustomClaimTypes.KeyType, "management"));
+
+        foreach (PublicKeyScopes scope in Enum.GetValues(typeof(PublicKeyScopes)))
+        {
+            var scopeValue = scope.GetValue();
+            options.AddPolicy(scopeValue, policy => policy
+                .AddAuthenticationSchemes("ApiKey")
+                .RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Scopes, scopeValue));
+        }
+
+        foreach (SecretKeyScopes scope in Enum.GetValues(typeof(SecretKeyScopes)))
+        {
+            var scopeValue = scope.GetValue();
+            options.AddPolicy(scopeValue, policy => policy
+                .AddAuthenticationSchemes("ApiSecret")
+                .RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Scopes, scopeValue));
+        }
     }
 }

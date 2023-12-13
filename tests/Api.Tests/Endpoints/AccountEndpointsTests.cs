@@ -172,19 +172,19 @@ public class AccountEndpointsTests
     }
     #endregion
 
-    #region CreateApiKeyAsync
+    #region CreatePublicKeyAsync
     [Fact]
-    public async Task CreateApiKeyAsync_Returns_Ok_WhenSuccessful()
+    public async Task CreatePublicKeyAsync_Returns_Ok_WhenSuccessful()
     {
         // Arrange
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var eventLoggerMock = new Mock<IEventLogger>();
-        var payload = _fixture.Create<CreateApiKeyDto>();
+        var payload = _fixture.Create<CreatePublicKeyDto>();
         sharedManagementServiceMock.Setup(x => x.CreateApiKeyAsync("myapp1", payload))
             .ReturnsAsync(new CreateApiKeyResultDto("myapp1:public:12345678"));
 
         // Act
-        var actual = await AppsEndpoints.CreateApiKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
+        var actual = await AppsEndpoints.CreatePublicKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
 
         // Assert
         Assert.Equal(typeof(Ok<CreateApiKeyResultDto>), actual.GetType());
@@ -193,7 +193,49 @@ public class AccountEndpointsTests
         sharedManagementServiceMock.Verify(x =>
                 x.CreateApiKeyAsync(
                     It.Is<string>(p => p == "myapp1"),
-                    It.Is<CreateApiKeyDto>(p => p == payload)), Times.Once);
+                    It.Is<CreatePublicKeyDto>(p => p == payload)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreatePublicKeyAsync_Logs_CorrectEvent()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var eventLoggerMock = new Mock<IEventLogger>();
+        var payload = _fixture.Create<CreatePublicKeyDto>();
+        sharedManagementServiceMock.Setup(x => x.CreateApiKeyAsync("myapp1", payload))
+            .ReturnsAsync(new CreateApiKeyResultDto("myapp1:public:12345678"));
+
+        // Act
+        _ = await AppsEndpoints.CreatePublicKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
+
+        // Assert
+        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
+    }
+    #endregion
+
+    #region CreateSecretKeyAsync
+    [Fact]
+    public async Task CreateSecretKeyAsync_Returns_Ok_WhenSuccessful()
+    {
+        // Arrange
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var eventLoggerMock = new Mock<IEventLogger>();
+        var payload = _fixture.Create<CreateSecretKeyDto>();
+        sharedManagementServiceMock.Setup(x => x.CreateApiKeyAsync("myapp1", payload))
+            .ReturnsAsync(new CreateApiKeyResultDto("myapp1:public:12345678"));
+
+        // Act
+        var actual = await AppsEndpoints.CreateSecretKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
+
+        // Assert
+        Assert.Equal(typeof(Ok<CreateApiKeyResultDto>), actual.GetType());
+        var actualResult = ((Ok<CreateApiKeyResultDto>)actual).Value;
+        Assert.Equal("myapp1:public:12345678", actualResult!.ApiKey);
+        sharedManagementServiceMock.Verify(x =>
+            x.CreateApiKeyAsync(
+                It.Is<string>(p => p == "myapp1"),
+                It.Is<CreateSecretKeyDto>(p => p == payload)), Times.Once);
     }
 
     [Fact]
@@ -202,12 +244,12 @@ public class AccountEndpointsTests
         // Arrange
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var eventLoggerMock = new Mock<IEventLogger>();
-        var payload = _fixture.Create<CreateApiKeyDto>();
+        var payload = _fixture.Create<CreateSecretKeyDto>();
         sharedManagementServiceMock.Setup(x => x.CreateApiKeyAsync("myapp1", payload))
             .ReturnsAsync(new CreateApiKeyResultDto("myapp1:public:12345678"));
 
         // Act
-        _ = await AppsEndpoints.CreateApiKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
+        _ = await AppsEndpoints.CreateSecretKeyAsync("myapp1", payload, sharedManagementServiceMock.Object, eventLoggerMock.Object);
 
         // Assert
         eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);

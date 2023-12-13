@@ -8,6 +8,7 @@ using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Passwordless.Common.Constants;
 using Passwordless.Common.EventLog.Enums;
+using Passwordless.Common.Extensions;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
 
@@ -28,9 +29,12 @@ public class CreatePublicKeyModel : BaseExtendedPageModel
         _currentContext = currentContext;
         _eventLogger = eventLogger;
         _logger = logger;
+
+        string[] scopes = Enum.GetValues(typeof(PublicKeyScopes)).Cast<PublicKeyScopes>().Select(x => x.GetValue()).ToArray();
+        Model = new(scopes);
     }
 
-    public CreateApiKeyModel Model { get; } = new(ApiKeyScopes.PublicScopes);
+    public CreateApiKeyModel Model { get; }
 
     public void OnGet()
     {
@@ -45,11 +49,14 @@ public class CreatePublicKeyModel : BaseExtendedPageModel
             return Page();
         }
 
-        var selectedScopes = selectedScopesValue.Split(',').ToHashSet();
+        var selectedScopes = selectedScopesValue
+            .Split(',')
+            .Select(x => x.AsPublicKeyScope())
+            .ToHashSet();
 
         try
         {
-            var request = new CreateApiKeyRequest(ApiKeyTypes.Public, selectedScopes);
+            var request = new CreatePublicKeyRequest(selectedScopes);
             await _managementClient.CreateApiKeyAsync(_currentContext.AppId!, request);
 
             var eventDto = new OrganizationEventDto(Request.HttpContext.User.GetId(),

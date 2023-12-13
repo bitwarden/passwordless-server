@@ -71,7 +71,11 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
-        app.MapPost("/admin/apps/{appId}/api-keys", CreateApiKeyAsync)
+        app.MapPost("/admin/apps/{appId}/public-keys", CreatePublicKeyAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("/admin/apps/{appId}/secret-keys", CreateSecretKeyAsync)
             .RequireManagementKey()
             .RequireCors("default");
 
@@ -123,9 +127,20 @@ public static class AppsEndpoints
             .RequireCors("default");
     }
 
-    public static async Task<IResult> CreateApiKeyAsync(
+    public static async Task<IResult> CreatePublicKeyAsync(
         [FromRoute] string appId,
-        [FromBody] CreateApiKeyDto payload,
+        [FromBody] CreatePublicKeyDto payload,
+        ISharedManagementService service,
+        IEventLogger eventLogger)
+    {
+        var result = await service.CreateApiKeyAsync(appId, payload);
+        eventLogger.LogApiKeyCreatedEvent(result.ApiKey);
+        return Ok(result);
+    }
+
+    public static async Task<IResult> CreateSecretKeyAsync(
+        [FromRoute] string appId,
+        [FromBody] CreateSecretKeyDto payload,
         ISharedManagementService service,
         IEventLogger eventLogger)
     {

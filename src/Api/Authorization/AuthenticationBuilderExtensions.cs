@@ -17,13 +17,20 @@ public static class AuthenticationBuilderExtensions
             options.HeaderName = "ApiKey";
             options.ClaimsCreator = async (managementService, apiKey) =>
             {
-                var accountName = await managementService.ValidatePublicKey(apiKey);
+                var validationResult = await managementService.ValidatePublicKey(apiKey);
 
-                return new[]
+                var claims = new List<Claim>
                 {
-                    new Claim(CustomClaimTypes.AccountName, accountName),
-                    new Claim(CustomClaimTypes.KeyType, "public"),
+                    new (CustomClaimTypes.AccountName, validationResult.ApplicationId),
+                    new (CustomClaimTypes.KeyType, "public")
                 };
+
+                foreach (var scope in validationResult.Scopes)
+                {
+                    claims.Add(new(CustomClaimTypes.Scopes, scope));
+                }
+
+                return claims.ToArray();
             };
             options.ProblemDetailWriter = new DefaultProblemDetailWriter("ApiSecret");
         });
@@ -33,13 +40,20 @@ public static class AuthenticationBuilderExtensions
             options.HeaderName = "ApiSecret";
             options.ClaimsCreator = async (managementService, apiSecret) =>
             {
-                var accountName = await managementService.ValidateSecretKey(apiSecret);
+                var validationResult = await managementService.ValidateSecretKey(apiSecret);
 
-                return new[]
+                var claims = new List<Claim>
                 {
-                    new Claim(CustomClaimTypes.AccountName, accountName),
-                    new Claim(CustomClaimTypes.KeyType,  "secret"),
+                    new (CustomClaimTypes.AccountName, validationResult.ApplicationId),
+                    new (CustomClaimTypes.KeyType, "secret")
                 };
+
+                foreach (var scope in validationResult.Scopes)
+                {
+                    claims.Add(new(CustomClaimTypes.Scopes, scope));
+                }
+
+                return claims.ToArray();
             };
             options.ProblemDetailWriter = new DefaultProblemDetailWriter("ApiKey");
         });
