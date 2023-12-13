@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Passwordless.Common.Constants;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Authorization;
 
@@ -16,20 +15,9 @@ public static class GeneralExtensions
         return builder.RequireAuthorization(Constants.ManagementKeyPolicy);
     }
 
-    public static RouteHandlerBuilder RequirePublicKey(this RouteHandlerBuilder builder)
+    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, string scope)
     {
-        return builder.RequireAuthorization(Constants.PublicKeyPolicy);
-    }
-
-    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, ApiKeyTypes type, string scope)
-    {
-        string scheme = type switch
-        {
-            ApiKeyTypes.Public => "public",
-            ApiKeyTypes.Secret => "secret",
-            _ => throw new ArgumentOutOfRangeException(nameof(type))
-        };
-        return builder.RequireAuthorization($"{scheme}-{scope}");
+        return builder.RequireAuthorization(scope);
     }
 
     public static void AddPasswordlessPolicies(this AuthorizationOptions options)
@@ -55,7 +43,7 @@ public static class GeneralExtensions
 
         foreach (var scope in ApiKeyScopes.PublicScopes)
         {
-            options.AddPolicy($"public-{scope}", policy => policy
+            options.AddPolicy(scope, policy => policy
                 .AddAuthenticationSchemes("ApiKey")
                 .RequireAuthenticatedUser()
                 .RequireClaim(CustomClaimTypes.Scopes, scope));
@@ -63,7 +51,7 @@ public static class GeneralExtensions
 
         foreach (var scope in ApiKeyScopes.SecretScopes)
         {
-            options.AddPolicy($"secret-{scope}", policy => policy
+            options.AddPolicy(scope, policy => policy
                 .AddAuthenticationSchemes("ApiSecret")
                 .RequireAuthenticatedUser()
                 .RequireClaim(CustomClaimTypes.Scopes, scope));

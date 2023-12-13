@@ -22,7 +22,7 @@ public static class RegisterEndpoints
 
                 return Ok(new RegisterTokenResponse(result));
             })
-            .RequireAuthorization(ApiKeyTypes.Secret, ApiKeyScopes.TokenRegister)
+            .RequireAuthorization(ApiKeyScopes.SecretTokenRegister)
             .RequireCors("default");
 
         app.MapPost("/register/begin", async (
@@ -35,7 +35,7 @@ public static class RegisterEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(ApiKeyTypes.Public, ApiKeyScopes.Register)
+            .RequireAuthorization(ApiKeyScopes.PublicRegister)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -53,7 +53,7 @@ public static class RegisterEndpoints
                 return Ok(result);
             })
             .WithParameterValidation()
-            .RequireAuthorization(ApiKeyTypes.Public, ApiKeyScopes.Register)
+            .RequireAuthorization(ApiKeyScopes.PublicRegister)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
     }

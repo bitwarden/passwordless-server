@@ -105,9 +105,7 @@ public class SharedManagementService : ISharedManagementService
         string apiKey2 = await SetupApiKey(accountName, storage);
 
         (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, storage);
-
-        var managementSecretScopes = new[] { ApiKeyScopes.Login, ApiKeyScopes.Register, ApiKeyScopes.Management };
-        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage, managementSecretScopes);
+        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage);
 
         var account = new AccountMetaInformation
         {
@@ -405,7 +403,7 @@ public class SharedManagementService : ISharedManagementService
 
     private static Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage)
     {
-        return SetupApiSecret(accountName, storage, new[] { "token_register", "token_verify" });
+        return SetupApiSecret(accountName, storage, new[] { ApiKeyScopes.SecretTokenRegister, ApiKeyScopes.SecretTokenVerify });
     }
 
     private static async Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage, string[] scopes)
@@ -413,13 +411,13 @@ public class SharedManagementService : ISharedManagementService
         var secretKey = ApiKeyUtils.GeneratePrivateApiKey(accountName, "secret");
         // last 4 chars
         var pk2 = secretKey.originalApiKey.Substring(secretKey.originalApiKey.Length - 4);
-        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, new string[] { "token_register", "token_verify" });
+        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, scopes);
         return secretKey;
     }
 
     private static Task<string> SetupApiKey(string accountName, ITenantStorage storage)
     {
-        return SetupApiKey(accountName, storage, new[] { "register", "login" });
+        return SetupApiKey(accountName, storage, new[] { ApiKeyScopes.PublicRegister, ApiKeyScopes.PublicLogin });
     }
 
     private static async Task<string> SetupApiKey(string accountName, ITenantStorage storage, string[] scopes)
