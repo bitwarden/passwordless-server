@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
@@ -322,6 +323,54 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var assertKeyIsDeleted = await assertKeyIsDeletedResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
 
         assertKeyIsDeleted.Should().NotContain(x => x.Id == keyToDelete.Id);
+    }
+
+    [Fact]
+    public async Task I_can_enable_the_generate_sign_in_token_endpoint()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
+            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest("a_user"));
+        
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
+        
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
+        {
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId
+        });
+        signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
+    }
+    
+    [Fact]
+    public async Task I_can_disable_the_generate_sign_in_token_endpoint()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
+            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest("a_user"));
+        
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
+        
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
+        {
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId
+        });
+        signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     public void Dispose()

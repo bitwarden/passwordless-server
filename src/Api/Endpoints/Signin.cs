@@ -2,6 +2,7 @@
 using Passwordless.Api.Extensions;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
+using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -15,9 +16,12 @@ public static class SigninEndpoints
     {
         app.MapPost("/signin/generate-token", async (
                 SigninTokenRequest signinToken,
+                IFeatureContextProvider provider,
                 IFido2Service fido2Service
             ) =>
             {
+                if (!(await provider.UseContext()).SignInTokenEndpointEnabled) return Forbid();
+                
                 var result = await fido2Service.CreateSigninToken(signinToken);
 
                 return Ok(new SigninTokenResponse(result));
