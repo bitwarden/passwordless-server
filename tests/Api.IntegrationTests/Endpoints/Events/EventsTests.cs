@@ -120,7 +120,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         _ = await _client.EnableEventLogging(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
-        var keyToDelete = apiKeys!.First();
+        var keyToDelete = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
         _ = await _client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
 
         // Act

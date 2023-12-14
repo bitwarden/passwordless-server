@@ -323,7 +323,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         assertKeyIsDeleted.Should().NotContain(x => x.Id == keyToDelete.Id);
     }
-    
+
     public void Dispose()
     {
         _client.Dispose();

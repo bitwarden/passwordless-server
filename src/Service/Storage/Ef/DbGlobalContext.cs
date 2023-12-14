@@ -58,12 +58,12 @@ public abstract class DbGlobalContext : DbContext
         modelBuilder.Entity<AppFeature>(b =>
         {
             b.HasKey(x => x.Tenant);
-            
+
             b.HasOne(x => x.Application)
                 .WithOne(x => x.Features)
                 .HasForeignKey<AppFeature>(x => x.Tenant)
                 .IsRequired();
-            
+
             b.Property(x => x.SignInTokenEndpointEnabled)
                 .HasDefaultValue(true);
         });
