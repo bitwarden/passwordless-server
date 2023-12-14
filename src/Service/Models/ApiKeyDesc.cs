@@ -1,7 +1,4 @@
-using Passwordless.Service.Helpers;
-using Passwordless.Service.Models;
-
-namespace Passwordless.Service.Storage;
+namespace Passwordless.Service.Models;
 
 public class ApiKeyDesc : PerTenant
 {
@@ -16,8 +13,7 @@ public class ApiKeyDesc : PerTenant
     public DateTime? LastLockedAt { get; set; }
     public DateTime? LastUnlockedAt { get; set; }
 
-    public void CheckLocked()
-    {
-        if (IsLocked) throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
-    }
+    public string MaskedApiKey => ApiKey.Contains("public")
+        ? $"{Tenant}:public:{Id.PadLeft(32, '*')}"
+        : $"{Tenant}:secret:{Id.PadLeft(32, '*')}";
 }
