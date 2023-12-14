@@ -120,7 +120,8 @@ public class SharedManagementService : ISharedManagementService
                 Tenant = accountName,
                 EventLoggingIsEnabled = appCreationOptions.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod,
-                MaxUsers = appCreationOptions.MaxUsers
+                MaxUsers = appCreationOptions.MaxUsers,
+                SignInTokenEndpointEnabled = true
             }
         };
         await storage.SaveAccountInformation(account);

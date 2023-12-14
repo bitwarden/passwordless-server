@@ -102,6 +102,37 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.ToTable("Aliases");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.ApiKeyDesc", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ApiKey")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastLockedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUnlockedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Tenant", "Id");
+
+                    b.ToTable("ApiKeys");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Property<string>("Tenant")
@@ -118,6 +149,11 @@ namespace Passwordless.Service.Migrations.Sqlite
 
                     b.Property<long?>("MaxUsers")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SignInTokenEndpointEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.HasKey("Tenant");
 
@@ -208,37 +244,6 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.HasKey("Tenant", "KeyId");
 
                     b.ToTable("TokenKeys");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Storage.ApiKeyDesc", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AccountName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ApiKey")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("LastLockedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("LastUnlockedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Scopes")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Tenant", "Id");
-
-                    b.ToTable("ApiKeys");
                 });
 
             modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>

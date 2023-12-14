@@ -178,6 +178,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
         appFeature.EventLoggingIsEnabled.Should().BeTrue();
         appFeature.DeveloperLoggingEndsAt.Should().BeNull();
+        appFeature.SignInTokenEndpointEnabled.Should().BeTrue();
     }
 
     [Fact]
@@ -322,6 +323,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         assertKeyIsDeleted.Should().NotContain(x => x.Id == keyToDelete.Id);
     }
+    
     public void Dispose()
     {
         _client.Dispose();

@@ -217,7 +217,8 @@ public static class AppsEndpoints
             EventLoggingIsEnabled = featuresContext.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = featuresContext.EventLoggingRetentionPeriod,
             DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt,
-            MaxUsers = featuresContext.MaxUsers
+            MaxUsers = featuresContext.MaxUsers,
+            SignInTokenEndpointEnabled = featuresContext.SignInTokenEndpointEnabled
         };
         return Ok(dto);
     }

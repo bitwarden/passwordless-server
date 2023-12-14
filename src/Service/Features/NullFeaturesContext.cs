@@ -6,6 +6,6 @@ public sealed class NullFeaturesContext : IFeaturesContext
     public int EventLoggingRetentionPeriod { get; init; }
     public DateTime? DeveloperLoggingEndsAt { get; init; }
     public long? MaxUsers { get; init; }
+    public bool SignInTokenEndpointEnabled { get; init; } = true;
     public bool IsInFeaturesContext => false;
-
 }

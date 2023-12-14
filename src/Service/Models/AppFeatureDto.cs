@@ -5,6 +5,7 @@ public class AppFeatureDto
     public bool EventLoggingIsEnabled { get; set; }
     public int EventLoggingRetentionPeriod { get; set; }
     public DateTime? DeveloperLoggingEndsAt { get; set; }
+    public bool SignInTokenEndpointEnabled { get; set; }
 
     /// <summary>
     /// Maximum number of individual users allowed to use the application
@@ -18,7 +19,8 @@ public class AppFeatureDto
         {
             EventLoggingIsEnabled = entity.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = entity.EventLoggingRetentionPeriod,
-            DeveloperLoggingEndsAt = entity.DeveloperLoggingEndsAt
+            DeveloperLoggingEndsAt = entity.DeveloperLoggingEndsAt,
+            SignInTokenEndpointEnabled = entity.SignInTokenEndpointEnabled
         };
         return dto;
     }
