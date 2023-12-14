@@ -331,16 +331,16 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = GetApplicationName();
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
-        
+
         // Act
         using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
             new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest("a_user"));
-        
+
         // Assert
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
-        
+
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
         {
             Origin = PasswordlessApiFactory.OriginUrl,
@@ -348,23 +348,23 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         });
         signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
     }
-    
+
     [Fact]
     public async Task I_can_disable_the_generate_sign_in_token_endpoint()
     {
         // Arrange
         var applicationName = GetApplicationName();
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
-        
+
         // Act
         using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
-            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest("a_user"));
-        
+            new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest("a_user"));
+
         // Assert
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
-        
+
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
         {
             Origin = PasswordlessApiFactory.OriginUrl,

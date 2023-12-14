@@ -130,7 +130,7 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
-        
+
         app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/disable", DisableGenerateSignInTokenEndpoint)
             .WithParameterValidation()
             .RequireManagementKey()
@@ -290,7 +290,7 @@ public static class AppsEndpoints
         eventLogger.LogGenerateSignInTokenEndpointEnabled(request.PerformedBy);
         return NoContent();
     }
-    
+
     public static async Task<IResult> DisableGenerateSignInTokenEndpoint(
         [FromRoute] string appId,
         DisableGenerateSignInTokenEndpointRequest request,
@@ -303,9 +303,9 @@ public static class AppsEndpoints
     }
 
     public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
-    
+
     public record DisableGenerateSignInTokenEndpointRequest(string PerformedBy);
-    
+
     public record AvailableResponse(bool Available);
 
     public record CancelResult(string Message);

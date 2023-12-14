@@ -21,7 +21,7 @@ public static class SigninEndpoints
             ) =>
             {
                 if (!(await provider.UseContext()).SignInTokenEndpointEnabled) return Forbid();
-                
+
                 var result = await fido2Service.CreateSigninToken(signinToken);
 
                 return Ok(new SigninTokenResponse(result));

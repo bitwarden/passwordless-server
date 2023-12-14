@@ -312,7 +312,7 @@ public static class EventLoggerExtensions
             Subject = tenantId,
             ApiKeyId = publicKey.AbbreviatedValue
         });
-    
+
     public static void LogGenerateSignInTokenEndpointEnabled(this IEventLogger logger, string performedBy) =>
         logger.LogEvent(context => new EventDto
         {
@@ -325,7 +325,7 @@ public static class EventLoggerExtensions
             Subject = context.TenantId,
             ApiKeyId = string.Empty
         });
-    
+
     public static void LogGenerateSignInTokenEndpointDisabled(this IEventLogger logger, string performedBy) =>
         logger.LogEvent(context => new EventDto
         {
