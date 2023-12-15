@@ -141,7 +141,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
         using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
@@ -167,7 +167,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
         using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",

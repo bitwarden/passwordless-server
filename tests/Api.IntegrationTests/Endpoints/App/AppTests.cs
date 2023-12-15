@@ -339,7 +339,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Assert
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
 
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
@@ -363,7 +363,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Assert
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
 
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")

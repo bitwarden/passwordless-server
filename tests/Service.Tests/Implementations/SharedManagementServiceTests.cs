@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -393,7 +394,6 @@ public class SharedManagementServiceTests
         Assert.Equal("test:public:2e728aa5986f4ba8b073a5b28a939795", actualPublicKey.ApiKey);
         Assert.False(actualPublicKey.IsLocked);
         Assert.Equal(new DateTime(2023, 10, 1), actualPublicKey.LastLockedAt);
-        Assert.Equal(new DateTime(2023, 10, 2), actualPublicKey.LastUnlockedAt);
         Assert.Equal(2, actualPublicKey.Scopes.Count);
         Assert.Contains(PublicKeyScopes.Register.GetValue(), actualPublicKey.Scopes);
         Assert.Contains(PublicKeyScopes.Login.GetValue(), actualPublicKey.Scopes);
@@ -404,7 +404,6 @@ public class SharedManagementServiceTests
         Assert.Equal("test:secret:****************************6d02", actualSecretKey.ApiKey);
         Assert.True(actualSecretKey.IsLocked);
         Assert.Equal(new DateTime(2023, 11, 1), actualSecretKey.LastLockedAt);
-        Assert.Null(actualSecretKey.LastUnlockedAt);
         Assert.Equal(2, actualSecretKey.Scopes.Count);
         Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
         Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);
