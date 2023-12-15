@@ -10,9 +10,8 @@ using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 using Application = Passwordless.AdminConsole.Models.Application;
-using NewAppOptions = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppOptions;
-using NewAppResponse = Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts.NewAppResponse;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
@@ -105,11 +104,11 @@ public class CreateApplicationModel : PageModel
             app.BillingPriceId = subItem.priceId;
         }
 
-        NewAppResponse res;
+        CreateAppResultDto res;
         try
         {
             var features = _billingOptions.Plans[form.Plan].Features;
-            var newAppOptions = new NewAppOptions
+            var newAppOptions = new CreateAppDto
             {
                 AdminEmail = email,
                 EventLoggingIsEnabled = features.EventLoggingIsEnabled,

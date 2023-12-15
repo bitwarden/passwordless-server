@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
@@ -54,7 +55,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var content = await response.Content.ReadFromJsonAsync<CreateAppResultDto>();
         content.Should().NotBeNull();
         content!.Message.Should().Be("Store keys safely. They will only be shown to you once.");
         content.ApiKey1.Should().NotBeNullOrWhiteSpace();
@@ -95,7 +96,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
         var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
-        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
@@ -119,7 +120,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
-        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
@@ -193,7 +194,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Assert
         getApiKeysResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         apiKeys.Should().NotBeNullOrEmpty();
         apiKeys!.Where(x => x.Type == ApiKeyTypes.Public).Should().HaveCount(2);
         apiKeys!.Where(x => x.Type == ApiKeyTypes.Secret).Should().HaveCount(2);
@@ -209,14 +210,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Act
         using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/public-keys",
-            new CreatePublicKeyDto([PublicKeyScopes.Login, PublicKeyScopes.Register]));
+            new CreatePublicKeyRequest([PublicKeyScopes.Login, PublicKeyScopes.Register]));
 
         // Assert
         createApiKeyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var apiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResultDto>();
+        var apiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
 
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
 
         apiKeys.Should().NotBeNullOrEmpty();
         apiKeys.Should().Contain(x => x.ApiKey == apiKey!.ApiKey);
@@ -232,14 +233,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Act
         using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
-            new CreateSecretKeyDto([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
+            new CreateSecretKeyRequest([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
 
         // Assert
         createApiKeyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var apiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResultDto>();
+        var apiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
 
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
 
         apiKeys.Should().NotBeNullOrEmpty();
         apiKeys.Should().Contain(x => x.ApiKey.GetLast(4) == apiKey!.ApiKey.GetLast(4));
@@ -252,7 +253,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var applicationName = GetApplicationName();
         _ = await _client.CreateApplicationAsync(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
 
         // Act
@@ -280,7 +281,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var applicationName = GetApplicationName();
         _ = await _client.CreateApplicationAsync(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var key = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
         _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{key.Id}/lock", null);
 
@@ -309,7 +310,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var applicationName = GetApplicationName();
         _ = await _client.CreateApplicationAsync(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToDelete = apiKeys!.First();
 
         // Act
@@ -318,7 +319,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var assertKeyIsDeletedResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var assertKeyIsDeleted = await assertKeyIsDeletedResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var assertKeyIsDeleted = await assertKeyIsDeletedResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
 
         assertKeyIsDeleted.Should().NotContain(x => x.Id == keyToDelete.Id);
     }

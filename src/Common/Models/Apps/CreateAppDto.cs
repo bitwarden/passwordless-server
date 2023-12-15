@@ -1,6 +1,6 @@
-namespace Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
+﻿namespace Passwordless.Common.Models.Apps;
 
-public class NewAppOptions
+public record CreateAppDto
 {
     public string AdminEmail { get; set; } = "";
     public bool EventLoggingIsEnabled { get; set; } = false;

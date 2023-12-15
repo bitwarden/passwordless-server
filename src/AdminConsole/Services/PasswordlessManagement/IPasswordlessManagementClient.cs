@@ -1,11 +1,11 @@
 using Passwordless.AdminConsole.Models.DTOs;
-using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 public interface IPasswordlessManagementClient
 {
-    Task<NewAppResponse> CreateApplication(string appId, NewAppOptions registerOptions);
+    Task<CreateAppResultDto> CreateApplication(string appId, CreateAppDto options);
     Task<MarkDeleteApplicationResponse> MarkDeleteApplication(MarkDeleteApplicationRequest request);
     Task<bool> DeleteApplicationAsync(string application);
     Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId);

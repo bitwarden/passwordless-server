@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -19,7 +20,7 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 public interface ISharedManagementService
 {
     Task<bool> IsAvailable(string appId);
-    Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions);
+    Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options);
     Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey);
     Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
@@ -29,9 +30,9 @@ public interface ISharedManagementService
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
-    Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreatePublicKeyDto payload);
-    Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreateSecretKeyDto payload);
-    Task<IReadOnlyCollection<ApiKeyDto>> ListApiKeysAsync(string appId);
+    Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest payload);
+    Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest payload);
+    Task<IReadOnlyCollection<ApiKeyResponse>> ListApiKeysAsync(string appId);
     Task LockApiKeyAsync(string appId, string apiKeyId);
     Task UnlockApiKeyAsync(string appId, string apiKeyId);
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
@@ -69,19 +70,19 @@ public class SharedManagementService : ISharedManagementService
         return !await storage.TenantExists();
     }
 
-    public async Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions)
+    public async Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options)
     {
         if (string.IsNullOrWhiteSpace(appId))
         {
             throw new ApiException($"'{nameof(appId)}' cannot be null, empty or whitespace.", 400);
         }
-        if (appCreationOptions == null)
+        if (options == null)
         {
             throw new ApiException("No application creation options have been defined.", 400);
         }
 
         var accountName = appId;
-        var adminEmail = appCreationOptions.AdminEmail;
+        var adminEmail = options.AdminEmail;
 
         if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))
         {
@@ -118,13 +119,13 @@ public class SharedManagementService : ISharedManagementService
             Features = new AppFeature
             {
                 Tenant = accountName,
-                EventLoggingIsEnabled = appCreationOptions.EventLoggingIsEnabled,
-                EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod,
-                MaxUsers = appCreationOptions.MaxUsers
+                EventLoggingIsEnabled = options.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
+                MaxUsers = options.MaxUsers
             }
         };
         await storage.SaveAccountInformation(account);
-        return new AccountKeysCreation
+        return new CreateAppResultDto
         {
             ApiKey1 = apiKey1,
             ApiKey2 = apiKey2,
@@ -306,7 +307,7 @@ public class SharedManagementService : ISharedManagementService
         return dto;
     }
 
-    public async Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreatePublicKeyDto payload)
+    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest payload)
     {
         if (payload.Scopes == null || !payload.Scopes.Any())
         {
@@ -315,10 +316,10 @@ public class SharedManagementService : ISharedManagementService
 
         var storage = tenantFactory.Create(appId);
         var publicKeyResult = await SetupApiKey(appId, storage, payload.Scopes.ToArray());
-        return new CreateApiKeyResultDto(publicKeyResult);
+        return new CreateApiKeyResponse(publicKeyResult);
     }
 
-    public async Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreateSecretKeyDto payload)
+    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest payload)
     {
         if (payload.Scopes == null || !payload.Scopes.Any())
         {
@@ -327,23 +328,21 @@ public class SharedManagementService : ISharedManagementService
 
         var storage = tenantFactory.Create(appId);
         var secretKeyResult = await SetupApiSecret(appId, storage, payload.Scopes.ToArray());
-        return new CreateApiKeyResultDto(secretKeyResult.original);
+        return new CreateApiKeyResponse(secretKeyResult.original);
     }
 
-    public async Task<IReadOnlyCollection<ApiKeyDto>> ListApiKeysAsync(string appId)
+    public async Task<IReadOnlyCollection<ApiKeyResponse>> ListApiKeysAsync(string appId)
     {
         var storage = tenantFactory.Create(appId);
         var keys = await storage.GetAllApiKeys();
-        var dtos = keys.Select(x => new ApiKeyDto
-        {
-            Id = x.Id,
-            ApiKey = x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
-            Type = x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
-            Scopes = x.Scopes.Order().ToHashSet(),
-            IsLocked = x.IsLocked,
-            LastLockedAt = x.LastLockedAt,
-            LastUnlockedAt = x.LastUnlockedAt
-        }).ToImmutableList();
+        var dtos = keys.Select(x => new ApiKeyResponse(
+            x.Id,
+            x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
+            x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
+            x.Scopes.Order().ToHashSet(),
+            x.IsLocked,
+            x.LastLockedAt
+        )).ToImmutableList();
         return dtos;
     }
 
