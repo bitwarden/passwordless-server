@@ -235,7 +235,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> MarkDeleteApplicationAsync(
         [FromRoute] string appId,
-        [FromBody] MarkDeleteAppDto payload,
+        [FromBody] MarkDeleteApplicationRequest payload,
         ISharedManagementService service,
         IRequestContext requestContext,
         ILogger logger,
@@ -263,7 +263,7 @@ public static class AppsEndpoints
         ISystemClock clock)
     {
         await service.UnFreezeAccount(appId);
-        var res = new CancelResult("Your account will not be deleted since the process was aborted with the cancellation link");
+        var res = new CancelApplicationDeletionResponse("Your account will not be deleted since the process was aborted with the cancellation link");
 
         eventLogger.LogAppDeleteCancelledEvent();
 

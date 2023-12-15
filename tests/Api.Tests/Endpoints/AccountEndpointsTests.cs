@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
-using Passwordless.Api.Models;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
@@ -21,7 +20,7 @@ public class AccountEndpointsTests
     public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()
     {
         var appId = "demo-application";
-        var payload = new MarkDeleteAppDto { DeletedBy = "admin@example.com" };
+        var payload = new MarkDeleteApplicationRequest(appId, "admin@example.com");
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.MarkDeleteApplicationAsync(
