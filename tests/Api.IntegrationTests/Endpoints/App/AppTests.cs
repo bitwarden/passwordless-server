@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
@@ -54,7 +55,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Assert
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var content = await response.Content.ReadFromJsonAsync<CreateAppResultDto>();
         content.Should().NotBeNull();
         content!.Message.Should().Be("Store keys safely. They will only be shown to you once.");
         content.ApiKey1.Should().NotBeNullOrWhiteSpace();
@@ -95,7 +96,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         const int expectedEventLoggingRetentionPeriod = 30;
         var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
-        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
@@ -119,7 +120,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
-        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
         using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 

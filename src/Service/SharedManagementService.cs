@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -19,7 +20,7 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 public interface ISharedManagementService
 {
     Task<bool> IsAvailable(string appId);
-    Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions);
+    Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options);
     Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey);
     Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey);
     Task FreezeAccount(string accountName);
@@ -69,19 +70,19 @@ public class SharedManagementService : ISharedManagementService
         return !await storage.TenantExists();
     }
 
-    public async Task<AccountKeysCreation> GenerateAccount(string appId, AppCreateDTO appCreationOptions)
+    public async Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options)
     {
         if (string.IsNullOrWhiteSpace(appId))
         {
             throw new ApiException($"'{nameof(appId)}' cannot be null, empty or whitespace.", 400);
         }
-        if (appCreationOptions == null)
+        if (options == null)
         {
             throw new ApiException("No application creation options have been defined.", 400);
         }
 
         var accountName = appId;
-        var adminEmail = appCreationOptions.AdminEmail;
+        var adminEmail = options.AdminEmail;
 
         if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))
         {
@@ -118,13 +119,13 @@ public class SharedManagementService : ISharedManagementService
             Features = new AppFeature
             {
                 Tenant = accountName,
-                EventLoggingIsEnabled = appCreationOptions.EventLoggingIsEnabled,
-                EventLoggingRetentionPeriod = appCreationOptions.EventLoggingRetentionPeriod,
-                MaxUsers = appCreationOptions.MaxUsers
+                EventLoggingIsEnabled = options.EventLoggingIsEnabled,
+                EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
+                MaxUsers = options.MaxUsers
             }
         };
         await storage.SaveAccountInformation(account);
-        return new AccountKeysCreation
+        return new CreateAppResultDto
         {
             ApiKey1 = apiKey1,
             ApiKey2 = apiKey2,
