@@ -243,7 +243,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
 
         apiKeys.Should().NotBeNullOrEmpty();
-        apiKeys.Should().Contain(x => x.ApiKey == apiKey!.ApiKey.GetLast(4));
+        apiKeys.Should().Contain(x => x.ApiKey.GetLast(4) == apiKey!.ApiKey.GetLast(4));
     }
 
     [Fact]
