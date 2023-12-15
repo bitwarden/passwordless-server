@@ -4,8 +4,8 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Passwordless.Common.EventLog.Enums;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
 

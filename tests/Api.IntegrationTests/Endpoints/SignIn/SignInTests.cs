@@ -8,6 +8,7 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.IntegrationTests.Helpers.User;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
@@ -173,7 +174,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         _factory.TimeProvider.SetUtcNow(serverTime);
         using var client = _factory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
@@ -198,7 +199,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var unknownUserId = $"user{Guid.NewGuid():N}";
         using var client = _factory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync();
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1);
 
@@ -222,7 +223,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         using var client = _factory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync();
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<AccountKeysCreation>();
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1)
             .AddUserAgent();

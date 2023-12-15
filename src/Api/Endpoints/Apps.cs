@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
@@ -32,7 +33,7 @@ public static class AppsEndpoints
 
         app.MapPost("/admin/apps/{appId}/create", async (
                 [FromRoute] string appId,
-                [FromBody] AppCreateDTO payload,
+                [FromBody] CreateAppDto payload,
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
@@ -139,7 +140,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> CreatePublicKeyAsync(
         [FromRoute] string appId,
-        [FromBody] CreatePublicKeyDto payload,
+        [FromBody] CreatePublicKeyRequest payload,
         ISharedManagementService service,
         IEventLogger eventLogger)
     {
@@ -150,7 +151,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> CreateSecretKeyAsync(
         [FromRoute] string appId,
-        [FromBody] CreateSecretKeyDto payload,
+        [FromBody] CreateSecretKeyRequest payload,
         ISharedManagementService service,
         IEventLogger eventLogger)
     {
