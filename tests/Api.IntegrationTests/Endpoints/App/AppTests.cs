@@ -180,7 +180,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
         appFeature.EventLoggingIsEnabled.Should().BeTrue();
         appFeature.DeveloperLoggingEndsAt.Should().BeNull();
-        appFeature.SignInTokenEndpointEnabled.Should().BeTrue();
+        appFeature.IsGenerateSignInTokenEndpointEnabled.Should().BeTrue();
     }
 
     [Fact]

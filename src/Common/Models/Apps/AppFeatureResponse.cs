@@ -5,4 +5,4 @@ public record AppFeatureResponse(
     int EventLoggingRetentionPeriod,
     DateTime? DeveloperLoggingEndsAt,
     long? MaxUsers,
-    bool SignInTokenEndpointEnabled);
+    bool IsGenerateSignInTokenEndpointEnabled);

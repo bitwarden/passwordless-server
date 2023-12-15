@@ -64,7 +64,7 @@ public abstract class DbGlobalContext : DbContext
                 .HasForeignKey<AppFeature>(x => x.Tenant)
                 .IsRequired();
 
-            b.Property(x => x.SignInTokenEndpointEnabled)
+            b.Property(x => x.IsGenerateSignInTokenEndpointEnabled)
                 .HasDefaultValue(true);
         });
 

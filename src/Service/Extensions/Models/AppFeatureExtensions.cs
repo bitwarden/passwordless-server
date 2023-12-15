@@ -14,6 +14,6 @@ public static class AppFeatureExtensions
             entity.EventLoggingRetentionPeriod,
             entity.DeveloperLoggingEndsAt,
             entity.MaxUsers,
-            entity.SignInTokenEndpointEnabled);
+            entity.IsGenerateSignInTokenEndpointEnabled);
     }
 }

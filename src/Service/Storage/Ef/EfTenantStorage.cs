@@ -226,13 +226,13 @@ public class EfTenantStorage : ITenantStorage
     public async Task EnableGenerateSignInTokenEndpoint()
     {
         await db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.SignInTokenEndpointEnabled, true));
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, true));
     }
 
     public async Task DisableGenerateSignInTokenEndpoint()
     {
         await db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.SignInTokenEndpointEnabled, false));
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, false));
     }
 
     public async Task LockAllApiKeys(bool isLocked)

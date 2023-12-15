@@ -46,7 +46,7 @@ public class FeatureContextProvider : IFeatureContextProvider
                     features.EventLoggingRetentionPeriod,
                     features.DeveloperLoggingEndsAt,
                     features.MaxUsers,
-                    features.SignInTokenEndpointEnabled);
+                    features.IsGenerateSignInTokenEndpointEnabled);
             }
             return new NullFeaturesContext();
         });

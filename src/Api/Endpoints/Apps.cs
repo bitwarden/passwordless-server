@@ -229,7 +229,7 @@ public static class AppsEndpoints
             featuresContext.EventLoggingRetentionPeriod,
             featuresContext.DeveloperLoggingEndsAt,
             featuresContext.MaxUsers,
-            featuresContext.SignInTokenEndpointEnabled);
+            featuresContext.IsGenerateSignInTokenEndpointEnabled);
 
         return Ok(dto);
     }

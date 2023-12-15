@@ -125,7 +125,7 @@ public class SharedManagementService : ISharedManagementService
                 EventLoggingIsEnabled = options.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
                 MaxUsers = options.MaxUsers,
-                SignInTokenEndpointEnabled = true
+                IsGenerateSignInTokenEndpointEnabled = true
             }
         };
         await storage.SaveAccountInformation(account);

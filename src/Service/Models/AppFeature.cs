@@ -22,7 +22,7 @@ public class AppFeature : PerTenant
     /// <summary>
     /// Determines if the Sign In Token Endpoint is enabled or disabled
     /// </summary>
-    public bool SignInTokenEndpointEnabled { get; set; } = true;
+    public bool IsGenerateSignInTokenEndpointEnabled { get; set; } = true;
 
     public AccountMetaInformation Application { get; set; }
 }

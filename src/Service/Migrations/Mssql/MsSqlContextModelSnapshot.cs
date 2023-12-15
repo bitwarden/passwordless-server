@@ -152,13 +152,13 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<int>("EventLoggingRetentionPeriod")
                         .HasColumnType("int");
 
-                    b.Property<long?>("MaxUsers")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("SignInTokenEndpointEnabled")
+                    b.Property<bool>("IsGenerateSignInTokenEndpointEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<long?>("MaxUsers")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Tenant");
 

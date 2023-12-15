@@ -147,13 +147,13 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<int>("EventLoggingRetentionPeriod")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("MaxUsers")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("SignInTokenEndpointEnabled")
+                    b.Property<bool>("IsGenerateSignInTokenEndpointEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
+
+                    b.Property<long?>("MaxUsers")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Tenant");
 

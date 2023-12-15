@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Passwordless.Service.Migrations.Sqlite;
+namespace Passwordless.Service.Migrations.Mssql;
 
 /// <inheritdoc />
 public partial class AddSignInTokenEndpointSetting : Migration
@@ -11,9 +11,9 @@ public partial class AddSignInTokenEndpointSetting : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.AddColumn<bool>(
-            name: "SignInTokenEndpointEnabled",
+            name: "IsGenerateSignInTokenEndpointEnabled",
             table: "AppFeatures",
-            type: "INTEGER",
+            type: "bit",
             nullable: false,
             defaultValue: true);
     }
@@ -22,7 +22,7 @@ public partial class AddSignInTokenEndpointSetting : Migration
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropColumn(
-            name: "SignInTokenEndpointEnabled",
+            name: "IsGenerateSignInTokenEndpointEnabled",
             table: "AppFeatures");
     }
 }
