@@ -338,7 +338,7 @@ public class SharedManagementService : ISharedManagementService
         var dtos = keys.Select(x => new ApiKeyDto
         {
             Id = x.Id,
-            ApiKey = x.ApiKey.Contains("public") ? x.ApiKey : x.Id,
+            ApiKey = x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
             Type = x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
             Scopes = x.Scopes.Order().ToHashSet(),
             IsLocked = x.IsLocked,
