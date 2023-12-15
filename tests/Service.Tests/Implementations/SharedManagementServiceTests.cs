@@ -296,13 +296,13 @@ public class SharedManagementServiceTests
 
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesDto>()), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesRequest>()), Times.Never);
     }
 
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenAppIdIsNull()
     {
-        var payload = new ManageFeaturesDto();
+        var payload = new ManageFeaturesRequest();
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(null, payload));
 
@@ -316,7 +316,7 @@ public class SharedManagementServiceTests
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsEmpty()
     {
-        var payload = new ManageFeaturesDto();
+        var payload = new ManageFeaturesRequest();
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(string.Empty, payload));
 
@@ -331,7 +331,7 @@ public class SharedManagementServiceTests
     public async Task SetFeaturesAsync_Returns_ExpectedResult()
     {
         const string appId = "myappid";
-        var payload = new ManageFeaturesDto
+        var payload = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = true,
             EventLoggingRetentionPeriod = 7,
@@ -346,7 +346,7 @@ public class SharedManagementServiceTests
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         storageMock.Verify(x => x.SetFeaturesAsync(
-            It.Is<ManageFeaturesDto>(p => p == payload)), Times.Once);
+            It.Is<ManageFeaturesRequest>(p => p == payload)), Times.Once);
     }
     #endregion
 

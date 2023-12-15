@@ -10,12 +10,12 @@ public interface IPasswordlessManagementClient
     Task<bool> DeleteApplicationAsync(string application);
     Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId);
     Task<ICollection<string>> ListApplicationsPendingDeletionAsync();
-    Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request);
-    Task<AppFeatureDto> GetFeaturesAsync(string appId);
+    Task SetFeaturesAsync(string appId, ManageFeaturesRequest request);
+    Task<AppFeatureResponse> GetFeaturesAsync(string appId);
     Task<ICollection<ApiKeyResponse>> GetApiKeysAsync(string appId);
     Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest request);
     Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest request);
-    Task LockApiKeyAsync(string appId, object apiKeyId);
-    Task UnlockApiKeyAsync(string appId, object apiKeyId);
-    Task DeleteApiKeyAsync(string appId, object apiKeyId);
+    Task LockApiKeyAsync(string appId, string apiKeyId);
+    Task UnlockApiKeyAsync(string appId, string apiKeyId);
+    Task DeleteApiKeyAsync(string appId, string apiKeyId);
 }
