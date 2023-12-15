@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -295,13 +296,13 @@ public class SharedManagementServiceTests
 
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesDto>()), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesRequest>()), Times.Never);
     }
 
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenAppIdIsNull()
     {
-        var payload = new ManageFeaturesDto();
+        var payload = new ManageFeaturesRequest();
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(null, payload));
 
@@ -315,7 +316,7 @@ public class SharedManagementServiceTests
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsEmpty()
     {
-        var payload = new ManageFeaturesDto();
+        var payload = new ManageFeaturesRequest();
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(string.Empty, payload));
 
@@ -330,7 +331,7 @@ public class SharedManagementServiceTests
     public async Task SetFeaturesAsync_Returns_ExpectedResult()
     {
         const string appId = "myappid";
-        var payload = new ManageFeaturesDto
+        var payload = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = true,
             EventLoggingRetentionPeriod = 7,
@@ -345,7 +346,7 @@ public class SharedManagementServiceTests
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         storageMock.Verify(x => x.SetFeaturesAsync(
-            It.Is<ManageFeaturesDto>(p => p == payload)), Times.Once);
+            It.Is<ManageFeaturesRequest>(p => p == payload)), Times.Once);
     }
     #endregion
 
@@ -393,7 +394,6 @@ public class SharedManagementServiceTests
         Assert.Equal("test:public:2e728aa5986f4ba8b073a5b28a939795", actualPublicKey.ApiKey);
         Assert.False(actualPublicKey.IsLocked);
         Assert.Equal(new DateTime(2023, 10, 1), actualPublicKey.LastLockedAt);
-        Assert.Equal(new DateTime(2023, 10, 2), actualPublicKey.LastUnlockedAt);
         Assert.Equal(2, actualPublicKey.Scopes.Count);
         Assert.Contains(PublicKeyScopes.Register.GetValue(), actualPublicKey.Scopes);
         Assert.Contains(PublicKeyScopes.Login.GetValue(), actualPublicKey.Scopes);
@@ -404,7 +404,6 @@ public class SharedManagementServiceTests
         Assert.Equal("test:secret:****************************6d02", actualSecretKey.ApiKey);
         Assert.True(actualSecretKey.IsLocked);
         Assert.Equal(new DateTime(2023, 11, 1), actualSecretKey.LastLockedAt);
-        Assert.Null(actualSecretKey.LastUnlockedAt);
         Assert.Equal(2, actualSecretKey.Scopes.Count);
         Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
         Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);

@@ -142,7 +142,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var name = GetApplicationName();
         _ = await _client.CreateApplicationAsync(name);
-        var manageFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
+        var manageFeatureRequest = new ManageFeaturesRequest { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
 
         // Act
         var manageFeatureResponse = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageFeatureRequest);
@@ -166,7 +166,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         var name = GetApplicationName();
         _ = await _client.CreateApplicationAsync(name);
-        var manageAppFeatureRequest = new ManageFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
+        var manageAppFeatureRequest = new ManageFeaturesRequest { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true };
         _ = await _client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
 
         // Act
@@ -174,7 +174,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         //Assert
         getAppFeatureResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var appFeature = await getAppFeatureResponse.Content.ReadFromJsonAsync<AppFeatureDto>();
+        var appFeature = await getAppFeatureResponse.Content.ReadFromJsonAsync<AppFeatureResponse>();
         appFeature.Should().NotBeNull();
         appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
         appFeature.EventLoggingIsEnabled.Should().BeTrue();

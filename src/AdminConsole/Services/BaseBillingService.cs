@@ -7,8 +7,8 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
-using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -50,7 +50,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         var plan = _billingOptions.Plans[selectedPlan];
         await this.UpdateApplicationAsync(app, selectedPlan, subscriptionItemId, priceId);
 
-        var updateFeaturesRequest = new SetApplicationFeaturesRequest
+        var updateFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod,
@@ -98,7 +98,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             .Where<Application>(db.Applications, a => a.OrganizationId == orgId)
             .ToListAsync();
 
-        var setFeaturesRequest = new SetApplicationFeaturesRequest
+        var setFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
@@ -180,7 +180,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
 
         await db.SaveChangesAsync();
 
-        var setFeaturesRequest = new SetApplicationFeaturesRequest
+        var setFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,

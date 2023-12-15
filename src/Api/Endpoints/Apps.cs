@@ -195,7 +195,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> ManageFeaturesAsync(
         [FromRoute] string appId,
-        [FromBody] ManageFeaturesDto payload,
+        [FromBody] ManageFeaturesRequest payload,
         ISharedManagementService service)
     {
         await service.SetFeaturesAsync(appId, payload);
@@ -213,13 +213,13 @@ public static class AppsEndpoints
     public static async Task<IResult> GetFeaturesAsync(IFeatureContextProvider featuresContextProvider)
     {
         var featuresContext = await featuresContextProvider.UseContext();
-        var dto = new AppFeatureDto
-        {
-            EventLoggingIsEnabled = featuresContext.EventLoggingIsEnabled,
-            EventLoggingRetentionPeriod = featuresContext.EventLoggingRetentionPeriod,
-            DeveloperLoggingEndsAt = featuresContext.DeveloperLoggingEndsAt,
-            MaxUsers = featuresContext.MaxUsers
-        };
+
+        var dto = new AppFeatureResponse(
+            featuresContext.EventLoggingIsEnabled,
+            featuresContext.EventLoggingRetentionPeriod,
+            featuresContext.DeveloperLoggingEndsAt,
+            featuresContext.MaxUsers);
+
         return Ok(dto);
     }
 
