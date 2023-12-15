@@ -46,17 +46,17 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         return await response.Content.ReadFromJsonAsync<CancelApplicationDeletionResponse>();
     }
 
-    public async Task SetFeaturesAsync(string appId, SetApplicationFeaturesRequest request)
+    public async Task SetFeaturesAsync(string appId, ManageFeaturesRequest request)
     {
         var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/features", request);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<AppFeatureDto> GetFeaturesAsync(string appId)
+    public async Task<AppFeatureResponse> GetFeaturesAsync(string appId)
     {
         var response = await _client.GetAsync($"admin/apps/{appId}/features");
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<AppFeatureDto>();
+        var result = await response.Content.ReadFromJsonAsync<AppFeatureResponse>();
         return result;
     }
 
@@ -84,19 +84,19 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         return result!;
     }
 
-    public async Task LockApiKeyAsync(string appId, object apiKeyId)
+    public async Task LockApiKeyAsync(string appId, string apiKeyId)
     {
         var response = await _client.PostAsync($"admin/apps/{appId}/api-keys/{apiKeyId}/lock", null);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task UnlockApiKeyAsync(string appId, object apiKeyId)
+    public async Task UnlockApiKeyAsync(string appId, string apiKeyId)
     {
         var response = await _client.PostAsync($"admin/apps/{appId}/api-keys/{apiKeyId}/unlock", null);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DeleteApiKeyAsync(string appId, object apiKeyId)
+    public async Task DeleteApiKeyAsync(string appId, string apiKeyId)
     {
         var response = await _client.DeleteAsync($"admin/apps/{appId}/api-keys/{apiKeyId}");
         response.EnsureSuccessStatusCode();

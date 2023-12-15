@@ -1,4 +1,4 @@
-using Passwordless.AdminConsole.Models.DTOs;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Models;
 
@@ -8,7 +8,7 @@ public record FeaturesContext(
     DateTime? DeveloperLoggingEndsAt,
     long? MaxUsers)
 {
-    public static FeaturesContext FromDto(AppFeatureDto dto)
+    public static FeaturesContext FromDto(AppFeatureResponse dto)
     {
         return new FeaturesContext(dto.EventLoggingIsEnabled, dto.EventLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt, dto.MaxUsers);
     }

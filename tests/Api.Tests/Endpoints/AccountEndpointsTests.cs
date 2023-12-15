@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
@@ -96,7 +97,7 @@ public class AccountEndpointsTests
     public async Task ManageFeaturesAsync_Returns_ExpectedResult()
     {
         const string appId = "myappid";
-        var payload = new ManageFeaturesDto
+        var payload = new ManageFeaturesRequest
         {
             EventLoggingRetentionPeriod = 14,
             EventLoggingIsEnabled = true,
@@ -109,7 +110,7 @@ public class AccountEndpointsTests
         sharedManagementServiceMock.Verify(x =>
             x.SetFeaturesAsync(
                 It.Is<string>(p => p == appId),
-                It.Is<ManageFeaturesDto>(p => p == payload)),
+                It.Is<ManageFeaturesRequest>(p => p == payload)),
             Times.Once);
         Assert.Equal(typeof(NoContent), actual.GetType());
     }

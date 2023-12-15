@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using Passwordless.Service.Models;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.App;
 
@@ -12,7 +12,7 @@ public static class AppManagementHelpers
             client.AddManagementKey();
         }
 
-        _ = await client.PostAsJsonAsync($"admin/apps/{applicationName}/features", new ManageFeaturesDto
+        _ = await client.PostAsJsonAsync($"admin/apps/{applicationName}/features", new ManageFeaturesRequest
         {
             EventLoggingRetentionPeriod = 7,
             EventLoggingIsEnabled = true,

@@ -1,6 +1,7 @@
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -174,7 +175,7 @@ public class EfTenantStorage : ITenantStorage
         await db.SaveChangesAsync();
     }
 
-    public async Task SetFeaturesAsync(ManageFeaturesDto features)
+    public async Task SetFeaturesAsync(ManageFeaturesRequest features)
     {
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;

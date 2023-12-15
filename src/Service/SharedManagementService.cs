@@ -9,6 +9,7 @@ using Passwordless.Common.Models;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -28,8 +29,8 @@ public interface ISharedManagementService
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
-    Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
-    Task<AppFeatureDto> GetFeaturesAsync(string appId);
+    Task SetFeaturesAsync(string appId, ManageFeaturesRequest payload);
+    Task<AppFeatureResponse> GetFeaturesAsync(string appId);
     Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest payload);
     Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest payload);
     Task<IReadOnlyCollection<ApiKeyResponse>> ListApiKeysAsync(string appId);
@@ -283,7 +284,7 @@ public class SharedManagementService : ISharedManagementService
         return tenants;
     }
 
-    public async Task SetFeaturesAsync(string appId, ManageFeaturesDto payload)
+    public async Task SetFeaturesAsync(string appId, ManageFeaturesRequest payload)
     {
         if (payload == null)
         {
@@ -299,11 +300,11 @@ public class SharedManagementService : ISharedManagementService
         await storage.SetFeaturesAsync(payload);
     }
 
-    public async Task<AppFeatureDto> GetFeaturesAsync(string appId)
+    public async Task<AppFeatureResponse> GetFeaturesAsync(string appId)
     {
         var storage = tenantFactory.Create(appId);
         var entity = await storage.GetAppFeaturesAsync();
-        var dto = AppFeatureDto.FromEntity(entity);
+        var dto = entity.ToDto();
         return dto;
     }
 
