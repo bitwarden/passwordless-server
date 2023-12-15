@@ -1,5 +1,5 @@
 using Passwordless.Common.Constants;
 
-namespace Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
+namespace Passwordless.Common.Models.Apps;
 
 public record CreatePublicKeyRequest(HashSet<PublicKeyScopes> Scopes);

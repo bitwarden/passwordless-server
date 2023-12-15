@@ -1,5 +1,4 @@
 using Passwordless.AdminConsole.Models.DTOs;
-using Passwordless.AdminConsole.Services.PasswordlessManagement.Contracts;
 using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Services.PasswordlessManagement;

@@ -1,4 +1,4 @@
-namespace Passwordless.Service.Models;
+namespace Passwordless.Common.Models.Apps;
 
 public enum ApiKeyTypes
 {

@@ -7,7 +7,6 @@ using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Constants;
 using Passwordless.Common.EventLog.Enums;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.Models;
 using Xunit;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Events;
@@ -46,8 +45,8 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         _ = await _client.CreateApplicationAsync(applicationName);
         await _client.EnableEventLogging(applicationName);
         using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
-            new CreateSecretKeyDto([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
-        var createApiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResultDto>();
+            new CreateSecretKeyRequest([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
+        var createApiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
         _client.AddSecretKey(createApiKey!.ApiKey);
 
         // Act
@@ -70,7 +69,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         await _client.EnableEventLogging(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
         _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
 
@@ -94,7 +93,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         await _client.EnableEventLogging(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
         _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
         _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
@@ -120,7 +119,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
-        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyDto>>();
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToDelete = apiKeys!.First();
         _ = await _client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
 

@@ -30,9 +30,9 @@ public interface ISharedManagementService
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, ManageFeaturesDto payload);
     Task<AppFeatureDto> GetFeaturesAsync(string appId);
-    Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreatePublicKeyDto payload);
-    Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreateSecretKeyDto payload);
-    Task<IReadOnlyCollection<ApiKeyDto>> ListApiKeysAsync(string appId);
+    Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest payload);
+    Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest payload);
+    Task<IReadOnlyCollection<ApiKeyResponse>> ListApiKeysAsync(string appId);
     Task LockApiKeyAsync(string appId, string apiKeyId);
     Task UnlockApiKeyAsync(string appId, string apiKeyId);
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
@@ -307,7 +307,7 @@ public class SharedManagementService : ISharedManagementService
         return dto;
     }
 
-    public async Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreatePublicKeyDto payload)
+    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreatePublicKeyRequest payload)
     {
         if (payload.Scopes == null || !payload.Scopes.Any())
         {
@@ -316,10 +316,10 @@ public class SharedManagementService : ISharedManagementService
 
         var storage = tenantFactory.Create(appId);
         var publicKeyResult = await SetupApiKey(appId, storage, payload.Scopes.ToArray());
-        return new CreateApiKeyResultDto(publicKeyResult);
+        return new CreateApiKeyResponse(publicKeyResult);
     }
 
-    public async Task<CreateApiKeyResultDto> CreateApiKeyAsync(string appId, CreateSecretKeyDto payload)
+    public async Task<CreateApiKeyResponse> CreateApiKeyAsync(string appId, CreateSecretKeyRequest payload)
     {
         if (payload.Scopes == null || !payload.Scopes.Any())
         {
@@ -328,23 +328,21 @@ public class SharedManagementService : ISharedManagementService
 
         var storage = tenantFactory.Create(appId);
         var secretKeyResult = await SetupApiSecret(appId, storage, payload.Scopes.ToArray());
-        return new CreateApiKeyResultDto(secretKeyResult.original);
+        return new CreateApiKeyResponse(secretKeyResult.original);
     }
 
-    public async Task<IReadOnlyCollection<ApiKeyDto>> ListApiKeysAsync(string appId)
+    public async Task<IReadOnlyCollection<ApiKeyResponse>> ListApiKeysAsync(string appId)
     {
         var storage = tenantFactory.Create(appId);
         var keys = await storage.GetAllApiKeys();
-        var dtos = keys.Select(x => new ApiKeyDto
-        {
-            Id = x.Id,
-            ApiKey = x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
-            Type = x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
-            Scopes = x.Scopes.Order().ToHashSet(),
-            IsLocked = x.IsLocked,
-            LastLockedAt = x.LastLockedAt,
-            LastUnlockedAt = x.LastUnlockedAt
-        }).ToImmutableList();
+        var dtos = keys.Select(x => new ApiKeyResponse(
+            x.Id,
+            x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
+            x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
+            x.Scopes.Order().ToHashSet(),
+            x.IsLocked,
+            x.LastLockedAt
+        )).ToImmutableList();
         return dtos;
     }
 

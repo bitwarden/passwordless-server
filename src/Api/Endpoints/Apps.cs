@@ -130,7 +130,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> CreatePublicKeyAsync(
         [FromRoute] string appId,
-        [FromBody] CreatePublicKeyDto payload,
+        [FromBody] CreatePublicKeyRequest payload,
         ISharedManagementService service,
         IEventLogger eventLogger)
     {
@@ -141,7 +141,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> CreateSecretKeyAsync(
         [FromRoute] string appId,
-        [FromBody] CreateSecretKeyDto payload,
+        [FromBody] CreateSecretKeyRequest payload,
         ISharedManagementService service,
         IEventLogger eventLogger)
     {
