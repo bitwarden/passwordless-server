@@ -1,6 +1,8 @@
 namespace Passwordless.Common.Services.Licensing.Models;
 
-public abstract record BaseLicenseData<TPlan>(
-    ushort ManifestVersion,
-    Guid InstallationId,
-    IDictionary<string, TPlan> Plans) where TPlan : BasePlan;
+public abstract class BaseLicenseData
+{
+    public ushort ManifestVersion { get; set; }
+    public Guid InstallationId { get; set; }
+    public Dictionary<string, BasePlan> Plans { get; init; }
+};

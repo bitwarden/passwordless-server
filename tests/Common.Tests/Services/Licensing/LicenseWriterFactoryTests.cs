@@ -1,5 +1,4 @@
 using Passwordless.Common.Services.Licensing;
-using Passwordless.Common.Services.Licensing.V1;
 
 namespace Passwordless.Common.Tests.Services.Licensing;
 
