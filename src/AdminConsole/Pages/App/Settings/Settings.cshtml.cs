@@ -18,6 +18,7 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
+    private readonly IPasswordlessManagementClient _managementClient;
     private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
@@ -36,6 +37,7 @@ public class SettingsModel : BaseExtendedPageModel
         _currentContext = currentContext;
         _appService = appService;
         _billingService = billingService;
+        _managementClient = managementClient;
         _billingOptions = billingOptions.Value;
         ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
@@ -53,6 +55,8 @@ public class SettingsModel : BaseExtendedPageModel
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
     public ApiKeysModel ApiKeysModel { get; }
+    
+    public bool IsGenerateSignInTokenEndpointEnabled { get; private set; }
 
     private async Task InitializeAsync()
     {
@@ -63,6 +67,8 @@ public class SettingsModel : BaseExtendedPageModel
 
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
+
+        IsGenerateSignInTokenEndpointEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
     }
 
     public async Task OnGet()
@@ -176,6 +182,30 @@ public class SettingsModel : BaseExtendedPageModel
         }
     }
 
+    public async Task<IActionResult> OnPostSettingsAsync()
+    {
+        try
+        {
+            var performedBy = User.Identity?.Name ?? Unknown;
+            var applicationId = _currentContext.AppId ?? Unknown;
+
+            if (IsGenerateSignInTokenEndpointEnabled)
+            {
+                await _managementClient.EnableGenerateSignInTokenEndpointAsync(applicationId, performedBy);
+            }
+            else
+            {
+                await _managementClient.DisableGenerateSignInTokenEndpointAsync(applicationId, performedBy);
+            }
+
+            return RedirectToPage();
+        }
+        catch
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+        }
+    }
+    
     private void AddPlan(string plan)
     {
         var options = _billingOptions.Plans[plan];
