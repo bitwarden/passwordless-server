@@ -1,4 +1,5 @@
 using Passwordless.Common.EventLog.Enums;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
 using Passwordless.Service.EventLog.Models;
 
@@ -192,6 +193,71 @@ public static class EventLoggerExtensions
             EventType = EventType.ApiUserDeleted,
             Severity = Severity.Informational,
             Subject = userId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogApiKeyCreatedEvent(this IEventLogger logger, string apiKey) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Created Api Key {apiKey.GetLast(4)}",
+            Severity = Severity.Informational,
+            EventType = EventType.AdminApiKeyCreated,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = "Unknown User",
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogApiKeyLockedEvent(this IEventLogger logger, string apiKeyId) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Locked Api Key {apiKeyId}",
+            Severity = Severity.Informational,
+            EventType = EventType.AdminApiKeyLocked,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = "Unknown User",
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogApiKeyUnlockedEvent(this IEventLogger logger, string apiKeyId) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Unlocked Api Key {apiKeyId}",
+            Severity = Severity.Informational,
+            EventType = EventType.AdminApiKeyUnlocked,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = "Unknown User",
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogApiKeyDeletedEvent(this IEventLogger logger, string apiKeyId) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Deleted Api Key {apiKeyId}",
+            Severity = Severity.Informational,
+            EventType = EventType.AdminApiKeyDeleted,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = "Unknown User",
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogApiKeysEnumeratedEvent(this IEventLogger logger) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = "Api keys enumerated",
+            Severity = Severity.Informational,
+            EventType = EventType.AdminApiKeysEnumerated,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = "Unknown User",
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
             ApiKeyId = context.AbbreviatedKey
         });
 

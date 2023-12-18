@@ -1,5 +1,4 @@
 ﻿@page "/settings"
-@using Passwordless.AdminConsole.TagHelpers
 @model SettingsModel
 
 @{
@@ -59,6 +58,11 @@
         }
     </div>
 </panel>
+
+@if (!Model.PendingDelete)
+{
+    <partial name="_ApiKeys" model="Model.ApiKeysModel" />
+}
 
 <panel header="Delete Application">
     @if (Model.PendingDelete)

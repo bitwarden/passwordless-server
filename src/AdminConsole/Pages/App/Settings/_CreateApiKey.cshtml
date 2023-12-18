@@ -1,0 +1,20 @@
+﻿@model CreateApiKeyModel
+
+<div class="panel">
+    <div class="panel-content">
+        <form method="post" asp-page-handler="Create" class="flex flex-col space-y-4">
+            <h3>Scopes</h3>
+            @foreach (var scope in Model.Scopes)
+            {
+                <div>
+                    <input type="checkbox" id="@scope" name="SelectedScopes" value="@scope" checked="@(Model.SelectedScopes.Contains(scope))">
+                    <label for="@scope">@scope</label>
+                </div>
+            }
+            <div id="create-api-key-actions">
+                <button id="create-api-key-btn" class="btn-primary" type="submit">Create</button>
+            </div>
+            <div asp-validation-summary="All"></div>
+        </form>
+    </div>
+</div>

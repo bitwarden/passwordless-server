@@ -4,8 +4,6 @@ public static class MailBootstrap
 {
     public static void AddMail(this WebApplicationBuilder builder)
     {
-        // Register depend on configuration
-        builder.Services.AddSingleton<IMailProvider, FileMailProvider>();
         if (builder.Configuration.GetSection("Mail:Postmark").Exists())
         {
             builder.Services.AddSingleton<IMailProvider, PostmarkMailProvider>();
@@ -13,6 +11,11 @@ public static class MailBootstrap
         else if (builder.Configuration.GetSection("Mail:Smtp").Exists())
         {
             builder.Services.AddSingleton<IMailProvider, MailKitSmtpMailProvider>();
+        }
+        else
+        {
+            builder.Services.AddOptions<FileMailProviderConfiguration>().BindConfiguration("Mail:File");
+            builder.Services.AddSingleton<IMailProvider, FileMailProvider>();
         }
     }
 }

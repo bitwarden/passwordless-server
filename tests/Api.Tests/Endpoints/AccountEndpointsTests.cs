@@ -1,8 +1,9 @@
+using AutoFixture;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Helpers;
-using Passwordless.Api.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
@@ -12,12 +13,14 @@ namespace Passwordless.Api.Tests.Endpoints;
 
 public class AccountEndpointsTests
 {
+    private readonly Fixture _fixture = new();
+
     #region MarkDeleteApplicationAsync
     [Fact]
     public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()
     {
         var appId = "demo-application";
-        var payload = new MarkDeleteAppDto { DeletedBy = "admin@example.com" };
+        var payload = new MarkDeleteApplicationRequest(appId, "admin@example.com");
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
         var deletedAt = new DateTime(2023, 08, 02, 16, 13, 00);
         sharedManagementServiceMock.Setup(x => x.MarkDeleteApplicationAsync(
@@ -93,7 +96,7 @@ public class AccountEndpointsTests
     public async Task ManageFeaturesAsync_Returns_ExpectedResult()
     {
         const string appId = "myappid";
-        var payload = new ManageFeaturesDto
+        var payload = new ManageFeaturesRequest
         {
             EventLoggingRetentionPeriod = 14,
             EventLoggingIsEnabled = true,
@@ -106,7 +109,7 @@ public class AccountEndpointsTests
         sharedManagementServiceMock.Verify(x =>
             x.SetFeaturesAsync(
                 It.Is<string>(p => p == appId),
-                It.Is<ManageFeaturesDto>(p => p == payload)),
+                It.Is<ManageFeaturesRequest>(p => p == payload)),
             Times.Once);
         Assert.Equal(typeof(NoContent), actual.GetType());
     }

@@ -1,6 +1,6 @@
-﻿namespace Passwordless.Service.Models;
+﻿namespace Passwordless.Common.Models.Apps;
 
-public class AccountKeysCreation
+public class CreateAppResultDto
 {
     public string Message { get; set; }
     public string ApiKey1 { get; set; }

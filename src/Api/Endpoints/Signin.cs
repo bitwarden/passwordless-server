@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
+using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -8,9 +9,7 @@ namespace Passwordless.Api.Endpoints;
 
 public static class SigninEndpoints
 {
-    private record SigninTokenRequest(string UserId);
-
-    private record SigninTokenResponse(string Token);
+    public record SigninTokenResponse(string Token);
 
     public static void MapSigninEndpoints(this WebApplication app)
     {
@@ -19,11 +18,11 @@ public static class SigninEndpoints
                 IFido2Service fido2Service
             ) =>
             {
-                var result = await fido2Service.CreateSigninToken(signinToken.UserId);
+                var result = await fido2Service.CreateSigninToken(signinToken);
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireSecretKey()
+            .RequireAuthorization(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
 
         app.MapPost("/signin/begin", async (
@@ -35,7 +34,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequirePublicKey()
+            .RequireAuthorization(PublicKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -50,7 +49,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequirePublicKey()
+            .RequireAuthorization(PublicKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -63,7 +62,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireSecretKey()
+            .RequireAuthorization(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
     }
 }

@@ -257,23 +257,30 @@ public class Fido2Service : IFido2Service
         return new TokenResponse(token);
     }
 
-    public Task<string> CreateSigninToken(string userId)
+    public async Task<string> CreateSigninToken(SigninTokenRequest request)
     {
-        ValidateUserId(userId);
+        ValidateUserId(request.UserId);
 
-        _eventLogger.LogSigninTokenCreatedEvent(userId);
+        if (!await _storage.UserExists(request.UserId))
+        {
+            throw new ApiException("invalid_user", $"{request.UserId} is not recognized.", 400);
+        }
+
+        _eventLogger.LogSigninTokenCreatedEvent(request.UserId);
 
         var tokenProps = new VerifySignInToken
         {
             Success = true,
-            UserId = userId,
+            UserId = request.UserId,
             Timestamp = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddSeconds(120),
             TokenId = Guid.NewGuid(),
-            Type = "manual_signin"
+            Type = "manual_signin",
+            RpId = request.RPID,
+            Origin = request.Origin
         };
 
-        return _tokenService.EncodeTokenAsync(tokenProps, "verify_");
+        return await _tokenService.EncodeTokenAsync(tokenProps, "verify_");
     }
 
     public async Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request)

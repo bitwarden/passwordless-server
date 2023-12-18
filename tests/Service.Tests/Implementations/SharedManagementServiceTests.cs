@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Passwordless.Common.Constants;
+using Passwordless.Common.Extensions;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -293,13 +296,13 @@ public class SharedManagementServiceTests
 
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesDto>()), Times.Never);
+        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesRequest>()), Times.Never);
     }
 
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenAppIdIsNull()
     {
-        var payload = new ManageFeaturesDto();
+        var payload = new ManageFeaturesRequest();
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(null, payload));
 
@@ -313,7 +316,7 @@ public class SharedManagementServiceTests
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenTenantsIsEmpty()
     {
-        var payload = new ManageFeaturesDto();
+        var payload = new ManageFeaturesRequest();
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(string.Empty, payload));
 
@@ -328,7 +331,7 @@ public class SharedManagementServiceTests
     public async Task SetFeaturesAsync_Returns_ExpectedResult()
     {
         const string appId = "myappid";
-        var payload = new ManageFeaturesDto
+        var payload = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = true,
             EventLoggingRetentionPeriod = 7,
@@ -343,7 +346,67 @@ public class SharedManagementServiceTests
         _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         storageMock.Verify(x => x.SetFeaturesAsync(
-            It.Is<ManageFeaturesDto>(p => p == payload)), Times.Once);
+            It.Is<ManageFeaturesRequest>(p => p == payload)), Times.Once);
+    }
+    #endregion
+
+    #region ListApiKeysAsync
+    [Fact]
+    public async Task ListApiKeysAsync_Returns_ExpectedResult()
+    {
+        // Arrange
+        const string appId = "test";
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
+        storageMock.Setup(x => x.GetAllApiKeys()).ReturnsAsync(new List<ApiKeyDesc>
+        {
+            new()
+            {
+                Tenant = "test",
+                ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795",
+                Id = "9795",
+                Scopes = new[] { "register", "login" },
+                IsLocked = false,
+                LastLockedAt = new DateTime(2023, 10, 1),
+                LastUnlockedAt = new DateTime(2023, 10, 2)
+            },
+            new()
+            {
+                Tenant = "test",
+                ApiKey = "Wx9XPDW1cp1Jb0LxElrh+g==:/7E93JhN30boFyNyVbCW/g==",
+                Id = "6d02",
+                Scopes = new[] { "token_register", "token_verify" },
+                IsLocked = true,
+                LastLockedAt = new DateTime(2023, 11, 1),
+                LastUnlockedAt = null
+            }
+        });
+
+        // act
+        var actual = await _sut.ListApiKeysAsync(appId);
+
+        // assert
+        Assert.Equal(2, actual.Count);
+
+        var actualPublicKey = actual.First();
+        Assert.Equal("9795", actualPublicKey.Id);
+        Assert.Equal(ApiKeyTypes.Public, actualPublicKey.Type);
+        Assert.Equal("test:public:2e728aa5986f4ba8b073a5b28a939795", actualPublicKey.ApiKey);
+        Assert.False(actualPublicKey.IsLocked);
+        Assert.Equal(new DateTime(2023, 10, 1), actualPublicKey.LastLockedAt);
+        Assert.Equal(2, actualPublicKey.Scopes.Count);
+        Assert.Contains(PublicKeyScopes.Register.GetValue(), actualPublicKey.Scopes);
+        Assert.Contains(PublicKeyScopes.Login.GetValue(), actualPublicKey.Scopes);
+
+        var actualSecretKey = actual.Last();
+        Assert.Equal("6d02", actualSecretKey.Id);
+        Assert.Equal(ApiKeyTypes.Secret, actualSecretKey.Type);
+        Assert.Equal("test:secret:****************************6d02", actualSecretKey.ApiKey);
+        Assert.True(actualSecretKey.IsLocked);
+        Assert.Equal(new DateTime(2023, 11, 1), actualSecretKey.LastLockedAt);
+        Assert.Equal(2, actualSecretKey.Scopes.Count);
+        Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
+        Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);
     }
     #endregion
 }

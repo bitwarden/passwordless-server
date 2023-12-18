@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
+using Passwordless.Common.Constants;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
@@ -80,7 +82,8 @@ public abstract class DbGlobalContext : DbContext
         {
             Tenant = appName,
             Id = publicKey[^4..],
-            ApiKey = publicKey
+            ApiKey = publicKey,
+            Scopes = [PublicKeyScopes.Register.GetValue(), PublicKeyScopes.Login.GetValue()]
         });
 
         ApiKeys.Add(new ApiKeyDesc
@@ -88,7 +91,7 @@ public abstract class DbGlobalContext : DbContext
             Tenant = appName,
             Id = privateKey[^4..],
             ApiKey = ApiKeyUtils.HashPrivateApiKey(privateKey),
-            Scopes = new[] { "token_register", "token_verify" },
+            Scopes = [SecretKeyScopes.TokenRegister.GetValue(), SecretKeyScopes.TokenVerify.GetValue()]
         });
 
         AccountInfo.Add(new AccountMetaInformation { Tenant = appName, AcountName = appName });

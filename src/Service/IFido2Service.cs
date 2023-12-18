@@ -9,7 +9,7 @@ public interface IFido2Service
     Task<SessionResponse<CredentialCreateOptions>> RegisterBegin(FidoRegistrationBeginDTO request);
     Task<TokenResponse> RegisterComplete(RegistrationCompleteDTO request, string deviceInfo, string country);
 
-    Task<string> CreateSigninToken(string userId);
+    Task<string> CreateSigninToken(SigninTokenRequest request);
     Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request);
     Task<TokenResponse> SignInComplete(SignInCompleteDTO request, string device, string country);
     Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload);

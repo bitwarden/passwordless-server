@@ -4,6 +4,7 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.EventLog.Mappings;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Features;
 
 namespace Passwordless.Api.Endpoints;
@@ -31,22 +32,28 @@ public static class EventLog
             return Results.ValidationProblem(errors);
         }
 
-        var tenantId = request.GetTenantNameFromKey();
-
         var events = await storage.GetEventLogAsync(getEventLogEventsRequest.PageNumber, getEventLogEventsRequest.NumberOfResults ?? 100, cancellationToken);
 
-        return Results.Ok(new
+        return Results.Ok(new GetEventLogEventsResponse
         {
-            TenantId = tenantId,
-            Events = events.Select(x => x.ToEvent()),
+            TenantId = request.GetTenantNameFromKey() ?? string.Empty,
+            Events = events?.Select(x => x.ToEvent()) ?? new List<EventResponse>(),
             TotalEventCount = await storage.GetEventLogCountAsync(cancellationToken)
         });
     }
 
-    public struct GetEventLogEventsRequest
+    private struct GetEventLogEventsRequest
     {
         public int PageNumber { get; set; }
+
         [Range(1, 1000)]
         public int? NumberOfResults { get; set; }
+    }
+
+    public class GetEventLogEventsResponse
+    {
+        public string TenantId { get; set; } = String.Empty;
+        public IEnumerable<EventResponse> Events { get; set; } = new List<EventResponse>();
+        public int TotalEventCount { get; set; }
     }
 }

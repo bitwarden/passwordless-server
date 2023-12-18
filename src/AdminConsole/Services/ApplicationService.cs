@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
-using Passwordless.AdminConsole.Models.DTOs;
 using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Services;
 
