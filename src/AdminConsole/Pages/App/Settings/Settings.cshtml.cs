@@ -55,7 +55,7 @@ public class SettingsModel : BaseExtendedPageModel
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
     public ApiKeysModel ApiKeysModel { get; }
-    
+
     public bool IsGenerateSignInTokenEndpointEnabled { get; private set; }
 
     private async Task InitializeAsync()
@@ -205,7 +205,7 @@ public class SettingsModel : BaseExtendedPageModel
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
         }
     }
-    
+
     private void AddPlan(string plan)
     {
         var options = _billingOptions.Plans[plan];
