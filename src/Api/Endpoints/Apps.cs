@@ -126,6 +126,16 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors("default");
+
+        app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/enable", EnableGenerateSignInTokenEndpoint)
+            .WithParameterValidation()
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/disable", DisableGenerateSignInTokenEndpoint)
+            .WithParameterValidation()
+            .RequireManagementKey()
+            .RequireCors("default");
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(
@@ -218,7 +228,8 @@ public static class AppsEndpoints
             featuresContext.EventLoggingIsEnabled,
             featuresContext.EventLoggingRetentionPeriod,
             featuresContext.DeveloperLoggingEndsAt,
-            featuresContext.MaxUsers);
+            featuresContext.MaxUsers,
+            featuresContext.IsGenerateSignInTokenEndpointEnabled);
 
         return Ok(dto);
     }
@@ -269,6 +280,32 @@ public static class AppsEndpoints
 
         return Ok(res);
     }
+
+    public static async Task<IResult> EnableGenerateSignInTokenEndpoint(
+        [FromRoute] string appId,
+        EnableGenerateSignInTokenEndpointRequest request,
+        ISharedManagementService managementService,
+        IEventLogger eventLogger)
+    {
+        await managementService.EnableGenerateSignInTokenEndpoint(appId);
+        eventLogger.LogGenerateSignInTokenEndpointEnabled(request.PerformedBy);
+        return NoContent();
+    }
+
+    public static async Task<IResult> DisableGenerateSignInTokenEndpoint(
+        [FromRoute] string appId,
+        DisableGenerateSignInTokenEndpointRequest request,
+        ISharedManagementService managementService,
+        IEventLogger eventLogger)
+    {
+        await managementService.DisableGenerateSignInTokenEndpoint(appId);
+        eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
+        return NoContent();
+    }
+
+    public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
+
+    public record DisableGenerateSignInTokenEndpointRequest(string PerformedBy);
 
     public record AvailableResponse(bool Available);
 

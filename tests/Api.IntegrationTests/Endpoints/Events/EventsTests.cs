@@ -120,7 +120,7 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         _ = await _client.EnableEventLogging(applicationName);
         using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
-        var keyToDelete = apiKeys!.First();
+        var keyToDelete = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
         _ = await _client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
 
         // Act
@@ -132,6 +132,58 @@ public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClass
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyDeleted.ToString());
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_enabling_the_generate_sign_in_token_endpoint()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        const string user = "a_user";
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _client.EnableEventLogging(applicationName);
+        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
+            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest(user));
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminGenerateSignInTokenEndpointEnabled.ToString());
+        enabledEvent.Should().NotBeNull();
+        enabledEvent!.PerformedBy.Should().Be(user);
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_disabling_the_generate_sign_in_token_endpoint()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        const string user = "a_user";
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _client.EnableEventLogging(applicationName);
+        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
+            new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest(user));
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminGenerateSignInTokenEndpointDisabled.ToString());
+        enabledEvent.Should().NotBeNull();
+        enabledEvent!.PerformedBy.Should().Be(user);
     }
 
     public void Dispose()

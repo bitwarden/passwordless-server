@@ -6,6 +6,7 @@ public interface IFeaturesContext
     public int EventLoggingRetentionPeriod { get; init; }
     public DateTime? DeveloperLoggingEndsAt { get; init; }
     public bool IsInFeaturesContext { get; }
+    public bool IsGenerateSignInTokenEndpointEnabled { get; init; }
 
     /// <summary>
     /// Maximum number of individual users allowed to use the application
