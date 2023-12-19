@@ -298,11 +298,6 @@ public class EfTenantStorage : ITenantStorage
         await db.SaveChangesAsync();
     }
 
-    public Task<bool> UserExists(string userId) =>
-        db.Credentials.Where(x => x.UserId == userId).Select(x => x.UserId)
-            .Union(db.Aliases.Where(x => x.UserId == userId).Select(x => x.UserId))
-            .AnyAsync();
-
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {
         var credentialsPerUser = await db.Credentials

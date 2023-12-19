@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
@@ -193,46 +192,19 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     }
 
     [Fact]
-    public async Task I_receive_an_error_when_I_request_a_sign_in_token_for_a_user_that_does_not_exist()
-    {
-        // Arrange
-        var unknownUserId = $"user{Guid.NewGuid():N}";
-        using var client = _factory.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplicationAsync();
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddPublicKey(accountKeysCreation!.ApiKey1)
-            .AddSecretKey(accountKeysCreation.ApiSecret1);
-
-        // Act
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(unknownUserId)
-        {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
-        });
-
-        // Assert
-        signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var problemDetails = await signInGenerateTokenResponse.Content.ReadFromJsonAsync<ProblemDetails>();
-        problemDetails.Should().NotBeNull();
-        problemDetails!.Title.Should().Be($"{unknownUserId} is not recognized.");
-    }
-
-    [Fact]
-    public async Task I_receive_a_sign_in_token_for_an_existing_user()
+    public async Task I_receive_a_sign_in_token_for_a_valid_user_id()
     {
         // Arrange
         using var client = _factory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync();
+        var userId = $"user{Guid.NewGuid():N}";
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1)
             .AddUserAgent();
-        var registerToken = UserHelpers.TokenGenerator.Generate();
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await client.RegisterNewUser(driver, registerToken);
 
         // Act
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(registerToken.UserId)
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(userId)
         {
             Origin = PasswordlessApiFactory.OriginUrl,
             RPID = PasswordlessApiFactory.RpId
