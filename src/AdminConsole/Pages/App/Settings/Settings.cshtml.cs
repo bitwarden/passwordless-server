@@ -12,6 +12,7 @@ namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : BaseExtendedPageModel
 {
+    public const string SignInTokenEndpointEnabledCheckboxId = "IsGenerateSignInTokenEndpointEnabled";
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
     private readonly IDataService _dataService;
@@ -189,7 +190,7 @@ public class SettingsModel : BaseExtendedPageModel
             var performedBy = User.Identity?.Name ?? Unknown;
             var applicationId = _currentContext.AppId ?? Unknown;
 
-            if (IsGenerateSignInTokenEndpointEnabled)
+            if (Convert.ToBoolean(Request.Form[SignInTokenEndpointEnabledCheckboxId].FirstOrDefault()))
             {
                 await _managementClient.EnableGenerateSignInTokenEndpointAsync(applicationId, performedBy);
             }

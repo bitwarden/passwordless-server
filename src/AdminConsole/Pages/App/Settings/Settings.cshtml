@@ -66,15 +66,16 @@
 
 <panel header="Settings">
     <form method="post" asp-page-handler="Settings">
-        <h3>Trusted Verification Token Sign-In Endpoint</h3>
+        <h3>Custom Generated Token Sign-In Endpoint</h3>
         <p>
-            Trusted verification tokens have many uses in authentication. A primary use would be issuing a "magic link" for a
+            Custom generated tokens have many uses in authentication. A primary use would be issuing a "magic link" for a
             user to log-in to their account in the event they've misplaced their passkey. Once the identity of the user has been
             verified, you can send them a hyperlink that contains the token issued by `signin/generate-token`.
         </p>
         
-        <input type="checkbox" asp-for="IsGenerateSignInTokenEndpointEnabled" />
-        <button id="btn-save-settings" class="btn-secondary mt-3" type="submit">Save</button>
+        <input id="@SettingsModel.SignInTokenEndpointEnabledCheckboxId" class="mr-3" type="checkbox" asp-for="IsGenerateSignInTokenEndpointEnabled" /><label for="IsGenerateSignInTokenEndpointEnabled">Enable Custom Generated Token Sign-In Endpoint</label>
+        <br />
+        <button id="btn-save-settings" class="btn-primary mt-3" type="submit">Save</button>
     </form>
 </panel>
 
