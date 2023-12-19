@@ -27,7 +27,7 @@ public class Log : PageModel
 
     public async Task<ActionResult> OnGet(int pageNumber = 1, int numberOfResults = 100)
     {
-        var features = _currentContext.OrganizationFeatures;
+        var features = _currentContext.OrganizationOrganizationFeatures;
 
         if (!features.EventLoggingIsEnabled) return RedirectToPage("Overview");
 

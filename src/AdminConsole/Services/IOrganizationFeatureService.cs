@@ -4,5 +4,5 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface IOrganizationFeatureService
 {
-    FeaturesContext GetOrganizationFeatures(int orgId);
+    OrganizationFeaturesContext GetOrganizationFeatures(int orgId);
 }

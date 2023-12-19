@@ -17,7 +17,7 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
         _options = options.Value;
     }
 
-    public FeaturesContext GetOrganizationFeatures(int orgId)
+    public OrganizationFeaturesContext GetOrganizationFeatures(int orgId)
     {
         using var db = _dbContextFactory.CreateDbContext();
         var billingPlans = db.Applications
@@ -40,11 +40,10 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
             features = plan.Value.Features;
         }
 
-        return new FeaturesContext(
+        return new OrganizationFeaturesContext(
             features.EventLoggingIsEnabled,
             features.EventLoggingRetentionPeriod,
             null,
-            features.MaxUsers,
-            false);
+            features.MaxUsers);
     }
 }
