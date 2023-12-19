@@ -312,4 +312,30 @@ public static class EventLoggerExtensions
             Subject = tenantId,
             ApiKeyId = publicKey.AbbreviatedValue
         });
+
+    public static void LogGenerateSignInTokenEndpointEnabled(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = "/signin/generate-token was enabled.",
+            PerformedBy = string.IsNullOrWhiteSpace(performedBy) ? "Unknown User" : performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.AdminGenerateSignInTokenEndpointEnabled,
+            Severity = Severity.Alert,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
+
+    public static void LogGenerateSignInTokenEndpointDisabled(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = "/signin/generate-token endpoint was disabled.",
+            PerformedBy = string.IsNullOrWhiteSpace(performedBy) ? "Unknown User" : performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.AdminGenerateSignInTokenEndpointDisabled,
+            Severity = Severity.Alert,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
 }

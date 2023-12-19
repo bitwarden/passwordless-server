@@ -50,4 +50,6 @@ public interface ITenantStorage
     Task LockApiKeyAsync(string apiKeyId);
     Task UnlockApiKeyAsync(string apiKeyId);
     Task DeleteApiKeyAsync(string apiKeyId);
+    Task EnableGenerateSignInTokenEndpoint();
+    Task DisableGenerateSignInTokenEndpoint();
 }
