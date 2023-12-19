@@ -113,9 +113,6 @@ jobs:
       contents: read
       packages: write
 
-    env:
-      CONTAINER_NAMESPACE: bitwarden
-
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -132,6 +129,7 @@ jobs:
 
       - name: Build & push image
         env:
+          DOCKER_CONTAINER_NAMESPACE: bitwarden
           DOCKER_CONTENT_TRUST: 1
           DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ steps.setup-dct.outputs.dct-delegate-repo-passphrase }}
         run: >
@@ -140,10 +138,10 @@ jobs:
           --platform linux/amd64,linux/arm64
           --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
-          ${{ format('--tag {0}/{1}:latest', env.CONTAINER_NAMESPACE, matrix.name) }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', env.CONTAINER_NAMESPACE, matrix.name) || '' }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.CONTAINER_NAMESPACE, matrix.name, github.ref_name) || '' }}
-          ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', env.CONTAINER_NAMESPACE, matrix.name, inputs.image-tag) || '' }}
+          ${{ format('--tag {0}/{1}:latest', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.DOCKER_CONTAINER_NAMESPACE, matrix.name, github.ref_name) || '' }}
+          ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', env.DOCKER_CONTAINER_NAMESPACE, matrix.name, inputs.image-tag) || '' }}
 
       - name: Log out of Docker and disable Docker Notary
         run: |
