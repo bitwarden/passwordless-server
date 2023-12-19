@@ -70,10 +70,14 @@
         <p>
             Custom generated tokens have many uses in authentication. A primary use would be issuing a "magic link" for a
             user to log-in to their account in the event they've misplaced their passkey. Once the identity of the user has been
-            verified, you can send them a hyperlink that contains the token issued by `signin/generate-token`.
+            verified, you can send them a hyperlink that contains the token issued by <code>signin/generate-token</code>.
         </p>
         
-        <input id="@SettingsModel.SignInTokenEndpointEnabledCheckboxId" class="mr-3" type="checkbox" asp-for="IsGenerateSignInTokenEndpointEnabled" /><label for="IsGenerateSignInTokenEndpointEnabled">Enable Custom Generated Token Sign-In Endpoint</label>
+        
+        <label class="my-2" for="@SettingsModel.SignInTokenEndpointEnabledCheckboxId">
+            <input class="mr-1" id="@SettingsModel.SignInTokenEndpointEnabledCheckboxId" type="checkbox" asp-for="IsGenerateSignInTokenEndpointEnabled" />
+            Enable Custom Generated Token Sign-In Endpoint
+        </label>
         <br />
         <button id="btn-save-settings" class="btn-primary mt-3" type="submit">Save</button>
     </form>
