@@ -12,7 +12,7 @@ namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : BaseExtendedPageModel
 {
-    public const string SignInTokenEndpointEnabledCheckboxId = "IsGenerateSignInTokenEndpointEnabled";
+    public const string ManualVerificationTokenCheckboxId = "IsManualTokenGenerationEnabled";
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
     private readonly IDataService _dataService;
@@ -57,7 +57,7 @@ public class SettingsModel : BaseExtendedPageModel
 
     public ApiKeysModel ApiKeysModel { get; }
 
-    public bool IsGenerateSignInTokenEndpointEnabled { get; private set; }
+    public bool IsManualTokenGenerationEnabled { get; private set; }
 
     private async Task InitializeAsync()
     {
@@ -69,7 +69,7 @@ public class SettingsModel : BaseExtendedPageModel
         if (application == null) throw new InvalidOperationException("Application not found.");
         Application = application;
 
-        IsGenerateSignInTokenEndpointEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
+        IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
     }
 
     public async Task OnGet()
@@ -190,13 +190,13 @@ public class SettingsModel : BaseExtendedPageModel
             var performedBy = User.Identity?.Name ?? Unknown;
             var applicationId = _currentContext.AppId ?? Unknown;
 
-            if (Convert.ToBoolean(Request.Form[SignInTokenEndpointEnabledCheckboxId].FirstOrDefault()))
+            if (Convert.ToBoolean(Request.Form[ManualVerificationTokenCheckboxId].FirstOrDefault()))
             {
-                await _managementClient.EnableGenerateSignInTokenEndpointAsync(applicationId, performedBy);
+                await _managementClient.EnabledManuallyGeneratedTokensAsync(applicationId, performedBy);
             }
             else
             {
-                await _managementClient.DisableGenerateSignInTokenEndpointAsync(applicationId, performedBy);
+                await _managementClient.DisabledManuallyGeneratedTokensAsync(applicationId, performedBy);
             }
 
             return RedirectToPage();

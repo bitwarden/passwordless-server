@@ -101,7 +101,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task EnableGenerateSignInTokenEndpointAsync(string appId, string performedBy)
+    public async Task EnabledManuallyGeneratedTokensAsync(string appId, string performedBy)
     {
         var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/sign-in-generate-token-endpoint/enable", new
         {
@@ -110,7 +110,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DisableGenerateSignInTokenEndpointAsync(string appId, string performedBy)
+    public async Task DisabledManuallyGeneratedTokensAsync(string appId, string performedBy)
     {
         var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/sign-in-generate-token-endpoint/disable", new
         {
