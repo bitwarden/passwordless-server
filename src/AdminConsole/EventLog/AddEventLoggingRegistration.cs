@@ -21,7 +21,7 @@ public static class AddEventLoggingRegistration
         serviceProvider.GetRequiredService<ICurrentContext>() switch
         {
             { OrgId: null } => serviceProvider.GetRequiredService<EventLoggerEfUnauthenticatedWriteStorage<TDbContext>>(),
-            { OrganizationOrganizationFeatures.EventLoggingIsEnabled: true } => serviceProvider.GetRequiredService<EventLoggerEfWriteStorage<TDbContext>>(),
+            { OrganizationFeatures.EventLoggingIsEnabled: true } => serviceProvider.GetRequiredService<EventLoggerEfWriteStorage<TDbContext>>(),
             _ => NoOpEventLogger.Instance
         };
 }

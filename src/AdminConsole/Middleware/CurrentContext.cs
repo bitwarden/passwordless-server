@@ -20,7 +20,7 @@ public class CurrentContext : ICurrentContext
     public ApplicationFeatureContext Features { get; private set; }
     public Organization? Organization { get; private set; }
     public int? OrgId { get; private set; }
-    public OrganizationFeaturesContext OrganizationOrganizationFeatures { get; private set; } = new(false, 0, null, null);
+    public OrganizationFeaturesContext OrganizationFeatures { get; private set; } = new(false, 0);
 
     public void SetApp(Application application)
     {
@@ -43,7 +43,7 @@ public class CurrentContext : ICurrentContext
     public void SetOrganization(int organizationId, OrganizationFeaturesContext organizationFeaturesContext, Organization organization)
     {
         OrgId = organizationId;
-        OrganizationOrganizationFeatures = organizationFeaturesContext;
+        OrganizationFeatures = organizationFeaturesContext;
         Organization = organization;
     }
 }

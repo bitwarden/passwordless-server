@@ -62,7 +62,7 @@
                     <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/settings">
                         <CogIcon Class="nav-link-icon"/> Settings
                     </NavLink>
-                    @if (CurrentContext.OrganizationOrganizationFeatures.EventLoggingIsEnabled)
+                    @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
                     {
                         <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/log">
                             <CodeBracketSquareIcon Class="nav-link-icon"/> Organization Logs

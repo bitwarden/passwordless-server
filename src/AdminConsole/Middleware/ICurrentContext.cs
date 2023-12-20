@@ -17,7 +17,7 @@ public interface ICurrentContext
     ApplicationFeatureContext Features { get; }
     Organization? Organization { get; }
     int? OrgId { get; }
-    OrganizationFeaturesContext OrganizationOrganizationFeatures { get; }
+    OrganizationFeaturesContext OrganizationFeatures { get; }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
