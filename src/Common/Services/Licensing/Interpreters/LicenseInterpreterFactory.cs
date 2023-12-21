@@ -7,7 +7,7 @@ namespace Passwordless.Common.Services.Licensing.Interpreters;
 
 public class LicenseInterpreterFactory : ILicenseInterpreterFactory
 {
-    private IReadOnlyDictionary<ushort, ILicenseInterpreter<BaseLicenseData>> _interpreters;
+    private readonly IReadOnlyDictionary<ushort, ILicenseInterpreter> _interpreters;
     private readonly ILogger<LicenseInterpreterFactory> _logger;
 
     public LicenseInterpreterFactory(ILogger<LicenseInterpreterFactory> logger)
@@ -17,13 +17,14 @@ public class LicenseInterpreterFactory : ILicenseInterpreterFactory
         _interpreters = assembly.GetTypes()
             .Where(type =>
                 type.IsClass &&
-                type.GetInterfaces().Contains(typeof(ILicenseInterpreter<BaseLicenseData>)) &&
+                type.GetInterfaces().Contains(typeof(ILicenseInterpreter)) &&
                 Attribute.IsDefined(type, typeof(ManifestVersionAttribute)))
             .ToImmutableDictionary(
                 k => k.GetCustomAttribute<ManifestVersionAttribute>().ManifestVersion,
-                v => (ILicenseInterpreter<BaseLicenseData>)Activator.CreateInstance(v)!);
+                v => (ILicenseInterpreter)(Activator.CreateInstance(v)!));
     }
-    public ILicenseInterpreter<BaseLicenseData> Create(LicenseParameters parameters)
+
+    public ILicenseInterpreter Create(LicenseParameters parameters)
     {
         try
         {
@@ -31,8 +32,8 @@ public class LicenseInterpreterFactory : ILicenseInterpreterFactory
         }
         catch (KeyNotFoundException)
         {
-            _logger.LogCritical("No license writer found for manifest version {ManifestVersion}.", parameters.ManifestVersion);
-            throw;
+            _logger.LogError("No license interpreter found for manifest version {ManifestVersion}.", parameters.ManifestVersion);
+            throw new ArgumentOutOfRangeException(nameof(parameters), $"No license interpreter found for manifest version '{parameters.ManifestVersion}'.");
         }
     }
 }

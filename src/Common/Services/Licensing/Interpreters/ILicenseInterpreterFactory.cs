@@ -9,5 +9,5 @@ public interface ILicenseInterpreterFactory
     /// </summary>
     /// <param name="parameters"></param>
     /// <returns></returns>
-    ILicenseInterpreter<BaseLicenseData> Create(LicenseParameters parameters);
+    ILicenseInterpreter Create(LicenseParameters parameters);
 }

@@ -6,6 +6,6 @@ public class ManifestVersionAttribute : Attribute
     {
         ManifestVersion = manifestVersion;
     }
-    
+
     public ushort ManifestVersion { get; }
 }

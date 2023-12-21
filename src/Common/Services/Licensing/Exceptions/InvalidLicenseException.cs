@@ -8,6 +8,6 @@ public class InvalidLicenseException : Exception
     {
         License = license;
     }
-    
+
     public string License { get; }
 }
