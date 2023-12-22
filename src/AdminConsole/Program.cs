@@ -85,9 +85,6 @@ void RunTheApp()
             }
         }
     });
-    
-    builder.AddLicensingWriter();
-    builder.AddLicensingReader();
 
     IServiceCollection services = builder.Services;
 

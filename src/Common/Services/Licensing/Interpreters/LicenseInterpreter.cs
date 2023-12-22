@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Passwordless.Common.Services.Licensing.Models;
 
 namespace Passwordless.Common.Services.Licensing.Interpreters;
@@ -16,7 +15,7 @@ public class LicenseInterpreter : ILicenseInterpreter
         {
             InstallationId = parameters.InstallationId,
             ManifestVersion = parameters.ManifestVersion,
-            Plans = new ReadOnlyDictionary<string, BasePlan>(parameters.Plans.Select(p => new KeyValuePair<string, BasePlan>(p.Key, new Plan(p.Value.Seats, p.Value.SupportsAuditLogging))).ToDictionary())
+            Plans = parameters.Plans.Select(p => new KeyValuePair<string, Plan>(p.Key, new Plan(p.Value.Seats, p.Value.SupportsAuditLogging))).ToDictionary()
         };
     }
 }

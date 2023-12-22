@@ -16,7 +16,7 @@ public class LicenseWriterTests
     private readonly Mock<TimeProvider> _timeProviderMock = new();
 
     private readonly LicenseWriter _sut;
-
+    
     public LicenseWriterTests()
     {
         var interpreterFactoryLoggerMock = new Mock<ILogger<LicenseInterpreterFactory>>();

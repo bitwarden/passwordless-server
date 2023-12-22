@@ -21,9 +21,10 @@ public class LicenseInterpreterTests
         // assert
         Assert.Equal(parameters.InstallationId, actual.InstallationId);
         Assert.Equal(parameters.ManifestVersion, actual.ManifestVersion);
-        Assert.Equal(parameters.Plans.Count, actual.Plans.Count);
-        Assert.Equal(parameters.Plans.First().Key, actual.Plans.First().Key);
-        var actualFirstPlan = (Plan)actual.Plans.First().Value;
+        var actualData = (LicenseData) actual;
+        Assert.Equal(parameters.Plans.Count, actualData.Plans.Count);
+        Assert.Equal(parameters.Plans.First().Key, actualData.Plans.First().Key);
+        var actualFirstPlan = actualData.Plans.First().Value;
         Assert.Equal(parameters.Plans.First().Value.Seats, actualFirstPlan.Seats);
         Assert.Equal(parameters.Plans.First().Value.SupportsAuditLogging, actualFirstPlan.SupportsAuditLogging);
     }

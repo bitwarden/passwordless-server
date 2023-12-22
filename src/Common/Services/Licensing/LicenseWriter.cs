@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using Passwordless.Common.Services.Licensing.Constants;
 using Passwordless.Common.Services.Licensing.Cryptography;
@@ -19,8 +18,6 @@ public sealed class LicenseWriter(
 {
     public JwtSecurityToken Write(LicenseParameters parameters)
     {
-        RSA privateKey = signatureProvider.PrivateKey;
-
         var interpreter = interpreterFactory.Create(parameters);
         var data = interpreter.Generate(parameters);
         var serializedData = serializer.Serialize(data);
@@ -30,7 +27,9 @@ public sealed class LicenseWriter(
             new (CustomClaimTypes.Data, serializedData, JsonClaimValueTypes.Json)
         });
 
-        var signingCredentials = new SigningCredentials(new RsaSecurityKey(privateKey), SecurityAlgorithms.RsaSha256);
+        var signingCredentials = new SigningCredentials(
+            new RsaSecurityKey(signatureProvider.PrivateKey),
+            SecurityAlgorithms.RsaSha256);
 
         var securityTokenDescriptor = new SecurityTokenDescriptor
         {
@@ -38,7 +37,6 @@ public sealed class LicenseWriter(
             IssuedAt = timeProvider.GetUtcNow().UtcDateTime,
             Expires = parameters.ExpiresAt,
             SigningCredentials = signingCredentials
-
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

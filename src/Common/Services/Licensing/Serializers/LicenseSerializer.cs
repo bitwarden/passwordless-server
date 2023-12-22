@@ -15,4 +15,6 @@ public class LicenseSerializer : ILicenseSerializer
     {
         return JsonSerializer.Deserialize<T>(json, _options);
     }
+
+    public JsonSerializerOptions Options => _options;
 }

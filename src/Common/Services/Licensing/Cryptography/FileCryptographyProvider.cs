@@ -25,4 +25,18 @@ public class FileCryptographyProvider : ICryptographyProvider
             return key;
         }
     }
+
+    public RSA PublicKey
+    {
+        get
+        {
+            string path = _options.PublicKey;
+            string content = File.ReadAllText(path);
+
+            RSA key = RSA.Create();
+            key.ImportFromPem(content);
+
+            return key;
+        }
+    }
 }

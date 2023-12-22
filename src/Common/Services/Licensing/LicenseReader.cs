@@ -1,5 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
+using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Passwordless.Common.Services.Licensing.Constants;
 using Passwordless.Common.Services.Licensing.Cryptography;
@@ -9,44 +9,53 @@ using Passwordless.Common.Services.Licensing.Serializers;
 
 namespace Passwordless.Common.Services.Licensing;
 
-public class LicenseReader(
-    ILicenseSerializer serializer,
-    ICryptographyProvider signatureProvider,
-    ILogger<LicenseReader> logger) : ILicenseReader
+public class LicenseReader : ILicenseReader
 {
+    private readonly ILicenseSerializer _serializer;
+    private readonly ICryptographyProvider _signatureProvider;
+    private readonly ILogger<LicenseReader> _logger;
+
+    public LicenseReader(
+        ILicenseSerializer serializer,
+        ICryptographyProvider signatureProvider,
+        ILogger<LicenseReader> logger)
+    {
+        _serializer = serializer;
+        _signatureProvider = signatureProvider;
+        _logger = logger;
+    }
+
     public async Task<LicenseData> ValidateAsync(string jwt)
     {
-        RSA certificate = signatureProvider.PrivateKey;
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-
+        var publicKey = new RsaSecurityKey(_signatureProvider.PublicKey);
         var validationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new RsaSecurityKey(certificate),
+            IssuerSigningKey = publicKey,
+            ValidateAudience = false,
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true
         };
 
+        var tokenHandler = new JwtSecurityTokenHandler();
         var validationResult = await tokenHandler.ValidateTokenAsync(jwt, validationParameters);
 
         if (!validationResult.IsValid)
         {
-            logger.LogWarning("The license is invalid.");
+            _logger.LogWarning("The license is invalid.");
             throw new InvalidLicenseException(jwt);
         }
 
         var claims = validationResult.Claims;
 
-        var serializedData = (string)claims[CustomClaimTypes.Data];
-        var data = serializer.Deserialize<LicenseData>(serializedData);
-
+        var jsonElementData = (JsonElement)claims[CustomClaimTypes.Data];
+        var data = jsonElementData.Deserialize<LicenseData>(_serializer.Options);
         if (data == null)
         {
-            logger.LogWarning("The license data is empty.");
+            _logger.LogWarning("The license data is empty.");
             throw new InvalidLicenseException(jwt, "The license data is empty.");
         }
-
+        data.ExpiresAt = validationResult.SecurityToken.ValidTo;
         return data;
     }
 }

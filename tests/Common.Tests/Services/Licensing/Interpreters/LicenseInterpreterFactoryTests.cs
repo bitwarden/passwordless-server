@@ -43,6 +43,6 @@ public class LicenseInterpreterFactoryTests
         var exception = Assert.Throws<ArgumentOutOfRangeException>(() => _sut.Create(parameters));
         
         // Assert
-        Assert.Equal($"No license interpreter found for manifest version '{parameters.ManifestVersion}'. (Parameter 'ManifestVersion')", exception.Message);
+        Assert.Equal($"No license interpreter found for manifest version '{parameters.ManifestVersion}'. (Parameter 'parameters')", exception.Message);
     }
 }
