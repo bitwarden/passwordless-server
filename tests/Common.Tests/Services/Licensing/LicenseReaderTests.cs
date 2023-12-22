@@ -81,5 +81,6 @@ public class LicenseReaderTests
         
         // Assert
         Assert.Equal("The license is invalid.", actual.Message);
+        Assert.Equal(jwtString, actual.License);
     }
 }
