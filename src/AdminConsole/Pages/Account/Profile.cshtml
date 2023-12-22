@@ -8,8 +8,9 @@
     var requestToken = Antiforgery.GetAndStoreTokens(Model.HttpContext).RequestToken;
 }
 
-<panel header="Passkeys">
+<div class="panel">
+    <h2>Passkeys</h2>   
     <partial name="_Credentials" model="Model.Credentials"/>
-    <partial name="Shared/_PasswordlessClientJs" />
-    <partial name="Shared/_AddPasskeys" />
-</panel>
+    <partial name="Shared/_PasswordlessClientJs"/>
+    <partial name="Shared/_AddPasskeys"/>
+</div>

@@ -1,11 +1,13 @@
 ﻿@page "/settings"
+@using Badge = Passwordless.AdminConsole.Components.Shared.Badge
 @model SettingsModel
 
 @{
     ViewData["Title"] = "Settings";
 }
 
-<panel header="Plan">
+<div class="panel">
+    <h2>Plan</h2>
     <p>The plan you select for this app changes the pricing and features available.</p>
     <div class="gap-4 grid sm:grid-cols-1 md:grid-cols-3">
         @foreach (var plan in Model.Plans)
@@ -16,16 +18,16 @@
                     {
                         if (plan.IsOutdated)
                         {
-                            <badge variant="ColorVariant.Warning" text="New Available"></badge>
+                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Warning)" param-Message="@("New Available")" />
                         }
                         else
                         {
-                            <badge variant="ColorVariant.Primary" text="Active"></badge>
+                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Primary)" param-Message="@("Active")" />
                         }
                     }
                     else
                     {
-                        <badge class="invisible" text="Inactive"></badge>
+                        <component type="typeof(Badge)" render-mode="Static" param-Class="@("invisible")" param-Message="@("Hidden")" />
                     }
                 </div>
                 <h3 class="text-center">@plan.Label</h3>
@@ -57,7 +59,7 @@
             </div>
         }
     </div>
-</panel>
+</div>
 
 @if (!Model.PendingDelete)
 {
