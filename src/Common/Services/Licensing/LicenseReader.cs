@@ -25,6 +25,10 @@ public class LicenseReader : ILicenseReader
         _logger = logger;
     }
 
+    /**
+     * Validates the license and returns the license data.
+     * We always expect the latest known license manifest version.
+     */
     public async Task<LicenseData> ValidateAsync(string jwt)
     {
         var publicKey = new RsaSecurityKey(_signatureProvider.PublicKey);

@@ -7,5 +7,8 @@ public class ManifestVersionAttribute : Attribute
         ManifestVersion = manifestVersion;
     }
 
+    /// <summary>
+    /// The manifest version of the license.
+    /// </summary>
     public ushort ManifestVersion { get; }
 }

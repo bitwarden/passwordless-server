@@ -18,8 +18,12 @@ public sealed class LicenseWriter(
 {
     public JwtSecurityToken Write(LicenseParameters parameters)
     {
+        // Select the right interpreter for the manifest version.
         var interpreter = interpreterFactory.Create(parameters);
+
+        // Generate the license data to be signed.
         var data = interpreter.Generate(parameters);
+
         var serializedData = serializer.Serialize(data);
 
         ClaimsIdentity claimsIdentity = new ClaimsIdentity(new Claim[]
