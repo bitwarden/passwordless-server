@@ -20,14 +20,14 @@ public class LicenseReaderTests
     private readonly LicenseReader _sut;
 
     private readonly LicenseWriter _licenseWriter;
-    
+
     public LicenseReaderTests()
     {
         var interpreterFactoryLoggerMock = new Mock<ILogger<LicenseInterpreterFactory>>();
         var interpreterFactory = new LicenseInterpreterFactory(interpreterFactoryLoggerMock.Object);
 
         var serializer = new LicenseSerializer();
-        
+
         var fileSignatureConfiguration = new FileCryptographyConfiguration
         {
             PrivateKey = "license_dev_private.pem",
@@ -39,7 +39,7 @@ public class LicenseReaderTests
         var signatureProvider = new FileCryptographyProvider(optionsMock.Object);
 
         _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(DateTimeOffset.UtcNow);
-        
+
         _licenseWriter = new LicenseWriter(interpreterFactory, serializer, signatureProvider, _timeProviderMock.Object);
 
         var loggerMock = new Mock<ILogger<LicenseReader>>();
@@ -55,20 +55,20 @@ public class LicenseReaderTests
             .With(x => x.ExpiresAt, DateTime.UtcNow.Date.AddYears(10))
             .Create();
         var jwt = _licenseWriter.Write(parameters);
-        
+
         var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         var jwtString = jwtSecurityTokenHandler.WriteToken(jwt)!;
 
         // Act
         var actual = await _sut.ValidateAsync(jwtString);
-        
+
         // Assert
         Assert.NotNull(actual);
         Assert.Equal(parameters.InstallationId, actual.InstallationId);
         Assert.Equal(parameters.ManifestVersion, actual.ManifestVersion);
         Assert.Equal(parameters.ExpiresAt, actual.ExpiresAt);
     }
-    
+
     [Fact]
     public async Task ValidateAsync_Throws_InvalidLicenseException_WhenSignatureIsInvalid()
     {
@@ -78,7 +78,7 @@ public class LicenseReaderTests
         // Act
         var actual = await Assert.ThrowsAsync<InvalidLicenseException>(async () =>
             await _sut.ValidateAsync(jwtString));
-        
+
         // Assert
         Assert.Equal("The license is invalid.", actual.Message);
         Assert.Equal(jwtString, actual.License);

@@ -16,14 +16,14 @@ public class LicenseWriterTests
     private readonly Mock<TimeProvider> _timeProviderMock = new();
 
     private readonly LicenseWriter _sut;
-    
+
     public LicenseWriterTests()
     {
         var interpreterFactoryLoggerMock = new Mock<ILogger<LicenseInterpreterFactory>>();
         var interpreterFactory = new LicenseInterpreterFactory(interpreterFactoryLoggerMock.Object);
 
         var serializer = new LicenseSerializer();
-        
+
         var fileSignatureConfiguration = new FileCryptographyConfiguration
         {
             PrivateKey = "license_dev_private.pem"
@@ -35,7 +35,7 @@ public class LicenseWriterTests
 
         _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(DateTimeOffset.UtcNow);
 
-        
+
         _sut = new LicenseWriter(interpreterFactory, serializer, signatureProvider, _timeProviderMock.Object);
     }
 
@@ -50,7 +50,7 @@ public class LicenseWriterTests
 
         // Act
         var actual = _sut.Write(parameters);
-        
+
         // Assert
         Assert.NotNull(actual);
         Assert.Equal("JWT", actual.Header.Typ);

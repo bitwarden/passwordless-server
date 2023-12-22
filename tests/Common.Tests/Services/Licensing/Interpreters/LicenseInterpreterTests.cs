@@ -14,30 +14,30 @@ public class LicenseInterpreterTests
     {
         // arrange
         var parameters = _fixture.Build<LicenseParameters>().With(x => x.ManifestVersion, 1).Create();
-        
+
         // act
         var actual = _sut.Generate(parameters);
-        
+
         // assert
         Assert.Equal(parameters.InstallationId, actual.InstallationId);
         Assert.Equal(parameters.ManifestVersion, actual.ManifestVersion);
-        var actualData = (LicenseData) actual;
+        var actualData = (LicenseData)actual;
         Assert.Equal(parameters.Plans.Count, actualData.Plans.Count);
         Assert.Equal(parameters.Plans.First().Key, actualData.Plans.First().Key);
         var actualFirstPlan = actualData.Plans.First().Value;
         Assert.Equal(parameters.Plans.First().Value.Seats, actualFirstPlan.Seats);
         Assert.Equal(parameters.Plans.First().Value.SupportsAuditLogging, actualFirstPlan.SupportsAuditLogging);
     }
-    
+
     [Fact]
     public void Generate_Throws_ArgumentNullException_WhenParametersIsNull()
     {
         // arrange
         LicenseParameters? parameters = null;
-        
+
         // act
         var exception = Assert.Throws<ArgumentNullException>(() => _sut.Generate(parameters));
-        
+
         // assert
         Assert.Equal("Value cannot be null. (Parameter 'parameters')", exception.Message);
     }
