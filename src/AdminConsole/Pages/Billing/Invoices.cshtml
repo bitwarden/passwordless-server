@@ -1,49 +1,58 @@
 @page
-@using Passwordless.AdminConsole.TagHelpers
+@using Badge = Passwordless.AdminConsole.Components.Shared.Badge
 @model Passwordless.AdminConsole.Pages.Billing.InvoicesModel
 
 @{
     ViewBag.Title = "Invoices - Billing";
 }
 
-<panel header="History">
-    <div class="table-container">
-        <table id="invoices-table" class="tbl-default min-w-full">
-            <thead>
-            <tr>
-                <th>Invoice Number</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            @if (Model.Invoices.Any())
-            {
-                @foreach (var invoice in Model.Invoices)
+<div class="panel">
+    <h2>History</h2>
+    <div class="panel-content">
+        <div class="table-container">
+            <table id="invoices-table" class="tbl-default min-w-full">
+                <thead>
+                <tr>
+                    <th>Invoice Number</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.Invoices.Any())
+                {
+                    @foreach (var invoice in Model.Invoices)
+                    {
+                        <tr>
+                            <td>@invoice.Number</td>
+                            <td><asp-local-time datetime="@invoice.Date"/></td>
+                            <td>@invoice.Amount</td>
+                            <td>
+                                @if (invoice.Paid)
+                                {
+                                    <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Success)" param-Message="@("Paid")" />
+                                }
+                                else
+                                {
+                                    <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Danger)" param-Message="@("Pending")" />
+                                }
+                            </td>
+                            <td>
+                                <a href="@invoice.Pdf" target="_blank"><partial name="Shared/Icons/Download"/></a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>@invoice.Number</td>
-                        <td><asp-local-time datetime="@invoice.Date"/></td>
-                        <td>@invoice.Amount</td>
-                        <td>
-                            <badge asp-if="invoice.Paid" variant="ColorVariant.Success" text="Paid"></badge>
-                            <badge asp-if="!invoice.Paid" variant="ColorVariant.Danger" text="Pending"></badge>
-                        </td>
-                        <td>
-                            <a href="@invoice.Pdf" target="_blank"><partial name="Shared/Icons/Download" /></a>
-                        </td>
+                        <td colspan="5">No invoices found.</td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="5">No invoices found.</td>
-                </tr>
-            }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</panel>
+</div>
