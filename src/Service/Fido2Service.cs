@@ -270,7 +270,7 @@ public class Fido2Service : IFido2Service
             Timestamp = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddSeconds(120),
             TokenId = Guid.NewGuid(),
-            Type = "manual_signin",
+            Type = "generated_signin",
             RpId = request.RPID,
             Origin = request.Origin
         };
