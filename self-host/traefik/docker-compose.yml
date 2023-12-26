@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.10
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  passwordless:
+    container_name: passwordless
+    image: ghcr.io/passwordless/passwordless-self-host:latest
+    volumes:
+      - /Users/jonashendrickx/src/bitwarden/passwordless-server/self-host/traefik/pwdcache:/etc/bitwarden_passwordless
+    restart: unless-stopped
+    environment:
+      # The port to which our app will listen publicly, necessary for non-request contexts.
+      BWP_PORT: 80
+      BWP_DOMAIN: passwordless.docker.localhost
+    labels:
+      - "traefik.http.routers.passwordless.rule=Host(`passwordless.docker.localhost`)" 
