@@ -377,6 +377,3 @@ mail.md
 
 *.db-shm
 *.db-wal
-
-
-/src/AdminConsole/wwwroot/css/tailwind.css
