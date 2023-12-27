@@ -2,6 +2,7 @@
 @attribute [AllowAnonymous]
 
 <PageTitle>Welcome!</PageTitle>
+<PageScript Src="./Components/Pages/Anonymous.razor.js"></PageScript>
 
 <h1>Welcome to Blazor!</h1>
 <button class="btn-primary">Tailwind Button</button>
@@ -9,6 +10,10 @@
 <p>@message</p>
 
 <ReleaseNotes />
+
+<div id="chart">
+    
+</div>
 
 @code {
     private string message = 
