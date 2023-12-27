@@ -19,5 +19,10 @@ public class AppFeature : PerTenant
     /// </summary>
     public long? MaxUsers { get; set; }
 
+    /// <summary>
+    /// Determines if the Sign In Token Endpoint is enabled or disabled
+    /// </summary>
+    public bool IsGenerateSignInTokenEndpointEnabled { get; set; } = true;
+
     public AccountMetaInformation Application { get; set; }
 }

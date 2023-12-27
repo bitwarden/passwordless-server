@@ -223,6 +223,18 @@ public class EfTenantStorage : ITenantStorage
         }
     }
 
+    public async Task EnableGenerateSignInTokenEndpoint()
+    {
+        await db.AppFeatures.ExecuteUpdateAsync(x => x
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, true));
+    }
+
+    public async Task DisableGenerateSignInTokenEndpoint()
+    {
+        await db.AppFeatures.ExecuteUpdateAsync(x => x
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, false));
+    }
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x
@@ -285,11 +297,6 @@ public class EfTenantStorage : ITenantStorage
         db.Credentials.Update(c);
         await db.SaveChangesAsync();
     }
-
-    public Task<bool> UserExists(string userId) =>
-        db.Credentials.Where(x => x.UserId == userId).Select(x => x.UserId)
-            .Union(db.Aliases.Where(x => x.UserId == userId).Select(x => x.UserId))
-            .AnyAsync();
 
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {

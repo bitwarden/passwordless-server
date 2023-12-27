@@ -261,11 +261,6 @@ public class Fido2Service : IFido2Service
     {
         ValidateUserId(request.UserId);
 
-        if (!await _storage.UserExists(request.UserId))
-        {
-            throw new ApiException("invalid_user", $"{request.UserId} is not recognized.", 400);
-        }
-
         _eventLogger.LogSigninTokenCreatedEvent(request.UserId);
 
         var tokenProps = new VerifySignInToken
@@ -275,7 +270,7 @@ public class Fido2Service : IFido2Service
             Timestamp = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddSeconds(120),
             TokenId = Guid.NewGuid(),
-            Type = "manual_signin",
+            Type = "generated_signin",
             RpId = request.RPID,
             Origin = request.Origin
         };

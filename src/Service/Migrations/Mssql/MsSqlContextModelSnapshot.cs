@@ -107,6 +107,37 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("Aliases");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.ApiKeyDesc", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApiKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastUnlockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Tenant", "Id");
+
+                    b.ToTable("ApiKeys");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Property<string>("Tenant")
@@ -120,6 +151,11 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<int>("EventLoggingRetentionPeriod")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsGenerateSignInTokenEndpointEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<long?>("MaxUsers")
                         .HasColumnType("bigint");
@@ -213,37 +249,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.HasKey("Tenant", "KeyId");
 
                     b.ToTable("TokenKeys");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Storage.ApiKeyDesc", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AccountName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ApiKey")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastLockedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LastUnlockedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Scopes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Tenant", "Id");
-
-                    b.ToTable("ApiKeys");
                 });
 
             modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>

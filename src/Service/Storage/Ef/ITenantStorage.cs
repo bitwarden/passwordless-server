@@ -28,7 +28,6 @@ public interface ITenantStorage
     Task StoreApiKey(string pkpart, string apikey, string[] scopes);
     Task<bool> TenantExists();
     Task UpdateCredential(byte[] credentialId, uint counter, string country, string device);
-    Task<bool> UserExists(string userId);
     Task<List<UserSummary>> GetUsers(string lastUserId);
 
     // Aliases
@@ -50,4 +49,6 @@ public interface ITenantStorage
     Task LockApiKeyAsync(string apiKeyId);
     Task UnlockApiKeyAsync(string apiKeyId);
     Task DeleteApiKeyAsync(string apiKeyId);
+    Task EnableGenerateSignInTokenEndpoint();
+    Task DisableGenerateSignInTokenEndpoint();
 }
