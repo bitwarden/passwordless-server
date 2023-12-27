@@ -52,7 +52,7 @@
     <None Include="Services\AuthenticatorData\authenticator-data.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="npm run build"  />
+  <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
+    <Exec Command="npm run build" />
   </Target>
 </Project>
