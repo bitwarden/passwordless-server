@@ -220,7 +220,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_APP_NAME }}
           publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }}
-          package: '${{ matrix.app }}'
+          package: ${{ matrix.app }}
 
   # Notify the Slack channel about the release
   notify:
