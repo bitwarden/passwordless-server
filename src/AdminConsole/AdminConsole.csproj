@@ -53,6 +53,7 @@
   </ItemGroup>
 
   <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
+    <Exec Command="npm install" />
     <Exec Command="npm run build" />
   </Target>
 </Project>
