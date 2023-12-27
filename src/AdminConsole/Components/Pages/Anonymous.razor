@@ -11,11 +11,11 @@
 
 <ReleaseNotes />
 
-<div id="chart">
-    
-</div>
+<LineChart Id="DumbChart" XCategories="@XCategories"></LineChart>
 
 @code {
     private string message = 
         "Hello from a Razor component and welcome to Blazor!";
+
+    public IEnumerable<string> XCategories = new [] { "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998" };
 }
