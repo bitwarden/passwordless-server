@@ -19,7 +19,8 @@ services:
     container_name: passwordless
     image: ghcr.io/passwordless/passwordless-self-host:latest
     volumes:
-      - /Users/jonashendrickx/src/bitwarden/passwordless-server/self-host/traefik/pwdcache:/etc/bitwarden_passwordless
+      # change this directory to your own, or use a named volume
+      - /your/directory/pwdcache:/etc/bitwarden_passwordless
     restart: unless-stopped
     environment:
       # The port to which our app will listen publicly, necessary for non-request contexts.
