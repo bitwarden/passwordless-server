@@ -73,6 +73,7 @@ ENV Passwordless_ApiUrl="http://localhost:5701/api"
 ENV PasswordlessManagement_ApiUrl="http://localhost:5701/api"
 ENV PasswordlessManagement_InternalApiUrl="http://localhost:5000"
 ENV SelfHosted=true
+ENV RP_PORT=5701
 
 # Add packages
 RUN apt-get update && apt-get install -y \
