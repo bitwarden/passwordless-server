@@ -1,0 +1,26 @@
+@page "/app/{app}/Reporting"
+@using Passwordless.AdminConsole.Services
+@using Passwordless.Common.Models.Reporting
+
+@inject IScopedPasswordlessClient PasswordlessClient
+
+<PageTitle>Reporting</PageTitle>
+
+<LineChart Id="periodic-credentials-users" XCategories="@XCategories" Series="@Values"></LineChart>
+
+@code {
+    [Parameter]
+    public string App { get; set; }
+    
+    public IEnumerable<string> XCategories { get; private set; }
+    
+    public IEnumerable<int> Values { get; private set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var req = new PeriodicCredentialReportRequest(null, null);
+        var report = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
+        XCategories = report.Select(x => x.CreatedAt.ToShortDateString()).ToList();
+        Values = report.Select(x => x.Users).ToList();
+    }
+}

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
@@ -233,6 +234,25 @@ public class EfTenantStorage : ITenantStorage
     {
         await db.AppFeatures.ExecuteUpdateAsync(x => x
             .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, false));
+    }
+
+    public async Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(
+        DateTime? from,
+        DateTime? to)
+    {
+        var query = db.PeriodicCredentialReports.AsQueryable();
+        if (from.HasValue)
+        {
+            query = query.Where(x => x.CreatedAt >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(x => x.CreatedAt <= to.Value);
+        }
+        return await query
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

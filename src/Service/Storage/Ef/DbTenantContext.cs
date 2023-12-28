@@ -9,10 +9,11 @@ public abstract class DbTenantContext : DbGlobalContext
 {
     public string Tenant { get; }
 
-    public DbTenantContext(
+    protected DbTenantContext(
         DbContextOptions options,
-        ITenantProvider tenantProvider
-    ) : base(options)
+        ITenantProvider tenantProvider,
+        TimeProvider timeProvider
+    ) : base(options, timeProvider)
     {
         Tenant = tenantProvider.Tenant;
     }
@@ -26,6 +27,7 @@ public abstract class DbTenantContext : DbGlobalContext
         modelBuilder.Entity<AliasPointer>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<AppFeature>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<ApplicationEvent>().HasQueryFilter(c => c.TenantId == Tenant);
+        modelBuilder.Entity<PeriodicCredentialReport>().HasQueryFilter(c => c.Tenant == Tenant);
 
         base.OnModelCreating(modelBuilder);
     }

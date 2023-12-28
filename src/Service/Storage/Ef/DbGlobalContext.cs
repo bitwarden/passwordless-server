@@ -11,8 +11,13 @@ namespace Passwordless.Service.Storage.Ef;
 
 public abstract class DbGlobalContext : DbContext
 {
-    public DbGlobalContext(DbContextOptions options) : base(options)
+    protected readonly TimeProvider TimeProvider;
+
+    protected DbGlobalContext(
+        DbContextOptions options,
+        TimeProvider timeProvider) : base(options)
     {
+        TimeProvider = timeProvider;
     }
 
     public DbSet<EFStoredCredential> Credentials => Set<EFStoredCredential>();
@@ -22,6 +27,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
     public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
+    public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -74,6 +80,18 @@ public abstract class DbGlobalContext : DbContext
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.Events)
                 .HasForeignKey(x => x.TenantId)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<PeriodicCredentialReport>(builder =>
+        {
+            builder.HasKey(x => new { x.Tenant, x.CreatedAt });
+
+            builder.Property(x => x.CreatedAt);
+
+            builder.HasOne(x => x.Application)
+                .WithMany(x => x.PeriodicCredentialReports)
+                .HasForeignKey(x => x.Tenant)
                 .IsRequired();
         });
 

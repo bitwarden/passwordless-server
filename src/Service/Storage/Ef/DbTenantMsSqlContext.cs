@@ -4,8 +4,11 @@ namespace Passwordless.Service.Storage.Ef;
 
 public class DbTenantMsSqlContext : DbTenantContext
 {
-    public DbTenantMsSqlContext(DbContextOptions<DbTenantMsSqlContext> options, ITenantProvider tenantProvider)
-        : base(options, tenantProvider)
+    public DbTenantMsSqlContext(
+        DbContextOptions<DbTenantMsSqlContext> options,
+        ITenantProvider tenantProvider,
+        TimeProvider timeProvider)
+        : base(options, tenantProvider, timeProvider)
     {
     }
 }
