@@ -2,7 +2,6 @@
 @attribute [AllowAnonymous]
 
 <PageTitle>Welcome!</PageTitle>
-<PageScript Src="./Components/Pages/Anonymous.razor.js"></PageScript>
 
 <h1>Welcome to Blazor!</h1>
 <button class="btn-primary">Tailwind Button</button>
@@ -11,11 +10,7 @@
 
 <ReleaseNotes />
 
-<LineChart Id="DumbChart" XCategories="@XCategories"></LineChart>
-
 @code {
     private string message = 
         "Hello from a Razor component and welcome to Blazor!";
-
-    public IEnumerable<string> XCategories = new [] { "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998" };
 }
