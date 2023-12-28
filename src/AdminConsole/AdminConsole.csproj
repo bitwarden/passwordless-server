@@ -57,7 +57,7 @@
     <Exec Command="npm install" />
     <Exec Command="npm run build" />
     
-    <!-- Apexx Charts -->
+    <!-- Apex Charts -->
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.min.js" DestinationFolder="wwwroot\lib\apexcharts\" />
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.css" DestinationFolder="wwwroot\lib\apexcharts\" />
     <ItemGroup>
