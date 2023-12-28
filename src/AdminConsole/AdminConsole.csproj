@@ -56,5 +56,13 @@
   <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
     <Exec Command="npm install" />
     <Exec Command="npm run build" />
+    
+    <!-- Apexx Charts -->
+    <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.min.js" DestinationFolder="wwwroot\lib\apexcharts\" />
+    <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.css" DestinationFolder="wwwroot\lib\apexcharts\" />
+    <ItemGroup>
+      <ApexChartsFilesLocales Include="node_modules\apexcharts\dist\locales\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(ApexChartsFilesLocales)" DestinationFolder="wwwroot\lib\apexcharts\locales\*" />
   </Target>
 </Project>
