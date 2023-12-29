@@ -56,7 +56,8 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
             queryBuilder.Add("to", request.To.Value.ToString("yyyy-MM-dd"));
         }
 
-        var response = await _client.GetAsync($"/apps/{_currentContext.AppId}/reporting/credentials/periodic?{queryBuilder.ToQueryString().Value}");
+        var q = queryBuilder.ToQueryString();
+        var response = await _client.GetAsync($"/apps/{_currentContext.AppId}/reporting/credentials/periodic{q}");
         response.EnsureSuccessStatusCode();
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;

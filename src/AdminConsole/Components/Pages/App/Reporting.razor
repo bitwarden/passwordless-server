@@ -3,6 +3,7 @@
 @using Passwordless.Common.Models.Reporting
 
 @inject IScopedPasswordlessClient PasswordlessClient
+@inject IHttpContextAccessor HttpContextAccessor;
 
 <PageTitle>Reporting</PageTitle>
 
@@ -12,15 +13,15 @@
 
 <div class="page-content-container">
     <Panel Header="Filter">
-        <EditForm id="filter-form" FormName="filter" class="gap-4 grid grid-cols-1 md:grid-cols-3" Model="Filter" OnValidSubmit="HandleFilterSubmit">
+        <EditForm id="filter-form" FormName="filter" class="gap-4 grid grid-cols-1 md:grid-cols-3" Model="Filter">
             <div>
                 <label for="from-datepicker">From</label>
-                <InputDate id="from-datepicker" Type="InputDateType.Date" @bind-Value="Filter.From" />
+                <InputDate DisplayName="From" id="from-datepicker" Type="InputDateType.Date" @bind-Value="Filter.From" />
             </div>
             
             <div>
                 <label for="to-datepicker">To</label>
-                <InputDate id="to-datepicker" Type="InputDateType.Date" @bind-Value="Filter.To" />
+                <InputDate DisplayName="To" id="to-datepicker" Type="InputDateType.Date" @bind-Value="Filter.To" />
             </div>
             
             <button id="filter-btn" class="btn btn-primary" type="submit">
@@ -49,6 +50,7 @@
     [Parameter]
     public string App { get; set; }
 
+    [SupplyParameterFromForm]
     public FilterViewModel Filter { get; set; } = new();
     
     public IEnumerable<string> XCategories { get; private set; }
@@ -57,14 +59,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var req = new PeriodicCredentialReportRequest(null, null);
+        var req = new PeriodicCredentialReportRequest(Filter.From, Filter.To);
         var report = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
         XCategories = report.Select(x => x.CreatedAt.ToShortDateString()).ToList();
         Values = report.Select(x => x.Users).ToList();
-    }
-
-    private async Task HandleFilterSubmit(EditContext arg)
-    {
     }
 
     public class FilterViewModel
