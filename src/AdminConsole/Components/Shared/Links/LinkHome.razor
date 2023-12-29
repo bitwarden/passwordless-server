@@ -1,21 +1,26 @@
 @inherits BaseRazorComponent
 
 <a class="@Class" href="">
-    @if (IsDesktop)
+    @if (IsDesktop.HasValue)
     {
-        <LogoFull />
+        if (IsDesktop.Value)
+        {
+            <LogoFull />
+        }
+        else
+        {
+            <LogoMobile />
+        }
     }
     else
     {
-        <LogoMobile />
+        <LogoFull Class="hidden lg:block"/>
+        <LogoMobile Class="lg:hidden"/>
     }
 </a>
 
 @code
 {
     [Parameter]
-    public RenderFragment ChildContent { get; set; }
-
-    [Parameter]
-    public bool IsDesktop { get; set; }
+    public bool? IsDesktop { get; set; }
 }

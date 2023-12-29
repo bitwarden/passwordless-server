@@ -6,11 +6,50 @@
 
 <PageTitle>Reporting</PageTitle>
 
-<LineChart Id="periodic-credentials-users" XCategories="@XCategories" Series="@Values"></LineChart>
+<div class="page-header-container">
+    <h1>Reporting</h1>
+</div>
+
+<div class="page-content-container">
+    <Panel Header="Filter">
+        <EditForm id="filter-form" FormName="filter" class="gap-4 grid grid-cols-1 md:grid-cols-3" Model="Filter" OnValidSubmit="HandleFilterSubmit">
+            <div>
+                <label for="from-datepicker">From</label>
+                <InputDate id="from-datepicker" Type="InputDateType.Date" @bind-Value="Filter.From" />
+            </div>
+            
+            <div>
+                <label for="to-datepicker">To</label>
+                <InputDate id="to-datepicker" Type="InputDateType.Date" @bind-Value="Filter.To" />
+            </div>
+            
+            <button id="filter-btn" class="btn btn-primary" type="submit">
+                Filter
+            </button>
+        </EditForm>
+    </Panel>
+    <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <Panel>
+            <LineChart Id="periodic-credentials-users1" XCategories="@XCategories" Series="@Values"></LineChart>
+        </Panel>
+        <Panel>
+            <LineChart Id="periodic-credentials-users2" XCategories="@XCategories" Series="@Values"></LineChart>
+        </Panel>
+        <Panel>
+            <LineChart Id="periodic-credentials-users3" XCategories="@XCategories" Series="@Values"></LineChart>
+        </Panel>
+        <Panel>
+            <LineChart Id="periodic-credentials-users4" XCategories="@XCategories" Series="@Values"></LineChart>
+        </Panel>
+    </div>
+</div>
+
 
 @code {
     [Parameter]
     public string App { get; set; }
+
+    public FilterViewModel Filter { get; set; } = new();
     
     public IEnumerable<string> XCategories { get; private set; }
     
@@ -22,5 +61,15 @@
         var report = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
         XCategories = report.Select(x => x.CreatedAt.ToShortDateString()).ToList();
         Values = report.Select(x => x.Users).ToList();
+    }
+
+    private async Task HandleFilterSubmit(EditContext arg)
+    {
+    }
+
+    public class FilterViewModel
+    {
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
     }
 }
