@@ -13,18 +13,18 @@
 
 <div class="page-content-container">
     <Panel Header="Filter">
-        <EditForm id="filter-form" FormName="filter" class="gap-4 grid grid-cols-1 md:grid-cols-3" Model="Filter">
-            <div>
+        <EditForm id="filter-form" FormName="filter" class="flex items-end space-x-4" Model="Filter">
+            <div class="flex-1">
                 <label for="from-datepicker">From</label>
                 <InputDate DisplayName="From" id="from-datepicker" Type="InputDateType.Date" @bind-Value="Filter.From" />
             </div>
             
-            <div>
+            <div class="flex-1">
                 <label for="to-datepicker">To</label>
                 <InputDate DisplayName="To" id="to-datepicker" Type="InputDateType.Date" @bind-Value="Filter.To" />
             </div>
             
-            <button id="filter-btn" class="btn btn-primary" type="submit">
+            <button id="filter-btn" class="btn btn-primary flex-1" type="submit">
                 Filter
             </button>
         </EditForm>
