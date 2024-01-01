@@ -11,12 +11,14 @@
                 type: 'line'
             },
             series: [{
-                name: 'sales',
+                name: '@SeriesName',
                 data: @JsonSerializer.Serialize(Series)
             }],
             xaxis: {
                 categories: @((MarkupString)JsonSerializer.Serialize(XCategories))
-            }
+            },
+            colors:['#2563eb']
+
         }
         
         let chart = new ApexCharts(document.querySelector("#@Id"), options);
@@ -30,13 +32,16 @@
      */
     [Parameter]
     public required string Id { get; set; }
-    
+
     /**
      * The X axis categories of the chart.
      */
     [Parameter]
-    public IEnumerable<TXCategory> XCategories { get; set; }
+    public required IEnumerable<TXCategory> XCategories { get; set; }
     
     [Parameter]
-    public IEnumerable<int> Series { get; set; }
+    public required string SeriesName { get; set; }
+
+    [Parameter]
+    public required IEnumerable<int> Series { get; set; }
 }
