@@ -1,4 +1,4 @@
-using Passwordless.Common;
+using Passwordless.Common.Background;
 using Passwordless.Service;
 
 namespace Passwordless.Api.Reporting.Background;

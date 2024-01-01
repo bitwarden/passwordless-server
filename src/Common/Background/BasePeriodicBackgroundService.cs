@@ -1,4 +1,4 @@
-namespace Passwordless.Common;
+namespace Passwordless.Common.Background;
 
 public abstract class BasePeriodicBackgroundService : BackgroundService
 {
@@ -38,22 +38,9 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Calculate the time until the next execution
-        var currentTime = _timeProvider.GetLocalNow().TimeOfDay;
+        var executionPlan = ExecutionPlanUtility.GetExecutionPlan(_executionTime, _period, _timeProvider);
 
-        TimeSpan initialDelay;
-        if (_executionTime > currentTime)
-        {
-            initialDelay = _executionTime - currentTime;
-        }
-        else
-        {
-            initialDelay = _period - (currentTime - _executionTime);
-            var multiplier = Math.Ceiling(Math.Abs(initialDelay.Divide(_period)));
-            initialDelay = initialDelay.Add(_period.Multiply(multiplier));
-        }
-
-        _timer = new Timer(DoWork, null, initialDelay, _period);
+        _timer = new Timer(DoWork, null, executionPlan.InitialDelay, _period);
 
         return Task.CompletedTask;
     }
