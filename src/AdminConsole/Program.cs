@@ -209,7 +209,6 @@ void RunTheApp()
     }
 
     app.MapAccountEndpoints();
-    app.MapReportingEndpoints();
 
     app.Run();
 }
