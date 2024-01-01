@@ -1,9 +1,9 @@
 @page "/app/{app}/Reporting"
 @using Passwordless.AdminConsole.Services
 @using Passwordless.Common.Models.Reporting
+@using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
 
 @inject IScopedPasswordlessClient PasswordlessClient
-@inject IHttpContextAccessor HttpContextAccessor;
 
 <PageTitle>Reporting</PageTitle>
 
@@ -30,17 +30,15 @@
         </EditForm>
     </Panel>
     <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <Panel>
-            <LineChart Id="periodic-credentials-users1" XCategories="@XCategories" Series="@Values"></LineChart>
+        <Panel Header="Total Credentials">
+            <CascadingValue Value="@PeriodicCredentialReports">
+                <TotalCredentialsCountChart />
+            </CascadingValue>
         </Panel>
-        <Panel>
-            <LineChart Id="periodic-credentials-users2" XCategories="@XCategories" Series="@Values"></LineChart>
-        </Panel>
-        <Panel>
-            <LineChart Id="periodic-credentials-users3" XCategories="@XCategories" Series="@Values"></LineChart>
-        </Panel>
-        <Panel>
-            <LineChart Id="periodic-credentials-users4" XCategories="@XCategories" Series="@Values"></LineChart>
+        <Panel Header="Total Users">
+            <CascadingValue Value="@PeriodicCredentialReports">
+                <TotalUsersCountChart />
+            </CascadingValue>
         </Panel>
     </div>
 </div>
@@ -50,19 +48,15 @@
     [Parameter]
     public string App { get; set; }
 
-    [SupplyParameterFromForm]
-    public FilterViewModel Filter { get; set; } = new();
+    [SupplyParameterFromForm] public FilterViewModel Filter { get; set; } = new();
     
-    public IEnumerable<string> XCategories { get; private set; }
-    
-    public IEnumerable<int> Values { get; private set; }
+    public Task<IEnumerable<PeriodicCredentialReportResponse>> PeriodicCredentialReports { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         var req = new PeriodicCredentialReportRequest(Filter.From, Filter.To);
-        var report = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
-        XCategories = report.Select(x => x.CreatedAt.ToShortDateString()).ToList();
-        Values = report.Select(x => x.Users).ToList();
+        PeriodicCredentialReports = PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
+        return Task.CompletedTask;
     }
 
     public class FilterViewModel
