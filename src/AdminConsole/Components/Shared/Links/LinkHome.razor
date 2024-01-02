@@ -21,6 +21,10 @@
 
 @code
 {
+    /// <summary>
+    /// When set, it either renders the full-sized logo or the mobile-sized logo.
+    /// When not set, it renders both, but hides the one that is not appropriate for the current screen size.
+    /// </summary>
     [Parameter]
     public bool? IsDesktop { get; set; }
 }
