@@ -2,8 +2,11 @@
 @using Passwordless.AdminConsole.Services
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
+@using Passwordless.AdminConsole.Middleware
 
 @inject IScopedPasswordlessClient PasswordlessClient
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject ICurrentContext CurrentContext;
 
 <PageTitle>Reporting</PageTitle>
 
@@ -13,21 +16,52 @@
 
 <div class="page-content-container">
     <Panel Header="Filter">
-        <EditForm id="filter-form" FormName="filter" class="flex items-end space-x-4" Model="Filter">
-            <div class="flex-1">
-                <label for="from-datepicker">From</label>
-                <InputDate DisplayName="From" id="from-datepicker" Type="InputDateType.Date" @bind-Value="Filter.From" />
+        <div class="flex flex-col space-y-4">
+            @if (IsFilterDatePickerEnabled)
+            {
+                <EditForm id="filter-form" class="flex items-end space-x-4" EditContext="_filterContext" FormName="filter-form">
+                    <div class="flex-1">
+                        <label for="from-datepicker">From</label>
+                        <InputDate DisplayName="From" id="from-datepicker" Type="InputDateType.Date" @bind-Value="Filter.From"/>
+                    </div>
+                    <div class="flex-1">
+                        <label for="to-datepicker">To</label>
+                        <InputDate DisplayName="To" id="to-datepicker" Type="InputDateType.Date" @bind-Value="Filter.To"/>
+                    </div>
+                    <button id="filter-btn" class="btn btn-primary flex-1" type="submit">
+                        Filter
+                    </button>
+                </EditForm>
+                <hr/>
+            }
+            <div class="flex items-end space-x-4">
+                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="1w-filter-form">
+                    <button class="btn btn-primary flex-1" type="submit">
+                        Last Week
+                    </button>
+                </EditForm>
+                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="1m-filter-form">
+                    <button class="btn btn-primary flex-1" type="submit">
+                        Last Month
+                    </button>
+                </EditForm>
+                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="6m-filter-form">
+                    <button class="btn btn-primary flex-1" type="submit">
+                        Last 6 Months
+                    </button>
+                </EditForm>
+                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="1y-filter-form">
+                    <button class="btn btn-primary flex-1" type="submit">
+                        Last Year
+                    </button>
+                </EditForm>
+                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="5y-filter-form">
+                    <button class="btn btn-primary flex-1" type="submit">
+                        Last 5 Years
+                    </button>
+                </EditForm>
             </div>
-            
-            <div class="flex-1">
-                <label for="to-datepicker">To</label>
-                <InputDate DisplayName="To" id="to-datepicker" Type="InputDateType.Date" @bind-Value="Filter.To" />
-            </div>
-            
-            <button id="filter-btn" class="btn btn-primary flex-1" type="submit">
-                Filter
-            </button>
-        </EditForm>
+        </div>
     </Panel>
     <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <Panel Header="Total Credentials">
@@ -48,15 +82,42 @@
     [Parameter]
     public string App { get; set; }
 
-    [SupplyParameterFromForm] public FilterViewModel Filter { get; set; } = new();
+    public bool IsFilterDatePickerEnabled => false;
+
+    [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
+    
+    private EditContext? _filterContext;
     
     public Task<IEnumerable<PeriodicCredentialReportResponse>> PeriodicCredentialReports { get; set; }
 
-    protected override Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
+        Filter ??= new FilterViewModel();
+        _filterContext = new EditContext(Filter);
+        if (HttpContextAccessor.HttpContext!.Request.HasFormContentType && HttpContextAccessor.HttpContext.Request.Form["_handler"] != "filter-form")
+        {
+            switch (HttpContextAccessor.HttpContext.Request.Form["_handler"])
+            {
+                case "1w-filter-form":
+                    Filter.From = DateTime.UtcNow.Date.AddDays(-7);
+                    break;
+                case "1m-filter-form":
+                    Filter.From = DateTime.UtcNow.Date.AddMonths(-1);
+                    break;
+                case "6m-filter-form":
+                    Filter.From = DateTime.UtcNow.Date.AddMonths(-6);
+                    break;
+                case "1y-filter-form":
+                    Filter.From = DateTime.UtcNow.Date.AddYears(-1);
+                    break;
+                case "5y-filter-form":
+                    Filter.From = DateTime.UtcNow.Date.AddYears(-5);
+                    break;
+            }
+            Filter.To = null;
+        }
         var req = new PeriodicCredentialReportRequest(Filter.From, Filter.To);
         PeriodicCredentialReports = PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
-        return Task.CompletedTask;
     }
 
     public class FilterViewModel
