@@ -84,10 +84,9 @@ fi
 #########################
 # Internal & Public Url #
 #########################
-if [ "$BWP_DOMAIN" = "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
-  echo "[Configuration] ERROR: Set environment variable 'BWP_ENABLE_SSL' to 'true' when 'BWP_DOMAIN' is not 'localhost'.";
-  echo "[Configuration] ERROR: WebAuthn requires SSL when not running on 'localhost'.";
-  exit 1;
+if [ "$BWP_DOMAIN" != "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
+  echo "[Configuration] WARNING: Set environment variable 'BWP_ENABLE_SSL' to 'true' when 'BWP_DOMAIN' is not 'localhost'.";
+  echo "[Configuration] WARNING: WebAuthn requires SSL when not running on 'localhost'. This could result in unexpected behavior.";
 fi
 
 if [ "$BWP_ENABLE_SSL" = "true" ]; then

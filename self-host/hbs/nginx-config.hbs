@@ -2,8 +2,8 @@ server {
     server_name {{{String.Coalesce env.BWP_DOMAIN "localhost"}}};
 
     {{#if (String.Equal env.BWP_ENABLE_SSL "true")}}
-        listen {{{String.Coalesce env.BWP_PORT "5701"}}} ssl http2;
-        #listen [::]:{{{String.Coalesce env.BWP_PORT "5701"}}} ssl http2;
+        listen {{{String.Coalesce env.RP_PORT "5701"}}} ssl http2;
+        #listen [::]:{{{String.Coalesce env.RP_PORT "5701"}}} ssl http2;
 
         ssl_certificate /etc/bitwarden_passwordless/{{{String.Coalesce env.BWP_SSL_CERT "ssl.crt"}}};
         ssl_certificate_key /etc/bitwarden_passwordless/{{{String.Coalesce env.BWP_SSL_KEY "ssl.key"}}};
@@ -35,7 +35,7 @@ server {
     
         include /etc/nginx/security-headers-ssl.conf;
     {{else}}
-        listen {{{String.Coalesce env.BWP_PORT "5701"}}} default_server;
+        listen {{{String.Coalesce env.RP_PORT "5701"}}} default_server;
     {{/if}}
 
     include /etc/nginx/security-headers.conf;
