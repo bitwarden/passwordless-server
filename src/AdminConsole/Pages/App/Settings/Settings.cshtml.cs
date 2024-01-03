@@ -101,12 +101,21 @@ public class SettingsModel : BaseExtendedPageModel
         if (userName == Unknown || applicationId == Unknown)
         {
             _logger.LogError("Failed to delete application with name: {appName} and by user: {username}.", applicationId, userName);
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected happened. Please try again later." });
+            return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
         }
 
-        var response = await _appService.MarkApplicationForDeletionAsync(applicationId, userName);
+        try
+        {
+            var response = await _appService.MarkApplicationForDeletionAsync(applicationId, userName);
 
-        return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
+            return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete application: {appName}.", applicationId);
+            return RedirectToPage("/Error", new { ex.Message });
+        }
+
     }
 
     /// <summary>
@@ -117,16 +126,21 @@ public class SettingsModel : BaseExtendedPageModel
     {
         var applicationId = _currentContext.AppId ?? Unknown;
 
+        if (applicationId == Unknown)
+        {
+            _logger.LogError("Failed to cancel application deletion for application: {appId}", applicationId);
+            return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
+        }
+
         try
         {
             await _appService.CancelDeletionForApplicationAsync(applicationId);
-
             return RedirectToPage();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _logger.LogError("Failed to cancel application deletion for application: {appId}", applicationId);
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+            return RedirectToPage("/Error", new { ex.Message });
         }
     }
 
@@ -185,25 +199,28 @@ public class SettingsModel : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostSettingsAsync()
     {
+        if (string.IsNullOrWhiteSpace(_currentContext.AppId) || string.IsNullOrWhiteSpace(User.Identity?.Name))
+        {
+            return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
+        }
+
         try
         {
-            var performedBy = User.Identity?.Name ?? Unknown;
-            var applicationId = _currentContext.AppId ?? Unknown;
-
             if (Convert.ToBoolean(Request.Form[ManualVerificationTokenCheckboxId].FirstOrDefault()))
             {
-                await _managementClient.EnabledManuallyGeneratedTokensAsync(applicationId, performedBy);
+                await _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
             }
             else
             {
-                await _managementClient.DisabledManuallyGeneratedTokensAsync(applicationId, performedBy);
+                await _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
             }
 
             return RedirectToPage();
         }
-        catch
+        catch (Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+            _logger.LogError(ex, "Failed to save ManuallyGeneratedToken setting for {appId}", _currentContext.AppId);
+            return RedirectToPage("/Error", new { ex.Message });
         }
     }
 
