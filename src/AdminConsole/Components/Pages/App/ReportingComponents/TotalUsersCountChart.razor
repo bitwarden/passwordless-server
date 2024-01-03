@@ -5,14 +5,14 @@
     [CascadingParameter]
     public Task<IEnumerable<PeriodicCredentialReportResponse>> Data { get; set; }
     
-    private IReadOnlyCollection<string>? XCategories { get; set; }
+    private IReadOnlyCollection<DateTime>? XCategories { get; set; }
     
     private IReadOnlyCollection<int>? Values { get; set; }
     
     protected override async Task OnInitializedAsync()
     {
         var data = await Data;
-        XCategories = data.Select(x => x.CreatedAt.ToShortDateString()).ToList();
+        XCategories = data.Select(x => x.CreatedAt).ToList();
         Values = data.Select(x => x.Users).ToList();
     }
 }

@@ -15,10 +15,10 @@
                 data: @JsonSerializer.Serialize(Series)
             }],
             xaxis: {
+                type: 'datetime',
                 categories: @((MarkupString)JsonSerializer.Serialize(XCategories))
             },
             colors:['#2563eb']
-
         }
         
         let chart = new ApexCharts(document.querySelector("#@Id"), options);
