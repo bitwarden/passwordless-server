@@ -7,6 +7,9 @@
 
 <script type="module" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
     let options = {
+            title: {
+                text: '@Title'
+            },
             chart: {
                 type: 'line'
             },
@@ -44,4 +47,8 @@
 
     [Parameter]
     public required IEnumerable<int> Series { get; set; }
+
+    [Parameter]
+    public required string Title { get; set; }
+
 }
