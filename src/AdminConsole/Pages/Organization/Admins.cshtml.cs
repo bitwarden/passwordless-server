@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -10,6 +11,7 @@ using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
+[EnableRateLimiting("fixed")]
 public class Admins : PageModel
 {
     private readonly IDataService _dataService;
@@ -108,10 +110,15 @@ public class Admins : PageModel
         var orgId = org.Id;
         var orgName = org.Name;
         ConsoleAdmin user = await _dataService.GetUserAsync();
-        var userEmail = user.Email;
+        var userEmail = user.Email!;
         var userName = user.Name;
 
-        await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
+        var existingInvites = await _invitationService.GetInvitesAsync(User.GetOrgId()!.Value);
+
+        if (existingInvites.All(x => x.ToEmail != form.Email))
+        {
+            await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
+        }
 
         _eventLogger.LogInviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime);
 

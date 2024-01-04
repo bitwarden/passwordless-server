@@ -24,13 +24,13 @@ public class InvitationService<TDbContext> : IInvitationService where TDbContext
         _actionContextAccessor = actionContextAccessor;
     }
 
-    public async Task SendInviteAsync(string toEmail, int TargetOrgId, string TargetOrgName, string fromEmail, string fromName)
+    public async Task SendInviteAsync(string toEmail, int targetOrgId, string targetOrgName, string fromEmail, string fromName)
     {
         var inv = new Invite()
         {
             ToEmail = toEmail,
-            TargetOrgId = TargetOrgId,
-            TargetOrgName = TargetOrgName,
+            TargetOrgId = targetOrgId,
+            TargetOrgName = targetOrgName,
             FromEmail = fromEmail,
             FromName = fromName
         };

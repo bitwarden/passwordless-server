@@ -1,6 +1,8 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
@@ -155,6 +157,15 @@ void RunTheApp()
 
     builder.Services.AddAntiforgery();
 
+    builder.Services.AddRateLimiter(limiter => limiter
+        .AddFixedWindowLimiter(policyName: "fixed", options =>
+        {
+            options.PermitLimit = 10;
+            options.Window = TimeSpan.FromMinutes(1);
+            options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            options.QueueLimit = 0;
+        }));
+
     WebApplication app;
     try
     {
@@ -192,6 +203,7 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
+    app.UseRateLimiter();
     app.UseAntiforgery();
     app.MapHealthEndpoints();
     app.UseAuthentication();
