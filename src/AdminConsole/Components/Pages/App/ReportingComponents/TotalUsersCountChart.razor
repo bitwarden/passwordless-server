@@ -1,18 +1,41 @@
 @using Passwordless.Common.Models.Reporting
-<LineChart Id="total-users-count-chart" XCategories="@XCategories" Series="@Values" SeriesName="Users" Title="Total Users"></LineChart>
+@using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
+<ApexChart Id="total-users-count-chart" Options="Options"></ApexChart>
 
 @code {
     [CascadingParameter]
     public Task<IEnumerable<PeriodicCredentialReportResponse>> Data { get; set; }
     
-    private IReadOnlyCollection<DateTime>? XCategories { get; set; }
-    
-    private IReadOnlyCollection<int>? Values { get; set; }
+    public ApexChartOptions<DateTime, int> Options { get; set; }
+
     
     protected override async Task OnInitializedAsync()
     {
         var data = await Data;
-        XCategories = data.Select(x => x.CreatedAt).ToList();
-        Values = data.Select(x => x.Users).ToList();
+        Options = new()
+        {
+            Chart = new Chart
+            {
+                Type = ChartTypes.Line
+            },
+            Colors = new []{ Color.Default },
+            Series = new List<Series<int>>
+            {
+                new()
+                {
+                    Name = "Users",
+                    Data = data.Select(x => x.Users)
+                }
+            },
+            Title = new Title
+            {
+                Text = "Total Users"
+            },
+            Xaxis = new()
+            {
+                Type = XAxisTypes.Datetime, 
+                Categories = data.Select(x => x.CreatedAt)
+            }
+        };
     }
 }

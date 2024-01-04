@@ -1,0 +1,24 @@
+@using Passwordless.AdminConsole.Components.Shared.ApexCharts.Serialization
+@using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
+
+@typeparam TXValueType
+@typeparam TYValueType
+
+@inject IHttpContextAccessor HttpContextAccessor
+
+<div id="@Id"></div>
+
+<script type="module" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
+    let options = @((MarkupString)JsonSerializer.Serialize(Options, ApexChartJsonSerializer.Options))
+    let chart = new ApexCharts(document.querySelector("#@Id"), options);    
+    chart.render();
+</script>
+
+@code {
+    
+    [Parameter]
+    public required string Id { get; set; }
+    
+    [Parameter]
+    public required ApexChartOptions<TXValueType, TYValueType> Options { get; set; }
+}
