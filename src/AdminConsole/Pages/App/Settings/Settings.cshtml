@@ -75,13 +75,12 @@
             verified, you can send them a hyperlink that contains the token issued by <code>signin/generate-token</code>.
         </p>
         
-        
-        <label class="my-2" for="@SettingsModel.ManualVerificationTokenCheckboxId">
-            <input class="mr-1" id="@SettingsModel.ManualVerificationTokenCheckboxId" type="checkbox" asp-for="IsManualTokenGenerationEnabled" />
+        <label for="@SettingsModel.ManualVerificationTokenCheckboxId">
+            <input class="mr-1 my-4" id="@SettingsModel.ManualVerificationTokenCheckboxId" type="checkbox" asp-for="IsManualTokenGenerationEnabled" />
             Enable Manually Generated Verification Tokens
         </label>
-        <br />
-        <button id="btn-save-settings" class="btn-primary mt-3" type="submit">Save</button>
+        <br>
+        <button id="btn-save-settings" class="btn-primary" type="submit">Save</button>
     </form>
 </panel>
 
