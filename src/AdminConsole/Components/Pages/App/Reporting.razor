@@ -15,7 +15,7 @@
 </div>
 
 <div class="page-content-container">
-    <Panel Header="Filter">
+    <Panel>
         <div class="flex flex-col space-y-4">
             @if (IsFilterDatePickerEnabled)
             {
@@ -34,33 +34,15 @@
                 </EditForm>
                 <hr/>
             }
-            <div class="flex items-end space-x-4">
-                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="1w-filter-form">
-                    <button class="btn btn-primary flex-1" type="submit">
-                        Last Week
-                    </button>
-                </EditForm>
-                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="1m-filter-form">
-                    <button class="btn btn-primary flex-1" type="submit">
-                        Last Month
-                    </button>
-                </EditForm>
-                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="6m-filter-form">
-                    <button class="btn btn-primary flex-1" type="submit">
-                        Last 6 Months
-                    </button>
-                </EditForm>
-                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="1y-filter-form">
-                    <button class="btn btn-primary flex-1" type="submit">
-                        Last Year
-                    </button>
-                </EditForm>
-                <EditForm class="flex-1 flex" EditContext="_filterContext" FormName="5y-filter-form">
-                    <button class="btn btn-primary flex-1" type="submit">
-                        Last 5 Years
-                    </button>
-                </EditForm>
-            </div>
+            <EditForm id="filter-preset-form" EditContext="_filterContext" FormName="filter-preset-form">
+                <div class="btn-group-basic">
+                    <button type="submit" class="btn-group-basic-item" name="filter-preset-form" value="1w">Last Week</button>
+                    <button type="submit" class="btn-group-basic-item" name="filter-preset-form" value="1m">Last Month</button>
+                    <button type="submit" class="btn-group-basic-item" name="filter-preset-form" value="6m">Last 6 Months</button>
+                    <button type="submit" class="btn-group-basic-item" name="filter-preset-form" value="1y">Last Year</button>
+                    <button type="submit" class="btn-group-basic-item" name="filter-preset-form" value="5y">Last 5 Years</button>
+                </div>
+            </EditForm>
         </div>
     </Panel>
     <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -96,21 +78,21 @@
         _filterContext = new EditContext(Filter);
         if (HttpContextAccessor.HttpContext!.Request.HasFormContentType && HttpContextAccessor.HttpContext.Request.Form["_handler"] != "filter-form")
         {
-            switch (HttpContextAccessor.HttpContext.Request.Form["_handler"])
+            switch (HttpContextAccessor.HttpContext.Request.Form["filter-preset-form"])
             {
-                case "1w-filter-form":
+                case "1w":
                     Filter.From = DateTime.UtcNow.Date.AddDays(-7);
                     break;
-                case "1m-filter-form":
+                case "1m":
                     Filter.From = DateTime.UtcNow.Date.AddMonths(-1);
                     break;
-                case "6m-filter-form":
+                case "6m":
                     Filter.From = DateTime.UtcNow.Date.AddMonths(-6);
                     break;
-                case "1y-filter-form":
+                case "1y":
                     Filter.From = DateTime.UtcNow.Date.AddYears(-1);
                     break;
-                case "5y-filter-form":
+                case "5y":
                     Filter.From = DateTime.UtcNow.Date.AddYears(-5);
                     break;
             }
