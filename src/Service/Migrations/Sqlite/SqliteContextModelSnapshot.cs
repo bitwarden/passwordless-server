@@ -235,10 +235,10 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Credentials")
+                    b.Property<int>("CredentialsCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Users")
+                    b.Property<int>("UsersCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Tenant", "CreatedAt");

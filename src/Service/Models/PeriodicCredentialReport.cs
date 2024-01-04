@@ -7,12 +7,12 @@ public class PeriodicCredentialReport : PerTenant
     /// <summary>
     /// The number of credentials in the tenant.
     /// </summary>
-    public int Credentials { get; set; }
+    public int CredentialsCount { get; set; }
 
     /// <summary>
     /// The number of users in the tenant.
     /// </summary>
-    public int Users { get; set; }
+    public int UsersCount { get; set; }
 
     public virtual AccountMetaInformation Application { get; init; }
 

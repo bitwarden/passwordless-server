@@ -240,10 +240,10 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Credentials")
+                    b.Property<int>("CredentialsCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("Users")
+                    b.Property<int>("UsersCount")
                         .HasColumnType("int");
 
                     b.HasKey("Tenant", "CreatedAt");

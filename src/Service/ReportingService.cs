@@ -28,7 +28,7 @@ public class ReportingService : IReportingService
         var storage = _tenantStorageFactory.Create();
         var entities = await storage.GetPeriodicCredentialReportsAsync(parameters.From, parameters.To);
         return entities
-            .Select(x => new PeriodicCredentialReportResponse(x.CreatedAt, x.Users, x.Credentials))
+            .Select(x => new PeriodicCredentialReportResponse(x.CreatedAt, x.UsersCount, x.CredentialsCount))
             .ToList();
     }
 }
