@@ -1,3 +1,4 @@
+using System.Data;
 using Passwordless.Common.Background;
 using Passwordless.Service;
 
@@ -24,7 +25,16 @@ public sealed class PeriodicCredentialReportsBackgroundService : BasePeriodicBac
     {
         using IServiceScope scope = _serviceProvider.CreateScope();
         var reportingService = scope.ServiceProvider.GetRequiredService<IReportingService>();
-        var result = await reportingService.UpdatePeriodicCredentialReportsAsync();
+        int result;
+        try
+        {
+            result = await reportingService.UpdatePeriodicCredentialReportsAsync();
+        }
+        catch (DBConcurrencyException)
+        {
+            return;
+        }
         _logger.LogInformation("{BackgroundService} updated {Records}.", nameof(PeriodicCredentialReportsBackgroundService), result);
+
     }
 }
