@@ -1,4 +1,3 @@
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -12,6 +11,7 @@ using Passwordless.AdminConsole.Endpoints;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
+using Passwordless.AdminConsole.RateLimiting;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.AuthenticatorData;
@@ -156,18 +156,7 @@ void RunTheApp()
 
     builder.Services.AddAntiforgery();
 
-    builder.Services.AddRateLimiter(limiter =>
-    {
-        limiter.AddPolicy("organizationIdFixedLength", context => 
-                RateLimitPartition.GetFixedWindowLimiter(
-                    context.User.GetOrgId()!.Value.ToString(),
-                    factory: _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = 100,
-                        Window = TimeSpan.FromMinutes(1),
-                        QueueLimit = 0
-                    }));
-    });
+    builder.Services.AddRateLimiting();
 
     WebApplication app;
     try

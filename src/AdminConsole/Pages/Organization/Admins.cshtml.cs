@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.RateLimiting;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
-[EnableRateLimiting("organizationIdFixedLength")]
+[EnableRateLimiting(AdminPageRateLimit.PolicyName)]
 public class Admins : PageModel
 {
     private readonly IDataService _dataService;
@@ -93,13 +94,13 @@ public class Admins : PageModel
     public async Task<IActionResult> OnPostInvite(InviteForm form)
     {
         CanInviteAdmin = await _dataService.CanInviteAdminAsync();
-        
+
         if (CanInviteAdmin is false)
         {
             ModelState.AddModelError("error", "You need to upgrade to a paid organization to invite more admins.");
             return await OnGet();
         }
-        
+
         Models.Organization org = await _dataService.GetOrganizationAsync();
         var existingInvites = await _invitationService.GetInvitesAsync(org.Id);
 
@@ -114,7 +115,7 @@ public class Admins : PageModel
             ModelState.AddModelError("error", "There is a pending invite already for this address. Please cancel before resending.");
             return await OnGet();
         }
-        
+
         if (!ModelState.IsValid)
         {
             // todo: Is there a pattern where we don't need to repeat this?
