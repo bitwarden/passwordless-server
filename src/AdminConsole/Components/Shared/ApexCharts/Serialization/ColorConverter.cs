@@ -9,7 +9,14 @@ public sealed class ColorConverter : JsonConverter<Color>
 {
     public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        throw new NotSupportedException();
+        var hex = reader.GetString();
+
+        if (hex is null)
+        {
+            return null;
+        }
+
+        return new Color(hex);
     }
 
     public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
