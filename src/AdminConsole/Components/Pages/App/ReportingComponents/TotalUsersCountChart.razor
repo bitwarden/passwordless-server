@@ -1,18 +1,18 @@
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
-<ApexChart Id="total-users-count-chart" Options="Options"></ApexChart>
+<ApexChart Id="total-users-count-chart" Options="_options"></ApexChart>
 
 @code {
     [CascadingParameter]
-    public Task<IEnumerable<PeriodicCredentialReportResponse>> Data { get; set; }
-    
-    public ApexChartOptions<DateTime, int> Options { get; set; }
+    public required Task<IEnumerable<PeriodicCredentialReportResponse>> Data { get; set; }
+
+    public ApexChartOptions<DateTime, int> _options;
 
     
     protected override async Task OnInitializedAsync()
     {
         var data = await Data;
-        Options = new()
+        _options = new()
         {
             Chart = new Chart
             {

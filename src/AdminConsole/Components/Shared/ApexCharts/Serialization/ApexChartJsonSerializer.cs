@@ -13,6 +13,6 @@ public static class ApexChartJsonSerializer
         },
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = true
+        WriteIndented = false
     };
 }

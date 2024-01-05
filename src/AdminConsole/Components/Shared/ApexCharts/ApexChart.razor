@@ -9,7 +9,7 @@
 <div id="@Id"></div>
 
 <script type="module" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
-    let options = @((MarkupString)JsonSerializer.Serialize(Options, ApexChartJsonSerializer.Options))
+    let options = @((MarkupString)JsonSerializer.Serialize(Options, ApexChartJsonSerializer.Options));
     let chart = new ApexCharts(document.querySelector("#@Id"), options);    
     chart.render();
 </script>
