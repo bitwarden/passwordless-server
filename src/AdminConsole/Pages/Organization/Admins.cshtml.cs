@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,7 +10,7 @@ using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
-[EnableRateLimiting("fixed")]
+[EnableRateLimiting("organizationIdFixedLength")]
 public class Admins : PageModel
 {
     private readonly IDataService _dataService;
@@ -20,7 +19,7 @@ public class Admins : PageModel
     private readonly SignInManager<ConsoleAdmin> _signinManager;
     private readonly IPasswordlessClient _passwordlessClient;
     private readonly IEventLogger _eventLogger;
-    private readonly ISystemClock _systemClock;
+    private readonly TimeProvider _timeProvider;
 
     public Admins(
         IDataService dataService,
@@ -29,7 +28,7 @@ public class Admins : PageModel
         SignInManager<ConsoleAdmin> signinManager,
         IPasswordlessClient passwordlessClient,
         IEventLogger eventLogger,
-        ISystemClock systemClock)
+        TimeProvider timeProvider)
     {
         _dataService = dataService;
         _invitationService = invitationService;
@@ -37,7 +36,7 @@ public class Admins : PageModel
         _signinManager = signinManager;
         _passwordlessClient = passwordlessClient;
         _eventLogger = eventLogger;
-        _systemClock = systemClock;
+        _timeProvider = timeProvider;
     }
 
     public List<ConsoleAdmin> ConsoleAdmins { get; set; }
@@ -49,7 +48,7 @@ public class Admins : PageModel
     public async Task<IActionResult> OnGet()
     {
         ConsoleAdmins = await _dataService.GetConsoleAdminsAsync();
-        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
+        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId()!.Value);
         CanInviteAdmin = await _dataService.CanInviteAdminAsync();
 
         return Page();
@@ -78,7 +77,7 @@ public class Admins : PageModel
 
         var performedBy = users.FirstOrDefault(x => x.Email == User.GetEmail());
         if (performedBy is not null)
-            _eventLogger.LogDeleteAdminEvent(performedBy, user, _systemClock.UtcNow.UtcDateTime);
+            _eventLogger.LogDeleteAdminEvent(performedBy, user, _timeProvider.GetUtcNow().UtcDateTime);
 
         // if user is self
         if (user.Email == User.GetEmail())
@@ -94,33 +93,39 @@ public class Admins : PageModel
     public async Task<IActionResult> OnPostInvite(InviteForm form)
     {
         CanInviteAdmin = await _dataService.CanInviteAdminAsync();
+        
         if (CanInviteAdmin is false)
         {
             ModelState.AddModelError("error", "You need to upgrade to a paid organization to invite more admins.");
             return await OnGet();
         }
+        
+        Models.Organization org = await _dataService.GetOrganizationAsync();
+        var existingInvites = await _invitationService.GetInvitesAsync(org.Id);
 
+        if (existingInvites.Count == 10)
+        {
+            ModelState.AddModelError("error", "You can only have 10 pending invites at a time.");
+            return await OnGet();
+        }
+
+        if (existingInvites.Any(x => x.ToEmail == form.Email))
+        {
+            ModelState.AddModelError("error", "There is a pending invite already for this address. Please cancel before resending.");
+            return await OnGet();
+        }
+        
         if (!ModelState.IsValid)
         {
             // todo: Is there a pattern where we don't need to repeat this?
             return await OnGet();
         }
 
-        Models.Organization org = await _dataService.GetOrganizationAsync();
-        var orgId = org.Id;
-        var orgName = org.Name;
         ConsoleAdmin user = await _dataService.GetUserAsync();
-        var userEmail = user.Email!;
-        var userName = user.Name;
 
-        var existingInvites = await _invitationService.GetInvitesAsync(User.GetOrgId()!.Value);
+        await _invitationService.SendInviteAsync(form.Email, org.Id, org.Name, user.Email!, user.Name);
 
-        if (existingInvites.All(x => x.ToEmail != form.Email))
-        {
-            await _invitationService.SendInviteAsync(form.Email, orgId, orgName, userEmail, userName);
-        }
-
-        _eventLogger.LogInviteAdminEvent(user, form.Email, _systemClock.UtcNow.UtcDateTime);
+        _eventLogger.LogInviteAdminEvent(user, form.Email, _timeProvider.GetUtcNow().UtcDateTime);
 
         return RedirectToPage();
     }
@@ -140,7 +145,7 @@ public class Admins : PageModel
             _eventLogger.LogCancelAdminInviteEvent(
                 performedBy,
                 inviteToCancel.ToEmail,
-                _systemClock.UtcNow.UtcDateTime
+                _timeProvider.GetUtcNow().UtcDateTime
             );
         }
 
