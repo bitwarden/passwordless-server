@@ -55,5 +55,12 @@
   <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
     <Exec Command="npm install" />
     <Exec Command="npm run build" />
+    
+    <!-- ES Module Shims -->
+    <Copy SourceFiles="node_modules\es-module-shims\dist\es-module-shims.js" DestinationFolder="wwwroot\lib\es-module-shims\" />
+    
+    <!-- Vue.js -->
+    <Copy SourceFiles="node_modules\vue\dist\vue.esm-browser.js" DestinationFolder="wwwroot\lib\vue\" />
+    <Copy SourceFiles="node_modules\vue\dist\vue.esm-browser.prod.js" DestinationFolder="wwwroot\lib\vue\" />
   </Target>
 </Project>
