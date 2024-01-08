@@ -11,5 +11,5 @@ public record CreateAppDto
     /// </summary>
     public long? MaxUsers { get; set; }
 
-    public AttestationTypes Attestation { get; set; } = AttestationTypes.None;
+    public bool AllowAttestation { get; set; } = false;
 }

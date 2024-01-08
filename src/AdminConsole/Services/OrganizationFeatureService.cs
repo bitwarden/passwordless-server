@@ -44,6 +44,7 @@ public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureServic
             features.EventLoggingIsEnabled,
             features.EventLoggingRetentionPeriod,
             null,
-            features.MaxUsers);
+            features.MaxUsers,
+            features.AllowAttestation);
     }
 }

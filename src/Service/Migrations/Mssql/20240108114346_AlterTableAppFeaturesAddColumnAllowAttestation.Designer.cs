@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
 
@@ -11,9 +12,11 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    partial class MsSqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240108114346_AlterTableAppFeaturesAddColumnAllowAttestation")]
+    partial class AlterTableAppFeaturesAddColumnAllowAttestation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

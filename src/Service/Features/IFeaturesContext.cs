@@ -15,6 +15,8 @@ public interface IFeaturesContext
     /// </summary>
     long? MaxUsers { get; init; }
     
-    /// <inheritdoc cref="AttestationConveyancePreference"/>
-    public AttestationConveyancePreference Attestation { get; init; }
+    /// <summary>
+    /// Determines or now whether attestation is allowed for this application.
+    /// </summary>
+    public bool AllowAttestation { get; init; }
 }

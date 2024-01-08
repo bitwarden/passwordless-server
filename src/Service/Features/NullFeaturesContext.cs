@@ -1,5 +1,3 @@
-using Fido2NetLib.Objects;
-
 namespace Passwordless.Service.Features;
 
 public sealed class NullFeaturesContext : IFeaturesContext
@@ -8,7 +6,7 @@ public sealed class NullFeaturesContext : IFeaturesContext
     public int EventLoggingRetentionPeriod { get; init; }
     public DateTime? DeveloperLoggingEndsAt { get; init; }
     public long? MaxUsers { get; init; }
-    public AttestationConveyancePreference Attestation { get; init; }
+    public bool AllowAttestation { get; init; }
     public bool IsGenerateSignInTokenEndpointEnabled { get; init; } = true;
     public bool IsInFeaturesContext => false;
 }

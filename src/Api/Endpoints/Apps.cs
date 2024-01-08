@@ -6,7 +6,6 @@ using Passwordless.Api.Models;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
-using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -230,7 +229,7 @@ public static class AppsEndpoints
             featuresContext.EventLoggingRetentionPeriod,
             featuresContext.DeveloperLoggingEndsAt,
             featuresContext.MaxUsers,
-            featuresContext.Attestation.ToDto(),
+            featuresContext.AllowAttestation,
             featuresContext.IsGenerateSignInTokenEndpointEnabled);
 
         return Ok(dto);

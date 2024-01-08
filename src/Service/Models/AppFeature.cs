@@ -21,8 +21,10 @@ public class AppFeature : PerTenant
     /// </summary>
     public long? MaxUsers { get; set; }
 
-    /// <inheritdoc cref="AttestationConveyancePreference"/>
-    public AttestationConveyancePreference Attestation { get; set; }
+    /// <summary>
+    /// Determines or now whether attestation is allowed for this application.
+    /// </summary>
+    public bool AllowAttestation { get; set; }
     
     /// <summary>
     /// Determines if the Sign In Token Endpoint is enabled or disabled

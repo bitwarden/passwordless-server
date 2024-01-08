@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Passwordless.AdminConsole.Models;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Middleware;
 
@@ -20,7 +21,7 @@ public class CurrentContext : ICurrentContext
     public FeaturesContext Features { get; private set; }
     public Organization? Organization { get; private set; }
     public int? OrgId { get; private set; }
-    public FeaturesContext OrganizationFeatures { get; private set; } = new(false, 0, null, null);
+    public FeaturesContext OrganizationFeatures { get; private set; } = new(false, 0, null, null, false);
 
     public void SetApp(Application application)
     {

@@ -1,7 +1,6 @@
 using Fido2NetLib.Objects;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Passwordless.Common.Models.Apps;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
@@ -42,7 +41,7 @@ public class Fido2ServiceTests
             // TODO: Assert more details about the register token passed in
             .Setup(t => t.EncodeTokenAsync(It.IsAny<RegisterToken>(), "register_", false))
             .ReturnsAsync("test_token");
-        _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, null, AttestationConveyancePreference.None, true));
+        _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, null, false, true));
 
         // act
         var actual = await _sut.CreateRegisterToken(new RegisterToken
@@ -65,7 +64,7 @@ public class Fido2ServiceTests
             // TODO: Assert more details about the register token passed in
             .Setup(t => t.EncodeTokenAsync(It.IsAny<RegisterToken>(), "register_", false))
             .ReturnsAsync("test_token");
-        _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, AttestationConveyancePreference.None, true));
+        _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, false, true));
         _mockTenantStorage.Setup(x => x.GetUsersCount()).ReturnsAsync(10000);
         _mockTenantStorage.Setup(x => x.GetCredentialsByUserIdAsync(It.Is<string>(p => p == "test"))).ReturnsAsync(new List<StoredCredential>(0));
 
@@ -96,7 +95,7 @@ public class Fido2ServiceTests
             // TODO: Assert more details about the register token passed in
             .Setup(t => t.EncodeTokenAsync(It.IsAny<RegisterToken>(), "register_", false))
             .ReturnsAsync("test_token");
-        _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, AttestationConveyancePreference.None, true));
+        _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, false, true));
         _mockTenantStorage.Setup(x => x.GetUsersCount()).ReturnsAsync(10000);
         _mockTenantStorage.Setup(x => x.GetCredentialsByUserIdAsync(It.Is<string>(p => p == "test"))).ReturnsAsync(
             new List<StoredCredential>(1) { new() { UserHandle = "test"u8.ToArray() } });

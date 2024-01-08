@@ -63,10 +63,7 @@ public abstract class DbGlobalContext : DbContext
                 .WithOne(x => x.Features)
                 .HasForeignKey<AppFeature>(x => x.Tenant)
                 .IsRequired();
-
-            b.Property(x => x.Attestation)
-                .HasDefaultValue(AttestationConveyancePreference.None);
-
+            
             b.Property(x => x.IsGenerateSignInTokenEndpointEnabled)
                 .HasDefaultValue(true);
         });
