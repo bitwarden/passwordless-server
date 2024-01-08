@@ -78,8 +78,8 @@
 </div>
     
 
-<script async src="@Url.Content("~/lib/es-module-shims.js")"></script>
-@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue.esm-browser.js", "/lib/vue.esm-browser.prod.js") });
+<script async src="@Url.Content("~/lib/es-module-shims/es-module-shims.js")"></script>
+@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue/vue.esm-browser.js", "/lib/vue/vue.esm-browser.prod.js") });
 <script type="text/javascript" src="~/js/core.js" asp-append-version="true"></script>
 <script type="module" src="@Url.Content("~/js/elements/copy-text.mjs")"></script>
 <script type="module" src="@Url.Content("~/js/elements/local-time.mjs")"></script>
