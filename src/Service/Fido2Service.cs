@@ -121,7 +121,8 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
         }, _metadataService);
 
         if (string.IsNullOrEmpty(userId))
@@ -204,7 +205,8 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
         }, _metadataService);
 
         var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
@@ -307,7 +309,8 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
         }, _metadataService);
 
         var existingCredentials = new List<PublicKeyCredentialDescriptor>();
@@ -350,7 +353,8 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
         }, _metadataService);
 
         // Get the assertion options we sent the client
