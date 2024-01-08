@@ -59,5 +59,13 @@
     <!-- Apex Charts -->
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.min.js" DestinationFolder="wwwroot\lib\apexcharts\" />
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.css" DestinationFolder="wwwroot\lib\apexcharts\" />
+
+    <!-- ES Module Shims -->
+    <Copy SourceFiles="node_modules\es-module-shims\dist\es-module-shims.js" DestinationFolder="wwwroot\lib\es-module-shims\" />
+    
+    <!-- Vue.js -->
+    <Copy SourceFiles="node_modules\vue\dist\vue.esm-browser.js" DestinationFolder="wwwroot\lib\vue\" />
+    <Copy SourceFiles="node_modules\vue\dist\vue.esm-browser.prod.js" DestinationFolder="wwwroot\lib\vue\" />
+
   </Target>
 </Project>
