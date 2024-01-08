@@ -30,7 +30,8 @@ public class NewAccountModel : PageModel
             {
                 DisplayName = name,
                 Aliases = new HashSet<string>(1) { email },
-                AliasHashing = false
+                AliasHashing = false,
+                Attestation = "direct"
             });
 
             return new JsonResult(token);

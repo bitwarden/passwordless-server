@@ -25,4 +25,8 @@
       <PackageReference Include="UAParser" Version="3.1.47" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include=".mds-cache\" />
+  </ItemGroup>
+
 </Project>
