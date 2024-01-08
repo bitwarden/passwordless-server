@@ -13,6 +13,6 @@ public sealed class ManageFeaturesRequest
 
     [Range(0, 90)]
     public int EventLoggingRetentionPeriod { get; init; }
-    
+
     public bool AllowAttestation { get; init; }
 }

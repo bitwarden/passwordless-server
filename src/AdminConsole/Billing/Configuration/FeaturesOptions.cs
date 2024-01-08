@@ -1,5 +1,3 @@
-using Passwordless.Common.Models.Apps;
-
 namespace Passwordless.AdminConsole.Billing.Configuration;
 
 public class FeaturesOptions

@@ -75,7 +75,7 @@ public class Fido2Service : IFido2Service
             {
                 throw new ApiException("invalid_attestation", "Attestation type not supported on your plan.", 400);
             }
-            
+
             // We won't support enterprise for now or other new attestation types known at this time.
             if (tokenProps.Attestation != "direct" && tokenProps.Attestation != "indirect")
             {

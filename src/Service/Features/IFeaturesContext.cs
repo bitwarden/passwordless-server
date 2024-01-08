@@ -1,5 +1,3 @@
-using Fido2NetLib.Objects;
-
 namespace Passwordless.Service.Features;
 
 public interface IFeaturesContext
@@ -14,7 +12,7 @@ public interface IFeaturesContext
     /// Maximum number of individual users allowed to use the application
     /// </summary>
     long? MaxUsers { get; init; }
-    
+
     /// <summary>
     /// Determines or now whether attestation is allowed for this application.
     /// </summary>

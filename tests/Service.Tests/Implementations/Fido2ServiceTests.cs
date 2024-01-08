@@ -1,4 +1,3 @@
-using Fido2NetLib.Objects;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Passwordless.Service.EventLog.Loggers;

@@ -1,5 +1,3 @@
-using Fido2NetLib.Objects;
-
 namespace Passwordless.Service.Models;
 
 public class AppFeature : PerTenant
@@ -25,7 +23,7 @@ public class AppFeature : PerTenant
     /// Determines or now whether attestation is allowed for this application.
     /// </summary>
     public bool AllowAttestation { get; set; }
-    
+
     /// <summary>
     /// Determines if the Sign In Token Endpoint is enabled or disabled
     /// </summary>

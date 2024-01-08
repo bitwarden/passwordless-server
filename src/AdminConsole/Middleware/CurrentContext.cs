@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Passwordless.AdminConsole.Models;
-using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Middleware;
 
