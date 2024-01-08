@@ -71,7 +71,16 @@ public class Fido2Service : IFido2Service
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
         if (!tokenProps.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
         {
-            throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
+            if (!features.AllowAttestation)
+            {
+                throw new ApiException("invalid_attestation", "Attestation type not supported on your plan.", 400);
+            }
+            
+            // We won't support enterprise for now or other new attestation types known at this time.
+            if (tokenProps.Attestation != "direct" && tokenProps.Attestation != "indirect")
+            {
+                throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
+            }
         }
 
         // check if aliases is available
