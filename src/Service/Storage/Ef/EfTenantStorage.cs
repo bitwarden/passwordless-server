@@ -2,6 +2,7 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -181,6 +182,7 @@ public class EfTenantStorage : ITenantStorage
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
         existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         existingEntity.MaxUsers = features.MaxUsers;
+        existingEntity.Attestation = features.Attestation.FromDto();
         await db.SaveChangesAsync();
     }
 

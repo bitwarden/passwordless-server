@@ -10,4 +10,6 @@ public record CreateAppDto
     /// Maximum number of users allowed for this application.
     /// </summary>
     public long? MaxUsers { get; set; }
+
+    public AttestationTypes Attestation { get; set; } = AttestationTypes.None;
 }

@@ -1,3 +1,5 @@
+using Fido2NetLib.Objects;
+
 namespace Passwordless.Service.Models;
 
 public class AppFeature : PerTenant
@@ -19,6 +21,9 @@ public class AppFeature : PerTenant
     /// </summary>
     public long? MaxUsers { get; set; }
 
+    /// <inheritdoc cref="AttestationConveyancePreference"/>
+    public AttestationConveyancePreference Attestation { get; set; }
+    
     /// <summary>
     /// Determines if the Sign In Token Endpoint is enabled or disabled
     /// </summary>
