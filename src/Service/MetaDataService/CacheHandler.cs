@@ -1,19 +1,16 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Passwordless.Service.MetaDataService;
 
 public class CacheHandler : DelegatingHandler
 {
-    private readonly MetadataConfiguration _options;
+    private const string Path = ".mds-cache/mds.jwt";
+
     private readonly ILogger<CacheHandler> _logger;
 
-    public CacheHandler(
-        IOptions<MetadataConfiguration> options,
-        ILogger<CacheHandler> logger)
+    public CacheHandler(ILogger<CacheHandler> logger)
     {
-        _options = options.Value;
         _logger = logger;
     }
 
@@ -23,12 +20,12 @@ public class CacheHandler : DelegatingHandler
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            await File.CreateText($"{_options.Path}/mds.jwt").WriteAsync(content);
+            await File.CreateText(Path).WriteAsync(content);
             _logger.LogInformation($"Updated MDS blob.");
         }
         else
         {
-            var content = await File.ReadAllTextAsync($"{_options}/mds.jwt", cancellationToken);
+            var content = await File.ReadAllTextAsync(Path, cancellationToken);
             response.Content = new StringContent(content);
             response.StatusCode = HttpStatusCode.OK;
             _logger.LogWarning($"Using cached MDS blob.");
