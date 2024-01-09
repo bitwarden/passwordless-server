@@ -16,7 +16,7 @@ public class CacheHandler : DelegatingHandler
         _options = options.Value;
         _logger = logger;
     }
-    
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var response = await base.SendAsync(request, cancellationToken);
