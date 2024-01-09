@@ -24,7 +24,7 @@ public static class RegisterTokenValidator
         {
             throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
         }
-        
+
         if (!features.AllowAttestation)
         {
             throw new ApiException("attestation_not_supported_on_plan", "Attestation type not supported on your plan", 400);
