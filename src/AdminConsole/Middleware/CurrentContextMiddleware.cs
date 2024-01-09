@@ -74,7 +74,7 @@ public class CurrentContextMiddleware
             return;
         }
 
-        var featuresContext = FeaturesContext.FromDto(features);
+        var featuresContext = ApplicationFeatureContext.FromDto(features);
 
 #pragma warning disable CS0618 // I am the one valid caller of this method
         currentContext.SetFeatures(featuresContext);
