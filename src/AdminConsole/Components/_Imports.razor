@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
@@ -18,3 +19,5 @@
 @using Passwordless.AdminConsole.Components.Shared.ApexCharts
 @using Passwordless.AdminConsole.Components.Shared.Icons
 @using Passwordless.AdminConsole.Components.Shared.Links
+
+@inject IFileVersionProvider Version
