@@ -1,0 +1,26 @@
+<script type="@Type" src="@Src"></script>
+
+@code {
+    /// <summary>
+    /// The source of the script to load.
+    /// </summary>
+    [Parameter]
+    public required string Src { get; set; }
+    
+    /// <summary>
+    /// This attribute indicates the type of script represented.
+    /// </summary>
+    [Parameter]
+    public required string Type { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var src = Version.Get(Src);
+        if (src == Src)
+        {
+            throw new ArgumentException("The script source could not be found.", nameof(Src));
+        }
+        Src = src;
+    }
+
+}

@@ -5,15 +5,15 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
-    <link rel="stylesheet" href="@Version.Get("css/site.css")" />
-    <link rel="stylesheet" href="@Version.Get("css/tailwind.css")" />
+    <BlazorStylesheet Href="css/site.css" />
+    <BlazorStylesheet Href="css/tailwind.css" />
     <HeadOutlet/>
 </head>
 
 <body class="h-full bg-gray-50">
     <Routes/>
     <script src="_framework/blazor.web.js"></script>
-    <script type="text/javascript" src="@Version.Get("lib/apexcharts/apexcharts.min.js")"></script>
-    <script type="text/javascript" src="@Version.Get("js/core.js")"></script>
+    <BlazorScript Type="text/javascript" Src="lib/apexcharts/apexcharts.min.js" />
+    <BlazorScript Type="text/javascript" Src="js/core.js" />
 </body>
 </html>
