@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Do not delete, required for Attestation -->
     <Folder Include=".mds-cache\" />
   </ItemGroup>
 
