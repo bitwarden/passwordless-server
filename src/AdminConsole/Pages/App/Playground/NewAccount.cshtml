@@ -80,7 +80,10 @@
                                     }
                                     <span asp-validation-for="Attestation"></span>
                                 </div>
-                                <warning-alert-box message="@((MarkupString)"Attestation is only available on 'Enterprise' plans, read more <a class=\"link-blue\" href=\"https://docs.passwordless.dev/guide/concepts.html#attestation\">here</a>.")"></warning-alert-box>
+                                @if (!CurrentContext.Features.AllowAttestation)
+                                {
+                                    <warning-alert-box message="@((MarkupString)"Attestation is only available on 'Enterprise' plans, read more <a class=\"link-blue\" href=\"https://docs.passwordless.dev/guide/concepts.html#attestation\">here</a>.")"></warning-alert-box>
+                                }
                             </div>
                             
 
