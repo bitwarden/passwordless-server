@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 namespace Passwordless.Service.MetaDataService;
 
 /// <summary>
-/// For self-hosting, we might not have a way to update the MDS blob.
+/// The OfflineCacheHandler will attempt to read the MDS blob from the local file system. Use this if the intent is
+/// to manually synchronize with the latest MDS blob from the FIDO Alliance. This is useful for self-hosted
+/// deployments where there is no connectivity to the FIDO Alliance or internet.
 /// </summary>
 public sealed class OfflineCacheHandler : DelegatingHandler
 {
@@ -20,9 +22,10 @@ public sealed class OfflineCacheHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[OfflineCacheHandler] Synchronizing using the MDS blob found at '{Path}'.", Path);
         if (!File.Exists(Path))
         {
-            _logger.LogError("No offline MDS blob found at '{Path}'.", Path);
+            _logger.LogError("[OfflineCacheHandler] No offline MDS blob found at '{Path}'.", Path);
         }
         var content = await File.ReadAllTextAsync(Path, cancellationToken);
 

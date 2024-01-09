@@ -26,7 +26,7 @@ public static class MetaDataServiceBootstrap
             httpClientBuilder.AddHttpMessageHandler<CacheHandler>();
         }
 
-        builder.Services.AddTransient<IMetadataRepository, Fido2MetadataServiceRepository>();
-        builder.Services.AddTransient<IMetadataService, DistributedCacheMetadataService>();
+        builder.Services.AddSingleton<IMetadataRepository, Fido2MetadataServiceRepository>();
+        builder.Services.AddSingleton<IMetadataService, DistributedCacheMetadataService>();
     }
 }
