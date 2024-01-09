@@ -17,10 +17,10 @@ public class CurrentContext : ICurrentContext
 
     public string? ApiKey { get; private set; }
     public bool IsFrozen { get; private set; }
-    public FeaturesContext Features { get; private set; }
+    public ApplicationFeatureContext Features { get; private set; }
     public Organization? Organization { get; private set; }
     public int? OrgId { get; private set; }
-    public FeaturesContext OrganizationFeatures { get; private set; } = new(false, 0, null, null, false);
+    public OrganizationFeaturesContext OrganizationFeatures { get; private set; } = new(false, 0);
 
     public void SetApp(Application application)
     {
@@ -35,15 +35,15 @@ public class CurrentContext : ICurrentContext
         IsFrozen = application.DeleteAt.HasValue;
     }
 
-    public void SetFeatures(FeaturesContext context)
+    public void SetFeatures(ApplicationFeatureContext context)
     {
         Features = context;
     }
 
-    public void SetOrganization(int organizationId, FeaturesContext featuresContext, Organization organization)
+    public void SetOrganization(int organizationId, OrganizationFeaturesContext organizationFeaturesContext, Organization organization)
     {
         OrgId = organizationId;
-        OrganizationFeatures = featuresContext;
+        OrganizationFeatures = organizationFeaturesContext;
         Organization = organization;
     }
 }

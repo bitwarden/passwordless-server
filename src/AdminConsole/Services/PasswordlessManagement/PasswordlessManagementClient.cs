@@ -100,4 +100,22 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var response = await _client.DeleteAsync($"admin/apps/{appId}/api-keys/{apiKeyId}");
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task EnabledManuallyGeneratedTokensAsync(string appId, string performedBy)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/sign-in-generate-token-endpoint/enable", new
+        {
+            PerformedBy = performedBy
+        });
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DisabledManuallyGeneratedTokensAsync(string appId, string performedBy)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/sign-in-generate-token-endpoint/disable", new
+        {
+            PerformedBy = performedBy
+        });
+        response.EnsureSuccessStatusCode();
+    }
 }
