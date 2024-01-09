@@ -12,6 +12,7 @@ using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Validation;
 
 namespace Passwordless.Service;
 
@@ -72,19 +73,7 @@ public class Fido2Service : IFido2Service
 
         // Attestation
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
-        if (!tokenProps.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
-        {
-            if (!features.AllowAttestation)
-            {
-                throw new ApiException("invalid_attestation", "Attestation type not supported on your plan.", 400);
-            }
-
-            // We won't support enterprise for now or other new attestation types known at this time.
-            if (tokenProps.Attestation != "direct" && tokenProps.Attestation != "indirect")
-            {
-                throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
-            }
-        }
+        RegisterTokenValidator.ValidateAttestation(tokenProps, features);
 
         // check if aliases is available
         if (tokenProps.Aliases != null)
@@ -158,19 +147,7 @@ public class Fido2Service : IFido2Service
 
             // Attestation
             if (string.IsNullOrEmpty(token.Attestation)) token.Attestation = "none";
-            if (!token.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
-            {
-                if (!features.AllowAttestation)
-                {
-                    throw new ApiException("invalid_attestation", "Attestation type not supported on your plan.", 400);
-                }
-
-                // We won't support enterprise for now or other new attestation types known at this time.
-                if (token.Attestation != "direct" && token.Attestation != "indirect")
-                {
-                    throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
-                }
-            }
+            RegisterTokenValidator.ValidateAttestation(token, features);
 
             var attestation = token.Attestation.ToEnum<AttestationConveyancePreference>();
 

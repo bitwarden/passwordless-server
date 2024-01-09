@@ -1,3 +1,4 @@
+using Fido2NetLib;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Passwordless.Service.EventLog.Loggers;
@@ -14,6 +15,7 @@ public class Fido2ServiceTests
     private readonly Mock<ITokenService> _mockTokenService;
     private readonly Mock<IEventLogger> _mockEventLogger;
     private readonly Mock<IFeatureContextProvider> _mockFeatureContextProvider;
+    private readonly Mock<IMetadataService> _mockMetadataService;
 
     private readonly Fido2Service _sut;
 
@@ -23,13 +25,15 @@ public class Fido2ServiceTests
         _mockTokenService = new Mock<ITokenService>();
         _mockEventLogger = new Mock<IEventLogger>();
         _mockFeatureContextProvider = new Mock<IFeatureContextProvider>();
+        _mockMetadataService = new Mock<IMetadataService>();
 
         _sut = new Fido2Service(new ManualTenantProvider("test"),
             NullLogger.Instance,
             _mockTenantStorage.Object,
             _mockTokenService.Object,
             _mockEventLogger.Object,
-            _mockFeatureContextProvider.Object);
+            _mockFeatureContextProvider.Object,
+            _mockMetadataService.Object);
     }
 
     [Fact]
