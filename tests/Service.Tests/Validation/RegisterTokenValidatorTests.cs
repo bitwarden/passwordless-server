@@ -23,7 +23,7 @@ public class RegisterTokenValidatorTests
         // assert
         Assert.IsType<ApiException>(actual);
         Assert.Equal("invalid_attestation", ((ApiException)actual).ErrorCode);
-        Assert.Equal("Attestation type not supported.", ((ApiException)actual).Message);
+        Assert.Equal("Attestation type not supported", ((ApiException)actual).Message);
         Assert.Equal(400, ((ApiException)actual).StatusCode);
     }
 
@@ -42,8 +42,8 @@ public class RegisterTokenValidatorTests
 
         // assert
         Assert.IsType<ApiException>(actual);
-        Assert.Equal("invalid_attestation", ((ApiException)actual).ErrorCode);
-        Assert.Equal("Attestation type not supported on your plan.", ((ApiException)actual).Message);
+        Assert.Equal("attestation_not_supported_on_plan", ((ApiException)actual).ErrorCode);
+        Assert.Equal("Attestation type not supported on your plan", ((ApiException)actual).Message);
         Assert.Equal(400, ((ApiException)actual).StatusCode);
     }
 }
