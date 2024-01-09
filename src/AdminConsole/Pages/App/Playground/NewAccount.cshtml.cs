@@ -21,7 +21,7 @@ public class NewAccountModel : PageModel
 
     }
 
-    public async Task<IActionResult> OnPostToken(string name, string email)
+    public async Task<IActionResult> OnPostToken(string name, string email, string attestation)
     {
         try
         {
@@ -30,8 +30,7 @@ public class NewAccountModel : PageModel
             {
                 DisplayName = name,
                 Aliases = new HashSet<string>(1) { email },
-                AliasHashing = false,
-                Attestation = "direct"
+                AliasHashing = false
             });
 
             return new JsonResult(token);
@@ -50,4 +49,6 @@ public class NewAccountModel : PageModel
 
     [MaxLength(64)]
     public string Nickname { get; set; }
+
+    public string Attestation { get; set; } = "none";
 }
