@@ -5,6 +5,7 @@
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@using Microsoft.AspNetCore.Components
 @model NewAccountModel
 
 @{
@@ -79,6 +80,7 @@
                                     }
                                     <span asp-validation-for="Attestation"></span>
                                 </div>
+                                <warning-alert-box message="@((MarkupString)"Attestation is only available on 'Enterprise' plans, read more <a class=\"link-blue\" href=\"https://docs.passwordless.dev/guide/concepts.html#attestation\">here</a>.")"></warning-alert-box>
                             </div>
                             
 
