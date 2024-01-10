@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject ICurrentContext CurrentContext
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IWebHostEnvironment Environment
 
 <nav class="space-y-1 flex flex-col h-full content-between overflow-y-auto">
     <CascadingAuthenticationState>
@@ -30,9 +31,12 @@
                                 <NavLink class="nav-link" ActiveClass="nav-link-active" href="@UsersUrl">
                                     <UsersIcon Class="nav-link-icon"/> Users
                                 </NavLink>
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="@ReportingUrl">
-                                    <StackedBarChartIcon Class="nav-link-icon" /> Reporting
-                                </NavLink>
+                                @if (Environment.IsDevelopment())
+                                {
+                                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="@ReportingUrl">
+                                        <StackedBarChartIcon Class="nav-link-icon" /> Reporting
+                                    </NavLink>
+                                }
                             }
                             <NavLink class="nav-link" ActiveClass="nav-link-active" href="@SettingsUrl">
                                 <CogIcon Class="nav-link-icon"/> Settings
