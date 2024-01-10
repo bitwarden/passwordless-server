@@ -3,7 +3,6 @@ using Passwordless.Api.Extensions;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Features;
-using Passwordless.Service.MagicLinks;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -27,24 +26,6 @@ public static class SigninEndpoints
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
-            .RequireCors("default");
-
-        app.MapPost("/signin/send-magic-link", async (
-                SendMagicLinkRequest request,
-                IFeatureContextProvider provider,
-                MagicLinkService magicLinkService
-            ) =>
-            {
-                // check if generate setting is on
-                if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled) return Forbid();
-
-                await magicLinkService.SendMagicLink(request.ToDto());
-
-                return Ok(new SendMagicLinkResponse());
-            })
-            .WithParameterValidation()
-            .RequireRateLimiting(AddMagicLinkLimiterBootstrap.MagicLinkRateLimiterPolicyName)
             .RequireAuthorization(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
 

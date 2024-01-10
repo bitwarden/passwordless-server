@@ -165,6 +165,7 @@ app.MapAliasEndpoints();
 app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
+app.MapMagicEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
 

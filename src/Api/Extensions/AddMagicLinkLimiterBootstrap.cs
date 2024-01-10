@@ -12,7 +12,7 @@ public static class AddMagicLinkLimiterBootstrap
 
     public static IServiceCollection AddMagicLinks(this IServiceCollection serviceCollection) =>
         serviceCollection
-            .AddDistributedMemoryCache() // this is for development only
+            .AddDistributedMemoryCache()
             .AddMagicLinksLimiter();
 
     public static IServiceCollection AddMagicLinksLimiter(this IServiceCollection serviceCollection) =>
@@ -63,14 +63,14 @@ public class MagicLinkRateLimiterProvider
     private FixedWindowRateLimiterOptions GetOptions(ApplicationRisk risk) => risk.Risk switch
     {
         < 10 and >= 0 => new FixedWindowRateLimiterOptions(),
-        < 20 and >= 10 => new FixedWindowRateLimiterOptions { PermitLimit = 10000, Window = TimeSpan.FromDays(30) }, // 10000 emails/month 120/min
+        < 20 and >= 10 => new FixedWindowRateLimiterOptions { PermitLimit = 120, Window = TimeSpan.FromSeconds(60) }, // 10000 emails/month 120/min
         < 30 and >= 20 => new FixedWindowRateLimiterOptions(),
         < 40 and >= 30 => new FixedWindowRateLimiterOptions(),
         < 50 and >= 40 => new FixedWindowRateLimiterOptions(),
         < 60 and >= 50 => new FixedWindowRateLimiterOptions(),
-        < 70 and >= 60 => new FixedWindowRateLimiterOptions { PermitLimit = 100, Window = TimeSpan.FromDays(30) }, // 100 emails/month 2 emails/min
+        < 70 and >= 60 => new FixedWindowRateLimiterOptions { PermitLimit = 2, Window = TimeSpan.FromSeconds(60) }, // 100 emails/month 2 emails/min
         < 80 and >= 70 => new FixedWindowRateLimiterOptions(),
-        < 90 and >= 80 => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromDays(30) }, // 10 emails/month 1 email/minute
+        < 90 and >= 80 => new FixedWindowRateLimiterOptions { PermitLimit = 1, Window = TimeSpan.FromSeconds(60) }, // 10 emails/month 1 email/minute
         < 100 and >= 90 => new FixedWindowRateLimiterOptions(), // have to think about this one (its limited by destination)
         _ => new FixedWindowRateLimiterOptions() // override the on reject to return 200 but do nothing
     };
