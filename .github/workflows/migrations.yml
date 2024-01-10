@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
 
       - name: Install Entity Framework toolkit
-        run: dotnet tool install dotnet-ef --global --version 5.0.0
+        run: dotnet tool install dotnet-ef --global
 
       - name: Generate script
         run: >
