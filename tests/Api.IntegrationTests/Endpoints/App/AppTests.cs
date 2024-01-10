@@ -11,20 +11,21 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
+using Xunit.Abstractions;
 using static Passwordless.Api.IntegrationTests.Helpers.App.CreateAppHelpers;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
 public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
+    private readonly PasswordlessApiFactory _apiFactory;
     private readonly HttpClient _client;
-    private readonly PasswordlessApiFactory _factory;
 
-    public AppTests(PasswordlessApiFactory apiFactory)
+    public AppTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _factory = apiFactory;
-        _client = apiFactory.CreateClient()
-            .AddManagementKey();
+        _apiFactory = apiFactory;
+        _apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient().AddManagementKey();
     }
 
     [Theory]
@@ -77,7 +78,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Assert
         res.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
 
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>()
             .Create(name)
@@ -99,14 +100,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
-        using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        using var appHttpClient = _apiFactory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
 
         // Assert
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
 
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
         appFeature.Should().NotBeNull();
@@ -123,7 +124,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
-        using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        using var appHttpClient = _apiFactory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
@@ -150,7 +151,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Assert
         manageFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
 
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
         appFeature.Should().NotBeNull();
@@ -188,7 +189,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = GetApplicationName();
-        using var client = _factory.CreateClient().AddManagementKey();
+        using var client = _apiFactory.CreateClient().AddManagementKey();
         _ = await client.CreateApplicationAsync(applicationName);
 
         // Act
