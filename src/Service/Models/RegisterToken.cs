@@ -7,23 +7,23 @@ namespace Passwordless.Service.Models;
 public class RegisterToken : Token
 {
     [Key(10)]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
     [Key(11)]
-    public string DisplayName { get; set; }
+    public string? DisplayName { get; set; }
     [Key(12)]
-    public string Username { get; set; }
+    public required string Username { get; set; }
     [Key(13)]
-    public string Attestation { get; set; } = "None";
+    public required string Attestation { get; set; }
     [Key(14)]
-    public string AuthenticatorType { get; set; }
+    public string? AuthenticatorType { get; set; }
     [Key(15)]
-    public bool Discoverable { get; set; } = true;
+    public required bool Discoverable { get; set; }
     [Key(16)]
     public string UserVerification { get; set; } = "Preferred";
     [Key(17)]
-    public HashSet<string> Aliases { get; set; }
-
-    [Key(18)] public bool AliasHashing { get; set; } = true;
+    public HashSet<string>? Aliases { get; set; }
+    [Key(18)]
+    public bool AliasHashing { get; set; } = true;
 }
 
 [MessagePackObject]

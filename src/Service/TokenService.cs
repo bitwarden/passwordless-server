@@ -156,7 +156,7 @@ public class TokenService : ITokenService
         }
         else
         {
-            msgpack = MessagePackSerializer.Serialize<T>(token);
+            msgpack = MessagePackSerializer.Serialize(token);
         }
 
         (Key key, int keyId) = await GetRandomKeyAsync();

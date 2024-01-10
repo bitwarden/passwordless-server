@@ -42,21 +42,16 @@ public class Fido2Service : IFido2Service
         _featureContextProvider = featureContextProvider;
     }
 
-    public async Task<string> CreateRegisterToken(RegisterToken tokenProps)
+    public async Task<string> CreateRegisterToken(RegisterTokenInput tokenInput)
     {
-        if (tokenProps.ExpiresAt == default)
-        {
-            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
-        }
-
-        ValidateAliases(tokenProps.Aliases);
-        ValidateUserId(tokenProps.UserId);
-        ValidateUsername(tokenProps.Username);
+        ValidateAliases(tokenInput.Aliases);
+        ValidateUserId(tokenInput.UserId);
+        ValidateUsername(tokenInput.Username);
 
         var features = await _featureContextProvider.UseContext();
         if (features.MaxUsers.HasValue)
         {
-            var credentials = await _storage.GetCredentialsByUserIdAsync(tokenProps.UserId);
+            var credentials = await _storage.GetCredentialsByUserIdAsync(tokenInput.UserId);
             if (!credentials.Any())
             {
                 var users = await _storage.GetUsersCount();
@@ -68,30 +63,38 @@ public class Fido2Service : IFido2Service
         }
 
         // Attestation
-        if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
-        if (!tokenProps.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
+        if (string.IsNullOrEmpty(tokenInput.Attestation)) tokenInput.Attestation = "none";
+        if (!tokenInput.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
         {
             throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
         }
 
         // check if aliases is available
-        if (tokenProps.Aliases != null)
+        if (tokenInput.Aliases != null)
         {
-            ValidateAliases(tokenProps.Aliases);
+            ValidateAliases(tokenInput.Aliases);
 
-            var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenantProvider.Tenant));
+            var hashedAliases = tokenInput.Aliases.Select(alias => HashAlias(alias, _tenantProvider.Tenant));
 
             // todo: check if alias exists and belongs to different user.
-            var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenProps.UserId);
+            var isAvailable = await _storage.CheckIfAliasIsAvailable(hashedAliases, tokenInput.UserId);
             if (!isAvailable)
             {
                 throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
             }
         }
 
-        var token = await _tokenService.EncodeTokenAsync(tokenProps, "register_");
+        var token = await _tokenService.EncodeTokenAsync(new RegisterToken
+        {
+            ExpiresAt = tokenInput.ExpiresAt ?? DateTime.UtcNow.AddSeconds(120),
+            UserId = tokenInput.UserId,
+            DisplayName = tokenInput.DisplayName,
+            Username = tokenInput.Username,
+            Attestation = tokenInput.Attestation ?? "None",
+            Discoverable = tokenInput.Discoverable ?? true
+        }, "register_");
 
-        _eventLogger.LogRegistrationTokenCreatedEvent(tokenProps.UserId);
+        _eventLogger.LogRegistrationTokenCreatedEvent(tokenInput.UserId);
 
         return token;
     }
@@ -160,7 +163,9 @@ public class Fido2Service : IFido2Service
                     CredProps = true
                 });
 
-            var session = await _tokenService.EncodeTokenAsync(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
+            var session = await _tokenService.EncodeTokenAsync(
+                // Have to use contractless serializer here because the Options comes from Fido2NetLib
+                new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
 
             _eventLogger.LogRegistrationBeganEvent(userId);
 
@@ -388,7 +393,7 @@ public class Fido2Service : IFido2Service
         return token;
     }
 
-    private static void ValidateAliases(Aliases aliases, bool throwIfNull = false)
+    private static void ValidateAliases(Aliases? aliases, bool throwIfNull = false)
     {
         try
         {
