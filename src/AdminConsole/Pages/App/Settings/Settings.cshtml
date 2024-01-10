@@ -74,11 +74,11 @@
             user to log-in to their account in the event they've misplaced their passkey. Once the identity of the user has been
             verified, you can send them a hyperlink that contains the token issued by <code>signin/generate-token</code>.
         </p>
-        
         <label for="@SettingsModel.ManualVerificationTokenCheckboxId">
-            <input class="mr-1 my-4" id="@SettingsModel.ManualVerificationTokenCheckboxId" type="checkbox" asp-for="IsManualTokenGenerationEnabled" />
+            <input class="mr-1 my-4" type="checkbox" id="@SettingsModel.ManualVerificationTokenCheckboxId" name="@SettingsModel.ManualVerificationTokenCheckboxId" value="true" checked="@Model.IsManualTokenGenerationEnabled"/>
             Enable Manually Generated Verification Tokens
         </label>
+        
         <br>
         <button id="btn-save-settings" class="btn-primary" type="submit">Save</button>
     </form>

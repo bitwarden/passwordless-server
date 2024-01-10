@@ -206,7 +206,9 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            if (Convert.ToBoolean(Request.Form[ManualVerificationTokenCheckboxId].FirstOrDefault()))
+            Request.Form.TryGetValue(ManualVerificationTokenCheckboxId, out var values);
+            var enabled = Convert.ToBoolean(values.FirstOrDefault());
+            if (enabled)
             {
                 await _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
             }
