@@ -27,23 +27,23 @@ public class ApplicationRiskBackgroundService : BackgroundService
             do
             {
                 // set application risks based on rules we set.
-                
+
                 // query all existing account metadata information
-                
+
                 // new app is 90 (no existing risk record)
-                
+
                 // app.CreatedDate > 1 day = 80
-                
+
                 // app.CreatedDate > 3 days = 70
-                
+
                 // app.CreatedDate > 7 days = 60
-                
+
                 // app.CreatedDate > 30 days = 50
-                
+
                 // app is paid = 10
-                
+
                 // if app type is manual then ignore (bitwarden employee enforced this)
-                
+
             } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException)

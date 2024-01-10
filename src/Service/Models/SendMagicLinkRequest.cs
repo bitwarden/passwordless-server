@@ -9,11 +9,11 @@ public class SendMagicLinkRequest
     [Required]
     [EmailAddress]
     public string UserEmail { get; init; }
-    
+
     [Required]
     [MagicLinkTemplateUrl]
     public string MagicLinkUrl { get; init; }
-    
+
     [Required]
     public string UserId { get; init; }
 }
@@ -25,6 +25,6 @@ public static class SendMagicLinkRequestExtensions
         {
             UserId = request.UserId,
             UserEmail = new MailAddress(request.UserEmail),
-            UrlTokenTemplate = request.MagicLinkUrl 
+            UrlTokenTemplate = request.MagicLinkUrl
         };
 }
