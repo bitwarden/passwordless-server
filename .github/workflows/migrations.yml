@@ -1,0 +1,68 @@
+name: migrations
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+env:
+  # Setting these variables allows .NET CLI to use rich color codes in console output
+  TERM: xterm
+  DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+  # Skip boilerplate output
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  script:
+    strategy:
+      matrix:
+        app:
+          - Api
+          - AdminConsole
+        include:
+          - app: Api
+            ef-context: DbGlobalMsSqlContext
+          - app: Api
+            ef-context: DbGlobalSqliteContext
+          - app: AdminConsole
+            ef-context: MssqlConsoleDbContext
+          - app: AdminConsole
+            ef-context: SqliteConsoleDbContext
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+
+      - name: Install Entity Framework toolkit
+        run: dotnet tool install dotnet-ef --global --version 5.0.0
+
+      - name: Generate script
+        run: >
+            dotnet ef migrations script
+            --configuration Release
+            --project src/${{ matrix.app }}
+            --context ${{ matrix.ef-context }}
+            --idempotent
+            --output ${{ matrix.app }}.sql
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        with:
+          name: ${{ matrix.app }}-${{ matrix.ef-context }}-migrations
+          path: ${{ matrix.app }}.sql
