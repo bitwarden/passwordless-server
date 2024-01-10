@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
+using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
@@ -108,6 +109,8 @@ if (builder.Environment.IsDevelopment())
 
 builder.AddPasswordlessHealthChecks();
 
+builder.Services.AddMagicLinks();
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -150,6 +153,8 @@ app.UseStaticFiles();
 app.UseMiddleware<EventLogStorageCommitMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ApplicationRiskMiddleware>();
+app.UseRateLimiter();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<EventLogContextMiddleware>();

@@ -22,6 +22,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
     public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
+    public DbSet<ApplicationRisk> ApplicationRisks => Set<ApplicationRisk>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +76,12 @@ public abstract class DbGlobalContext : DbContext
                 .WithMany(x => x.Events)
                 .HasForeignKey(x => x.TenantId)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<ApplicationRisk>(builder =>
+        {
+            builder.HasKey(x => x.Tenant);
+            builder.HasOne(x => x.Application);
         });
 
         base.OnModelCreating(modelBuilder);
