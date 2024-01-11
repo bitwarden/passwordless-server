@@ -60,7 +60,7 @@ public class MagicLinkRateLimiterProvider
         return new FixedWindowRateLimiter(GetOptions(applicationRisk));
     }
 
-    private FixedWindowRateLimiterOptions GetOptions(ApplicationRisk risk) => risk.Risk switch
+    private FixedWindowRateLimiterOptions GetOptions(ApplicationMagicLinkLimits magicLinkLimits) => magicLinkLimits.Risk switch
     {
         < 10 and >= 0 => new FixedWindowRateLimiterOptions(),
         < 20 and >= 10 => new FixedWindowRateLimiterOptions { PermitLimit = 120, Window = TimeSpan.FromSeconds(60) }, // 10000 emails/month 120/min
@@ -77,10 +77,10 @@ public class MagicLinkRateLimiterProvider
 
     public Task SetRateLimiterAsync(string appId, int risk) =>
         _cache.SetAsync($"magic-link-{appId}",
-            Serialize(new ApplicationRisk { Tenant = appId, Risk = risk }),
+            Serialize(new ApplicationMagicLinkLimits { Tenant = appId, Risk = risk }),
             new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromMinutes(1) });
 
-    private byte[] Serialize(ApplicationRisk dto) => Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dto));
+    private byte[] Serialize(ApplicationMagicLinkLimits dto) => Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dto));
 
-    private ApplicationRisk Deserialize(byte[] byteArray) => JsonSerializer.Deserialize<ApplicationRisk>(Encoding.UTF8.GetString(byteArray)) ?? new ApplicationRisk();
+    private ApplicationMagicLinkLimits Deserialize(byte[] byteArray) => JsonSerializer.Deserialize<ApplicationMagicLinkLimits>(Encoding.UTF8.GetString(byteArray)) ?? new ApplicationMagicLinkLimits();
 }

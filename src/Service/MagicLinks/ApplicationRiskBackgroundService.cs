@@ -52,7 +52,7 @@ public class ApplicationRiskBackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Setting of ApplicationRisks failed");
+            _logger.LogError(ex, "Setting of MagicLinkLimits failed");
         }
     }
 }
