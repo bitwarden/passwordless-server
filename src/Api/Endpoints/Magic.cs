@@ -12,7 +12,7 @@ public static class MagicEndpoints
 {
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/signin/send-magic-link", async (
+        app.MapPost("/magic-link/send", async (
                 SendMagicLinkRequest request,
                 IFeatureContextProvider provider,
                 MagicLinkService magicLinkService
