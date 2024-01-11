@@ -374,6 +374,39 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
+    [Fact]
+    public async Task I_can_check_whether_an_app_id_is_available()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+
+        // Act
+        using var response = await _client.GetAsync($"/admin/apps/{applicationName}/available");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
+        result.Should().NotBeNull();
+        result!.Available.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task I_can_check_whether_an_app_id_is_unavailable()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        _ = await _client.CreateApplicationAsync(applicationName);
+
+        // Act
+        using var response = await _client.GetAsync($"/admin/apps/{applicationName}/available");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
+        result.Should().NotBeNull();
+        result!.Available.Should().BeFalse();
+    }
+
     public void Dispose()
     {
         _client.Dispose();
