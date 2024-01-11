@@ -52,10 +52,16 @@ public abstract class DbTenantContext : DbGlobalContext
 
         foreach (EntityEntry entry in entries)
         {
-            // for entities that inherit from PerTenant
-            // Automatically set tenant value
+            // Make sure that Tenant is set on the entities that require it.
+            // This should already be enforced by the compiler, but just in case
+            // we'll do it here as well.
             if (entry.Entity is PerTenant trackable)
             {
+                if (string.IsNullOrEmpty(trackable.Tenant) || trackable.Tenant != Tenant)
+                {
+                    // TODO: log a warning here
+                }
+
                 trackable.Tenant = Tenant;
                 if (entry.State == EntityState.Modified)
                 {

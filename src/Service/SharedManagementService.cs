@@ -126,7 +126,8 @@ public class SharedManagementService : ISharedManagementService
                 EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
                 MaxUsers = options.MaxUsers,
                 IsGenerateSignInTokenEndpointEnabled = true
-            }
+            },
+            Tenant = storage.Tenant
         };
         await storage.SaveAccountInformation(account);
         return new CreateAppResultDto

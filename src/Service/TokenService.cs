@@ -226,7 +226,7 @@ public class TokenService : ITokenService
 
                 // todo: Handle 409 exception from storage? Storage will throw if keyid is duplicate.
                 var keyId = RandomNumberGenerator.GetInt32(int.MaxValue);
-                await _storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial });
+                await _storage.AddTokenKey(new TokenKey { CreatedAt = DateTime.UtcNow, KeyId = keyId, KeyMaterial = keyInputMaterial, Tenant = _storage.Tenant });
                 alternatives.Add(keyId, keyInputMaterial);
 
                 try

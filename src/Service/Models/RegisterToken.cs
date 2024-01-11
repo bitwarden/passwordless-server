@@ -9,21 +9,21 @@ public class RegisterToken : Token
     [Key(10)]
     public required string UserId { get; set; }
     [Key(11)]
-    public string? DisplayName { get; set; }
+    public required string? DisplayName { get; set; }
     [Key(12)]
     public required string Username { get; set; }
     [Key(13)]
-    public required string Attestation { get; set; }
+    public required string? Attestation { get; set; }
     [Key(14)]
-    public string? AuthenticatorType { get; set; }
+    public required string? AuthenticatorType { get; set; }
     [Key(15)]
-    public required bool Discoverable { get; set; }
+    public required bool? Discoverable { get; set; }
     [Key(16)]
-    public string UserVerification { get; set; } = "Preferred";
+    public required string? UserVerification { get; set; }
     [Key(17)]
-    public HashSet<string>? Aliases { get; set; }
+    public required HashSet<string>? Aliases { get; set; }
     [Key(18)]
-    public bool AliasHashing { get; set; } = true;
+    public required bool? AliasHashing { get; set; }
 }
 
 [MessagePackObject]
@@ -61,13 +61,13 @@ public class VerifySignInToken : Token
 public class Token
 {
     [Key(0)]
-    public DateTime ExpiresAt { get; set; }
+    public required DateTime ExpiresAt { get; set; }
 
     [Key(1)]
-    public Guid TokenId { get; set; }
+    public required Guid TokenId { get; set; }
 
     [Key(2)]
-    public string Type { get; set; }
+    public required string Type { get; set; }
 
     public void Validate()
     {

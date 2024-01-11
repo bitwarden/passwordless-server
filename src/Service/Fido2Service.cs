@@ -87,11 +87,17 @@ public class Fido2Service : IFido2Service
         var token = await _tokenService.EncodeTokenAsync(new RegisterToken
         {
             ExpiresAt = tokenInput.ExpiresAt ?? DateTime.UtcNow.AddSeconds(120),
+            TokenId = Guid.NewGuid(),
+            Type = "internal_register",
             UserId = tokenInput.UserId,
             DisplayName = tokenInput.DisplayName,
             Username = tokenInput.Username,
-            Attestation = tokenInput.Attestation ?? "None",
-            Discoverable = tokenInput.Discoverable ?? true
+            Attestation = tokenInput.Attestation,
+            AuthenticatorType = tokenInput.AuthenticatorType,
+            Discoverable = tokenInput.Discoverable,
+            UserVerification = tokenInput.UserVerification,
+            Aliases = tokenInput.Aliases,
+            AliasHashing = tokenInput.AliasHashing
         }, "register_");
 
         _eventLogger.LogRegistrationTokenCreatedEvent(tokenInput.UserId);
@@ -139,7 +145,7 @@ public class Fido2Service : IFido2Service
             // Selection
             var authenticatorSelection = new AuthenticatorSelection
             {
-                ResidentKey = token.Discoverable ? ResidentKeyRequirement.Required : ResidentKeyRequirement.Discouraged,
+                ResidentKey = token.Discoverable is null or true ? ResidentKeyRequirement.Required : ResidentKeyRequirement.Discouraged,
                 UserVerification = token.UserVerification.ToEnum<UserVerificationRequirement>(),
                 AuthenticatorAttachment = token.AuthenticatorType?.ToEnum<AuthenticatorAttachment>()
             };
@@ -165,7 +171,7 @@ public class Fido2Service : IFido2Service
 
             var session = await _tokenService.EncodeTokenAsync(
                 // Have to use contractless serializer here because the Options comes from Fido2NetLib
-                new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
+                new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing ?? true }, "session_", true);
 
             _eventLogger.LogRegistrationBeganEvent(userId);
 
