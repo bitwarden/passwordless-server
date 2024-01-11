@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Passwordless.Service.Validation;
+namespace Passwordless.Service.MagicLinks.Validation;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class MagicLinkTemplateUrl : ValidationAttribute

@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
-using Passwordless.Service.Validation;
+using Passwordless.Service.MagicLinks.Validation;
 
-namespace Passwordless.Service.Models;
+namespace Passwordless.Service.MagicLinks.Models;
 
 public class SendMagicLinkRequest
 {

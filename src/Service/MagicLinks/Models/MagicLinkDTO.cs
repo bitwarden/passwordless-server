@@ -1,6 +1,6 @@
 using System.Net.Mail;
 
-namespace Passwordless.Service.Models;
+namespace Passwordless.Service.MagicLinks.Models;
 
 public class MagicLinkDTO
 {

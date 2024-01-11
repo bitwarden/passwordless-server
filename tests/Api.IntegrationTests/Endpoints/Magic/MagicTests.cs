@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.Models;
+using Passwordless.Service.MagicLinks.Models;
 using Xunit;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Magic;

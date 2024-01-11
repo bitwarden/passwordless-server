@@ -1,4 +1,5 @@
 using Passwordless.Common.Services.Mail;
+using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.MagicLinks;
@@ -16,13 +17,10 @@ public class MagicLinkService
 
     public async Task<MagicLinkResult> SendMagicLink(MagicLinkDTO dto)
     {
-        // generate verification token
         var token = await _fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
 
-        // generate the magic link
         var link = new Uri(dto.UrlTokenTemplate.Replace("<token>", token));
 
-        // send magic link
         await _mailProvider.SendAsync(new MailMessage
         {
             To = new[] { dto.UserEmail.ToString() },

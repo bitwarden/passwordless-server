@@ -1,9 +1,8 @@
 using Passwordless.Api.Authorization;
-using Passwordless.Api.Extensions;
 using Passwordless.Common.Constants;
 using Passwordless.Service.Features;
 using Passwordless.Service.MagicLinks;
-using Passwordless.Service.Models;
+using Passwordless.Service.MagicLinks.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -26,7 +25,6 @@ public static class MagicEndpoints
                 return Ok(new SendMagicLinkResponse());
             })
             .WithParameterValidation()
-            .RequireRateLimiting(AddMagicLinkLimiterBootstrap.MagicLinkRateLimiterPolicyName)
             .RequireAuthorization(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
     }
