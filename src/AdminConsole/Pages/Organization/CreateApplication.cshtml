@@ -1,7 +1,4 @@
 @page
-@using Microsoft.Extensions.Options
-@using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject IOptions<PasswordlessManagementOptions> Options
 @model CreateApplicationModel
 
 @{
@@ -99,17 +96,20 @@
             });
 
             const checkAvailability = async (appId) => {
-                var res = await fetch("@Options.Value.ApiUrl/apps/available", {
-                    method: "POST",
+                let res = await fetch(`/Applications/${appId}/Available`, {
+                    method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ appId: appId }),
+                    }
                 });
                 return res.ok;
             }
 
             watch(appId, async () => {
+                if (parsedAppId.value.length < 3) {
+                    availability.value = "not-available";
+                    return;
+                }
                 const available = await checkAvailability(parsedAppId.value);
                 availability.value = available ? "available" : "not-available";
             })
