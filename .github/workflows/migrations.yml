@@ -71,3 +71,11 @@ jobs:
         with:
           name: ${{ matrix.app }}-${{ matrix.ef-context }}
           path: ${{ matrix.app }}.sql
+
+      - name: Produce summary
+        run: |
+          echo "### Idempotent migrations for ${{ matrix.app }} (${{ matrix.ef-context }})" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
+          cat ${{ matrix.app }}.sql >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "\n" >> $GITHUB_STEP_SUMMARY
