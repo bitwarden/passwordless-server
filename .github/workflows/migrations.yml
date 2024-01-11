@@ -31,12 +31,8 @@ jobs:
         include:
           - app: Api
             ef-context: DbGlobalMsSqlContext
-          #- app: Api
-          #   ef-context: DbGlobalSqliteContext
           - app: AdminConsole
             ef-context: MssqlConsoleDbContext
-          #- app: AdminConsole
-          #  ef-context: SqliteConsoleDbContext
 
     runs-on: ubuntu-latest
     permissions:
