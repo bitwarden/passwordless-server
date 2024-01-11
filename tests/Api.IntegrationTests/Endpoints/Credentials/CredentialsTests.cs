@@ -6,7 +6,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
-using Passwordless.Api.IntegrationTests.Infra;
 using Passwordless.Api.Models;
 using Passwordless.Service.Models;
 using Xunit;
@@ -14,10 +13,9 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Credentials;
 
-public class CredentialsTests : IClassFixture<TestApiFixture>, IDisposable
+public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
-    private readonly TestApi _testApi;
-
+    private readonly HttpClient _client;
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
         .RuleFor(x => x.DisplayName, x => x.Person.FullName)
@@ -30,9 +28,13 @@ public class CredentialsTests : IClassFixture<TestApiFixture>, IDisposable
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-    public CredentialsTests(ITestOutputHelper testOutput, TestApiFixture testApiFixture)
+    public CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _testApi = testApiFixture.CreateApi(testOutput: testOutput);
+        apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient()
+            .AddPublicKey()
+            .AddSecretKey()
+            .AddUserAgent();
     }
 
     [Fact]
@@ -42,19 +44,19 @@ public class CredentialsTests : IClassFixture<TestApiFixture>, IDisposable
         const string originUrl = "https://bitwarden.com/products/passwordless/";
         const string rpId = "bitwarden.com";
         var tokenRequest = TokenGenerator.Generate();
-        using var tokenResponse = await _testApi.Client.PostAsJsonAsync("register/token", tokenRequest);
+        using var tokenResponse = await _client.PostAsJsonAsync("register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
         var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
-        using var registrationBeginResponse = await _testApi.Client.PostAsJsonAsync("register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await _client.PostAsJsonAsync("register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
         var authenticatorAttestationRawResponse = await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
 
-        _ = await _testApi.Client.PostAsJsonAsync("register/complete",
+        _ = await _client.PostAsJsonAsync("register/complete",
             new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = authenticatorAttestationRawResponse });
 
         // Act
-        using var credentialsResponse = await _testApi.Client.GetAsync($"credentials/list?userId={tokenRequest.UserId}");
+        using var credentialsResponse = await _client.GetAsync($"credentials/list?userId={tokenRequest.UserId}");
 
         // Assert
         credentialsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -69,7 +71,7 @@ public class CredentialsTests : IClassFixture<TestApiFixture>, IDisposable
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_with_secret_key()
     {
         // Act
-        using var credentialsResponse = await _testApi.Client.GetAsync("credentials/list");
+        using var credentialsResponse = await _client.GetAsync("credentials/list");
 
         // Assert
         credentialsResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -81,6 +83,6 @@ public class CredentialsTests : IClassFixture<TestApiFixture>, IDisposable
 
     public void Dispose()
     {
-        _testApi.Dispose();
+        _client.Dispose();
     }
 }

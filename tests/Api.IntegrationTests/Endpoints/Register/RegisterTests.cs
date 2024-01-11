@@ -6,16 +6,15 @@ using FluentAssertions;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.User;
-using Passwordless.Api.IntegrationTests.Infra;
 using Passwordless.Service.Models;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
-public class RegisterTests : IClassFixture<TestApiFixture>, IDisposable
+public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
-    private readonly TestApi _testApi;
+    private readonly HttpClient _client;
 
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
@@ -29,9 +28,13 @@ public class RegisterTests : IClassFixture<TestApiFixture>, IDisposable
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-    public RegisterTests(ITestOutputHelper testOutput, TestApiFixture testApiFixture)
+    public RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _testApi = testApiFixture.CreateApi(testOutput: testOutput);
+        apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient()
+            .AddPublicKey()
+            .AddSecretKey()
+            .AddUserAgent();
     }
 
     [Fact]
@@ -41,7 +44,7 @@ public class RegisterTests : IClassFixture<TestApiFixture>, IDisposable
         var request = TokenGenerator.Generate();
 
         // Act
-        var response = await _testApi.Client.PostAsJsonAsync("/register/token", request);
+        var response = await _client.PostAsJsonAsync("/register/token", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -55,18 +58,18 @@ public class RegisterTests : IClassFixture<TestApiFixture>, IDisposable
     {
         // Arrange
         var tokenRequest = TokenGenerator.Generate();
-        var tokenResponse = await _testApi.Client.PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = TestApi.OriginUrl,
-            RPID = TestApi.RpId
+            Origin = PasswordlessApiFactory.OriginUrl,
+            RPID = PasswordlessApiFactory.RpId
         };
 
         // Act
-        using var registrationBeginResponse = await _testApi.Client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
         // Assert
         registrationBeginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -80,10 +83,10 @@ public class RegisterTests : IClassFixture<TestApiFixture>, IDisposable
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(TestApi.OriginUrl);
+        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
 
         // Act
-        using var registerCompleteResponse = await _testApi.Client.RegisterNewUser(driver);
+        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);
 
         // Assert
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -93,6 +96,6 @@ public class RegisterTests : IClassFixture<TestApiFixture>, IDisposable
 
     public void Dispose()
     {
-        _testApi.Dispose();
+        _client.Dispose();
     }
 }

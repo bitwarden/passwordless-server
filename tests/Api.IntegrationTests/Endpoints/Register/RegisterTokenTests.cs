@@ -1,19 +1,19 @@
 using System.Net;
 using System.Net.Http.Json;
 using Passwordless.Api.IntegrationTests.Helpers;
-using Passwordless.Api.IntegrationTests.Infra;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
-public class RegisterTokenTests : IClassFixture<TestApiFixture>, IDisposable
+public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
-    private readonly TestApi _testApi;
+    private readonly HttpClient _client;
 
-    public RegisterTokenTests(ITestOutputHelper testOutput, TestApiFixture testApiFixture)
+    public RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _testApi = testApiFixture.CreateApi(testOutput: testOutput);
+        apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient().AddSecretKey();
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class RegisterTokenTests : IClassFixture<TestApiFixture>, IDisposable
     {
         var payload = new { UserId = "1", Username = "test" };
 
-        var httpResponse = await _testApi.Client.PostAsJsonAsync("register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
     }
@@ -42,7 +42,7 @@ public class RegisterTokenTests : IClassFixture<TestApiFixture>, IDisposable
             payload = new { UserId = userid };
         }
 
-        var httpResponse = await _testApi.Client.PostAsJsonAsync("register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
 
@@ -76,7 +76,7 @@ public class RegisterTokenTests : IClassFixture<TestApiFixture>, IDisposable
             payload = new { UserId = "1", Username = input };
         }
 
-        var httpResponse = await _testApi.Client.PostAsJsonAsync("register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
 
@@ -102,7 +102,7 @@ public class RegisterTokenTests : IClassFixture<TestApiFixture>, IDisposable
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        var httpResponse = await _testApi.Client.PostAsJsonAsync("register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
         var body = await httpResponse.Content.ReadAsStringAsync();
@@ -127,13 +127,13 @@ public class RegisterTokenTests : IClassFixture<TestApiFixture>, IDisposable
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        var httpResponse = await _testApi.Client.PostAsJsonAsync("register/token", payload);
+        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
 
         Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
     }
 
     public void Dispose()
     {
-        _testApi.Dispose();
+        _client.Dispose();
     }
 }
