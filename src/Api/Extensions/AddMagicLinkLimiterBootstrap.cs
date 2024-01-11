@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.RateLimiting;
 using Microsoft.Extensions.Caching.Distributed;
+using Passwordless.Service.MagicLinks;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Extensions;
@@ -12,8 +13,7 @@ public static class AddMagicLinkLimiterBootstrap
 
     public static IServiceCollection AddMagicLinks(this IServiceCollection serviceCollection) =>
         serviceCollection
-            .AddDistributedMemoryCache()
-            .AddMagicLinksLimiter();
+            .AddTransient<MagicLinkService>();
 
     public static IServiceCollection AddMagicLinksLimiter(this IServiceCollection serviceCollection) =>
         serviceCollection.AddRateLimiter(limiters =>

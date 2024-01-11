@@ -3,17 +3,23 @@ using System.ComponentModel.DataAnnotations;
 namespace Passwordless.Service.Validation;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class MagicLinkTemplateUrl() : ValidationAttribute("Magic Link Url must be a valid uri and contain the token template (e.g. `<token>`).")
+public class MagicLinkTemplateUrl : ValidationAttribute
 {
     private const string TokenTemplate = "<token>";
 
-    public override bool IsValid(object value)
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-        if (value is not string stringValue) return false;
+        if (value is not string stringValue || string.IsNullOrWhiteSpace(stringValue))
+            return new ValidationResult("Value must be a non-empty string.");
 
-        return stringValue.Contains(TokenTemplate)
-               && Uri.TryCreate(stringValue, UriKind.Absolute, out Uri uriResult)
-               && (uriResult!.Scheme == Uri.UriSchemeHttp
-                   || uriResult.Scheme == Uri.UriSchemeHttps);
+        if (!stringValue.Contains(TokenTemplate))
+            return new ValidationResult("Value must contain the `<token>` template.");
+
+        if (!(Uri.TryCreate(stringValue, UriKind.Absolute, out Uri uriResult)
+              && (uriResult!.Scheme == Uri.UriSchemeHttp
+                  || uriResult.Scheme == Uri.UriSchemeHttps)))
+            return new ValidationResult("Value must be a valid url.");
+
+        return ValidationResult.Success;
     }
 }
