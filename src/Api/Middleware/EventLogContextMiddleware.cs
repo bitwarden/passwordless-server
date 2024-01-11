@@ -2,7 +2,6 @@ using Passwordless.Api.Extensions;
 using Passwordless.Common.Models;
 using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Features;
-using Passwordless.Service.Helpers;
 
 namespace Passwordless.Api.Middleware;
 
@@ -16,7 +15,8 @@ public class EventLogContextMiddleware
     {
         if (!context.Items.ContainsKey("__AuthorizationMiddlewareWithEndpointInvoked"))
         {
-            throw new ApiException("invalid_api_key", "An invalid 'ApiKey' or 'ApiSecret' header was provided.", 400);
+            await _next(context);
+            return;
         }
 
         var tenantId = context.Request.GetTenantName();

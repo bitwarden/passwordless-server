@@ -1,4 +1,5 @@
 using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.EventLog.Models;
 
 namespace Passwordless.Api.Middleware;
 
@@ -28,7 +29,11 @@ public class EventLogStorageCommitMiddleware
         {
             try
             {
-                await provider.GetRequiredService<IEventLogger>().FlushAsync();
+                var eventLoggerContext = provider.GetRequiredService<IEventLogContext>();
+                if (!string.IsNullOrEmpty(eventLoggerContext.TenantId))
+                {
+                    await provider.GetRequiredService<IEventLogger>().FlushAsync();
+                }
             }
             catch (Exception ex)
             {
