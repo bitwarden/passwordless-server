@@ -147,13 +147,13 @@ if (isSelfHosted)
 app.UseCors("default");
 app.UseSecurityHeaders();
 app.UseStaticFiles();
+app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.UseMiddleware<EventLogStorageCommitMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseMiddleware<EventLogContextMiddleware>();
-app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();
 app.MapAliasEndpoints();
