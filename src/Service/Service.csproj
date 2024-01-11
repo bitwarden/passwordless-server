@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <!-- TODO: remove this and update EF Core models to properly support NOT NULL constraints -->
-    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

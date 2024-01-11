@@ -28,6 +28,7 @@ if (isSelfHosted)
 }
 
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
+
 builder.Host.UseSerilog((ctx, sp, config) =>
 {
     config
@@ -57,7 +58,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
                 configuration: ddConfig);
         }
     }
-});
+}, false, true);
 
 var services = builder.Services;
 

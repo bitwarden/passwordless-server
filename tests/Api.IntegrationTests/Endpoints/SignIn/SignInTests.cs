@@ -7,6 +7,7 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.IntegrationTests.Helpers.User;
+using Passwordless.Api.IntegrationTests.Infra;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -15,10 +16,9 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
 
-public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class SignInTests : IClassFixture<TestApiFixture>, IDisposable
 {
-    private readonly HttpClient _httpClient;
-    private readonly PasswordlessApiFactory _apiFactory;
+    private readonly TestApi _testApi;
 
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
@@ -32,24 +32,19 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-    public SignInTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
+    public SignInTests(ITestOutputHelper testOutput, TestApiFixture testApiFixture)
     {
-        _apiFactory = apiFactory;
-        _apiFactory.TestOutput = testOutput;
-        _httpClient = apiFactory.CreateClient()
-            .AddPublicKey()
-            .AddSecretKey()
-            .AddUserAgent();
+        _testApi = testApiFixture.CreateApi(testOutput: testOutput);
     }
 
     [Fact]
     public async Task I_can_retrieve_assertion_options_to_begin_sign_in()
     {
         // Arrange
-        var request = new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId };
+        var request = new SignInBeginDTO { Origin = TestApi.OriginUrl, RPID = TestApi.RpId };
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync("/signin/begin", request);
+        var response = await _testApi.Client.PostAsJsonAsync("/signin/begin", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -65,18 +60,18 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await _httpClient.RegisterNewUser(driver);
+        using var driver = WebDriverFactory.GetWebDriver(TestApi.OriginUrl);
+        await _testApi.Client.RegisterNewUser(driver);
 
-        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        var signInBeginResponse = await _testApi.Client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = TestApi.OriginUrl, RPID = TestApi.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
-        var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
+        var signInCompleteResponse = await _testApi.Client.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId,
+            Origin = TestApi.OriginUrl,
+            RPID = TestApi.RpId,
             Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });
@@ -92,19 +87,19 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-        await _httpClient.RegisterNewUser(driver);
+        using var driver = WebDriverFactory.GetWebDriver(TestApi.OriginUrl);
+        await _testApi.Client.RegisterNewUser(driver);
 
-        var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        var signInBeginResponse = await _testApi.Client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = TestApi.OriginUrl, RPID = TestApi.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
 
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
-        var signInCompleteResponse = await _httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
+        var signInCompleteResponse = await _testApi.Client.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId,
+            Origin = TestApi.OriginUrl,
+            RPID = TestApi.RpId,
             Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });
@@ -115,7 +110,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         signInTokenResponse.Should().NotBeNull();
         signInTokenResponse!.Token.Should().StartWith("verify_");
 
-        var verifySignInResponse = await _httpClient.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
+        var verifySignInResponse = await _testApi.Client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -123,12 +118,12 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_receive_an_error_message_when_sending_an_unrecognized_passkey()
     {
         // Arrange
-        using var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        using var options = await _testApi.Client.AddPublicKey().PostAsJsonAsync("/signin/begin", new { Origin = TestApi.OriginUrl, RPID = TestApi.RpId });
         var response = await options.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
         var payloadWithUnrecognizedPasskey = new
         {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId,
+            Origin = TestApi.OriginUrl,
+            RPID = TestApi.RpId,
             Session = response!.Session,
             Response = new
             {
@@ -147,7 +142,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         };
 
         // Act
-        using var result = await _httpClient.PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
+        using var result = await _testApi.Client.AddPublicKey().PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
 
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -171,21 +166,21 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = $"test{Guid.NewGuid():N}";
         var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
-        _apiFactory.TimeProvider.SetUtcNow(serverTime);
-        using var client = _apiFactory.CreateClient().AddManagementKey();
+        _testApi.TimeProvider.SetUtcNow(serverTime);
+        using var client = _testApi.Client.AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetWebDriver(TestApi.OriginUrl);
         await client.RegisterNewUser(driver);
-        _apiFactory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
+        _testApi.TimeProvider.SetUtcNow(serverTime.AddDays(31));
 
         // Act
         await client.SignInUser(driver);
 
         // Assert
-        using var scope = _apiFactory.Services.CreateScope();
+        using var scope = _testApi.Services.CreateScope();
         var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(applicationName).GetTokenKeys();
         tokenKeys.Should().NotBeNull();
         tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
@@ -196,7 +191,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_receive_a_sign_in_token_for_a_valid_user_id()
     {
         // Arrange
-        using var client = _apiFactory.CreateClient().AddManagementKey();
+        using var client = _testApi.Client.AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync();
         var userId = $"user{Guid.NewGuid():N}";
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
@@ -207,8 +202,8 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Act
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(userId)
         {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
+            Origin = TestApi.OriginUrl,
+            RPID = TestApi.RpId
         });
 
         // Assert
@@ -217,12 +212,12 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         generateToken.Should().NotBeNull();
         generateToken!.Token.Should().StartWith("verify_");
 
-        var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = TestApi.OriginUrl, RPID = TestApi.RpId });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     public void Dispose()
     {
-        _httpClient.Dispose();
+        _testApi.Dispose();
     }
 }

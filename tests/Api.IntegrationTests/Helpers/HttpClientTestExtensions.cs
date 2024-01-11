@@ -13,6 +13,7 @@ public static class HttpClientTestExtensions
 
     public static HttpClient AddPublicKey(this HttpClient client, string apiKey)
     {
+        client.DefaultRequestHeaders.Remove("ApiKey");
         client.DefaultRequestHeaders.Add("ApiKey", apiKey);
         return client;
     }
@@ -24,12 +25,14 @@ public static class HttpClientTestExtensions
 
     public static HttpClient AddSecretKey(this HttpClient client, string secretKey)
     {
+        client.DefaultRequestHeaders.Remove("ApiSecret");
         client.DefaultRequestHeaders.Add("ApiSecret", secretKey);
         return client;
     }
 
     public static HttpClient AddUserAgent(this HttpClient client)
     {
+        client.DefaultRequestHeaders.Remove("User-Agent");
         client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
         return client;
     }
@@ -39,12 +42,14 @@ public static class HttpClientTestExtensions
 
     public static HttpClient AddManagementKey(this HttpClient client)
     {
+        client.DefaultRequestHeaders.Remove("ManagementKey");
         client.DefaultRequestHeaders.Add("ManagementKey", "shared_dev_key");
         return client;
     }
 
     public static HttpClient AddAcceptApplicationJson(this HttpClient client)
     {
+        client.DefaultRequestHeaders.Remove("Accept");
         client.DefaultRequestHeaders.Add("Accept", "application/json");
         return client;
     }

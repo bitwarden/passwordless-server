@@ -4,6 +4,7 @@ using FluentAssertions;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
+using Passwordless.Api.IntegrationTests.Infra;
 using Passwordless.Common.Constants;
 using Passwordless.Common.EventLog.Enums;
 using Passwordless.Common.Models.Apps;
@@ -12,14 +13,13 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Events;
 
-public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class EventsTests : IClassFixture<TestApiFixture>, IDisposable
 {
-    private readonly HttpClient _client;
+    private readonly TestApi _testApi;
 
-    public EventsTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
+    public EventsTests(ITestOutputHelper testOutput, TestApiFixture testApiFixture)
     {
-        apiFactory.TestOutput = testOutput;
-        _client = apiFactory.CreateClient();
+        _testApi = testApiFixture.CreateApi(testOutput: testOutput);
     }
 
     [Fact]
@@ -27,14 +27,14 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await _testApi.Client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        await _client.EnableEventLogging(applicationName);
-        _ = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        _testApi.Client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        await _testApi.Client.EnableEventLogging(applicationName);
+        _ = await _testApi.Client.GetAsync($"/admin/apps/{applicationName}/api-keys");
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -49,15 +49,15 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await _client.CreateApplicationAsync(applicationName);
-        await _client.EnableEventLogging(applicationName);
-        using var createApiKeyResponse = await _client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
+        _ = await _testApi.Client.CreateApplicationAsync(applicationName);
+        await _testApi.Client.EnableEventLogging(applicationName);
+        using var createApiKeyResponse = await _testApi.Client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
             new CreateSecretKeyRequest([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
         var createApiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
-        _client.AddSecretKey(createApiKey!.ApiKey);
+        _testApi.Client.AddSecretKey(createApiKey!.ApiKey);
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -71,17 +71,17 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_view_the_event_for_locking_an_api_key()
     {
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await _testApi.Client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        await _client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        _testApi.Client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        await _testApi.Client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _testApi.Client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
-        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await _testApi.Client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -95,18 +95,18 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_view_the_event_for_unlocking_an_api_key()
     {
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await _testApi.Client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        await _client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        _testApi.Client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        await _testApi.Client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _testApi.Client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
-        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
-        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+        _ = await _testApi.Client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await _testApi.Client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -121,17 +121,17 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await _testApi.Client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _ = await _client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        _testApi.Client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _testApi.Client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _testApi.Client.GetAsync($"/admin/apps/{applicationName}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToDelete = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
-        _ = await _client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
+        _ = await _testApi.Client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -147,15 +147,15 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
-        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        using var appCreationResponse = await _testApi.Client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _ = await _client.EnableEventLogging(applicationName);
-        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
+        _testApi.Client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _testApi.Client.EnableEventLogging(applicationName);
+        using var enableResponse = await _testApi.Client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
             new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest(user));
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -173,15 +173,15 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
-        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        using var appCreationResponse = await _testApi.Client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _ = await _client.EnableEventLogging(applicationName);
-        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
+        _testApi.Client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _testApi.Client.EnableEventLogging(applicationName);
+        using var enableResponse = await _testApi.Client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
             new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest(user));
 
         // Act
-        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        using var getApplicationEventsResponse = await _testApi.Client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -195,6 +195,6 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
     public void Dispose()
     {
-        _client.Dispose();
+        _testApi.Dispose();
     }
 }
