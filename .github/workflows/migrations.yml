@@ -78,4 +78,3 @@ jobs:
           echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
           cat ${{ matrix.app }}.sql >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "\n" >> $GITHUB_STEP_SUMMARY
