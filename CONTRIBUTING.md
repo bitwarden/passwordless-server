@@ -54,8 +54,8 @@ This will install `dotnet ef` globally. Additional documentation around this can
 ##### Important Note
 
 When generating migrations, you can only have the connection string for your desired database platform in the 
-`appsettings.Development.json`.  If you have both, it will either error when attempting the migration, or pretend it did 
-what you wanted and not actually do anything.  You would have to change the code for it to run both migrations at once.
+`appsettings.Development.json`. If you have both, it will either error when attempting the migration, or pretend it did 
+what you wanted and not actually do anything. You would have to change the code for it to run both migrations at once.
 
 ##### For AdminConsole
 
