@@ -10,6 +10,11 @@ public class ReportingEndpointsTests
 {
     private readonly Fixture _fixture = new();
 
+    public ReportingEndpointsTests()
+    {
+        _fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
+    }
+
     #region GetPeriodicCredentialReportsAsync
     [Fact]
     public async Task GetPeriodicCredentialReportsAsync_Returns_ExpectedResult()
