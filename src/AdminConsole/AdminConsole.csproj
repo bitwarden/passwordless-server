@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
-    <Exec Command="npm install" />
+    <Exec Command="npm ci" />
     <Exec Command="npm run build" />
     
     <!-- ES Module Shims -->
