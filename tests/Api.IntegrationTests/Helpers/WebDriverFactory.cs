@@ -13,9 +13,10 @@ public static class WebDriverFactory
     {
         for (int i = 0; i < 5; i++)
         {
+            ChromeDriver? driver = null;
             try
             {
-                (ChromeDriver driver, var res) = GetDriver(driverUrl);
+                (driver, var res) = GetDriver(driverUrl);
                 if (res) return driver;
             }
             catch (WebDriverTimeoutException e)
@@ -23,6 +24,9 @@ public static class WebDriverFactory
                 Console.WriteLine(e);
             }
             Console.WriteLine("Waited but need to retry: " + i);
+
+            driver?.Quit();
+
         }
 
         throw new InvalidOperationException("Could not create a chrome driver");
