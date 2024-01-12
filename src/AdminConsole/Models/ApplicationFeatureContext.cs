@@ -13,10 +13,10 @@ public record ApplicationFeatureContext(
     public static ApplicationFeatureContext FromDto(AppFeatureResponse dto)
     {
         return new ApplicationFeatureContext(
-            dto.EventLoggingIsEnabled, 
-            dto.EventLoggingRetentionPeriod, 
-            dto.DeveloperLoggingEndsAt, 
-            dto.MaxUsers, 
+            dto.EventLoggingIsEnabled,
+            dto.EventLoggingRetentionPeriod,
+            dto.DeveloperLoggingEndsAt,
+            dto.MaxUsers,
             dto.IsGenerateSignInTokenEndpointEnabled,
             dto.IsMagicLinksEnabled);
     }

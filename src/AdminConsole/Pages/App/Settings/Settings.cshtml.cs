@@ -215,7 +215,7 @@ public class SettingsModel : BaseExtendedPageModel
                 IsManualTokenGenerationEnabled
                     ? _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name)
                     : _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name),
-                
+
                 IsMagicLinksEnabled
                     ? _managementClient.EnableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
                     : _managementClient.DisableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)

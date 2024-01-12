@@ -118,7 +118,7 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         });
         response.EnsureSuccessStatusCode();
     }
-    
+
     public async Task EnableMagicLinksAsync(string appId, string performedBy)
     {
         var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/magic-links/enable", new
