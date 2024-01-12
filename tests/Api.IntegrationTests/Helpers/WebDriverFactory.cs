@@ -17,7 +17,11 @@ public static class WebDriverFactory
             try
             {
                 (driver, var res) = GetDriver(driverUrl);
-                if (res) return driver;
+                if (res)
+                {
+                    Console.WriteLine("Successfully created driver: " + i);
+                    return driver;
+                }
             }
             catch (WebDriverTimeoutException e)
             {
