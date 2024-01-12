@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices.JavaScript;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -26,12 +27,15 @@ public static class WebDriverFactory
         driver.AddVirtualAuthenticator(virtualAuth);
         
         WebDriverWait waiter = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-    
+
+        var sw = Stopwatch.StartNew();
         var res = waiter.Until((webDriver  =>
         {
             var exists =  ( webDriver as IJavaScriptExecutor).ExecuteScript("return navigator.credentials != undefined") as bool?;
             return exists == true;
         }));
+        sw.Stop();
+        Console.WriteLine($"Waited for {sw.ElapsedMilliseconds}ms for navigator.credentials to be available");
         
         // if res is fals, the test will fail
         
