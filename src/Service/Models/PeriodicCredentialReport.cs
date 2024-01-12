@@ -2,7 +2,7 @@ namespace Passwordless.Service.Models;
 
 public class PeriodicCredentialReport : PerTenant
 {
-    public DateTime CreatedAt { get; set; }
+    public DateOnly CreatedAt { get; set; }
 
     /// <summary>
     /// The number of credentials in the tenant.

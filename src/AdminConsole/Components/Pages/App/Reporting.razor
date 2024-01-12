@@ -93,7 +93,7 @@
             }
             Filter.To = null;
         }
-        var req = new PeriodicCredentialReportRequest(Filter.From, Filter.To);
+        var req = PeriodicCredentialReportRequest.Create(Filter.From, Filter.To);
         PeriodicCredentialReports = PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
     }
 

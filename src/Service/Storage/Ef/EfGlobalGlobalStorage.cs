@@ -41,7 +41,7 @@ public class EfGlobalGlobalStorage : IGlobalStorage
                     Tenant = accountInformation.Tenant,
                     UsersCount = credentials.Select(x => x.UserId).Distinct().Count(),
                     CredentialsCount = credentials.Count(),
-                    CreatedAt = _timeProvider.GetUtcNow().UtcDateTime.Date
+                    CreatedAt = DateOnly.FromDateTime(_timeProvider.GetUtcNow().UtcDateTime)
                 });
 
         await _db.PeriodicCredentialReports.AddRangeAsync(result);

@@ -237,8 +237,8 @@ public class EfTenantStorage : ITenantStorage
     }
 
     public async Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(
-        DateTime? from,
-        DateTime? to)
+        DateOnly? from,
+        DateOnly? to)
     {
         var query = db.PeriodicCredentialReports.AsQueryable();
         if (from.HasValue)

@@ -28,10 +28,10 @@ public class TotalCredentialsCountChartTests : TestContext
         // Arrange
         var data = Task.FromResult(new List<PeriodicCredentialReportResponse>
         {
-            new(new DateTime(2024, 1, 2), 0, 0),
-            new(new DateTime(2024, 1, 3), 1, 1),
-            new(new DateTime(2024, 1, 4), 1, 2),
-            new(new DateTime(2024, 1, 5), 5, 10)
+            new(new DateOnly(2024, 1, 2), 0, 0),
+            new(new DateOnly(2024, 1, 3), 1, 1),
+            new(new DateOnly(2024, 1, 4), 1, 2),
+            new(new DateOnly(2024, 1, 5), 5, 10)
         }.AsEnumerable());
 
         var cut = RenderComponent<TotalCredentialsCountChart>(parameters => parameters
