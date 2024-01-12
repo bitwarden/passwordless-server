@@ -10,6 +10,7 @@ using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.Models;
 using Passwordless.Service.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Credentials;
 
@@ -18,9 +19,10 @@ public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposab
     private readonly HttpClient _client;
     private readonly Faker<RegisterToken> _tokenGenerator = RequestHelpers.GetRegisterTokenGeneratorRules();
 
-    public CredentialsTests(PasswordlessApiFactory factory)
+    public CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _client = factory.CreateClient()
+        apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient()
             .AddPublicKey()
             .AddSecretKey()
             .AddUserAgent();

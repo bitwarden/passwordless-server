@@ -152,7 +152,7 @@ public class SharedManagementService : ISharedManagementService
             if (existingKey.IsLocked)
             {
                 _eventLogger.LogDisabledApiKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
-                throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
+                throw new ApiException("api_key_locked", "ApiKey has been locked.", 403);
             }
 
             if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
@@ -180,7 +180,7 @@ public class SharedManagementService : ISharedManagementService
             }
 
             _eventLogger.LogDisabledPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
-            throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
+            throw new ApiException("api_key_locked", "ApiKey has been locked.", 403);
         }
 
         _eventLogger.LogInvalidPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
-using Passwordless.Api.Models;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
@@ -17,7 +16,7 @@ public static class AppsEndpoints
 {
     public static void MapAccountEndpoints(this WebApplication app)
     {
-        app.MapPost("/apps/available", async (AppAvailable payload, ISharedManagementService accountService) =>
+        app.MapGet("/admin/apps/{appId}/available", async ([AsParameters] GetAppIdAvailabilityRequest payload, ISharedManagementService accountService) =>
             {
                 if (payload.AppId.Length < 3)
                 {
@@ -26,10 +25,11 @@ public static class AppsEndpoints
 
                 var result = await accountService.IsAvailable(payload.AppId);
 
-                var res = new AvailableResponse(result);
+                var res = new GetAppIdAvailabilityResponse(result);
 
                 return result ? Ok(res) : Conflict(res);
             })
+            .RequireManagementKey()
             .RequireCors("default");
 
         app.MapPost("/admin/apps/{appId}/create", async (
@@ -341,8 +341,6 @@ public static class AppsEndpoints
     public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
 
     public record DisableGenerateSignInTokenEndpointRequest(string PerformedBy);
-
-    public record AvailableResponse(bool Available);
 
     public record CancelResult(string Message);
 }

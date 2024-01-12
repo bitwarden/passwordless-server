@@ -13,20 +13,21 @@ using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
+using Xunit.Abstractions;
 using static Passwordless.Api.IntegrationTests.Helpers.App.CreateAppHelpers;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
 public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
+    private readonly PasswordlessApiFactory _apiFactory;
     private readonly HttpClient _client;
-    private readonly PasswordlessApiFactory _factory;
 
-    public AppTests(PasswordlessApiFactory apiFactory)
+    public AppTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _factory = apiFactory;
-        _client = apiFactory.CreateClient()
-            .AddManagementKey();
+        _apiFactory = apiFactory;
+        _apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient().AddManagementKey();
     }
 
     [Theory]
@@ -79,7 +80,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Assert
         res.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
 
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>()
             .Create(name)
@@ -101,14 +102,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
-        using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        using var appHttpClient = _apiFactory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
 
         // Assert
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
 
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
         appFeature.Should().NotBeNull();
@@ -125,7 +126,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
-        using var appHttpClient = _factory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        using var appHttpClient = _apiFactory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
@@ -152,7 +153,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Assert
         manageFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
 
         var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
         appFeature.Should().NotBeNull();
@@ -190,7 +191,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = GetApplicationName();
-        using var client = _factory.CreateClient().AddManagementKey();
+        using var client = _apiFactory.CreateClient().AddManagementKey();
         _ = await client.CreateApplicationAsync(applicationName);
 
         // Act
@@ -418,6 +419,39 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task I_can_check_whether_an_app_id_is_available()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+
+        // Act
+        using var response = await _client.GetAsync($"/admin/apps/{applicationName}/available");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
+        result.Should().NotBeNull();
+        result!.Available.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task I_can_check_whether_an_app_id_is_unavailable()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        _ = await _client.CreateApplicationAsync(applicationName);
+
+        // Act
+        using var response = await _client.GetAsync($"/admin/apps/{applicationName}/available");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
+        result.Should().NotBeNull();
+        result!.Available.Should().BeFalse();
     }
 
     public void Dispose()
