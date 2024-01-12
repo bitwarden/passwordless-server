@@ -11,9 +11,8 @@ public abstract class DbTenantContext : DbGlobalContext
 
     protected DbTenantContext(
         DbContextOptions options,
-        ITenantProvider tenantProvider,
-        TimeProvider timeProvider
-    ) : base(options, timeProvider)
+        ITenantProvider tenantProvider
+    ) : base(options)
     {
         Tenant = tenantProvider.Tenant;
     }

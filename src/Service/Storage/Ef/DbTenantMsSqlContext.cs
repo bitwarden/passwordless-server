@@ -6,9 +6,8 @@ public class DbTenantMsSqlContext : DbTenantContext
 {
     public DbTenantMsSqlContext(
         DbContextOptions<DbTenantMsSqlContext> options,
-        ITenantProvider tenantProvider,
-        TimeProvider timeProvider)
-        : base(options, tenantProvider, timeProvider)
+        ITenantProvider tenantProvider)
+        : base(options, tenantProvider)
     {
     }
 }

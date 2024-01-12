@@ -11,13 +11,9 @@ namespace Passwordless.Service.Storage.Ef;
 
 public abstract class DbGlobalContext : DbContext
 {
-    protected readonly TimeProvider TimeProvider;
-
     protected DbGlobalContext(
-        DbContextOptions options,
-        TimeProvider timeProvider) : base(options)
+        DbContextOptions options) : base(options)
     {
-        TimeProvider = timeProvider;
     }
 
     public DbSet<EFStoredCredential> Credentials => Set<EFStoredCredential>();

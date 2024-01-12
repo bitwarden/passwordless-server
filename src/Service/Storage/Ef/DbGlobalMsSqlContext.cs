@@ -4,8 +4,8 @@ namespace Passwordless.Service.Storage.Ef;
 
 public class DbGlobalMsSqlContext : DbGlobalContext
 {
-    public DbGlobalMsSqlContext(DbContextOptions<DbGlobalMsSqlContext> options, TimeProvider timeProvider)
-        : base(options, timeProvider)
+    public DbGlobalMsSqlContext(DbContextOptions<DbGlobalMsSqlContext> options)
+        : base(options)
     {
     }
 }
