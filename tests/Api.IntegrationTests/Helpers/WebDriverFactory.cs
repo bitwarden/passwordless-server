@@ -22,6 +22,7 @@ public static class WebDriverFactory
             {
                 Console.WriteLine(e);
             }
+            Console.WriteLine("Waited but need to retry: " + i);
         }
 
         throw new InvalidOperationException("Could not create a chrome driver");
