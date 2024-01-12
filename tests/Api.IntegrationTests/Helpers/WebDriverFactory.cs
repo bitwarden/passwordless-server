@@ -1,6 +1,5 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.VirtualAuth;
 
 namespace Passwordless.Api.IntegrationTests.Helpers;
@@ -18,7 +17,7 @@ public static class WebDriverFactory
             .SetHasResidentKey(true);
 
         var options = new ChromeOptions();
-        options.AddArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless", $"--remote-debugging-port={PortUtilities.FindFreePort()}");
+        options.AddArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless");
         var driver = new ChromeDriver(options);
         driver.Url = driverUrl;
         driver.AddVirtualAuthenticator(virtualAuth);
