@@ -337,7 +337,6 @@ public static class AppsEndpoints
         return NoContent();
     }
 
-
     public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
 
     public record DisableGenerateSignInTokenEndpointRequest(string PerformedBy);
