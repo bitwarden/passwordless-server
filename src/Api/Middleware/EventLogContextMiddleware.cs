@@ -13,6 +13,9 @@ public class EventLogContextMiddleware
 
     public async Task InvokeAsync(HttpContext context, IEventLogContext eventLogContext, IFeatureContextProvider featureContextProvider)
     {
+        // Check when upgrading .NET
+        // Magic, we want to verify an authorization policy was applied to the endpoint so we know we have a tenant context to log against.
+        // We may want to move this middleware to use endpoint filters where we specifically use event logging.
         if (!context.Items.ContainsKey("__AuthorizationMiddlewareWithEndpointInvoked"))
         {
             await _next(context);
