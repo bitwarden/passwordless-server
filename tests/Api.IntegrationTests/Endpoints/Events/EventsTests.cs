@@ -8,12 +8,19 @@ using Passwordless.Common.Constants;
 using Passwordless.Common.EventLog.Enums;
 using Passwordless.Common.Models.Apps;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Events;
 
-public class EventsTests(PasswordlessApiFactory passwordlessApiFactory) : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
-    private readonly HttpClient _client = passwordlessApiFactory.CreateClient();
+    private readonly HttpClient _client;
+
+    public EventsTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
+    {
+        apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient();
+    }
 
     [Fact]
     public async Task I_can_view_the_event_for_a_user_retrieving_the_api_keys()

@@ -118,4 +118,10 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         });
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request)
+    {
+        var response = await _client.GetFromJsonAsync<GetAppIdAvailabilityResponse>($"admin/apps/{request.AppId}/available");
+        return response!;
+    }
 }
