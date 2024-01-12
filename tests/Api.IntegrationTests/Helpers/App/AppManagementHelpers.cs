@@ -49,7 +49,7 @@ public static class AppManagementHelpers
 
         return client;
     }
-    
+
     public static async Task<HttpClient> EnableMagicLinks(this HttpClient client, string applicationName, string performedBy)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
@@ -72,7 +72,7 @@ public static class AppManagementHelpers
 
         _ = (await client.PostAsJsonAsync($"admin/apps/{applicationName}/magic-links/disable",
             new DisableMagicLinksRequest(performedBy))).EnsureSuccessStatusCode();
-        
+
         return client;
     }
 }

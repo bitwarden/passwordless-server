@@ -338,7 +338,7 @@ public static class EventLoggerExtensions
             Subject = context.TenantId,
             ApiKeyId = string.Empty
         });
-    
+
     public static void LogMagicLinksEnabled(this IEventLogger logger, string performedBy) =>
         logger.LogEvent(context => new EventDto
         {

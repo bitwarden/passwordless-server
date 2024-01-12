@@ -376,7 +376,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         });
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
-    
+
     [Fact]
     public async Task I_can_enable_the_magic_links()
     {
@@ -394,7 +394,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
 
         var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
-        
+
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
     }
@@ -414,9 +414,9 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
-        
+
         var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
-        
+
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }

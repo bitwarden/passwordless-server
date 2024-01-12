@@ -10,7 +10,7 @@ public static class RequestHelpers
         .RuleFor(x => x.UserId, () => Guid.NewGuid().ToString())
         .RuleFor(x => x.UserEmail, faker => faker.Person.Email)
         .RuleFor(x => x.MagicLinkUrl, faker => $"{faker.Internet.Url()}?token=<token>");
-    
+
     public static Faker<RegisterToken> GetRegisterTokenGeneratorRules() => new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
         .RuleFor(x => x.DisplayName, x => x.Person.FullName)

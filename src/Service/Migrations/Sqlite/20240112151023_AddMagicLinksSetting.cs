@@ -2,28 +2,27 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Passwordless.Service.Migrations.Sqlite
+namespace Passwordless.Service.Migrations.Sqlite;
+
+/// <inheritdoc />
+public partial class AddMagicLinksSetting : Migration
 {
     /// <inheritdoc />
-    public partial class AddMagicLinksSetting : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsMagicLinksEnabled",
-                table: "AppFeatures",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: true);
-        }
+        migrationBuilder.AddColumn<bool>(
+            name: "IsMagicLinksEnabled",
+            table: "AppFeatures",
+            type: "INTEGER",
+            nullable: false,
+            defaultValue: true);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "IsMagicLinksEnabled",
-                table: "AppFeatures");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "IsMagicLinksEnabled",
+            table: "AppFeatures");
     }
 }
