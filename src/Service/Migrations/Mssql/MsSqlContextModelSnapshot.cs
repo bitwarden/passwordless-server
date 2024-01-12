@@ -237,8 +237,8 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<string>("Tenant")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<int>("CredentialsCount")
                         .HasColumnType("int");

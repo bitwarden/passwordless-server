@@ -232,7 +232,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<string>("Tenant")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateOnly>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("CredentialsCount")

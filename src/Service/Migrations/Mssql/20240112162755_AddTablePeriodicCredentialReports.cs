@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Passwordless.Service.Migrations.Sqlite;
+namespace Passwordless.Service.Migrations.Mssql;
 
 /// <inheritdoc />
 public partial class AddTablePeriodicCredentialReports : Migration
@@ -14,10 +14,10 @@ public partial class AddTablePeriodicCredentialReports : Migration
             name: "PeriodicCredentialReports",
             columns: table => new
             {
-                Tenant = table.Column<string>(type: "TEXT", nullable: false),
-                CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                CredentialsCount = table.Column<int>(type: "INTEGER", nullable: false),
-                UsersCount = table.Column<int>(type: "INTEGER", nullable: false)
+                Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                CreatedAt = table.Column<DateOnly>(type: "date", nullable: false),
+                CredentialsCount = table.Column<int>(type: "int", nullable: false),
+                UsersCount = table.Column<int>(type: "int", nullable: false)
             },
             constraints: table =>
             {

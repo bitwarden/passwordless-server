@@ -81,9 +81,6 @@ public abstract class DbGlobalContext : DbContext
         modelBuilder.Entity<PeriodicCredentialReport>(builder =>
         {
             builder.HasKey(x => new { x.Tenant, x.CreatedAt });
-
-            builder.Property(x => x.CreatedAt);
-
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.PeriodicCredentialReports)
                 .HasForeignKey(x => x.Tenant)
