@@ -15,7 +15,7 @@ public static class WebDriverFactory
         {
             (ChromeDriver driver, var res) = GetDriver(driverUrl);
             if (res) return driver;
-            
+
             driver.Quit();
         }
 
