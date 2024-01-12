@@ -18,7 +18,7 @@ public static class MagicEndpoints
             ) =>
             {
                 // check if generate setting is on
-                if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled) return Forbid();
+                if (!(await provider.UseContext()).IsMagicLinksEnabled) return Forbid();
 
                 await magicLinkService.SendMagicLink(request.ToDto());
 

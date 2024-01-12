@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.Endpoints;
@@ -18,19 +17,6 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly PasswordlessApiFactory _factory;
-
-    private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
-        .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
-        .RuleFor(x => x.DisplayName, x => x.Person.FullName)
-        .RuleFor(x => x.Username, x => x.Person.Email)
-        .RuleFor(x => x.Attestation, "None")
-        .RuleFor(x => x.Discoverable, true)
-        .RuleFor(x => x.UserVerification, "Preferred")
-        .RuleFor(x => x.Aliases, x => new HashSet<string> { x.Person.FirstName })
-        .RuleFor(x => x.AliasHashing, false)
-        .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
-        .RuleFor(x => x.TokenId, Guid.Empty);
-
 
     public SignInTests(PasswordlessApiFactory factory)
     {

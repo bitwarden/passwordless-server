@@ -5,6 +5,7 @@ using Fido2NetLib;
 using FluentAssertions;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.IntegrationTests.Helpers.User;
 using Passwordless.Service.Models;
 using Xunit;
@@ -15,17 +16,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
     private readonly HttpClient _client;
 
-    private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
-        .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
-        .RuleFor(x => x.DisplayName, x => x.Person.FullName)
-        .RuleFor(x => x.Username, x => x.Person.Email)
-        .RuleFor(x => x.Attestation, "None")
-        .RuleFor(x => x.Discoverable, true)
-        .RuleFor(x => x.UserVerification, "Preferred")
-        .RuleFor(x => x.Aliases, x => new HashSet<string> { x.Person.FirstName })
-        .RuleFor(x => x.AliasHashing, false)
-        .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
-        .RuleFor(x => x.TokenId, Guid.Empty);
+    private readonly Faker<RegisterToken> _tokenGenerator = RequestHelpers.GetRegisterTokenGeneratorRules();
 
     public RegisterTests(PasswordlessApiFactory apiFactory)
     {
@@ -39,7 +30,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_token_to_start_registration()
     {
         // Arrange
-        var request = TokenGenerator.Generate();
+        var request = _tokenGenerator.Generate();
 
         // Act
         var response = await _client.PostAsJsonAsync("/register/token", request);
@@ -55,7 +46,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_the_credential_create_options_and_session_token_for_creating_a_new_user()
     {
         // Arrange
-        var tokenRequest = TokenGenerator.Generate();
+        var tokenRequest = _tokenGenerator.Generate();
         var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 

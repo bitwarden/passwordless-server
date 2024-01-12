@@ -24,5 +24,10 @@ public class AppFeature : PerTenant
     /// </summary>
     public bool IsGenerateSignInTokenEndpointEnabled { get; set; } = true;
 
+    /// <summary>
+    /// Determines if the Magic Link feature is enabled or disabled
+    /// </summary>
+    public bool IsMagicLinksEnabled { get; set; } = true;
+
     public AccountMetaInformation Application { get; set; }
 }

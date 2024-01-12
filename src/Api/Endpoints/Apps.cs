@@ -7,6 +7,7 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
+using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -136,6 +137,16 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
+        
+        app.MapPost("admin/apps/{appId}/magic-links/enable", EnableMagicLinks)
+            .WithParameterValidation()
+            .RequireManagementKey()
+            .RequireCors("default");
+
+        app.MapPost("admin/apps/{appId}/magic-links/disable", DisableMagicLinks)
+            .WithParameterValidation()
+            .RequireManagementKey()
+            .RequireCors("default");
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(
@@ -229,7 +240,8 @@ public static class AppsEndpoints
             featuresContext.EventLoggingRetentionPeriod,
             featuresContext.DeveloperLoggingEndsAt,
             featuresContext.MaxUsers,
-            featuresContext.IsGenerateSignInTokenEndpointEnabled);
+            featuresContext.IsGenerateSignInTokenEndpointEnabled,
+            featuresContext.IsMagicLinksEnabled);
 
         return Ok(dto);
     }
@@ -302,6 +314,29 @@ public static class AppsEndpoints
         eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
         return NoContent();
     }
+    
+    public static async Task<IResult> EnableMagicLinks(
+        [FromRoute] string appId,
+        EnableMagicLinksRequest request,
+        ISharedManagementService managementService,
+        IEventLogger eventLogger)
+    {
+        await managementService.EnableMagicLinks(appId);
+        eventLogger.LogMagicLinksEnabled(request.PerformedBy);
+        return NoContent();
+    }
+
+    public static async Task<IResult> DisableMagicLinks(
+        [FromRoute] string appId,
+        DisableMagicLinksRequest request,
+        ISharedManagementService managementService,
+        IEventLogger eventLogger)
+    {
+        await managementService.DisableMagicLinks(appId);
+        eventLogger.LogMagicLinksDisabled(request.PerformedBy);
+        return NoContent();
+    }
+
 
     public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
 

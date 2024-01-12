@@ -157,6 +157,11 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsMagicLinksEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<long?>("MaxUsers")
                         .HasColumnType("bigint");
 

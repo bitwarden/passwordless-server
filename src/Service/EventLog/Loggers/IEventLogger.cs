@@ -338,4 +338,30 @@ public static class EventLoggerExtensions
             Subject = context.TenantId,
             ApiKeyId = string.Empty
         });
+    
+    public static void LogMagicLinksEnabled(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = "Magic Links feature was enabled.",
+            PerformedBy = string.IsNullOrWhiteSpace(performedBy) ? "Unknown User" : performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.AdminMagicLinksEnabled,
+            Severity = Severity.Alert,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
+
+    public static void LogMagicLinksDisabled(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = "Magic Links feature was disabled.",
+            PerformedBy = string.IsNullOrWhiteSpace(performedBy) ? "Unknown User" : performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.AdminMagicLinksDisabled,
+            Severity = Severity.Alert,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
 }

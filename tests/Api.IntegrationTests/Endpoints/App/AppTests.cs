@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
@@ -371,6 +373,50 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
             Origin = PasswordlessApiFactory.OriginUrl,
             RPID = PasswordlessApiFactory.RpId
         });
+        signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+    
+    [Fact]
+    public async Task I_can_enable_the_magic_links()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/magic-links/enable",
+            new EnableMagicLinksRequest("a_user"));
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
+        
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
+        signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task I_can_disable_magic_links()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/magic-links/disable",
+            new DisableMagicLinksRequest("a_user"));
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
+        
+        var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
+        
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 

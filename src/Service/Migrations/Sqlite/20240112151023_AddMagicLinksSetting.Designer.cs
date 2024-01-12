@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
 
@@ -10,9 +11,11 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    partial class SqliteContextModelSnapshot : ModelSnapshot
+    [Migration("20240112151023_AddMagicLinksSetting")]
+    partial class AddMagicLinksSetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");

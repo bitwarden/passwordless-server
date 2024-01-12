@@ -235,6 +235,14 @@ public class EfTenantStorage : ITenantStorage
             .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, false));
     }
 
+    public Task EnableMagicLinks() =>
+        db.AppFeatures.ExecuteUpdateAsync(x => x
+            .SetProperty(f => f.IsMagicLinksEnabled, true));
+
+    public Task DisableMagicLinks() =>
+        db.AppFeatures.ExecuteUpdateAsync(x => x
+            .SetProperty(f => f.IsMagicLinksEnabled, false));
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x

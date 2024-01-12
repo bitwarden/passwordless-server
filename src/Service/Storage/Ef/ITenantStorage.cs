@@ -51,4 +51,6 @@ public interface ITenantStorage
     Task DeleteApiKeyAsync(string apiKeyId);
     Task EnableGenerateSignInTokenEndpoint();
     Task DisableGenerateSignInTokenEndpoint();
+    Task EnableMagicLinks();
+    Task DisableMagicLinks();
 }

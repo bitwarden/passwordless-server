@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.Models;
 using Passwordless.Service.Models;
 using Xunit;
@@ -15,17 +16,7 @@ namespace Passwordless.Api.IntegrationTests.Endpoints.Credentials;
 public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
     private readonly HttpClient _client;
-    private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
-        .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
-        .RuleFor(x => x.DisplayName, x => x.Person.FullName)
-        .RuleFor(x => x.Username, x => x.Person.Email)
-        .RuleFor(x => x.Attestation, "None")
-        .RuleFor(x => x.Discoverable, true)
-        .RuleFor(x => x.UserVerification, "Preferred")
-        .RuleFor(x => x.Aliases, x => new HashSet<string> { x.Person.FirstName })
-        .RuleFor(x => x.AliasHashing, false)
-        .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
-        .RuleFor(x => x.TokenId, Guid.Empty);
+    private readonly Faker<RegisterToken> _tokenGenerator = RequestHelpers.GetRegisterTokenGeneratorRules();
 
     public CredentialsTests(PasswordlessApiFactory factory)
     {
@@ -41,7 +32,7 @@ public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposab
         // Arrange
         const string originUrl = "https://bitwarden.com/products/passwordless/";
         const string rpId = "bitwarden.com";
-        var tokenRequest = TokenGenerator.Generate();
+        var tokenRequest = _tokenGenerator.Generate();
         using var tokenResponse = await _client.PostAsJsonAsync("register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
         var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };

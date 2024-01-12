@@ -14,10 +14,7 @@ namespace Passwordless.Api.IntegrationTests.Endpoints.Magic;
 public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
     private readonly HttpClient _client = apiFactory.CreateClient();
-    private readonly Faker<SendMagicLinkRequest> _requestFaker = new Faker<SendMagicLinkRequest>()
-        .RuleFor(x => x.UserId, () => Guid.NewGuid().ToString())
-        .RuleFor(x => x.UserEmail, faker => faker.Person.Email)
-        .RuleFor(x => x.MagicLinkUrl, faker => $"{faker.Internet.Url()}?token=<token>");
+    private readonly Faker<SendMagicLinkRequest> _requestFaker = RequestHelpers.GetMagicLinkRequestRules();
 
     [Fact]
     public async Task I_can_send_a_magic_link_email()
@@ -26,7 +23,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = _client.EnableManuallyGenerateAccessTokenEndpoint(applicationName, "a_user");
+        _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
         var request = _requestFaker.Generate();
 
@@ -46,7 +43,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = _client.DisableManuallyGenerateAccessTokenEndpoint(applicationName, "a_user");
+        _ = await _client.DisableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
         var request = _requestFaker.Generate();
 
@@ -64,7 +61,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = _client.EnableManuallyGenerateAccessTokenEndpoint(applicationName, "a_user");
+        _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
         var request = _requestFaker
             .RuleFor(x => x.MagicLinkUrl, faker => faker.Internet.Url())
@@ -89,7 +86,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = _client.EnableManuallyGenerateAccessTokenEndpoint(applicationName, "a_user");
+        _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
         var request = _requestFaker
             .RuleFor(x => x.MagicLinkUrl, () => "<token>")

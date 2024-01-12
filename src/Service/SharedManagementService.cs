@@ -39,6 +39,8 @@ public interface ISharedManagementService
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
     Task EnableGenerateSignInTokenEndpoint(string appId);
     Task DisableGenerateSignInTokenEndpoint(string appId);
+    Task EnableMagicLinks(string appId);
+    Task DisableMagicLinks(string appId);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -405,6 +407,10 @@ public class SharedManagementService : ISharedManagementService
 
         return storage.DisableGenerateSignInTokenEndpoint();
     }
+
+    public Task EnableMagicLinks(string appId) => tenantFactory.Create(appId).EnableMagicLinks();
+
+    public Task DisableMagicLinks(string appId) => tenantFactory.Create(appId).DisableMagicLinks();
 
     private static Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage)
     {
