@@ -59,6 +59,9 @@ public class SettingsModel : BaseExtendedPageModel
     [BindProperty]
     public bool IsManualTokenGenerationEnabled { get; set; }
 
+    [BindProperty]
+    public bool IsMagicLinksEnabled { get; set; }
+
     private async Task InitializeAsync()
     {
         Organization = await _dataService.GetOrganizationWithDataAsync();
@@ -70,6 +73,7 @@ public class SettingsModel : BaseExtendedPageModel
         Application = application;
 
         IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
+        IsMagicLinksEnabled = _currentContext.Features.IsMagicLinksEnabled;
     }
 
     public async Task OnGet()
@@ -206,20 +210,24 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            if (IsManualTokenGenerationEnabled)
+            var settingsTasks = new List<Task>
             {
-                await _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
-            }
-            else
-            {
-                await _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
-            }
+                IsManualTokenGenerationEnabled
+                    ? _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name)
+                    : _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name),
+                
+                IsMagicLinksEnabled
+                    ? _managementClient.EnableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
+                    : _managementClient.DisableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
+            };
+
+            await Task.WhenAll(settingsTasks);
 
             return RedirectToPage();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save ManuallyGeneratedToken setting for {appId}", _currentContext.AppId);
+            _logger.LogError(ex, "Failed to save settings for {appId}", _currentContext.AppId);
             return RedirectToPage("/Error", new { ex.Message });
         }
     }

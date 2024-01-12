@@ -118,6 +118,24 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         });
         response.EnsureSuccessStatusCode();
     }
+    
+    public async Task EnableMagicLinksAsync(string appId, string performedBy)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/magic-links/enable", new
+        {
+            PerformedBy = performedBy
+        });
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DisableMagicLinksAsync(string appId, string performedBy)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/magic-links/disable", new
+        {
+            PerformedBy = performedBy
+        });
+        response.EnsureSuccessStatusCode();
+    }
 
     public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request)
     {

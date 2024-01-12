@@ -20,4 +20,6 @@ public interface IPasswordlessManagementClient
     Task EnabledManuallyGeneratedTokensAsync(string appId, string performedBy);
     Task DisabledManuallyGeneratedTokensAsync(string appId, string performedBy);
     Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request);
+    Task EnableMagicLinksAsync(string appId, string performedBy);
+    Task DisableMagicLinksAsync(string appId, string performedBy);
 }
