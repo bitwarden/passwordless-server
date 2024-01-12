@@ -12,7 +12,6 @@ namespace Passwordless.AdminConsole.Pages.App.Settings;
 
 public class SettingsModel : BaseExtendedPageModel
 {
-    public const string ManualVerificationTokenCheckboxId = "IsManualTokenGenerationEnabled";
     private const string Unknown = "unknown";
     private readonly ILogger<SettingsModel> _logger;
     private readonly IDataService _dataService;
@@ -57,7 +56,8 @@ public class SettingsModel : BaseExtendedPageModel
 
     public ApiKeysModel ApiKeysModel { get; }
 
-    public bool IsManualTokenGenerationEnabled { get; private set; }
+    [BindProperty]
+    public bool IsManualTokenGenerationEnabled { get; set; }
 
     private async Task InitializeAsync()
     {
@@ -206,7 +206,7 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            if (Convert.ToBoolean(Request.Form[ManualVerificationTokenCheckboxId].FirstOrDefault()))
+            if (IsManualTokenGenerationEnabled)
             {
                 await _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
             }
