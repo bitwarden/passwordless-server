@@ -11,8 +11,7 @@ namespace Passwordless.Service.Storage.Ef;
 
 public abstract class DbGlobalContext : DbContext
 {
-    protected DbGlobalContext(
-        DbContextOptions options) : base(options)
+    protected DbGlobalContext(DbContextOptions options) : base(options)
     {
     }
 
