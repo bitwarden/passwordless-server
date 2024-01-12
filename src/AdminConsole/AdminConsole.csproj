@@ -66,6 +66,5 @@
     <!-- Vue.js -->
     <Copy SourceFiles="node_modules\vue\dist\vue.esm-browser.js" DestinationFolder="wwwroot\lib\vue\" />
     <Copy SourceFiles="node_modules\vue\dist\vue.esm-browser.prod.js" DestinationFolder="wwwroot\lib\vue\" />
-
   </Target>
 </Project>
