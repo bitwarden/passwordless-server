@@ -84,7 +84,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
-
+    
         // Act
         using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);
 

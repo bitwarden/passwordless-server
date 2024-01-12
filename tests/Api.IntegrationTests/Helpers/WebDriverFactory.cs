@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices.JavaScript;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Internal;
+using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.VirtualAuth;
 
 namespace Passwordless.Api.IntegrationTests.Helpers;
@@ -22,7 +24,17 @@ public static class WebDriverFactory
         var driver = new ChromeDriver(options);
         driver.Url = driverUrl;
         driver.AddVirtualAuthenticator(virtualAuth);
-
+        
+        WebDriverWait waiter = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+    
+        var res = waiter.Until((webDriver  =>
+        {
+            var exists =  ( webDriver as IJavaScriptExecutor).ExecuteScript("return navigator.credentials != undefined") as bool?;
+            return exists == true;
+        }));
+        
+        // if res is fals, the test will fail
+        
         return driver;
     }
 }
