@@ -49,11 +49,6 @@ jobs:
         run: dotnet tool install dotnet-ef --global
 
       - name: Generate script
-        env:
-          ConnectionStrings__sqlite:api: ""
-          ConnectionStrings__mssql:api: this needs to be set, the value is not important
-          ConnectionStrings__sqlite:admin: ""
-          ConnectionStrings__mssql:admin: this needs to be set, the value is not important
         run: >
             dotnet ef migrations script
             --configuration Release
