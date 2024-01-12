@@ -19,7 +19,7 @@ public static class WebDriverFactory
                 (driver, var res) = GetDriver(driverUrl);
                 if (res)
                 {
-                    Console.WriteLine("Successfully created driver: " + i);
+                    Console.WriteLine("Driverdebug: Successfully created driver: " + i);
                     return driver;
                 }
             }
@@ -27,13 +27,13 @@ public static class WebDriverFactory
             {
                 Console.WriteLine(e);
             }
-            Console.WriteLine("Waited but need to retry: " + i);
+            Console.WriteLine("Driverdebug: Waited but need to retry: " + i);
 
             driver?.Quit();
 
         }
 
-        throw new InvalidOperationException("Could not create a chrome driver");
+        throw new InvalidOperationException("Driverdebug: Could not create a chrome driver");
     }
 
     private static (ChromeDriver driver, bool res) GetDriver(string driverUrl)
@@ -61,7 +61,7 @@ public static class WebDriverFactory
             return exists == true;
         }));
         sw.Stop();
-        Console.WriteLine($"Waited for {sw.ElapsedMilliseconds}ms for navigator.credentials to be available");
+        Console.WriteLine($"Driverdebug: Waited for {sw.ElapsedMilliseconds}ms for navigator.credentials to be available");
         return (driver, res);
     }
 }
