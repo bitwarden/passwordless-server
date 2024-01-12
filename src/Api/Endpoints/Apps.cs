@@ -137,7 +137,7 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
-        
+
         app.MapPost("admin/apps/{appId}/magic-links/enable", EnableMagicLinks)
             .WithParameterValidation()
             .RequireManagementKey()
@@ -314,7 +314,7 @@ public static class AppsEndpoints
         eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
         return NoContent();
     }
-    
+
     public static async Task<IResult> EnableMagicLinks(
         [FromRoute] string appId,
         EnableMagicLinksRequest request,
