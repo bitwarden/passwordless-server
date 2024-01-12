@@ -11,6 +11,19 @@ public static class WebDriverFactory
 {
     public static WebDriver GetWebDriver(string driverUrl)
     {
+        for (int i = 0; i < 5; i++)
+        {
+            (ChromeDriver driver, var res) = GetDriver(driverUrl);
+            if (res) return driver;
+            
+            driver.Quit();
+        }
+
+        throw new InvalidOperationException("Could not create a chrome driver");
+    }
+
+    private static (ChromeDriver driver, bool res) GetDriver(string driverUrl)
+    {
         var virtualAuth = new VirtualAuthenticatorOptions()
             .SetIsUserVerified(true)
             .SetHasUserVerification(true)
@@ -35,9 +48,6 @@ public static class WebDriverFactory
         }));
         sw.Stop();
         Console.WriteLine($"Waited for {sw.ElapsedMilliseconds}ms for navigator.credentials to be available");
-
-        // if res is fals, the test will fail
-
-        return driver;
+        return (driver, res);
     }
 }
