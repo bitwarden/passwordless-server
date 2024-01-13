@@ -13,6 +13,12 @@ public class EventLogContextMiddleware
 
     public async Task InvokeAsync(HttpContext context, IEventLogContext eventLogContext, IFeatureContextProvider featureContextProvider)
     {
+        if (context.GetEndpoint() == null)
+        {
+            await _next(context);
+            return;
+        }
+
         var tenantId = context.Request.GetTenantName();
         var requestKey = context.Request.GetPublicApiKey() ?? context.Request.GetApiSecret();
         var isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;

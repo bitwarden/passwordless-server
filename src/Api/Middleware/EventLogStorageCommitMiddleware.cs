@@ -20,6 +20,12 @@ public class EventLogStorageCommitMiddleware
     /// <param name="provider">Used to get the `IEventLogger` instance based on the current state of the request.</param>
     public async Task InvokeAsync(HttpContext context, IServiceProvider provider)
     {
+        if (context.GetEndpoint() == null)
+        {
+            await _next(context);
+            return;
+        }
+
         try
         {
             await _next(context);

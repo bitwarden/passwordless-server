@@ -22,17 +22,25 @@ public class FeatureContextProvider : IFeatureContextProvider
             if (httpContext == null) return new NullFeaturesContext();
 
             string appId = null;
-            if (httpContext.Request.RouteValues.ContainsKey("appId"))
+
+            try
             {
-                appId = httpContext.Request.RouteValues["appId"].ToString();
+                if (httpContext.Request.Headers.ContainsKey("ApiKey"))
+                {
+                    appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiKey"].ToString());
+                }
+                else if (httpContext.Request.Headers.ContainsKey("ApiSecret"))
+                {
+                    appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiSecret"].ToString());
+                }
+                else if (httpContext.Request.RouteValues.ContainsKey("appId"))
+                {
+                    appId = httpContext.Request.RouteValues["appId"].ToString();
+                }
             }
-            if (httpContext.Request.Headers.ContainsKey("ApiKey"))
+            catch (ArgumentException)
             {
-                appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiKey"].ToString());
-            }
-            if (httpContext.Request.Headers.ContainsKey("ApiSecret"))
-            {
-                appId = ApiKeyUtils.GetAppId(httpContext.Request.Headers["ApiSecret"].ToString());
+                return new NullFeaturesContext();
             }
 
             if (string.IsNullOrWhiteSpace(appId)) return new NullFeaturesContext();
