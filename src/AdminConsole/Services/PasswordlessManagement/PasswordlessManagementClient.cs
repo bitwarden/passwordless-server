@@ -39,8 +39,6 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
     public async Task<bool> DeleteApplicationAsync(string appId)
     {
         using var response = await http.DeleteAsync($"admin/apps/{Uri.EscapeDataString(appId)}");
-        // response.EnsureSuccessStatusCode(); ???
-
         return response.IsSuccessStatusCode;
     }
 
