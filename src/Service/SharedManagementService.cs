@@ -125,6 +125,7 @@ public class SharedManagementService : ISharedManagementService
                 EventLoggingIsEnabled = options.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
                 MaxUsers = options.MaxUsers,
+                AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
             }
         };
