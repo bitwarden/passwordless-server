@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Internal;
@@ -9,34 +8,7 @@ namespace Passwordless.Api.IntegrationTests.Helpers;
 
 public static class WebDriverFactory
 {
-    public static WebDriver GetWebDriver(string driverUrl)
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            ChromeDriver? driver = null;
-            try
-            {
-                (driver, var res) = GetDriver(driverUrl);
-                if (res)
-                {
-                    Console.WriteLine("Driverdebug: Successfully created driver: " + i);
-                    return driver;
-                }
-            }
-            catch (WebDriverTimeoutException e)
-            {
-                Console.WriteLine(e);
-            }
-            Console.WriteLine("Driverdebug: Waited but need to retry: " + i);
-
-            driver?.Quit();
-
-        }
-
-        throw new InvalidOperationException("Driverdebug: Could not create a chrome driver");
-    }
-
-    private static (ChromeDriver driver, bool res) GetDriver(string driverUrl)
+    private static WebDriver CreateDriver(string driverUrl)
     {
         var virtualAuth = new VirtualAuthenticatorOptions()
             .SetIsUserVerified(true)
@@ -47,21 +19,56 @@ public static class WebDriverFactory
             .SetHasResidentKey(true);
 
         var options = new ChromeOptions();
-        options.AddArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless", $"--remote-debugging-port={PortUtilities.FindFreePort()}");
-        var driver = new ChromeDriver(options);
-        driver.Url = driverUrl;
+        options.AddArguments(
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--headless",
+            $"--remote-debugging-port={PortUtilities.FindFreePort()}"
+        );
+
+        var driver = new ChromeDriver(options)
+        {
+            Url = driverUrl
+        };
+
         driver.AddVirtualAuthenticator(virtualAuth);
 
-        WebDriverWait waiter = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+        return driver;
+    }
 
-        var sw = Stopwatch.StartNew();
-        var res = waiter.Until((webDriver =>
+    public static WebDriver GetDriver(string driverUrl)
+    {
+        // WebDriver initialization can be flaky, so we retry a few times
+        for (int retriesRemaining = 5; ; retriesRemaining--)
         {
-            var exists = (webDriver as IJavaScriptExecutor).ExecuteScript("return navigator.credentials != undefined") as bool?;
-            return exists == true;
-        }));
-        sw.Stop();
-        Console.WriteLine($"Driverdebug: Waited for {sw.ElapsedMilliseconds}ms for navigator.credentials to be available");
-        return (driver, res);
+            var driver = default(WebDriver?);
+
+            try
+            {
+                driver = CreateDriver(driverUrl);
+
+                var isDriverReady = new WebDriverWait(driver, TimeSpan.FromSeconds(30)).Until(d =>
+                    ((IJavaScriptExecutor)d).ExecuteScript(
+                        // lang=javascript
+                        "return navigator.credentials !== undefined"
+                    ) is true
+                );
+
+                if (isDriverReady)
+                    return driver;
+
+                driver.Dispose();
+
+                if (retriesRemaining <= 0)
+                    throw new TimeoutException("Failed to initialize the web driver.");
+            }
+            catch (WebDriverTimeoutException)
+            {
+                driver?.Dispose();
+
+                if (retriesRemaining <= 0)
+                    throw;
+            }
+        }
     }
 }
