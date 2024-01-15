@@ -101,7 +101,7 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        Models.Organization org = await _dataService.GetOrganizationAsync();
+        var org = await _dataService.GetOrganizationAsync();
         var existingInvites = await _invitationService.GetInvitesAsync(org.Id);
 
         if (existingInvites.Count >= 10)
