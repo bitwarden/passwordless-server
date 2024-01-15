@@ -116,6 +116,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<string>("ApiKey")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsLocked")
                         .HasColumnType("INTEGER");
 

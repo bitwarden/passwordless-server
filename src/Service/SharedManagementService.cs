@@ -341,6 +341,7 @@ public class SharedManagementService : ISharedManagementService
         var keys = await storage.GetAllApiKeys();
         var dtos = keys.Select(x => new ApiKeyResponse(
             x.Id,
+            x.CreatedAt,
             x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
             x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
             x.Scopes.Order().ToHashSet(),
