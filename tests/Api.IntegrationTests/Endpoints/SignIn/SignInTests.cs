@@ -65,7 +65,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await _httpClient.RegisterNewUser(driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
@@ -92,7 +92,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await _httpClient.RegisterNewUser(driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
@@ -177,7 +177,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await client.RegisterNewUser(driver);
         _apiFactory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
 

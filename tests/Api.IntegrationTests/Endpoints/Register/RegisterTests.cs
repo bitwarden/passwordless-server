@@ -83,7 +83,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
 
         // Act
         using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);
