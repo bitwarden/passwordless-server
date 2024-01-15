@@ -182,6 +182,7 @@ public class EfTenantStorage : ITenantStorage
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
         existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         existingEntity.MaxUsers = features.MaxUsers;
+        existingEntity.AllowAttestation = features.AllowAttestation;
         await db.SaveChangesAsync();
     }
 

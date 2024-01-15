@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
 
@@ -11,9 +12,11 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    partial class MsSqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240108114346_AlterTableAppFeaturesAddColumnAllowAttestation")]
+    partial class AlterTableAppFeaturesAddColumnAllowAttestation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -235,25 +238,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("Credentials");
                 });
 
-            modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateOnly>("CreatedAt")
-                        .HasColumnType("date");
-
-                    b.Property<int>("CredentialsCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Tenant", "CreatedAt");
-
-                    b.ToTable("PeriodicCredentialReports");
-                });
-
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
                 {
                     b.Property<string>("Tenant")
@@ -295,24 +279,11 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("Application");
                 });
 
-            modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
-                {
-                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
-                        .WithMany("PeriodicCredentialReports")
-                        .HasForeignKey("Tenant")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
                     b.Navigation("Events");
 
                     b.Navigation("Features");
-
-                    b.Navigation("PeriodicCredentialReports");
                 });
 #pragma warning restore 612, 618
         }

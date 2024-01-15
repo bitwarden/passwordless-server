@@ -12,6 +12,7 @@ using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
+using Passwordless.Service.Validation;
 
 namespace Passwordless.Service;
 
@@ -25,6 +26,7 @@ public class Fido2Service : IFido2Service
     private readonly ITokenService _tokenService;
     private readonly IEventLogger _eventLogger;
     private readonly IFeatureContextProvider _featureContextProvider;
+    private readonly IMetadataService _metadataService;
 
     // Internal for testing
     public Fido2Service(ITenantProvider tenantProvider,
@@ -32,7 +34,8 @@ public class Fido2Service : IFido2Service
         ITenantStorage storage,
         ITokenService tokenService,
         IEventLogger eventLogger,
-        IFeatureContextProvider featureContextProvider)
+        IFeatureContextProvider featureContextProvider,
+        IMetadataService metadataService)
     {
         _storage = storage;
         _tenantProvider = tenantProvider;
@@ -40,6 +43,7 @@ public class Fido2Service : IFido2Service
         _tokenService = tokenService;
         _eventLogger = eventLogger;
         _featureContextProvider = featureContextProvider;
+        _metadataService = metadataService;
     }
 
     public async Task<string> CreateRegisterToken(RegisterToken tokenProps)
@@ -69,10 +73,7 @@ public class Fido2Service : IFido2Service
 
         // Attestation
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
-        if (!tokenProps.Attestation.Equals("none", StringComparison.CurrentCultureIgnoreCase))
-        {
-            throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
-        }
+        RegisterTokenValidator.ValidateAttestation(tokenProps, features);
 
         // check if aliases is available
         if (tokenProps.Aliases != null)
@@ -98,6 +99,8 @@ public class Fido2Service : IFido2Service
 
     public async Task<SessionResponse<CredentialCreateOptions>> RegisterBegin(FidoRegistrationBeginDTO request)
     {
+        var features = await _featureContextProvider.UseContext();
+
         var token = await _tokenService.DecodeTokenAsync<RegisterToken>(request.Token, "register_");
         token.Validate();
 
@@ -107,8 +110,9 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
-        });
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, _metadataService);
 
         if (string.IsNullOrEmpty(userId))
         {
@@ -143,10 +147,7 @@ public class Fido2Service : IFido2Service
 
             // Attestation
             if (string.IsNullOrEmpty(token.Attestation)) token.Attestation = "none";
-            if (token.Attestation.ToLower() != "none")
-            {
-                throw new ApiException("invalid_attestation", "Attestation type not supported", 400);
-            }
+            RegisterTokenValidator.ValidateAttestation(token, features);
 
             var attestation = token.Attestation.ToEnum<AttestationConveyancePreference>();
 
@@ -181,8 +182,9 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
-        });
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, _metadataService);
 
         var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
         {
@@ -284,8 +286,9 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
-        });
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, _metadataService);
 
         var existingCredentials = new List<PublicKeyCredentialDescriptor>();
         var userId = request.UserId;
@@ -327,8 +330,9 @@ public class Fido2Service : IFido2Service
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID
-        });
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, _metadataService);
 
         // Get the assertion options we sent the client
         var options = await _tokenService.DecodeTokenAsync<AssertionOptions>(request.Session, "session_", true);
