@@ -94,22 +94,19 @@ public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
         };
 
         var endpoint = Context.GetEndpoint();
-        if (endpoint == null)
+        if (endpoint != null)
         {
-            await _problemDetailsService.WriteAsync(context);
-            return;
-        }
+            var policies = endpoint
+                .Metadata
+                .Where(x => x is AuthorizeAttribute)
+                .Cast<AuthorizeAttribute>()
+                .ToList();
 
-        var policies = endpoint
-            .Metadata
-            .Where(x => x is AuthorizeAttribute)
-            .Cast<AuthorizeAttribute>()
-            .ToList();
-
-        if (policies.Count > 0)
-        {
-            context.ProblemDetails.Detail =
-                $"You are unable to view this resource because you do not have the required permissions. Required scopes: {string.Join(", ", policies.Select(x => x.Policy))}";
+            if (policies.Count > 0)
+            {
+                context.ProblemDetails.Detail =
+                    $"You are unable to view this resource because you do not have the required permissions. Required scopes: {string.Join(", ", policies.Select(x => x.Policy))}";
+            }
         }
 
         await _problemDetailsService.WriteAsync(context);
