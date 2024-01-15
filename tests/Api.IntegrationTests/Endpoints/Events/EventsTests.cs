@@ -6,7 +6,9 @@ using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Constants;
 using Passwordless.Common.EventLog.Enums;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -176,8 +178,8 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _ = await _client.EnableEventLogging(applicationName);
-        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
+        await _client.EnableEventLogging(applicationName);
+        await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
             new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest(user));
 
         // Act
@@ -191,6 +193,107 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminGenerateSignInTokenEndpointDisabled.ToString());
         enabledEvent.Should().NotBeNull();
         enabledEvent!.PerformedBy.Should().Be(user);
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_using_a_disabled_api_secret()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        await _client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
+        var keyToLock = apiKeys!.First(x => x.ApiKey.EndsWith(accountKeysCreation.ApiSecret1.GetLast(4)));
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await _client.GetAsync("credentials/list");
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthDisabledSecretKeyUsed.ToString());
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_using_a_disabled_public_key()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _client.AddPublicKey(accountKeysCreation.ApiKey1);
+        await _client.EnableEventLogging(applicationName);
+        using var getApiKeysResponse = await _client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
+        var keyToLock = apiKeys!.First(x => x.ApiKey.EndsWith(accountKeysCreation.ApiKey1.GetLast(4)));
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await _client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        _ = await _client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthDisabledPublicKeyUsed.ToString());
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_using_a_non_existent_api_key()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _client.AddPublicKey($"{applicationName}:public:invalid-public-key");
+        await _client.EnableEventLogging(applicationName);
+        _ = await _client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthInvalidPublicKeyUsed.ToString());
+    }
+    
+    [Fact]
+    public async Task I_can_view_the_event_for_using_a_non_existent_api_secret()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _client.AddSecretKey($"{applicationName}:secret:invalid-secret-key");
+        await _client.EnableEventLogging(applicationName);
+        _ = await _client.GetAsync("credentials/list");
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+        
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthInvalidSecretKeyUsed.ToString());
     }
 
     public void Dispose()
