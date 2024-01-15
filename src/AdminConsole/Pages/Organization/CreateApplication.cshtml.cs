@@ -116,7 +116,7 @@ public class CreateApplicationModel : PageModel
                 MaxUsers = features.MaxUsers,
                 AllowAttestation = features.AllowAttestation
             };
-            res = await _managementClient.CreateApplication(app.Id, newAppOptions);
+            res = await _managementClient.CreateApplicationAsync(app.Id, newAppOptions);
         }
         catch (Exception e)
         {
