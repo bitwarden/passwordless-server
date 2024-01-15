@@ -22,4 +22,5 @@ public interface IPasswordlessManagementClient
     Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request);
     Task EnableMagicLinksAsync(string appId, string performedBy);
     Task DisableMagicLinksAsync(string appId, string performedBy);
+    Task SetAppSettingsAsync(string applicationId, SetAppSettingsRequest appSettings);
 }

@@ -6,6 +6,7 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -210,18 +211,11 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            var settingsTasks = new List<Task>
-            {
-                IsManualTokenGenerationEnabled
-                    ? _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name)
-                    : _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name),
-
-                IsMagicLinksEnabled
-                    ? _managementClient.EnableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
-                    : _managementClient.DisableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
-            };
-
-            await Task.WhenAll(settingsTasks);
+            await _managementClient.SetAppSettingsAsync(_currentContext.AppId,
+                new SetAppSettingsRequest(
+                    User.Identity.Name,
+                    IsManualTokenGenerationEnabled == _currentContext.Features.IsGenerateSignInTokenEndpointEnabled ? null : IsManualTokenGenerationEnabled,
+                    IsMagicLinksEnabled == _currentContext.Features.IsMagicLinksEnabled ? null : IsMagicLinksEnabled));
 
             return RedirectToPage();
         }

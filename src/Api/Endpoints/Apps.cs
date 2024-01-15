@@ -156,20 +156,44 @@ public static class AppsEndpoints
     private static async Task<IResult> SetAppSettings(
         [FromRoute] string appId,
         SetAppSettingsRequest request,
-        HttpContext context)
+        SharedManagementService service,
+        IEventLogger eventLogger)
     {
-        // get app settings
-        
-        // check to see what changed
-        
-        // event log appropriately
-        
+        var features = await service.GetFeaturesAsync(appId);
+
+        await service.SetFeaturesAsync(appId, new ManageFeaturesRequest
+        {
+            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
+            MaxUsers = features.MaxUsers,
+            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            EnableManuallyGeneratedAuthenticationTokens = request.EnableManuallyGeneratedAuthenticationTokens ?? features.IsGenerateSignInTokenEndpointEnabled,
+            EnableMagicLinks = request.EnableMagicLinks ?? features.IsMagicLinksEnabled
+        });
+
+        switch (request.EnableManuallyGeneratedAuthenticationTokens)
+        {
+            case true:
+                eventLogger.LogGenerateSignInTokenEndpointEnabled(request.PerformedBy);
+                break;
+            case false:
+                eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
+                break;
+        }
+
+        switch (request.EnableMagicLinks)
+        {
+            case true:
+                eventLogger.LogMagicLinksEnabled(request.PerformedBy);
+                break;
+            case false:
+                eventLogger.LogMagicLinksDisabled(request.PerformedBy);
+                break;
+        }
+
         return NoContent();
     }
 
-    private record SetAppSettingsRequest(bool? EnableManuallyGeneratedAuthenticationTokens, bool? EnableMagicLinks);
-
-public static async Task<IResult> CreatePublicKeyAsync(
+    public static async Task<IResult> CreatePublicKeyAsync(
         [FromRoute] string appId,
         [FromBody] CreatePublicKeyRequest payload,
         ISharedManagementService service,

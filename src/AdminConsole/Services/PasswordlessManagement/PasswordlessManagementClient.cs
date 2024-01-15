@@ -142,4 +142,10 @@ public class PasswordlessManagementClient : IPasswordlessManagementClient
         var response = await _client.GetFromJsonAsync<GetAppIdAvailabilityResponse>($"admin/apps/{request.AppId}/available");
         return response!;
     }
+
+    public async Task SetAppSettingsAsync(string applicationId, SetAppSettingsRequest appSettings)
+    {
+        var response = await _client.PostAsJsonAsync($"admin/apps/{applicationId}/settings", appSettings);
+        response.EnsureSuccessStatusCode();
+    }
 }
