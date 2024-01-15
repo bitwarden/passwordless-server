@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
@@ -147,9 +146,30 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
+
+        app.MapPost("admin/apps/{appId}/settings", SetAppSettings)
+            .WithParameterValidation()
+            .RequireManagementKey()
+            .RequireCors("default");
     }
 
-    public static async Task<IResult> CreatePublicKeyAsync(
+    private static async Task<IResult> SetAppSettings(
+        [FromRoute] string appId,
+        SetAppSettingsRequest request,
+        HttpContext context)
+    {
+        // get app settings
+        
+        // check to see what changed
+        
+        // event log appropriately
+        
+        return NoContent();
+    }
+
+    private record SetAppSettingsRequest(bool? EnableManuallyGeneratedAuthenticationTokens, bool? EnableMagicLinks);
+
+public static async Task<IResult> CreatePublicKeyAsync(
         [FromRoute] string appId,
         [FromBody] CreatePublicKeyRequest payload,
         ISharedManagementService service,
@@ -282,8 +302,7 @@ public static class AppsEndpoints
     public static async Task<IResult> CancelDeletionAsync(
         [FromRoute] string appId,
         ISharedManagementService service,
-        IEventLogger eventLogger,
-        ISystemClock clock)
+        IEventLogger eventLogger)
     {
         await service.UnFreezeAccount(appId);
         var res = new CancelApplicationDeletionResponse("Your account will not be deleted since the process was aborted with the cancellation link");
