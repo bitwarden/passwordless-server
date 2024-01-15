@@ -7,6 +7,7 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
@@ -93,11 +94,15 @@ services.ConfigureHttpJsonOptions(options =>
 services.AddDatabase(builder.Configuration);
 services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
+services.AddScoped<IReportingService, ReportingService>();
 services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2Service, Fido2Service>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
+
+services.AddHostedService<PeriodicCredentialReportsBackgroundService>();
+
 builder.AddMail();
 
 services.AddSingleton<Microsoft.Extensions.Internal.ISystemClock, Microsoft.Extensions.Internal.SystemClock>();
@@ -173,6 +178,7 @@ app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
+app.MapReportingEndpoints();
 
 app.MapPasswordlessHealthChecks();
 

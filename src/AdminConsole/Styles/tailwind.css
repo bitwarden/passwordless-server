@@ -74,6 +74,14 @@
     .text-input {
         @apply px-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6
     }
+    
+    input[type="date"] {
+        @apply px-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6;
+    }
+    
+    h1 {
+        @apply text-2xl font-semibold text-gray-900 leading-6 mb-8;
+    }
 
     .h2, h2 {
         @apply text-2xl font-semibold text-gray-900 leading-6;
@@ -262,6 +270,26 @@
     
     .nav-link-submenu-title {
         @apply text-xs font-semibold text-blue-200 ml-3 mb-3 truncate;
+    }
+    
+    .btn-group-basic {
+        @apply isolate inline-flex rounded-md shadow-sm;
+    }
+    
+    .btn-group-basic-item {
+        @apply relative inline-flex items-center bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10;
+    }
+    
+    .btn-group-basic-item:first-of-type {
+        @apply rounded-l-md;
+    }
+    
+    .btn-group-basic-item:last-of-type {
+        @apply rounded-r-md;
+    }
+    
+    .btn-group-basic-item:not(:first-of-type) {
+        @apply -ml-px;
     }
 }
 
