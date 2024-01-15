@@ -5,6 +5,7 @@
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@using Microsoft.AspNetCore.Components
 @model NewAccountModel
 
 @{
@@ -47,6 +48,44 @@
                                     <span asp-validation-for="Nickname"></span>
                                 </div>
                             </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium leading-6 text-gray-900">Attestation</label>
+                                <div class="mt-2 flex">
+                                    <div class="flex-1 radio-control">
+                                        <input asp-for="Attestation" type="radio" name="attestation" id="attestation-none" class="radio-input" value="none"/>
+                                        <label for="attestation-none" class="radio-label">None</label>
+                                    </div>
+                                    @if (CurrentContext.Features.AllowAttestation)
+                                    {
+                                        <div class="flex-1 radio-control">
+                                            <input asp-for="Attestation" type="radio" name="attestation" id="attestation-direct" class="radio-input" value="direct" />
+                                            <label for="attestation-direct" class="radio-label">Direct</label>
+                                        </div>
+                                        <div class="flex-1 radio-control">
+                                            <input asp-for="Attestation" type="radio" name="attestation" id="attestation-indirect" class="radio-input" value="indirect"/>
+                                            <label for="attestation-indirect" class="radio-label">Indirect</label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flex-1 radio-control">
+                                            <input type="radio" name="attestation" id="attestation-direct" class="radio-input" disabled="disabled" />
+                                            <label for="attestation-direct" class="radio-label">Direct</label>
+                                        </div>
+                                        <div class="flex-1 radio-control">
+                                            <input type="radio" name="attestation" id="attestation-indirect" class="radio-input" disabled="disabled" />
+                                            <label for="attestation-indirect" class="radio-label">Indirect</label>
+                                        </div>
+                                    }
+                                    <span asp-validation-for="Attestation"></span>
+                                </div>
+                                @if (!CurrentContext.Features.AllowAttestation)
+                                {
+                                    <warning-alert-box message="@((MarkupString)"Attestation is only available on 'Enterprise' plans, read more <a class=\"link-blue\" href=\"https://docs.passwordless.dev/guide/concepts.html#attestation\">here</a>.")"></warning-alert-box>
+                                }
+                            </div>
+                            
 
                             <div>
                                 <button type="submit" btn-primary>Register</button>

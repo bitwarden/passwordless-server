@@ -95,8 +95,7 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     }
 
     [Theory]
-    [InlineData("direct")]
-    [InlineData("indirect")]
+    [InlineData("enterprise")]
     [InlineData("other")]
     public async Task OtherAssertionIsNotAccepted(string attestation)
     {
