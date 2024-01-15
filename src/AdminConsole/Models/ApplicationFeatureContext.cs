@@ -7,10 +7,11 @@ public record ApplicationFeatureContext(
     int EventLoggingRetentionPeriod,
     DateTime? DeveloperLoggingEndsAt,
     long? MaxUsers,
+    bool AllowAttestation,
     bool IsGenerateSignInTokenEndpointEnabled)
 {
     public static ApplicationFeatureContext FromDto(AppFeatureResponse dto)
     {
-        return new ApplicationFeatureContext(dto.EventLoggingIsEnabled, dto.EventLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt, dto.MaxUsers, dto.IsGenerateSignInTokenEndpointEnabled);
+        return new ApplicationFeatureContext(dto.EventLoggingIsEnabled, dto.EventLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt, dto.MaxUsers, dto.AllowAttestation, dto.IsGenerateSignInTokenEndpointEnabled);
     }
-};
+}

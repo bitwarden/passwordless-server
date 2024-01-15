@@ -138,6 +138,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<string>("Tenant")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("AllowAttestation")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
                         .HasColumnType("TEXT");
 

@@ -43,6 +43,7 @@ public abstract class BaseAlertBox : TagHelper
         BaseAlertIcon? icon = Variant switch
         {
             ColorVariant.Danger => new DangerAlertIcon(),
+            ColorVariant.Warning => new WarningAlertIcon(),
             ColorVariant.Info => new InfoAlertIcon(),
             ColorVariant.Success => new SuccessAlertIcon(),
             _ => null
@@ -61,6 +62,7 @@ public abstract class BaseAlertBox : TagHelper
             string colorClass = Variant switch
             {
                 ColorVariant.Danger => "bg-red-50",
+                ColorVariant.Warning => "bg-yellow-50",
                 ColorVariant.Info => "bg-blue-50",
                 ColorVariant.Success => "bg-green-50",
                 _ => string.Empty
@@ -86,6 +88,7 @@ public abstract class BaseAlertBox : TagHelper
         string colorClass = Variant switch
         {
             ColorVariant.Danger => "text-red-800",
+            ColorVariant.Warning => "text-yellow-800",
             ColorVariant.Info => "text-blue-800",
             ColorVariant.Success => "text-green-800",
             _ => string.Empty
