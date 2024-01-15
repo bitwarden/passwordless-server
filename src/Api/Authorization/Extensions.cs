@@ -6,22 +6,22 @@ namespace Passwordless.Api.Authorization;
 
 public static class GeneralExtensions
 {
-    public static RouteHandlerBuilder RequireSecretKey(this RouteHandlerBuilder builder)
+    public static TBuilder RequireSecretKey<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder
     {
         return builder.RequireAuthorization(Constants.SecretKeyPolicy);
     }
 
-    public static RouteHandlerBuilder RequireManagementKey(this RouteHandlerBuilder builder)
+    public static TBuilder RequireManagementKey<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder
     {
         return builder.RequireAuthorization(Constants.ManagementKeyPolicy);
     }
 
-    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, PublicKeyScopes scope)
+    public static TBuilder RequireAuthorization<TBuilder>(this TBuilder builder, PublicKeyScopes scope) where TBuilder : IEndpointConventionBuilder
     {
         return builder.RequireAuthorization(scope.GetValue());
     }
 
-    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, SecretKeyScopes scope)
+    public static TBuilder RequireAuthorization<TBuilder>(this TBuilder builder, SecretKeyScopes scope) where TBuilder : IEndpointConventionBuilder
     {
         return builder.RequireAuthorization(scope.GetValue());
     }

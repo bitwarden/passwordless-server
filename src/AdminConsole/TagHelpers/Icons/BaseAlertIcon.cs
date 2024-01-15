@@ -18,6 +18,7 @@ public abstract class BaseAlertIcon : TagHelper
         string colorClass = Variant switch
         {
             ColorVariant.Danger => "fill-red-400",
+            ColorVariant.Warning => "fill-yellow-400",
             ColorVariant.Info => "fill-blue-400",
             ColorVariant.Success => "fill-green-400",
             _ => null
