@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
@@ -9,9 +10,10 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
 {
     private readonly HttpClient _client;
 
-    public RegisterTokenTests(PasswordlessApiFactory factory)
+    public RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _client = factory.CreateClient().AddSecretKey();
+        apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient().AddSecretKey();
     }
 
     [Fact]
@@ -93,8 +95,7 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     }
 
     [Theory]
-    [InlineData("direct")]
-    [InlineData("indirect")]
+    [InlineData("enterprise")]
     [InlineData("other")]
     public async Task OtherAssertionIsNotAccepted(string attestation)
     {

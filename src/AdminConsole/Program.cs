@@ -192,12 +192,12 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
-    app.UseAntiforgery();
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseMiddleware<EventLogStorageCommitMiddleware>();
     app.UseAuthorization();
+    app.UseAntiforgery();
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
@@ -209,6 +209,7 @@ void RunTheApp()
     }
 
     app.MapAccountEndpoints();
+    app.MapApplicationEndpoints();
 
     app.Run();
 }

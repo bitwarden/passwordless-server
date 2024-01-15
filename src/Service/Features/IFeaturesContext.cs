@@ -12,4 +12,9 @@ public interface IFeaturesContext
     /// Maximum number of individual users allowed to use the application
     /// </summary>
     long? MaxUsers { get; init; }
+
+    /// <summary>
+    /// Determines or now whether attestation is allowed for this application.
+    /// </summary>
+    public bool AllowAttestation { get; init; }
 }
