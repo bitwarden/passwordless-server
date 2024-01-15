@@ -240,7 +240,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
-        
+
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
@@ -263,7 +263,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
-        
+
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
@@ -271,7 +271,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthInvalidPublicKeyUsed.ToString());
     }
-    
+
     [Fact]
     public async Task I_can_view_the_event_for_using_a_non_existent_api_secret()
     {
@@ -284,10 +284,10 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         await _client.EnableEventLogging(applicationName);
         _ = await _client.GetAsync("credentials/list");
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        
+
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
-        
+
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
