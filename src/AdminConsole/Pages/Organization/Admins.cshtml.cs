@@ -122,7 +122,7 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        ConsoleAdmin user = await _dataService.GetUserAsync();
+        var user = await _dataService.GetUserAsync();
 
         await _invitationService.SendInviteAsync(form.Email, org.Id, org.Name, user.Email!, user.Name);
 
