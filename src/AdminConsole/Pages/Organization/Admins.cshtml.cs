@@ -104,7 +104,7 @@ public class Admins : PageModel
         Models.Organization org = await _dataService.GetOrganizationAsync();
         var existingInvites = await _invitationService.GetInvitesAsync(org.Id);
 
-        if (existingInvites.Count == 10)
+        if (existingInvites.Count >= 10)
         {
             ModelState.AddModelError("error", "You can only have 10 pending invites at a time.");
             return await OnGet();
