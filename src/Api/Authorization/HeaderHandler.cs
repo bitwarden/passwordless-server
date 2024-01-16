@@ -87,7 +87,7 @@ public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
             HttpContext = Context,
             ProblemDetails = new ProblemDetails
             {
-                Title = "You are forbidden from viewing this resource.",
+                Title = "You are forbidden from accessing this resource.",
                 Status = StatusCodes.Status403Forbidden,
                 Type = "https://docs.passwordless.dev/guide/errors.html#forbidden",
             },
