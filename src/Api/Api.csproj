@@ -25,4 +25,9 @@
       <PackageReference Include="UAParser" Version="3.1.47" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Do not delete, required for Attestation -->
+    <Folder Include=".mds-cache\" />
+  </ItemGroup>
+
 </Project>

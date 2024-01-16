@@ -143,6 +143,9 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<string>("Tenant")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("AllowAttestation")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("DeveloperLoggingEndsAt")
                         .HasColumnType("datetime2");
 
@@ -232,6 +235,25 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("Credentials");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
+
+                    b.Property<int>("CredentialsCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsersCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Tenant", "CreatedAt");
+
+                    b.ToTable("PeriodicCredentialReports");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.TokenKey", b =>
                 {
                     b.Property<string>("Tenant")
@@ -273,11 +295,24 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("Application");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("PeriodicCredentialReports")
+                        .HasForeignKey("Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
                     b.Navigation("Events");
 
                     b.Navigation("Features");
+
+                    b.Navigation("PeriodicCredentialReports");
                 });
 #pragma warning restore 612, 618
         }

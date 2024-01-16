@@ -1,0 +1,15 @@
+<div class="panel">
+    @if (!string.IsNullOrEmpty(Header))
+    {
+        <h2>@Header</h2>
+    }
+    <div class="panel-content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Header { get; set; }
+
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+}

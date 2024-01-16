@@ -113,7 +113,8 @@ public class CreateApplicationModel : PageModel
                 AdminEmail = email,
                 EventLoggingIsEnabled = features.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
-                MaxUsers = features.MaxUsers
+                MaxUsers = features.MaxUsers,
+                AllowAttestation = features.AllowAttestation
             };
             res = await _managementClient.CreateApplication(app.Id, newAppOptions);
         }
