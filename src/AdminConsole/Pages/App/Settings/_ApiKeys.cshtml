@@ -25,6 +25,7 @@
                 <thead>
                 <tr>
                     <th>Api Key</th>
+                    <th>Created At</th>
                     <th>Type</th>
                     <th>Locked</th>
                     <th>Scopes</th>
@@ -44,6 +45,7 @@
                     {
                         <tr>
                             <td>@apiKey.Value</td>
+                            <td><asp-local-time datetime="apiKey.CreatedAt"></asp-local-time></td>
                             <td>@apiKey.Type</td>
                             @if (apiKey.IsLocked)
                             {
