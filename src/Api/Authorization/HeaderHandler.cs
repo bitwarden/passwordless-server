@@ -105,7 +105,7 @@ public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
             if (policies.Count > 0)
             {
                 context.ProblemDetails.Detail =
-                    $"You are unable to view this resource because you do not have the required permissions. Required scopes: {string.Join(", ", policies.Select(x => x.Policy))}";
+                    $"You are unable to access this resource because you do not have the required permissions. Required scopes: {string.Join(", ", policies.Select(x => x.Policy))}";
             }
         }
 
