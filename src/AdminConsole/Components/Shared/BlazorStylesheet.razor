@@ -1,0 +1,21 @@
+@inject IFileVersionProvider Version
+
+<link rel="stylesheet" href="@Href" />
+
+@code {
+    /// <summary>
+    /// Specifies the URL of the linked resource.
+    /// </summary>
+    [Parameter]
+    public required string Href { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        var href = Version.Get(Href);
+        if (href == Href)
+        {
+            throw new ArgumentException("Stylesheet does not exist.", nameof(Href));
+        }
+        Href = href;
+    }
+}

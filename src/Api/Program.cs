@@ -7,6 +7,7 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
@@ -14,6 +15,7 @@ using Passwordless.Common.Utils;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
+using Passwordless.Service.MetaDataService;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -29,35 +31,40 @@ if (isSelfHosted)
 
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 builder.Host.UseSerilog((ctx, sp, config) =>
-{
-    config
-        .ReadFrom.Configuration(ctx.Configuration)
-        .ReadFrom.Services(sp)
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.WithEnvironmentName()
-        .WriteTo.Console();
-
-    if (builder.Environment.IsDevelopment())
     {
-        config.WriteTo.Seq("http://localhost:5341");
-    }
+        config
+            .ReadFrom.Configuration(ctx.Configuration)
+            .ReadFrom.Services(sp)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithEnvironmentName()
+            .WriteTo.Console();
 
-    var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
-    if (!string.IsNullOrEmpty(ddApiKey))
-    {
-        var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
-        var ddUrl = $"https://http-intake.logs.{ddSite}";
-        var ddConfig = new DatadogConfiguration(ddUrl);
+        if (builder.Environment.IsDevelopment())
+        {
+            config.WriteTo.Seq("http://localhost:5341");
+        }
 
+        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
         if (!string.IsNullOrEmpty(ddApiKey))
         {
-            config.WriteTo.DatadogLogs(
-                ddApiKey,
-                configuration: ddConfig);
+            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
+            var ddUrl = $"https://http-intake.logs.{ddSite}";
+            var ddConfig = new DatadogConfiguration(ddUrl);
+
+            if (!string.IsNullOrEmpty(ddApiKey))
+            {
+                config.WriteTo.DatadogLogs(
+                    ddApiKey,
+                    configuration: ddConfig);
+            }
         }
-    }
-});
+    },
+    false,
+    // Pass log events down to other logging providers (e.g. Microsoft) after Serilog, so
+    // that they can be processed in a uniform way in tests.
+    true
+);
 
 var services = builder.Services;
 
@@ -87,12 +94,21 @@ services.ConfigureHttpJsonOptions(options =>
 services.AddDatabase(builder.Configuration);
 services.AddTransient<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
+services.AddScoped<IReportingService, ReportingService>();
 services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2Service, Fido2Service>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
+
+services.AddHostedService<PeriodicCredentialReportsBackgroundService>();
+
 builder.AddMail();
+
+services.AddSingleton<Microsoft.Extensions.Internal.ISystemClock, Microsoft.Extensions.Internal.SystemClock>();
+services.AddMemoryCache();
+services.AddDistributedMemoryCache();
+builder.AddMetaDataService();
 
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
@@ -162,6 +178,7 @@ app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
+app.MapReportingEndpoints();
 
 app.MapPasswordlessHealthChecks();
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests;
 
@@ -24,19 +25,20 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
     };
 
 
-    private readonly PasswordlessApiFactory _factory;
+    private readonly PasswordlessApiFactory _apiFactory;
     private readonly HttpClient _client;
 
-    public AuthorizationTests(PasswordlessApiFactory factory)
+    public AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _factory = factory;
-        _client = factory.CreateClient().AddAcceptApplicationJson();
+        _apiFactory = apiFactory;
+        _apiFactory.TestOutput = testOutput;
+        _client = apiFactory.CreateClient().AddAcceptApplicationJson();
     }
 
     [Fact]
     public async Task ValidateThatEndpointsHaveProtection()
     {
-        var endpointDataSource = _factory.Services.GetRequiredService<EndpointDataSource>();
+        var endpointDataSource = _apiFactory.Services.GetRequiredService<EndpointDataSource>();
 
         foreach (var endpoint in endpointDataSource.Endpoints.OfType<RouteEndpoint>())
         {

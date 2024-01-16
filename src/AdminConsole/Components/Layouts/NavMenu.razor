@@ -1,13 +1,12 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Identity
+﻿@using Badge = Passwordless.AdminConsole.Components.Shared.Badge
 @using Passwordless.AdminConsole.Middleware
-@using System.Security.Policy
 @using Passwordless.AdminConsole.TagHelpers
-@using Badge = Passwordless.AdminConsole.Components.Shared.Badge
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject NavigationManager NavigationManager
 @inject ICurrentContext CurrentContext
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IWebHostEnvironment Environment
 
 <nav class="space-y-1 flex flex-col h-full content-between overflow-y-auto">
     <CascadingAuthenticationState>
@@ -24,7 +23,7 @@
                             @if (!CurrentContext.IsFrozen)
                             {
                                 <NavLink class="nav-link" ActiveClass="nav-link-active" href="@OnboardingUrl">
-                                    <UsersIcon Class="nav-link-icon"/> Getting Started
+                                    <StartIcon Class="nav-link-icon"/> Getting Started
                                 </NavLink>
                                 <NavLink class="nav-link" ActiveClass="nav-link-active" href="@PlaygroundUrl">
                                     <BeakerIcon Class="nav-link-icon"/> Playground
@@ -32,6 +31,12 @@
                                 <NavLink class="nav-link" ActiveClass="nav-link-active" href="@UsersUrl">
                                     <UsersIcon Class="nav-link-icon"/> Users
                                 </NavLink>
+                                @if (Environment.IsDevelopment())
+                                {
+                                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="@ReportingUrl">
+                                        <StackedBarChartIcon Class="nav-link-icon" /> Reporting
+                                    </NavLink>
+                                }
                             }
                             <NavLink class="nav-link" ActiveClass="nav-link-active" href="@SettingsUrl">
                                 <CogIcon Class="nav-link-icon"/> Settings
@@ -109,6 +114,7 @@
     private string OnboardingUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/onboarding/get-started" : OrganizationOverviewUrl;
     private string PlaygroundUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/playground/" : OrganizationOverviewUrl;
     private string UsersUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/credentials/list" : OrganizationOverviewUrl;
+    private string ReportingUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/reporting" : OrganizationOverviewUrl;
     private string SettingsUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/settings" : OrganizationOverviewUrl;
     private string AppLogsUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/logs" : OrganizationOverviewUrl;
 }

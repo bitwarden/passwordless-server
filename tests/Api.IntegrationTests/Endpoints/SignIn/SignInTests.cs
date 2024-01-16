@@ -11,13 +11,14 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
 
 public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 {
     private readonly HttpClient _httpClient;
-    private readonly PasswordlessApiFactory _factory;
+    private readonly PasswordlessApiFactory _apiFactory;
 
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
@@ -31,11 +32,11 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-
-    public SignInTests(PasswordlessApiFactory factory)
+    public SignInTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
-        _factory = factory;
-        _httpClient = factory.CreateClient()
+        _apiFactory = apiFactory;
+        _apiFactory.TestOutput = testOutput;
+        _httpClient = apiFactory.CreateClient()
             .AddPublicKey()
             .AddSecretKey()
             .AddUserAgent();
@@ -64,7 +65,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await _httpClient.RegisterNewUser(driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
@@ -91,7 +92,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await _httpClient.RegisterNewUser(driver);
 
         var signInBeginResponse = await _httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
@@ -170,21 +171,21 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = $"test{Guid.NewGuid():N}";
         var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
-        _factory.TimeProvider.SetUtcNow(serverTime);
-        using var client = _factory.CreateClient().AddManagementKey();
+        _apiFactory.TimeProvider.SetUtcNow(serverTime);
+        using var client = _apiFactory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await client.RegisterNewUser(driver);
-        _factory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
+        _apiFactory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
 
         // Act
         await client.SignInUser(driver);
 
         // Assert
-        using var scope = _factory.Services.CreateScope();
+        using var scope = _apiFactory.Services.CreateScope();
         var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(applicationName).GetTokenKeys();
         tokenKeys.Should().NotBeNull();
         tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
@@ -195,7 +196,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_receive_a_sign_in_token_for_a_valid_user_id()
     {
         // Arrange
-        using var client = _factory.CreateClient().AddManagementKey();
+        using var client = _apiFactory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync();
         var userId = $"user{Guid.NewGuid():N}";
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();

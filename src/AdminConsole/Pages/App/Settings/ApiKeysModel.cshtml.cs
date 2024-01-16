@@ -39,6 +39,7 @@ public class ApiKeysModel
 
     public record ApiKey(
         string Id,
+        DateTime CreatedAt,
         string Value,
         string Type,
         IReadOnlySet<string> Scopes,
@@ -54,6 +55,7 @@ public class ApiKeysModel
                 : currentContext.ApiSecret!.EndsWith(dto.Id);
             return new ApiKey(
                 dto.Id,
+                dto.CreatedAt,
                 dto.ApiKey,
                 dto.Type.ToString(),
                 dto.Scopes,

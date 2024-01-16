@@ -1,9 +1,14 @@
+// ReSharper disable UnusedType.Global
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.Helpers;
 
+/// <summary>
+/// Do not delete this file. It is used by EF Core to create migrations.
+/// </summary>
 public class SqliteContextFactory : IDesignTimeDbContextFactory<DbGlobalSqliteContext>
 {
     public DbGlobalSqliteContext CreateDbContext(string[] args)
@@ -15,6 +20,9 @@ public class SqliteContextFactory : IDesignTimeDbContextFactory<DbGlobalSqliteCo
     }
 }
 
+/// <summary>
+/// Do not delete this file. It is used by EF Core to create migrations.
+/// </summary>
 public class MsSqlContextFactory : IDesignTimeDbContextFactory<DbGlobalMsSqlContext>
 {
     public DbGlobalMsSqlContext CreateDbContext(string[] args)

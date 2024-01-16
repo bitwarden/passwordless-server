@@ -5,12 +5,16 @@
   "main": "index.js",
   "scripts": {
     "tw:watch": "tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.css --watch",
-    "build": "npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.css"
+    "build": "tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.css"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^3.4.0",
+    "apexcharts": "^3.45.1",
+    "es-module-shims": "^1.8.2",
+    "tailwindcss": "^3.4.0",
+    "vue": "^3.4.10"
   }
 }

@@ -51,12 +51,6 @@ dotnet tool install --global dotnet-ef
 This will install `dotnet ef` globally. Additional documentation around this can be found 
 [here](https://learn.microsoft.com/en-us/ef/core/get-started/overview/install#get-the-net-core-cli-tools).
 
-##### Important Note
-
-When generating migrations, you can only have the connection string for your desired database platform in the 
-`appsettings.Development.json`.  If you have both, it will either error when attempting the migration, or pretend it did 
-what you wanted and not actually do anything.  You would have to change the code for it to run both migrations at once.
-
 ##### For AdminConsole
 
 1. Make your desired changes to the entities that define the database tables for the `ConsoleDbContext` located in 

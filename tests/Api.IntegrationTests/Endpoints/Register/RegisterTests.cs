@@ -8,6 +8,7 @@ using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.User;
 using Passwordless.Service.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
@@ -27,8 +28,9 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
 
-    public RegisterTests(PasswordlessApiFactory apiFactory)
+    public RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
     {
+        apiFactory.TestOutput = testOutput;
         _client = apiFactory.CreateClient()
             .AddPublicKey()
             .AddSecretKey()
@@ -81,7 +83,7 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetWebDriver(PasswordlessApiFactory.OriginUrl);
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
 
         // Act
         using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);

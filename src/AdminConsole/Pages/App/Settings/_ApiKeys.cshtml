@@ -25,6 +25,7 @@
                 <thead>
                 <tr>
                     <th>Api Key</th>
+                    <th>Created At</th>
                     <th>Type</th>
                     <th>Locked</th>
                     <th>Scopes</th>
@@ -44,6 +45,7 @@
                     {
                         <tr>
                             <td>@apiKey.Value</td>
+                            <td><asp-local-time datetime="apiKey.CreatedAt"></asp-local-time></td>
                             <td>@apiKey.Type</td>
                             @if (apiKey.IsLocked)
                             {
@@ -66,8 +68,8 @@
                                 {
                                     <form method="post" asp-page-handler="UnlockApiKey">
                                         @Html.Hidden(ApiKeysModel.SelectedApiKeyIdField, apiKey.Id)
-                                        <button class="btn-warning">
-                                            <component type="typeof(UnlockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
+                                        <button class="btn-warning flex items-center">
+                                            <component type="typeof(UnlockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/> Unlock
                                         </button>
                                     </form>
 
@@ -76,8 +78,8 @@
                                 {
                                     <form method="post" asp-page-handler="LockApiKey">
                                         @Html.Hidden(ApiKeysModel.SelectedApiKeyIdField, apiKey.Id)
-                                        <button class="btn-warning">
-                                            <component type="typeof(LockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
+                                        <button class="btn-warning flex items-center">
+                                            <component type="typeof(LockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/> Lock
                                         </button>
                                     </form>
                                 }
@@ -97,6 +99,7 @@
                 </tbody>
             </table>
         </div>
+        <info-alert-box message="@((MarkupString)"To learn more about API key management, read more <a class=\"link-blue underline\" href=\"https://docs.passwordless.dev/guide/admin-console/applications.html#api-key-management\">here</a>.")"></info-alert-box>
         <info-alert-box message="To delete an API key, first lock the API key."></info-alert-box>
     </div>
 </div>

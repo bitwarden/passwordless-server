@@ -66,6 +66,24 @@
     <partial name="_ApiKeys" model="Model.ApiKeysModel" />
 }
 
+<panel header="Settings">
+    <form method="post" asp-page-handler="Settings">
+        <h3>Manually Generated Verification Tokens</h3>
+        <p>
+            Manually generated verification tokens have many uses in authentication. A primary use would be issuing a "magic link" for a
+            user to log-in to their account in the event they've misplaced their passkey. Once the identity of the user has been
+            verified, you can send them a hyperlink that contains the token issued by <code>signin/generate-token</code>.
+        </p>
+        <label asp-for="IsManualTokenGenerationEnabled">
+            <input class="mr-1 my-4" type="checkbox" asp-for="IsManualTokenGenerationEnabled"/>
+            Enable Manually Generated Verification Tokens
+        </label>
+        
+        <br>
+        <button id="btn-save-settings" class="btn-primary" type="submit">Save</button>
+    </form>
+</panel>
+
 <panel header="Delete Application">
     @if (Model.PendingDelete)
     {

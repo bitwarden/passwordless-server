@@ -125,6 +125,7 @@ public class SharedManagementService : ISharedManagementService
                 EventLoggingIsEnabled = options.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
                 MaxUsers = options.MaxUsers,
+                AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
             }
         };
@@ -150,7 +151,7 @@ public class SharedManagementService : ISharedManagementService
             if (existingKey.IsLocked)
             {
                 _eventLogger.LogDisabledApiKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationSecretKey(secretKey));
-                throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
+                throw new ApiException("api_key_locked", "ApiKey has been locked.", 403);
             }
 
             if (ApiKeyUtils.Validate(existingKey.ApiKey, secretKey))
@@ -178,7 +179,7 @@ public class SharedManagementService : ISharedManagementService
             }
 
             _eventLogger.LogDisabledPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
-            throw new ApiException("ApiKey has been disabled due to account deletion in process. Please see email to reverse.", 403);
+            throw new ApiException("api_key_locked", "ApiKey has been locked.", 403);
         }
 
         _eventLogger.LogInvalidPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
@@ -341,6 +342,7 @@ public class SharedManagementService : ISharedManagementService
         var keys = await storage.GetAllApiKeys();
         var dtos = keys.Select(x => new ApiKeyResponse(
             x.Id,
+            x.CreatedAt,
             x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
             x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
             x.Scopes.Order().ToHashSet(),

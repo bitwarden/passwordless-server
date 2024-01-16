@@ -14,10 +14,10 @@ public interface ICurrentContext
     string? ApiSecret { get; }
     string? ApiKey { get; }
     bool IsFrozen { get; }
-    FeaturesContext Features { get; }
+    ApplicationFeatureContext Features { get; }
     Organization? Organization { get; }
     int? OrgId { get; }
-    FeaturesContext OrganizationFeatures { get; }
+    OrganizationFeaturesContext OrganizationFeatures { get; }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
@@ -25,9 +25,9 @@ public interface ICurrentContext
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
-    void SetFeatures(FeaturesContext context);
+    void SetFeatures(ApplicationFeatureContext context);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("There should only be one caller of this method, you are probably not it.")]
-    void SetOrganization(int organizationId, FeaturesContext context, Organization organization);
+    void SetOrganization(int organizationId, OrganizationFeaturesContext context, Organization organization);
 }

@@ -17,4 +17,7 @@ public interface IPasswordlessManagementClient
     Task LockApiKeyAsync(string appId, string apiKeyId);
     Task UnlockApiKeyAsync(string appId, string apiKeyId);
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
+    Task EnabledManuallyGeneratedTokensAsync(string appId, string performedBy);
+    Task DisabledManuallyGeneratedTokensAsync(string appId, string performedBy);
+    Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request);
 }
