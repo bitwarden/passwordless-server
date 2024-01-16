@@ -5,6 +5,6 @@ namespace Passwordless.Service.MagicLinks.Models;
 public class MagicLinkDTO
 {
     public string UserId { get; init; }
-    public MailAddress UserEmail { get; init; }
+    public MailAddress EmailAddress { get; init; }
     public string UrlTokenTemplate { get; init; }
 }
