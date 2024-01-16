@@ -1,17 +1,11 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization;
-@using Passwordless.AdminConsole.Components.Shared.Icons
-@using Passwordless.AdminConsole.Components.Shared.Links
-
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <div class="page">
     <AuthorizeView>
         <Authorized>
             <div id="sidebar" class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-primary-700 w-64">
-                <LinkHome Class="flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1">
-                    <LogoFull />
-                </LinkHome>
-                <NavMenu/>
+                <LinkHome Class="flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1" IsDesktop="true" />
+                <NavMenu />
             </div>
             <div id="navbar-mobile" class="navbar-mobile">
                 <button id="btn-sidebar-open" type="button" class="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
@@ -19,27 +13,19 @@
                     <HamburgerIcon />
                 </button>
             </div>
-            
+                
             <!-- Close button for the sidebar -->
             <div class="hidden absolute inset-0 bg-black opacity-50 z-40" id="sidebar-overlay"></div>
-            
+                
             <div class="content-container-authorized">
                 <main>
-                    <div class="top-row px-4">
-                        <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-                    </div>
-
-                    <article class="content px-4">
-                        @Body
-                    </article>
+                    @Body
                 </main>
             </div>
         </Authorized>
         <NotAuthorized>
             <div class="sidebar-anonymous">
-                <LinkHome>
-                    <LogoMobile />
-                </LinkHome>
+                <LinkHome IsDesktop="false" />
             </div>
             <div class="content-container-anonymous">
                 <main>

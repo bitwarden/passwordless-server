@@ -2,7 +2,7 @@ using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
 using static Microsoft.AspNetCore.Http.Results;
 
-namespace Passwordless.AdminConsole.Controller;
+namespace Passwordless.AdminConsole.Endpoints;
 
 public static class ApplicationEndpoints
 {
