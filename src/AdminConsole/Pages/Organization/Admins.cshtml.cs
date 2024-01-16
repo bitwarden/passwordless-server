@@ -110,7 +110,7 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        if (existingInvites.Any(x => string.Equals(x.ToEmail, form.Email, StringComparison.CurrentCultureIgnoreCase)))
+        if (existingInvites.Any(x => string.Equals(x.ToEmail, form.Email, StringComparison.OrdinalIgnoreCase)))
         {
             ModelState.AddModelError("error", "There is a pending invite already for this address. Please cancel before resending.");
             return await OnGet();
