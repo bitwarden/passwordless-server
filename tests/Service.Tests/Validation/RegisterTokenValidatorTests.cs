@@ -15,7 +15,7 @@ public class RegisterTokenValidatorTests
         {
             Attestation = "enterprise",
         };
-        var features = new FeaturesContext(false, 0, null, null, true, false);
+        var features = new FeaturesContext(false, 0, null, null, true, false, false);
 
         // act
         var actual = Record.Exception(() => RegisterTokenValidator.ValidateAttestation(token, features));
@@ -35,7 +35,7 @@ public class RegisterTokenValidatorTests
         {
             Attestation = "direct",
         };
-        var features = new FeaturesContext(false, 0, null, null, false, false);
+        var features = new FeaturesContext(false, 0, null, null, false, false, false);
 
         // act
         var actual = Record.Exception(() => RegisterTokenValidator.ValidateAttestation(token, features));

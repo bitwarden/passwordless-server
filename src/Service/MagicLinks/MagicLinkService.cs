@@ -41,18 +41,7 @@ public class MagicLinkService
                             font-size: 1rem;">
                 		<h3 style="text-align: center;">Hello</h3>
                 		<p style="text-align: center;">Please click the button below to log in.</p>
-                		<a href="{link}" style="
-                		    width: 2.5rem;
-                		    margin-left: auto;
-                		    margin-right: auto;
-                		    padding: .75rem 1.5rem;
-                    		background-color: rgb(18 82 163); 
-                    		border-radius: 999px;
-                    		color: white;
-                    		text-align: center; 
-                    		text-decoration: none; 
-                    		display: block;
-                    		cursor: pointer;">Login</a>
+                		<a href="{link}" style="width: 2.5rem; margin-left: auto; margin-right: auto; padding: .75rem 1.5rem; background-color: rgb(18 82 163); border-radius: 999px; color: white; text-align: center; text-decoration: none; display: block; cursor: pointer;">Login</a>
                 		<p style="text-align: center;">If you did not request this email, it is safe to ignore.</p>
                 	</body>
                 </html>

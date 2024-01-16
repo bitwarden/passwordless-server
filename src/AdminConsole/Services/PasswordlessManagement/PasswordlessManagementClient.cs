@@ -156,10 +156,10 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
             $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
         );
-    
+
     public async Task EnableMagicLinksAsync(string appId, string performedBy)
     {
-        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/magic-links/enable", new
+        var response = await http.PostAsJsonAsync($"admin/apps/{appId}/magic-links/enable", new
         {
             PerformedBy = performedBy
         });
@@ -168,7 +168,7 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
 
     public async Task DisableMagicLinksAsync(string appId, string performedBy)
     {
-        var response = await _client.PostAsJsonAsync($"admin/apps/{appId}/magic-links/disable", new
+        var response = await http.PostAsJsonAsync($"admin/apps/{appId}/magic-links/disable", new
         {
             PerformedBy = performedBy
         });
