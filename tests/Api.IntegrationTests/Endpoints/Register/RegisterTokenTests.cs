@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,9 +23,8 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     {
         var payload = new { UserId = "1", Username = "test" };
 
-        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
-
-        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Theory]
@@ -42,22 +43,23 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
             payload = new { UserId = userid };
         }
 
-        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
+        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var body = await httpResponse.Content.ReadAsStringAsync();
+        var body = await response.Content.ReadAsStringAsync();
 
         AssertHelper.AssertEqualJson(
             // lang=json
             """
-             {
-               "type": "https://docs.passwordless.dev/guide/errors.html#",
-               "title": "Invalid UserId: UserId cannot be null or empty",
-               "status": 400,
-               "errorCode": null
-             }
-             """, body);
+            {
+              "type": "https://docs.passwordless.dev/guide/errors.html#",
+              "title": "Invalid UserId: UserId cannot be null or empty",
+              "status": 400,
+              "errorCode": null
+            }
+            """, body);
     }
 
     [Theory]
@@ -76,22 +78,21 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
             payload = new { UserId = "1", Username = input };
         }
 
-        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
+        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
-
-        var body = await httpResponse.Content.ReadAsStringAsync();
+        var body = await response.Content.ReadAsStringAsync();
 
         AssertHelper.AssertEqualJson(
             // lang=json
             """
-             {
-               "type": "https://docs.passwordless.dev/guide/errors.html#",
-               "title": "Invalid Username: Username cannot be null or empty",
-               "status": 400,
-               "errorCode": null
-             }
-             """, body);
+            {
+              "type": "https://docs.passwordless.dev/guide/errors.html#",
+              "title": "Invalid Username: Username cannot be null or empty",
+              "status": 400,
+              "errorCode": null
+            }
+            """, body);
     }
 
     [Theory]
@@ -101,10 +102,10 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
+        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
-        var body = await httpResponse.Content.ReadAsStringAsync();
+        var body = await response.Content.ReadAsStringAsync();
 
         AssertHelper.AssertEqualJson(
             // lang=json
@@ -126,9 +127,8 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        var httpResponse = await _client.PostAsJsonAsync("register/token", payload);
-
-        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     public void Dispose()

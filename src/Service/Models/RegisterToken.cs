@@ -7,7 +7,7 @@ namespace Passwordless.Service.Models;
 public class RegisterToken : Token
 {
     [Key(10)]
-    public required string UserId { get; set; }
+    public string UserId { get; set; }
     [Key(11)]
     public string DisplayName { get; set; }
     [Key(12)]
