@@ -152,10 +152,10 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         response.EnsureSuccessStatusCode();
     }
 
-    public Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request) =>
-        http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
+    public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request) =>
+        (await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
             $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
-        )!;
+        ))!;
 
     public async Task EnableMagicLinksAsync(string appId, string performedBy)
     {
