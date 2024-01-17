@@ -26,7 +26,7 @@ public class EFStoredCredential : PerTenant
         // This setter is required by EF, but the value should already be
         // set in UserHandle. Ideally, we'd remove this column and use a
         // computed column or query filter instead, but it is what it is.
-        [Obsolete]
+        [Obsolete("This should only be used internally by EF.", true)]
         private set { }
     }
 
