@@ -26,7 +26,7 @@ public class MagicLinkService
             To = [dto.EmailAddress.ToString()],
             From = "do-not-reply@passwordless.dev",
             Subject = "Verify Email Address",
-            TextBody = $"Please click the link to sign in: {link}",
+            TextBody = $"Please click the link or copy into your browser of choice to log in: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
                 //lang=html
                 $"""
@@ -39,6 +39,7 @@ public class MagicLinkService
                         <h3 style="text-align: center;">Hello</h3>
                         <p style="text-align: center;">Please click the button below to log in.</p>
                         <a href="{link}" style="width: 2.5rem; margin-left: auto; margin-right: auto; padding: .75rem 1.5rem; background-color: rgb(18 82 163); border-radius: 999px; color: white; text-align: center; text-decoration: none; display: block; cursor: pointer;">Login</a>
+                        <p>Having trouble? Copy this link to your browser: {link}</p>
                         <p style="text-align: center;">If you did not request this email, it is safe to ignore.</p>
                     </body>
                  </html>
