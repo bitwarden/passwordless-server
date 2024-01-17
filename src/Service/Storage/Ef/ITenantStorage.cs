@@ -51,6 +51,7 @@ public interface ITenantStorage
     Task DeleteApiKeyAsync(string apiKeyId);
     Task EnableGenerateSignInTokenEndpoint();
     Task DisableGenerateSignInTokenEndpoint();
+    Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(DateOnly? from, DateOnly? to);
     Task EnableMagicLinks();
     Task DisableMagicLinks();
 }

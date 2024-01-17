@@ -24,6 +24,23 @@ public static class AppManagementHelpers
         return client;
     }
 
+    public static async Task<HttpClient> EnableAttestation(this HttpClient client, string applicationName)
+    {
+        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
+        {
+            client.AddManagementKey();
+        }
+
+        var response = await client.PostAsJsonAsync($"admin/apps/{applicationName}/features", new ManageFeaturesRequest
+        {
+            AllowAttestation = true
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        return client;
+    }
+
     public static async Task<HttpClient> EnableManuallyGenerateAccessTokenEndpoint(this HttpClient client, string applicationName, string performedBy)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))

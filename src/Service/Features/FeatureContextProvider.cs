@@ -46,6 +46,7 @@ public class FeatureContextProvider : IFeatureContextProvider
                     features.EventLoggingRetentionPeriod,
                     features.DeveloperLoggingEndsAt,
                     features.MaxUsers,
+                    features.AllowAttestation,
                     features.IsGenerateSignInTokenEndpointEnabled,
                     features.IsMagicLinksEnabled);
             }

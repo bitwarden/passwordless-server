@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Passwordless.AdminConsole.Identity;
 
-namespace Passwordless.AdminConsole.Controller;
+namespace Passwordless.AdminConsole.Endpoints;
 
 public static class AccountEndpoints
 {

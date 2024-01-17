@@ -5,6 +5,7 @@ public sealed record FeaturesContext(
         int EventLoggingRetentionPeriod,
         DateTime? DeveloperLoggingEndsAt,
         long? MaxUsers,
+        bool AllowAttestation,
         bool IsGenerateSignInTokenEndpointEnabled,
         bool IsMagicLinksEnabled)
     : IFeaturesContext

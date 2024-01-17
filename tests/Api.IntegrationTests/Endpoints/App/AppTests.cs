@@ -378,7 +378,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     }
 
     [Fact]
-    public async Task I_can_enable_the_magic_links()
+    public async Task I_can_enable_magic_links()
     {
         // Arrange
         var applicationName = GetApplicationName();

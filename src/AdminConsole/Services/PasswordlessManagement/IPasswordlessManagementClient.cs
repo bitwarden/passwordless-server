@@ -4,10 +4,10 @@ namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 public interface IPasswordlessManagementClient
 {
-    Task<CreateAppResultDto> CreateApplication(string appId, CreateAppDto options);
-    Task<MarkDeleteApplicationResponse> MarkDeleteApplication(MarkDeleteApplicationRequest request);
-    Task<bool> DeleteApplicationAsync(string application);
-    Task<CancelApplicationDeletionResponse> CancelApplicationDeletion(string applicationId);
+    Task<CreateAppResultDto> CreateApplicationAsync(string appId, CreateAppDto options);
+    Task<MarkDeleteApplicationResponse> MarkDeleteApplicationAsync(MarkDeleteApplicationRequest request);
+    Task<bool> DeleteApplicationAsync(string appId);
+    Task<CancelApplicationDeletionResponse> CancelApplicationDeletionAsync(string appId);
     Task<ICollection<string>> ListApplicationsPendingDeletionAsync();
     Task SetFeaturesAsync(string appId, ManageFeaturesRequest request);
     Task<AppFeatureResponse> GetFeaturesAsync(string appId);

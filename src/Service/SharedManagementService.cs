@@ -127,6 +127,7 @@ public class SharedManagementService : ISharedManagementService
                 EventLoggingIsEnabled = options.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
                 MaxUsers = options.MaxUsers,
+                AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
             }
         };
@@ -343,6 +344,7 @@ public class SharedManagementService : ISharedManagementService
         var keys = await storage.GetAllApiKeys();
         var dtos = keys.Select(x => new ApiKeyResponse(
             x.Id,
+            x.CreatedAt,
             x.ApiKey.Contains("public") ? x.ApiKey : x.MaskedApiKey,
             x.ApiKey.Contains("public") ? ApiKeyTypes.Public : ApiKeyTypes.Secret,
             x.Scopes.Order().ToHashSet(),

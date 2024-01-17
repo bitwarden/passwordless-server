@@ -6,11 +6,12 @@ using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
-using Passwordless.AdminConsole.Controller;
 using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Endpoints;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
+using Passwordless.AdminConsole.RateLimiting;
 using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.AuthenticatorData;
@@ -155,6 +156,8 @@ void RunTheApp()
 
     builder.Services.AddAntiforgery();
 
+    builder.Services.AddRateLimiting();
+
     WebApplication app;
     try
     {
@@ -192,21 +195,18 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
-    app.UseAntiforgery();
     app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseMiddleware<CurrentContextMiddleware>();
     app.UseMiddleware<EventLogStorageCommitMiddleware>();
     app.UseAuthorization();
+    app.UseAntiforgery();
+    app.UseRateLimiter();
     app.MapPasswordless()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
 
-    if (app.Environment.IsDevelopment())
-    {
-        // Scan the App component for Blazor page components and map the routes.
-        app.MapRazorComponents<App>();
-    }
+    app.MapRazorComponents<App>();
 
     app.MapAccountEndpoints();
     app.MapApplicationEndpoints();

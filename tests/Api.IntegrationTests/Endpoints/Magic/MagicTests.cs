@@ -64,7 +64,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
         var request = _requestFaker
-            .RuleFor(x => x.MagicLinkUrl, faker => faker.Internet.Url())
+            .RuleFor(x => x.LinkTemplate, faker => faker.Internet.Url())
             .Generate();
 
         // Act
@@ -74,7 +74,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var responseDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         responseDetails.Should().NotBeNull();
-        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals("MagicLinkUrl", StringComparison.CurrentCultureIgnoreCase));
+        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals("LinkTemplate", StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
         magicLinkUrlError.Value.Should().ContainMatch("Value must contain the `<token>` template.");
     }
@@ -89,7 +89,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
         var request = _requestFaker
-            .RuleFor(x => x.MagicLinkUrl, () => "<token>")
+            .RuleFor(x => x.LinkTemplate, () => "<token>")
             .Generate();
 
         // Act
@@ -99,7 +99,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var responseDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         responseDetails.Should().NotBeNull();
-        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals("MagicLinkUrl", StringComparison.CurrentCultureIgnoreCase));
+        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals("LinkTemplate", StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
         magicLinkUrlError.Value.Should().ContainMatch("Value must be a valid url.");
     }

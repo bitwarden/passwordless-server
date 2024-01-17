@@ -5,5 +5,6 @@ public record AppFeatureResponse(
     int EventLoggingRetentionPeriod,
     DateTime? DeveloperLoggingEndsAt,
     long? MaxUsers,
+    bool AllowAttestation,
     bool IsGenerateSignInTokenEndpointEnabled,
     bool IsMagicLinksEnabled);

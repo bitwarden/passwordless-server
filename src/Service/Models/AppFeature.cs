@@ -20,6 +20,11 @@ public class AppFeature : PerTenant
     public long? MaxUsers { get; set; }
 
     /// <summary>
+    /// Determines or now whether attestation is allowed for this application.
+    /// </summary>
+    public bool AllowAttestation { get; set; }
+
+    /// <summary>
     /// Determines if the Sign In Token Endpoint is enabled or disabled
     /// </summary>
     public bool IsGenerateSignInTokenEndpointEnabled { get; set; } = true;

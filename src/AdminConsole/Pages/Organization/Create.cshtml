@@ -44,14 +44,14 @@
                 <fieldset class="mt-4">
                     <legend class="sr-only">I’m building applications for:</legend>
                     <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
-                        <div class="flex items-center">
-                            <input asp-for="Form.OrgType" id="OrgTypePersonal" value="personal" type="radio" checked class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
-                            <label for="OrgTypePersonal" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Myself</label>
+                        <div class="radio-control">
+                            <input asp-for="Form.OrgType" id="OrgTypePersonal" value="personal" type="radio" checked class="radio-input">
+                            <label for="OrgTypePersonal" class="radio-label">Myself</label>
                         </div>
 
-                        <div class="flex items-center">
-                            <input asp-for="Form.OrgType" id="OrgTypeCompany" value="company" type="radio" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
-                            <label for="OrgTypeCompany" class="ml-3 block text-sm font-medium leading-6 text-gray-900">My company</label>
+                        <div class="radio-control">
+                            <input asp-for="Form.OrgType" id="OrgTypeCompany" value="company" type="radio" class="radio-input">
+                            <label for="OrgTypeCompany" class="radio-label">My company</label>
                         </div>
                     </div>
 
@@ -65,19 +65,19 @@
                 <fieldset class="mt-4">
                     <legend class="sr-only">How will you use passwordless.dev?</legend>
                     <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
-                        <div class="flex items-center">
-                            <input asp-for="Form.UseCase" id="UseCaseCustomers" value="customers" type="radio" checked class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
-                            <label asp-for="Form.UseCase" for="UseCaseCustomers" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Users</label>
+                        <div class="radio-control">
+                            <input asp-for="Form.UseCase" id="UseCaseCustomers" value="customers" type="radio" checked class="radio-input">
+                            <label asp-for="Form.UseCase" for="UseCaseCustomers" class="radio-label">Users</label>
                         </div>
 
-                        <div class="flex items-center">
-                            <input asp-for="Form.UseCase" id="UseCaseEmployees" value="employees" type="radio" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
-                            <label asp-for="Form.UseCase" for="UseCaseEmployees" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Employees</label>
+                        <div class="radio-control">
+                            <input asp-for="Form.UseCase" id="UseCaseEmployees" value="employees" type="radio" class="radio-input">
+                            <label asp-for="Form.UseCase" for="UseCaseEmployees" class="radio-label">Employees</label>
                         </div>
 
-                        <div class="flex items-center">
-                            <input asp-for="Form.UseCase" id="UseCaseBoth" value="both" type="radio" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600">
-                            <label asp-for="Form.UseCase" for="UseCaseBoth" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Both</label>
+                        <div class="radio-control">
+                            <input asp-for="Form.UseCase" id="UseCaseBoth" value="both" type="radio" class="radio-input">
+                            <label asp-for="Form.UseCase" for="UseCaseBoth" class="radio-label">Both</label>
                         </div>
                         <span asp-validation-for="Form.UseCase"></span>
 

@@ -284,6 +284,7 @@ public static class AppsEndpoints
             featuresContext.EventLoggingRetentionPeriod,
             featuresContext.DeveloperLoggingEndsAt,
             featuresContext.MaxUsers,
+            featuresContext.AllowAttestation,
             featuresContext.IsGenerateSignInTokenEndpointEnabled,
             featuresContext.IsMagicLinksEnabled);
 
