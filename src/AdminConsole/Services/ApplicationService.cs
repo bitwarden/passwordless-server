@@ -32,7 +32,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 
     public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletionAsync(string applicationId, string userName)
     {
-        var response = await _client.MarkDeleteApplication(new MarkDeleteApplicationRequest(applicationId, userName));
+        var response = await _client.MarkDeleteApplicationAsync(new MarkDeleteApplicationRequest(applicationId, userName));
 
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var application = await db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
@@ -57,7 +57,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 
     public async Task CancelDeletionForApplicationAsync(string applicationId)
     {
-        _ = await _client.CancelApplicationDeletion(applicationId);
+        _ = await _client.CancelApplicationDeletionAsync(applicationId);
 
         await using var db = await _dbContextFactory.CreateDbContextAsync();
         var application = await db.Applications
