@@ -152,14 +152,14 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request) =>
-        await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
+    public Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request) =>
+        http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
             $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
-        );
+        )!;
 
     public async Task EnableMagicLinksAsync(string appId, string performedBy)
     {
-        using var response = await http.PostAsJsonAsync($"admin/apps/{appId}/magic-links/enable", new
+        using var response = await http.PostAsJsonAsync($"admin/apps/{Uri.EscapeDataString(appId)}/magic-links/enable", new
         {
             PerformedBy = performedBy
         });
@@ -168,7 +168,7 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
 
     public async Task DisableMagicLinksAsync(string appId, string performedBy)
     {
-        using var response = await http.PostAsJsonAsync($"admin/apps/{appId}/magic-links/disable", new
+        using var response = await http.PostAsJsonAsync($"admin/apps/{Uri.EscapeDataString(appId)}/magic-links/disable", new
         {
             PerformedBy = performedBy
         });
