@@ -47,7 +47,7 @@ public class Fido2ServiceTests
         _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, null, false, true));
 
         // act
-        var actual = await _sut.CreateRegisterToken(new RegisterTokenInput
+        var actual = await _sut.CreateRegisterToken(new RegisterToken
         {
             UserId = "test",
             ExpiresAt = default,
@@ -72,7 +72,7 @@ public class Fido2ServiceTests
         // act
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
         {
-            await _sut.CreateRegisterToken(new RegisterTokenInput
+            await _sut.CreateRegisterToken(new RegisterToken
             {
                 UserId = "test",
                 ExpiresAt = default,
@@ -100,7 +100,7 @@ public class Fido2ServiceTests
             new List<StoredCredential>(1) { new() { UserHandle = "test"u8.ToArray(), Descriptor = null!, Origin = null!, AttestationFmt = null!, CreatedAt = DateTime.UtcNow, PublicKey = null!, SignatureCounter = 123, RPID = null! } });
 
         // act
-        var actual = await _sut.CreateRegisterToken(new RegisterTokenInput
+        var actual = await _sut.CreateRegisterToken(new RegisterToken
         {
             UserId = "test",
             ExpiresAt = default,

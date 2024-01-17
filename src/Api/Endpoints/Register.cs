@@ -13,7 +13,7 @@ public static class RegisterEndpoints
     public static void MapRegisterEndpoints(this WebApplication app)
     {
         app.MapPost("/register/token", async (
-                RegisterTokenInput registerToken,
+                RegisterToken registerToken,
                 IFido2Service fido2Service,
                 CancellationToken token
             ) =>
