@@ -13,7 +13,7 @@ public class MagicLinkTemplateUrl : ValidationAttribute
             return new ValidationResult("Value must be a non-empty string.");
 
         if (!stringValue.Contains(TokenTemplate))
-            return new ValidationResult("Value must contain the `<token>` template.");
+            return new ValidationResult($"Value must contain the `{TokenTemplate}` template.");
 
         if (!(Uri.TryCreate(stringValue, UriKind.Absolute, out Uri uriResult)
               && (uriResult!.Scheme == Uri.UriSchemeHttp
