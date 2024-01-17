@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Models.Apps;
@@ -34,7 +33,7 @@ public class RoutingIntegrationTests : IClassFixture<PasswordlessApiFactory>
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, actual.StatusCode);
     }
-    
+
     [Fact]
     public async Task NonExistentEndpoint_Returns_NotFound_WhenBadFormatApiKeyHeadersAreProvided()
     {
