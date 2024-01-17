@@ -27,7 +27,7 @@ public class MagicLinkService
             From = "do-not-reply@passwordless.dev",
             Subject = "Verify Email Address",
             TextBody = $"Please click the link to sign in: {link}",
-            HtmlBody = 
+            HtmlBody =
                 //lang=html
                 $"""
                  <!DOCTYPE html>
