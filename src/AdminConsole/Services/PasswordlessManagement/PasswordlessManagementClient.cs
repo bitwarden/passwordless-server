@@ -168,7 +168,7 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
 
     public async Task DisableMagicLinksAsync(string appId, string performedBy)
     {
-        var response = await http.PostAsJsonAsync($"admin/apps/{appId}/magic-links/disable", new
+        using var response = await http.PostAsJsonAsync($"admin/apps/{appId}/magic-links/disable", new
         {
             PerformedBy = performedBy
         });
