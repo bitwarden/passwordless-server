@@ -14,4 +14,6 @@ public class FeaturesOptions
     /// Maximum number of individual users allowed to use the application
     /// </summary>
     public long? MaxUsers { get; set; }
+
+    public bool AllowAttestation { get; set; }
 }

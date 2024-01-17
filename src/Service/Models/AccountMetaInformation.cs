@@ -28,4 +28,5 @@ public class AccountMetaInformation : PerTenant
 
     public AppFeature? Features { get; set; }
     public virtual IReadOnlyCollection<ApplicationEvent>? Events { get; set; }
+    public virtual IReadOnlyCollection<PeriodicCredentialReport>? PeriodicCredentialReports { get; set; }
 }

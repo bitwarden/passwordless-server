@@ -41,8 +41,8 @@ public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposab
     public async Task I_can_view_a_list_of_registered_users_credentials()
     {
         // Arrange
-        const string originUrl = "https://bitwarden.com/products/passwordless/";
-        const string rpId = "bitwarden.com";
+        const string originUrl = PasswordlessApiFactory.OriginUrl;
+        const string rpId = PasswordlessApiFactory.RpId;
         var tokenRequest = TokenGenerator.Generate();
         using var tokenResponse = await _client.PostAsJsonAsync("register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
