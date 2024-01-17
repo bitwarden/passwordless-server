@@ -23,7 +23,7 @@ public class MagicLinkService
 
         await _mailProvider.SendAsync(new MailMessage
         {
-            To = new[] { dto.EmailAddress.ToString() },
+            To = [dto.EmailAddress.ToString()],
             From = "do-not-reply@passwordless.dev",
             Subject = "Verify Email Address",
             TextBody = $"Please click the link to sign in: {link}",
