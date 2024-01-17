@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -80,16 +81,35 @@ public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
     protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
     {
         Response.StatusCode = StatusCodes.Status403Forbidden;
-        await _problemDetailsService.WriteAsync(new ProblemDetailsContext
+
+        var context = new ProblemDetailsContext
         {
             HttpContext = Context,
             ProblemDetails = new ProblemDetails
             {
-                Title = "You are forbidden from viewing this resource.",
+                Title = "You are forbidden from accessing this resource.",
                 Status = StatusCodes.Status403Forbidden,
                 Type = "https://docs.passwordless.dev/guide/errors.html#forbidden",
             },
-        });
+        };
+
+        var endpoint = Context.GetEndpoint();
+        if (endpoint != null)
+        {
+            var policies = endpoint
+                .Metadata
+                .Where(x => x is AuthorizeAttribute)
+                .Cast<AuthorizeAttribute>()
+                .ToList();
+
+            if (policies.Count > 0)
+            {
+                context.ProblemDetails.Detail =
+                    $"You are unable to access this resource because you do not have the required permissions. Required scopes: {string.Join(", ", policies.Select(x => x.Policy))}";
+            }
+        }
+
+        await _problemDetailsService.WriteAsync(context);
     }
 
     private string? GatherDetail()

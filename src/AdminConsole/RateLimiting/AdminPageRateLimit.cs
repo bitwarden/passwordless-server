@@ -1,0 +1,24 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
+using Passwordless.AdminConsole.Helpers;
+
+namespace Passwordless.AdminConsole.RateLimiting;
+
+public static class AdminPageRateLimit
+{
+    public const string PolicyName = "organizationIdFixedLength";
+    private const int PermitLimit = 100;
+    private static readonly TimeSpan Window = TimeSpan.FromMinutes(1);
+    private const int QueueLimit = 0;
+
+    public static RateLimiterOptions AddAdminPageRateLimitPolicy(this RateLimiterOptions limiter) =>
+        limiter.AddPolicy(PolicyName, context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                context.User.GetOrgId()!.Value.ToString(),
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = PermitLimit,
+                    Window = Window,
+                    QueueLimit = QueueLimit
+                }));
+}
