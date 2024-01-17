@@ -206,11 +206,7 @@ void RunTheApp()
         .LoginRoute?.AddEndpointFilter<LoginEndpointFilter>();
     app.MapRazorPages();
 
-    if (app.Environment.IsDevelopment())
-    {
-        // Scan the App component for Blazor page components and map the routes.
-        app.MapRazorComponents<App>();
-    }
+    app.MapRazorComponents<App>();
 
     app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
