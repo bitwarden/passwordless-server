@@ -19,7 +19,7 @@ public class MagicLinkService
     {
         var token = await _fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
 
-        var link = new Uri(dto.UrlTokenTemplate.Replace("<token>", token));
+        var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
 
         await _mailProvider.SendAsync(new MailMessage
         {

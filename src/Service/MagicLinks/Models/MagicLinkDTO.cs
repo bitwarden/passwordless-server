@@ -6,5 +6,5 @@ public class MagicLinkDTO
 {
     public string UserId { get; init; }
     public MailAddress EmailAddress { get; init; }
-    public string UrlTokenTemplate { get; init; }
+    public string LinkTemplate { get; init; }
 }

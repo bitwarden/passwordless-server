@@ -25,6 +25,6 @@ public static class SendMagicLinkRequestExtensions
         {
             UserId = request.UserId,
             EmailAddress = new MailAddress(request.EmailAddress),
-            UrlTokenTemplate = request.LinkTemplate
+            LinkTemplate = request.LinkTemplate
         };
 }
