@@ -1,6 +1,7 @@
 using Passwordless.Api.Authorization;
 using Passwordless.Common.Constants;
 using Passwordless.Service.Features;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
 using Passwordless.Service.MagicLinks.Models;
 using static Microsoft.AspNetCore.Http.Results;
@@ -17,8 +18,8 @@ public static class MagicEndpoints
                 MagicLinkService magicLinkService
             ) =>
             {
-                // check if generate setting is on
-                if (!(await provider.UseContext()).IsMagicLinksEnabled) return Forbid();
+                if (!(await provider.UseContext()).IsMagicLinksEnabled)
+                    throw new ApiException("You must enable Magic Links setting to order to use this feature.", 403);
 
                 await magicLinkService.SendMagicLink(request.ToDto());
 

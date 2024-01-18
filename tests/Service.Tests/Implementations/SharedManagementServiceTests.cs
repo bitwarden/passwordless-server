@@ -76,8 +76,11 @@ public class SharedManagementServiceTests
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
-            CreatedAt = _now.AddDays(-1)
+            CreatedAt = _now.AddDays(-1),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
+
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
         _tenantStorageFactoryMock
@@ -106,8 +109,11 @@ public class SharedManagementServiceTests
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
-            CreatedAt = _now.AddDays(-4)
+            CreatedAt = _now.AddDays(-4),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
+
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
         _tenantStorageFactoryMock
@@ -135,7 +141,9 @@ public class SharedManagementServiceTests
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
-            CreatedAt = _now.AddDays(-365)
+            CreatedAt = _now.AddDays(-365),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -165,7 +173,9 @@ public class SharedManagementServiceTests
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
-            CreatedAt = _now.AddDays(-365)
+            CreatedAt = _now.AddDays(-365),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -216,7 +226,9 @@ public class SharedManagementServiceTests
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
-            DeleteAt = _now.AddDays(-1)
+            DeleteAt = _now.AddDays(-1),
+            Tenant = appId,
+            AdminEmails = new[] { "admin@email.com" }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -242,7 +254,9 @@ public class SharedManagementServiceTests
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
-            DeleteAt = _now.AddDays(1)
+            DeleteAt = _now.AddDays(1),
+            Tenant = appId,
+            AdminEmails = new[] { "admin@email.com" }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
