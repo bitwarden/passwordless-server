@@ -18,7 +18,7 @@ public static class MagicEndpoints
                 MagicLinkService magicLinkService
             ) =>
             {
-                if (!(await provider.UseContext()).IsMagicLinksEnabled) 
+                if (!(await provider.UseContext()).IsMagicLinksEnabled)
                     throw new ApiException("You must enable Magic Links setting to order to use this feature.", 403);
 
                 await magicLinkService.SendMagicLink(request.ToDto());
