@@ -177,7 +177,7 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
 
     public async Task SetAppSettingsAsync(string applicationId, SetAppSettingsRequest appSettings)
     {
-       using var response = await http.PostAsJsonAsync($"admin/apps/{Uri.EscapeDataString(applicationId)}/settings", appSettings);
+        using var response = await http.PostAsJsonAsync($"admin/apps/{Uri.EscapeDataString(applicationId)}/settings", appSettings);
         response.EnsureSuccessStatusCode();
     }
 }
