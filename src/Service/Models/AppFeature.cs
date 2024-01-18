@@ -34,5 +34,5 @@ public class AppFeature : PerTenant
     /// </summary>
     public bool IsMagicLinksEnabled { get; set; } = true;
 
-    public AccountMetaInformation Application { get; set; }
+    public AccountMetaInformation? Application { get; set; }
 }

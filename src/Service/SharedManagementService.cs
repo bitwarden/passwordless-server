@@ -129,7 +129,8 @@ public class SharedManagementService : ISharedManagementService
                 MaxUsers = options.MaxUsers,
                 AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
-            }
+            },
+            Tenant = storage.Tenant
         };
         await storage.SaveAccountInformation(account);
         return new CreateAppResultDto

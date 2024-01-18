@@ -19,7 +19,6 @@ public static class RegisterEndpoints
             ) =>
             {
                 var result = await fido2Service.CreateRegisterToken(registerToken);
-
                 return Ok(new RegisterTokenResponse(result));
             })
             .RequireAuthorization(SecretKeyScopes.TokenRegister)
@@ -32,7 +31,6 @@ public static class RegisterEndpoints
             ) =>
             {
                 var result = await fido2Service.RegisterBegin(payload);
-
                 return Ok(result);
             })
             .RequireAuthorization(PublicKeyScopes.Register)

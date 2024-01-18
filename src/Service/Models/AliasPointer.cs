@@ -2,7 +2,7 @@ namespace Passwordless.Service.Models;
 
 public class AliasPointer : PerTenant
 {
-    public string UserId { get; set; }
-    public string Alias { get; set; }
-    public string Plaintext { get; set; }
+    public required string UserId { get; set; }
+    public required string Alias { get; set; }
+    public string? Plaintext { get; set; }
 }
