@@ -26,13 +26,13 @@ public class TotalCredentialsCountChartTests : TestContext
     public void RenderComponent_Renders_ExpectedId()
     {
         // Arrange
-        var data = Task.FromResult(new List<PeriodicCredentialReportResponse>
+        var data = new List<PeriodicCredentialReportResponse>
         {
             new(new DateOnly(2024, 1, 2), 0, 0),
             new(new DateOnly(2024, 1, 3), 1, 1),
             new(new DateOnly(2024, 1, 4), 1, 2),
             new(new DateOnly(2024, 1, 5), 5, 10)
-        }.AsEnumerable());
+        }.AsEnumerable();
 
         var cut = RenderComponent<TotalCredentialsCountChart>(parameters => parameters
             .Add(p => p.Data, data));

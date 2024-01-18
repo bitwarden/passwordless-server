@@ -1,17 +1,23 @@
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
-<ApexChart Id="total-users-count-chart" Options="_options"></ApexChart>
+
+<ApexChart Id="total-users-count-chart" Options="_options" />
 
 @code {
-    [CascadingParameter]
-    public required Task<IEnumerable<PeriodicCredentialReportResponse>> Data { get; set; }
+    [Parameter]
+    public required IEnumerable<PeriodicCredentialReportResponse> Data { get; set; }
 
-    public ApexChartOptions<DateTime, int> _options;
+    private const int MinDataPoints = 3;
 
+    private ApexChartOptions<DateTime, int>? _options;
     
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var data = await Data;
+        if (Data.Count() < MinDataPoints)
+        {
+            Data = new List<PeriodicCredentialReportResponse>();
+        }
+
         _options = new()
         {
             Chart = new Chart
@@ -24,7 +30,7 @@
                 new()
                 {
                     Name = "Users",
-                    Data = data.Select(x => x.Users)
+                    Data = Data.Select(x => x.Users)
                 }
             },
             Title = new Title
@@ -34,7 +40,7 @@
             Xaxis = new()
             {
                 Type = XAxisTypes.Datetime, 
-                Categories = data.Select(x => x.CreatedAt.ToDateTime(new TimeOnly(0, 0)))
+                Categories = Data.Select(x => x.CreatedAt.ToDateTime(new TimeOnly(0, 0)))
             }
         };
     }
