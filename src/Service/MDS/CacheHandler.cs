@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 
-namespace Passwordless.Service.MetaDataService;
+namespace Passwordless.Service.MDS;
 
 /// <summary>
 /// The cache handler will attempt to download the latest MDS blob and cache it locally. The cache will be used

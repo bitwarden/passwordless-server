@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.MDS;
 using Passwordless.Common.Models.Reporting;
 
 namespace Passwordless.AdminConsole.Services;
@@ -11,6 +12,9 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 {
     Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
+    Task<IEnumerable<string>> GetAttestationTypesAsync();
+    Task<IEnumerable<string>> GetCertificationStatusesAsync();
+    Task<IEnumerable<AuthenticatorDto>> GetMetaDataStatementEntriesAsync();
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -62,5 +66,23 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
         return rest;
+    }
+    
+    public async Task<IEnumerable<string> > GetAttestationTypesAsync()
+    {
+        var response = await _client.GetAsync("/mds/attestation-types");
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
+    }
+    
+    public async Task<IEnumerable<string> > GetCertificationStatusesAsync()
+    {
+        var response = await _client.GetAsync("/mds/certification-statuses");
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
+    }
+    
+    public async Task<IEnumerable<AuthenticatorDto> > GetMetaDataStatementEntriesAsync()
+    {
+        var response = await _client.GetAsync("/mds/entries");
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<AuthenticatorDto>>())!;
     }
 }

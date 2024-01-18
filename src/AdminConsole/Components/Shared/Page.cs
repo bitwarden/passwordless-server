@@ -11,7 +11,7 @@ public sealed class Page : ComponentBase
     
     [Parameter]
     public required RenderFragment ChildContent { get; set; }
-    
+
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
         builder.OpenComponent<Microsoft.AspNetCore.Components.Web.PageTitle>(0);

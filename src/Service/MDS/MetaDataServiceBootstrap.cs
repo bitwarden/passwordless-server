@@ -2,7 +2,7 @@ using Fido2NetLib;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Passwordless.Service.MetaDataService;
+namespace Passwordless.Service.MDS;
 
 public static class MetaDataServiceBootstrap
 {

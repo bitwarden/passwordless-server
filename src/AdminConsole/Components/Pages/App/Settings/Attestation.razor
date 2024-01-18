@@ -1,9 +1,104 @@
 @page "/app/{app}/settings/attestation"
+@using Passwordless.AdminConsole.Services
+@using Passwordless.Common.Models.MDS
+
+@inject IScopedPasswordlessClient PasswordlessClient
 
 <Page Title="Attestation">
-    
+    <Panel Header="Authenticators">
+        <EditForm id="filter-attestation-form" class="flex flex-col space-y-4" EditContext="_filterContext" FormName="filter-attestation-form">
+            <div class="flex space-x-4">
+            </div>
+            
+            <div class="flex space-x-4">
+                
+            </div>
+            <div class="flex space-x-4">
+                <button id="search-btn" class="btn btn-primary" type="submit" name="filter-attestation-form" value="search">Search</button>
+                <button id="reset-btn" class="btn btn-secondary" type="submit" name="filter-attestation-form" value="reset">Reset</button>
+            </div>
+        </EditForm>
+        <hr />
+        <div class="mt-8 flow-root">
+            <div class="overflow-y-hidden overflow-x-auto table-container">
+                <table class="tbl-default min-w-full">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="relative px-7 sm:w-12 sm:px-6"></th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900">Description</th>
+                        <th scope="col" class="hidden px-3 py-3.5 text-left text-xs font-semibold text-gray-900 xl:table-cell">AaGuid</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900">Attestation Types</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900">Certification Level</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+
+                    @if (_data != null)
+                    {
+                        @foreach (var item in _data)
+                        {
+                            <tr>
+                                <td class="relative px-7 sm:w-12 sm:px-6">
+                                    <input type="checkbox" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                </td>
+                                <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
+                                    @item.Name
+                                    <dl class="font-normal xl:hidden">
+                                        <dt class="sr-only">AaGuid</dt>
+                                        <dd class="mt-1 truncate text-gray-500">@item.AaGuid</dd>
+                                    </dl>
+                                </td>
+                                <td class="hidden whitespace-nowrap px-3 py-4 text-xs text-gray-500 xl:table-cell">@item.AaGuid</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-xs text-gray-500">
+                                    <ul>
+                                        @foreach (var type in item.AttestationTypes)
+                                        {
+                                            <li>@type</li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-xs text-gray-500">
+                                    <ul>
+                                        @foreach (var level in item.Certification)
+                                        {
+                                            <li>@level</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </Panel>
 </Page>
 
 @code {
+    [Parameter] public required string App { get; set; }
     
+    [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
+    
+    private EditContext? _filterContext;
+
+    private IEnumerable<string> _attestationTypes;
+    private IEnumerable<string> _certificationLevels;
+    private IEnumerable<AuthenticatorDto> _data;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Filter ??= new FilterViewModel();
+        _filterContext = new EditContext(Filter);
+        _attestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
+        _certificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
+        _data = await PasswordlessClient.GetMetaDataStatementEntriesAsync();
+    }
+
+    public class FilterViewModel
+    {
+        public IEnumerable<string> AttestationTypes { get; set; } = new List<string>();
+        public IEnumerable<string> CertificationLevels { get; set; } = new List<string>();
+    }
 }
