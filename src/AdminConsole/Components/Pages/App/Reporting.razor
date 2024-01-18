@@ -46,10 +46,11 @@
         </div>
         <hr />
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
-            <CascadingValue Value="@PeriodicCredentialReports">
-                <TotalCredentialsCountChart />
-                <TotalUsersCountChart />
-            </CascadingValue>
+            @if (IsLoaded)
+            {
+                <TotalCredentialsCountChart Data="PeriodicCredentialReports"  />
+                <TotalUsersCountChart Data="PeriodicCredentialReports" />
+            }
         </div>
     </Panel>
 </div>
@@ -65,9 +66,11 @@
     
     private EditContext? _filterContext;
     
-    public Task<IEnumerable<PeriodicCredentialReportResponse>> PeriodicCredentialReports { get; set; }
+    public IEnumerable<PeriodicCredentialReportResponse> PeriodicCredentialReports { get; set; }
 
-    protected override void OnInitialized()
+    public bool IsLoaded { get; private set; }    
+
+    protected override async Task OnInitializedAsync()
     {
         Filter ??= new FilterViewModel();
         _filterContext = new EditContext(Filter);
@@ -93,8 +96,14 @@
             }
             Filter.To = null;
         }
+        IsLoaded = await LoadAsync();
+    }
+
+    public async Task<bool> LoadAsync()
+    {
         var req = PeriodicCredentialReportRequest.Create(Filter.From, Filter.To);
-        PeriodicCredentialReports = PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
+        PeriodicCredentialReports = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
+        return true;
     }
 
     public class FilterViewModel
