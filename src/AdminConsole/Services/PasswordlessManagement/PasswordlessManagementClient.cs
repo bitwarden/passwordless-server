@@ -174,5 +174,4 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         });
         response.EnsureSuccessStatusCode();
     }
-
 }
