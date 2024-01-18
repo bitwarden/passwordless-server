@@ -51,9 +51,7 @@ public class Fido2ServiceTests
         {
             UserId = "test",
             ExpiresAt = default,
-            TokenId = Guid.NewGuid(),
-            Type = "thing",
-            Username = "test_user",
+            Username = "test_user"
         });
 
         // assert
@@ -78,9 +76,7 @@ public class Fido2ServiceTests
             {
                 UserId = "test",
                 ExpiresAt = default,
-                TokenId = Guid.NewGuid(),
-                Type = "thing",
-                Username = "test_user",
+                Username = "test_user"
             });
         });
 
@@ -101,16 +97,14 @@ public class Fido2ServiceTests
         _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, false, true));
         _mockTenantStorage.Setup(x => x.GetUsersCount()).ReturnsAsync(10000);
         _mockTenantStorage.Setup(x => x.GetCredentialsByUserIdAsync(It.Is<string>(p => p == "test"))).ReturnsAsync(
-            new List<StoredCredential>(1) { new() { UserHandle = "test"u8.ToArray() } });
+            new List<StoredCredential>(1) { new() { UserHandle = "test"u8.ToArray(), Descriptor = null!, Origin = null!, AttestationFmt = null!, CreatedAt = DateTime.UtcNow, PublicKey = null!, SignatureCounter = 123, RPID = null! } });
 
         // act
         var actual = await _sut.CreateRegisterToken(new RegisterToken
         {
             UserId = "test",
             ExpiresAt = default,
-            TokenId = Guid.NewGuid(),
-            Type = "thing",
-            Username = "test_user",
+            Username = "test_user"
         });
 
         // assert

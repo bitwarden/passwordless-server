@@ -13,7 +13,8 @@ public class RegisterTokenValidatorTests
         // arrange
         var token = new RegisterToken
         {
-            Attestation = "enterprise",
+            UserId = "123",
+            Attestation = "enterprise"
         };
         var features = new FeaturesContext(false, 0, null, null, true, false);
 
@@ -33,7 +34,8 @@ public class RegisterTokenValidatorTests
         // arrange
         var token = new RegisterToken
         {
-            Attestation = "direct",
+            UserId = "123",
+            Attestation = "direct"
         };
         var features = new FeaturesContext(false, 0, null, null, false, false);
 
