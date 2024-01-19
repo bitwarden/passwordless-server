@@ -1,8 +1,8 @@
-using Passwordless.Service.Models;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.Service;
 
 public interface IApplicationService
 {
-    Task SetFeaturesAsync(SetFeaturesDto features);
+    Task SetFeaturesAsync(SetFeaturesRequest features);
 }

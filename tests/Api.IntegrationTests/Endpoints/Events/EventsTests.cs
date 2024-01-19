@@ -151,7 +151,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
-        _ = await _client.EnableManuallyGenerateAccessTokenEndpoint(applicationName, "a_user");
+        _ = await _client.EnableManuallyGenerateAccessTokenEndpoint("a_user");
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
@@ -176,7 +176,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
-        _ = await _client.DisableManuallyGenerateAccessTokenEndpoint(applicationName, "a_user");
+        _ = await _client.DisableManuallyGenerateAccessTokenEndpoint("a_user");
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
@@ -201,7 +201,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
-        _ = await _client.EnableMagicLinks(applicationName, "a_user");
+        _ = await _client.EnableMagicLinks("a_user");
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
@@ -226,7 +226,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
-        _ = await _client.DisableMagicLinks(applicationName, "a_user");
+        _ = await _client.DisableMagicLinks("a_user");
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");

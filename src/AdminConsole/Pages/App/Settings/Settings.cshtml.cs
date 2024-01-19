@@ -19,7 +19,7 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
-    private readonly IPasswordlessManagementClient _managementClient;
+    private readonly IScopedPasswordlessClient _scopedPasswordlessClient;
     private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
@@ -31,6 +31,7 @@ public class SettingsModel : BaseExtendedPageModel
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
         IOptions<BillingOptions> billingOptions,
+        IScopedPasswordlessClient scopedPasswordlessClient,
         IEventLogger eventLogger)
     {
         _logger = logger;
@@ -38,7 +39,7 @@ public class SettingsModel : BaseExtendedPageModel
         _currentContext = currentContext;
         _appService = appService;
         _billingService = billingService;
-        _managementClient = managementClient;
+        _scopedPasswordlessClient = scopedPasswordlessClient;
         _billingOptions = billingOptions.Value;
         ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
@@ -70,8 +71,7 @@ public class SettingsModel : BaseExtendedPageModel
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
 
-        if (application == null) throw new InvalidOperationException("Application not found.");
-        Application = application;
+        Application = application ?? throw new InvalidOperationException("Application not found.");
 
         IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
         IsMagicLinksEnabled = _currentContext.Features.IsMagicLinksEnabled;
@@ -204,6 +204,9 @@ public class SettingsModel : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostSettingsAsync()
     {
+        static bool? GetChangedValueForRequest(bool originalValue, bool postedValue) =>
+            originalValue == postedValue ? null : postedValue;
+
         if (string.IsNullOrWhiteSpace(_currentContext.AppId) || string.IsNullOrWhiteSpace(User.Identity?.Name))
         {
             return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
@@ -211,11 +214,13 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            await _managementClient.SetAppSettingsAsync(_currentContext.AppId,
-                new SetAppSettingsRequest(
-                    User.Identity.Name,
-                    IsManualTokenGenerationEnabled == _currentContext.Features.IsGenerateSignInTokenEndpointEnabled ? null : IsManualTokenGenerationEnabled,
-                    IsMagicLinksEnabled == _currentContext.Features.IsMagicLinksEnabled ? null : IsMagicLinksEnabled));
+            await _scopedPasswordlessClient.SetFeaturesAsync(new SetFeaturesRequest
+            {
+                PerformedBy = User.Identity!.Name,
+                EnableManuallyGeneratedAuthenticationTokens =
+                    GetChangedValueForRequest(_currentContext.Features.IsGenerateSignInTokenEndpointEnabled, IsManualTokenGenerationEnabled),
+                EnableMagicLinks = GetChangedValueForRequest(_currentContext.Features.IsMagicLinksEnabled, IsMagicLinksEnabled)
+            });
 
             return RedirectToPage();
         }

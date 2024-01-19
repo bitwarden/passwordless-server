@@ -5,9 +5,8 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
-using Passwordless.Service.MagicLinks.Models;
-using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
+using SetFeaturesRequest = Passwordless.Common.Models.Apps.SetFeaturesRequest;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -126,71 +125,6 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/enable", EnableGenerateSignInTokenEndpoint)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/disable", DisableGenerateSignInTokenEndpoint)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/magic-links/enable", EnableMagicLinks)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/magic-links/disable", DisableMagicLinks)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/settings", SetAppSettings)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
-    }
-
-    private static async Task<IResult> SetAppSettings(
-        [FromRoute] string appId,
-        SetAppSettingsRequest request,
-        SharedManagementService service,
-        IEventLogger eventLogger)
-    {
-        var features = await service.GetFeaturesAsync(appId);
-
-        await service.SetFeaturesAsync(appId, new ManageFeaturesRequest
-        {
-            EventLoggingIsEnabled = features.EventLoggingIsEnabled,
-            MaxUsers = features.MaxUsers,
-            EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
-            EnableManuallyGeneratedAuthenticationTokens = request.EnableManuallyGeneratedAuthenticationTokens ?? features.IsGenerateSignInTokenEndpointEnabled,
-            EnableMagicLinks = request.EnableMagicLinks ?? features.IsMagicLinksEnabled
-        });
-
-        switch (request.EnableManuallyGeneratedAuthenticationTokens)
-        {
-            case true:
-                eventLogger.LogGenerateSignInTokenEndpointEnabled(request.PerformedBy);
-                break;
-            case false:
-                eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
-                break;
-        }
-
-        switch (request.EnableMagicLinks)
-        {
-            case true:
-                eventLogger.LogMagicLinksEnabled(request.PerformedBy);
-                break;
-            case false:
-                eventLogger.LogMagicLinksDisabled(request.PerformedBy);
-                break;
-        }
-
-        return NoContent();
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(
@@ -268,7 +202,7 @@ public static class AppsEndpoints
     }
 
     public static async Task<IResult> SetFeaturesAsync(
-        SetFeaturesDto payload,
+        SetFeaturesRequest payload,
         IApplicationService service)
     {
         await service.SetFeaturesAsync(payload);
@@ -336,54 +270,6 @@ public static class AppsEndpoints
 
         return Ok(res);
     }
-
-    public static async Task<IResult> EnableGenerateSignInTokenEndpoint(
-        [FromRoute] string appId,
-        EnableGenerateSignInTokenEndpointRequest request,
-        ISharedManagementService managementService,
-        IEventLogger eventLogger)
-    {
-        await managementService.EnableGenerateSignInTokenEndpoint(appId);
-        eventLogger.LogGenerateSignInTokenEndpointEnabled(request.PerformedBy);
-        return NoContent();
-    }
-
-    public static async Task<IResult> DisableGenerateSignInTokenEndpoint(
-        [FromRoute] string appId,
-        DisableGenerateSignInTokenEndpointRequest request,
-        ISharedManagementService managementService,
-        IEventLogger eventLogger)
-    {
-        await managementService.DisableGenerateSignInTokenEndpoint(appId);
-        eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
-        return NoContent();
-    }
-
-    public static async Task<IResult> EnableMagicLinks(
-        [FromRoute] string appId,
-        EnableMagicLinksRequest request,
-        ISharedManagementService managementService,
-        IEventLogger eventLogger)
-    {
-        await managementService.EnableMagicLinks(appId);
-        eventLogger.LogMagicLinksEnabled(request.PerformedBy);
-        return NoContent();
-    }
-
-    public static async Task<IResult> DisableMagicLinks(
-        [FromRoute] string appId,
-        DisableMagicLinksRequest request,
-        ISharedManagementService managementService,
-        IEventLogger eventLogger)
-    {
-        await managementService.DisableMagicLinks(appId);
-        eventLogger.LogMagicLinksDisabled(request.PerformedBy);
-        return NoContent();
-    }
-
-    public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
-
-    public record DisableGenerateSignInTokenEndpointRequest(string PerformedBy);
 
     public record CancelResult(string Message);
 }

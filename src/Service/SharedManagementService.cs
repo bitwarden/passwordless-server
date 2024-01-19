@@ -37,10 +37,6 @@ public interface ISharedManagementService
     Task LockApiKeyAsync(string appId, string apiKeyId);
     Task UnlockApiKeyAsync(string appId, string apiKeyId);
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
-    Task EnableGenerateSignInTokenEndpoint(string appId);
-    Task DisableGenerateSignInTokenEndpoint(string appId);
-    Task EnableMagicLinks(string appId);
-    Task DisableMagicLinks(string appId);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -396,24 +392,6 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("api_key_not_found", "Apikey was not found", 404);
         }
     }
-
-    public Task EnableGenerateSignInTokenEndpoint(string appId)
-    {
-        var storage = tenantFactory.Create(appId);
-
-        return storage.EnableGenerateSignInTokenEndpoint();
-    }
-
-    public Task DisableGenerateSignInTokenEndpoint(string appId)
-    {
-        var storage = tenantFactory.Create(appId);
-
-        return storage.DisableGenerateSignInTokenEndpoint();
-    }
-
-    public Task EnableMagicLinks(string appId) => tenantFactory.Create(appId).EnableMagicLinks();
-
-    public Task DisableMagicLinks(string appId) => tenantFactory.Create(appId).DisableMagicLinks();
 
     private static Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage)
     {

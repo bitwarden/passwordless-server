@@ -1,7 +1,5 @@
 using System.Net.Http.Json;
-using Passwordless.Api.Endpoints;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.MagicLinks.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.App;
 
@@ -9,11 +7,7 @@ public static class AppManagementHelpers
 {
     public static async Task<HttpClient> EnableEventLogging(this HttpClient client, string applicationName)
     {
-        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
-        {
-            client.AddManagementKey();
-        }
-
+        client.AddManagementKey();
         _ = await client.PostAsJsonAsync($"admin/apps/{applicationName}/features", new ManageFeaturesRequest
         {
             EventLoggingRetentionPeriod = 7,
@@ -26,11 +20,7 @@ public static class AppManagementHelpers
 
     public static async Task<HttpClient> EnableAttestation(this HttpClient client, string applicationName)
     {
-        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
-        {
-            client.AddManagementKey();
-        }
-
+        client.AddManagementKey();
         var response = await client.PostAsJsonAsync($"admin/apps/{applicationName}/features", new ManageFeaturesRequest
         {
             AllowAttestation = true
@@ -41,54 +31,54 @@ public static class AppManagementHelpers
         return client;
     }
 
-    public static async Task<HttpClient> EnableManuallyGenerateAccessTokenEndpoint(this HttpClient client, string applicationName, string performedBy)
+    public static async Task<HttpClient> EnableManuallyGenerateAccessTokenEndpoint(this HttpClient client, string performedBy)
     {
-        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
-        {
-            client.AddManagementKey();
-        }
-
-        _ = await client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
-            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest(performedBy));
+        if (!client.HasSecretKey()) throw new Exception("Secret key must be set on HttpClient");
+        _ = (await client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = performedBy,
+                EnableManuallyGeneratedAuthenticationTokens = true
+            })).EnsureSuccessStatusCode();
 
         return client;
     }
 
-    public static async Task<HttpClient> DisableManuallyGenerateAccessTokenEndpoint(this HttpClient client, string applicationName, string performedBy)
+    public static async Task<HttpClient> DisableManuallyGenerateAccessTokenEndpoint(this HttpClient client, string performedBy)
     {
-        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
-        {
-            client.AddManagementKey();
-        }
-
-        _ = await client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
-            new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest(performedBy));
+        if (!client.HasSecretKey()) throw new Exception("Secret key must be set on HttpClient");
+        _ = (await client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = performedBy,
+                EnableManuallyGeneratedAuthenticationTokens = false
+            })).EnsureSuccessStatusCode();
 
         return client;
     }
 
-    public static async Task<HttpClient> EnableMagicLinks(this HttpClient client, string applicationName, string performedBy)
+    public static async Task<HttpClient> EnableMagicLinks(this HttpClient client, string performedBy)
     {
-        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
-        {
-            client.AddManagementKey();
-        }
-
-        _ = await client.PostAsJsonAsync($"admin/apps/{applicationName}/magic-links/enable",
-            new EnableMagicLinksRequest(performedBy));
+        if (!client.HasSecretKey()) throw new Exception("Secret key must be set on HttpClient");
+        _ = (await client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = performedBy,
+                EnableMagicLinks = true
+            })).EnsureSuccessStatusCode();
 
         return client;
     }
 
-    public static async Task<HttpClient> DisableMagicLinks(this HttpClient client, string applicationName, string performedBy)
+    public static async Task<HttpClient> DisableMagicLinks(this HttpClient client, string performedBy)
     {
-        if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
-        {
-            client.AddManagementKey();
-        }
-
-        _ = (await client.PostAsJsonAsync($"admin/apps/{applicationName}/magic-links/disable",
-            new DisableMagicLinksRequest(performedBy))).EnsureSuccessStatusCode();
+        if (!client.HasSecretKey()) throw new Exception("Secret key must be set on HttpClient");
+        _ = (await client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = performedBy,
+                EnableMagicLinks = false
+            })).EnsureSuccessStatusCode();
 
         return client;
     }

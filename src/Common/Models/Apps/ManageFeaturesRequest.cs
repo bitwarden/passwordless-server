@@ -15,7 +15,4 @@ public sealed class ManageFeaturesRequest
     public int EventLoggingRetentionPeriod { get; init; }
 
     public bool AllowAttestation { get; init; }
-
-    public bool EnableManuallyGeneratedAuthenticationTokens { get; init; }
-    public bool EnableMagicLinks { get; init; }
 }

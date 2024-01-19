@@ -1,7 +1,7 @@
 using Moq;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Tests.Implementations;
@@ -9,12 +9,13 @@ namespace Passwordless.Service.Tests.Implementations;
 public class ApplicationServiceTests
 {
     private readonly Mock<ITenantStorage> _storageMock = new();
+    private readonly Mock<IEventLogger> _eventLoggerMock = new();
 
     private readonly ApplicationService _sut;
 
     public ApplicationServiceTests()
     {
-        _sut = new ApplicationService(_storageMock.Object);
+        _sut = new ApplicationService(_storageMock.Object, _eventLoggerMock.Object);
     }
 
     #region SetFeaturesAsync
@@ -32,7 +33,7 @@ public class ApplicationServiceTests
     [Fact]
     public async Task SetFeaturesAsync_Returns_ExpectedResult()
     {
-        var payload = new SetFeaturesDto
+        var payload = new SetFeaturesRequest
         {
             EventLoggingRetentionPeriod = 7
         };
@@ -40,7 +41,7 @@ public class ApplicationServiceTests
         await _sut.SetFeaturesAsync(payload);
 
         _storageMock.Verify(x => x.SetFeaturesAsync(
-            It.Is<SetFeaturesDto>(p => p == payload)), Times.Once);
+            It.Is<SetFeaturesRequest>(p => p == payload)), Times.Once);
     }
     #endregion
 }
