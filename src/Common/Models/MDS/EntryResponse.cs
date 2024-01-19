@@ -1,7 +1,7 @@
 namespace Passwordless.Common.Models.MDS;
 
-public record AuthenticatorDto(
+public record EntryResponse(
     Guid AaGuid,
     string Name,
-    IEnumerable<string> Certification,
+    IEnumerable<string> CertificationStatuses,
     IEnumerable<string> AttestationTypes);

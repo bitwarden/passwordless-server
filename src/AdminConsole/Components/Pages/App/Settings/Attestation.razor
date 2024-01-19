@@ -6,19 +6,26 @@
 
 <Page Title="Attestation">
     <Panel Header="Authenticators">
-        <EditForm id="filter-attestation-form" class="flex flex-col space-y-4" EditContext="_filterContext" FormName="filter-attestation-form">
-            <div class="flex space-x-4">
-            </div>
+        @if (Filter != null)
+        {
+            <EditForm id="filter-attestation-form" class="flex flex-col space-y-4" Model="Filter" FormName="filter-attestation-form" OnValidSubmit="OnValidSubmit">
+                <div class="flex space-x-4">
+                    @foreach (var attestationType in Filter.AttestationTypes)
+                    {
+                        <InputCheckbox @bind-Value="attestationType.IsSelected" DisplayName="@attestationType.Name" />
+                    }
+                </div>
             
-            <div class="flex space-x-4">
+                <div class="flex space-x-4">
                 
-            </div>
-            <div class="flex space-x-4">
-                <button id="search-btn" class="btn btn-primary" type="submit" name="filter-attestation-form" value="search">Search</button>
-                <button id="reset-btn" class="btn btn-secondary" type="submit" name="filter-attestation-form" value="reset">Reset</button>
-            </div>
-        </EditForm>
-        <hr />
+                </div>
+                <div class="flex space-x-4">
+                    <button id="search-btn" class="btn btn-primary" type="submit" name="filter-attestation-form" value="search">Search</button>
+                    <button id="reset-btn" class="btn btn-secondary" type="submit" name="filter-attestation-form" value="reset">Reset</button>
+                </div>
+            </EditForm>
+        }
+        <hr/>
         <div class="mt-8 flow-root">
             <div class="overflow-y-hidden overflow-x-auto table-container">
                 <table class="tbl-default min-w-full">
@@ -87,18 +94,34 @@
     private IEnumerable<string> _certificationLevels;
     private IEnumerable<AuthenticatorDto> _data;
     
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        Filter ??= new FilterViewModel();
-        _filterContext = new EditContext(Filter);
         _attestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
         _certificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
+        Filter ??= new FilterViewModel
+        {
+            AttestationTypes = _attestationTypes.Select(x => new SelectableItem { Name = x }).ToList(),
+            CertificationLevels = _certificationLevels.Select(x => new SelectableItem { Name = x }).ToList()
+        };
+        _filterContext = new EditContext(Filter);
         _data = await PasswordlessClient.GetMetaDataStatementEntriesAsync();
     }
 
     public class FilterViewModel
     {
-        public IEnumerable<string> AttestationTypes { get; set; } = new List<string>();
-        public IEnumerable<string> CertificationLevels { get; set; } = new List<string>();
+        public ICollection<SelectableItem> AttestationTypes { get; set; }
+        public ICollection<SelectableItem> CertificationLevels { get; set; }
     }
+
+    public class SelectableItem
+    {
+        public string Name { get; set; }
+        public bool IsSelected { get; set; }
+    }
+
+    private void OnValidSubmit(EditContext editContext)
+    {
+        
+    }
+
 }

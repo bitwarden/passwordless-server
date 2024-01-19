@@ -1,5 +1,5 @@
-﻿using Fido2NetLib;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
+using Passwordless.Common.Models.MDS;
 using Passwordless.Service.MDS;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -32,10 +32,10 @@ public static class MetaDataServiceEndpoints
         
         parent.MapGet(
             "/entries",
-            async (IMetaDataService r) =>
+            async ([AsParameters] EntriesRequest request, IMetaDataService r) =>
             {
-                var result = await r.GetEntriesAsync();
+                var result = await r.GetEntriesAsync(request);
                 return Ok(result);
-            });
+            }).WithParameterValidation();
     }
 }

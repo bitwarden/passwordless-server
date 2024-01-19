@@ -35,21 +35,31 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
         return result;
     }
 
-    public async Task<IEnumerable<AuthenticatorDto>> GetEntriesAsync()
+    public async Task<IEnumerable<EntryResponse>> GetEntriesAsync(EntriesRequest request)
     {
         var blob = await GetDistributedCachedBlob(base._repositories.First());
         var result = blob.Entries
             .Where(x => x.MetadataStatement.ProtocolFamily == "fido2")
             .OrderBy(x => x.MetadataStatement.Description)
             .Select(x =>
-                new AuthenticatorDto(
+                new EntryResponse(
                     x.AaGuid!.Value,
                     x.MetadataStatement.Description,
                     x.StatusReports.Select(statusReport => statusReport.Status.ToString()),
                     x.MetadataStatement.AttestationTypes)
-                )
-            .ToList();
-        return result;
+            );
+
+        if (request.AttestationTypes != null)
+        {
+            result = result.Where(x => x.AttestationTypes.Any(y => request.AttestationTypes.Contains(y)));
+        }
+        
+        if (request.CertificationStatuses != null)
+        {
+            result = result.Where(x => x.CertificationStatuses.Any(y => request.CertificationStatuses.Contains(y)));
+        }
+        
+        return result.ToList();
     }
 
     public async Task<IEnumerable<string>> GetCertificationStatusesAsync()
