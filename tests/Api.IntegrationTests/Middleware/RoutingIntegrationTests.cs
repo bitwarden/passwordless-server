@@ -19,7 +19,7 @@ public class RoutingIntegrationTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task NonExistentEndpoint_Returns_NotFound_WhenBadFormatApiSecretHeadersAreProvided()
+    public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_secret_with_a_non_existing_endpoint()
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -35,7 +35,7 @@ public class RoutingIntegrationTests : IClassFixture<PasswordlessApiFactory>
     }
 
     [Fact]
-    public async Task NonExistentEndpoint_Returns_NotFound_WhenBadFormatApiKeyHeadersAreProvided()
+    public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_key_with_a_non_existing_endpoint()
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
