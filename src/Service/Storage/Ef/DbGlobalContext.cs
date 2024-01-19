@@ -39,7 +39,6 @@ public abstract class DbGlobalContext : DbContext
         modelBuilder.Entity<TokenKey>()
             .HasKey(c => new { c.Tenant, c.KeyId });
 
-
         modelBuilder.Entity<AccountMetaInformation>()
             .Ignore(c => c.AdminEmails)
             .HasKey(x => x.AcountName);
@@ -108,7 +107,7 @@ public abstract class DbGlobalContext : DbContext
             Scopes = [SecretKeyScopes.TokenRegister.GetValue(), SecretKeyScopes.TokenVerify.GetValue()]
         });
 
-        AccountInfo.Add(new AccountMetaInformation { Tenant = appName, AcountName = appName });
+        AccountInfo.Add(new AccountMetaInformation { Tenant = appName, AcountName = appName, AdminEmails = ["test@test.com"] });
 
         return Task.CompletedTask;
     }

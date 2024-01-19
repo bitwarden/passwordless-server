@@ -5,29 +5,31 @@ namespace Passwordless.Service.Models;
 
 public class EFStoredCredential : PerTenant
 {
-    public byte[] DescriptorId { get; set; }
+    public required byte[] DescriptorId { get; set; }
     public PublicKeyCredentialType? DescriptorType { get; set; }
-    public AuthenticatorTransport[] DescriptorTransports { get; set; }
-    public byte[] PublicKey { get; set; }
-    public byte[] UserHandle { get; set; }
-    public uint SignatureCounter { get; set; }
-    public string AttestationFmt { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public Guid AaGuid { get; set; }
+    public AuthenticatorTransport[]? DescriptorTransports { get; set; }
+    public required byte[] PublicKey { get; set; }
+    public required byte[] UserHandle { get; set; }
+    public required uint SignatureCounter { get; set; }
+    public required string AttestationFmt { get; set; }
+    public required DateTime CreatedAt { get; set; }
+    public Guid? AaGuid { get; set; }
     public DateTime LastUsedAt { get; set; }
-    public string RPID { get; set; }
-    public string Origin { get; set; }
-    public string Country { get; set; }
-    public string Device { get; set; }
-    public string Nickname { get; set; }
+    public required string RPID { get; set; }
+    public required string Origin { get; set; }
+    public string? Country { get; set; }
+    public string? Device { get; set; }
+    public string? Nickname { get; set; }
     public string UserId
     {
-        get
-        {
-            return Encoding.UTF8.GetString(UserHandle);
-        }
+        get => Encoding.UTF8.GetString(UserHandle);
+        // This setter is required by EF, but the value should already be
+        // set in UserHandle. Ideally, we'd remove this column and use a
+        // computed column or query filter instead, but it is what it is.
+        [Obsolete("This should only be used internally by EF.", true)]
         private set { }
     }
+
     public bool? BackupState { get; set; }
 
     public bool? IsBackupEligible { get; set; }
@@ -36,7 +38,7 @@ public class EFStoredCredential : PerTenant
 
     internal StoredCredential ToStoredCredential()
     {
-        return new StoredCredential()
+        return new StoredCredential
         {
             Descriptor = new PublicKeyCredentialDescriptor(DescriptorType.Value, DescriptorId, DescriptorTransports),
             PublicKey = PublicKey,
@@ -59,7 +61,7 @@ public class EFStoredCredential : PerTenant
 
     internal static EFStoredCredential FromStoredCredential(StoredCredential s, string tenant)
     {
-        return new EFStoredCredential()
+        return new EFStoredCredential
         {
             Tenant = tenant,
             PublicKey = s.PublicKey,

@@ -11,4 +11,6 @@ public class ApexChartOptions<TXValueType, TYValueType>
     public IEnumerable<Series<TYValueType>>? Series { get; set; }
 
     public Xaxis<TXValueType>? Xaxis { get; set; }
+
+    public NoData NoData { get; set; } = new();
 }

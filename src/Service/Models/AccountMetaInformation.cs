@@ -5,8 +5,9 @@ namespace Passwordless.Service.Models;
 
 public class AccountMetaInformation : PerTenant
 {
-    public string SubscriptionTier { get; set; }
-    public string[] AdminEmails { get; set; }
+    // Should probably be removed
+    public string? SubscriptionTier { get; set; }
+    public required string[] AdminEmails { get; set; }
 
     public string AdminEmailsSerialized
     {
@@ -19,11 +20,13 @@ public class AccountMetaInformation : PerTenant
             AdminEmails = JsonSerializer.Deserialize<string[]>(value);
         }
     }
-    public string AcountName { get; set; }
+
+    // Should probably be removed
+    public required string AcountName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? DeleteAt { get; set; }
 
-    public AppFeature Features { get; set; }
-    public virtual IReadOnlyCollection<ApplicationEvent> Events { get; set; }
-    public virtual IReadOnlyCollection<PeriodicCredentialReport> PeriodicCredentialReports { get; set; }
+    public AppFeature? Features { get; set; }
+    public virtual IReadOnlyCollection<ApplicationEvent>? Events { get; set; }
+    public virtual IReadOnlyCollection<PeriodicCredentialReport>? PeriodicCredentialReports { get; set; }
 }

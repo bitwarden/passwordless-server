@@ -13,6 +13,7 @@ public class ApiDescTests
             Tenant = "test",
             Id = "9795",
             ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795",
+            Scopes = new[] { "test" }
         };
 
         // Act
@@ -30,7 +31,8 @@ public class ApiDescTests
         {
             Tenant = "test",
             Id = "6d02",
-            ApiKey = "8572398573289572389573289572389572389572389"
+            ApiKey = "8572398573289572389573289572389572389572389",
+            Scopes = new[] { "test" }
         };
 
         // Act
