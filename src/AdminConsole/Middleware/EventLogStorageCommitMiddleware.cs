@@ -10,6 +10,7 @@ public partial class EventLogStorageCommitMiddleware
 
     public async Task InvokeAsync(HttpContext context, IEventLogger eventLogger)
     {
+        // If the request is not in our routing tables, skip this middleware.
         if (context.GetEndpoint() == null)
         {
             await _next(context);

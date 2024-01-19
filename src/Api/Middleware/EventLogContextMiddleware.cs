@@ -13,6 +13,7 @@ public class EventLogContextMiddleware
 
     public async Task InvokeAsync(HttpContext context, IEventLogContext eventLogContext, IFeatureContextProvider featureContextProvider)
     {
+        // If the request is not in our routing tables, skip this middleware.
         if (context.GetEndpoint() == null)
         {
             await _next(context);
