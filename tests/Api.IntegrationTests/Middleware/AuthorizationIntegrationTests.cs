@@ -19,7 +19,7 @@ public class AuthorizationIntegrationTests : IClassFixture<PasswordlessApiFactor
     }
 
     [Fact]
-    public async Task ExistentEndpointProtectedByApiKey_Returns_Unauthorized_WhenBadApiKeyIsProvided()
+    public async Task I_receive_a_403_when_i_use_a_invalid_api_key_with_an_existing_endpoint()
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -35,7 +35,7 @@ public class AuthorizationIntegrationTests : IClassFixture<PasswordlessApiFactor
     }
 
     [Fact]
-    public async Task ExistentEndpointProtectedByApiKey_Returns_Unauthorized_WhenBadFormatApiKeyIsProvided()
+    public async Task I_receive_a_403_when_i_use_a_badly_formatted_api_key_with_an_existing_endpoint()
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -51,7 +51,7 @@ public class AuthorizationIntegrationTests : IClassFixture<PasswordlessApiFactor
     }
 
     [Fact]
-    public async Task ExistentEndpointProtectedByApiSecret_Returns_Unauthorized_WhenBadApiSecretIsProvided()
+    public async Task I_receive_a_403_when_i_use_a_invalid_api_secret_with_an_existing_endpoint()
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -67,7 +67,7 @@ public class AuthorizationIntegrationTests : IClassFixture<PasswordlessApiFactor
     }
 
     [Fact]
-    public async Task ExistentEndpointProtectedByApiSecret_Returns_Unauthorized_WhenBadFormatApiSecretIsProvided()
+    public async Task I_receive_a_403_when_i_use_a_badly_formatted_api_secret_with_an_existing_endpoint()
     {
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
