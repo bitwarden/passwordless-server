@@ -14,7 +14,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
     Task<IEnumerable<string>> GetAttestationTypesAsync();
     Task<IEnumerable<string>> GetCertificationStatusesAsync();
-    Task<IEnumerable<AuthenticatorDto>> GetMetaDataStatementEntriesAsync();
+    Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync();
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -80,9 +80,9 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
     }
     
-    public async Task<IEnumerable<AuthenticatorDto> > GetMetaDataStatementEntriesAsync()
+    public async Task<IEnumerable<EntryResponse> > GetMetaDataStatementEntriesAsync()
     {
         var response = await _client.GetAsync("/mds/entries");
-        return (await response.Content.ReadFromJsonAsync<IEnumerable<AuthenticatorDto>>())!;
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<EntryResponse>>())!;
     }
 }

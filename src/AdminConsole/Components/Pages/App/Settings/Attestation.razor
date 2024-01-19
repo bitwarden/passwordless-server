@@ -3,22 +3,33 @@
 @using Passwordless.Common.Models.MDS
 
 @inject IScopedPasswordlessClient PasswordlessClient
+@inject IHttpContextAccessor HttpContextAccessor
 
 <Page Title="Attestation">
     <Panel Header="Authenticators">
-        @if (Filter != null)
+        @if (Filter != null && _attestationTypes != null && _certificationLevels != null)
         {
             <EditForm id="filter-attestation-form" class="flex flex-col space-y-4" Model="Filter" FormName="filter-attestation-form" OnValidSubmit="OnValidSubmit">
-                <div class="flex space-x-4">
-                    @foreach (var attestationType in Filter.AttestationTypes)
-                    {
-                        <InputCheckbox @bind-Value="attestationType.IsSelected" DisplayName="@attestationType.Name" />
-                    }
-                </div>
-            
-                <div class="flex space-x-4">
+                <InputText @bind-Value="Filter.Test" />
+                <label>
+                    Attestation Types:
+                    <InputSelect @bind-Value="Filter!.AttestationTypes">
+                        @foreach(var attestationType in _attestationTypes)
+                        {
+                            <option value="@attestationType" selected="@Filter.AttestationTypes.Contains(attestationType)">@attestationType</option>
+                        }
+                    </InputSelect>
+                </label>
+                <label>
+                    FIDO2 Certification:
+                    <InputSelect @bind-Value="Filter!.CertificationStatuses">
+                        @foreach(var certificationLevel in _certificationLevels)
+                        {
+                            <option value="@certificationLevel" selected="@Filter.CertificationStatuses.Contains(certificationLevel)">@certificationLevel</option>
+                        }
+                    </InputSelect>
+                </label>
                 
-                </div>
                 <div class="flex space-x-4">
                     <button id="search-btn" class="btn btn-primary" type="submit" name="filter-attestation-form" value="search">Search</button>
                     <button id="reset-btn" class="btn btn-secondary" type="submit" name="filter-attestation-form" value="reset">Reset</button>
@@ -66,7 +77,7 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-xs text-gray-500">
                                     <ul>
-                                        @foreach (var level in item.Certification)
+                                        @foreach (var level in item.CertificationStatuses)
                                         {
                                             <li>@level</li>
                                         }
@@ -88,40 +99,27 @@
     
     [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
     
-    private EditContext? _filterContext;
-
-    private IEnumerable<string> _attestationTypes;
-    private IEnumerable<string> _certificationLevels;
-    private IEnumerable<AuthenticatorDto> _data;
+    private IEnumerable<string>? _attestationTypes;
+    private IEnumerable<string>? _certificationLevels;
+    private IEnumerable<EntryResponse>? _data;
     
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         _attestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
         _certificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
-        Filter ??= new FilterViewModel
+
+        Filter ??= new FilterViewModel();
+
+        if (!HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {
-            AttestationTypes = _attestationTypes.Select(x => new SelectableItem { Name = x }).ToList(),
-            CertificationLevels = _certificationLevels.Select(x => new SelectableItem { Name = x }).ToList()
-        };
-        _filterContext = new EditContext(Filter);
-        _data = await PasswordlessClient.GetMetaDataStatementEntriesAsync();
+            _data = await PasswordlessClient.GetMetaDataStatementEntriesAsync();
+        }
     }
 
     public class FilterViewModel
     {
-        public ICollection<SelectableItem> AttestationTypes { get; set; }
-        public ICollection<SelectableItem> CertificationLevels { get; set; }
+        public string Test { get; set; }
+        public string[] AttestationTypes { get; set; } = Array.Empty<string>();
+        public string[] CertificationStatuses { get; set; } = Array.Empty<string>();
     }
-
-    public class SelectableItem
-    {
-        public string Name { get; set; }
-        public bool IsSelected { get; set; }
-    }
-
-    private void OnValidSubmit(EditContext editContext)
-    {
-        
-    }
-
 }
