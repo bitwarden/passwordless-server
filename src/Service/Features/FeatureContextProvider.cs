@@ -40,6 +40,8 @@ public class FeatureContextProvider : IFeatureContextProvider
             }
             catch (ArgumentException)
             {
+                // In case of a bad api key format, we may not be able to obtain the tenant context.
+                // We'll just return a null context as we won't have a need to log the bad api key.
                 return new NullFeaturesContext();
             }
 
