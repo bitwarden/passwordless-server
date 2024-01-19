@@ -1,10 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <!-- TODO: remove this and update EF Core models to properly support NOT NULL constraints -->
-    <Nullable>disable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Fido2" Version="4.0.0-beta11" />
     <PackageReference Include="Fido2.AspNet" Version="4.0.0-beta11" />

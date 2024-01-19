@@ -40,7 +40,7 @@ public class ApexChartJsonSerializerTests
         var expected = "{}";
 
         // Act
-        var actual = JsonSerializer.Serialize(new ApexChartOptions<string, int>(), ApexChartJsonSerializer.Options);
+        var actual = JsonSerializer.Serialize(new Xaxis<int>(), ApexChartJsonSerializer.Options);
 
         // Assert
         Assert.Equal(expected, actual);
@@ -50,7 +50,7 @@ public class ApexChartJsonSerializerTests
     public void Properties_Are_Serialized_With_CamelCase()
     {
         // Arrange
-        var expected = "{\"chart\":{\"type\":\"line\"}}";
+        var expected = "{\"chart\":{\"type\":\"line\"},\"noData\":{\"text\":\"No data available yet.\"}}";
 
         // Act
         var actual = JsonSerializer.Serialize(new ApexChartOptions<string, int>

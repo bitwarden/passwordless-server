@@ -35,7 +35,7 @@ public class FriendlyExceptionsMiddleware
         }
         catch (SqliteException e) when (env.IsDevelopment())
         {
-            // this is done to allow migrations to be applied in development mode
+            // This is done to allow migrations to be applied in development mode
             throw;
         }
         catch (ApiException apiException)
@@ -50,8 +50,8 @@ public class FriendlyExceptionsMiddleware
                 {
                     Status = apiException.StatusCode,
                     Title = apiException.Message,
-                    Type = $"https://docs.passwordless.dev/guide/errors.html#{apiException.ErrorCode}",
-                },
+                    Type = $"https://docs.passwordless.dev/guide/errors.html#{apiException.ErrorCode}"
+                }
             };
 
             var extras = apiException.Extras ?? new Dictionary<string, object>();
@@ -62,13 +62,32 @@ public class FriendlyExceptionsMiddleware
             {
                 problemDetailsContext.ProblemDetails.Extensions.TryAdd(pair.Key, pair.Value);
             }
+
             context.Response.StatusCode = apiException.StatusCode;
             await _problemDetailsService.WriteAsync(problemDetailsContext);
+        }
+        // 4xx errors produced by the framework
+        catch (BadHttpRequestException badRequestException)
+        {
+            Tracer.Instance.ActiveScope?.Span.SetException(badRequestException);
+            _logger.UncaughtException(badRequestException);
+
+            context.Response.StatusCode = badRequestException.StatusCode;
+            await _problemDetailsService.WriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = context,
+                ProblemDetails = new ProblemDetails
+                {
+                    Status = badRequestException.StatusCode,
+                    Title = badRequestException.Message
+                }
+            });
         }
         catch (Exception exception)
         {
             Tracer.Instance.ActiveScope?.Span.SetException(exception);
             _logger.UncaughtException(exception);
+
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await _problemDetailsService.WriteAsync(new ProblemDetailsContext
             {
@@ -76,8 +95,8 @@ public class FriendlyExceptionsMiddleware
                 ProblemDetails = new ProblemDetails
                 {
                     Detail = "The api has encountered an error",
-                    Status = StatusCodes.Status500InternalServerError,
-                },
+                    Status = StatusCodes.Status500InternalServerError
+                }
             });
         }
     }

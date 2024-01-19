@@ -5,7 +5,8 @@ namespace Passwordless.Service.EventLog.Models;
 
 public class ApplicationEvent : Event
 {
-    public string TenantId { get; init; }
-    public string ApiKeyId { get; init; }
-    public AccountMetaInformation Application { get; init; }
+    public required string TenantId { get; set; }
+    public string? ApiKeyId { get; set; }
+
+    public AccountMetaInformation? Application { get; set; }
 }

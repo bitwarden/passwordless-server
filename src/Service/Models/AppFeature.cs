@@ -29,5 +29,5 @@ public class AppFeature : PerTenant
     /// </summary>
     public bool IsGenerateSignInTokenEndpointEnabled { get; set; } = true;
 
-    public AccountMetaInformation Application { get; set; }
+    public AccountMetaInformation? Application { get; set; }
 }
