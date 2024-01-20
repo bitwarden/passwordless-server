@@ -24,6 +24,7 @@ public static class HttpClientTestExtensions
 
     public static HttpClient AddSecretKey(this HttpClient client, string secretKey)
     {
+        if (client.DefaultRequestHeaders.Contains("ApiSecret")) client.DefaultRequestHeaders.Remove("ApiSecret");
         client.DefaultRequestHeaders.Add("ApiSecret", secretKey);
         return client;
     }
