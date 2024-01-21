@@ -1,4 +1,5 @@
-﻿using Passwordless.Api.Authorization;
+﻿using Microsoft.AspNetCore.Mvc;
+using Passwordless.Api.Authorization;
 using Passwordless.Common.Models.MDS;
 using Passwordless.Service.MDS;
 using static Microsoft.AspNetCore.Http.Results;
@@ -32,7 +33,7 @@ public static class MetaDataServiceEndpoints
         
         parent.MapGet(
             "/entries",
-            async ([AsParameters] EntriesRequest request, IMetaDataService r) =>
+            async ([AsParameters] EntriesRequest request, IMetaDataService r, IHttpContextAccessor httpContextAccessor) =>
             {
                 var result = await r.GetEntriesAsync(request);
                 return Ok(result);

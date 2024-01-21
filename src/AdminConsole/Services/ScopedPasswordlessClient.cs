@@ -1,3 +1,4 @@
+using System.Collections;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
@@ -14,7 +15,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
     Task<IEnumerable<string>> GetAttestationTypesAsync();
     Task<IEnumerable<string>> GetCertificationStatusesAsync();
-    Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync();
+    Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -80,9 +81,24 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
     }
     
-    public async Task<IEnumerable<EntryResponse> > GetMetaDataStatementEntriesAsync()
+    public async Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request)
     {
-        var response = await _client.GetAsync("/mds/entries");
-        return (await response.Content.ReadFromJsonAsync<IEnumerable<EntryResponse>>())!;
+        var queryBuilder = new QueryBuilder();
+        if (request.AttestationTypes != null)
+        {
+            foreach (var attestationType in request.AttestationTypes)
+            {
+                queryBuilder.Add(nameof(request.AttestationTypes), attestationType);
+            }
+        }
+        if (request.CertificationStatuses != null)
+        {
+            foreach (var certificationStatus in request.CertificationStatuses)
+            {
+                queryBuilder.Add(nameof(request.CertificationStatuses), certificationStatus);
+            }
+        }
+        var q = queryBuilder.ToQueryString();
+        return (await _client.GetFromJsonAsync<EntryResponse[]>($"/mds/entries{q}"))!;
     }
 }

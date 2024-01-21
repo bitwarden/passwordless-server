@@ -49,12 +49,12 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
                     x.MetadataStatement.AttestationTypes)
             );
 
-        if (request.AttestationTypes != null)
+        if (request.AttestationTypes != null && request.AttestationTypes.Any())
         {
             result = result.Where(x => x.AttestationTypes.Any(y => request.AttestationTypes.Contains(y)));
         }
         
-        if (request.CertificationStatuses != null)
+        if (request.CertificationStatuses != null && request.CertificationStatuses.Any())
         {
             result = result.Where(x => x.CertificationStatuses.Any(y => request.CertificationStatuses.Contains(y)));
         }

@@ -5,16 +5,16 @@
 @inject IScopedPasswordlessClient PasswordlessClient
 @inject IHttpContextAccessor HttpContextAccessor
 
-<Page Title="Attestation">
+@if (_isInitialized)
+{
+    <Page Title="Attestation">
     <Panel Header="Authenticators">
-        @if (Filter != null && _attestationTypes != null && _certificationLevels != null)
-        {
-            <EditForm id="filter-attestation-form" class="flex flex-col space-y-4" Model="Filter" FormName="filter-attestation-form" OnValidSubmit="OnValidSubmit">
-                <InputText @bind-Value="Filter.Test" />
+        <EditForm id="filter-attestation-form" class="flex flex-col space-y-4" Model="Filter" FormName="filter-attestation-form">
+            <div class="grid grid-cols-2 gap-4">
                 <label>
                     Attestation Types:
-                    <InputSelect @bind-Value="Filter!.AttestationTypes">
-                        @foreach(var attestationType in _attestationTypes)
+                    <InputSelect @bind-Value="Filter!.AttestationTypes" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        @foreach (var attestationType in _attestationTypes)
                         {
                             <option value="@attestationType" selected="@Filter.AttestationTypes.Contains(attestationType)">@attestationType</option>
                         }
@@ -22,20 +22,21 @@
                 </label>
                 <label>
                     FIDO2 Certification:
-                    <InputSelect @bind-Value="Filter!.CertificationStatuses">
-                        @foreach(var certificationLevel in _certificationLevels)
+                    <InputSelect @bind-Value="Filter!.CertificationStatuses" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        @foreach (var certificationLevel in _certificationLevels)
                         {
                             <option value="@certificationLevel" selected="@Filter.CertificationStatuses.Contains(certificationLevel)">@certificationLevel</option>
                         }
                     </InputSelect>
                 </label>
                 
-                <div class="flex space-x-4">
-                    <button id="search-btn" class="btn btn-primary" type="submit" name="filter-attestation-form" value="search">Search</button>
-                    <button id="reset-btn" class="btn btn-secondary" type="submit" name="filter-attestation-form" value="reset">Reset</button>
-                </div>
-            </EditForm>
-        }
+            </div>
+            <div class="flex space-x-4">
+                <button id="search-btn" class="btn btn-primary" type="submit" name="filter-attestation-form" value="search">Search</button>
+                <button id="reset-btn" class="btn btn-secondary" type="submit" name="filter-attestation-form" value="reset">Reset</button>
+            </div>
+        </EditForm>
+
         <hr/>
         <div class="mt-8 flow-root">
             <div class="overflow-y-hidden overflow-x-auto table-container">
@@ -86,18 +87,20 @@
                             </tr>
                         }
                     }
-
                     </tbody>
                 </table>
             </div>
         </div>
     </Panel>
 </Page>
+}
 
 @code {
+    private bool _isInitialized
+    ;
     [Parameter] public required string App { get; set; }
-    
-    [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
+
+    [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; } = new ();
     
     private IEnumerable<string>? _attestationTypes;
     private IEnumerable<string>? _certificationLevels;
@@ -107,19 +110,24 @@
     {
         _attestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
         _certificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
+        
+        _data = await PasswordlessClient.GetMetaDataStatementEntriesAsync(Filter!.ToDto());
 
-        Filter ??= new FilterViewModel();
-
-        if (!HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            _data = await PasswordlessClient.GetMetaDataStatementEntriesAsync();
-        }
+        _isInitialized = true;
     }
 
     public class FilterViewModel
     {
-        public string Test { get; set; }
         public string[] AttestationTypes { get; set; } = Array.Empty<string>();
         public string[] CertificationStatuses { get; set; } = Array.Empty<string>();
+
+        public EntriesRequest ToDto()
+        {
+            return new EntriesRequest
+            {
+                AttestationTypes = AttestationTypes,
+                CertificationStatuses = CertificationStatuses
+            };
+        }
     }
 }
