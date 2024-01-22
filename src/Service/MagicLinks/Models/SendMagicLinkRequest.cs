@@ -16,7 +16,7 @@ public class SendMagicLinkRequest
 
     [Required]
     public string UserId { get; init; }
-    
+
     public MagicLinkDTO ToDto() => new()
     {
         UserId = UserId,
