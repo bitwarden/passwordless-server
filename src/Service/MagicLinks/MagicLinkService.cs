@@ -15,7 +15,7 @@ public class MagicLinkService
         _mailProvider = mailProvider;
     }
 
-    public async Task<MagicLinkResult> SendMagicLink(MagicLinkDTO dto)
+    public async Task SendMagicLink(MagicLinkDTO dto)
     {
         var token = await _fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
 
@@ -45,17 +45,5 @@ public class MagicLinkService
                  </html>
                  """
         });
-
-        return new MagicLinkResult();
-    }
-
-    public class Result
-    {
-        public bool Success { get; set; }
-        public string ErrorMessage { get; set; }
-    }
-
-    public class MagicLinkResult : Result
-    {
     }
 }

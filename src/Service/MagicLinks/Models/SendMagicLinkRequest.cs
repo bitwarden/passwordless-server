@@ -16,15 +16,11 @@ public class SendMagicLinkRequest
 
     [Required]
     public string UserId { get; init; }
-}
-
-public static class SendMagicLinkRequestExtensions
-{
-    public static MagicLinkDTO ToDto(this SendMagicLinkRequest request) =>
-        new()
-        {
-            UserId = request.UserId,
-            EmailAddress = new MailAddress(request.EmailAddress),
-            LinkTemplate = request.UrlTemplate
-        };
+    
+    public MagicLinkDTO ToDto() => new()
+    {
+        UserId = UserId,
+        EmailAddress = new MailAddress(EmailAddress),
+        LinkTemplate = UrlTemplate
+    };
 }
