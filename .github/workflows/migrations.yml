@@ -22,10 +22,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  # Checks if the PR contains database changes
+  # Checks if the diff contains database changes
   check:
-    if: ${{ github.event_name == 'pull_request' }}
-
     strategy:
       matrix:
         app:
@@ -62,14 +60,16 @@ jobs:
           --json
           --prefix-output
           --no-connect
-          | grep -E '^Data:'
-          | sed -E 's/^Data: (.*)$/\1/'
+          | grep -E '^data:'
+          | sed -E 's/^data: (.*)$/\1/'
           | jq -r '.[] | .Id'
           | tee migrations.txt
 
       - name: Produce summary
         run: |
-          $diff=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          $diff=$(git diff --name-only \
+            ${{ github.event.pull_request.base.sha || 'HEAD~1' }} \
+            ${{ github.event.pull_request.head.sha }})
 
           $pending=()
           for $migration in $(cat migrations.txt); do
