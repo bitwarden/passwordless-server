@@ -179,7 +179,7 @@ app.MapAliasEndpoints();
 app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
-if(app.Environment.IsDevelopment()) app.MapMagicEndpoints();
+if (app.Environment.IsDevelopment()) app.MapMagicEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
 app.MapReportingEndpoints();
