@@ -67,9 +67,9 @@ jobs:
 
       - name: Produce summary
         run: |
-          $diff = git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
+          $diff=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
-          $pending = ()
+          $pending=()
           for $migration in $(cat migrations.txt); do
             if echo $diff | grep -q $migration; then
               $pending += $migration
@@ -123,7 +123,6 @@ jobs:
           --project src/${{ matrix.app }}
           --context ${{ matrix.ef-context }}
           --idempotent
-          --no-connect
           --output migrations.sql
 
       - name: Produce summary
