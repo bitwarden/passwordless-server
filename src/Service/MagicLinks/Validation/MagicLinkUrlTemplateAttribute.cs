@@ -15,8 +15,8 @@ public class MagicLinkTemplateUrlAttribute : ValidationAttribute
         if (!stringValue.Contains(TokenTemplate))
             return new ValidationResult($"Value must contain the `{TokenTemplate}` template.");
 
-        if (!(Uri.TryCreate(stringValue, UriKind.Absolute, out Uri uriResult)
-              && (uriResult!.Scheme == Uri.UriSchemeHttp
+        if (!(Uri.TryCreate(stringValue, UriKind.Absolute, out var uriResult)
+              && (uriResult.Scheme == Uri.UriSchemeHttp
                   || uriResult.Scheme == Uri.UriSchemeHttps)))
             return new ValidationResult("Value must be a valid URL.");
 

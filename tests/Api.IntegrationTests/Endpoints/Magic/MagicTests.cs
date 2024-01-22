@@ -74,7 +74,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var responseDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         responseDetails.Should().NotBeNull();
-        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals("LinkTemplate", StringComparison.CurrentCultureIgnoreCase));
+        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals(nameof(request.UrlTemplate), StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
         magicLinkUrlError.Value.Should().ContainMatch("Value must contain the `<token>` template.");
     }
@@ -99,9 +99,9 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var responseDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         responseDetails.Should().NotBeNull();
-        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals("LinkTemplate", StringComparison.CurrentCultureIgnoreCase));
+        var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals(nameof(request.UrlTemplate), StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
-        magicLinkUrlError.Value.Should().ContainMatch("Value must be a valid url.");
+        magicLinkUrlError.Value.Should().ContainMatch("Value must be a valid URL.");
     }
 
     public void Dispose()
