@@ -64,7 +64,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         _client.AddSecretKey(appCreated!.ApiSecret1);
         _ = await _client.EnableMagicLinks("a_user");
         var request = _requestFaker
-            .RuleFor(x => x.LinkTemplate, faker => faker.Internet.Url())
+            .RuleFor(x => x.UrlTemplate, faker => faker.Internet.Url())
             .Generate();
 
         // Act
@@ -89,7 +89,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         _client.AddSecretKey(appCreated!.ApiSecret1);
         await _client.EnableMagicLinks("a_user");
         var request = _requestFaker
-            .RuleFor(x => x.LinkTemplate, () => "<token>")
+            .RuleFor(x => x.UrlTemplate, () => "<token>")
             .Generate();
 
         // Act

@@ -204,7 +204,7 @@ public class SettingsModel : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostSettingsAsync()
     {
-        static bool? GetChangedValueForRequest(bool originalValue, bool postedValue) =>
+        static bool? GetFinalValue(bool originalValue, bool postedValue) =>
             originalValue == postedValue ? null : postedValue;
 
         if (string.IsNullOrWhiteSpace(_currentContext.AppId) || string.IsNullOrWhiteSpace(User.Identity?.Name))
@@ -218,8 +218,8 @@ public class SettingsModel : BaseExtendedPageModel
             {
                 PerformedBy = User.Identity!.Name,
                 EnableManuallyGeneratedAuthenticationTokens =
-                    GetChangedValueForRequest(_currentContext.Features.IsGenerateSignInTokenEndpointEnabled, IsManualTokenGenerationEnabled),
-                EnableMagicLinks = GetChangedValueForRequest(_currentContext.Features.IsMagicLinksEnabled, IsMagicLinksEnabled)
+                    GetFinalValue(_currentContext.Features.IsGenerateSignInTokenEndpointEnabled, IsManualTokenGenerationEnabled),
+                EnableMagicLinks = GetFinalValue(_currentContext.Features.IsMagicLinksEnabled, IsMagicLinksEnabled)
             });
 
             return RedirectToPage();

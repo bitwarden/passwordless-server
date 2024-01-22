@@ -11,9 +11,8 @@ public record ApplicationFeatureContext(
     bool IsGenerateSignInTokenEndpointEnabled,
     bool IsMagicLinksEnabled)
 {
-    public static ApplicationFeatureContext FromDto(AppFeatureResponse dto)
-    {
-        return new ApplicationFeatureContext(
+    public static ApplicationFeatureContext FromDto(AppFeatureResponse dto) =>
+        new(
             dto.EventLoggingIsEnabled,
             dto.EventLoggingRetentionPeriod,
             dto.DeveloperLoggingEndsAt,
@@ -21,5 +20,4 @@ public record ApplicationFeatureContext(
             dto.AllowAttestation,
             dto.IsGenerateSignInTokenEndpointEnabled,
             dto.IsMagicLinksEnabled);
-    }
 }
