@@ -18,7 +18,7 @@ public class MagicLinkTemplateUrlAttribute : ValidationAttribute
         if (!(Uri.TryCreate(stringValue, UriKind.Absolute, out Uri uriResult)
               && (uriResult!.Scheme == Uri.UriSchemeHttp
                   || uriResult.Scheme == Uri.UriSchemeHttps)))
-            return new ValidationResult("Value must be a valid url.");
+            return new ValidationResult("Value must be a valid URL.");
 
         return ValidationResult.Success;
     }
