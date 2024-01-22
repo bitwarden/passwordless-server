@@ -5,26 +5,32 @@ public static class HttpClientTestExtensions
     public const string ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795";
     public const string ApiSecret = "test:secret:a679563b331846c79c20b114a4f56d02";
 
+    private const string ManagementKeyHeaderKey = "ManagementKey";
+    private const string ApiSecretHeaderKey = "ApiSecret";
+    private const string ApiKeyHeaderKey = "ApiKey";
+
     public static bool HasPublicKey(this HttpClient client) =>
-        client.DefaultRequestHeaders.Contains("ApiKey");
+        client.DefaultRequestHeaders.Contains(ApiKeyHeaderKey);
 
     public static HttpClient AddPublicKey(this HttpClient client) =>
         client.AddPublicKey(ApiKey);
 
     public static HttpClient AddPublicKey(this HttpClient client, string apiKey)
     {
-        client.DefaultRequestHeaders.Add("ApiKey", apiKey);
+        if (client.HasPublicKey()) client.DefaultRequestHeaders.Remove(ApiKeyHeaderKey);
+        client.DefaultRequestHeaders.Add(ApiKeyHeaderKey, apiKey);
         return client;
     }
 
     public static bool HasSecretKey(this HttpClient client) =>
-        client.DefaultRequestHeaders.Contains("ApiSecret");
+        client.DefaultRequestHeaders.Contains(ApiSecretHeaderKey);
 
     public static HttpClient AddSecretKey(this HttpClient client) => client.AddSecretKey(ApiSecret);
 
     public static HttpClient AddSecretKey(this HttpClient client, string secretKey)
     {
-        client.DefaultRequestHeaders.Add("ApiSecret", secretKey);
+        if (client.HasSecretKey()) client.DefaultRequestHeaders.Remove(ApiSecretHeaderKey);
+        client.DefaultRequestHeaders.Add(ApiSecretHeaderKey, secretKey);
         return client;
     }
 
@@ -34,12 +40,12 @@ public static class HttpClientTestExtensions
         return client;
     }
 
-    public static bool HasManagementKey(this HttpClient client) =>
-        client.DefaultRequestHeaders.Contains("ManagementKey");
+    public static bool HasManagementKey(this HttpClient client) => client.DefaultRequestHeaders.Contains(ManagementKeyHeaderKey);
 
     public static HttpClient AddManagementKey(this HttpClient client)
     {
-        client.DefaultRequestHeaders.Add("ManagementKey", "shared_dev_key");
+        if (client.HasManagementKey()) client.DefaultRequestHeaders.Remove(ManagementKeyHeaderKey);
+        client.DefaultRequestHeaders.Add(ManagementKeyHeaderKey, "shared_dev_key");
         return client;
     }
 

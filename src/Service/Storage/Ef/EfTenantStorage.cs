@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
@@ -168,12 +167,11 @@ public class EfTenantStorage : ITenantStorage
         return !await db.Aliases.AnyAsync(a => aliases.Contains(a.Alias) && a.UserId != userId);
     }
 
-    public async Task SetFeaturesAsync(SetFeaturesDto features)
-    {
-        var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
-        existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
-        await db.SaveChangesAsync();
-    }
+    public async Task SetFeaturesAsync(SetFeaturesRequest features) =>
+        await db.AppFeatures.ExecuteUpdateAsync(x => x
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, existing => features.EnableManuallyGeneratedAuthenticationTokens ?? existing.IsGenerateSignInTokenEndpointEnabled)
+            .SetProperty(f => f.IsMagicLinksEnabled, existing => features.EnableMagicLinks ?? existing.IsMagicLinksEnabled)
+            .SetProperty(f => f.EventLoggingRetentionPeriod, existing => features.EventLoggingRetentionPeriod ?? existing.EventLoggingRetentionPeriod));
 
     public async Task SetFeaturesAsync(ManageFeaturesRequest features)
     {
@@ -224,18 +222,6 @@ public class EfTenantStorage : ITenantStorage
         }
     }
 
-    public async Task EnableGenerateSignInTokenEndpoint()
-    {
-        await db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, true));
-    }
-
-    public async Task DisableGenerateSignInTokenEndpoint()
-    {
-        await db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, false));
-    }
-
     public async Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(
         DateOnly? from,
         DateOnly? to)
@@ -254,14 +240,6 @@ public class EfTenantStorage : ITenantStorage
             .OrderBy(x => x.CreatedAt)
             .ToListAsync();
     }
-
-    public Task EnableMagicLinks() =>
-        db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.IsMagicLinksEnabled, true));
-
-    public Task DisableMagicLinks() =>
-        db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.IsMagicLinksEnabled, false));
 
     public async Task LockAllApiKeys(bool isLocked)
     {

@@ -6,6 +6,7 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -18,7 +19,7 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
-    private readonly IPasswordlessManagementClient _managementClient;
+    private readonly IScopedPasswordlessClient _scopedPasswordlessClient;
     private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
@@ -30,6 +31,7 @@ public class SettingsModel : BaseExtendedPageModel
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
         IOptions<BillingOptions> billingOptions,
+        IScopedPasswordlessClient scopedPasswordlessClient,
         IEventLogger eventLogger)
     {
         _logger = logger;
@@ -37,7 +39,7 @@ public class SettingsModel : BaseExtendedPageModel
         _currentContext = currentContext;
         _appService = appService;
         _billingService = billingService;
-        _managementClient = managementClient;
+        _scopedPasswordlessClient = scopedPasswordlessClient;
         _billingOptions = billingOptions.Value;
         ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
@@ -69,8 +71,7 @@ public class SettingsModel : BaseExtendedPageModel
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
 
-        if (application == null) throw new InvalidOperationException("Application not found.");
-        Application = application;
+        Application = application ?? throw new InvalidOperationException("Application not found.");
 
         IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
         IsMagicLinksEnabled = _currentContext.Features.IsMagicLinksEnabled;
@@ -203,6 +204,9 @@ public class SettingsModel : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostSettingsAsync()
     {
+        static bool? GetChangedValueForRequest(bool originalValue, bool postedValue) =>
+            originalValue == postedValue ? null : postedValue;
+
         if (string.IsNullOrWhiteSpace(_currentContext.AppId) || string.IsNullOrWhiteSpace(User.Identity?.Name))
         {
             return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
@@ -210,18 +214,13 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            var settingsTasks = new List<Task>
+            await _scopedPasswordlessClient.SetFeaturesAsync(new SetFeaturesRequest
             {
-                IsManualTokenGenerationEnabled
-                    ? _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name)
-                    : _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name),
-
-                IsMagicLinksEnabled
-                    ? _managementClient.EnableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
-                    : _managementClient.DisableMagicLinksAsync(_currentContext.AppId, User.Identity.Name)
-            };
-
-            await Task.WhenAll(settingsTasks);
+                PerformedBy = User.Identity!.Name,
+                EnableManuallyGeneratedAuthenticationTokens =
+                    GetChangedValueForRequest(_currentContext.Features.IsGenerateSignInTokenEndpointEnabled, IsManualTokenGenerationEnabled),
+                EnableMagicLinks = GetChangedValueForRequest(_currentContext.Features.IsMagicLinksEnabled, IsMagicLinksEnabled)
+            });
 
             return RedirectToPage();
         }

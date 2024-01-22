@@ -23,8 +23,8 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
         // Act
@@ -43,8 +43,8 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = await _client.DisableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
+        _ = await _client.DisableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
         // Act
@@ -61,8 +61,8 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
+        _ = await _client.EnableMagicLinks("a_user");
         var request = _requestFaker
             .RuleFor(x => x.LinkTemplate, faker => faker.Internet.Url())
             .Generate();
@@ -86,8 +86,8 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = await _client.EnableMagicLinks(applicationName, "a_user");
         _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
         var request = _requestFaker
             .RuleFor(x => x.LinkTemplate, () => "<token>")
             .Generate();

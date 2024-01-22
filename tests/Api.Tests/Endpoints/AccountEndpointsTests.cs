@@ -7,7 +7,6 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
 
@@ -119,7 +118,7 @@ public class AccountEndpointsTests
     [Fact]
     public async Task SetFeaturesAsync_Returns_ExpectedResult()
     {
-        var payload = new SetFeaturesDto
+        var payload = new SetFeaturesRequest
         {
             EventLoggingRetentionPeriod = 14
         };
