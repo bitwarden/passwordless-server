@@ -15,7 +15,7 @@ namespace Passwordless.Service.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
 
             modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
                 {
@@ -64,6 +64,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AdminEmailsSerialized")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -76,6 +77,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Tenant")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("AcountName");
@@ -95,6 +97,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "Alias");
@@ -114,6 +117,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ApiKey")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -129,6 +133,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Scopes")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "Id");
@@ -179,10 +184,11 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<byte[]>("DescriptorId")
                         .HasColumnType("BLOB");
 
-                    b.Property<Guid>("AaGuid")
+                    b.Property<Guid?>("AaGuid")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AttestationFmt")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool?>("BackupState")
@@ -216,21 +222,26 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Origin")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("PublicKey")
+                        .IsRequired()
                         .HasColumnType("BLOB");
 
                     b.Property<string>("RPID")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<uint>("SignatureCounter")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("UserHandle")
+                        .IsRequired()
                         .HasColumnType("BLOB");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "DescriptorId");
@@ -269,6 +280,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("KeyMaterial")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "KeyId");

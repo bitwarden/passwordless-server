@@ -22,9 +22,22 @@ public sealed class CredentialsModel
         Items = items
             .Select(x =>
             {
-                var viewModel = new CredentialModel(x.Descriptor.Id, x.PublicKey, x.SignatureCounter,
-                    x.AttestationFmt, x.CreatedAt, x.AaGuid, x.LastUsedAt, x.RPID, x.Origin, x.Device, x.Nickname);
-                viewModel.AuthenticatorName = _authenticatorDataProvider.GetName(x.AaGuid);
+                var viewModel = new CredentialModel(
+                    x.Descriptor.Id,
+                    x.PublicKey,
+                    x.SignatureCounter,
+                    x.AttestationFmt,
+                    x.CreatedAt,
+                    x.AaGuid,
+                    x.LastUsedAt,
+                    x.RPID,
+                    x.Origin,
+                    x.Device,
+                    x.Nickname,
+                    x.BackupState,
+                    x.IsBackupEligible,
+                    x.IsDiscoverable,
+                    _authenticatorDataProvider.GetName(x.AaGuid));
                 return viewModel;
             }).ToList();
     }
@@ -61,11 +74,11 @@ public sealed class CredentialsModel
 
         public string Nickname { get; }
 
-        public bool? BackupState { get; set; }
+        public bool? BackupState { get; }
 
-        public bool? IsBackupEligible { get; set; }
+        public bool? IsBackupEligible { get; }
 
-        public bool? IsDiscoverable { get; set; }
+        public bool? IsDiscoverable { get; }
 
         public string AuthenticatorName { get; set; }
 
@@ -126,7 +139,22 @@ public sealed class CredentialsModel
 
         public bool IsAuthenticatorKnown => AaGuid != Guid.Empty;
 
-        public CredentialModel(byte[] descriptorId, byte[] publicKey, uint signatureCounter, string attestationFmt, DateTime createdAt, Guid aaGuid, DateTime lastUsedAt, string rpid, string origin, string device, string nickname)
+        public CredentialModel(
+            byte[] descriptorId,
+            byte[] publicKey,
+            uint signatureCounter,
+            string attestationFmt,
+            DateTime createdAt,
+            Guid aaGuid,
+            DateTime lastUsedAt,
+            string rpid,
+            string origin,
+            string device,
+            string nickname,
+            bool? backupState,
+            bool? isBackupEligible,
+            bool? isDiscoverable,
+            string authenticatorName)
         {
             DescriptorId = descriptorId.ToBase64Url();
             PublicKey = publicKey;
@@ -139,6 +167,10 @@ public sealed class CredentialsModel
             Origin = origin;
             Device = device;
             Nickname = nickname;
+            BackupState = backupState;
+            IsBackupEligible = isBackupEligible;
+            IsDiscoverable = isDiscoverable;
+            AuthenticatorName = authenticatorName;
         }
     }
 }
