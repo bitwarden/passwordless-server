@@ -113,6 +113,17 @@
     }
 </panel>
 
+@if (Model.IsAttestationAllowed)
+{
+    <panel header="Attestation">
+        <p>When attestation is enabled, you can choose to limit the authenticators used with your application.</p>
+        
+        <div>
+            <a class="btn-primary" href="/app/@Model.ApplicationId/settings/authenticators">View authenticators</a>
+        </div>
+    </panel>
+}
+
 @section Scripts
 {
     <script type="module">
