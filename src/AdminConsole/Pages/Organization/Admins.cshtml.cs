@@ -133,22 +133,25 @@ public class Admins : PageModel
 
     public async Task<IActionResult> OnPostCancel(string hashedCode)
     {
-        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId().Value);
+        Invites = await _invitationService.GetInvitesAsync(User.GetOrgId()!.Value);
 
         var inviteToCancel = Invites.FirstOrDefault(x => x.HashedCode == hashedCode);
 
-        await _invitationService.CancelInviteAsync(hashedCode);
+        if (inviteToCancel is null)
+        {
+            ModelState.AddModelError("error", "Could not cancel because invite could not be found.");
+            return await OnGet();
+        }
+
+        await _invitationService.CancelInviteAsync(inviteToCancel.HashedCode);
 
         var performedBy = await _dataService.GetUserAsync();
 
-        if (inviteToCancel is not null)
-        {
-            _eventLogger.LogCancelAdminInviteEvent(
-                performedBy,
-                inviteToCancel.ToEmail,
-                _timeProvider.GetUtcNow().UtcDateTime
-            );
-        }
+        _eventLogger.LogCancelAdminInviteEvent(
+            performedBy,
+            inviteToCancel.ToEmail,
+            _timeProvider.GetUtcNow().UtcDateTime
+        );
 
         return RedirectToPage();
     }
