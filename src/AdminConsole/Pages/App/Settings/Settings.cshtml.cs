@@ -1,11 +1,9 @@
 ﻿using System.Collections.Immutable;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Middleware;
-using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Application = Passwordless.AdminConsole.Models.Application;
@@ -254,7 +252,7 @@ public class SettingsModel : BaseExtendedPageModel
             isOutdated);
         Plans.Add(model);
     }
-    
+
     public bool IsAttestationAllowed => _currentContext.Features.AllowAttestation;
 
     public record PlanModel(
