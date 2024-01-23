@@ -72,7 +72,7 @@ public abstract class DbGlobalContext : DbContext
         
         modelBuilder.Entity<Authenticator>(b =>
         {
-            b.HasKey(x => x.Tenant);
+            b.HasKey(x => new { x.Tenant, x.AaGuid });
 
             b.HasOne(x => x.AppFeature)
                 .WithMany(x => x.Authenticators)

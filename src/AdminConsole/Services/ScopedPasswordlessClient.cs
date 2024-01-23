@@ -17,6 +17,8 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task<IEnumerable<string>> GetCertificationStatusesAsync();
     Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
     Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
+    Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request);
+    Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -109,5 +111,17 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         queryBuilder.Add(nameof(request.IsAllowed), request.IsAllowed.ToString());
         var q = queryBuilder.ToQueryString();
         return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/apps/list-authenticators{q}"))!;
+    }
+    
+    public async Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("/apps/whitelist-authenticators", request);
+        response.EnsureSuccessStatusCode();
+    }
+    
+    public async Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("/apps/delist-authenticators", request);
+        response.EnsureSuccessStatusCode();
     }
 }

@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -171,25 +171,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("AppFeatures");
                 });
 
-            modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
-                {
-                    b.Property<string>("Tenant")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid>("AaGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsAllowed")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Tenant");
-
-                    b.ToTable("Authenticators");
-                });
-
             modelBuilder.Entity("Passwordless.Service.Models.EFStoredCredential", b =>
                 {
                     b.Property<string>("Tenant")
@@ -317,17 +298,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("Application");
                 });
 
-            modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
-                {
-                    b.HasOne("Passwordless.Service.Models.AppFeature", "AppFeature")
-                        .WithMany("Authenticators")
-                        .HasForeignKey("Tenant")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppFeature");
-                });
-
             modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -346,11 +316,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("Features");
 
                     b.Navigation("PeriodicCredentialReports");
-                });
-
-            modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
-                {
-                    b.Navigation("Authenticators");
                 });
 #pragma warning restore 612, 618
         }

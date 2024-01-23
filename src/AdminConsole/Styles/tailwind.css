@@ -155,6 +155,10 @@
     div.table-container {
         @apply overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg;
     }
+    
+    tr.selected {
+        @apply bg-blue-100;
+    }
 
     .pricing-card {
         @apply bg-white shadow sm:rounded-lg p-4 flex flex-col space-y-4 border-2 border-gray-200;

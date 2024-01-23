@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
@@ -261,6 +260,36 @@ public class EfTenantStorage : ITenantStorage
         return await db.Authenticators
             .Where(x => x.IsAllowed == isAllowed)
             .ToListAsync();
+    }
+
+    public async Task WhitelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
+    {
+        var existingAuthenticators = db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid));
+        
+        await existingAuthenticators.ExecuteUpdateAsync(x => x
+                .SetProperty(x => x.IsAllowed, true)
+            );
+        
+        var existingAaGuids = await existingAuthenticators.Select(x => x.AaGuid).ToListAsync();
+        var newAuthenticators = aaGuids
+            .Where(x => !existingAaGuids.Contains(x))
+            .Select(x => new Authenticator
+            {
+                AaGuid = x,
+                IsAllowed = true,
+                CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+                Tenant = Tenant
+            }).ToList();
+        
+        db.Authenticators.AddRange(newAuthenticators);
+        await db.SaveChangesAsync();
+    }
+
+    public Task DelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
+    {
+        return db.Authenticators
+            .Where(x => aaGuids.Contains(x.AaGuid))
+            .ExecuteDeleteAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

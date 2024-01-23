@@ -1,5 +1,6 @@
 @page "/app/{app}/settings/authenticators/manage"
 @using Passwordless.AdminConsole.Services
+@using Passwordless.Common.Models.Apps
 @using Passwordless.Common.Models.MDS
 
 @inherits BaseApplicationPage
@@ -14,8 +15,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label>
                         Attestation Types:
-                        <InputSelect @bind-Value="FilterForm!.AttestationTypes" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                            @foreach (var attestationType in _attestationTypes!)
+                        <InputSelect @bind-Value="FilterForm.AttestationTypes" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            @foreach (var attestationType in AttestationTypes!)
                             {
                                 <option value="@attestationType" selected="@FilterForm.AttestationTypes!.Contains(attestationType)">@attestationType</option>
                             }
@@ -23,45 +24,45 @@
                     </label>
                     <label>
                         FIDO2 Certification:
-                        <InputSelect @bind-Value="FilterForm!.CertificationStatuses" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                            @foreach (var certificationLevel in _certificationLevels!)
+                        <InputSelect @bind-Value="FilterForm.CertificationStatuses" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            @foreach (var certificationLevel in CertificationLevels!)
                             {
                                 <option value="@certificationLevel" selected="@FilterForm.CertificationStatuses!.Contains(certificationLevel)">@certificationLevel</option>
                             }
                         </InputSelect>
                     </label>
-
                 </div>
                 <div class="flex space-x-4">
-                    <button id="search-btn" class="btn-primary" type="submit" name="filter-form" value="search">Search</button>
-                    <button id="reset-btn" class="btn-secondary" type="submit" name="filter-form" value="reset">Reset</button>
+                    <button id="search-btn" class="btn-primary" type="submit" name="FilterForm.Action" value="search">Search</button>
+                    <button id="reset-btn" class="btn-secondary" type="submit" name="FilterForm.Action" value="reset">Reset</button>
                 </div>
             </EditForm>
 
             <hr/>
-            <EditForm id="manage-form" class="mt-8 flow-root" Model="Data" FormName="manage-form" OnValidSubmit="OnValidManageForm">
+            <EditForm id="manage-form" class="flex-col space-y-4" Model="Data" FormName="manage-form">
                 <div class="flex space-x-4">
-                    <button id="save-btn" class="btn-primary" type="submit" name="manage-form" value="save">Save</button>
-                    <button id="reset-btn" class="btn-secondary" type="submit" name="manage-form" value="reset">Reset</button>
+                    <button id="add-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="add">Add authenticator(s)</button>
+                    <button id="remove-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="remove">Remove authenticator(s)</button>
+                    <button id="clear-selection-manage-btn" class="btn-secondary" type="submit" name="ManageForm.Action" value="reset">Clear selection</button>
                 </div>
                 <div class="overflow-y-hidden overflow-x-auto table-container">
                     <table class="tbl-default min-w-full">
                         <thead>
                         <tr>
-                            <th scope="col" class="relative px-7 sm:w-12 sm:px-6"></th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900">Description</th>
-                            <th scope="col" class="hidden px-3 py-3.5 text-left text-xs font-semibold text-gray-900 xl:table-cell">AaGuid</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900">Attestation Types</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900">Certification Level</th>
+                            <th class="relative px-7 sm:w-12 sm:px-6"></th>
+                            <th>Description</th>
+                            <th class="hidden xl:table-cell">AaGuid</th>
+                            <th>Attestation Types</th>
+                            <th>Certification Level</th>
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
                         @foreach (var item in Data)
                         {
-                            <tr>
+                            <tr class="@item.GetRowClass()">
                                 <td class="relative px-7 sm:w-12 sm:px-6">
                                     <input name="ManageForm.Displayed" type="hidden" value="@item.AaGuid" />
-                                    <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
+                                    <input name="ManageForm.Selected" type="checkbox" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
                                 </td>
                                 <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
                                     @item.Name
@@ -70,8 +71,8 @@
                                         <dd class="mt-1 truncate text-gray-500">@item.AaGuid</dd>
                                     </dl>
                                 </td>
-                                <td class="hidden whitespace-nowrap px-3 py-4 text-xs text-gray-500 xl:table-cell">@item.AaGuid</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-xs text-gray-500">
+                                <td class="hidden whitespace-nowrap xl:table-cell">@item.AaGuid</td>
+                                <td class="whitespace-nowrap">
                                     <ul>
                                         @foreach (var type in item.AttestationTypes)
                                         {
@@ -79,7 +80,7 @@
                                         }
                                     </ul>
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-xs text-gray-500">
+                                <td class="whitespace-nowrap">
                                     <ul>
                                         @foreach (var level in item.CertificationStatuses)
                                         {
@@ -102,21 +103,52 @@
 @code {
     private bool _isInitialized;
     
-    [SupplyParameterFromForm(FormName = "filter-form")] public FilterViewModel? FilterForm { get; set; } = new();
-    [SupplyParameterFromForm(FormName = "manage-form")] public ManageViewModel? ManageForm { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "filter-form")] public FilterViewModel FilterForm { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "manage-form")] public ManageViewModel ManageForm { get; set; } = new();
     
-    private IEnumerable<string>? _attestationTypes;
-    private IEnumerable<string>? _certificationLevels;
-    public IEnumerable<ListViewModel>? Data { get; set; }
+    public IEnumerable<string>? AttestationTypes { get; private set; }
+    public IEnumerable<string>? CertificationLevels { get; private set; }
+    public IEnumerable<ListViewModel>? Data { get; private set; }
     
     protected override async Task OnInitializedAsync()
     {
-        _attestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
-        _certificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
-
-        var data = await PasswordlessClient.GetMetaDataStatementEntriesAsync(FilterForm!.ToDto());
+        if (FilterForm.Action == "reset") FilterForm = new();
         
-        Data = data.Select(ListViewModel.FromDto);
+        switch (ManageForm.Action)
+        {
+            case "add":
+            {
+                var request = new WhitelistAuthenticatorsRequest(ManageForm.Selected);
+                await PasswordlessClient.WhitelistAuthenticatorsAsync(request);
+                break;
+            }
+            case "remove":
+            {
+                var request = new DelistAuthenticatorsRequest(ManageForm.Selected);
+                await PasswordlessClient.DelistAuthenticatorsAsync(request);
+                break;
+            }
+            case "reset":
+            {
+                ManageForm = new();
+                break;
+            }
+        }
+        
+        AttestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
+        CertificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
+
+        var data = await PasswordlessClient.GetMetaDataStatementEntriesAsync(FilterForm.ToDto());
+
+        var configuredAuthenticatorsRequest = new ConfiguredAuthenticatorRequest(true);
+        var allowedAuthenticators = await PasswordlessClient.GetConfiguredAuthenticatorsAsync(configuredAuthenticatorsRequest);
+        
+        Data = data.Select(x =>
+        {
+            var viewModel = ListViewModel.FromDto(x);
+            viewModel.IsSelected = allowedAuthenticators.Any(c => x.AaGuid == c.AaGuid);
+            return viewModel;
+        });
 
         _isInitialized = true;
     }
@@ -138,6 +170,8 @@
             set => _certificationStatuses = value ?? Array.Empty<string>();
         }
         
+        public string? Action { get; set; }
+        
         public EntriesRequest ToDto()
         {
             return new EntriesRequest
@@ -152,36 +186,25 @@
     {
         public Guid[] Displayed { get; set; } = Array.Empty<Guid>();
         public Guid[] Selected { get; set; } = Array.Empty<Guid>();
-
-        public IEnumerable<Guid> GetSelected()
-        {
-            return Displayed.Where(x => Selected.Contains(x));
-        }
+        public string? Action { get; set; }
     }
 
-    public class ListViewModel
+    public record ListViewModel(
+        Guid AaGuid,
+        string Name,
+        IEnumerable<string> CertificationStatuses,
+        IEnumerable<string> AttestationTypes)
     {
-        public Guid AaGuid { get; init; }
-        public string Name { get; init; }
-        public IEnumerable<string> CertificationStatuses { get; init; }
-        public IEnumerable<string> AttestationTypes { get; init; }
         public bool IsSelected { get; set; }
+        
+        public string GetRowClass()
+        {
+            return IsSelected ? "selected" : string.Empty;
+        }
 
         public static ListViewModel FromDto(EntryResponse dto)
         {
-            return new ListViewModel
-            {
-                AaGuid = dto.AaGuid,
-                Name = dto.Name,
-                CertificationStatuses = dto.CertificationStatuses,
-                AttestationTypes = dto.AttestationTypes
-            };
+            return new ListViewModel(dto.AaGuid, dto.Name, dto.CertificationStatuses, dto.AttestationTypes);
         }
     }
-
-    private void OnValidManageForm()
-    {
-        // todo
-    }
-
 }
