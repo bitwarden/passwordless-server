@@ -5,11 +5,11 @@ namespace Passwordless.Common.Validation;
 [AttributeUsage(AttributeTargets.Property)]
 public class RegularExpressionCollectionAttribute(string pattern) : RegularExpressionAttribute(pattern)
 {
-    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    public override bool IsValid(object? value)
     {
         if (value == null)
         {
-            return ValidationResult.Success;
+            return true;
         }
 
         if (value is not IEnumerable<string> collection)
@@ -19,13 +19,13 @@ public class RegularExpressionCollectionAttribute(string pattern) : RegularExpre
 
         foreach (var item in collection)
         {
-            var result = base.IsValid(item, validationContext);
-            if (result != ValidationResult.Success)
+            var result = base.IsValid(item);
+            if (!result)
             {
                 return result;
             }
         }
 
-        return ValidationResult.Success;
+        return true;
     }
 }
