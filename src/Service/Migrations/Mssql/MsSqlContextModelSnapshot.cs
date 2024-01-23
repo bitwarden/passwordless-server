@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -69,6 +69,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AdminEmailsSerialized")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -81,6 +82,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tenant")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AcountName");
@@ -100,6 +102,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Tenant", "Alias");
@@ -119,6 +122,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ApiKey")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -134,6 +138,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Scopes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Tenant", "Id");
@@ -179,10 +184,11 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<byte[]>("DescriptorId")
                         .HasColumnType("varbinary(900)");
 
-                    b.Property<Guid>("AaGuid")
+                    b.Property<Guid?>("AaGuid")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AttestationFmt")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("BackupState")
@@ -216,21 +222,26 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Origin")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("PublicKey")
+                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("RPID")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("SignatureCounter")
                         .HasColumnType("bigint");
 
                     b.Property<byte[]>("UserHandle")
+                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Tenant", "DescriptorId");
@@ -269,6 +280,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("datetime2");
 
                     b.Property<string>("KeyMaterial")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Tenant", "KeyId");

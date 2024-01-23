@@ -5,7 +5,7 @@ namespace Passwordless.Service;
 
 public interface IFido2Service
 {
-    Task<string> CreateRegisterToken(RegisterToken tokenProps);
+    Task<string> CreateRegisterToken(RegisterToken tokenInput);
     Task<SessionResponse<CredentialCreateOptions>> RegisterBegin(FidoRegistrationBeginDTO request);
     Task<TokenResponse> RegisterComplete(RegistrationCompleteDTO request, string deviceInfo, string country);
 

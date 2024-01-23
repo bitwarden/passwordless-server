@@ -30,7 +30,6 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task AddTokenKey(TokenKey tokenKey)
     {
-        tokenKey.Tenant = Tenant;
         db.TokenKeys.Add(tokenKey);
         await db.SaveChangesAsync();
     }
