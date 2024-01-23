@@ -143,10 +143,12 @@ public static class AppsEndpoints
             .RequireCors();
 
         app.MapPost("/apps/whitelist-authenticators", WhitelistAuthenticatorsAsync)
+            .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors();
 
         app.MapDelete("/apps/delist-authenticators", DelistAuthenticatorsAsync)
+            .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors();
     }
