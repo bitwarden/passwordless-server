@@ -31,9 +31,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         using var response = await _client.PostAsJsonAsync("magic-link/send", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var magicLinkResponse = response.Content.ReadFromJsonAsync<SendMagicLinkResponse>();
-        magicLinkResponse.Should().NotBeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
