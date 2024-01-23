@@ -57,40 +57,48 @@
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                        @foreach (var item in Data)
+                        @if (Data!.Count == 0)
                         {
-                            <tr class="@item.GetRowClass()">
-                                <td class="relative px-7 sm:w-12 sm:px-6">
-                                    <input name="ManageForm.Displayed" type="hidden" value="@item.AaGuid" />
-                                    <input name="ManageForm.Selected" type="checkbox" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
-                                </td>
-                                <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
-                                    @item.Name
-                                    <dl class="font-normal xl:hidden">
-                                        <dt class="sr-only">AaGuid</dt>
-                                        <dd class="mt-1 truncate text-gray-500">@item.AaGuid</dd>
-                                    </dl>
-                                </td>
-                                <td class="hidden whitespace-nowrap xl:table-cell">@item.AaGuid</td>
-                                <td class="whitespace-nowrap">
-                                    <ul>
-                                        @foreach (var type in item.AttestationTypes)
-                                        {
-                                            <li>@type</li>
-                                        }
-                                    </ul>
-                                </td>
-                                <td class="whitespace-nowrap">
-                                    <ul>
-                                        @foreach (var level in item.CertificationStatuses)
-                                        {
-                                            <li>@level</li>
-                                        }
-                                    </ul>
-                                </td>
+                            <tr>
+                                <td colspan="5">All authenticators are currently allowed.</td>
                             </tr>
                         }
-
+                        else
+                        {
+                            @foreach (var item in Data)
+                            {
+                                <tr class="@item.GetRowClass()">
+                                    <td class="relative px-7 sm:w-12 sm:px-6">
+                                        <input name="ManageForm.Displayed" type="hidden" value="@item.AaGuid"/>
+                                        <input name="ManageForm.Selected" type="checkbox" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
+                                    </td>
+                                    <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
+                                        @item.Name
+                                        <dl class="font-normal xl:hidden">
+                                            <dt class="sr-only">AaGuid</dt>
+                                            <dd class="mt-1 truncate text-gray-500">@item.AaGuid</dd>
+                                        </dl>
+                                    </td>
+                                    <td class="hidden whitespace-nowrap xl:table-cell">@item.AaGuid</td>
+                                    <td class="whitespace-nowrap">
+                                        <ul>
+                                            @foreach (var type in item.AttestationTypes)
+                                            {
+                                                <li>@type</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                    <td class="whitespace-nowrap">
+                                        <ul>
+                                            @foreach (var level in item.CertificationStatuses)
+                                            {
+                                                <li>@level</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                </tr>
+                            }
+                        }
                         </tbody>
                     </table>
                 </div>
@@ -108,7 +116,7 @@
     
     public IEnumerable<string>? AttestationTypes { get; private set; }
     public IEnumerable<string>? CertificationLevels { get; private set; }
-    public IEnumerable<ListViewModel>? Data { get; private set; }
+    public IReadOnlyCollection<ListViewModel>? Data { get; private set; }
     
     protected override async Task OnInitializedAsync()
     {
@@ -148,7 +156,7 @@
             var viewModel = ListViewModel.FromDto(x);
             viewModel.IsSelected = allowedAuthenticators.Any(c => x.AaGuid == c.AaGuid);
             return viewModel;
-        });
+        }).ToList();
 
         _isInitialized = true;
     }
