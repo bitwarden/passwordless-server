@@ -1,42 +1,40 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Passwordless.Service.Migrations.Mssql
+namespace Passwordless.Service.Migrations.Mssql;
+
+/// <inheritdoc />
+public partial class AddTableAuthenticators : Migration
 {
     /// <inheritdoc />
-    public partial class AddTableAuthenticators : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.CreateTable(
-                name: "Authenticators",
-                columns: table => new
-                {
-                    Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AaGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsAllowed = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Authenticators", x => new { x.Tenant, x.AaGuid });
-                    table.ForeignKey(
-                        name: "FK_Authenticators_AppFeatures_Tenant",
-                        column: x => x.Tenant,
-                        principalTable: "AppFeatures",
-                        principalColumn: "Tenant",
-                        onDelete: ReferentialAction.Cascade);
-                });
-        }
+        migrationBuilder.CreateTable(
+            name: "Authenticators",
+            columns: table => new
+            {
+                Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                AaGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                IsAllowed = table.Column<bool>(type: "bit", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_Authenticators", x => new { x.Tenant, x.AaGuid });
+                table.ForeignKey(
+                    name: "FK_Authenticators_AppFeatures_Tenant",
+                    column: x => x.Tenant,
+                    principalTable: "AppFeatures",
+                    principalColumn: "Tenant",
+                    onDelete: ReferentialAction.Cascade);
+            });
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Authenticators");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropTable(
+            name: "Authenticators");
     }
 }

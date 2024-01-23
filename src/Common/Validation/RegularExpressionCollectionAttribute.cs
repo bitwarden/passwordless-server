@@ -11,7 +11,7 @@ public class RegularExpressionCollectionAttribute(string pattern) : RegularExpre
         {
             return ValidationResult.Success;
         }
-        
+
         if (value is not IEnumerable<string> collection)
         {
             throw new InvalidOperationException("This attribute can only be applied to collections");
@@ -25,7 +25,7 @@ public class RegularExpressionCollectionAttribute(string pattern) : RegularExpre
                 return result;
             }
         }
-        
+
         return ValidationResult.Success;
     }
 }

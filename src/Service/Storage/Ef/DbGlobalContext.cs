@@ -68,7 +68,7 @@ public abstract class DbGlobalContext : DbContext
             b.Property(x => x.IsGenerateSignInTokenEndpointEnabled)
                 .HasDefaultValue(true);
         });
-        
+
         modelBuilder.Entity<Authenticator>(b =>
         {
             b.HasKey(x => new { x.Tenant, x.AaGuid });

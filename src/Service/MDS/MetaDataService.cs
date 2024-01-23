@@ -22,7 +22,7 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
             systemClock)
     {
     }
-    
+
     public async Task<IEnumerable<string>> GetAttestationTypesAsync()
     {
         var blob = await GetDistributedCachedBlob(base._repositories.First());
@@ -53,12 +53,12 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
         {
             result = result.Where(x => x.AttestationTypes.Any(y => request.AttestationTypes.Contains(y)));
         }
-        
+
         if (request.CertificationStatuses != null && request.CertificationStatuses.Any())
         {
             result = result.Where(x => x.CertificationStatuses.Any(y => request.CertificationStatuses.Contains(y)));
         }
-        
+
         return result.ToList();
     }
 

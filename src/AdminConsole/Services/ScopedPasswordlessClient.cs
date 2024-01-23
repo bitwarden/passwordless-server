@@ -71,19 +71,19 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
         return rest;
     }
-    
-    public async Task<IEnumerable<string> > GetAttestationTypesAsync()
+
+    public async Task<IEnumerable<string>> GetAttestationTypesAsync()
     {
         var response = await _client.GetAsync("/mds/attestation-types");
         return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
     }
-    
-    public async Task<IEnumerable<string> > GetCertificationStatusesAsync()
+
+    public async Task<IEnumerable<string>> GetCertificationStatusesAsync()
     {
         var response = await _client.GetAsync("/mds/certification-statuses");
         return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
     }
-    
+
     public async Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request)
     {
         var queryBuilder = new QueryBuilder();
@@ -104,7 +104,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         var q = queryBuilder.ToQueryString();
         return (await _client.GetFromJsonAsync<EntryResponse[]>($"/mds/entries{q}"))!;
     }
-    
+
     public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
     {
         var queryBuilder = new QueryBuilder();
@@ -112,13 +112,13 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         var q = queryBuilder.ToQueryString();
         return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/apps/list-authenticators{q}"))!;
     }
-    
+
     public async Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request)
     {
         var response = await _client.PostAsJsonAsync("/apps/whitelist-authenticators", request);
         response.EnsureSuccessStatusCode();
     }
-    
+
     public async Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request)
     {
         var response = await _client.PostAsJsonAsync("/apps/delist-authenticators", request);
