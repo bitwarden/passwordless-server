@@ -1,5 +1,7 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Common.Models.MDS;
+using Passwordless.Service.Features;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.MDS;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -16,25 +18,35 @@ public static class MetaDataServiceEndpoints
 
         parent.MapGet(
             "/attestation-types",
-            async (IMetaDataService r) =>
+            async (IMetaDataService mds) =>
             {
-                var result = await r.GetAttestationTypesAsync();
+                var result = await mds.GetAttestationTypesAsync();
                 return Ok(result);
             });
 
         parent.MapGet(
             "/certification-statuses",
-            async (IMetaDataService r) =>
+            async (IMetaDataService mds) =>
             {
-                var result = await r.GetCertificationStatusesAsync();
+                var result = await mds.GetCertificationStatusesAsync();
                 return Ok(result);
             });
 
         parent.MapGet(
             "/entries",
-            async ([AsParameters] EntriesRequest request, IMetaDataService r, IHttpContextAccessor httpContextAccessor) =>
+            async (
+                [AsParameters] EntriesRequest request,
+                IMetaDataService mds,
+                IFeatureContextProvider featureContextProvider) =>
             {
-                var result = await r.GetEntriesAsync(request);
+                var features = await featureContextProvider.UseContext();
+
+                if (!features.AllowAttestation)
+                {
+                    throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
+                }
+
+                var result = await mds.GetEntriesAsync(request);
                 return Ok(result);
             }).WithParameterValidation();
     }

@@ -6,6 +6,7 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -150,20 +151,46 @@ public static class AppsEndpoints
             .RequireCors();
     }
 
-    public static async Task<IResult> ListConfiguredAuthenticatorsAsync([AsParameters] ConfiguredAuthenticatorRequest request, ISharedManagementService sharedManagementService)
+    public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
+        [AsParameters] ConfiguredAuthenticatorRequest request,
+        ISharedManagementService sharedManagementService,
+        IFeatureContextProvider featureContextProvider)
     {
+        var features = await featureContextProvider.UseContext();
+        if (!features.AllowAttestation)
+        {
+            throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
+        }
         var result = await sharedManagementService.ListConfiguredAuthenticatorsAsync(request);
         return Ok(result);
     }
 
-    public static async Task<IResult> WhitelistAuthenticatorsAsync([FromBody] WhitelistAuthenticatorsRequest request, ISharedManagementService sharedManagementService)
+    public static async Task<IResult> WhitelistAuthenticatorsAsync(
+        [FromBody] WhitelistAuthenticatorsRequest request,
+        ISharedManagementService sharedManagementService,
+        IFeatureContextProvider featureContextProvider)
     {
+        var features = await featureContextProvider.UseContext();
+        if (!features.AllowAttestation)
+        {
+            throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
+        }
+
         await sharedManagementService.WhitelistAuthenticatorsAsync(request);
         return NoContent();
     }
 
-    public static async Task<IResult> DelistAuthenticatorsAsync([FromBody] DelistAuthenticatorsRequest request, ISharedManagementService sharedManagementService)
+    public static async Task<IResult> DelistAuthenticatorsAsync(
+        [FromBody] DelistAuthenticatorsRequest request,
+        ISharedManagementService sharedManagementService,
+        IFeatureContextProvider featureContextProvider)
     {
+        var features = await featureContextProvider.UseContext();
+        if (!features.AllowAttestation)
+        {
+            throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
+        }
+
         await sharedManagementService.DelistAuthenticatorsAsync(request);
         return NoContent();
     }
