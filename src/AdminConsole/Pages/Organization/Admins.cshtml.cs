@@ -143,7 +143,7 @@ public class Admins : PageModel
             return await OnGet();
         }
 
-        await _invitationService.CancelInviteAsync(inviteToCancel.HashedCode);
+        await _invitationService.CancelInviteAsync(inviteToCancel);
 
         var performedBy = await _dataService.GetUserAsync();
 
