@@ -15,11 +15,45 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 {
     Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
+
+    /// <summary>
+    /// Retrieve a list of all attestation types in the FIDO2 MDS.
+    /// </summary>
+    /// <returns></returns>
     Task<IEnumerable<string>> GetAttestationTypesAsync();
+
+    /// <summary>
+    /// Retrieve a list of all certification statuses in the FIDO2 MDS.
+    /// </summary>
+    /// <returns></returns>
     Task<IEnumerable<string>> GetCertificationStatusesAsync();
+
+    /// <summary>
+    /// Get a list of all authenticators in the FIDO2 MDS.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
+
+    /// <summary>
+    /// Returns a list of configured authenticators for the current app. If the list is empty, all authenticators are allowed.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
+
+    /// <summary>
+    /// Add specified authenticators to the whitelist.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request);
+
+    /// <summary>
+    /// Remove specified authenticators from the whitelist.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request);
 }
 
