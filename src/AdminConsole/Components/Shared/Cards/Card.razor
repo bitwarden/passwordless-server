@@ -3,11 +3,11 @@
         <h3>@Title</h3>
         @if (!string.IsNullOrWhiteSpace(SubTitle))
         {
-            <p class="mt-1 max-w-2xl text-sm text-gray-500">@SubTitle</p>
+            <p class="subtitle">@SubTitle</p>
         }
         @if (ChildContent != null)
         {
-            <dl class="mt-2">
+            <dl class="credential-card-summary-footer">
                 @ChildContent
             </dl>
         }
