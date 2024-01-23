@@ -67,10 +67,10 @@
     <partial name="_ApiKeys" model="Model.ApiKeysModel" />
 }
 
-<panel header="Settings">
+<div class="panel">
     <form method="post" asp-page-handler="Settings">
-        <h3>Manually Generated Verification Tokens</h3>
-        <p>
+        <h2>Manually Generated Verification Tokens</h2>
+        <p class="mt-3">
             Manually generated verification tokens have many uses in authentication. A primary use would be issuing a "magic link" for a
             user to log-in to their account in the event they've misplaced their passkey. Once the identity of the user has been
             verified, you can send them a hyperlink that contains the token issued by <code>signin/generate-token</code>.
@@ -82,8 +82,8 @@
         <br>
         @if (Environment.IsDevelopment())
         {
-            <h3>Magic Links</h3>
-            <p>
+            <h2>Magic Links</h2>
+            <p class="mt-3">
                 Magic Links provide a secure and user-friendly way to authenticate users in applications. While onboarding new
                 users into your application or in the event of account recovery, a Magic Link can be sent via email to gain access
                 to the system. This removes the friction of verifying users and resetting passkeys, enhancing the user experience.
@@ -96,7 +96,7 @@
         }
         <button id="btn-save-settings" class="btn-primary" type="submit">Save</button>
     </form>
-</panel>
+</div>
 
 <panel header="Delete Application">
     @if (Model.PendingDelete)

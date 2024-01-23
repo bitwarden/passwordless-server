@@ -23,7 +23,7 @@ public static class MagicEndpoints
 
                 await magicLinkService.SendMagicLink(request.ToDto());
 
-                return Ok(new SendMagicLinkResponse());
+                return NoContent();
             })
             .WithParameterValidation()
             .RequireAuthorization(SecretKeyScopes.TokenVerify)
