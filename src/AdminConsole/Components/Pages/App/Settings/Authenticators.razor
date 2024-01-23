@@ -1,12 +1,10 @@
 @page "/app/{app}/settings/authenticators"
-@using Passwordless.AdminConsole.Services
 @using Passwordless.Common.Models.MDS
-@using Passwordless.AdminConsole.Components.Shared.Cards
-@using Passwordless.AdminConsole.Middleware
 @using Passwordless.Common.Models.Apps
 
 @inject NavigationManager NavigationManager
 @inject ICurrentContext CurrentContext
+@inject IScopedPasswordlessClient Client
 
 @inherits BaseApplicationPage
 
@@ -29,8 +27,6 @@
         </Panel>
     </Page>
 }
-
-@inject IScopedPasswordlessClient Client
 
 @code {
     private bool _isInitialized;
