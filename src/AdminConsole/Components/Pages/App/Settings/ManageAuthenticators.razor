@@ -69,7 +69,6 @@
                             {
                                 <tr class="@item.GetRowClass()">
                                     <td class="relative px-7 sm:w-12 sm:px-6">
-                                        <input name="ManageForm.Displayed" type="hidden" value="@item.AaGuid"/>
                                         <input name="ManageForm.Selected" type="checkbox" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
                                     </td>
                                     <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
@@ -192,7 +191,6 @@
 
     public class ManageViewModel
     {
-        public Guid[] Displayed { get; set; } = Array.Empty<Guid>();
         public Guid[] Selected { get; set; } = Array.Empty<Guid>();
         public string? Action { get; set; }
     }
