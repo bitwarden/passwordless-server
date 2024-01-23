@@ -2,10 +2,13 @@
 @using Passwordless.AdminConsole.Services
 @using Passwordless.Common.Models.Apps
 @using Passwordless.Common.Models.MDS
+@using Passwordless.AdminConsole.Middleware
 
 @inherits BaseApplicationPage
 
 @inject IScopedPasswordlessClient PasswordlessClient
+@inject ICurrentContext CurrentContext;
+@inject NavigationManager NavigationManager;
 
 @if (_isInitialized)
 {
@@ -119,6 +122,12 @@
     
     protected override async Task OnInitializedAsync()
     {
+        if (!CurrentContext.Features.AllowAttestation)
+        {
+            NavigationManager.NavigateTo($"app/{App}/settings");
+            return;
+        }
+        
         if (FilterForm.Action == "reset") FilterForm = new();
         
         switch (ManageForm.Action)

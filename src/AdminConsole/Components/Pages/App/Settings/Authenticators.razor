@@ -2,9 +2,11 @@
 @using Passwordless.AdminConsole.Services
 @using Passwordless.Common.Models.MDS
 @using Passwordless.AdminConsole.Components.Shared.Cards
+@using Passwordless.AdminConsole.Middleware
 @using Passwordless.Common.Models.Apps
 
 @inject NavigationManager NavigationManager
+@inject ICurrentContext CurrentContext
 
 @inherits BaseApplicationPage
 
@@ -39,6 +41,11 @@
     
     protected override async Task OnInitializedAsync()
     {
+        if (!CurrentContext.Features.AllowAttestation)
+        {
+            NavigationManager.NavigateTo($"app/{App}/settings");
+            return;
+        }
         var mds = await Client.GetMetaDataStatementEntriesAsync(new EntriesRequest());
         var whitelistRequest = new ConfiguredAuthenticatorRequest(true);
         var whitelist = await Client.GetConfiguredAuthenticatorsAsync(whitelistRequest);
