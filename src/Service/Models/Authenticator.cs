@@ -14,5 +14,5 @@ public class Authenticator : PerTenant
     /// </summary>
     public bool IsAllowed { get; set; }
 
-    public AppFeature AppFeature { get; set; }
+    public AppFeature? AppFeature { get; set; }
 }
