@@ -1,0 +1,70 @@
+@page "/app/{app}/settings/authenticators"
+@using Passwordless.AdminConsole.Services
+@using Passwordless.Common.Models.MDS
+@using Passwordless.AdminConsole.Components.Shared.Cards
+@using Passwordless.Common.Models.Apps
+
+@inject NavigationManager NavigationManager
+
+@inherits BaseApplicationPage
+
+@if (_isInitialized)
+{
+    <Page Title="Authenticators">
+        <Panel Header="Allowed Authenticators">
+            <p>If this list is empty, all authenticators are allowed. Use this list if you want to control what authenticators can be used to register credentials.</p>
+            <EditForm Model="ManageWhitelistForm" FormName="whitelist-form" OnSubmit="OnWhitelistFormSubmitted">
+                <button class="btn-primary" name="ManageWhitelistForm.Action" type="submit" value="manage">Manage</button>
+            </EditForm>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                @foreach (var authenticator in Whitelist!)
+                {
+                    <Card Title="@authenticator.Name" SubTitle="@authenticator.AaGuid.ToString()">
+                        <CardSummaryProperty Label="Created At" Value="@authenticator.CreatedAt" />
+                    </Card>
+                }
+            </div>
+        </Panel>
+    </Page>
+}
+
+@inject IScopedPasswordlessClient Client
+
+@code {
+    private bool _isInitialized;
+    
+    public IEnumerable<ConfiguredAuthenticatorViewModel>? Whitelist { get; private set; }
+
+    [SupplyParameterFromForm] public ManageWhitelistViewModel ManageWhitelistForm { get; private set; } = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var mds = await Client.GetMetaDataStatementEntriesAsync(new EntriesRequest());
+        var whitelistRequest = new ConfiguredAuthenticatorRequest(true);
+        var whitelist = await Client.GetConfiguredAuthenticatorsAsync(whitelistRequest);
+        Whitelist = whitelist
+            .Select(x => new ConfiguredAuthenticatorViewModel(
+                x.AaGuid,
+                mds.First(m => m.AaGuid == x.AaGuid).Name,
+                x.CreatedAt))
+            .ToList();
+        _isInitialized = true;
+    }
+
+    public record ConfiguredAuthenticatorViewModel(Guid AaGuid, string Name, DateTime CreatedAt);
+
+    private void OnWhitelistFormSubmitted()
+    {
+        switch (ManageWhitelistForm.Action)
+        {
+            case "manage":
+                NavigationManager.NavigateTo($"app/{App}/settings/authenticators/manage");
+                break;
+        }
+    }
+    
+    public class ManageWhitelistViewModel
+    {
+        public string? Action { get; set; }
+    }
+}

@@ -256,6 +256,13 @@ public class EfTenantStorage : ITenantStorage
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Authenticator>> GetAuthenticatorsAsync(bool isAllowed)
+    {
+        return await db.Authenticators
+            .Where(x => x.IsAllowed == isAllowed)
+            .ToListAsync();
+    }
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x

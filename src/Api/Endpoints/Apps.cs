@@ -136,6 +136,16 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
+
+        app.MapGet("/apps/list-authenticators", ListConfiguredAuthenticatorsAsync)
+            .RequireSecretKey()
+            .RequireCors();
+    }
+
+    public static async Task<IResult> ListConfiguredAuthenticatorsAsync([AsParameters] ConfiguredAuthenticatorRequest request, ISharedManagementService sharedManagementService)
+    {
+        var result = await sharedManagementService.ListConfiguredAuthenticatorsAsync(request);
+        return Ok(result);
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(

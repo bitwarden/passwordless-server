@@ -30,4 +30,6 @@ public class AppFeature : PerTenant
     public bool IsGenerateSignInTokenEndpointEnabled { get; set; } = true;
 
     public AccountMetaInformation Application { get; set; }
+    
+    public IEnumerable<Authenticator> Authenticators { get; set; }
 }

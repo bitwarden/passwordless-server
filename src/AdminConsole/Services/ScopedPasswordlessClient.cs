@@ -1,9 +1,9 @@
-using System.Collections;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.MDS;
 using Passwordless.Common.Models.Reporting;
 
@@ -16,6 +16,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task<IEnumerable<string>> GetAttestationTypesAsync();
     Task<IEnumerable<string>> GetCertificationStatusesAsync();
     Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
+    Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -100,5 +101,13 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         }
         var q = queryBuilder.ToQueryString();
         return (await _client.GetFromJsonAsync<EntryResponse[]>($"/mds/entries{q}"))!;
+    }
+    
+    public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
+    {
+        var queryBuilder = new QueryBuilder();
+        queryBuilder.Add(nameof(request.IsAllowed), request.IsAllowed.ToString());
+        var q = queryBuilder.ToQueryString();
+        return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/apps/list-authenticators{q}"))!;
     }
 }

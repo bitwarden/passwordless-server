@@ -167,6 +167,10 @@
     .credential-card {
         @apply overflow-hidden bg-white shadow sm:rounded-lg max-w-fit;
     }
+
+    .card {
+        @apply overflow-hidden bg-white shadow sm:rounded-lg;
+    }
     
     .credential-card-new {
         @apply overflow-hidden shadow sm:rounded-lg max-w-fit border-2 border-green-600;

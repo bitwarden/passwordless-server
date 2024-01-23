@@ -39,6 +39,7 @@ public interface ISharedManagementService
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
     Task EnableGenerateSignInTokenEndpoint(string appId);
     Task DisableGenerateSignInTokenEndpoint(string appId);
+    Task<IEnumerable<ConfiguredAuthenticatorResponse>> ListConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
 }
 
 public class SharedManagementService : ISharedManagementService
@@ -406,6 +407,13 @@ public class SharedManagementService : ISharedManagementService
         var storage = tenantFactory.Create(appId);
 
         return storage.DisableGenerateSignInTokenEndpoint();
+    }
+
+    public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> ListConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
+    {
+        var storage = tenantFactory.Create();
+        var entities = await storage.GetAuthenticatorsAsync(request.IsAllowed);
+        return entities.Select(x => new ConfiguredAuthenticatorResponse(x.AaGuid, x.CreatedAt)).ToList();
     }
 
     private static Task<(string original, string hashed)> SetupApiSecret(string accountName, ITenantStorage storage)

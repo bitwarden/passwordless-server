@@ -1,0 +1,23 @@
+<div class="card">
+    <div class="px-4 py-5 sm:px-6">
+        <h3>@Title</h3>
+        @if (!string.IsNullOrWhiteSpace(SubTitle))
+        {
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">@SubTitle</p>
+        }
+        @if (ChildContent != null)
+        {
+            <dl class="mt-2">
+                @ChildContent
+            </dl>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public required string Title { get; set; }
+
+    [Parameter] public string? SubTitle { get; set; }
+    
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
