@@ -139,7 +139,7 @@ public class Admins : PageModel
 
         if (inviteToCancel is null)
         {
-            ModelState.AddModelError("error", "Could not cancel because invite could not be found.");
+            ModelState.AddModelError("error", "Failed to find an invite to cancel.");
             return await OnGet();
         }
 
