@@ -74,7 +74,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         responseDetails.Should().NotBeNull();
         var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals(nameof(request.UrlTemplate), StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
-        magicLinkUrlError.Value.Should().Contain($"You have provided a {nameof(request.UrlTemplate)} without a <token> template. Please include it like so: https://www.exmaple.com?token=<token>");
+        magicLinkUrlError.Value.Should().Contain($"You have provided a {nameof(request.UrlTemplate)} without a <token> template. Please include it like so: https://www.example.com?token=<token>");
     }
 
     [Fact]
