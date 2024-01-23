@@ -1,12 +1,12 @@
 @inject IHttpContextAccessor HttpContextAccessor
 
-<time id="@(_id)" datetime="@(Value.ToString("s"))"></time>
+<time id="@(Id)" datetime="@(Value.ToString("s"))"></time>
 <script nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
-    document.getElementById(@((MarkupString)JsonSerializer.Serialize(_id))).innerText = new Date(@((MarkupString)JsonSerializer.Serialize(Value))).toLocaleString();
+    document.getElementById(@((MarkupString)JsonSerializer.Serialize(Id))).innerText = new Date(@((MarkupString)JsonSerializer.Serialize(Value))).toLocaleString();
 </script>
 
 @code {
-    private readonly string _id = Guid.NewGuid().ToString();
+    public string Id { get; } = Guid.NewGuid().ToString();
     
     [Parameter]
     public required DateTime Value { get; set; }
