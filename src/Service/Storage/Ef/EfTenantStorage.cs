@@ -254,11 +254,16 @@ public class EfTenantStorage : ITenantStorage
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Authenticator>> GetAuthenticatorsAsync(bool isAllowed)
+    public async Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null)
     {
-        return await db.Authenticators
-            .Where(x => x.IsAllowed == isAllowed)
-            .ToListAsync();
+        IQueryable<Authenticator> query = db.Authenticators;
+
+        if (isAllowed.HasValue)
+        {
+            query = query.Where(x => x.IsAllowed == isAllowed.Value);
+        }
+
+        return await query.ToListAsync();
     }
 
     public async Task WhitelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
