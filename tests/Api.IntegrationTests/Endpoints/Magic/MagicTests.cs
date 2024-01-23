@@ -74,7 +74,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         responseDetails.Should().NotBeNull();
         var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals(nameof(request.UrlTemplate), StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
-        magicLinkUrlError.Value.Should().ContainMatch("Value must contain the `<token>` template.");
+        magicLinkUrlError.Value.Should().ContainMatch($"You have provided a {nameof(request.UrlTemplate)} without a <token> template. For example, https://www.exmaple.com?token=<token>");
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         responseDetails.Should().NotBeNull();
         var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals(nameof(request.UrlTemplate), StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
-        magicLinkUrlError.Value.Should().ContainMatch("Value must be a valid URL.");
+        magicLinkUrlError.Value.Should().ContainMatch($"You have provided a {nameof(request.UrlTemplate)} that cannot be converted to a URL.");
     }
 
     public void Dispose()
