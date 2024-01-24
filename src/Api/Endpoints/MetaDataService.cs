@@ -39,16 +39,8 @@ public static class MetaDataServiceEndpoints
             "/entries",
             async (
                 [AsParameters] EntriesRequest request,
-                IMetaDataService mds,
-                IFeatureContextProvider featureContextProvider) =>
+                IMetaDataService mds) =>
             {
-                var features = await featureContextProvider.UseContext();
-
-                if (!features.AllowAttestation)
-                {
-                    throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
-                }
-
                 var result = await mds.GetEntriesAsync(request);
                 return Ok(result);
             }).WithParameterValidation();
