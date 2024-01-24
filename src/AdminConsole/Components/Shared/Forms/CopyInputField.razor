@@ -31,28 +31,25 @@
 </div>
 
 <script nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
-    let copyButton = document.getElementById("@CopyButtonId");
-    copyButton.addEventListener("click", (event) => {
+    document.getElementById("@CopyButtonId").addEventListener("click", (event) => {
         try {
-            console.log('clicked');
-                let element = document.getElementById("@CopyInputFieldId");
-                navigator.clipboard.writeText(element.value).then(() => {
-                    document.getElementById("@CopyIconId").classList.add("hidden");
-                    document.getElementById("@CopyCompletedIconId").classList.remove("hidden");
-                    setTimeout(() => {
-                        document.getElementById("@CopyIconId").classList.remove("hidden");
-                        document.getElementById("@CopyCompletedIconId").classList.add("hidden");
-                    }, 1000);
-                });
-              } catch (err) {
-                console.error("Cannot copy text.");
-              }
+            let element = document.getElementById("@CopyInputFieldId");
+            navigator.clipboard.writeText(element.value).then(() => {
+                document.getElementById("@CopyIconId").classList.add("hidden");
+                document.getElementById("@CopyCompletedIconId").classList.remove("hidden");
+                setTimeout(() => {
+                    document.getElementById("@CopyIconId").classList.remove("hidden");
+                    document.getElementById("@CopyCompletedIconId").classList.add("hidden");
+                }, 1000);
+            });
+        } catch (err) {
+            console.error("Cannot copy text.");
+        }
         event.preventDefault();
     });
     
-    let showPasswordButton = document.getElementById("@ShowPasswordButtonId");
-    if (showPasswordButton) {
-        showPasswordButton.addEventListener("click", (event) => {
+    if (document.getElementById("@ShowPasswordButtonId")) {
+        document.getElementById("@ShowPasswordButtonId").addEventListener("click", (event) => {
             let element = document.getElementById("@CopyInputFieldId");
             let showIcon = document.getElementById("@HiddenPasswordIconId");
             let hideIcon = document.getElementById("@ShowPasswordIconId");
