@@ -25,7 +25,7 @@ public class AuthenticatorsEndpointsTests
         // Arrange
         var request = _fixture.Create<ConfiguredAuthenticatorRequest>();
 
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var serviceMock = new Mock<IApplicationService>();
 
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         var expectedFeaturesContext = _fixture
@@ -39,14 +39,14 @@ public class AuthenticatorsEndpointsTests
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await AuthenticatorsEndpoints.ListConfiguredAuthenticatorsAsync(
                 request,
-                sharedManagementServiceMock.Object,
+                serviceMock.Object,
                 featureContextProviderMock.Object));
 
         // Assert
         Assert.Equal("attestation_not_supported_on_plan", actual.ErrorCode);
         Assert.Equal("Attestation is not supported on your plan.", actual.Message);
         Assert.Equal(403, actual.StatusCode);
-        sharedManagementServiceMock.Verify(x => x.ListConfiguredAuthenticatorsAsync(It.IsAny<ConfiguredAuthenticatorRequest>()), Times.Never);
+        serviceMock.Verify(x => x.ListConfiguredAuthenticatorsAsync(It.IsAny<ConfiguredAuthenticatorRequest>()), Times.Never);
     }
 
     [Fact]
@@ -55,9 +55,9 @@ public class AuthenticatorsEndpointsTests
         // Arrange
         var request = _fixture.Create<ConfiguredAuthenticatorRequest>();
 
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var serviceMock = new Mock<IApplicationService>();
         var expectedResponse = _fixture.CreateMany<ConfiguredAuthenticatorResponse>().ToImmutableList();
-        sharedManagementServiceMock
+        serviceMock
             .Setup(x => x.ListConfiguredAuthenticatorsAsync(It.Is<ConfiguredAuthenticatorRequest>(p => p == request)))
             .ReturnsAsync(expectedResponse);
 
@@ -73,12 +73,12 @@ public class AuthenticatorsEndpointsTests
         // Act
         var actual = await AuthenticatorsEndpoints.ListConfiguredAuthenticatorsAsync(
                 request,
-                sharedManagementServiceMock.Object,
+                serviceMock.Object,
                 featureContextProviderMock.Object);
 
         // Assert
         Assert.Equal(typeof(Ok<IEnumerable<ConfiguredAuthenticatorResponse>>), actual.GetType());
-        sharedManagementServiceMock.Verify(x => x.ListConfiguredAuthenticatorsAsync(It.Is<ConfiguredAuthenticatorRequest>(p => p == request)), Times.Once);
+        serviceMock.Verify(x => x.ListConfiguredAuthenticatorsAsync(It.Is<ConfiguredAuthenticatorRequest>(p => p == request)), Times.Once);
         var actualResult = ((Ok<IEnumerable<ConfiguredAuthenticatorResponse>>)actual).Value!;
         Assert.Equal(expectedResponse, actualResult);
     }
@@ -91,7 +91,7 @@ public class AuthenticatorsEndpointsTests
         // Arrange
         var request = _fixture.Create<WhitelistAuthenticatorsRequest>();
 
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var serviceMock = new Mock<IApplicationService>();
 
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         var expectedFeaturesContext = _fixture
@@ -105,14 +105,14 @@ public class AuthenticatorsEndpointsTests
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await AuthenticatorsEndpoints.WhitelistAuthenticatorsAsync(
                 request,
-                sharedManagementServiceMock.Object,
+                serviceMock.Object,
                 featureContextProviderMock.Object));
 
         // Assert
         Assert.Equal("attestation_not_supported_on_plan", actual.ErrorCode);
         Assert.Equal("Attestation is not supported on your plan.", actual.Message);
         Assert.Equal(403, actual.StatusCode);
-        sharedManagementServiceMock.Verify(x => x.WhitelistAuthenticatorsAsync(It.IsAny<WhitelistAuthenticatorsRequest>()), Times.Never);
+        serviceMock.Verify(x => x.WhitelistAuthenticatorsAsync(It.IsAny<WhitelistAuthenticatorsRequest>()), Times.Never);
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class AuthenticatorsEndpointsTests
         // Arrange
         var request = _fixture.Create<WhitelistAuthenticatorsRequest>();
 
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var serviceMock = new Mock<IApplicationService>();
 
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         var expectedFeaturesContext = _fixture
@@ -135,12 +135,12 @@ public class AuthenticatorsEndpointsTests
         // Act
         var actual = await AuthenticatorsEndpoints.WhitelistAuthenticatorsAsync(
             request,
-            sharedManagementServiceMock.Object,
+            serviceMock.Object,
             featureContextProviderMock.Object);
 
         // Assert
         Assert.Equal(typeof(NoContent), actual.GetType());
-        sharedManagementServiceMock.Verify(x => x.WhitelistAuthenticatorsAsync(It.Is<WhitelistAuthenticatorsRequest>(p => p == request)), Times.Once);
+        serviceMock.Verify(x => x.WhitelistAuthenticatorsAsync(It.Is<WhitelistAuthenticatorsRequest>(p => p == request)), Times.Once);
     }
     #endregion
 
@@ -151,7 +151,7 @@ public class AuthenticatorsEndpointsTests
         // Arrange
         var request = _fixture.Create<DelistAuthenticatorsRequest>();
 
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var serviceMock = new Mock<IApplicationService>();
 
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         var expectedFeaturesContext = _fixture
@@ -165,14 +165,14 @@ public class AuthenticatorsEndpointsTests
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await AuthenticatorsEndpoints.DelistAuthenticatorsAsync(
                 request,
-                sharedManagementServiceMock.Object,
+                serviceMock.Object,
                 featureContextProviderMock.Object));
 
         // Assert
         Assert.Equal("attestation_not_supported_on_plan", actual.ErrorCode);
         Assert.Equal("Attestation is not supported on your plan.", actual.Message);
         Assert.Equal(403, actual.StatusCode);
-        sharedManagementServiceMock.Verify(x => x.DelistAuthenticatorsAsync(It.IsAny<DelistAuthenticatorsRequest>()), Times.Never);
+        serviceMock.Verify(x => x.DelistAuthenticatorsAsync(It.IsAny<DelistAuthenticatorsRequest>()), Times.Never);
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public class AuthenticatorsEndpointsTests
         // Arrange
         var request = _fixture.Create<DelistAuthenticatorsRequest>();
 
-        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        var serviceMock = new Mock<IApplicationService>();
 
         var featureContextProviderMock = new Mock<IFeatureContextProvider>();
         var expectedFeaturesContext = _fixture
@@ -195,12 +195,12 @@ public class AuthenticatorsEndpointsTests
         // Act
         var actual = await AuthenticatorsEndpoints.DelistAuthenticatorsAsync(
             request,
-            sharedManagementServiceMock.Object,
+            serviceMock.Object,
             featureContextProviderMock.Object);
 
         // Assert
         Assert.Equal(typeof(NoContent), actual.GetType());
-        sharedManagementServiceMock.Verify(x => x.DelistAuthenticatorsAsync(It.Is<DelistAuthenticatorsRequest>(p => p == request)), Times.Once);
+        serviceMock.Verify(x => x.DelistAuthenticatorsAsync(It.Is<DelistAuthenticatorsRequest>(p => p == request)), Times.Once);
     }
     #endregion
 }

@@ -1,7 +1,6 @@
 using static Microsoft.AspNetCore.Http.Results;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
-using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
 using Passwordless.Service.Features;
@@ -31,7 +30,7 @@ public static class AuthenticatorsEndpoints
     
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
-        ISharedManagementService sharedManagementService,
+        IApplicationService service,
         IFeatureContextProvider featureContextProvider)
     {
         var features = await featureContextProvider.UseContext();
@@ -39,13 +38,13 @@ public static class AuthenticatorsEndpoints
         {
             throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
         }
-        var result = await sharedManagementService.ListConfiguredAuthenticatorsAsync(request);
+        var result = await service.ListConfiguredAuthenticatorsAsync(request);
         return Ok(result);
     }
 
     public static async Task<IResult> WhitelistAuthenticatorsAsync(
         [FromBody] WhitelistAuthenticatorsRequest request,
-        ISharedManagementService sharedManagementService,
+        IApplicationService service,
         IFeatureContextProvider featureContextProvider)
     {
         var features = await featureContextProvider.UseContext();
@@ -54,13 +53,13 @@ public static class AuthenticatorsEndpoints
             throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
         }
 
-        await sharedManagementService.WhitelistAuthenticatorsAsync(request);
+        await service.WhitelistAuthenticatorsAsync(request);
         return NoContent();
     }
 
     public static async Task<IResult> DelistAuthenticatorsAsync(
         [FromBody] DelistAuthenticatorsRequest request,
-        ISharedManagementService sharedManagementService,
+        IApplicationService service,
         IFeatureContextProvider featureContextProvider)
     {
         var features = await featureContextProvider.UseContext();
@@ -69,7 +68,7 @@ public static class AuthenticatorsEndpoints
             throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
         }
 
-        await sharedManagementService.DelistAuthenticatorsAsync(request);
+        await service.DelistAuthenticatorsAsync(request);
         return NoContent();
     }
 }
