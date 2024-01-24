@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
@@ -104,14 +102,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
     public async Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request)
     {
-        var json = JsonSerializer.Serialize(request);
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json"),
-            Method = HttpMethod.Delete,
-            RequestUri = new Uri($"{_client.BaseAddress}authenticators/delist")
-        };
-        var response = await _client.SendAsync(httpRequestMessage);
+        var response = await _client.PostAsJsonAsync("/authenticators/delist", request);
         response.EnsureSuccessStatusCode();
     }
 }

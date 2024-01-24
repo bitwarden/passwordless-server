@@ -22,7 +22,7 @@ public static class AuthenticatorsEndpoints
             .WithParameterValidation()
             .RequireSecretKey();
 
-        group.MapDelete("/delist", DelistAuthenticatorsAsync)
+        group.MapPost("/delist", DelistAuthenticatorsAsync)
             .WithParameterValidation()
             .RequireSecretKey();
     }
