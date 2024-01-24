@@ -16,7 +16,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label>
                         Attestation Types:
-                        <InputSelect @bind-Value="FilterForm.AttestationTypes" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <InputSelect @bind-Value="FilterForm.AttestationTypes" class="single-select">
                             @foreach (var attestationType in AttestationTypes!)
                             {
                                 <option value="@attestationType" selected="@FilterForm.AttestationTypes!.Contains(attestationType)">@attestationType</option>
@@ -25,7 +25,7 @@
                     </label>
                     <label>
                         FIDO2 Certification:
-                        <InputSelect @bind-Value="FilterForm.CertificationStatuses" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <InputSelect @bind-Value="FilterForm.CertificationStatuses" class="single-select">
                             @foreach (var certificationLevel in CertificationLevels!)
                             {
                                 <option value="@certificationLevel" selected="@FilterForm.CertificationStatuses!.Contains(certificationLevel)">@certificationLevel</option>
@@ -169,19 +169,19 @@
 
     public class FilterViewModel
     {
-        private string[] _attestationTypes = Array.Empty<string>();
+        private string[] _attestationTypes = [];
 
         public string[]? AttestationTypes
         {
             get => _attestationTypes;
-            set => _attestationTypes = value ?? Array.Empty<string>();
+            set => _attestationTypes = value ?? [];
         }
         
-        private string[] _certificationStatuses = Array.Empty<string>();
+        private string[] _certificationStatuses = [];
         public string[]? CertificationStatuses
         {
             get => _certificationStatuses;
-            set => _certificationStatuses = value ?? Array.Empty<string>();
+            set => _certificationStatuses = value ?? [];
         }
         
         public string? Action { get; set; }
