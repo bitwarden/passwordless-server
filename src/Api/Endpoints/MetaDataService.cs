@@ -13,7 +13,7 @@ public static class MetaDataServiceEndpoints
     {
         var parent = app
             .MapGroup("/mds")
-            .RequireSecretKey()
+            .RequireManagementKey()
             .RequireCors("default");
 
         // internal endpoints do not document, pending scopes to be added to be used by admin console only.

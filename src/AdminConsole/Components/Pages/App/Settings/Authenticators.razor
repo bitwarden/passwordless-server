@@ -1,10 +1,12 @@
 @page "/app/{app}/settings/authenticators"
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.MDS
 @using Passwordless.Common.Models.Apps
 @using Passwordless.Common.Models.Authenticators
 
 @inject NavigationManager NavigationManager
 @inject ICurrentContext CurrentContext
+@inject IPasswordlessManagementClient ManagementClient
 @inject IScopedPasswordlessClient Client
 
 @inherits BaseApplicationPage
@@ -42,7 +44,7 @@
             return;
         }
 
-        var mds = await Client.GetMetaDataStatementEntriesAsync(new EntriesRequest());
+        var mds = await ManagementClient.GetMetaDataStatementEntriesAsync(new EntriesRequest());
         var whitelistRequest = new ConfiguredAuthenticatorRequest(true);
         var whitelist = await Client.GetConfiguredAuthenticatorsAsync(whitelistRequest);
         Whitelist = whitelist

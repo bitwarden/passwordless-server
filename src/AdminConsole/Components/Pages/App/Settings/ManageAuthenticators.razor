@@ -1,10 +1,12 @@
 @page "/app/{app}/settings/authenticators/manage"
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.Apps
 @using Passwordless.Common.Models.Authenticators
 @using Passwordless.Common.Models.MDS
 
 @inherits BaseApplicationPage
 
+@inject IPasswordlessManagementClient ManagementClient
 @inject IScopedPasswordlessClient PasswordlessClient
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
@@ -152,10 +154,10 @@
             }
         }
         
-        AttestationTypes = await PasswordlessClient.GetAttestationTypesAsync();
-        CertificationLevels = await PasswordlessClient.GetCertificationStatusesAsync();
+        AttestationTypes = await ManagementClient.GetAttestationTypesAsync();
+        CertificationLevels = await ManagementClient.GetCertificationStatusesAsync();
 
-        var data = await PasswordlessClient.GetMetaDataStatementEntriesAsync(FilterForm.ToDto());
+        var data = await ManagementClient.GetMetaDataStatementEntriesAsync(FilterForm.ToDto());
 
         var configuredAuthenticatorsRequest = new ConfiguredAuthenticatorRequest(true);
         var allowedAuthenticators = await PasswordlessClient.GetConfiguredAuthenticatorsAsync(configuredAuthenticatorsRequest);

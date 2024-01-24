@@ -6,7 +6,6 @@ using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Authenticators;
-using Passwordless.Common.Models.MDS;
 using Passwordless.Common.Models.Reporting;
 
 namespace Passwordless.AdminConsole.Services;
@@ -15,25 +14,6 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 {
     Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
-
-    /// <summary>
-    /// Retrieve a list of all attestation types in the FIDO2 MDS.
-    /// </summary>
-    /// <returns></returns>
-    Task<IEnumerable<string>> GetAttestationTypesAsync();
-
-    /// <summary>
-    /// Retrieve a list of all certification statuses in the FIDO2 MDS.
-    /// </summary>
-    /// <returns></returns>
-    Task<IEnumerable<string>> GetCertificationStatusesAsync();
-
-    /// <summary>
-    /// Get a list of all authenticators in the FIDO2 MDS.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
 
     /// <summary>
     /// Returns a list of configured authenticators for the current app. If the list is empty, all authenticators are allowed.
@@ -106,39 +86,6 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
         return rest;
-    }
-
-    public async Task<IEnumerable<string>> GetAttestationTypesAsync()
-    {
-        var response = await _client.GetAsync("/mds/attestation-types");
-        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
-    }
-
-    public async Task<IEnumerable<string>> GetCertificationStatusesAsync()
-    {
-        var response = await _client.GetAsync("/mds/certification-statuses");
-        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
-    }
-
-    public async Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request)
-    {
-        var queryBuilder = new QueryBuilder();
-        if (request.AttestationTypes != null)
-        {
-            foreach (var attestationType in request.AttestationTypes)
-            {
-                queryBuilder.Add(nameof(request.AttestationTypes), attestationType);
-            }
-        }
-        if (request.CertificationStatuses != null)
-        {
-            foreach (var certificationStatus in request.CertificationStatuses)
-            {
-                queryBuilder.Add(nameof(request.CertificationStatuses), certificationStatus);
-            }
-        }
-        var q = queryBuilder.ToQueryString();
-        return (await _client.GetFromJsonAsync<EntryResponse[]>($"/mds/entries{q}"))!;
     }
 
     public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http.Extensions;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Models.MDS;
 
 namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
@@ -156,4 +158,37 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
             $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
         );
+
+    public async Task<IEnumerable<string>> GetAttestationTypesAsync()
+    {
+        var response = await http.GetAsync("/mds/attestation-types");
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
+    }
+
+    public async Task<IEnumerable<string>> GetCertificationStatusesAsync()
+    {
+        var response = await http.GetAsync("/mds/certification-statuses");
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
+    }
+
+    public async Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request)
+    {
+        var queryBuilder = new QueryBuilder();
+        if (request.AttestationTypes != null)
+        {
+            foreach (var attestationType in request.AttestationTypes)
+            {
+                queryBuilder.Add(nameof(request.AttestationTypes), attestationType);
+            }
+        }
+        if (request.CertificationStatuses != null)
+        {
+            foreach (var certificationStatus in request.CertificationStatuses)
+            {
+                queryBuilder.Add(nameof(request.CertificationStatuses), certificationStatus);
+            }
+        }
+        var q = queryBuilder.ToQueryString();
+        return (await http.GetFromJsonAsync<EntryResponse[]>($"/mds/entries{q}"))!;
+    }
 }
