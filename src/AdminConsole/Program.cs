@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Endpoints;
