@@ -16,6 +16,7 @@ public static class MetaDataServiceEndpoints
             .RequireSecretKey()
             .RequireCors("default");
 
+        // internal endpoints do not document, pending scopes to be added to be used by admin console only.
         parent.MapGet(
             "/attestation-types",
             async (IMetaDataService mds) =>
@@ -24,6 +25,7 @@ public static class MetaDataServiceEndpoints
                 return Ok(result);
             });
 
+        // internal endpoints do not document, pending scopes to be added to be used by admin console only.
         parent.MapGet(
             "/certification-statuses",
             async (IMetaDataService mds) =>
@@ -32,6 +34,7 @@ public static class MetaDataServiceEndpoints
                 return Ok(result);
             });
 
+        // internal endpoints do not document, pending scopes to be added to be used by admin console only.
         parent.MapGet(
             "/entries",
             async (
