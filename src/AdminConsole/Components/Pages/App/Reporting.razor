@@ -5,6 +5,10 @@
 @inject IScopedPasswordlessClient PasswordlessClient
 @inject IHttpContextAccessor HttpContextAccessor;
 
+<HeadContent>
+    <BlazorScript Type="text/javascript" Src="lib/apexcharts/apexcharts.min.js" />
+</HeadContent>
+
 <Page Title="Reporting">
     <Panel>
         <div class="flex flex-col space-y-4">
