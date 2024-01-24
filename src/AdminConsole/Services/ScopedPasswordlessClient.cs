@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Models.Authenticators;
 using Passwordless.Common.Models.MDS;
 using Passwordless.Common.Models.Reporting;
 
@@ -146,12 +146,12 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         var queryBuilder = new QueryBuilder();
         queryBuilder.Add(nameof(request.IsAllowed), request.IsAllowed.ToString());
         var q = queryBuilder.ToQueryString();
-        return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/apps/list-authenticators{q}"))!;
+        return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/authenticators/list{q}"))!;
     }
 
     public async Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request)
     {
-        var response = await _client.PostAsJsonAsync("/apps/whitelist-authenticators", request);
+        var response = await _client.PostAsJsonAsync("/authenticators/whitelist", request);
         response.EnsureSuccessStatusCode();
     }
 
@@ -162,7 +162,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json"),
             Method = HttpMethod.Delete,
-            RequestUri = new Uri($"{_client.BaseAddress}apps/delist-authenticators")
+            RequestUri = new Uri($"{_client.BaseAddress}authenticators/delist")
         };
         var response = await _client.SendAsync(httpRequestMessage);
         response.EnsureSuccessStatusCode();

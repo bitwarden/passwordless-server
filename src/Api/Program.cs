@@ -181,6 +181,7 @@ app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
 app.MapReportingEndpoints();
 app.MapMetaDataServiceEndpoints();
+app.MapAuthenticatorsEndpoints();
 
 app.MapPasswordlessHealthChecks();
 

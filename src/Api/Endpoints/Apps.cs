@@ -137,64 +137,6 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
-
-        app.MapGet("/apps/list-authenticators", ListConfiguredAuthenticatorsAsync)
-            .RequireSecretKey()
-            .RequireCors();
-
-        app.MapPost("/apps/whitelist-authenticators", WhitelistAuthenticatorsAsync)
-            .WithParameterValidation()
-            .RequireSecretKey()
-            .RequireCors();
-
-        app.MapDelete("/apps/delist-authenticators", DelistAuthenticatorsAsync)
-            .WithParameterValidation()
-            .RequireSecretKey()
-            .RequireCors();
-    }
-
-    public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
-        [AsParameters] ConfiguredAuthenticatorRequest request,
-        ISharedManagementService sharedManagementService,
-        IFeatureContextProvider featureContextProvider)
-    {
-        var features = await featureContextProvider.UseContext();
-        if (!features.AllowAttestation)
-        {
-            throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
-        }
-        var result = await sharedManagementService.ListConfiguredAuthenticatorsAsync(request);
-        return Ok(result);
-    }
-
-    public static async Task<IResult> WhitelistAuthenticatorsAsync(
-        [FromBody] WhitelistAuthenticatorsRequest request,
-        ISharedManagementService sharedManagementService,
-        IFeatureContextProvider featureContextProvider)
-    {
-        var features = await featureContextProvider.UseContext();
-        if (!features.AllowAttestation)
-        {
-            throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
-        }
-
-        await sharedManagementService.WhitelistAuthenticatorsAsync(request);
-        return NoContent();
-    }
-
-    public static async Task<IResult> DelistAuthenticatorsAsync(
-        [FromBody] DelistAuthenticatorsRequest request,
-        ISharedManagementService sharedManagementService,
-        IFeatureContextProvider featureContextProvider)
-    {
-        var features = await featureContextProvider.UseContext();
-        if (!features.AllowAttestation)
-        {
-            throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
-        }
-
-        await sharedManagementService.DelistAuthenticatorsAsync(request);
-        return NoContent();
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(

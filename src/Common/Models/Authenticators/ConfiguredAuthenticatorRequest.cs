@@ -1,4 +1,4 @@
-namespace Passwordless.Common.Models.Apps;
+namespace Passwordless.Common.Models.Authenticators;
 
 /// <summary>
 /// 

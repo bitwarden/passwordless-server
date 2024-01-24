@@ -1,3 +1,3 @@
-namespace Passwordless.Common.Models.Apps;
+namespace Passwordless.Common.Models.Authenticators;
 
 public record ConfiguredAuthenticatorResponse(Guid AaGuid, DateTime CreatedAt);

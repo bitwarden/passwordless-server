@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Passwordless.Common.Models.Apps;
+namespace Passwordless.Common.Models.Authenticators;
 
 public record WhitelistAuthenticatorsRequest(
     [Required, MinLength(1)]
