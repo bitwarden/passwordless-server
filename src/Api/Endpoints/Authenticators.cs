@@ -13,18 +13,16 @@ public static class AuthenticatorsEndpoints
     public static void MapAuthenticatorsEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/authenticators")
-            .RequireCors("default");
-
-        group.MapGet("/list", ListConfiguredAuthenticatorsAsync)
+            .RequireCors("default")
             .RequireSecretKey();
+
+        group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
 
         group.MapPost("/whitelist", WhitelistAuthenticatorsAsync)
-            .WithParameterValidation()
-            .RequireSecretKey();
+            .WithParameterValidation();
 
         group.MapPost("/delist", DelistAuthenticatorsAsync)
-            .WithParameterValidation()
-            .RequireSecretKey();
+            .WithParameterValidation();
     }
 
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(

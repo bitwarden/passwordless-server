@@ -14,7 +14,7 @@ public class RegularExpressionCollectionAttribute(string pattern) : RegularExpre
 
         if (value is not IEnumerable<string> collection)
         {
-            throw new InvalidOperationException("This attribute can only be applied to collections");
+            throw new InvalidOperationException("This attribute can only be applied to collections.");
         }
 
         foreach (var item in collection)
