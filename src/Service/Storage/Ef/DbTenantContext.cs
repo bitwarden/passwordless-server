@@ -27,7 +27,8 @@ public abstract class DbTenantContext : DbGlobalContext
         modelBuilder.Entity<AppFeature>().HasQueryFilter(c => c.Tenant == Tenant);
         modelBuilder.Entity<ApplicationEvent>().HasQueryFilter(c => c.TenantId == Tenant);
         modelBuilder.Entity<PeriodicCredentialReport>().HasQueryFilter(c => c.Tenant == Tenant);
-
+        modelBuilder.Entity<Authenticator>().HasQueryFilter(c => c.Tenant == Tenant);
+        
         base.OnModelCreating(modelBuilder);
     }
 

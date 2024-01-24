@@ -41,6 +41,8 @@ public class EfTenantStorage : ITenantStorage
         await db.TokenKeys.ExecuteDeleteAsync();
         await db.Credentials.ExecuteDeleteAsync();
         await db.AccountInfo.ExecuteDeleteAsync();
+        await db.AppFeatures.ExecuteDeleteAsync();
+        await db.Authenticators.ExecuteDeleteAsync();
     }
 
     public Task DeleteCredential(byte[] id)
