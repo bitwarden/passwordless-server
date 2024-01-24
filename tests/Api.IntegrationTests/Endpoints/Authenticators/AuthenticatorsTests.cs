@@ -47,6 +47,31 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     }
 
     [Fact]
+    public async Task I_can_retrieve_configured_authenticators_with_expected_result()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        await _client.EnableAttestation(applicationName);
+        var request = new WhitelistAuthenticatorsRequest(new List<Guid>
+        {
+            Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
+        });
+        _ = await _client.PostAsJsonAsync("authenticators/whitelist", request);
+
+        // Act
+        var actual = await _client.GetFromJsonAsync<IReadOnlyCollection<ConfiguredAuthenticatorResponse>>("authenticators/list?isAllowed=true");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual!.Count.Should().Be(1);
+        actual.First().AaGuid.Should().Be(Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F"));
+    }
+
+    [Fact]
     public async Task I_receive_forbidden_when_retrieving_configured_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
