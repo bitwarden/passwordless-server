@@ -1,16 +1,11 @@
 using System.Collections.Immutable;
 using AutoFixture;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 using Passwordless.Api.Endpoints;
-using Passwordless.Api.Helpers;
-using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
-using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
 

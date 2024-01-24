@@ -22,7 +22,7 @@ public class ApplicationService : IApplicationService
 
         await _storage.SetFeaturesAsync(features);
     }
-    
+
     public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> ListConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
     {
         var entities = await _storage.GetAuthenticatorsAsync(request.IsAllowed);

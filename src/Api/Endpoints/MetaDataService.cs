@@ -1,7 +1,5 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Common.Models.MDS;
-using Passwordless.Service.Features;
-using Passwordless.Service.Helpers;
 using Passwordless.Service.MDS;
 using static Microsoft.AspNetCore.Http.Results;
 

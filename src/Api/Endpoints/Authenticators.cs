@@ -1,10 +1,10 @@
-using static Microsoft.AspNetCore.Http.Results;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
+using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -14,7 +14,7 @@ public static class AuthenticatorsEndpoints
     {
         var group = app.MapGroup("/authenticators")
             .RequireCors("default");
-        
+
         group.MapGet("/list", ListConfiguredAuthenticatorsAsync)
             .RequireSecretKey();
 
@@ -26,7 +26,7 @@ public static class AuthenticatorsEndpoints
             .WithParameterValidation()
             .RequireSecretKey();
     }
-    
+
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
         IApplicationService service,

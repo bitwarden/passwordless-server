@@ -7,7 +7,6 @@ using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Common.Models.Authenticators;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Extensions.Models;
