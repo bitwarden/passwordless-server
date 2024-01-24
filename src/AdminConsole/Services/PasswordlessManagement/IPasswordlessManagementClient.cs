@@ -26,18 +26,18 @@ public interface IPasswordlessManagementClient
     /// Retrieve a list of all attestation types in the FIDO2 MDS.
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<string>> GetAttestationTypesAsync();
+    Task<IReadOnlyCollection<string>> GetAttestationTypesAsync();
 
     /// <summary>
     /// Retrieve a list of all certification statuses in the FIDO2 MDS.
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<string>> GetCertificationStatusesAsync();
+    Task<IReadOnlyCollection<string>> GetCertificationStatusesAsync();
 
     /// <summary>
     /// Get a list of all authenticators in the FIDO2 MDS.
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
+    Task<IReadOnlyCollection<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request);
 }

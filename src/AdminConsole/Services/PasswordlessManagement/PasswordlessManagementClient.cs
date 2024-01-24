@@ -159,19 +159,19 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
             $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
         );
 
-    public async Task<IEnumerable<string>> GetAttestationTypesAsync()
+    public async Task<IReadOnlyCollection<string>> GetAttestationTypesAsync()
     {
-        var response = await http.GetAsync("/mds/attestation-types");
-        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
+        using var response = await http.GetAsync("/mds/attestation-types");
+        return (await response.Content.ReadFromJsonAsync<List<string>>())!;
     }
 
-    public async Task<IEnumerable<string>> GetCertificationStatusesAsync()
+    public async Task<IReadOnlyCollection<string>> GetCertificationStatusesAsync()
     {
-        var response = await http.GetAsync("/mds/certification-statuses");
-        return (await response.Content.ReadFromJsonAsync<IEnumerable<string>>())!;
+        using var response = await http.GetAsync("/mds/certification-statuses");
+        return (await response.Content.ReadFromJsonAsync<List<string>>())!;
     }
 
-    public async Task<IEnumerable<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request)
+    public async Task<IReadOnlyCollection<EntryResponse>> GetMetaDataStatementEntriesAsync(EntriesRequest request)
     {
         var queryBuilder = new QueryBuilder();
         if (request.AttestationTypes != null)

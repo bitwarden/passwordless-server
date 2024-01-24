@@ -18,8 +18,7 @@ public sealed class Page : ComponentBase
         builder.AddAttribute(1, nameof(PageTitle.ChildContent), (RenderFragment)(b =>
         {
             b.AddContent(2, Title);
-        }
-            ));
+        }));
         builder.CloseComponent();
 
         builder.OpenElement(3, "div");

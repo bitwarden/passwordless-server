@@ -96,13 +96,13 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
     public async Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request)
     {
-        var response = await _client.PostAsJsonAsync("/authenticators/whitelist", request);
+        using var response = await _client.PostAsJsonAsync("/authenticators/whitelist", request);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request)
     {
-        var response = await _client.PostAsJsonAsync("/authenticators/delist", request);
+        using var response = await _client.PostAsJsonAsync("/authenticators/delist", request);
         response.EnsureSuccessStatusCode();
     }
 }
