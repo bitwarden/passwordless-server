@@ -4,7 +4,7 @@
 
 @layer components {
     select.single-select {
-        @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5;
+        @apply mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6;
     }
     .page-header-container {
         @apply max-w-7xl px-4 sm:px-6 lg:px-8;

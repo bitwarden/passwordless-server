@@ -16,19 +16,21 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label>
                         Attestation Types:
-                        <InputSelect @bind-Value="FilterForm.AttestationTypes" class="single-select">
+                        <InputSelect @bind-Value="FilterForm.AttestationType" class="single-select">
+                            <option value="">All attestation types</option>
                             @foreach (var attestationType in AttestationTypes!)
                             {
-                                <option value="@attestationType" selected="@FilterForm.AttestationTypes!.Contains(attestationType)">@attestationType</option>
+                                <option value="@attestationType" selected="@(FilterForm.AttestationType == attestationType)">@attestationType</option>
                             }
                         </InputSelect>
                     </label>
                     <label>
                         FIDO2 Certification:
-                        <InputSelect @bind-Value="FilterForm.CertificationStatuses" class="single-select">
+                        <InputSelect @bind-Value="FilterForm.CertificationStatus" class="single-select">
+                            <option value="">All certification levels</option>
                             @foreach (var certificationLevel in CertificationLevels!)
                             {
-                                <option value="@certificationLevel" selected="@FilterForm.CertificationStatuses!.Contains(certificationLevel)">@certificationLevel</option>
+                                <option value="@certificationLevel" selected="@(FilterForm.CertificationStatus == certificationLevel)">@certificationLevel</option>
                             }
                         </InputSelect>
                     </label>
@@ -169,29 +171,18 @@
 
     public class FilterViewModel
     {
-        private string[] _attestationTypes = [];
+        public string? AttestationType { get; set; }
 
-        public string[]? AttestationTypes
-        {
-            get => _attestationTypes;
-            set => _attestationTypes = value ?? [];
-        }
-        
-        private string[] _certificationStatuses = [];
-        public string[]? CertificationStatuses
-        {
-            get => _certificationStatuses;
-            set => _certificationStatuses = value ?? [];
-        }
-        
+        public string? CertificationStatus { get; set; }
+
         public string? Action { get; set; }
         
         public EntriesRequest ToDto()
         {
             return new EntriesRequest
             {
-                AttestationTypes = AttestationTypes,
-                CertificationStatuses = CertificationStatuses
+                AttestationTypes = !string.IsNullOrEmpty(AttestationType) ? [AttestationType] : [],
+                CertificationStatuses = !string.IsNullOrEmpty(CertificationStatus) ? [CertificationStatus] : []
             };
         }
     }
