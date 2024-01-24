@@ -273,7 +273,7 @@ public class EfTenantStorage : ITenantStorage
         var existingAuthenticators = db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid));
 
         await existingAuthenticators.ExecuteUpdateAsync(x => x
-                .SetProperty(x => x.IsAllowed, true)
+                .SetProperty(entity => entity.IsAllowed, true)
             );
 
         var existingAaGuids = await existingAuthenticators.Select(x => x.AaGuid).ToListAsync();
