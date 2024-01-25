@@ -2,6 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Passwordless.Common.Validation;
 
+/// <summary>
+/// Validate collections of strings against a regular expression.
+/// </summary>
+/// <param name="pattern"></param>
 [AttributeUsage(AttributeTargets.Property)]
 public class RegularExpressionCollectionAttribute(string pattern) : RegularExpressionAttribute(pattern)
 {
