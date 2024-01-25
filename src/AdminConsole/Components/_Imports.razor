@@ -1,4 +1,4 @@
-@attribute [Authorize]
+@attribute [Authorize(CustomPolicy.HasAppRole)]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -13,8 +13,10 @@
 @using System.Net.Http
 @using System.Net.Http.Json
 @using System.Text.Json
+@using Elfie.Serialization
 
 @using Passwordless.AdminConsole
+@using Passwordless.AdminConsole.Authorization
 @using Passwordless.AdminConsole.Components
 @using Passwordless.AdminConsole.Components.Shared
 @using Passwordless.AdminConsole.Components.Shared.ApexCharts
