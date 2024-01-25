@@ -41,7 +41,7 @@
             </EditForm>
 
             <hr/>
-            <EditForm id="manage-form" class="flex-col space-y-4" Model="Data" FormName="manage-form">
+            <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="ManageFormHandler">
                 <div class="flex space-x-4">
                     <button id="add-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="add">Add authenticator(s)</button>
                     <button id="remove-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="remove">Remove authenticator(s)</button>
@@ -69,9 +69,9 @@
                         {
                             @foreach (var item in Data)
                             {
-                                <tr class="@item.GetRowClass()">
+                                <tr>
                                     <td class="relative px-7 sm:w-12 sm:px-6">
-                                        <input name="ManageForm.Selected" type="checkbox" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
+                                        <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid" class="interactive-checkbox absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
                                     </td>
                                     <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
                                         @item.Name
@@ -115,6 +115,28 @@
             document.getElementById("filter-form").submit();
         }
     });
+    
+    document.addEventListener("change", (event) => {
+        if (event.target.classList.contains("interactive-checkbox")) {            
+            // get the value of this checkbox
+            const el = event.target;
+            const value = el.value;
+        
+            // submit the form using fetch
+            const d= new FormData();
+            
+            d.append("ManageForm.Selected", value);
+            d.append("ManageForm.Action", el.checked ? "add" : "remove");
+            
+            d.append("_handler", el.form["_handler"].value);
+            d.append("__RequestVerificationToken", el.form["__RequestVerificationToken"].value);
+            
+            fetch(el.form.action, {
+                method: "POST",
+                body: d
+            });
+        }
+    });
 </script>
 
 @code {
@@ -135,6 +157,29 @@
             return;
         }
         
+        
+        
+        AttestationTypes = await ManagementClient.GetAttestationTypesAsync();
+        CertificationLevels = await ManagementClient.GetCertificationStatusesAsync();
+
+        var data = await ManagementClient.GetMetaDataStatementEntriesAsync(FilterForm.ToDto());
+
+        var configuredAuthenticatorsRequest = new ConfiguredAuthenticatorRequest(true);
+        var allowedAuthenticators = await PasswordlessClient.GetConfiguredAuthenticatorsAsync(configuredAuthenticatorsRequest);
+        
+        Data = data.Select(x =>
+        {
+            var viewModel = ListViewModel.FromDto(x);
+            viewModel.IsSelected = allowedAuthenticators.Any(c => x.AaGuid == c.AaGuid);
+            return viewModel;
+        }).ToList();
+
+        _isInitialized = true;
+    }
+
+    // If EditForm has OnSubmit="ManageFormSubmit", form submission goes to a handler instead of OnInitializedAsync
+    private async Task ManageFormHandler()
+    {
         switch (ManageForm.Action)
         {
             case "add":
@@ -155,23 +200,6 @@
                 break;
             }
         }
-        
-        AttestationTypes = await ManagementClient.GetAttestationTypesAsync();
-        CertificationLevels = await ManagementClient.GetCertificationStatusesAsync();
-
-        var data = await ManagementClient.GetMetaDataStatementEntriesAsync(FilterForm.ToDto());
-
-        var configuredAuthenticatorsRequest = new ConfiguredAuthenticatorRequest(true);
-        var allowedAuthenticators = await PasswordlessClient.GetConfiguredAuthenticatorsAsync(configuredAuthenticatorsRequest);
-        
-        Data = data.Select(x =>
-        {
-            var viewModel = ListViewModel.FromDto(x);
-            viewModel.IsSelected = allowedAuthenticators.Any(c => x.AaGuid == c.AaGuid);
-            return viewModel;
-        }).ToList();
-
-        _isInitialized = true;
     }
 
     public class FilterViewModel
