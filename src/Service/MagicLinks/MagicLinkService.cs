@@ -24,7 +24,7 @@ public class MagicLinkService
         await _mailProvider.SendAsync(new MailMessage
         {
             To = [dto.EmailAddress.ToString()],
-            From = "do-not-reply@passwordless.dev",
+            From = "do-not-reply@maila.passwordless.dev",
             Subject = "Verify Email Address",
             TextBody = $"Please click the link or copy into your browser of choice to log in: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
