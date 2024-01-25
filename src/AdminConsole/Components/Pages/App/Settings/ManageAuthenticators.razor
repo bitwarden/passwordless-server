@@ -42,11 +42,6 @@
 
             <hr/>
             <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
-                <div class="flex space-x-4">
-                    <button id="add-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="add">Add authenticator(s)</button>
-                    <button id="remove-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="remove">Remove authenticator(s)</button>
-                    <button id="clear-selection-manage-btn" class="btn-secondary" type="submit" name="ManageForm.Action" value="reset">Clear selection</button>
-                </div>
                 <div class="overflow-y-hidden overflow-x-auto table-container">
                     <table class="tbl-default min-w-full">
                         <thead>
@@ -188,11 +183,6 @@
             {
                 var request = new RemoveAuthenticatorsRequest(ManageForm.Selected);
                 await PasswordlessClient.RemoveAuthenticatorsAsync(request);
-                break;
-            }
-            case "reset":
-            {
-                ManageForm = new();
                 break;
             }
         }
