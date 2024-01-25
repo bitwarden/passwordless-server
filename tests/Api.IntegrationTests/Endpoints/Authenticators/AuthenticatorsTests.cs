@@ -56,11 +56,11 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _client.AddPublicKey(accountKeysCreation!.ApiKey1);
         await _client.EnableAttestation(applicationName);
-        var request = new WhitelistAuthenticatorsRequest(new List<Guid>
+        var request = new AddAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        });
-        _ = await _client.PostAsJsonAsync("authenticators/whitelist", request);
+        }, true);
+        _ = await _client.PostAsJsonAsync("authenticators/add", request);
 
         // Act
         var actual = await _client.GetFromJsonAsync<IReadOnlyCollection<ConfiguredAuthenticatorResponse>>("authenticators/list?isAllowed=true");
@@ -99,13 +99,13 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         _client.AddPublicKey(accountKeysCreation!.ApiKey1);
         await _client.EnableAttestation(applicationName);
 
-        var request = new WhitelistAuthenticatorsRequest(new List<Guid>
+        var request = new AddAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        });
+        }, true);
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/whitelist", request);
+        var actual = await _client.PostAsJsonAsync("authenticators/add", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -121,13 +121,13 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
-        var request = new WhitelistAuthenticatorsRequest(new List<Guid>
+        var request = new AddAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        });
+        }, true);
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/whitelist", request);
+        var actual = await _client.PostAsJsonAsync("authenticators/add", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -144,16 +144,16 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         _client.AddPublicKey(accountKeysCreation!.ApiKey1);
         await _client.EnableAttestation(applicationName);
 
-        var whitelistRequest = new WhitelistAuthenticatorsRequest(new List<Guid>
+        var whitelistRequest = new AddAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        });
-        _ = await _client.PostAsJsonAsync("authenticators/whitelist", whitelistRequest);
-        var request = new DelistAuthenticatorsRequest(
+        }, true);
+        _ = await _client.PostAsJsonAsync("authenticators/add", whitelistRequest);
+        var request = new RemoveAuthenticatorsRequest(
             new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") });
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/delist", request);
+        var actual = await _client.PostAsJsonAsync("authenticators/remove", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -169,13 +169,13 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
-        var request = new DelistAuthenticatorsRequest(new List<Guid>
+        var request = new RemoveAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
         });
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/delist", request);
+        var actual = await _client.PostAsJsonAsync("authenticators/remove", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.Forbidden);

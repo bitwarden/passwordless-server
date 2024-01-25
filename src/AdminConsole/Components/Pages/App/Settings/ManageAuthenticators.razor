@@ -41,7 +41,7 @@
             </EditForm>
 
             <hr/>
-            <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="ManageFormHandler">
+            <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
                 <div class="flex space-x-4">
                     <button id="add-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="add">Add authenticator(s)</button>
                     <button id="remove-manage-btn" class="btn-primary" type="submit" name="ManageForm.Action" value="remove">Remove authenticator(s)</button>
@@ -71,7 +71,7 @@
                             {
                                 <tr>
                                     <td class="relative px-7 sm:w-12 sm:px-6">
-                                        <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid" class="interactive-checkbox absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
+                                        <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
                                     </td>
                                     <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
                                         @item.Name
@@ -115,26 +115,23 @@
             document.getElementById("filter-form").submit();
         }
     });
-    
+
     document.addEventListener("change", (event) => {
-        if (event.target.classList.contains("interactive-checkbox")) {            
-            // get the value of this checkbox
-            const el = event.target;
-            const value = el.value;
-        
-            // submit the form using fetch
-            const d= new FormData();
+        if (event.target.name === "ManageForm.Selected") {            
+            let checkbox = event.target;
             
-            d.append("ManageForm.Selected", value);
-            d.append("ManageForm.Action", el.checked ? "add" : "remove");
+            const formData = new FormData();
+            formData.append("ManageForm.Selected", checkbox.value);
+            formData.append("ManageForm.Action", checkbox.checked ? "add" : "remove");
+            formData.append("_handler", checkbox.form["_handler"].value);
+            formData.append("__RequestVerificationToken", checkbox.form["__RequestVerificationToken"].value);
             
-            d.append("_handler", el.form["_handler"].value);
-            d.append("__RequestVerificationToken", el.form["__RequestVerificationToken"].value);
-            
-            fetch(el.form.action, {
+            fetch(checkbox.form.action, {
                 method: "POST",
-                body: d
-            });
+                body: formData
+            }).catch(() => {
+               event.target.checked = !event.target.checked;
+            })
         }
     });
 </script>
@@ -177,21 +174,20 @@
         _isInitialized = true;
     }
 
-    // If EditForm has OnSubmit="ManageFormSubmit", form submission goes to a handler instead of OnInitializedAsync
-    private async Task ManageFormHandler()
+    private async Task OnAuthenticatorModified()
     {
         switch (ManageForm.Action)
         {
             case "add":
             {
-                var request = new WhitelistAuthenticatorsRequest(ManageForm.Selected);
-                await PasswordlessClient.WhitelistAuthenticatorsAsync(request);
+                var request = new AddAuthenticatorsRequest(ManageForm.Selected, true);
+                await PasswordlessClient.AddAuthenticatorsAsync(request);
                 break;
             }
             case "remove":
             {
-                var request = new DelistAuthenticatorsRequest(ManageForm.Selected);
-                await PasswordlessClient.DelistAuthenticatorsAsync(request);
+                var request = new RemoveAuthenticatorsRequest(ManageForm.Selected);
+                await PasswordlessClient.RemoveAuthenticatorsAsync(request);
                 break;
             }
             case "reset":
@@ -231,11 +227,6 @@
         IEnumerable<string> AttestationTypes)
     {
         public bool IsSelected { get; set; }
-        
-        public string GetRowClass()
-        {
-            return IsSelected ? "selected" : string.Empty;
-        }
 
         public static ListViewModel FromDto(EntryResponse dto)
         {

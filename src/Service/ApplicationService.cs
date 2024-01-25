@@ -29,13 +29,13 @@ public class ApplicationService : IApplicationService
         return entities.Select(x => new ConfiguredAuthenticatorResponse(x.AaGuid, x.CreatedAt)).ToList();
     }
 
-    public Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request)
+    public Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
     {
-        return _storage.WhitelistAuthenticatorsAsync(request.AaGuids);
+        return _storage.AddAuthenticatorsAsync(request.AaGuids, request.IsAllowed);
     }
 
-    public Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request)
+    public Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
     {
-        return _storage.DelistAuthenticatorsAsync(request.AaGuids);
+        return _storage.RemoveAuthenticatorsAsync(request.AaGuids);
     }
 }

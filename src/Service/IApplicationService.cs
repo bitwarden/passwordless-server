@@ -7,6 +7,6 @@ public interface IApplicationService
 {
     Task SetFeaturesAsync(SetFeaturesDto features);
     Task<IEnumerable<ConfiguredAuthenticatorResponse>> ListConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
-    Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request);
-    Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request);
+    Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request);
+    Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request);
 }

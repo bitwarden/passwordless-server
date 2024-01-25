@@ -19,10 +19,10 @@ public static class AuthenticatorsEndpoints
 
         group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
 
-        group.MapPost("/whitelist", WhitelistAuthenticatorsAsync)
+        group.MapPost("/add", AddAuthenticatorsAsync)
             .WithParameterValidation();
 
-        group.MapPost("/delist", DelistAuthenticatorsAsync)
+        group.MapPost("/remove", RemoveAuthenticatorsAsync)
             .WithParameterValidation();
     }
 
@@ -40,8 +40,8 @@ public static class AuthenticatorsEndpoints
         return Ok(result);
     }
 
-    public static async Task<IResult> WhitelistAuthenticatorsAsync(
-        [FromBody] WhitelistAuthenticatorsRequest request,
+    public static async Task<IResult> AddAuthenticatorsAsync(
+        [FromBody] AddAuthenticatorsRequest request,
         IApplicationService service,
         IFeatureContextProvider featureContextProvider,
         IEventLogger eventLogger)
@@ -52,13 +52,13 @@ public static class AuthenticatorsEndpoints
             throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
         }
 
-        await service.WhitelistAuthenticatorsAsync(request);
+        await service.AddAuthenticatorsAsync(request);
         eventLogger.LogAuthenticatorsWhitelistedEvent();
         return NoContent();
     }
 
-    public static async Task<IResult> DelistAuthenticatorsAsync(
-        [FromBody] DelistAuthenticatorsRequest request,
+    public static async Task<IResult> RemoveAuthenticatorsAsync(
+        [FromBody] RemoveAuthenticatorsRequest request,
         IApplicationService service,
         IFeatureContextProvider featureContextProvider,
         IEventLogger eventLogger)
@@ -69,7 +69,7 @@ public static class AuthenticatorsEndpoints
             throw new ApiException("attestation_not_supported_on_plan", "Attestation is not supported on your plan.", 403);
         }
 
-        await service.DelistAuthenticatorsAsync(request);
+        await service.RemoveAuthenticatorsAsync(request);
         eventLogger.LogAuthenticatorsDelistedEvent();
         return NoContent();
     }

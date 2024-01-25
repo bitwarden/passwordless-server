@@ -53,6 +53,6 @@ public interface ITenantStorage
     Task DisableGenerateSignInTokenEndpoint();
     Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(DateOnly? from, DateOnly? to);
     Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null);
-    Task WhitelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids);
-    Task DelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids);
+    Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed);
+    Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids);
 }

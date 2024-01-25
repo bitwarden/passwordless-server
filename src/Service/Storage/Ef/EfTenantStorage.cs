@@ -268,12 +268,12 @@ public class EfTenantStorage : ITenantStorage
         return await query.ToListAsync();
     }
 
-    public async Task WhitelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
+    public async Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed)
     {
         var existingAuthenticators = db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid));
 
         await existingAuthenticators.ExecuteUpdateAsync(x => x
-                .SetProperty(entity => entity.IsAllowed, true)
+                .SetProperty(entity => entity.IsAllowed, isAllowed)
             );
 
         var existingAaGuids = await existingAuthenticators.Select(x => x.AaGuid).ToListAsync();
@@ -282,7 +282,7 @@ public class EfTenantStorage : ITenantStorage
             .Select(x => new Authenticator
             {
                 AaGuid = x,
-                IsAllowed = true,
+                IsAllowed = isAllowed,
                 CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
                 Tenant = Tenant
             }).ToList();
@@ -291,7 +291,7 @@ public class EfTenantStorage : ITenantStorage
         await db.SaveChangesAsync();
     }
 
-    public Task DelistAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
+    public Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
     {
         return db.Authenticators
             .Where(x => aaGuids.Contains(x.AaGuid))

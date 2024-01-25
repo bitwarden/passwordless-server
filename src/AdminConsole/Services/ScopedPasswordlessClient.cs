@@ -21,18 +21,18 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
 
     /// <summary>
-    /// Add specified authenticators to the whitelist.
+    /// Add specified authenticators to the whitelist/blacklist.
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request);
+    Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request);
 
     /// <summary>
-    /// Remove specified authenticators from the whitelist.
+    /// Remove specified authenticators from the whitelist/blacklist.
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request);
+    Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -94,15 +94,15 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/authenticators/list{q}"))!;
     }
 
-    public async Task WhitelistAuthenticatorsAsync(WhitelistAuthenticatorsRequest request)
+    public async Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
     {
-        using var response = await _client.PostAsJsonAsync("/authenticators/whitelist", request);
+        using var response = await _client.PostAsJsonAsync("/authenticators/add", request);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DelistAuthenticatorsAsync(DelistAuthenticatorsRequest request)
+    public async Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
     {
-        using var response = await _client.PostAsJsonAsync("/authenticators/delist", request);
+        using var response = await _client.PostAsJsonAsync("/authenticators/remove", request);
         response.EnsureSuccessStatusCode();
     }
 }
