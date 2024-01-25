@@ -2,6 +2,8 @@
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
 
+@inherits BaseApplicationPage
+
 @inject IScopedPasswordlessClient PasswordlessClient
 @inject IHttpContextAccessor HttpContextAccessor;
 
@@ -51,9 +53,6 @@
 </Page>
 
 @code {
-    [Parameter]
-    public string App { get; set; }
-
     public bool IsFilterDatePickerEnabled => false;
 
     [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }

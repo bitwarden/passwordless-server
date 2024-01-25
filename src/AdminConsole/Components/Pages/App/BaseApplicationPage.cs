@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Passwordless.AdminConsole.Authorization;
 
 namespace Passwordless.AdminConsole.Components.Pages.App;
 
+[Authorize(CustomPolicy.HasAppRole)]
 public abstract class BaseApplicationPage : ComponentBase
 {
     /// <summary>
