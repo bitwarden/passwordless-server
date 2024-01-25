@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using static Microsoft.AspNetCore.Http.Results;
@@ -42,7 +43,8 @@ public static class AuthenticatorsEndpoints
     public static async Task<IResult> WhitelistAuthenticatorsAsync(
         [FromBody] WhitelistAuthenticatorsRequest request,
         IApplicationService service,
-        IFeatureContextProvider featureContextProvider)
+        IFeatureContextProvider featureContextProvider,
+        IEventLogger eventLogger)
     {
         var features = await featureContextProvider.UseContext();
         if (!features.AllowAttestation)
@@ -51,13 +53,15 @@ public static class AuthenticatorsEndpoints
         }
 
         await service.WhitelistAuthenticatorsAsync(request);
+        eventLogger.LogAuthenticatorsWhitelistedEvent();
         return NoContent();
     }
 
     public static async Task<IResult> DelistAuthenticatorsAsync(
         [FromBody] DelistAuthenticatorsRequest request,
         IApplicationService service,
-        IFeatureContextProvider featureContextProvider)
+        IFeatureContextProvider featureContextProvider,
+        IEventLogger eventLogger)
     {
         var features = await featureContextProvider.UseContext();
         if (!features.AllowAttestation)
@@ -66,6 +70,7 @@ public static class AuthenticatorsEndpoints
         }
 
         await service.DelistAuthenticatorsAsync(request);
+        eventLogger.LogAuthenticatorsDelistedEvent();
         return NoContent();
     }
 }

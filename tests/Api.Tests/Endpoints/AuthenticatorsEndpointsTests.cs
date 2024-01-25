@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Passwordless.Api.Endpoints;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
+using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 
@@ -96,12 +98,15 @@ public class AuthenticatorsEndpointsTests
         featureContextProviderMock.Setup(x => x.UseContext())
             .ReturnsAsync(expectedFeaturesContext);
 
+        var eventLoggerMock = new Mock<IEventLogger>();
+
         // Act
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await AuthenticatorsEndpoints.WhitelistAuthenticatorsAsync(
                 request,
                 serviceMock.Object,
-                featureContextProviderMock.Object));
+                featureContextProviderMock.Object,
+                eventLoggerMock.Object));
 
         // Assert
         Assert.Equal("attestation_not_supported_on_plan", actual.ErrorCode);
@@ -127,15 +132,48 @@ public class AuthenticatorsEndpointsTests
             .Setup(x => x.UseContext())
             .ReturnsAsync(expectedFeaturesContext);
 
+        var eventLoggerMock = new Mock<IEventLogger>();
+
         // Act
         var actual = await AuthenticatorsEndpoints.WhitelistAuthenticatorsAsync(
             request,
             serviceMock.Object,
-            featureContextProviderMock.Object);
+            featureContextProviderMock.Object,
+            eventLoggerMock.Object);
 
         // Assert
         Assert.Equal(typeof(NoContent), actual.GetType());
         serviceMock.Verify(x => x.WhitelistAuthenticatorsAsync(It.Is<WhitelistAuthenticatorsRequest>(p => p == request)), Times.Once);
+    }
+
+    [Fact]
+    public async Task WhitelistAuthenticatorsAsync_LogsAuthenticatorsWhitelistedEvent()
+    {
+        // Arrange
+        var request = _fixture.Create<WhitelistAuthenticatorsRequest>();
+
+        var serviceMock = new Mock<IApplicationService>();
+
+        var featureContextProviderMock = new Mock<IFeatureContextProvider>();
+        var expectedFeaturesContext = _fixture
+            .Build<FeaturesContext>()
+            .With(x => x.AllowAttestation, true)
+            .Create();
+        featureContextProviderMock
+            .Setup(x => x.UseContext())
+            .ReturnsAsync(expectedFeaturesContext);
+
+        var eventLoggerMock = new Mock<IEventLogger>();
+
+        // Act
+        await AuthenticatorsEndpoints.WhitelistAuthenticatorsAsync(
+            request,
+            serviceMock.Object,
+            featureContextProviderMock.Object,
+            eventLoggerMock.Object);
+
+        // Assert
+        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
     }
     #endregion
 
@@ -156,12 +194,15 @@ public class AuthenticatorsEndpointsTests
         featureContextProviderMock.Setup(x => x.UseContext())
             .ReturnsAsync(expectedFeaturesContext);
 
+        var eventLoggerMock = new Mock<IEventLogger>();
+
         // Act
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await AuthenticatorsEndpoints.DelistAuthenticatorsAsync(
                 request,
                 serviceMock.Object,
-                featureContextProviderMock.Object));
+                featureContextProviderMock.Object,
+                eventLoggerMock.Object));
 
         // Assert
         Assert.Equal("attestation_not_supported_on_plan", actual.ErrorCode);
@@ -187,15 +228,48 @@ public class AuthenticatorsEndpointsTests
             .Setup(x => x.UseContext())
             .ReturnsAsync(expectedFeaturesContext);
 
+        var eventLoggerMock = new Mock<IEventLogger>();
+
         // Act
         var actual = await AuthenticatorsEndpoints.DelistAuthenticatorsAsync(
             request,
             serviceMock.Object,
-            featureContextProviderMock.Object);
+            featureContextProviderMock.Object,
+            eventLoggerMock.Object);
 
         // Assert
         Assert.Equal(typeof(NoContent), actual.GetType());
         serviceMock.Verify(x => x.DelistAuthenticatorsAsync(It.Is<DelistAuthenticatorsRequest>(p => p == request)), Times.Once);
+    }
+
+    [Fact]
+    public async Task DelistAuthenticatorsAsync_LogsAuthenticatorsDelistedEvent()
+    {
+        // Arrange
+        var request = _fixture.Create<DelistAuthenticatorsRequest>();
+
+        var serviceMock = new Mock<IApplicationService>();
+
+        var featureContextProviderMock = new Mock<IFeatureContextProvider>();
+        var expectedFeaturesContext = _fixture
+            .Build<FeaturesContext>()
+            .With(x => x.AllowAttestation, true)
+            .Create();
+        featureContextProviderMock
+            .Setup(x => x.UseContext())
+            .ReturnsAsync(expectedFeaturesContext);
+
+        var eventLoggerMock = new Mock<IEventLogger>();
+
+        // Act
+        await AuthenticatorsEndpoints.DelistAuthenticatorsAsync(
+            request,
+            serviceMock.Object,
+            featureContextProviderMock.Object,
+            eventLoggerMock.Object);
+
+        // Assert
+        eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<Func<IEventLogContext, EventDto>>()), Times.Once);
     }
     #endregion
 }

@@ -338,4 +338,30 @@ public static class EventLoggerExtensions
             Subject = context.TenantId,
             ApiKeyId = string.Empty
         });
+
+    public static void LogAuthenticatorsWhitelistedEvent(this IEventLogger logger) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = "Authenticators whitelisted.",
+            PerformedBy = "Unknown User",
+            TenantId = context.TenantId,
+            EventType = EventType.ApiAuthenticatorsWhitelisted,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogAuthenticatorsDelistedEvent(this IEventLogger logger) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = "Authenticators removed from whitelist or blacklist.",
+            PerformedBy = "Unknown User",
+            TenantId = context.TenantId,
+            EventType = EventType.ApiAuthenticatorsDelisted,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
 }
