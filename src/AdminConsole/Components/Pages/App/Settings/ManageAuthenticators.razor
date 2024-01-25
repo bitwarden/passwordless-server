@@ -1,6 +1,5 @@
 @page "/app/{app}/settings/authenticators/manage"
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@using Passwordless.Common.Models.Apps
 @using Passwordless.Common.Models.Authenticators
 @using Passwordless.Common.Models.MDS
 
@@ -8,6 +7,7 @@
 
 @inject IPasswordlessManagementClient ManagementClient
 @inject IScopedPasswordlessClient PasswordlessClient
+@inject IHttpContextAccessor HttpContextAccessor
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
 
@@ -19,7 +19,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label>
                         Attestation Types:
-                        <InputSelect @bind-Value="FilterForm.AttestationType" class="single-select">
+                        <InputSelect id="attestation-types-select" @bind-Value="FilterForm.AttestationType" class="single-select">
                             <option value="">All attestation types</option>
                             @foreach (var attestationType in AttestationTypes!)
                             {
@@ -29,7 +29,7 @@
                     </label>
                     <label>
                         FIDO2 Certification:
-                        <InputSelect @bind-Value="FilterForm.CertificationStatus" class="single-select">
+                        <InputSelect id="certification-statuses-select" @bind-Value="FilterForm.CertificationStatus" class="single-select">
                             <option value="">All certification levels</option>
                             @foreach (var certificationLevel in CertificationLevels!)
                             {
@@ -37,10 +37,6 @@
                             }
                         </InputSelect>
                     </label>
-                </div>
-                <div class="flex space-x-4">
-                    <button id="search-btn" class="btn-primary" type="submit" name="FilterForm.Action" value="search">Search</button>
-                    <button id="reset-btn" class="btn-secondary" type="submit" name="FilterForm.Action" value="reset">Reset</button>
                 </div>
             </EditForm>
 
@@ -113,6 +109,14 @@
     </Page>
 }
 
+<script type="text/javascript" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
+    document.addEventListener("change", (event) => {
+        if (event.target.id === "attestation-types-select" || event.target.id === "certification-statuses-select") {
+            document.getElementById("filter-form").submit();
+        }
+    });
+</script>
+
 @code {
     private bool _isInitialized;
     
@@ -130,8 +134,6 @@
             NavigationManager.NavigateTo($"app/{App}/settings");
             return;
         }
-        
-        if (FilterForm.Action == "reset") FilterForm = new();
         
         switch (ManageForm.Action)
         {
@@ -177,8 +179,6 @@
         public string? AttestationType { get; set; }
 
         public string? CertificationStatus { get; set; }
-
-        public string? Action { get; set; }
         
         public EntriesRequest ToDto()
         {
