@@ -7,7 +7,7 @@ public class PostmarkMailProvider(PostmarkMailClientFactory factory) : IMailProv
     public async Task SendAsync(MailMessage message)
     {
         var configuredClient = factory.GetClient(message.MessageType);
-        
+
         PostmarkMessage pm = new PostmarkMessage
         {
             To = string.Join(',', message.To),

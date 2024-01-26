@@ -6,14 +6,14 @@ namespace Passwordless.Common.Services.Mail;
 public class PostmarkMailClientFactory(PostmarkMailProviderConfiguration configuration)
 {
     private static readonly Dictionary<string, ConfiguredPostmarkClient> Clients = new();
-    
+
     public ConfiguredPostmarkClient GetClient(string streamName)
     {
         if (string.IsNullOrWhiteSpace(streamName))
         {
             return GetClient("Default");
         }
-        
+
         if (Clients.TryGetValue(streamName, out var value))
         {
             return value;
@@ -25,7 +25,7 @@ public class PostmarkMailClientFactory(PostmarkMailProviderConfiguration configu
         {
             var defaultClient = new ConfiguredPostmarkClient
             {
-                Client = new PostmarkClient(configuration.DefaultConfiguration.ApiKey), 
+                Client = new PostmarkClient(configuration.DefaultConfiguration.ApiKey),
                 From = new MailAddress(configuration.DefaultConfiguration.From)
             };
 
@@ -35,11 +35,11 @@ public class PostmarkMailClientFactory(PostmarkMailProviderConfiguration configu
 
         var streamClient = new ConfiguredPostmarkClient
         {
-            Client = new PostmarkClient(messageStream.ApiKey), 
-            From = new MailAddress(messageStream.From), 
+            Client = new PostmarkClient(messageStream.ApiKey),
+            From = new MailAddress(messageStream.From),
             MessageStream = messageStream.Name
         };
-        
+
         Clients.TryAdd(messageStream.Name, streamClient);
         return streamClient;
     }
