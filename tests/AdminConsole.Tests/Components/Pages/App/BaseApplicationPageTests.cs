@@ -37,7 +37,7 @@ public class BaseApplicationTests
     }
 
     /// <summary>
-    /// Verify that all application pages inherit from <c href="BaseApplicationPage" /> to ensure consistency.
+    /// Verify that all application pages whose route starts with '/app/{app}' inherit from <c href="BaseApplicationPage" /> to ensure consistency.
     /// </summary>
     [Fact]
     public void AllApplicationPages_Inherit_BaseApplicationPage_WhenPathMatches()
