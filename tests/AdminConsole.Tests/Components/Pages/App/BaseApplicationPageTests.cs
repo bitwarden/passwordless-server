@@ -21,7 +21,7 @@ public class BaseApplicationTests
         var componentTypes = assembly.GetTypes()
             .Where(type =>
                 typeof(Microsoft.AspNetCore.Components.ComponentBase).IsAssignableFrom(type) &&
-                type.Namespace.StartsWith("Passwordless.AdminConsole.Components.Pages.App"));
+                type.Namespace!.StartsWith("Passwordless.AdminConsole.Components.Pages.App"));
 
         foreach (var componentType in componentTypes)
         {
