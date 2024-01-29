@@ -8,18 +8,16 @@ public static class MailBootstrap
         {
             var configurationSection = builder.Configuration.GetSection("Mail:PostMark");
 
-            var postmarkConfiguration = new PostmarkMailProviderConfiguration
+            builder.Services.AddSingleton(new PostmarkMailProviderConfiguration
             {
                 DefaultConfiguration = new PostmarkClientConfiguration
                 {
-                    ApiKey = configurationSection.GetValue<string>("ApiKey"),
+                    ApiKey = configurationSection.GetValue<string>("ApiKey") ?? string.Empty,
                     Name = "Default",
-                    From = configurationSection.GetValue<string>("From")
+                    From = configurationSection.GetValue<string>("From") ?? string.Empty
                 },
                 MessageStreams = configurationSection.GetValue<List<PostmarkClientConfiguration>>("MessageStreams")
-            };
-
-            builder.Services.AddSingleton(postmarkConfiguration);
+            });
             builder.Services.AddSingleton<PostmarkMailClientFactory>();
             builder.Services.AddSingleton<IMailProvider, PostmarkMailProvider>();
         }

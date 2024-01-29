@@ -16,8 +16,8 @@ public class PostmarkMailProvider(PostmarkMailClientFactory factory) : IMailProv
             TextBody = message.TextBody,
             HtmlBody = message.HtmlBody,
             Tag = message.Tag,
-            Bcc = message.Bcc.Any() ? string.Join(',', message.Bcc) : null,
-            MessageStream = configuredClient.MessageStream
+            Bcc = message.Bcc.Count != 0 ? string.Join(',', message.Bcc) : null,
+            MessageStream = configuredClient.Name
         };
 
         IEnumerable<PostmarkResponse>? res = await configuredClient.Client.SendMessagesAsync(pm);

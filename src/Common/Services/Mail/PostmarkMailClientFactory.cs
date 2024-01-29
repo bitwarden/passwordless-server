@@ -1,3 +1,4 @@
+using System.Configuration;
 using System.Net.Mail;
 using PostmarkDotNet;
 
@@ -7,47 +8,48 @@ public class PostmarkMailClientFactory(PostmarkMailProviderConfiguration configu
 {
     private static readonly Dictionary<string, ConfiguredPostmarkClient> Clients = new();
 
-    public ConfiguredPostmarkClient GetClient(string streamName)
+    public ConfiguredPostmarkClient GetClient(string name)
     {
-        if (string.IsNullOrWhiteSpace(streamName))
-        {
-            return GetClient("Default");
-        }
+        var clientName = string.IsNullOrWhiteSpace(name)
+            ? configuration.DefaultConfiguration.Name
+            : name;
 
-        if (Clients.TryGetValue(streamName, out var value))
+        if (Clients.TryGetValue(clientName, out var value))
         {
             return value;
         }
 
-        var messageStream = configuration.MessageStreams?.FirstOrDefault(x => x.Name == streamName);
-
-        if (messageStream == null)
+        if (clientName == configuration.DefaultConfiguration.Name)
         {
-            var defaultClient = new ConfiguredPostmarkClient
-            {
-                Client = new PostmarkClient(configuration.DefaultConfiguration.ApiKey),
-                From = new MailAddress(configuration.DefaultConfiguration.From)
-            };
+            var defaultClient = GetConfiguredClient(configuration.DefaultConfiguration);
 
-            Clients.TryAdd("Default", defaultClient);
+            Clients.TryAdd(defaultClient.Name, defaultClient);
             return defaultClient;
         }
 
-        var streamClient = new ConfiguredPostmarkClient
-        {
-            Client = new PostmarkClient(messageStream.ApiKey),
-            From = new MailAddress(messageStream.From),
-            MessageStream = messageStream.Name
-        };
+        var messageStream = configuration.MessageStreams?.FirstOrDefault(x => x.Name == clientName);
 
-        Clients.TryAdd(messageStream.Name, streamClient);
-        return streamClient;
+        if (messageStream == null) throw new ConfigurationErrorsException($"The {clientName} message stream is not properly configured for Postmark.");
+
+        var configuredClient = GetConfiguredClient(messageStream);
+
+        Clients.TryAdd(configuredClient.Name, configuredClient);
+
+        return configuredClient;
     }
+
+    private static ConfiguredPostmarkClient GetConfiguredClient(PostmarkClientConfiguration config) =>
+        new()
+        {
+            Client = new PostmarkClient(config.ApiKey),
+            From = new MailAddress(config.From),
+            Name = config.Name
+        };
 }
 
 public class ConfiguredPostmarkClient
 {
     public required PostmarkClient Client { get; init; }
     public MailAddress? From { get; init; }
-    public string? MessageStream { get; init; }
+    public string Name { get; init; } = string.Empty;
 }
