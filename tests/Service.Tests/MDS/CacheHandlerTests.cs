@@ -51,7 +51,15 @@ public class CacheHandlerTests
     public async Task CacheHandler_Returns_ContentFromMDS_WhenReceivingSuccessfulStatusCode()
     {
         // arrange
-        string originalContent = await File.ReadAllTextAsync(CacheHandler.Path);
+        string? originalContent;
+        try
+        {
+            originalContent = await File.ReadAllTextAsync(CacheHandler.Path);
+        }
+        catch (FileNotFoundException)
+        {
+            originalContent = null;
+        }
 
         var httpClient = new HttpClient
             (new CacheHandler(new OkResponseHandler(), _loggerMock.Object))
