@@ -7,7 +7,7 @@ namespace Passwordless.AdminConsole.RateLimiting;
 public static class AdminPageRateLimit
 {
     public const string PolicyName = "organizationIdFixedLength";
-    private const int PermitLimit = 100;
+    private const int PermitLimit = 50;
     private static readonly TimeSpan Window = TimeSpan.FromMinutes(1);
     private const int QueueLimit = 0;
 

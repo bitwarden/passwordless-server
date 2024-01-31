@@ -73,10 +73,10 @@ public class InvitationService<TDbContext> : IInvitationService where TDbContext
         return await db.Invites.Where(i => i.TargetOrgId == orgId).ToListAsync();
     }
 
-    public async Task CancelInviteAsync(string hashedCode)
+    public async Task CancelInviteAsync(Invite inviteToCancel)
     {
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        await db.Invites.Where(i => i.HashedCode == hashedCode).ExecuteDeleteAsync();
+        await db.Invites.Where(i => i.HashedCode == inviteToCancel.HashedCode).ExecuteDeleteAsync();
     }
 
     public async Task<Invite> GetInviteFromRawCodeAsync(string code)

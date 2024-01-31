@@ -36,5 +36,6 @@
       "matchManagers": ["nuget"],
       "matchUpdateTypes": ["minor", "patch"]
     }
-  ]
+  ],
+  "ignoreDeps": ["Datadog.Trace"]
 }
