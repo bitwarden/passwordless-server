@@ -11,15 +11,15 @@ public class PostmarkMailProviderConfiguration
 
 public class PostmarkClientConfiguration
 {
-    public string Name { get; init; }
+    public required string Name { get; init; }
     public required string ApiKey { get; init; }
-    public string From { get; init; }
+    public string? From { get; init; }
 
     public ConfiguredPostmarkClient GetConfiguredClient() =>
         new()
         {
             Client = new PostmarkClient(ApiKey),
-            From = new MailAddress(From)
+            From = string.IsNullOrWhiteSpace(From) ? null : new MailAddress(From)
         };
 }
 
