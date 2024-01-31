@@ -23,7 +23,7 @@ public class PostmarkMailProviderTests
         var sut = new PostmarkMailProvider(configuration, logger.Object);
         var message = new MailMessage
         {
-            To = new List<string> { "mail@example.com"},
+            To = new List<string> { "mail@example.com" },
             TextBody = "Test message",
             MessageType = "Misconfigured Message Stream"
         };
@@ -40,11 +40,11 @@ public class PostmarkMailProviderTests
 
         // Assert
         logger.Verify(x => x.Log(
-                LogLevel.Warning, 
-                It.IsAny<EventId>(), 
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"MessageType {message.MessageType} was set but default Postmark Mail client was used.")), 
-                It.IsAny<Exception>(), 
-                ((Func<It.IsAnyType, Exception, string>) It.IsAny<object>())!), 
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"MessageType {message.MessageType} was set but default Postmark Mail client was used.")),
+                It.IsAny<Exception>(),
+                ((Func<It.IsAnyType, Exception, string>)It.IsAny<object>())!),
             Times.Once);
     }
 }

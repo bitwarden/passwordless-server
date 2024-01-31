@@ -14,7 +14,7 @@ public class PostmarkMailProvider(PostmarkMailProviderConfiguration configuratio
 
         if (!string.IsNullOrWhiteSpace(message.MessageType) && configuredClient == _defaultClient)
             logger.LogWarning("MessageType {messageType} was set but default Postmark Mail client was used.", message.MessageType);
-        
+
         PostmarkMessage pm = new PostmarkMessage
         {
             To = string.Join(',', message.To),
