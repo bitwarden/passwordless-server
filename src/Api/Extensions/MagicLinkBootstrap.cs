@@ -6,5 +6,5 @@ public static class MagicLinkBootstrap
 {
     public static IServiceCollection AddMagicLinks(this IServiceCollection serviceCollection) =>
         serviceCollection
-            .AddTransient<MagicLinkService>();
+            .AddScoped<MagicLinkService>();
 }
