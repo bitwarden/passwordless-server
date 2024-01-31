@@ -16,9 +16,9 @@ public static class MailBootstrap
                     Name = "Default",
                     From = configurationSection.GetValue<string>("From") ?? string.Empty
                 },
-                MessageStreams = configurationSection.GetValue<List<PostmarkClientConfiguration>>("MessageStreams")
+                MessageStreams = configurationSection.GetValue<List<PostmarkClientConfiguration>>("MessageStreams") ?? []
             });
-            builder.Services.AddSingleton<PostmarkMailClientFactory>();
+
             builder.Services.AddSingleton<IMailProvider, PostmarkMailProvider>();
         }
         else if (builder.Configuration.GetSection("Mail:Smtp").Exists())

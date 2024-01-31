@@ -120,7 +120,6 @@ public class SettingsModel : BaseExtendedPageModel
             _logger.LogError(ex, "Failed to delete application: {appName}.", applicationId);
             return RedirectToPage("/Error", new { ex.Message });
         }
-
     }
 
     /// <summary>
