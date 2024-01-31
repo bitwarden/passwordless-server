@@ -1,5 +1,4 @@
 using Passwordless.Api.Authorization;
-using Passwordless.Common.Constants;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
@@ -26,7 +25,7 @@ public static class MagicEndpoints
                 return NoContent();
             })
             .WithParameterValidation()
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
+            .RequireSecretKey()
             .RequireCors("default");
     }
 }
