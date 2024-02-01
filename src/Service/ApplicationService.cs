@@ -1,3 +1,4 @@
+using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
@@ -20,5 +21,21 @@ public class ApplicationService : IApplicationService
         }
 
         await _storage.SetFeaturesAsync(features);
+    }
+
+    public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> ListConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
+    {
+        var entities = await _storage.GetAuthenticatorsAsync(request.IsAllowed);
+        return entities.Select(x => new ConfiguredAuthenticatorResponse(x.AaGuid, x.CreatedAt)).ToList();
+    }
+
+    public Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
+    {
+        return _storage.AddAuthenticatorsAsync(request.AaGuids, request.IsAllowed);
+    }
+
+    public Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
+    {
+        return _storage.RemoveAuthenticatorsAsync(request.AaGuids);
     }
 }

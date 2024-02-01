@@ -253,6 +253,8 @@ public class SettingsModel : BaseExtendedPageModel
         Plans.Add(model);
     }
 
+    public bool IsAttestationAllowed => _currentContext.Features.AllowAttestation;
+
     public record PlanModel(
         string Value,
         string? PriceId,

@@ -21,6 +21,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<ApiKeyDesc> ApiKeys => Set<ApiKeyDesc>();
     public DbSet<AccountMetaInformation> AccountInfo => Set<AccountMetaInformation>();
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
+    public DbSet<Authenticator> Authenticators => Set<Authenticator>();
     public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
     public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
 
@@ -66,6 +67,16 @@ public abstract class DbGlobalContext : DbContext
 
             b.Property(x => x.IsGenerateSignInTokenEndpointEnabled)
                 .HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<Authenticator>(b =>
+        {
+            b.HasKey(x => new { x.Tenant, x.AaGuid });
+
+            b.HasOne(x => x.AppFeature)
+                .WithMany(x => x.Authenticators)
+                .HasForeignKey(x => x.Tenant)
+                .IsRequired();
         });
 
         modelBuilder.Entity<ApplicationEvent>(builder =>

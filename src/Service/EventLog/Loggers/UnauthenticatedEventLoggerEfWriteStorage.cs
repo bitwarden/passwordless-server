@@ -19,7 +19,9 @@ public class UnauthenticatedEventLoggerEfWriteStorage : EventLoggerEfWriteStorag
 
     public async override Task FlushAsync()
     {
-        if ((await _featureContextProvider.UseContext()).EventLoggingIsEnabled)
+        var featuresContext = await _featureContextProvider.UseContext();
+
+        if (featuresContext.IsInFeaturesContext && featuresContext.EventLoggingIsEnabled)
         {
             await base.FlushAsync();
         }

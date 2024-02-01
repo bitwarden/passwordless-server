@@ -27,7 +27,8 @@ public static class UseCspExtensions
                 "default-src 'self';" +
                 $"script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';" +
                 $"connect-src 'self' {passConfig.Value.ApiUrl};" +
-                "style-src 'self' 'unsafe-inline';";
+                "style-src 'self' 'unsafe-inline';" +
+                "img-src 'self' data:;";
 
             context.Response.Headers.Append(
                 "Content-Security-Policy",

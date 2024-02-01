@@ -1,0 +1,6 @@
+@inject IHttpContextAccessor HttpContextAccessor
+
+<time id="@(Id)" datetime="@(Value.ToString("s"))"></time>
+<script nonce="@CspNonce">
+    document.getElementById(@((MarkupString)JsonSerializer.Serialize(Id))).innerText = new Date(@((MarkupString)JsonSerializer.Serialize(Value))).toLocaleString();
+</script>

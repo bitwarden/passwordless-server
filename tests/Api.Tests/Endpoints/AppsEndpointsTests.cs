@@ -11,7 +11,7 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Tests.Endpoints;
 
-public class AccountEndpointsTests
+public class AppsEndpointsTests
 {
     private readonly Fixture _fixture = new();
 

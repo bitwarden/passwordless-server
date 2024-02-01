@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 
-namespace Passwordless.Service.MetaDataService;
+namespace Passwordless.Service.MDS;
 
 /// <summary>
 /// The cache handler will attempt to download the latest MDS blob and cache it locally. The cache will be used
@@ -10,11 +10,16 @@ namespace Passwordless.Service.MetaDataService;
 /// </summary>
 public class CacheHandler : DelegatingHandler
 {
-    private const string Path = ".mds-cache/mds.jwt";
+    public const string Path = ".mds-cache/mds.jwt";
 
     private readonly ILogger<CacheHandler> _logger;
 
     public CacheHandler(ILogger<CacheHandler> logger)
+    {
+        _logger = logger;
+    }
+
+    public CacheHandler(HttpMessageHandler httpMessageHandler, ILogger<CacheHandler> logger) : base(httpMessageHandler)
     {
         _logger = logger;
     }
@@ -26,11 +31,15 @@ public class CacheHandler : DelegatingHandler
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            await File.CreateText(Path).WriteAsync(content);
+            using (var cache = File.CreateText(Path))
+            {
+                await cache.WriteAsync(content);
+            }
             _logger.LogInformation("[CacheHandler] Successfully downloaded the latest MDS blob.");
         }
         else
         {
+
             var content = await File.ReadAllTextAsync(Path, cancellationToken);
             response.Content = new StringContent(content);
             response.StatusCode = HttpStatusCode.OK;

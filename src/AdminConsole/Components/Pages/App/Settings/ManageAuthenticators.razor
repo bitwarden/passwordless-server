@@ -1,0 +1,235 @@
+@page "/app/{app}/settings/authenticators/manage"
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.Common.Models.Authenticators
+@using Passwordless.Common.Models.MDS
+
+@inherits BaseApplicationPage
+
+@inject IPasswordlessManagementClient ManagementClient
+@inject IScopedPasswordlessClient PasswordlessClient
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ICurrentContext CurrentContext;
+@inject NavigationManager NavigationManager;
+
+@if (_isInitialized)
+{
+    <Page Title="Allowed Authenticators" BreadCrumbItems="_breadCrumbs">
+        <Panel Header="Manage">
+            <EditForm id="filter-form" class="flex flex-col space-y-4" Model="FilterForm" FormName="filter-form">
+                <div class="grid grid-cols-2 gap-4">
+                    <label>
+                        Attestation Types:
+                        <InputSelect id="attestation-types-select" @bind-Value="FilterForm.AttestationType" class="single-select">
+                            <option value="">All attestation types</option>
+                            @foreach (var attestationType in AttestationTypes!)
+                            {
+                                <option value="@attestationType" selected="@(FilterForm.AttestationType == attestationType)">@attestationType</option>
+                            }
+                        </InputSelect>
+                    </label>
+                    <label>
+                        FIDO2 Certification:
+                        <InputSelect id="certification-statuses-select" @bind-Value="FilterForm.CertificationStatus" class="single-select">
+                            <option value="">All certification levels</option>
+                            @foreach (var certificationLevel in CertificationLevels!)
+                            {
+                                <option value="@certificationLevel" selected="@(FilterForm.CertificationStatus == certificationLevel)">@certificationLevel</option>
+                            }
+                        </InputSelect>
+                    </label>
+                </div>
+            </EditForm>
+
+            <hr/>
+            <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
+                <div class="overflow-y-hidden overflow-x-auto table-container">
+                    <table class="tbl-default min-w-full">
+                        <thead>
+                        <tr>
+                            <th class="relative px-7 sm:w-12 sm:px-6">Allowed</th>
+                            <th>Description</th>
+                            <th class="hidden xl:table-cell">AaGuid</th>
+                            <th>Attestation Types</th>
+                            <th>Certification Level</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                        @if (Data!.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5">All authenticators are currently allowed.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Data)
+                            {
+                                <tr>
+                                    <td class="relative px-7 sm:w-12 sm:px-6">
+                                        <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid" />
+                                    </td>
+                                    <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
+                                        @item.Name
+                                        <dl class="font-normal xl:hidden">
+                                            <dt class="sr-only">AaGuid</dt>
+                                            <dd class="mt-1 truncate text-gray-500">@item.AaGuid</dd>
+                                        </dl>
+                                    </td>
+                                    <td class="hidden whitespace-nowrap xl:table-cell">@item.AaGuid</td>
+                                    <td class="whitespace-nowrap">
+                                        <ul>
+                                            @foreach (var type in item.AttestationTypes)
+                                            {
+                                                <li>@type</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                    <td class="whitespace-nowrap">
+                                        <ul>
+                                            @foreach (var level in item.CertificationStatuses)
+                                            {
+                                                <li>@level</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+            </EditForm>
+        </Panel>
+    </Page>
+}
+
+<script type="text/javascript" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
+    document.addEventListener("change", (event) => {
+        if (event.target.id === "attestation-types-select" || event.target.id === "certification-statuses-select") {
+            document.getElementById("filter-form").submit();
+        }
+    });
+
+    document.addEventListener("change", (event) => {
+        if (event.target.name === "ManageForm.Selected") {            
+            let checkbox = event.target;
+            
+            const formData = new FormData();
+            formData.append("ManageForm.Selected", checkbox.value);
+            formData.append("ManageForm.Action", checkbox.checked ? "add" : "remove");
+            formData.append("_handler", checkbox.form["_handler"].value);
+            formData.append("__RequestVerificationToken", checkbox.form["__RequestVerificationToken"].value);
+            
+            fetch(checkbox.form.action, {
+                method: "POST",
+                body: formData
+            }).catch(() => {
+               event.target.checked = !event.target.checked;
+            })
+        }
+    });
+</script>
+
+@code {
+    private bool _isInitialized;
+    
+    [SupplyParameterFromForm(FormName = "filter-form")] public FilterViewModel FilterForm { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "manage-form")] public ManageViewModel ManageForm { get; set; } = new();
+    
+    public IEnumerable<string>? AttestationTypes { get; private set; }
+    public IEnumerable<string>? CertificationLevels { get; private set; }
+    public IReadOnlyCollection<ListViewModel>? Data { get; private set; }
+    
+    private IReadOnlyCollection<BreadCrumb.BreadCrumbItem>? _breadCrumbs;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
+        {
+            new("Settings", $"app/{App}/settings"),
+            new("Authenticators", $"app/{App}/settings/authenticators"),
+            new("Allowed Authenticators", $"app/{App}/settings/authenticators/manage")
+        };
+        
+        if (!CurrentContext.Features.AllowAttestation)
+        {
+            NavigationManager.NavigateTo($"app/{App}/settings");
+            return;
+        }
+        
+        
+        
+        AttestationTypes = await ManagementClient.GetAttestationTypesAsync();
+        CertificationLevels = await ManagementClient.GetCertificationStatusesAsync();
+
+        var data = await ManagementClient.GetMetaDataStatementEntriesAsync(FilterForm.ToDto());
+
+        var configuredAuthenticatorsRequest = new ConfiguredAuthenticatorRequest(true);
+        var allowedAuthenticators = await PasswordlessClient.GetConfiguredAuthenticatorsAsync(configuredAuthenticatorsRequest);
+        
+        Data = data.Select(x =>
+        {
+            var viewModel = ListViewModel.FromDto(x);
+            viewModel.IsSelected = allowedAuthenticators.Any(c => x.AaGuid == c.AaGuid);
+            return viewModel;
+        }).ToList();
+
+        _isInitialized = true;
+    }
+
+    private async Task OnAuthenticatorModified()
+    {
+        switch (ManageForm.Action)
+        {
+            case "add":
+            {
+                var request = new AddAuthenticatorsRequest(ManageForm.Selected, true);
+                await PasswordlessClient.AddAuthenticatorsAsync(request);
+                break;
+            }
+            case "remove":
+            {
+                var request = new RemoveAuthenticatorsRequest(ManageForm.Selected);
+                await PasswordlessClient.RemoveAuthenticatorsAsync(request);
+                break;
+            }
+        }
+    }
+
+    public class FilterViewModel
+    {
+        public string? AttestationType { get; set; }
+
+        public string? CertificationStatus { get; set; }
+        
+        public EntriesRequest ToDto()
+        {
+            return new EntriesRequest
+            {
+                AttestationTypes = !string.IsNullOrEmpty(AttestationType) ? [AttestationType] : [],
+                CertificationStatuses = !string.IsNullOrEmpty(CertificationStatus) ? [CertificationStatus] : []
+            };
+        }
+    }
+
+    public class ManageViewModel
+    {
+        public Guid[] Selected { get; set; } = Array.Empty<Guid>();
+        public string? Action { get; set; }
+    }
+
+    public record ListViewModel(
+        Guid AaGuid,
+        string Name,
+        IEnumerable<string> CertificationStatuses,
+        IEnumerable<string> AttestationTypes)
+    {
+        public bool IsSelected { get; set; }
+
+        public static ListViewModel FromDto(EntryResponse dto)
+        {
+            return new ListViewModel(dto.AaGuid, dto.Name, dto.CertificationStatuses, dto.AttestationTypes);
+        }
+    }
+}

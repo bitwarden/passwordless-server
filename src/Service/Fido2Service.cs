@@ -192,6 +192,21 @@ public class Fido2Service : IFido2Service
             return !exists;
         });
 
+        // Check whether we're allowed to register credentials for this autheneticator
+        var features = await _featureContextProvider.UseContext();
+        if (features.AllowAttestation)
+        {
+            var configuredAuthenticators = await _storage.GetAuthenticatorsAsync();
+            if (configuredAuthenticators.Any(x => !x.IsAllowed && x.AaGuid == success.Result!.AaGuid))
+            {
+                throw new ApiException("authenticator_not_allowed", "The authenticator is not allowed to be used for registration", 400);
+            }
+            if (configuredAuthenticators.Any(x => x.IsAllowed && x.AaGuid != success.Result!.AaGuid))
+            {
+                throw new ApiException("authenticator_not_allowed", "The authenticator is not allowed to be used for registration", 400);
+            }
+        }
+
         var userId = Encoding.UTF8.GetString(success.Result.User.Id);
 
         // Add aliases
