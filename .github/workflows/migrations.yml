@@ -62,7 +62,7 @@ jobs:
           --no-connect
           | grep -E '^data:'
           | sed -E 's/^data: (.*)$/\1/'
-          | jq -r '.[] | .id'
+          | jq -r '.[].id | tostring'
           | tee migrations.txt
 
       - name: Get pending migrations
