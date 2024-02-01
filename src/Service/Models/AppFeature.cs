@@ -35,4 +35,6 @@ public class AppFeature : PerTenant
     public bool IsMagicLinksEnabled { get; set; } = true;
 
     public AccountMetaInformation? Application { get; set; }
+
+    public IEnumerable<Authenticator> Authenticators { get; set; }
 }

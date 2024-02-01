@@ -1,5 +1,6 @@
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
 
@@ -31,5 +32,21 @@ public class ApplicationService : IApplicationService
         if (features.EnableManuallyGeneratedAuthenticationTokens == false) _eventLogger.LogGenerateSignInTokenEndpointDisabled(features.PerformedBy);
         if (features.EnableMagicLinks == true) _eventLogger.LogMagicLinksEnabled(features.PerformedBy);
         if (features.EnableMagicLinks == false) _eventLogger.LogMagicLinksDisabled(features.PerformedBy);
+    }
+
+    public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> ListConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
+    {
+        var entities = await _storage.GetAuthenticatorsAsync(request.IsAllowed);
+        return entities.Select(x => new ConfiguredAuthenticatorResponse(x.AaGuid, x.CreatedAt)).ToList();
+    }
+
+    public Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
+    {
+        return _storage.AddAuthenticatorsAsync(request.AaGuids, request.IsAllowed);
+    }
+
+    public Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
+    {
+        return _storage.RemoveAuthenticatorsAsync(request.AaGuids);
     }
 }

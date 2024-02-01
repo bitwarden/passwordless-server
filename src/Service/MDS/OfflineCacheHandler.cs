@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Passwordless.Service.MetaDataService;
+namespace Passwordless.Service.MDS;
 
 /// <summary>
 /// The OfflineCacheHandler will attempt to read the MDS blob from the local file system. Use this if the intent is

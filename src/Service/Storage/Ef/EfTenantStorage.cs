@@ -41,6 +41,8 @@ public class EfTenantStorage : ITenantStorage
         await db.TokenKeys.ExecuteDeleteAsync();
         await db.Credentials.ExecuteDeleteAsync();
         await db.AccountInfo.ExecuteDeleteAsync();
+        await db.AppFeatures.ExecuteDeleteAsync();
+        await db.Authenticators.ExecuteDeleteAsync();
     }
 
     public Task DeleteCredential(byte[] id)
@@ -239,6 +241,48 @@ public class EfTenantStorage : ITenantStorage
         return await query
             .OrderBy(x => x.CreatedAt)
             .ToListAsync();
+    }
+
+    public async Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null)
+    {
+        IQueryable<Authenticator> query = db.Authenticators;
+
+        if (isAllowed.HasValue)
+        {
+            query = query.Where(x => x.IsAllowed == isAllowed.Value);
+        }
+
+        return await query.ToListAsync();
+    }
+
+    public async Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed)
+    {
+        var existingAuthenticators = db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid));
+
+        await existingAuthenticators.ExecuteUpdateAsync(x => x
+                .SetProperty(entity => entity.IsAllowed, isAllowed)
+            );
+
+        var existingAaGuids = await existingAuthenticators.Select(x => x.AaGuid).ToListAsync();
+        var newAuthenticators = aaGuids
+            .Where(x => !existingAaGuids.Contains(x))
+            .Select(x => new Authenticator
+            {
+                AaGuid = x,
+                IsAllowed = isAllowed,
+                CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+                Tenant = Tenant
+            }).ToList();
+
+        db.Authenticators.AddRange(newAuthenticators);
+        await db.SaveChangesAsync();
+    }
+
+    public Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
+    {
+        return db.Authenticators
+            .Where(x => aaGuids.Contains(x.AaGuid))
+            .ExecuteDeleteAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

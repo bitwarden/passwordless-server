@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Authenticators;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Reporting;
 
@@ -12,6 +13,28 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 {
     Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
+
+    /// <summary>
+    /// Returns a list of configured authenticators for the current app. If the list is empty, all authenticators are allowed.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request);
+
+    /// <summary>
+    /// Add specified authenticators to the whitelist/blacklist.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request);
+
+    /// <summary>
+    /// Remove specified authenticators from the whitelist/blacklist.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request);
+    
     Task SetFeaturesAsync(SetFeaturesRequest request);
 }
 
@@ -64,6 +87,26 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
         return rest;
+    }
+
+    public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)
+    {
+        var queryBuilder = new QueryBuilder();
+        queryBuilder.Add(nameof(request.IsAllowed), request.IsAllowed.ToString());
+        var q = queryBuilder.ToQueryString();
+        return (await _client.GetFromJsonAsync<ConfiguredAuthenticatorResponse[]>($"/authenticators/list{q}"))!;
+    }
+
+    public async Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
+    {
+        using var response = await _client.PostAsJsonAsync("/authenticators/add", request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
+    {
+        using var response = await _client.PostAsJsonAsync("/authenticators/remove", request);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task SetFeaturesAsync(SetFeaturesRequest request)

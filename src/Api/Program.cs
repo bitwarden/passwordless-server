@@ -16,7 +16,7 @@ using Passwordless.Common.Utils;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
-using Passwordless.Service.MetaDataService;
+using Passwordless.Service.MDS;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
@@ -101,6 +101,7 @@ services.AddScoped<IFido2Service, Fido2Service>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
+services.AddSingleton<IMetaDataService, MetaDataService>();
 
 services.AddHostedService<PeriodicCredentialReportsBackgroundService>();
 
@@ -183,6 +184,8 @@ if (app.Environment.IsDevelopment()) app.MapMagicEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
 app.MapReportingEndpoints();
+app.MapMetaDataServiceEndpoints();
+app.MapAuthenticatorsEndpoints();
 
 app.MapPasswordlessHealthChecks();
 

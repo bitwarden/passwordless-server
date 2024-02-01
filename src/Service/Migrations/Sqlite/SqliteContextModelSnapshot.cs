@@ -176,6 +176,25 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.ToTable("AppFeatures");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AaGuid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsAllowed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Tenant", "AaGuid");
+
+                    b.ToTable("Authenticators");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.EFStoredCredential", b =>
                 {
                     b.Property<string>("Tenant")
@@ -310,6 +329,17 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Navigation("Application");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AppFeature", "AppFeature")
+                        .WithMany("Authenticators")
+                        .HasForeignKey("Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppFeature");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -328,6 +358,11 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Navigation("Features");
 
                     b.Navigation("PeriodicCredentialReports");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
+                {
+                    b.Navigation("Authenticators");
                 });
 #pragma warning restore 612, 618
         }
