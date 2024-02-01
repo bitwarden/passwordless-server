@@ -13,7 +13,7 @@
 
 @if (_isInitialized)
 {
-    <Page Title="Allowed Authenticators">
+    <Page Title="Allowed Authenticators" BreadCrumbItems="_breadCrumbs">
         <Panel Header="Manage">
             <EditForm id="filter-form" class="flex flex-col space-y-4" Model="FilterForm" FormName="filter-form">
                 <div class="grid grid-cols-2 gap-4">
@@ -46,7 +46,7 @@
                     <table class="tbl-default min-w-full">
                         <thead>
                         <tr>
-                            <th class="relative px-7 sm:w-12 sm:px-6"></th>
+                            <th class="relative px-7 sm:w-12 sm:px-6">Allowed</th>
                             <th>Description</th>
                             <th class="hidden xl:table-cell">AaGuid</th>
                             <th>Attestation Types</th>
@@ -141,8 +141,17 @@
     public IEnumerable<string>? CertificationLevels { get; private set; }
     public IReadOnlyCollection<ListViewModel>? Data { get; private set; }
     
+    private IReadOnlyCollection<BreadCrumb.BreadCrumbItem>? _breadCrumbs;
+    
     protected override async Task OnInitializedAsync()
     {
+        _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
+        {
+            new("Settings", $"app/{App}/settings"),
+            new("Authenticators", $"app/{App}/settings/authenticators"),
+            new("Allowed Authenticators", $"app/{App}/settings/authenticators/manage")
+        };
+        
         if (!CurrentContext.Features.AllowAttestation)
         {
             NavigationManager.NavigateTo($"app/{App}/settings");

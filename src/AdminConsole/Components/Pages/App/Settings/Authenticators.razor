@@ -1,7 +1,6 @@
 @page "/app/{app}/settings/authenticators"
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.MDS
-@using Passwordless.Common.Models.Apps
 @using Passwordless.Common.Models.Authenticators
 
 @inject NavigationManager NavigationManager
@@ -13,18 +12,21 @@
 
 @if (_isInitialized)
 {
-    <Page Title="Authenticators">
+    <Page Title="Authenticators" BreadCrumbItems="_breadCrumbs">
         <Panel Header="Allowed Authenticators">
-            <p>If this list is empty, all authenticators are allowed. Use this list if you want to control what authenticators can be used to register credentials.</p>
+            <p><strong>All authenticators are allowed by default.</strong> If you wish, you can control what authenticators are allowed.</p>
             <EditForm Model="ManageWhitelistForm" FormName="whitelist-form" OnSubmit="OnWhitelistFormSubmitted">
-                <button class="btn-primary" name="ManageWhitelistForm.Action" type="submit" value="manage">Manage</button>
+                <button class="btn-primary" name="ManageWhitelistForm.Action" type="submit" value="manage">Choose allowed authenticators</button>
             </EditForm>
-            <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
-                @foreach (var authenticator in Whitelist!)
-                {
-                    <Card Title="@authenticator.Name" SubTitle="@authenticator.AaGuid.ToString()" />
-                }
-            </div>
+            @if (Whitelist.Any())
+            {
+                <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+                    @foreach (var authenticator in Whitelist)
+                    {
+                        <Card Title="@authenticator.Name" SubTitle="@authenticator.AaGuid.ToString()" />
+                    }
+                </div>
+            }
         </Panel>
     </Page>
 }
@@ -32,12 +34,20 @@
 @code {
     private bool _isInitialized;
 
-    public IEnumerable<ConfiguredAuthenticatorViewModel>? Whitelist { get; private set; }
+    public IReadOnlyCollection<ConfiguredAuthenticatorViewModel> Whitelist { get; private set; } = new List<ConfiguredAuthenticatorViewModel>(0);
 
     [SupplyParameterFromForm] public ManageWhitelistViewModel ManageWhitelistForm { get; private set; } = new();
 
+    private IReadOnlyCollection<BreadCrumb.BreadCrumbItem>? _breadCrumbs;
+    
     protected override async Task OnInitializedAsync()
     {
+        _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
+        {
+            new("Settings", $"app/{App}/settings"),
+            new("Authenticators", $"app/{App}/settings/authenticators")
+        };
+        
         if (!CurrentContext.Features.AllowAttestation)
         {
             NavigationManager.NavigateTo($"app/{App}/settings");
