@@ -1,6 +1,6 @@
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Common.Models.Authenticators;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
 

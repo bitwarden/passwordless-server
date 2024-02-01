@@ -3,8 +3,8 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Passwordless.Common.Models.Authenticators;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Models.Authenticators;
 using Passwordless.Common.Models.Reporting;
 
 namespace Passwordless.AdminConsole.Services;
@@ -34,7 +34,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     /// <param name="request"></param>
     /// <returns></returns>
     Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request);
-    
+
     Task SetFeaturesAsync(SetFeaturesRequest request);
 }
 

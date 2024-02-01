@@ -1,6 +1,5 @@
 using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Service;
 
