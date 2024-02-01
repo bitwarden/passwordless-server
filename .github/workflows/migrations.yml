@@ -51,7 +51,7 @@ jobs:
       - name: Install Entity Framework toolkit
         run: dotnet tool install dotnet-ef --global
 
-      - name: Get pending migrations
+      - name: Get migrations
         run: >
           dotnet ef migrations list
           --configuration Release
@@ -65,24 +65,25 @@ jobs:
           | jq -r '.[] | .id'
           | tee migrations.txt
 
-      - name: Produce summary
+      - name: Get pending migrations
         run: |
           $diff=$(git diff --name-only \
             ${{ github.event.pull_request.base.sha || 'HEAD~1' }} \
             ${{ github.event.pull_request.head.sha }})
-
-          $pending=()
+          
           for $migration in $(cat migrations.txt); do
             if echo $diff | grep -q $migration; then
-              $pending += $migration
+              echo $migration >> migrations.pending.txt
             fi
           done
 
-          if [ ${#pending[@]} -gt 0 ]; then
+      - name: Produce summary
+        run: |
+          if [ -s migrations.pending.txt ]; then
             echo "### Pending migrations for ${{ matrix.app }} (${{ matrix.ef-context }})" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-            for $migration in $pending; do
+            for $migration in $(cat migrations.pending.txt); do
               echo $migration >> $GITHUB_STEP_SUMMARY
             done
 
