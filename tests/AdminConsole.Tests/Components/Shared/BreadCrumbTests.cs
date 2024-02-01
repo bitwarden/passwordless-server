@@ -8,7 +8,7 @@ namespace Passwordless.AdminConsole.Tests.Components.Shared;
 public sealed class BreadCrumbTests : TestContext
 {
     private readonly Fixture _fixture = new();
-    
+
     [Fact]
     public void BreadCrumb_Renders_Nothing_WhenOnlyOneItem()
     {
@@ -17,14 +17,14 @@ public sealed class BreadCrumbTests : TestContext
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(1).ToList();
         var cut = RenderComponent<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
-        
+
         // Act
         var actual = cut.Markup;
-        
+
         // Assert
         Assert.Empty(actual);
     }
-    
+
     [Fact]
     public void BreadCrumb_Renders_Nothing_WhenNoItems()
     {
@@ -32,14 +32,14 @@ public sealed class BreadCrumbTests : TestContext
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(0).ToList();
         var cut = RenderComponent<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
-        
+
         // Act
         var actual = cut.Markup;
-        
+
         // Assert
         Assert.Empty(actual);
     }
-    
+
     [Fact]
     public void BreadCrumb_Renders_Nothing_WhenItemsIsNull()
     {
@@ -47,24 +47,24 @@ public sealed class BreadCrumbTests : TestContext
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(0).ToList();
         var cut = RenderComponent<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
-        
+
         // Act
         var actual = cut.Markup;
-        
+
         // Assert
         Assert.Empty(actual);
     }
-    
+
     [Fact]
     public void BreadCrumb_Renders_LastItemAsText()
     {
         // Arrange
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(2).ToList();
-        
+
         // Act
         var cut = RenderComponent<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
-        
+
         // Assert
         var orderedList = cut.Find("ol");
         var currentPageListItem = orderedList.Children.Last();
@@ -73,17 +73,17 @@ public sealed class BreadCrumbTests : TestContext
         Assert.Contains(currentPageListItem.Children.First().Children, x => x.NodeName == "SPAN");
         Assert.Equal(items.Last().Title, currentPageListItem.Children.First().Children.First(x => x.NodeName == "SPAN").TextContent);
     }
-    
+
     [Fact]
     public void BreadCrumb_Renders_FirstElementAsLink()
     {
         // Arrange
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(3).ToList();
-        
+
         // Act
         var cut = RenderComponent<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
-        
+
         // Assert
         var orderedList = cut.Find("ol");
         var firstListItem = orderedList.Children.First();
@@ -92,17 +92,17 @@ public sealed class BreadCrumbTests : TestContext
         Assert.Contains(items.First().Title, firstLinkTag.TextContent);
         Assert.Equal(items.First().Url, firstLinkTag.Attributes["href"]!.Value);
     }
-    
+
     [Fact]
     public void BreadCrumb_Renders_AllMiddleItemsButAsLinks()
     {
         // Arrange
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(3).ToList();
-        
+
         // Act
         var cut = RenderComponent<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
-        
+
         // Assert
         var orderedList = cut.Find("ol");
 
