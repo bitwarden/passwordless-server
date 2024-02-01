@@ -1,24 +1,17 @@
 @page "/app/{app}/Reporting"
-@using Passwordless.AdminConsole.Services
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
-@using Passwordless.AdminConsole.Middleware
+
+@inherits BaseApplicationPage
 
 @inject IScopedPasswordlessClient PasswordlessClient
 @inject IHttpContextAccessor HttpContextAccessor;
-@inject ICurrentContext CurrentContext;
 
 <HeadContent>
     <BlazorScript Type="text/javascript" Src="lib/apexcharts/apexcharts.min.js" />
 </HeadContent>
 
-<PageTitle>Reporting</PageTitle>
-
-<div class="page-header-container">
-    <h1>Reporting</h1>
-</div>
-
-<div class="page-content-container">
+<Page Title="Reporting">
     <Panel>
         <div class="flex flex-col space-y-4">
             @if (IsFilterDatePickerEnabled)
@@ -57,13 +50,9 @@
             }
         </div>
     </Panel>
-</div>
-
+</Page>
 
 @code {
-    [Parameter]
-    public string App { get; set; }
-
     public bool IsFilterDatePickerEnabled => false;
 
     [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
