@@ -134,30 +134,10 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task EnabledManuallyGeneratedTokensAsync(string appId, string performedBy)
-    {
-        using var response = await http.PostAsJsonAsync(
-            $"admin/apps/{Uri.EscapeDataString(appId)}/sign-in-generate-token-endpoint/enable",
-            new { PerformedBy = performedBy }
-        );
-
-        response.EnsureSuccessStatusCode();
-    }
-
-    public async Task DisabledManuallyGeneratedTokensAsync(string appId, string performedBy)
-    {
-        using var response = await http.PostAsJsonAsync(
-            $"admin/apps/{Uri.EscapeDataString(appId)}/sign-in-generate-token-endpoint/disable",
-            new { PerformedBy = performedBy }
-        );
-
-        response.EnsureSuccessStatusCode();
-    }
-
     public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request) =>
-        await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
+        (await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
             $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
-        );
+        ))!;
 
     public async Task<IReadOnlyCollection<string>> GetAttestationTypesAsync()
     {

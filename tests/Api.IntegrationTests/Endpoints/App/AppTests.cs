@@ -3,8 +3,8 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models.Apps;
@@ -13,6 +13,7 @@ using Passwordless.Service.Storage.Ef;
 using Xunit;
 using Xunit.Abstractions;
 using static Passwordless.Api.IntegrationTests.Helpers.App.CreateAppHelpers;
+using SetFeaturesRequest = Passwordless.Common.Models.Apps.SetFeaturesRequest;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
@@ -99,11 +100,15 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod };
         using var appHttpClient = _apiFactory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
-        using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
+        using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = "a_user",
+                EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod
+            });
 
         // Assert
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -123,11 +128,14 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var name = GetApplicationName();
         using var appCreateResponse = await _client.CreateApplicationAsync(name);
         var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        var setFeatureRequest = new SetFeaturesDto { EventLoggingRetentionPeriod = invalidRetentionPeriod };
         using var appHttpClient = _apiFactory.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
 
         // Act
-        using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", setFeatureRequest);
+        using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features", new SetFeaturesRequest
+        {
+            PerformedBy = "a_user",
+            EventLoggingRetentionPeriod = invalidRetentionPeriod
+        });
 
         // Assert
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -333,21 +341,26 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = GetApplicationName();
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
-
-        // Act
-        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
-            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest("a_user"));
-
-        // Assert
-        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
 
-        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
-        {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
-        });
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = "a_user",
+                EnableManuallyGeneratedAuthenticationTokens = true
+            });
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token",
+            new SigninTokenRequest("some_user")
+            {
+                Origin = PasswordlessApiFactory.OriginUrl,
+                RPID = PasswordlessApiFactory.RpId
+            });
         signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
     }
 
@@ -357,21 +370,78 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Arrange
         var applicationName = GetApplicationName();
         using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
-
-        // Act
-        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
-            new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest("a_user"));
-
-        // Assert
-        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
 
-        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest("some_user")
-        {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
-        });
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = "a_user",
+                EnableManuallyGeneratedAuthenticationTokens = false
+            });
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("signin/generate-token",
+            new SigninTokenRequest("some_user")
+            {
+                Origin = PasswordlessApiFactory.OriginUrl,
+                RPID = PasswordlessApiFactory.RpId
+            });
+        signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task I_can_enable_magic_links()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = "a_user",
+                EnableMagicLinks = true
+            });
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
+
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
+        signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task I_can_disable_magic_links()
+    {
+        // Arrange
+        var applicationName = GetApplicationName();
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = _client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        // Act
+        using var enableResponse = await _client.PostAsJsonAsync("apps/features",
+            new SetFeaturesRequest
+            {
+                PerformedBy = "a_user",
+                EnableMagicLinks = false
+            });
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
+
+        using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 

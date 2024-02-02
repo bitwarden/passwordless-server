@@ -6,6 +6,7 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -18,7 +19,7 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
     private readonly ISharedBillingService _billingService;
-    private readonly IPasswordlessManagementClient _managementClient;
+    private readonly IScopedPasswordlessClient _scopedPasswordlessClient;
     private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
@@ -30,6 +31,7 @@ public class SettingsModel : BaseExtendedPageModel
         ISharedBillingService billingService,
         IPasswordlessManagementClient managementClient,
         IOptions<BillingOptions> billingOptions,
+        IScopedPasswordlessClient scopedPasswordlessClient,
         IEventLogger eventLogger)
     {
         _logger = logger;
@@ -37,7 +39,7 @@ public class SettingsModel : BaseExtendedPageModel
         _currentContext = currentContext;
         _appService = appService;
         _billingService = billingService;
-        _managementClient = managementClient;
+        _scopedPasswordlessClient = scopedPasswordlessClient;
         _billingOptions = billingOptions.Value;
         ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
@@ -59,6 +61,9 @@ public class SettingsModel : BaseExtendedPageModel
     [BindProperty]
     public bool IsManualTokenGenerationEnabled { get; set; }
 
+    [BindProperty]
+    public bool IsMagicLinksEnabled { get; set; }
+
     private async Task InitializeAsync()
     {
         Organization = await _dataService.GetOrganizationWithDataAsync();
@@ -66,10 +71,10 @@ public class SettingsModel : BaseExtendedPageModel
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
 
-        if (application == null) throw new InvalidOperationException("Application not found.");
-        Application = application;
+        Application = application ?? throw new InvalidOperationException("Application not found.");
 
         IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
+        IsMagicLinksEnabled = _currentContext.Features.IsMagicLinksEnabled;
     }
 
     public async Task OnGet()
@@ -115,7 +120,6 @@ public class SettingsModel : BaseExtendedPageModel
             _logger.LogError(ex, "Failed to delete application: {appName}.", applicationId);
             return RedirectToPage("/Error", new { ex.Message });
         }
-
     }
 
     /// <summary>
@@ -199,6 +203,9 @@ public class SettingsModel : BaseExtendedPageModel
 
     public async Task<IActionResult> OnPostSettingsAsync()
     {
+        static bool? GetFinalValue(bool originalValue, bool postedValue) =>
+            originalValue == postedValue ? null : postedValue;
+
         if (string.IsNullOrWhiteSpace(_currentContext.AppId) || string.IsNullOrWhiteSpace(User.Identity?.Name))
         {
             return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
@@ -206,20 +213,19 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            if (IsManualTokenGenerationEnabled)
+            await _scopedPasswordlessClient.SetFeaturesAsync(new SetFeaturesRequest
             {
-                await _managementClient.EnabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
-            }
-            else
-            {
-                await _managementClient.DisabledManuallyGeneratedTokensAsync(_currentContext.AppId, User.Identity.Name);
-            }
+                PerformedBy = User.Identity!.Name,
+                EnableManuallyGeneratedAuthenticationTokens =
+                    GetFinalValue(_currentContext.Features.IsGenerateSignInTokenEndpointEnabled, IsManualTokenGenerationEnabled),
+                EnableMagicLinks = GetFinalValue(_currentContext.Features.IsMagicLinksEnabled, IsMagicLinksEnabled)
+            });
 
             return RedirectToPage();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save ManuallyGeneratedToken setting for {appId}", _currentContext.AppId);
+            _logger.LogError(ex, "Failed to save settings for {appId}", _currentContext.AppId);
             return RedirectToPage("/Error", new { ex.Message });
         }
     }

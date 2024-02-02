@@ -43,14 +43,12 @@ public interface ITenantStorage
     Task<List<ApiKeyDesc>> GetAllApiKeys();
     Task SetAppDeletionDate(DateTime? deletionAt);
     Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId);
-    Task SetFeaturesAsync(SetFeaturesDto features);
+    Task SetFeaturesAsync(SetFeaturesRequest features);
     Task SetFeaturesAsync(ManageFeaturesRequest features);
 
     Task LockApiKeyAsync(string apiKeyId);
     Task UnlockApiKeyAsync(string apiKeyId);
     Task DeleteApiKeyAsync(string apiKeyId);
-    Task EnableGenerateSignInTokenEndpoint();
-    Task DisableGenerateSignInTokenEndpoint();
     Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(DateOnly? from, DateOnly? to);
     Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null);
     Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed);
