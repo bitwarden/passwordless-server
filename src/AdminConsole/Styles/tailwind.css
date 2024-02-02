@@ -23,7 +23,7 @@
     }
 
     .btn {
-        @apply rounded py-1 px-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+        @apply rounded py-1 px-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 inline-block;
     }
 
     .btn-primary {
