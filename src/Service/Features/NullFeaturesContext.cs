@@ -8,5 +8,6 @@ public sealed class NullFeaturesContext : IFeaturesContext
     public long? MaxUsers { get; init; }
     public bool AllowAttestation { get; init; }
     public bool IsGenerateSignInTokenEndpointEnabled { get; init; } = true;
+    public bool IsMagicLinksEnabled { get; init; } = true;
     public bool IsInFeaturesContext => false;
 }

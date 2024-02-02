@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Endpoints;
+using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
@@ -125,6 +126,8 @@ if (builder.Environment.IsDevelopment())
 
 builder.AddPasswordlessHealthChecks();
 
+builder.Services.AddMagicLinks();
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -177,6 +180,7 @@ app.MapAliasEndpoints();
 app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
+if (app.Environment.IsDevelopment()) app.MapMagicEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
 app.MapReportingEndpoints();

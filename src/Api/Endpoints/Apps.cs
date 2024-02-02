@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
@@ -6,8 +5,8 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
-using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
+using SetFeaturesRequest = Passwordless.Common.Models.Apps.SetFeaturesRequest;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -126,16 +125,6 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/enable", EnableGenerateSignInTokenEndpoint)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
-
-        app.MapPost("admin/apps/{appId}/sign-in-generate-token-endpoint/disable", DisableGenerateSignInTokenEndpoint)
-            .WithParameterValidation()
-            .RequireManagementKey()
-            .RequireCors("default");
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(
@@ -213,7 +202,7 @@ public static class AppsEndpoints
     }
 
     public static async Task<IResult> SetFeaturesAsync(
-        SetFeaturesDto payload,
+        SetFeaturesRequest payload,
         IApplicationService service)
     {
         await service.SetFeaturesAsync(payload);
@@ -230,7 +219,8 @@ public static class AppsEndpoints
             featuresContext.DeveloperLoggingEndsAt,
             featuresContext.MaxUsers,
             featuresContext.AllowAttestation,
-            featuresContext.IsGenerateSignInTokenEndpointEnabled);
+            featuresContext.IsGenerateSignInTokenEndpointEnabled,
+            featuresContext.IsMagicLinksEnabled);
 
         return Ok(dto);
     }
@@ -271,8 +261,7 @@ public static class AppsEndpoints
     public static async Task<IResult> CancelDeletionAsync(
         [FromRoute] string appId,
         ISharedManagementService service,
-        IEventLogger eventLogger,
-        ISystemClock clock)
+        IEventLogger eventLogger)
     {
         await service.UnFreezeAccount(appId);
         var res = new CancelApplicationDeletionResponse("Your account will not be deleted since the process was aborted with the cancellation link");
@@ -281,32 +270,6 @@ public static class AppsEndpoints
 
         return Ok(res);
     }
-
-    public static async Task<IResult> EnableGenerateSignInTokenEndpoint(
-        [FromRoute] string appId,
-        EnableGenerateSignInTokenEndpointRequest request,
-        ISharedManagementService managementService,
-        IEventLogger eventLogger)
-    {
-        await managementService.EnableGenerateSignInTokenEndpoint(appId);
-        eventLogger.LogGenerateSignInTokenEndpointEnabled(request.PerformedBy);
-        return NoContent();
-    }
-
-    public static async Task<IResult> DisableGenerateSignInTokenEndpoint(
-        [FromRoute] string appId,
-        DisableGenerateSignInTokenEndpointRequest request,
-        ISharedManagementService managementService,
-        IEventLogger eventLogger)
-    {
-        await managementService.DisableGenerateSignInTokenEndpoint(appId);
-        eventLogger.LogGenerateSignInTokenEndpointDisabled(request.PerformedBy);
-        return NoContent();
-    }
-
-    public record EnableGenerateSignInTokenEndpointRequest(string PerformedBy);
-
-    public record DisableGenerateSignInTokenEndpointRequest(string PerformedBy);
 
     public record CancelResult(string Message);
 }

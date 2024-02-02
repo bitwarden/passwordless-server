@@ -67,6 +67,9 @@ public abstract class DbGlobalContext : DbContext
 
             b.Property(x => x.IsGenerateSignInTokenEndpointEnabled)
                 .HasDefaultValue(true);
+
+            b.Property(x => x.IsMagicLinksEnabled)
+                .HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Authenticator>(b =>
