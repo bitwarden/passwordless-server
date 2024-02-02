@@ -28,7 +28,8 @@ public static class UseCspExtensions
                 $"script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';" +
                 $"connect-src 'self' {passConfig.Value.ApiUrl};" +
                 "style-src 'self' 'unsafe-inline';" +
-                "img-src 'self' data:;";
+                "img-src 'self' data:;" +
+                "frame-ancestors 'none';";
 
             context.Response.Headers.Append(
                 "Content-Security-Policy",
@@ -47,6 +48,7 @@ public static class UseCspExtensions
         {
             context.Response.Headers.Append("X-Content-Type-Options", new[] { "nosniff" });
             context.Response.Headers.Append("Referrer-Policy", new[] { "no-referrer" });
+            context.Response.Headers.Append("X-Frame-Options", new[] { "DENY" });
             return next();
         });
 
