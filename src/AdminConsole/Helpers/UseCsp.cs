@@ -30,7 +30,8 @@ public static class UseCspExtensions
                 "style-src 'self' 'unsafe-inline';" +
                 "img-src 'self' data:;" +
                 "frame-ancestors 'none';" +
-                "base-uri 'self'";
+                "base-uri 'self';" +
+                "object-src 'none'";
 
             context.Response.Headers.Append(
                 "Content-Security-Policy",
