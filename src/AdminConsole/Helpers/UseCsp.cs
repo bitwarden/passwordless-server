@@ -29,7 +29,8 @@ public static class UseCspExtensions
                 $"connect-src 'self' {passConfig.Value.ApiUrl};" +
                 "style-src 'self' 'unsafe-inline';" +
                 "img-src 'self' data:;" +
-                "frame-ancestors 'none';";
+                "frame-ancestors 'none';" +
+                "base-uri 'self'";
 
             context.Response.Headers.Append(
                 "Content-Security-Policy",
