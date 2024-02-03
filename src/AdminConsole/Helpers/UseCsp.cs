@@ -50,7 +50,6 @@ public static class UseCspExtensions
         {
             context.Response.Headers.Append("X-Content-Type-Options", new[] { "nosniff" });
             context.Response.Headers.Append("Referrer-Policy", new[] { "no-referrer" });
-            context.Response.Headers.Append("X-Frame-Options", new[] { "DENY" });
             return next();
         });
 
