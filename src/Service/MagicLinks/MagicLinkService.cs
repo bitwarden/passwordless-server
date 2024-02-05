@@ -1,38 +1,59 @@
+using Microsoft.Extensions.Internal;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.MagicLinks;
 
-public class MagicLinkService
+public class MagicLinkService(
+    ISystemClock clock,
+    ITenantStorage tenantStorage,
+    IFido2Service fido2Service,
+    IMailProvider mailProvider)
 {
-    private readonly IFido2Service _fido2Service;
-    private readonly IMailProvider _mailProvider;
-
-    public MagicLinkService(IFido2Service fido2Service, IMailProvider mailProvider)
-    {
-        _fido2Service = fido2Service;
-        _mailProvider = mailProvider;
-    }
-
-    // General quota:
-    // Free: 50 emails/month, 50 emails/minute
-    // Pro: 1000 emails/month, 100 emails/minute
-    //
-    // App created <24 hours ago:
-    // Can only email the admin email address.
-    // 20% of quota, 20% of rate limit
-    //
-    // App created <3 days ago:
-    // 50% of quota, 50% of rate limit
-    //
-    // App created <30 days ago:
-    // 75% of quota, 75% of rate limit
-    //
-    // App created >30 days ago:
-    // 100% of quota, 100% of rate limit
     private async Task EnsureQuotaAsync(MagicLinkDTO dto)
     {
+        // Free: 50 emails/month, 50 emails/minute
+        // Pro: 1000 emails/month, 100 emails/minute
+        const int maxFreeMonthlyQuota = 50;
+        const int maxFreePerMinuteRateLimit = 50;
+        const int maxProMonthlyQuota = 1000;
+        const int maxProPerMinuteRateLimit = 100;
+
+        var now = clock.UtcNow;
+        var account = await tenantStorage.GetAccountInformation();
+
+        // App created <24 hours ago
+        // Can only email the admin email address.
+        // 20% of quota, 20% of rate limit
+        if ((account.CreatedAt - now).Duration() < TimeSpan.FromHours(24))
+        {
+            if (!account.AdminEmails.Contains(dto.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new ApiException(
+                    "Because your application has been created less than 24 hours ago, " +
+                    "you can only request magic links to the admin email address.",
+                    403
+                );
+            }
+        }
+
+        // App created <3 days ago
+        // 50% of quota, 50% of rate limit
+        if ((account.CreatedAt - now).Duration() < TimeSpan.FromDays(3))
+        {
+        }
+
+        // App created <30 days ago
+        // 75% of quota, 75% of rate limit
+        if ((account.CreatedAt - now).Duration() < TimeSpan.FromDays(30))
+        {
+        }
+
+        // App created >30 days ago
+        // 100% of quota, 100% of rate limit
 
     }
 
@@ -40,10 +61,10 @@ public class MagicLinkService
     {
         await EnsureQuotaAsync(dto);
 
-        var token = await _fido2Service.CreateSigninTokenAsync(new SigninTokenRequest(dto.UserId));
+        var token = await fido2Service.CreateSigninTokenAsync(new SigninTokenRequest(dto.UserId));
         var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
 
-        await _mailProvider.SendAsync(new MailMessage
+        await mailProvider.SendAsync(new MailMessage
         {
             To = [dto.EmailAddress.ToString()],
             Subject = "Verify Email Address",
