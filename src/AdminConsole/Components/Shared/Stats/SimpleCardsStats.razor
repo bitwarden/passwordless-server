@@ -1,13 +1,15 @@
-<dl class="@Class">
-    @foreach (var item in Items)
-    {
-        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt class="truncate font-sm font-sans font-semibold">@item.Label</dt>
-            <dd class="mt-1 text-3xl font-semibold tracking-tight text-blue-600">@item.GetValue()</dd>
-        </div>
-    }
-</dl>
-
+@if (Items.Count > 0)
+{
+    <dl class="@Class">
+        @foreach (var item in Items)
+        {
+            <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <dt class="truncate font-sm font-sans font-semibold">@item.Label</dt>
+                <dd class="mt-1 text-3xl font-semibold tracking-tight text-blue-600">@item.GetValue()</dd>
+            </div>
+        }
+    </dl>
+}
 
 @code {
     [Parameter(CaptureUnmatchedValues = true)]
