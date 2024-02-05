@@ -13,14 +13,14 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
-    private async Task EnsureQuotaAsync(MagicLinkDTO dto)
+    private async Task ValidateQuotaAsync(MagicLinkDTO dto)
     {
         // Free: 50 emails/month, 50 emails/minute
         // Pro: 1000 emails/month, 100 emails/minute
         const int maxFreeMonthlyQuota = 50;
-        const int maxFreePerMinuteRateLimit = 50;
+        const int maxFreeMinutelyRateLimit = 50;
         const int maxProMonthlyQuota = 1000;
-        const int maxProPerMinuteRateLimit = 100;
+        const int maxProMinutelyRateLimit = 100;
 
         var now = clock.UtcNow;
         var account = await tenantStorage.GetAccountInformation();
@@ -38,18 +38,52 @@ public class MagicLinkService(
                     403
                 );
             }
+
+            var monthlyQuota = 0.2 * (
+                account.SubscriptionTier == "Free"
+                    ? maxFreeMonthlyQuota
+                    : maxProMonthlyQuota
+            );
+
+            var minutelyRateLimit = 0.2 * (
+                account.SubscriptionTier == "Free"
+                    ? maxFreeMinutelyRateLimit
+                    : maxProMinutelyRateLimit
+            );
         }
 
         // App created <3 days ago
         // 50% of quota, 50% of rate limit
         if ((account.CreatedAt - now).Duration() < TimeSpan.FromDays(3))
         {
+            var monthlyQuota = 0.5 * (
+                account.SubscriptionTier == "Free"
+                    ? maxFreeMonthlyQuota
+                    : maxProMonthlyQuota
+            );
+
+            var minutelyRateLimit = 0.5 * (
+                account.SubscriptionTier == "Free"
+                    ? maxFreeMinutelyRateLimit
+                    : maxProMinutelyRateLimit
+            );
         }
 
         // App created <30 days ago
         // 75% of quota, 75% of rate limit
         if ((account.CreatedAt - now).Duration() < TimeSpan.FromDays(30))
         {
+            var monthlyQuota = 0.75 * (
+                account.SubscriptionTier == "Free"
+                    ? maxFreeMonthlyQuota
+                    : maxProMonthlyQuota
+            );
+
+            var minutelyRateLimit = 0.75 * (
+                account.SubscriptionTier == "Free"
+                    ? maxFreeMinutelyRateLimit
+                    : maxProMinutelyRateLimit
+            );
         }
 
         // App created >30 days ago
@@ -59,7 +93,7 @@ public class MagicLinkService(
 
     public async Task SendMagicLinkAsync(MagicLinkDTO dto)
     {
-        await EnsureQuotaAsync(dto);
+        await ValidateQuotaAsync(dto);
 
         var token = await fido2Service.CreateSigninTokenAsync(new SigninTokenRequest(dto.UserId));
         var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
