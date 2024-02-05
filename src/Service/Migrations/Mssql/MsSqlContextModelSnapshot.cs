@@ -284,6 +284,9 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<int>("DailyActiveUsersCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("TotalUsersCount")
+                        .HasColumnType("int");
+
                     b.Property<int>("WeeklyActiveUsersCount")
                         .HasColumnType("int");
 

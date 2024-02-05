@@ -1,0 +1,53 @@
+@using Passwordless.Common.Models.Reporting
+@using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
+
+<ApexChart Id="weekly-users-count-of-total-chart" Options="_options" />
+
+@code {
+    [Parameter]
+    public required IEnumerable<PeriodicActiveUserReportResponse> Data { get; set; }
+
+    private const int MinDataPoints = 3;
+
+    private ApexChartOptions<DateTime, int>? _options;
+    
+    protected override void OnInitialized()
+    {
+        if (Data.Count() < MinDataPoints)
+        {
+            Data = new List<PeriodicActiveUserReportResponse>();
+        }
+
+        _options = new()
+        {
+            Chart = new Chart
+            {
+                Type = ChartTypes.Bar,
+                Stacked = true,
+                StackType = "100%"
+            },
+            Series = new List<Series<int>>
+            {
+                new()
+                {
+                    Name = "Weekly Active Users",
+                    Data = Data.Select(x => x.WeeklyActiveUsers)
+                },
+                new()
+                {
+                    Name = "Weekly Inactive Users",
+                    Data = Data.Select(x => x.TotalUsers - x.WeeklyActiveUsers)
+                }
+            },
+            Title = new Title
+            {
+                Text = "Weekly Active Users of Total"
+            },
+            Xaxis = new()
+            {
+                Type = XAxisTypes.Datetime, 
+                Categories = Data.Select(x => x.CreatedAt.ToDateTime(new TimeOnly(0, 0)))
+            }
+        };
+    }
+}

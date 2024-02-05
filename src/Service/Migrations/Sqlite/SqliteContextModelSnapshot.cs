@@ -279,6 +279,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<int>("DailyActiveUsersCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("TotalUsersCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("WeeklyActiveUsersCount")
                         .HasColumnType("INTEGER");
 

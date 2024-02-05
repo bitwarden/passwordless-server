@@ -17,7 +17,8 @@ public partial class AddTablePeriodicActiveUserReports : Migration
                 Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 CreatedAt = table.Column<DateOnly>(type: "date", nullable: false),
                 DailyActiveUsersCount = table.Column<int>(type: "int", nullable: false),
-                WeeklyActiveUsersCount = table.Column<int>(type: "int", nullable: false)
+                WeeklyActiveUsersCount = table.Column<int>(type: "int", nullable: false),
+                TotalUsersCount = table.Column<int>(type: "int", nullable: false)
             },
             constraints: table =>
             {

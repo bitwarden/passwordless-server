@@ -8,5 +8,7 @@ public class PeriodicActiveUserReport : PerTenant
 
     public int WeeklyActiveUsersCount { get; set; }
 
+    public int TotalUsersCount { get; set; }
+
     public virtual AccountMetaInformation Application { get; init; }
 }

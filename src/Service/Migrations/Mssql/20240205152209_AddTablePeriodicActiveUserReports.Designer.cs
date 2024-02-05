@@ -12,7 +12,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240205142816_AddTablePeriodicActiveUserReports")]
+    [Migration("20240205152209_AddTablePeriodicActiveUserReports")]
     partial class AddTablePeriodicActiveUserReports
     {
         /// <inheritdoc />
@@ -285,6 +285,9 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("date");
 
                     b.Property<int>("DailyActiveUsersCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalUsersCount")
                         .HasColumnType("int");
 
                     b.Property<int>("WeeklyActiveUsersCount")

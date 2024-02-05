@@ -78,6 +78,11 @@ public class EfGlobalGlobalStorage : IGlobalStorage
                         .Distinct()
                         .Count(),
 
+                    TotalUsersCount = credentials
+                        .Select(x => x.UserId)
+                        .Distinct()
+                        .Count(),
+
                     CreatedAt = DateOnly.FromDateTime(_timeProvider.GetUtcNow().UtcDateTime)
                 });
 

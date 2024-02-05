@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20240205141741_AddTablePeriodicActiveUserReports")]
+    [Migration("20240205152232_AddTablePeriodicActiveUserReports")]
     partial class AddTablePeriodicActiveUserReports
     {
         /// <inheritdoc />
@@ -280,6 +280,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DailyActiveUsersCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalUsersCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("WeeklyActiveUsersCount")

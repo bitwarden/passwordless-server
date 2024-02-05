@@ -43,7 +43,7 @@ public class ReportingService : IReportingService
         var storage = _tenantStorageFactory.Create();
         var entities = await storage.GetPeriodicActiveUserReportsAsync(parameters.From, parameters.To);
         return entities
-            .Select(x => new PeriodicActiveUserReportResponse(x.CreatedAt, x.DailyActiveUsersCount, x.WeeklyActiveUsersCount))
+            .Select(x => new PeriodicActiveUserReportResponse(x.CreatedAt, x.DailyActiveUsersCount, x.WeeklyActiveUsersCount, x.TotalUsersCount))
             .ToList();
     }
 }
