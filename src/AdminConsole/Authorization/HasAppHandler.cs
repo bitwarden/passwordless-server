@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Passwordless.AdminConsole.Middleware;
 
 namespace Passwordless.AdminConsole.Authorization;
 
@@ -22,7 +23,7 @@ public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
         }
 
         // get app
-        var gotApp = httpContext.GetRouteData().Values.TryGetValue("app", out var app);
+        var gotApp = httpContext.GetRouteData().Values.TryGetValue(RouteParameters.AppId, out var app);
         if (!gotApp)
         {
             return false;
@@ -30,6 +31,6 @@ public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
 
         string appId = app.ToString();
 
-        return context.User.HasClaim(c => c.Type == "AppId" && c.Value == appId);
+        return context.User.HasClaim(c => c.Type == CustomClaimTypes.AppId && c.Value == appId);
     }
 }

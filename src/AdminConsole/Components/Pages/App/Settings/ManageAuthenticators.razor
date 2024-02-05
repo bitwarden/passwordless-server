@@ -1,4 +1,4 @@
-@page "/app/{app}/settings/authenticators/manage"
+@page "/app/{AppId}/settings/authenticators/manage"
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.Authenticators
 @using Passwordless.Common.Models.MDS
@@ -147,14 +147,14 @@
     {
         _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
         {
-            new("Settings", $"app/{App}/settings"),
-            new("Authenticators", $"app/{App}/settings/authenticators"),
-            new("Allowed Authenticators", $"app/{App}/settings/authenticators/manage")
+            new("Settings", $"app/{AppId}/settings"),
+            new("Authenticators", $"app/{AppId}/settings/authenticators"),
+            new("Allowed Authenticators", $"app/{AppId}/settings/authenticators/manage")
         };
         
         if (!CurrentContext.Features.AllowAttestation)
         {
-            NavigationManager.NavigateTo($"app/{App}/settings");
+            NavigationManager.NavigateTo($"app/{AppId}/settings");
             return;
         }
         
