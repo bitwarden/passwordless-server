@@ -273,6 +273,25 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("Credentials");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.PeriodicActiveUserReport", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
+
+                    b.Property<int>("DailyActiveUsersCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WeeklyActiveUsersCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Tenant", "CreatedAt");
+
+                    b.ToTable("PeriodicActiveUserReports");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
                 {
                     b.Property<string>("Tenant")
@@ -345,6 +364,17 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("AppFeature");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.PeriodicActiveUserReport", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("PeriodicActiveUserReports")
+                        .HasForeignKey("Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -361,6 +391,8 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("Events");
 
                     b.Navigation("Features");
+
+                    b.Navigation("PeriodicActiveUserReports");
 
                     b.Navigation("PeriodicCredentialReports");
                 });

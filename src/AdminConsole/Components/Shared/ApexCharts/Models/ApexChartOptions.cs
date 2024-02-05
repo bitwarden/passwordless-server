@@ -6,11 +6,13 @@ public class ApexChartOptions<TXValueType, TYValueType>
 
     public Chart? Chart { get; set; }
 
-    public IEnumerable<Color>? Colors { get; set; }
+    public IEnumerable<Color>? Colors { get; set; } = new[] { Color.Default, Color.AmberOrange, Color.MelonRed, Color.MediumPurple };
 
     public IEnumerable<Series<TYValueType>>? Series { get; set; }
 
     public Xaxis<TXValueType>? Xaxis { get; set; }
 
     public NoData NoData { get; set; } = new();
+
+    public Legend Legend { get; set; } = new();
 }

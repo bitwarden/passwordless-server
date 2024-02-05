@@ -50,4 +50,39 @@ public class EfGlobalGlobalStorage : IGlobalStorage
 
         return rows;
     }
+
+    /// <summary>
+    /// Records the amount of daily or weekly active users per tenant.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<int> UpdatePeriodicActiveUserReportsAsync()
+    {
+        var result = _db.AccountInfo
+            .GroupJoin(
+                _db.Credentials,
+                accountInfo => accountInfo.Tenant,
+                credential => credential.Tenant,
+                (accountInformation, credentials) => new PeriodicActiveUserReport
+                {
+                    Tenant = accountInformation.Tenant,
+
+                    DailyActiveUsersCount = credentials
+                        .Where(x => x.LastUsedAt >= _timeProvider.GetUtcNow().UtcDateTime.AddDays(-1))
+                        .Select(x => x.UserId)
+                        .Distinct()
+                        .Count(),
+
+                    WeeklyActiveUsersCount = credentials
+                        .Where(x => x.LastUsedAt >= _timeProvider.GetUtcNow().UtcDateTime.AddDays(-7))
+                        .Select(x => x.UserId)
+                        .Distinct()
+                        .Count(),
+
+                    CreatedAt = DateOnly.FromDateTime(_timeProvider.GetUtcNow().UtcDateTime)
+                });
+
+        await _db.PeriodicActiveUserReports.AddRangeAsync(result);
+
+        return await _db.SaveChangesAsync();
+    }
 }

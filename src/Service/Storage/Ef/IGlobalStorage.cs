@@ -3,4 +3,5 @@ public interface IGlobalStorage
 {
     Task<ICollection<string>> GetApplicationsPendingDeletionAsync();
     Task<int> UpdatePeriodicCredentialReportsAsync();
+    Task<int> UpdatePeriodicActiveUserReportsAsync();
 }

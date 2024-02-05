@@ -13,6 +13,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 {
     Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
+    Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest request);
 
     /// <summary>
     /// Returns a list of configured authenticators for the current app. If the list is empty, all authenticators are allowed.
@@ -87,6 +88,25 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
         return rest;
+    }
+
+    public async Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest request)
+    {
+        var queryBuilder = new QueryBuilder();
+        if (request.From.HasValue)
+        {
+            queryBuilder.Add("from", request.From.Value.ToString("yyyy-MM-dd"));
+        }
+        if (request.To.HasValue)
+        {
+            queryBuilder.Add("to", request.To.Value.ToString("yyyy-MM-dd"));
+        }
+
+        var q = queryBuilder.ToQueryString();
+        var response = await _client.GetAsync($"/apps/{_currentContext.AppId}/reporting/active-users/periodic{q}");
+        response.EnsureSuccessStatusCode();
+
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicActiveUserReportResponse>>())!;
     }
 
     public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)

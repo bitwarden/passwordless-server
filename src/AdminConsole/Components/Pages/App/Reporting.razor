@@ -47,6 +47,7 @@
             {
                 <TotalCredentialsCountChart Data="PeriodicCredentialReports"  />
                 <TotalUsersCountChart Data="PeriodicCredentialReports" />
+                <ActiveUsersCountChart Data="PeriodicActiveUserReports" />
             }
         </div>
     </Panel>
@@ -58,8 +59,10 @@
     [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
     
     private EditContext? _filterContext;
+
+    public IEnumerable<PeriodicCredentialReportResponse> PeriodicCredentialReports { get; set; } = new List<PeriodicCredentialReportResponse>(0);
     
-    public IEnumerable<PeriodicCredentialReportResponse> PeriodicCredentialReports { get; set; }
+    public IEnumerable<PeriodicActiveUserReportResponse> PeriodicActiveUserReports { get; set; } = new List<PeriodicActiveUserReportResponse>(0);
 
     public bool IsLoaded { get; private set; }    
 
@@ -94,8 +97,10 @@
 
     public async Task<bool> LoadAsync()
     {
-        var req = PeriodicCredentialReportRequest.Create(Filter.From, Filter.To);
-        PeriodicCredentialReports = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
+        var periodicCredentialReportRequest = PeriodicCredentialReportRequest.Create(Filter.From, Filter.To);
+        PeriodicCredentialReports = await PasswordlessClient.GetPeriodicCredentialReportsAsync(periodicCredentialReportRequest);
+        var periodicActiveUserReportRequest = PeriodicActiveUserReportRequest.Create(Filter.From, Filter.To);
+        PeriodicActiveUserReports = await PasswordlessClient.GetPeriodicActiveUserReportsAsync(periodicActiveUserReportRequest);
         return true;
     }
 

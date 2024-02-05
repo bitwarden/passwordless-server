@@ -31,4 +31,19 @@ public class ReportingService : IReportingService
             .Select(x => new PeriodicCredentialReportResponse(x.CreatedAt, x.UsersCount, x.CredentialsCount))
             .ToList();
     }
+
+    public Task<int> UpdatePeriodicActiveUserReportsAsync()
+    {
+        var storage = _storageFactory.Create();
+        return storage.UpdatePeriodicActiveUserReportsAsync();
+    }
+
+    public async Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest parameters)
+    {
+        var storage = _tenantStorageFactory.Create();
+        var entities = await storage.GetPeriodicActiveUserReportsAsync(parameters.From, parameters.To);
+        return entities
+            .Select(x => new PeriodicActiveUserReportResponse(x.CreatedAt, x.DailyActiveUsersCount, x.WeeklyActiveUsersCount))
+            .ToList();
+    }
 }

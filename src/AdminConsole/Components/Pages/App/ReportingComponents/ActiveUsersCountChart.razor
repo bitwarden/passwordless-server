@@ -1,11 +1,11 @@
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
 
-<ApexChart Id="total-users-count-chart" Options="_options" />
+<ApexChart Id="active-users-count-chart" Options="_options" />
 
 @code {
     [Parameter]
-    public required IEnumerable<PeriodicCredentialReportResponse> Data { get; set; }
+    public required IEnumerable<PeriodicActiveUserReportResponse> Data { get; set; }
 
     private const int MinDataPoints = 3;
 
@@ -15,7 +15,7 @@
     {
         if (Data.Count() < MinDataPoints)
         {
-            Data = new List<PeriodicCredentialReportResponse>();
+            Data = new List<PeriodicActiveUserReportResponse>();
         }
 
         _options = new()
@@ -28,13 +28,18 @@
             {
                 new()
                 {
-                    Name = "Users",
-                    Data = Data.Select(x => x.Users)
+                    Name = "Daily Active Users",
+                    Data = Data.Select(x => x.DailyActiveUsers)
+                },
+                new()
+                {
+                    Name = "Weekly Active Users",
+                    Data = Data.Select(x => x.WeeklyActiveUsers)
                 }
             },
             Title = new Title
             {
-                Text = "Total Users"
+                Text = "Active Users"
             },
             Xaxis = new()
             {
