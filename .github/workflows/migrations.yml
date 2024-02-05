@@ -62,13 +62,11 @@ jobs:
           --no-connect
           | grep -E '^data:'
           | sed -E 's/^data: (.*)$/\1/'
-          | jq -r '.[].id | tostring'
+          | jq -r '.[] | .id'
           | tee migrations.txt
 
       - name: Get pending migrations
         run: |
-          jq --version
-          
           $diff=$(git diff --name-only \
             ${{ github.event.pull_request.base.sha || 'HEAD~1' }} \
             ${{ github.event.pull_request.head.sha }})
