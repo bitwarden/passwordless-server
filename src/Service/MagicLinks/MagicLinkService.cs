@@ -15,10 +15,32 @@ public class MagicLinkService
         _mailProvider = mailProvider;
     }
 
-    public async Task SendMagicLink(MagicLinkDTO dto)
+    // General quota:
+    // Free: 50 emails/month, 50 emails/minute
+    // Pro: 1000 emails/month, 100 emails/minute
+    //
+    // App created <24 hours ago:
+    // Can only email the admin email address.
+    // 20% of quota, 20% of rate limit
+    //
+    // App created <3 days ago:
+    // 50% of quota, 50% of rate limit
+    //
+    // App created <30 days ago:
+    // 75% of quota, 75% of rate limit
+    //
+    // App created >30 days ago:
+    // 100% of quota, 100% of rate limit
+    private async Task EnsureQuotaAsync(MagicLinkDTO dto)
     {
-        var token = await _fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
 
+    }
+
+    public async Task SendMagicLinkAsync(MagicLinkDTO dto)
+    {
+        await EnsureQuotaAsync(dto);
+
+        var token = await _fido2Service.CreateSigninTokenAsync(new SigninTokenRequest(dto.UserId));
         var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
 
         await _mailProvider.SendAsync(new MailMessage
