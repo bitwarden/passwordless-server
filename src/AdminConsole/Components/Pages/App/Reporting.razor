@@ -1,6 +1,7 @@
 @page "/app/{app}/Reporting"
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
+@using Passwordless.AdminConsole.Components.Shared.Stats
 
 @inherits BaseApplicationPage
 
@@ -45,11 +46,10 @@
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
             @if (IsLoaded)
             {
+                <SimpleCardsStats class="col-span-2" Items="SummaryItems" />
                 <TotalCredentialsCountChart Data="PeriodicCredentialReports"  />
                 <TotalUsersCountChart Data="PeriodicCredentialReports" />
                 <ActiveUsersCountChart Data="PeriodicActiveUserReports" />
-                <DailyUsersCountOfTotalChart Data="PeriodicActiveUserReports" />
-                <WeeklyUsersCountOfTotalChart Data="PeriodicActiveUserReports" />
             }
         </div>
     </Panel>
@@ -66,6 +66,8 @@
     
     public IEnumerable<PeriodicActiveUserReportResponse> PeriodicActiveUserReports { get; set; } = new List<PeriodicActiveUserReportResponse>(0);
 
+    public ICollection<SimpleCardsStats.Item> SummaryItems { get; set; } = new List<SimpleCardsStats.Item>(0);
+    
     public bool IsLoaded { get; private set; }    
 
     protected override async Task OnInitializedAsync()
@@ -103,6 +105,13 @@
         PeriodicCredentialReports = await PasswordlessClient.GetPeriodicCredentialReportsAsync(periodicCredentialReportRequest);
         var periodicActiveUserReportRequest = PeriodicActiveUserReportRequest.Create(Filter.From, Filter.To);
         PeriodicActiveUserReports = await PasswordlessClient.GetPeriodicActiveUserReportsAsync(periodicActiveUserReportRequest);
+        var lastActiveUserReport = PeriodicActiveUserReports.LastOrDefault();
+        if (lastActiveUserReport != null)
+        {
+            double totalUsers = lastActiveUserReport.TotalUsers;
+            SummaryItems.Add(new SimpleCardsStats.Item("Daily Active Users", lastActiveUserReport.DailyActiveUsers / totalUsers, SimpleCardsStats.ValueTypes.Percentage));
+            SummaryItems.Add(new SimpleCardsStats.Item("Weekly Active Users", lastActiveUserReport.WeeklyActiveUsers / totalUsers, SimpleCardsStats.ValueTypes.Percentage));
+        }
         return true;
     }
 
