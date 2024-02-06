@@ -285,18 +285,21 @@ public class EfTenantStorage : ITenantStorage
             .ExecuteDeleteAsync();
     }
 
-    public async Task AddDispatchedEmailAsync(string userId, string emailAddress)
+    public async Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress)
     {
-        db.DispatchedEmails.Add(new DispatchedEmail
+        var email = new DispatchedEmail
         {
             Tenant = Tenant,
             Id = Guid.NewGuid(),
             CreatedAt = _timeProvider.GetUtcNow(),
             UserId = userId,
             EmailAddress = emailAddress
-        });
+        };
 
+        db.DispatchedEmails.Add(email);
         await db.SaveChangesAsync();
+
+        return email;
     }
 
     public async Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)

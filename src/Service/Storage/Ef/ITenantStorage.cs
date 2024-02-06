@@ -54,6 +54,6 @@ public interface ITenantStorage
     Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed);
     Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids);
 
-    Task AddDispatchedEmailAsync(string userId, string emailAddress);
+    Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress);
     Task<int> GetDispatchedEmailCountAsync(TimeSpan duration);
 }
