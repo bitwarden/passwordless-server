@@ -121,5 +121,7 @@ public class MagicLinkService(
                  """,
             MessageType = "magic-links"
         });
+
+        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
     }
 }
