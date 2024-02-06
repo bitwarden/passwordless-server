@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Internal;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks.Models;
@@ -8,87 +7,87 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.MagicLinks;
 
 public class MagicLinkService(
-    ISystemClock clock,
+    TimeProvider timeProvider,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
+    private async Task ValidateQuotaAsync(int monthlyQuota, int minutelyRateLimit)
+    {
+        var monthlyDispatchedEmailCount = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
+        if (monthlyDispatchedEmailCount >= monthlyQuota)
+        {
+            throw new ApiException(
+                "You have reached your monthly quota for magic links. Please try again later.",
+                429
+            );
+        }
+
+        var minutelyDispatchedEmailCount = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1));
+        if (minutelyDispatchedEmailCount >= minutelyRateLimit)
+        {
+            throw new ApiException(
+                "You have reached your rate limit for magic links. Please try again later.",
+                429
+            );
+        }
+    }
+
     private async Task ValidateQuotaAsync(MagicLinkDTO dto)
     {
-        // Free: 50 emails/month, 50 emails/minute
-        // Pro: 1000 emails/month, 100 emails/minute
-        const int maxFreeMonthlyQuota = 50;
-        const int maxFreeMinutelyRateLimit = 50;
-        const int maxProMonthlyQuota = 1000;
-        const int maxProMinutelyRateLimit = 100;
-
-        var now = clock.UtcNow;
+        var now = timeProvider.GetUtcNow();
         var account = await tenantStorage.GetAccountInformation();
+        var accountAge = (now - account.CreatedAt).Duration();
+        var isFreeAccount = account.SubscriptionTier == "Free";
 
-        // App created <24 hours ago
-        // Can only email the admin email address.
-        // 20% of quota, 20% of rate limit
-        if ((account.CreatedAt - now).Duration() < TimeSpan.FromHours(24))
+        // Applications created less than 24 hours ago can only send magic links to the admin email address
+        if (accountAge < TimeSpan.FromHours(24) &&
+            !account.AdminEmails.Contains(dto.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
-            if (!account.AdminEmails.Contains(dto.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
-            {
-                throw new ApiException(
-                    "Because your application has been created less than 24 hours ago, " +
-                    "you can only request magic links to the admin email address.",
-                    403
-                );
-            }
-
-            var monthlyQuota = 0.2 * (
-                account.SubscriptionTier == "Free"
-                    ? maxFreeMonthlyQuota
-                    : maxProMonthlyQuota
-            );
-
-            var minutelyRateLimit = 0.2 * (
-                account.SubscriptionTier == "Free"
-                    ? maxFreeMinutelyRateLimit
-                    : maxProMinutelyRateLimit
+            throw new ApiException(
+                "Because your application has been created less than 24 hours ago, " +
+                "you can only request magic links to the admin email address.",
+                403
             );
         }
 
-        // App created <3 days ago
-        // 50% of quota, 50% of rate limit
-        if ((account.CreatedAt - now).Duration() < TimeSpan.FromDays(3))
+        const int maxFreeMonthlyQuota = 50;
+        const int maxProMonthlyQuota = 1000;
+        var monthlyQuota = accountAge.TotalDays switch
         {
-            var monthlyQuota = 0.5 * (
-                account.SubscriptionTier == "Free"
-                    ? maxFreeMonthlyQuota
-                    : maxProMonthlyQuota
-            );
+            // App created <24 hours ago
+            < 1 when isFreeAccount => (int)(0.2 * maxFreeMonthlyQuota),
+            < 1 => (int)(0.2 * maxProMonthlyQuota),
+            // App created <3 days ago
+            < 3 when isFreeAccount => (int)(0.5 * maxFreeMonthlyQuota),
+            < 3 => (int)(0.5 * maxProMonthlyQuota),
+            // App created <30 days ago
+            < 30 when isFreeAccount => (int)(0.75 * maxFreeMonthlyQuota),
+            < 30 => (int)(0.75 * maxProMonthlyQuota),
+            // App created >30 days ago
+            _ when isFreeAccount => maxFreeMonthlyQuota,
+            _ => maxProMonthlyQuota
+        };
 
-            var minutelyRateLimit = 0.5 * (
-                account.SubscriptionTier == "Free"
-                    ? maxFreeMinutelyRateLimit
-                    : maxProMinutelyRateLimit
-            );
-        }
-
-        // App created <30 days ago
-        // 75% of quota, 75% of rate limit
-        if ((account.CreatedAt - now).Duration() < TimeSpan.FromDays(30))
+        const int maxFreeMinutelyRateLimit = 50;
+        const int maxProMinutelyRateLimit = 100;
+        var minutelyRateLimit = accountAge.TotalDays switch
         {
-            var monthlyQuota = 0.75 * (
-                account.SubscriptionTier == "Free"
-                    ? maxFreeMonthlyQuota
-                    : maxProMonthlyQuota
-            );
+            // App created <24 hours ago
+            < 1 when isFreeAccount => (int)(0.2 * maxFreeMinutelyRateLimit),
+            < 1 => (int)(0.2 * maxProMinutelyRateLimit),
+            // App created <3 days ago
+            < 3 when isFreeAccount => (int)(0.5 * maxFreeMinutelyRateLimit),
+            < 3 => (int)(0.5 * maxProMinutelyRateLimit),
+            // App created <30 days ago
+            < 30 when isFreeAccount => (int)(0.75 * maxFreeMinutelyRateLimit),
+            < 30 => (int)(0.75 * maxProMinutelyRateLimit),
+            // App created >30 days ago
+            _ when isFreeAccount => maxFreeMinutelyRateLimit,
+            _ => maxProMinutelyRateLimit
+        };
 
-            var minutelyRateLimit = 0.75 * (
-                account.SubscriptionTier == "Free"
-                    ? maxFreeMinutelyRateLimit
-                    : maxProMinutelyRateLimit
-            );
-        }
-
-        // App created >30 days ago
-        // 100% of quota, 100% of rate limit
-
+        await ValidateQuotaAsync(monthlyQuota, minutelyRateLimit);
     }
 
     public async Task SendMagicLinkAsync(MagicLinkDTO dto)

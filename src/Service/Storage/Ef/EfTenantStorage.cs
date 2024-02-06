@@ -285,6 +285,14 @@ public class EfTenantStorage : ITenantStorage
             .ExecuteDeleteAsync();
     }
 
+    public Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)
+    {
+        var from = _timeProvider.GetUtcNow().UtcDateTime - duration;
+        return db.DispatchedEmails
+            .Where(x => x.CreatedAt >= from)
+            .CountAsync();
+    }
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x
