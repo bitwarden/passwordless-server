@@ -12,29 +12,6 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
-    private async Task EnforceLimitsAsync(int monthlyLimit, int minutelyLimit)
-    {
-        var monthlyDispatchedEmailCount = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
-        if (monthlyDispatchedEmailCount >= monthlyLimit)
-        {
-            throw new ApiException(
-                "You have reached your monthly quota for magic link emails. " +
-                "Please try again later.",
-                429
-            );
-        }
-
-        var minutelyDispatchedEmailCount = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1));
-        if (minutelyDispatchedEmailCount >= minutelyLimit)
-        {
-            throw new ApiException(
-                "You have reached your rate limit for magic link emails. " +
-                "Please try again later.",
-                429
-            );
-        }
-    }
-
     private async Task EnforceLimitsAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
@@ -71,6 +48,15 @@ public class MagicLinkService(
             _ => maxProMonthlyLimit
         };
 
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= monthlyLimit)
+        {
+            throw new ApiException(
+                "You have reached your monthly quota for magic link emails. " +
+                "Please try again later.",
+                429
+            );
+        }
+
         const int maxFreeMinutelyLimit = 50;
         const int maxProMinutelyLimit = 100;
         var minutelyLimit = accountAge.TotalDays switch
@@ -89,7 +75,14 @@ public class MagicLinkService(
             _ => maxProMinutelyLimit
         };
 
-        await EnforceLimitsAsync(monthlyLimit, minutelyLimit);
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >= minutelyLimit)
+        {
+            throw new ApiException(
+                "You have reached your rate limit for magic link emails. " +
+                "Please try again later.",
+                429
+            );
+        }
     }
 
     public async Task SendMagicLinkAsync(MagicLinkDTO dto)
