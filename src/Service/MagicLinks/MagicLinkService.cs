@@ -12,10 +12,10 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
-    private async Task ValidateQuotaAsync(int monthlyQuota, int minutelyRateLimit)
+    private async Task EnforceLimitsAsync(int monthlyLimit, int minutelyLimit)
     {
         var monthlyDispatchedEmailCount = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
-        if (monthlyDispatchedEmailCount >= monthlyQuota)
+        if (monthlyDispatchedEmailCount >= monthlyLimit)
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic links. Please try again later.",
@@ -24,7 +24,7 @@ public class MagicLinkService(
         }
 
         var minutelyDispatchedEmailCount = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1));
-        if (minutelyDispatchedEmailCount >= minutelyRateLimit)
+        if (minutelyDispatchedEmailCount >= minutelyLimit)
         {
             throw new ApiException(
                 "You have reached your rate limit for magic links. Please try again later.",
@@ -33,7 +33,7 @@ public class MagicLinkService(
         }
     }
 
-    private async Task ValidateQuotaAsync(MagicLinkDTO dto)
+    private async Task EnforceLimitsAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
         var account = await tenantStorage.GetAccountInformation();
@@ -51,48 +51,48 @@ public class MagicLinkService(
             );
         }
 
-        const int maxFreeMonthlyQuota = 50;
-        const int maxProMonthlyQuota = 1000;
-        var monthlyQuota = accountAge.TotalDays switch
+        const int maxFreeMonthlyLimit = 50;
+        const int maxProMonthlyLimit = 1000;
+        var monthlyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago
-            < 1 when isFreeAccount => (int)(0.2 * maxFreeMonthlyQuota),
-            < 1 => (int)(0.2 * maxProMonthlyQuota),
+            < 1 when isFreeAccount => (int)(0.2 * maxFreeMonthlyLimit),
+            < 1 => (int)(0.2 * maxProMonthlyLimit),
             // App created <3 days ago
-            < 3 when isFreeAccount => (int)(0.5 * maxFreeMonthlyQuota),
-            < 3 => (int)(0.5 * maxProMonthlyQuota),
+            < 3 when isFreeAccount => (int)(0.5 * maxFreeMonthlyLimit),
+            < 3 => (int)(0.5 * maxProMonthlyLimit),
             // App created <30 days ago
-            < 30 when isFreeAccount => (int)(0.75 * maxFreeMonthlyQuota),
-            < 30 => (int)(0.75 * maxProMonthlyQuota),
+            < 30 when isFreeAccount => (int)(0.75 * maxFreeMonthlyLimit),
+            < 30 => (int)(0.75 * maxProMonthlyLimit),
             // App created >30 days ago
-            _ when isFreeAccount => maxFreeMonthlyQuota,
-            _ => maxProMonthlyQuota
+            _ when isFreeAccount => maxFreeMonthlyLimit,
+            _ => maxProMonthlyLimit
         };
 
-        const int maxFreeMinutelyRateLimit = 50;
-        const int maxProMinutelyRateLimit = 100;
-        var minutelyRateLimit = accountAge.TotalDays switch
+        const int maxFreeMinutelyLimit = 50;
+        const int maxProMinutelyLimit = 100;
+        var minutelyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago
-            < 1 when isFreeAccount => (int)(0.2 * maxFreeMinutelyRateLimit),
-            < 1 => (int)(0.2 * maxProMinutelyRateLimit),
+            < 1 when isFreeAccount => (int)(0.2 * maxFreeMinutelyLimit),
+            < 1 => (int)(0.2 * maxProMinutelyLimit),
             // App created <3 days ago
-            < 3 when isFreeAccount => (int)(0.5 * maxFreeMinutelyRateLimit),
-            < 3 => (int)(0.5 * maxProMinutelyRateLimit),
+            < 3 when isFreeAccount => (int)(0.5 * maxFreeMinutelyLimit),
+            < 3 => (int)(0.5 * maxProMinutelyLimit),
             // App created <30 days ago
-            < 30 when isFreeAccount => (int)(0.75 * maxFreeMinutelyRateLimit),
-            < 30 => (int)(0.75 * maxProMinutelyRateLimit),
+            < 30 when isFreeAccount => (int)(0.75 * maxFreeMinutelyLimit),
+            < 30 => (int)(0.75 * maxProMinutelyLimit),
             // App created >30 days ago
-            _ when isFreeAccount => maxFreeMinutelyRateLimit,
-            _ => maxProMinutelyRateLimit
+            _ when isFreeAccount => maxFreeMinutelyLimit,
+            _ => maxProMinutelyLimit
         };
 
-        await ValidateQuotaAsync(monthlyQuota, minutelyRateLimit);
+        await EnforceLimitsAsync(monthlyLimit, minutelyLimit);
     }
 
     public async Task SendMagicLinkAsync(MagicLinkDTO dto)
     {
-        await ValidateQuotaAsync(dto);
+        await EnforceLimitsAsync(dto);
 
         var token = await fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
         var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
