@@ -25,7 +25,7 @@ public static class UseCspExtensions
             var passConfig = context.RequestServices.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
             var csp =
                 "default-src 'self';" +
-                $"script-src cdn.passwordless.dev 'self' 'unsafe-eval' 'nonce-{nonce}';" +
+                $"script-src 'self' 'unsafe-eval' 'nonce-{nonce}';" +
                 $"connect-src 'self' {passConfig.Value.ApiUrl};" +
                 "style-src 'self' 'unsafe-inline';" +
                 "img-src 'self' data:;";

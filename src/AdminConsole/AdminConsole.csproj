@@ -56,6 +56,9 @@
     <Exec Command="npm ci" />
     <Exec Command="npm run build" />
     
+    <!-- Passwordless.dev Javascript Client -->
+    <Copy SourceFiles="node_modules\@passwordlessdev\passwordless-client\dist\umd\passwordless.umd.min.js" DestinationFolder="wwwroot\lib\passwordless\" />
+    
     <!-- Apex Charts -->
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.min.js" DestinationFolder="wwwroot\lib\apexcharts\" />
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.css" DestinationFolder="wwwroot\lib\apexcharts\" />
