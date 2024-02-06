@@ -18,7 +18,8 @@ public class MagicLinkService(
         if (monthlyDispatchedEmailCount >= monthlyLimit)
         {
             throw new ApiException(
-                "You have reached your monthly quota for magic links. Please try again later.",
+                "You have reached your monthly quota for magic link emails. " +
+                "Please try again later.",
                 429
             );
         }
@@ -27,7 +28,8 @@ public class MagicLinkService(
         if (minutelyDispatchedEmailCount >= minutelyLimit)
         {
             throw new ApiException(
-                "You have reached your rate limit for magic links. Please try again later.",
+                "You have reached your rate limit for magic link emails. " +
+                "Please try again later.",
                 429
             );
         }
