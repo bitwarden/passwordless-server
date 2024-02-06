@@ -1,4 +1,6 @@
-﻿namespace Passwordless.AdminConsole.RoutingHelpers;
+﻿using Passwordless.AdminConsole.Middleware;
+
+namespace Passwordless.AdminConsole.RoutingHelpers;
 
 
 public class LinkGeneratorDecorator : LinkGenerator
@@ -22,11 +24,11 @@ public class LinkGeneratorDecorator : LinkGenerator
         var newValues = new RouteValueDictionary(values);
 
         // get culture from ambient route values
-        if (ambientValues?.TryGetValue("app", out var value) == true)
+        if (ambientValues?.TryGetValue(RouteParameters.AppId, out var value) == true)
         {
             // add to the cloned route values to make it explicit
             // respects existing explicit value if specified
-            newValues.TryAdd("app", value);
+            newValues.TryAdd(RouteParameters.AppId, value);
         }
 
         return _innerLinkGenerator.GetPathByAddress(httpContext, address, newValues,
