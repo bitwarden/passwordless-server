@@ -29,7 +29,7 @@ public class MagicLinkService(
             );
         }
 
-        var maxMonthlyLimit = account.Features?.MaxMagicLinkEmailMonthlyLimit ?? 500;
+        var maxMonthlyLimit = account.Features?.MagicLinkEmailMaxMonthlyLimit ?? 500;
         var monthlyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago
@@ -52,7 +52,7 @@ public class MagicLinkService(
             );
         }
 
-        var maxMinutelyLimit = account.Features?.MaxMagicLinkEmailMinutelyLimit ?? 5;
+        var maxMinutelyLimit = account.Features?.MagicLinkEmailMaxMinutelyLimit ?? 5;
         var minutelyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago

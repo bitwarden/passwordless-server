@@ -13,13 +13,13 @@ public class AppFeature : PerTenant
     /// Maximum monthly limit for magic link emails sent by this application.
     /// The actual limit may be lower, depending on the age of the application.
     /// </summary>
-    public int MaxMagicLinkEmailMonthlyLimit { get; set; }
+    public int MagicLinkEmailMaxMonthlyLimit { get; set; }
 
     /// <summary>
     /// By-minute rate limit for magic link emails sent by this application.
     /// The actual limit may be lower, depending on the age of the application.
     /// </summary>
-    public int MaxMagicLinkEmailMinutelyLimit { get; set; }
+    public int MagicLinkEmailMaxMinutelyLimit { get; set; }
 
     /// <summary>
     /// Developer logging is only enabled when an end date has been set, and has to be manually re-enabled every time.

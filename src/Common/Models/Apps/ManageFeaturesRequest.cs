@@ -13,13 +13,13 @@ public sealed class ManageFeaturesRequest
     /// Maximum monthly limit for magic link emails sent by this application.
     /// The actual limit may be lower, depending on the age of the application.
     /// </summary>
-    public int MaxMagicLinkEmailMonthlyLimit { get; init; }
+    public int MagicLinkEmailMaxMonthlyLimit { get; init; }
 
     /// <summary>
     /// By-minute rate limit for magic link emails sent by this application.
     /// The actual limit may be lower, depending on the age of the application.
     /// </summary>
-    public int MaxMagicLinkEmailMinutelyLimit { get; init; }
+    public int MagicLinkEmailMaxMinutelyLimit { get; init; }
 
     /// <summary>
     /// Maximum number of individual users allowed to use the application
