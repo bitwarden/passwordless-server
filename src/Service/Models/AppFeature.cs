@@ -10,6 +10,18 @@ public class AppFeature : PerTenant
     public int EventLoggingRetentionPeriod { get; set; }
 
     /// <summary>
+    /// Maximum monthly limit for magic link emails sent by this application.
+    /// The actual limit may be lower, depending on the age of the application.
+    /// </summary>
+    public int MaxMagicLinkEmailMonthlyLimit { get; set; }
+
+    /// <summary>
+    /// By-minute rate limit for magic link emails sent by this application.
+    /// The actual limit may be lower, depending on the age of the application.
+    /// </summary>
+    public int MaxMagicLinkEmailMinutelyLimit { get; set; }
+
+    /// <summary>
     /// Developer logging is only enabled when an end date has been set, and has to be manually re-enabled every time.
     /// </summary>
     public DateTime? DeveloperLoggingEndsAt { get; set; }
@@ -36,5 +48,5 @@ public class AppFeature : PerTenant
 
     public AccountMetaInformation? Application { get; set; }
 
-    public IEnumerable<Authenticator> Authenticators { get; set; }
+    public IReadOnlyCollection<Authenticator>? Authenticators { get; set; }
 }

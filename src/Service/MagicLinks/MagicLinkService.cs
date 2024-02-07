@@ -17,7 +17,6 @@ public class MagicLinkService(
         var now = timeProvider.GetUtcNow();
         var account = await tenantStorage.GetAccountInformation();
         var accountAge = (now - account.CreatedAt).Duration();
-        var isFreeAccount = account.SubscriptionTier == "Free";
 
         // Applications created less than 24 hours ago can only send magic links to the admin email address
         if (accountAge < TimeSpan.FromHours(24) &&
@@ -30,25 +29,20 @@ public class MagicLinkService(
             );
         }
 
-        const int maxFreeMonthlyLimit = 50;
-        const int maxProMonthlyLimit = 1000;
+        var maxMonthlyLimit = account.Features?.MaxMagicLinkEmailMonthlyLimit ?? 500;
         var monthlyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago
-            < 1 when isFreeAccount => (int)(0.2 * maxFreeMonthlyLimit),
-            < 1 => (int)(0.2 * maxProMonthlyLimit),
+            < 1 => 0.2 * maxMonthlyLimit,
             // App created <3 days ago
-            < 3 when isFreeAccount => (int)(0.5 * maxFreeMonthlyLimit),
-            < 3 => (int)(0.5 * maxProMonthlyLimit),
+            < 3 => 0.5 * maxMonthlyLimit,
             // App created <30 days ago
-            < 30 when isFreeAccount => (int)(0.75 * maxFreeMonthlyLimit),
-            < 30 => (int)(0.75 * maxProMonthlyLimit),
+            < 30 => 0.75 * maxMonthlyLimit,
             // App created >30 days ago
-            _ when isFreeAccount => maxFreeMonthlyLimit,
-            _ => maxProMonthlyLimit
+            _ => maxMonthlyLimit
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= monthlyLimit)
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= (int)Math.Max(1, monthlyLimit))
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic link emails. " +
@@ -57,25 +51,20 @@ public class MagicLinkService(
             );
         }
 
-        const int maxFreeMinutelyLimit = 50;
-        const int maxProMinutelyLimit = 100;
+        var maxMinutelyLimit = account.Features?.MaxMagicLinkEmailMinutelyLimit ?? 10;
         var minutelyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago
-            < 1 when isFreeAccount => (int)(0.2 * maxFreeMinutelyLimit),
-            < 1 => (int)(0.2 * maxProMinutelyLimit),
+            < 1 => 0.2 * maxMinutelyLimit,
             // App created <3 days ago
-            < 3 when isFreeAccount => (int)(0.5 * maxFreeMinutelyLimit),
-            < 3 => (int)(0.5 * maxProMinutelyLimit),
+            < 3 => 0.5 * maxMinutelyLimit,
             // App created <30 days ago
-            < 30 when isFreeAccount => (int)(0.75 * maxFreeMinutelyLimit),
-            < 30 => (int)(0.75 * maxProMinutelyLimit),
+            < 30 => 0.75 * maxMinutelyLimit,
             // App created >30 days ago
-            _ when isFreeAccount => maxFreeMinutelyLimit,
-            _ => maxProMinutelyLimit
+            _ => maxMinutelyLimit
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >= minutelyLimit)
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >= (int)Math.Max(1, minutelyLimit))
         {
             throw new ApiException(
                 "You have reached your rate limit for magic link emails. " +

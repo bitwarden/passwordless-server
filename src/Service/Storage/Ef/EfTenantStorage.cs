@@ -180,6 +180,8 @@ public class EfTenantStorage : ITenantStorage
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
         existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
+        existingEntity.MaxMagicLinkEmailMonthlyLimit = features.MaxMagicLinkEmailMonthlyLimit;
+        existingEntity.MaxMagicLinkEmailMinutelyLimit = features.MaxMagicLinkEmailMinutelyLimit;
         existingEntity.MaxUsers = features.MaxUsers;
         existingEntity.AllowAttestation = features.AllowAttestation;
         await db.SaveChangesAsync();

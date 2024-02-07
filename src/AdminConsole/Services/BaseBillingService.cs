@@ -54,9 +54,12 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         {
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod,
+            MaxMagicLinkEmailMonthlyLimit = plan.Features.MaxMagicLinkEmailMonthlyLimit,
+            MaxMagicLinkEmailMinutelyLimit = plan.Features.MaxMagicLinkEmailMinutelyLimit,
             MaxUsers = plan.Features.MaxUsers,
             AllowAttestation = plan.Features.AllowAttestation
         };
+
         await _passwordlessClient.SetFeaturesAsync(app, updateFeaturesRequest);
     }
 
