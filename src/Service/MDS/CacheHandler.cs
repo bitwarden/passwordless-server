@@ -11,7 +11,7 @@ namespace Passwordless.Service.MDS;
 /// </summary>
 public sealed class CacheHandler : DelegatingHandler
 {
-    private const string Path = "mds.jwt";
+    public const string Path = "mds.jwt";
 
     private readonly IConfiguration _configuration;
     private readonly ILogger<CacheHandler> _logger;
@@ -19,6 +19,15 @@ public sealed class CacheHandler : DelegatingHandler
     public CacheHandler(
         IConfiguration configuration,
         ILogger<CacheHandler> logger)
+    {
+        _configuration = configuration;
+        _logger = logger;
+    }
+
+    public CacheHandler(
+        HttpMessageHandler httpMessageHandler,
+        IConfiguration configuration,
+        ILogger<CacheHandler> logger) : base(httpMessageHandler)
     {
         _configuration = configuration;
         _logger = logger;
