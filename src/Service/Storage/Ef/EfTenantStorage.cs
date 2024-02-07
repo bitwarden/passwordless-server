@@ -300,6 +300,13 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             .ToArrayAsync();
     }
 
+    public async Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)
+    {
+        var from = timeProvider.GetUtcNow().UtcDateTime - duration;
+        return await db.DispatchedEmails
+            .CountAsync(x => x.CreatedAt >= from);
+    }
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x

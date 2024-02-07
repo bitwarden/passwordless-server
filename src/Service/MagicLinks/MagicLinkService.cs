@@ -12,22 +12,6 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
-    // Cache dispatched emails to avoid unnecessary database calls
-    // TODO: this needs to be shared between instances of this service per tenant
-    private List<DispatchedEmail>? _dispatchedEmails;
-
-    private async Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)
-    {
-        _dispatchedEmails ??=
-        [
-            // We don't need more than 30 days worth of dispatched emails because
-            // that's the window of our longest rate limit.
-            ..await tenantStorage.GetDispatchedEmailsAsync(TimeSpan.FromDays(30))
-        ];
-
-        return _dispatchedEmails.Count(e => e.CreatedAt > timeProvider.GetUtcNow() - duration);
-    }
-
     private async Task EnforceLimitsAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
@@ -58,7 +42,8 @@ public class MagicLinkService(
             _ => maxMonthlyLimit
         };
 
-        if (await GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= (int)Math.Max(1, monthlyLimit))
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >=
+            (int)Math.Max(1, monthlyLimit))
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic link emails. " +
@@ -80,7 +65,8 @@ public class MagicLinkService(
             _ => maxMinutelyLimit
         };
 
-        if (await GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >= (int)Math.Max(1, minutelyLimit))
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >=
+            (int)Math.Max(1, minutelyLimit))
         {
             throw new ApiException(
                 "You have reached your rate limit for magic link emails. " +
@@ -122,7 +108,6 @@ public class MagicLinkService(
             MessageType = "magic-links"
         });
 
-        var email = await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
-        _dispatchedEmails?.Add(email);
+        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
     }
 }

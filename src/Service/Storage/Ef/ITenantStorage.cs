@@ -56,4 +56,5 @@ public interface ITenantStorage
 
     Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress);
     Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan duration);
+    Task<int> GetDispatchedEmailCountAsync(TimeSpan duration);
 }
