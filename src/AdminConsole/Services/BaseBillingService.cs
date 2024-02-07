@@ -67,10 +67,9 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     {
         var features = _billingOptions.Plans[planName].Features;
 
-
         // SetCustomerId on the Org
         await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var org = await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync<Organization>(db.Organizations, x => x.Id == orgId);
+        var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
 
         if (org == null)
         {
@@ -82,11 +81,9 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             return;
         }
 
-
         org.BillingCustomerId = customerId;
         org.BecamePaidAt = subscriptionCreatedAt;
         org.BillingSubscriptionId = subscriptionId;
-
 
         // Increase the limits
         org.MaxAdmins = features.MaxAdmins;
@@ -98,14 +95,16 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         }
 
 
-        var applications = await Queryable
-            .Where<Application>(db.Applications, a => a.OrganizationId == orgId)
+        var applications = await db.Applications
+            .Where(a => a.OrganizationId == orgId)
             .ToListAsync();
 
         var setFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMaxMonthlyLimit = features.MagicLinkEmailMaxMonthlyLimit,
+            MagicLinkEmailMaxMinutelyLimit = features.MagicLinkEmailMaxMinutelyLimit,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };
