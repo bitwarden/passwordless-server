@@ -6,21 +6,9 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
-public class EfTenantStorage : ITenantStorage
+public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : ITenantStorage
 {
-    private readonly DbTenantContext db;
-    private readonly TimeProvider _timeProvider;
-
-    public string Tenant { get; }
-
-    public EfTenantStorage(
-        DbTenantContext db,
-        TimeProvider timeProvider)
-    {
-        this.db = db;
-        Tenant = db.Tenant;
-        _timeProvider = timeProvider;
-    }
+    public string Tenant { get; } = db.Tenant;
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
@@ -193,7 +181,7 @@ public class EfTenantStorage : ITenantStorage
             .Where(x => x.Id == apiKeyId)
             .ExecuteUpdateAsync(apiKey => apiKey
                 .SetProperty(x => x.IsLocked, true)
-                .SetProperty(x => x.LastLockedAt, _timeProvider.GetUtcNow().UtcDateTime)
+                .SetProperty(x => x.LastLockedAt, timeProvider.GetUtcNow().UtcDateTime)
         );
         if (rows == 0)
         {
@@ -207,7 +195,7 @@ public class EfTenantStorage : ITenantStorage
             .Where(x => x.Id == apiKeyId)
             .ExecuteUpdateAsync(apiKey => apiKey
                 .SetProperty(x => x.IsLocked, false)
-                .SetProperty(x => x.LastUnlockedAt, _timeProvider.GetUtcNow().UtcDateTime)
+                .SetProperty(x => x.LastUnlockedAt, timeProvider.GetUtcNow().UtcDateTime)
             );
         if (rows == 0)
         {
@@ -272,7 +260,7 @@ public class EfTenantStorage : ITenantStorage
             {
                 AaGuid = x,
                 IsAllowed = isAllowed,
-                CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+                CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
                 Tenant = Tenant
             }).ToList();
 
@@ -293,7 +281,7 @@ public class EfTenantStorage : ITenantStorage
         {
             Tenant = Tenant,
             Id = Guid.NewGuid(),
-            CreatedAt = _timeProvider.GetUtcNow(),
+            CreatedAt = timeProvider.GetUtcNow(),
             UserId = userId,
             EmailAddress = emailAddress
         };
@@ -306,7 +294,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan duration)
     {
-        var from = _timeProvider.GetUtcNow().UtcDateTime - duration;
+        var from = timeProvider.GetUtcNow().UtcDateTime - duration;
         return await db.DispatchedEmails
             .Where(x => x.CreatedAt >= from)
             .ToArrayAsync();
@@ -327,7 +315,7 @@ public class EfTenantStorage : ITenantStorage
 
     public Task RemoveExpiredTokenKeys(CancellationToken cancellationToken)
     {
-        return db.TokenKeys.Where(x => x.CreatedAt < _timeProvider.GetUtcNow().AddDays(-30).DateTime)
+        return db.TokenKeys.Where(x => x.CreatedAt < timeProvider.GetUtcNow().AddDays(-30).DateTime)
             .ExecuteDeleteAsync(cancellationToken);
     }
 
