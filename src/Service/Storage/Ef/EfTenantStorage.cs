@@ -304,12 +304,12 @@ public class EfTenantStorage : ITenantStorage
         return email;
     }
 
-    public async Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)
+    public async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan duration)
     {
         var from = _timeProvider.GetUtcNow().UtcDateTime - duration;
         return await db.DispatchedEmails
             .Where(x => x.CreatedAt >= from)
-            .CountAsync();
+            .ToArrayAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

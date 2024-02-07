@@ -12,6 +12,26 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
+    // Cache last 30 days of dispatched emails in memory, so we don't have to query the database every time
+    // TODO: this needs to be shared between instances of this service per tenant
+    private List<DispatchedEmail>? _dispatchedEmails;
+
+    private async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan? duration = null)
+    {
+        _dispatchedEmails ??=
+        [
+            ..await tenantStorage.GetDispatchedEmailsAsync(duration ?? TimeSpan.FromDays(30))
+        ];
+
+        return _dispatchedEmails
+            // Filter again because the in-memory cache may contain more than 30 days of emails
+            .Where(e => e.CreatedAt > timeProvider.GetUtcNow() - (duration ?? TimeSpan.FromDays(30)))
+            .ToArray();
+    }
+
+    private async Task<int> GetDispatchedEmailCountAsync(TimeSpan? duration = null) =>
+        (await GetDispatchedEmailsAsync(duration)).Count;
+
     private async Task EnforceLimitsAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
@@ -42,8 +62,7 @@ public class MagicLinkService(
             _ => maxMonthlyLimit
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >=
-            (int)Math.Max(1, monthlyLimit))
+        if (await GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= (int)Math.Max(1, monthlyLimit))
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic link emails. " +
@@ -65,8 +84,7 @@ public class MagicLinkService(
             _ => maxMinutelyLimit
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >=
-            (int)Math.Max(1, minutelyLimit))
+        if (await GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >= (int)Math.Max(1, minutelyLimit))
         {
             throw new ApiException(
                 "You have reached your rate limit for magic link emails. " +
@@ -108,6 +126,7 @@ public class MagicLinkService(
             MessageType = "magic-links"
         });
 
-        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
+        var email = await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
+        _dispatchedEmails?.Add(email);
     }
 }
