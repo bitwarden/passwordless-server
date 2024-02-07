@@ -42,7 +42,8 @@ public class MagicLinkService(
             _ => maxMonthlyLimit
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= (int)Math.Max(1, monthlyLimit))
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >=
+            (int)Math.Max(1, monthlyLimit))
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic link emails. " +
@@ -64,7 +65,8 @@ public class MagicLinkService(
             _ => maxMinutelyLimit
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >= (int)Math.Max(1, minutelyLimit))
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromMinutes(1)) >=
+            (int)Math.Max(1, minutelyLimit))
         {
             throw new ApiException(
                 "You have reached your rate limit for magic link emails. " +
