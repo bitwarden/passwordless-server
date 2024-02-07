@@ -1,5 +1,5 @@
 using System.Net;
-using System.Net.Http.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Passwordless.Service.MDS;
@@ -11,28 +11,52 @@ namespace Passwordless.Service.MDS;
 /// </summary>
 public sealed class OfflineCacheHandler : DelegatingHandler
 {
-    private const string Path = "/etc/bitwarden_passwordless/mds.jwt";
+    private const string Path = "mds.jwt";
 
+    private readonly IConfiguration _configuration;
     private readonly ILogger<OfflineCacheHandler> _logger;
 
-    public OfflineCacheHandler(ILogger<OfflineCacheHandler> logger)
+    public OfflineCacheHandler(
+        IConfiguration configuration,
+        ILogger<OfflineCacheHandler> logger)
     {
+        _configuration = configuration;
         _logger = logger;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[OfflineCacheHandler] Synchronizing using the MDS blob found at '{Path}'.", Path);
-        if (!File.Exists(Path))
-        {
-            _logger.LogError("[OfflineCacheHandler] No offline MDS blob found at '{Path}'.", Path);
-        }
-        var content = await File.ReadAllTextAsync(Path, cancellationToken);
+        HttpResponseMessage? response = null;
 
-        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        if (string.Equals(_configuration["fido2:mds:mode"], "Online", StringComparison.InvariantCultureIgnoreCase))
         {
-            Content = JsonContent.Create(content)
-        };
+            try
+            {
+                response = await base.SendAsync(request, cancellationToken);
+            }
+            catch (HttpRequestException)
+            {
+                _logger.LogInformation("[OfflineCacheHandler] Synchronizing using the MDS blob with FIDO2 failed.");
+            }
+        }
+
+        if (response == null || !response.IsSuccessStatusCode)
+        {
+            _logger.LogInformation("[OfflineCacheHandler] Synchronizing using the MDS blob found at '{Path}'.", Path);
+            if (!File.Exists(Path))
+            {
+                _logger.LogError("[OfflineCacheHandler] No offline MDS blob found at '{Path}'.", Path);
+            }
+
+            var jwt = await File.ReadAllTextAsync(Path, cancellationToken);
+            var content = new StringContent(jwt);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+
+            response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = content,
+            };
+        }
 
         return response;
     }

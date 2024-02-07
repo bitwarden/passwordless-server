@@ -15,12 +15,10 @@ public static class MetaDataServiceBootstrap
             client.BaseAddress = new Uri("https://mds3.fidoalliance.org/");
         });
 
-        if (configuration["SelfHosted"] == "true" && configuration["fido2:mds:mode"] != "Online")
-        {
-            builder.Services.AddTransient<OfflineCacheHandler>();
-            httpClientBuilder.AddHttpMessageHandler<OfflineCacheHandler>();
-        }
-        else
+        builder.Services.AddTransient<OfflineCacheHandler>();
+        httpClientBuilder.AddHttpMessageHandler<OfflineCacheHandler>();
+
+        if (string.Equals(configuration["fido2:mds:mode"], "Online", StringComparison.InvariantCultureIgnoreCase))
         {
             builder.Services.AddTransient<CacheHandler>();
             httpClientBuilder.AddHttpMessageHandler<CacheHandler>();
