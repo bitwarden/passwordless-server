@@ -51,7 +51,7 @@ public class MagicLinkService(
             );
         }
 
-        var maxMinutelyLimit = account.Features?.MaxMagicLinkEmailMinutelyLimit ?? 10;
+        var maxMinutelyLimit = account.Features?.MaxMagicLinkEmailMinutelyLimit ?? 5;
         var minutelyLimit = accountAge.TotalDays switch
         {
             // App created <24 hours ago
