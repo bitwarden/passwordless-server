@@ -12,31 +12,27 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
-    // Cache last 30 days of dispatched emails in memory, so we don't have to query the database every time
+    // Cache dispatched emails to avoid unnecessary database calls
     // TODO: this needs to be shared between instances of this service per tenant
     private List<DispatchedEmail>? _dispatchedEmails;
 
-    private async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan? duration = null)
+    private async Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)
     {
         _dispatchedEmails ??=
         [
-            ..await tenantStorage.GetDispatchedEmailsAsync(duration ?? TimeSpan.FromDays(30))
+            // We don't need more than 30 days worth of dispatched emails because
+            // that's the window of our longest rate limit.
+            ..await tenantStorage.GetDispatchedEmailsAsync(TimeSpan.FromDays(30))
         ];
 
-        return _dispatchedEmails
-            // Filter again because the in-memory cache may contain more than 30 days of emails
-            .Where(e => e.CreatedAt > timeProvider.GetUtcNow() - (duration ?? TimeSpan.FromDays(30)))
-            .ToArray();
+        return _dispatchedEmails.Count(e => e.CreatedAt > timeProvider.GetUtcNow() - duration);
     }
-
-    private async Task<int> GetDispatchedEmailCountAsync(TimeSpan? duration = null) =>
-        (await GetDispatchedEmailsAsync(duration)).Count;
 
     private async Task EnforceLimitsAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
         var account = await tenantStorage.GetAccountInformation();
-        var accountAge = (now - account.CreatedAt).Duration();
+        var accountAge = now - account.CreatedAt;
 
         // Applications created less than 24 hours ago can only send magic links to the admin email address
         if (accountAge < TimeSpan.FromHours(24) &&
