@@ -5,9 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace Passwordless.Service.MDS;
 
 /// <summary>
-/// The OfflineCacheHandler will attempt to read the MDS blob from the local file system. Use this if the intent is
-/// to manually synchronize with the latest MDS blob from the FIDO Alliance. This is useful for self-hosted
-/// deployments where there is no connectivity to the FIDO Alliance or internet.
+/// First attempt to retrieve the MDS blob from FIDO2, when it fails, use the local file system.
 /// </summary>
 public sealed class CacheHandler : DelegatingHandler
 {
