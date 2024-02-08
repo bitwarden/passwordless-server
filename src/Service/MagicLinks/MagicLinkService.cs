@@ -42,7 +42,7 @@ public class MagicLinkService(
             _ => 1
         };
 
-        var quota = (int) Math.Max(
+        var quota = (int)Math.Max(
             // Make sure the quota is at least 1
             1,
             coefficient * (account.Features?.MagicLinkEmailMonthlyQuota ?? 500)
