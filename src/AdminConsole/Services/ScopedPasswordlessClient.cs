@@ -42,7 +42,6 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
 {
     private readonly HttpClient _client;
-    private readonly ICurrentContext _currentContext;
 
     public ScopedPasswordlessClient(
         HttpClient httpClient,
@@ -55,7 +54,6 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         })
     {
         _client = httpClient;
-        _currentContext = context;
 
         // can be dropped when call below is moved to the SDK.
         _client.DefaultRequestHeaders.Remove("ApiSecret");
