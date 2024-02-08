@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
@@ -84,6 +85,11 @@ services.AddCors(options
 services.AddHttpContextAccessor();
 services.AddScoped<ITenantProvider, TenantProvider>();
 
+services.AddRateLimiter(options =>
+{
+    options.AddMagicRateLimiterPolicy();
+});
+
 services.ConfigureHttpJsonOptions(options =>
 {
     // Already has the built in web defaults
@@ -143,6 +149,8 @@ else
         () =>
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
+
+app.UseRateLimiter();
 
 if (isSelfHosted)
 {
