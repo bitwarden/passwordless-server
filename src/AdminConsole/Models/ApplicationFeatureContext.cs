@@ -8,10 +8,16 @@ public record ApplicationFeatureContext(
     DateTime? DeveloperLoggingEndsAt,
     long? MaxUsers,
     bool AllowAttestation,
-    bool IsGenerateSignInTokenEndpointEnabled)
+    bool IsGenerateSignInTokenEndpointEnabled,
+    bool IsMagicLinksEnabled)
 {
-    public static ApplicationFeatureContext FromDto(AppFeatureResponse dto)
-    {
-        return new ApplicationFeatureContext(dto.EventLoggingIsEnabled, dto.EventLoggingRetentionPeriod, dto.DeveloperLoggingEndsAt, dto.MaxUsers, dto.AllowAttestation, dto.IsGenerateSignInTokenEndpointEnabled);
-    }
+    public static ApplicationFeatureContext FromDto(AppFeatureResponse dto) =>
+        new(
+            dto.EventLoggingIsEnabled,
+            dto.EventLoggingRetentionPeriod,
+            dto.DeveloperLoggingEndsAt,
+            dto.MaxUsers,
+            dto.AllowAttestation,
+            dto.IsGenerateSignInTokenEndpointEnabled,
+            dto.IsMagicLinksEnabled);
 }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Common.Models.Reporting;
 
@@ -33,6 +34,8 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     /// <param name="request"></param>
     /// <returns></returns>
     Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request);
+
+    Task SetFeaturesAsync(SetFeaturesRequest request);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -103,6 +106,12 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     public async Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
     {
         using var response = await _client.PostAsJsonAsync("/authenticators/remove", request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task SetFeaturesAsync(SetFeaturesRequest request)
+    {
+        using var response = await _client.PostAsJsonAsync($"/apps/features", request);
         response.EnsureSuccessStatusCode();
     }
 }

@@ -6,4 +6,5 @@ public record AppFeatureResponse(
     DateTime? DeveloperLoggingEndsAt,
     long? MaxUsers,
     bool AllowAttestation,
-    bool IsGenerateSignInTokenEndpointEnabled);
+    bool IsGenerateSignInTokenEndpointEnabled,
+    bool IsMagicLinksEnabled);

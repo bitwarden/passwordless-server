@@ -1,28 +1,17 @@
 using System.Net.Http.Json;
-using Bogus;
 using Fido2NetLib;
 using OpenQA.Selenium;
 using Passwordless.Api.Endpoints;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.User;
 
 public static class UserHelpers
 {
-    public static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
-        .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
-        .RuleFor(x => x.DisplayName, x => x.Person.FullName)
-        .RuleFor(x => x.Username, x => x.Person.Email)
-        .RuleFor(x => x.Attestation, "None")
-        .RuleFor(x => x.Discoverable, true)
-        .RuleFor(x => x.UserVerification, "Preferred")
-        .RuleFor(x => x.Aliases, x => new HashSet<string> { x.Person.FirstName })
-        .RuleFor(x => x.AliasHashing, false)
-        .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
-        .RuleFor(x => x.TokenId, Guid.Empty);
 
     public static Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver) =>
-        httpClient.RegisterNewUser(driver, TokenGenerator.Generate());
+        httpClient.RegisterNewUser(driver, RequestHelpers.GetRegisterTokenGeneratorRules().Generate());
 
     public static async Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver, RegisterToken registerToken)
     {

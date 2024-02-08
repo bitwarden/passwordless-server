@@ -7,6 +7,7 @@ public interface IFeaturesContext
     public DateTime? DeveloperLoggingEndsAt { get; init; }
     public bool IsInFeaturesContext { get; }
     public bool IsGenerateSignInTokenEndpointEnabled { get; init; }
+    public bool IsMagicLinksEnabled { get; init; }
 
     /// <summary>
     /// Maximum number of individual users allowed to use the application

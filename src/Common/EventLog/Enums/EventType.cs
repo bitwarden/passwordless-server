@@ -39,5 +39,7 @@ public enum EventType
     AdminApiKeyUnlocked = 7011,
     AdminApiKeysEnumerated = 7012,
     AdminGenerateSignInTokenEndpointEnabled = 7013,
-    AdminGenerateSignInTokenEndpointDisabled = 7014
+    AdminGenerateSignInTokenEndpointDisabled = 7014,
+    AdminMagicLinksEnabled = 7015,
+    AdminMagicLinksDisabled = 7016,
 }

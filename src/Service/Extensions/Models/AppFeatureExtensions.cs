@@ -15,6 +15,7 @@ public static class AppFeatureExtensions
             entity.DeveloperLoggingEndsAt,
             entity.MaxUsers,
             entity.AllowAttestation,
-            entity.IsGenerateSignInTokenEndpointEnabled);
+            entity.IsGenerateSignInTokenEndpointEnabled,
+            entity.IsMagicLinksEnabled);
     }
 }
