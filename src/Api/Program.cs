@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +89,8 @@ services.AddScoped<ITenantProvider, TenantProvider>();
 
 services.AddRateLimiter(options =>
 {
+    // Reject with 429 instead of the default 503
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddMagicRateLimiterPolicy();
 });
 
