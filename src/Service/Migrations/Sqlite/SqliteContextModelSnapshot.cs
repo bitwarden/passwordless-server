@@ -168,10 +168,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
-                    b.Property<int>("MagicLinkEmailMaxMinutelyLimit")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MagicLinkEmailMaxMonthlyLimit")
+                    b.Property<int>("MagicLinkEmailMonthlyQuota")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("MaxUsers")

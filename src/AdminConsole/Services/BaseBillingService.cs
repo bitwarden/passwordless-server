@@ -53,8 +53,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         {
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod,
-            MagicLinkEmailMaxMonthlyLimit = plan.Features.MagicLinkEmailMaxMonthlyLimit,
-            MagicLinkEmailMaxMinutelyLimit = plan.Features.MagicLinkEmailMaxMinutelyLimit,
+            MagicLinkEmailMonthlyQuota = plan.Features.MagicLinkEmailMonthlyQuota,
             MaxUsers = plan.Features.MaxUsers,
             AllowAttestation = plan.Features.AllowAttestation
         };
@@ -102,8 +101,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
-            MagicLinkEmailMaxMonthlyLimit = features.MagicLinkEmailMaxMonthlyLimit,
-            MagicLinkEmailMaxMinutelyLimit = features.MagicLinkEmailMaxMinutelyLimit,
+            MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };

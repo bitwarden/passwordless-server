@@ -12,7 +12,7 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
-    private async Task EnforceLimitsAsync(MagicLinkDTO dto)
+    private async Task EnforceQuotaAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
         var account = await tenantStorage.GetAccountInformation();
@@ -29,47 +29,29 @@ public class MagicLinkService(
             );
         }
 
-        var maxMonthlyLimit = account.Features?.MagicLinkEmailMaxMonthlyLimit ?? 500;
-        var monthlyLimit = accountAge.TotalDays switch
+        // Reduce the quota for newly created applications
+        var coefficient = accountAge.TotalDays switch
         {
             // App created <24 hours ago
-            < 1 => 0.2 * maxMonthlyLimit,
+            < 1 => 0.2,
             // App created <3 days ago
-            < 3 => 0.5 * maxMonthlyLimit,
+            < 3 => 0.5,
             // App created <30 days ago
-            < 30 => 0.75 * maxMonthlyLimit,
+            < 30 => 0.75,
             // App created >30 days ago
-            _ => maxMonthlyLimit
+            _ => 1
         };
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >=
-            (int)Math.Max(1, monthlyLimit))
+        var quota = (int) Math.Max(
+            // Make sure the quota is at least 1
+            1,
+            coefficient * (account.Features?.MagicLinkEmailMonthlyQuota ?? 500)
+        );
+
+        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= quota)
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic link emails. " +
-                "Please try again later.",
-                429
-            );
-        }
-
-        var maxMinutelyLimit = account.Features?.MagicLinkEmailMaxMinutelyLimit ?? 5;
-        var minutelyLimit = accountAge.TotalDays switch
-        {
-            // App created <24 hours ago
-            < 1 => 0.2 * maxMinutelyLimit,
-            // App created <3 days ago
-            < 3 => 0.5 * maxMinutelyLimit,
-            // App created <30 days ago
-            < 30 => 0.75 * maxMinutelyLimit,
-            // App created >30 days ago
-            _ => maxMinutelyLimit
-        };
-
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >=
-            (int)Math.Max(1, minutelyLimit))
-        {
-            throw new ApiException(
-                "You have reached your rate limit for magic link emails. " +
                 "Please try again later.",
                 429
             );
@@ -78,7 +60,7 @@ public class MagicLinkService(
 
     public async Task SendMagicLinkAsync(MagicLinkDTO dto)
     {
-        await EnforceLimitsAsync(dto);
+        await EnforceQuotaAsync(dto);
 
         var token = await fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
         var link = new Uri(dto.LinkTemplate.Replace("<token>", token));

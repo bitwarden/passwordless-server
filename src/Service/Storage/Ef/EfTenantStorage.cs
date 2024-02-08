@@ -168,8 +168,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
         existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
-        existingEntity.MagicLinkEmailMaxMonthlyLimit = features.MagicLinkEmailMaxMonthlyLimit;
-        existingEntity.MagicLinkEmailMaxMinutelyLimit = features.MagicLinkEmailMaxMinutelyLimit;
+        existingEntity.MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota;
         existingEntity.MaxUsers = features.MaxUsers;
         existingEntity.AllowAttestation = features.AllowAttestation;
         await db.SaveChangesAsync();

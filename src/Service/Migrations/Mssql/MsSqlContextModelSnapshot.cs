@@ -173,10 +173,7 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<int>("MagicLinkEmailMaxMinutelyLimit")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MagicLinkEmailMaxMonthlyLimit")
+                    b.Property<int>("MagicLinkEmailMonthlyQuota")
                         .HasColumnType("int");
 
                     b.Property<long?>("MaxUsers")
