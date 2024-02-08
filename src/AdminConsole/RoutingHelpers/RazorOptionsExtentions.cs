@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Middleware;
 
 namespace Passwordless.AdminConsole.RoutingHelpers;
 
 public static class RazorOptionsExtentions
 {
-
     public static RazorPagesOptions AddTenantRouting(this RazorPagesOptions options)
     {
         options.Conventions.AddFolderRouteModelConvention("/App/", model =>
@@ -14,7 +14,7 @@ public static class RazorOptionsExtentions
             for (var i = 0; i < selectorCount; i++)
             {
                 var selector = model.Selectors[i];
-                var template = selector.AttributeRouteModel.Template;
+                var template = selector.AttributeRouteModel!.Template!;
                 if (template.StartsWith("App/"))
                 {
                     template = template.Substring(7);
@@ -25,7 +25,7 @@ public static class RazorOptionsExtentions
                     AttributeRouteModel = new AttributeRouteModel
                     {
                         Order = 0,
-                        Template = "app/{app}/" + template
+                        Template = $"app/{{{RouteParameters.AppId}}}/{template}"
                     }
                 });
 
