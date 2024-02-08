@@ -83,7 +83,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         }
 
         var q = queryBuilder.ToQueryString();
-        var response = await _client.GetAsync($"/apps/{_currentContext.AppId}/reporting/credentials/periodic{q}");
+        var response = await _client.GetAsync($"/reporting/credentials/periodic{q}");
         response.EnsureSuccessStatusCode();
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
@@ -103,7 +103,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         }
 
         var q = queryBuilder.ToQueryString();
-        var response = await _client.GetAsync($"/apps/{_currentContext.AppId}/reporting/active-users/periodic{q}");
+        var response = await _client.GetAsync($"/reporting/active-users/periodic{q}");
         response.EnsureSuccessStatusCode();
 
         return (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicActiveUserReportResponse>>())!;

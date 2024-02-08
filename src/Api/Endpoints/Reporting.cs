@@ -9,7 +9,7 @@ public static class ReportingEndpoints
 {
     public static void MapReportingEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/apps/{appId}/reporting")
+        var group = app.MapGroup("/reporting")
             .RequireSecretKey()
             .RequireCors("default");
 
