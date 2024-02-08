@@ -1,3 +1,5 @@
+@inherits BaseCardStats
+
 @if (Items.Count > 0)
 {
     <dl class="@Class">
@@ -12,22 +14,8 @@
 }
 
 @code {
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IDictionary<string, object>? AdditionalAttributes { get; set; } = new Dictionary<string, object>();
-
-    public string Class { get; private set; } = "mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3";
-    
     [Parameter]
     public required ICollection<Item> Items { get; set; }
-
-    protected override void OnInitialized()
-    {
-        if (AdditionalAttributes == null) return;
-        if (AdditionalAttributes.TryGetValue("class", out var classAttribute))
-        {
-            Class = $"{Class} {classAttribute}";
-        }
-    }
 
     public sealed record Item(string Label, double Value, ValueTypes Type)
     {
