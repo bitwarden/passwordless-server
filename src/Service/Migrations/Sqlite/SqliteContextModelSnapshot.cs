@@ -168,6 +168,12 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
+                    b.Property<int>("MagicLinkEmailMaxMinutelyLimit")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MagicLinkEmailMaxMonthlyLimit")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long?>("MaxUsers")
                         .HasColumnType("INTEGER");
 
@@ -193,6 +199,34 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.HasKey("Tenant", "AaGuid");
 
                     b.ToTable("Authenticators");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.DispatchedEmail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Tenant");
+
+                    b.ToTable("DispatchedEmails");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.EFStoredCredential", b =>
@@ -340,6 +374,17 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Navigation("AppFeature");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.DispatchedEmail", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("DispatchedEmails")
+                        .HasForeignKey("Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.PeriodicCredentialReport", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
@@ -353,6 +398,8 @@ namespace Passwordless.Service.Migrations.Sqlite
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
+                    b.Navigation("DispatchedEmails");
+
                     b.Navigation("Events");
 
                     b.Navigation("Features");
