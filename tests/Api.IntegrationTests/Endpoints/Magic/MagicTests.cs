@@ -114,6 +114,137 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         magicLinkUrlError.Value.Should().Contain($"You have provided a {nameof(request.UrlTemplate)} that cannot be converted to a URL.");
     }
 
+    [Fact]
+    public async Task I_cannot_send_a_magic_link_email_to_a_non_admin_address_if_the_application_is_too_new()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse = await _client.CreateApplicationAsync(applicationName, "definitely-not@what-faker-will.generate");
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        // Act
+        using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task I_can_send_a_magic_link_email_to_an_admin_address_if_the_application_even_if_the_application_is_too_new()
+    {
+        // Arrange
+        const string emailAddress = "admin@email.com";
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse = await _client.CreateApplicationAsync(applicationName, emailAddress);
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
+        var request = _requestFaker
+            .RuleFor(x => x.EmailAddress, emailAddress)
+            .Generate();
+
+        // Act
+        using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task I_cannot_send_too_many_magic_link_emails_in_a_minute()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
+
+        // Act
+        var responseStatusCodes = await Task.WhenAll(
+            Enumerable.Range(0, 100).Select(async _ =>
+                {
+                    using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+                    return response.StatusCode;
+                }
+            )
+        );
+
+        // Assert
+        responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
+        responseStatusCodes.Should().Contain(HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
+    public async Task I_cannot_send_too_many_magic_link_emails_in_a_month()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
+
+        // Act
+        var responseStatusCodes = await Task.WhenAll(
+            Enumerable.Range(0, 5000).Select(async _ =>
+                {
+                    using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+                    apiFactory.TimeProvider.Advance(TimeSpan.FromMinutes(1));
+                    return response.StatusCode;
+                }
+            )
+        );
+
+        // Assert
+        responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
+        responseStatusCodes.Should().Contain(HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
+    public async Task I_can_send_a_magic_link_email_after_enough_time_passed_since_the_quota_was_exceeded()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
+
+        await Task.WhenAll(
+            Enumerable.Range(0, 5000).Select(async _ =>
+                {
+                    using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+                    apiFactory.TimeProvider.Advance(TimeSpan.FromMinutes(1));
+                    return response.StatusCode;
+                }
+            )
+        );
+
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(30));
+
+        // Act
+        using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
     public void Dispose()
     {
         _client.Dispose();
