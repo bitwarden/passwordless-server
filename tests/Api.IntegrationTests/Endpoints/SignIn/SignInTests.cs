@@ -158,8 +158,6 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     {
         // Arrange
         var applicationName = $"test{Guid.NewGuid():N}";
-        var serverTime = new DateTimeOffset(new DateTime(2023, 1, 1));
-        _apiFactory.TimeProvider.SetUtcNow(serverTime);
         using var client = _apiFactory.CreateClient().AddManagementKey();
         using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
@@ -167,7 +165,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         client.AddSecretKey(accountKeysCreation.ApiSecret1);
         using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
         await client.RegisterNewUser(driver);
-        _apiFactory.TimeProvider.SetUtcNow(serverTime.AddDays(31));
+        _apiFactory.TimeProvider.Advance(TimeSpan.FromDays(31));
 
         // Act
         await client.SignInUser(driver);
