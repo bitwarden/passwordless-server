@@ -173,7 +173,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     }
 
     [Fact]
-    public async Task I_cannot_send_too_many_magic_link_emails_in_a_minute()
+    public async Task I_cannot_send_too_many_magic_link_emails_in_a_short_time()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -190,14 +190,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        var responseStatusCodes = await Task.WhenAll(
-            Enumerable.Range(0, 100).Select(async _ =>
-                {
-                    using var response = await client.PostAsJsonAsync("magic-link/send", request);
-                    return response.StatusCode;
-                }
-            )
-        );
+        var responseStatusCodes = new List<HttpStatusCode>();
+        for (var i = 0; i < 100; i++)
+        {
+            using var response = await client.PostAsJsonAsync("magic-link/send", request);
+            responseStatusCodes.Add(response.StatusCode);
+        }
 
         // Assert
         responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
@@ -221,14 +219,10 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Skip all limitations for new applications
         api.Time.Advance(TimeSpan.FromDays(365));
 
-        await Task.WhenAll(
-            Enumerable.Range(0, 100).Select(async _ =>
-                {
-                    using var response = await client.PostAsJsonAsync("magic-link/send", request);
-                    return response.StatusCode;
-                }
-            )
-        );
+        for (var i = 0; i < 100; i++)
+        {
+            using var _ = await client.PostAsJsonAsync("magic-link/send", request);
+        }
 
         api.Time.Advance(TimeSpan.FromMinutes(30));
 
@@ -257,15 +251,13 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        var responseStatusCodes = await Task.WhenAll(
-            Enumerable.Range(0, 5000).Select(async _ =>
-                {
-                    using var response = await client.PostAsJsonAsync("magic-link/send", request);
-                    api.Time.Advance(TimeSpan.FromMinutes(1));
-                    return response.StatusCode;
-                }
-            )
-        );
+        var responseStatusCodes = new List<HttpStatusCode>();
+        for (var i = 0; i < 5000; i++)
+        {
+            using var response = await client.PostAsJsonAsync("magic-link/send", request);
+            api.Time.Advance(TimeSpan.FromMinutes(1));
+            responseStatusCodes.Add(response.StatusCode);
+        }
 
         // Assert
         responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
@@ -273,7 +265,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     }
 
     [Fact]
-    public async Task I_can_send_a_magic_link_email_after_enough_time_passed_since_the_quota_was_exceeded()
+    public async Task I_can_send_a_magic_link_email_after_enough_time_passed_since_the_monthly_quota_was_exceeded()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -289,15 +281,11 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Skip all limitations for new applications
         api.Time.Advance(TimeSpan.FromDays(365));
 
-        await Task.WhenAll(
-            Enumerable.Range(0, 5000).Select(async _ =>
-                {
-                    using var response = await client.PostAsJsonAsync("magic-link/send", request);
-                    api.Time.Advance(TimeSpan.FromMinutes(1));
-                    return response.StatusCode;
-                }
-            )
-        );
+        for (var i = 0; i < 5000; i++)
+        {
+            using var _ = await client.PostAsJsonAsync("magic-link/send", request);
+            api.Time.Advance(TimeSpan.FromMinutes(1));
+        }
 
         api.Time.Advance(TimeSpan.FromDays(30));
 

@@ -17,7 +17,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
         using var client = api.CreateClient();
-        
+
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
@@ -36,7 +36,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
         using var client = api.CreateClient();
-        
+
         var applicationName = CreateAppHelpers.GetApplicationName();
         using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
