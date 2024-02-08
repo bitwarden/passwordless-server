@@ -183,6 +183,38 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
     }
 
     [Fact]
+    public async Task I_can_send_a_magic_link_email_after_enough_time_passed_since_the_rate_limit_was_exceeded()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse = await _client.CreateApplicationAsync(applicationName);
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(appCreated!.ApiSecret1);
+        await _client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
+
+        await Task.WhenAll(
+            Enumerable.Range(0, 100).Select(async _ =>
+                {
+                    using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+                    return response.StatusCode;
+                }
+            )
+        );
+
+        apiFactory.TimeProvider.Advance(TimeSpan.FromMinutes(30));
+
+        // Act
+        using var response = await _client.PostAsJsonAsync("magic-link/send", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
     public async Task I_cannot_send_too_many_magic_link_emails_in_a_month()
     {
         // Arrange
