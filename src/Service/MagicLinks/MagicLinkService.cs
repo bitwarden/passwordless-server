@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks.Models;
@@ -8,6 +9,7 @@ namespace Passwordless.Service.MagicLinks;
 
 public class MagicLinkService(
     TimeProvider timeProvider,
+    IMemoryCache cache,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
     IMailProvider mailProvider)
@@ -48,7 +50,16 @@ public class MagicLinkService(
             coefficient * (account.Features?.MagicLinkEmailMonthlyQuota ?? 500)
         );
 
-        if (await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30)) >= quota)
+        var emailsDispatchedIn30Days = await cache.GetOrCreateAsync(
+            $"magic-link-emails-sent-30days-{tenantStorage.Tenant}",
+            async cacheEntry =>
+            {
+                cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(1));
+                return await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
+            }
+        );
+
+        if (emailsDispatchedIn30Days >= quota)
         {
             throw new ApiException(
                 "You have reached your monthly quota for magic link emails. " +
