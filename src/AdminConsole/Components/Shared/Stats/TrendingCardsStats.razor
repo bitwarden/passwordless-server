@@ -30,6 +30,15 @@
         }
     }
 
+    /// <summary>
+    /// The content of a single card
+    /// </summary>
+    /// <param name="Label">The primary label</param>
+    /// <param name="Value">The primary value</param>
+    /// <param name="Type">The primary type, affects formatting of the displayed value.</param>
+    /// <param name="SubLabel">The sub label, should be of format "prefix {0} suffix" for the 'SubValue' to display correctly.</param>
+    /// <param name="SubValue">The sub value</param>
+    /// <param name="SubType">The sub type, affects formatting of the displayed value.</param>
     public sealed record Item(
         string Label,
         double Value,
