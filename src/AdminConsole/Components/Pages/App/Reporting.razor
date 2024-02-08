@@ -1,7 +1,6 @@
 @page "/app/{app}/Reporting"
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
-@using Passwordless.AdminConsole.Components.Shared.Stats
 
 @inherits BaseApplicationPage
 
@@ -49,7 +48,6 @@
             {
                 <TotalCredentialsCountChart Data="PeriodicCredentialReports"/>
                 <TotalUsersCountChart Data="PeriodicCredentialReports"/>
-                <ActiveUsersCountChart Data="PeriodicActiveUserReports"/>
             }
         </div>
     </Panel>
