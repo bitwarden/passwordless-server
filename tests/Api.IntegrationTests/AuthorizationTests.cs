@@ -8,12 +8,13 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests;
 
-public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
+public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
     // Manual opt out for endpoints that allow anonymous access, all other endpoints are considered to require
     // some kind of authentication
-    private static readonly string[] _anonEndpoints = new[]
-    {
+    private static readonly string[] AnonEndpoints =
+    [
         "/",
         "/apps/available",
         "/apps/delete/cancel/{appId}",
@@ -22,27 +23,21 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
         "health/throw/api",
         "health/throw/exception",
         "health/version"
-    };
+    ];
 
-
-    private readonly PasswordlessApiFactory _apiFactory;
-    private readonly HttpClient _client;
-
-    public AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
-    {
-        _apiFactory = apiFactory;
-        _apiFactory.TestOutput = testOutput;
-        _client = apiFactory.CreateClient().AddAcceptApplicationJson();
-    }
 
     [Fact]
     public async Task ValidateThatEndpointsHaveProtection()
     {
-        var endpointDataSource = _apiFactory.Services.GetRequiredService<EndpointDataSource>();
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddAcceptApplicationJson();
 
+        // Act
+        var endpointDataSource = api.Services.GetRequiredService<EndpointDataSource>();
         foreach (var endpoint in endpointDataSource.Endpoints.OfType<RouteEndpoint>())
         {
-            if (_anonEndpoints.Contains(endpoint.RoutePattern.RawText))
+            if (AnonEndpoints.Contains(endpoint.RoutePattern.RawText))
             {
                 continue;
             }
@@ -53,10 +48,12 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
                 continue;
             }
 
+            // Assert
             foreach (var httpMethod in httpMethodMetadata.HttpMethods)
             {
-                var request = new HttpRequestMessage(new HttpMethod(httpMethod), CreateRoute(endpoint.RoutePattern));
-                var response = await _client.SendAsync(request);
+                using var request = new HttpRequestMessage(new HttpMethod(httpMethod), CreateRoute(endpoint.RoutePattern));
+                using var response = await client.SendAsync(request);
+
                 Assert.True(HttpStatusCode.Unauthorized == response.StatusCode,
                     $"Expected route: '{endpoint.RoutePattern.RawText}' to response with 401 Unauthorized but it responsed with {response.StatusCode}");
             }
@@ -66,11 +63,16 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
     [Fact]
     public async Task ValidateThatMissingApiSecretThrows()
     {
-        var httpResponse = await _client
-            .GetAsync("/credentials/list?userId=1");
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddAcceptApplicationJson();
 
-        var body = await httpResponse.Content.ReadAsStringAsync();
-        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+        // Act
+        using var response = await client.GetAsync("/credentials/list?userId=1");
+
+        // Assert
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
 
         AssertHelper.AssertEqualJson("""
         {
@@ -85,12 +87,18 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
     [Fact]
     public async Task ValidateThatInvalidApiSecretThrows()
     {
-        var httpResponse = await _client
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddAcceptApplicationJson();
+
+        // Act
+        using var response = await client
             .AddSecretKey(HttpClientTestExtensions.ApiSecret + "invalid")
             .GetAsync("/credentials/list?userId=1");
 
-        var body = await httpResponse.Content.ReadAsStringAsync();
-        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+        // Assert
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
 
         AssertHelper.AssertEqualJson("""
         {
@@ -112,7 +120,11 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
     [InlineData("public-header-instead", "A 'ApiKey' header was supplied when a 'ApiSecret' header should have been supplied.")]
     public async Task ApiSecretGivesHelpfulAdvice(string input, string details)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddAcceptApplicationJson();
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
 
         if (input == "public-header-instead")
         {
@@ -123,9 +135,12 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
             request.Headers.Add("ApiSecret", input);
         }
 
-        var httpResponse = await _client.SendAsync(request);
-        var body = await httpResponse.Content.ReadAsStringAsync();
-        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
 
         AssertHelper.AssertEqualJson($$"""
         {
@@ -147,7 +162,11 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
     [InlineData("secret-header-instead", "A 'ApiSecret' header was supplied when a 'ApiKey' header should have been supplied.")]
     public async Task ApiPublicGivesHelpfulAdvice(string input, string details)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddAcceptApplicationJson();
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");
 
         if (input == "secret-header-instead")
         {
@@ -157,9 +176,13 @@ public class AuthorizationTests : IClassFixture<PasswordlessApiFactory>
         {
             request.Headers.Add("ApiKey", input);
         }
-        var httpResponse = await _client.SendAsync(request);
-        var body = await httpResponse.Content.ReadAsStringAsync();
-        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
+
+        // Act
+        using var response = await client.SendAsync(request);
+
+        // Assert
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
 
         AssertHelper.AssertEqualJson($$"""
         {

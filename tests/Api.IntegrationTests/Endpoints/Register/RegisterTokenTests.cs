@@ -7,22 +7,23 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
-public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
-    private readonly HttpClient _client;
-
-    public RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
-    {
-        apiFactory.TestOutput = testOutput;
-        _client = apiFactory.CreateClient().AddSecretKey();
-    }
 
     [Fact]
     public async Task UserIdAndDisplayNameIsTheOnlyRequiredProperties()
     {
+        // Arrange
         var payload = new { UserId = "1", Username = "test" };
 
-        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddSecretKey();
+
+        // Act
+        using var response = await client.PostAsJsonAsync("register/token", payload);
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -32,17 +33,18 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     [InlineData("")]
     public async Task InvalidUserIdReturnsError(string userid)
     {
-        object payload;
-        if (userid == "-1")
-        {
-            payload = new { };
-        }
-        else
-        {
-            payload = new { UserId = userid };
-        }
+        // Arrange
+        object payload = userid == "-1"
+            ? new { }
+            : new { UserId = userid };
 
-        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddSecretKey();
+
+        // Act
+        using var response = await client.PostAsJsonAsync("register/token", payload);
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -67,17 +69,18 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     [InlineData("")]
     public async Task InvalidUsernameReturnsError(string input)
     {
-        object payload;
-        if (input == "-1")
-        {
-            payload = new { UserID = "1" };
-        }
-        else
-        {
-            payload = new { UserId = "1", Username = input };
-        }
+        // Arrange
+        object payload = input == "-1"
+            ? new { UserID = "1" }
+            : new { UserId = "1", Username = input };
 
-        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddSecretKey();
+
+        // Act
+        using var response = await client.PostAsJsonAsync("register/token", payload);
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var body = await response.Content.ReadAsStringAsync();
@@ -101,7 +104,14 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     {
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        using var response = await _client.PostAsJsonAsync("register/token", payload);
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddSecretKey();
+
+        // Act
+        using var response = await client.PostAsJsonAsync("register/token", payload);
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var body = await response.Content.ReadAsStringAsync();
@@ -124,14 +134,16 @@ public class RegisterTokenTests : IClassFixture<PasswordlessApiFactory>, IDispos
     [InlineData("None")]
     public async Task NoneAssertionIsAccepted(string attestation)
     {
+        // Arrange
         var payload = new { UserId = "1", Username = "test", attestation };
 
-        using var response = await _client.PostAsJsonAsync("register/token", payload);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddSecretKey();
 
-    public void Dispose()
-    {
-        _client.Dispose();
+        // Act
+        using var response = await client.PostAsJsonAsync("register/token", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

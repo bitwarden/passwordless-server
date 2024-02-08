@@ -8,27 +8,23 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Middleware;
 
-public class RoutingIntegrationTests : IClassFixture<PasswordlessApiFactory>
+public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
-    private readonly HttpClient _client;
-
-    public RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
-    {
-        apiFactory.TestOutput = testOutput;
-        _client = apiFactory.CreateClient();
-    }
-
     [Fact]
     public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_secret_with_a_non_existing_endpoint()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
+        
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey("e=mc2trooper");
+        client.AddSecretKey("e=mc2trooper");
 
         // Act
-        using var actual = await _client.GetAsync("/non-existent-endpoint");
+        using var actual = await client.GetAsync("/non-existent-endpoint");
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, actual.StatusCode);
@@ -38,13 +34,16 @@ public class RoutingIntegrationTests : IClassFixture<PasswordlessApiFactory>
     public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_key_with_a_non_existing_endpoint()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
+        
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddPublicKey("e=mc2trooper");
+        client.AddPublicKey("e=mc2trooper");
 
         // Act
-        using var actual = await _client.GetAsync("/non-existent-endpoint");
+        using var actual = await client.GetAsync("/non-existent-endpoint");
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, actual.StatusCode);
