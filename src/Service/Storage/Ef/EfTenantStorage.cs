@@ -274,6 +274,21 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             .ExecuteDeleteAsync();
     }
 
+    public async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan window)
+    {
+        var from = timeProvider.GetUtcNow().UtcDateTime - window;
+        return await db.DispatchedEmails
+            .Where(x => x.CreatedAt >= from)
+            .ToArrayAsync();
+    }
+
+    public async Task<int> GetDispatchedEmailCountAsync(TimeSpan window)
+    {
+        var from = timeProvider.GetUtcNow().UtcDateTime - window;
+        return await db.DispatchedEmails
+            .CountAsync(x => x.CreatedAt >= from);
+    }
+
     public async Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress)
     {
         var email = new DispatchedEmail
@@ -291,19 +306,14 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         return email;
     }
 
-    public async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan duration)
+    public async Task DeleteOldDispatchedEmailsAsync(TimeSpan age)
     {
-        var from = timeProvider.GetUtcNow().UtcDateTime - duration;
-        return await db.DispatchedEmails
-            .Where(x => x.CreatedAt >= from)
-            .ToArrayAsync();
-    }
+        var until = timeProvider.GetUtcNow().UtcDateTime - age;
+        await db.DispatchedEmails
+            .Where(x => x.CreatedAt < until)
+            .ExecuteDeleteAsync();
 
-    public async Task<int> GetDispatchedEmailCountAsync(TimeSpan duration)
-    {
-        var from = timeProvider.GetUtcNow().UtcDateTime - duration;
-        return await db.DispatchedEmails
-            .CountAsync(x => x.CreatedAt >= from);
+        await db.SaveChangesAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

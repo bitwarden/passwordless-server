@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Email;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
@@ -111,6 +112,7 @@ services.AddScoped<IRequestContext, RequestContext>();
 services.AddSingleton<IMetaDataService, MetaDataService>();
 
 services.AddHostedService<PeriodicCredentialReportsBackgroundService>();
+services.AddHostedService<DispatchedEmailCleanupService>();
 
 builder.AddMail();
 

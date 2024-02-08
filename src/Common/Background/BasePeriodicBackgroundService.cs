@@ -5,7 +5,7 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
     /// <summary>
     /// The time of day when the service should run.
     /// </summary>
-    private readonly TimeSpan _executionTime;
+    private readonly TimeOnly _executionTime;
 
     /// <summary>
     /// The period of time between executions.
@@ -19,13 +19,13 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
     private readonly TimeProvider _timeProvider;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="executionTime">The time of day when the service should run.</param>
     /// <param name="period">The period of time between executions.</param>
     /// <param name="timeProvider"></param>
     protected BasePeriodicBackgroundService(
-        TimeSpan executionTime,
+        TimeOnly executionTime,
         TimeSpan period,
         TimeProvider timeProvider)
     {
