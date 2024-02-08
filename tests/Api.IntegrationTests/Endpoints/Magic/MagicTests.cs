@@ -27,6 +27,9 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         await _client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
+
         // Act
         using var response = await _client.PostAsJsonAsync("magic-link/send", request);
 
@@ -44,6 +47,9 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         _client.AddSecretKey(appCreated!.ApiSecret1);
         _ = await _client.DisableMagicLinks("a_user");
         var request = _requestFaker.Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
 
         // Act
         using var response = await _client.PostAsJsonAsync("magic-link/send", request);
@@ -64,6 +70,9 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var request = _requestFaker
             .RuleFor(x => x.UrlTemplate, faker => faker.Internet.Url())
             .Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
 
         // Act
         using var response = await _client.PostAsJsonAsync("magic-link/send", request);
@@ -89,6 +98,9 @@ public class MagicTests(PasswordlessApiFactory apiFactory) : IClassFixture<Passw
         var request = _requestFaker
             .RuleFor(x => x.UrlTemplate, () => "<token>")
             .Generate();
+
+        // Skip all limitations for new applications
+        apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
 
         // Act
         using var response = await _client.PostAsJsonAsync("magic-link/send", request);

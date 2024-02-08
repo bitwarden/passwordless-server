@@ -413,8 +413,10 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         // Assert
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
+        // Skip all limitations for new applications
+        _apiFactory.TimeProvider.Advance(TimeSpan.FromDays(365));
 
+        var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
         using var signInGenerateTokenResponse = await _client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
     }

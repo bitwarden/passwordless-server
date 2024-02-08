@@ -22,7 +22,10 @@ public partial class PasswordlessApiFactory : WebApplicationFactory<Program>, IA
 
     public ITestOutputHelper? TestOutput { get; set; }
 
-    public FakeTimeProvider TimeProvider { get; } = new();
+    // Initialize the time provider with the current real time.
+    // Because not all parts of the system under test use the time provider,
+    // this helps us ensure that the time-based comparisons stay more-or-less consistent.
+    public FakeTimeProvider TimeProvider { get; } = new(DateTimeOffset.Now);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder) =>
         builder
