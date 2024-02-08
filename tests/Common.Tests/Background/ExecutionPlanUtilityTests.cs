@@ -9,7 +9,7 @@ public class ExecutionPlanUtilityTests
     public void GetExecutionPlan_WhenExecutionTimeIsSameAsCurrentTime_ReturnsCorrectInitialDelay()
     {
         // Arrange
-        var executionTime = new TimeSpan(22, 0, 0);
+        var executionTime = new TimeOnly(22, 00, 00);
         var period = new TimeSpan(1, 0, 0, 0);
 
         var timeProvider = new Mock<TimeProvider>();
@@ -26,7 +26,7 @@ public class ExecutionPlanUtilityTests
     public void GetExecutionPlan_WhenExecutionTimeIsAfterCurrentTime_ReturnsCorrectInitialDelay()
     {
         // Arrange
-        var executionTime = new TimeSpan(22, 0, 0);
+        var executionTime = new TimeOnly(22, 00, 00);
         var period = new TimeSpan(1, 0, 0, 0);
 
         var timeProvider = new Mock<TimeProvider>();
@@ -43,7 +43,7 @@ public class ExecutionPlanUtilityTests
     public void GetExecutionPlan_WhenExecutionTimeIsBeforeCurrentTime_ReturnsCorrectInitialDelay()
     {
         // Arrange
-        var executionTime = new TimeSpan(22, 0, 0);
+        var executionTime = new TimeOnly(22, 00, 00);
         var period = new TimeSpan(1, 0, 0, 0);
 
         var timeProvider = new Mock<TimeProvider>();
