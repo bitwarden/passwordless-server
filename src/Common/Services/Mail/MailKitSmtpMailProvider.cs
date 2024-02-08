@@ -3,7 +3,6 @@ using MimeKit;
 
 namespace Passwordless.Common.Services.Mail;
 
-// ReSharper disable once UnusedType.Global
 public class MailKitSmtpMailProvider : IMailProvider
 {
     private readonly string? _fromEmail;
@@ -72,7 +71,7 @@ public class MailKitSmtpMailProvider : IMailProvider
         }
         else
         {
-            var useSsl = _smtpPort == 587 && !_smtpSslOverride ? false : _smtpSsl;
+            var useSsl = (_smtpPort != 587 || _smtpSslOverride) && _smtpSsl;
             await client.ConnectAsync(_smtpHost, _smtpPort, useSsl);
         }
 

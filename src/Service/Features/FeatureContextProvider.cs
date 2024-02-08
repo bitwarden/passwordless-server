@@ -57,7 +57,8 @@ public class FeatureContextProvider : IFeatureContextProvider
                     features.DeveloperLoggingEndsAt,
                     features.MaxUsers,
                     features.AllowAttestation,
-                    features.IsGenerateSignInTokenEndpointEnabled);
+                    features.IsGenerateSignInTokenEndpointEnabled,
+                    features.IsMagicLinksEnabled);
             }
             return new NullFeaturesContext();
         });

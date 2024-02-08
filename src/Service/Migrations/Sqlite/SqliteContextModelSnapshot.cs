@@ -163,6 +163,11 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsMagicLinksEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<long?>("MaxUsers")
                         .HasColumnType("INTEGER");
 

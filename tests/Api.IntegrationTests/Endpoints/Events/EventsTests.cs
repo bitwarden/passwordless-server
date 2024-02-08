@@ -153,8 +153,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         _ = await _client.EnableEventLogging(applicationName);
-        using var enableResponse = await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/enable",
-            new AppsEndpoints.EnableGenerateSignInTokenEndpointRequest(user));
+        _ = await _client.EnableManuallyGenerateAccessTokenEndpoint("a_user");
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
@@ -179,8 +178,7 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         await _client.EnableEventLogging(applicationName);
-        await _client.PostAsJsonAsync($"admin/apps/{applicationName}/sign-in-generate-token-endpoint/disable",
-            new AppsEndpoints.DisableGenerateSignInTokenEndpointRequest(user));
+        await _client.DisableManuallyGenerateAccessTokenEndpoint(user);
 
         // Act
         using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
@@ -191,6 +189,56 @@ public class EventsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminGenerateSignInTokenEndpointDisabled.ToString());
+        enabledEvent.Should().NotBeNull();
+        enabledEvent!.PerformedBy.Should().Be(user);
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_enabling_magic_links()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        const string user = "a_user";
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _client.EnableEventLogging(applicationName);
+        _ = await _client.EnableMagicLinks("a_user");
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminMagicLinksEnabled.ToString());
+        enabledEvent.Should().NotBeNull();
+        enabledEvent!.PerformedBy.Should().Be(user);
+    }
+
+    [Fact]
+    public async Task I_can_view_the_event_for_disabling_magic_links()
+    {
+        // Arrange
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        const string user = "a_user";
+        using var appCreationResponse = await _client.CreateApplicationAsync(applicationName);
+        var accountKeysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        _ = await _client.EnableEventLogging(applicationName);
+        _ = await _client.DisableMagicLinks("a_user");
+
+        // Act
+        using var getApplicationEventsResponse = await _client.GetAsync("events?pageNumber=1");
+
+        // Assert
+        getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        applicationEvents.Should().NotBeNull();
+        applicationEvents!.Events.Should().NotBeEmpty();
+        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminMagicLinksDisabled.ToString());
         enabledEvent.Should().NotBeNull();
         enabledEvent!.PerformedBy.Should().Be(user);
     }

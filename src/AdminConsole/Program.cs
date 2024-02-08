@@ -113,6 +113,7 @@ void RunTheApp()
     services.ConfigureApplicationCookie(o =>
     {
         o.Cookie.Name = "AdminConsoleSignIn";
+        o.Cookie.SameSite = SameSiteMode.Strict;
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
     });
 
