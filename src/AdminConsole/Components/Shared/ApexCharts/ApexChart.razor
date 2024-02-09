@@ -4,15 +4,13 @@
 @typeparam TXValueType
 @typeparam TYValueType
 
-@inject IHttpContextAccessor HttpContextAccessor
-
 <div id="@Id"></div>
 
-<script type="module" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
+<SecureScript type="module">
     let options = @((MarkupString)JsonSerializer.Serialize(Options, ApexChartJsonSerializer.Options));
     let chart = new ApexCharts(document.querySelector("#@Id"), options);    
     chart.render();
-</script>
+</SecureScript>
 
 @code {
     
