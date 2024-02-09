@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LanguageInjectionConfiguration">
+    <injection language="JavaScript" injector-id="xml">
+      <display-name>SecureScript</display-name>
+      <single-file value="false" />
+      <place><![CDATA[xmlTag().withLocalName(string().equalTo("SecureScript"))]]></place>
+    </injection>
+    <injection language="CSS" injector-id="xml">
+      <display-name>SecureStylesheet</display-name>
+      <single-file value="false" />
+      <place><![CDATA[xmlTag().withLocalName(string().equalTo("SecureStylesheet"))]]></place>
+    </injection>
+  </component>
+</project>
