@@ -30,7 +30,7 @@
     </div>
 </div>
 
-<script nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
+<SecureScript>
     document.getElementById("@CopyButtonId").addEventListener("click", (event) => {
         try {
             let element = document.getElementById("@CopyInputFieldId");
@@ -65,7 +65,7 @@
             event.preventDefault();
         });
     }
-</script>
+</SecureScript>
 
 @code {
     public Guid Id { get; set; } = Guid.NewGuid();
