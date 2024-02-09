@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Fido2NetLib;
@@ -197,13 +198,16 @@ public class Fido2Service : IFido2Service
         if (features.AllowAttestation)
         {
             var configuredAuthenticators = await _storage.GetAuthenticatorsAsync();
-            if (configuredAuthenticators.Any(x => !x.IsAllowed && x.AaGuid == success.Result!.AaGuid))
+            var blacklist = configuredAuthenticators.Where(x => !x.IsAllowed).ToImmutableList();
+            if (blacklist.Any() && blacklist.Any(x => x.AaGuid == success.Result!.AaGuid))
             {
-                throw new ApiException("authenticator_not_allowed", "The authenticator is not allowed to be used for registration", 400);
+                throw new ApiException("authenticator_not_allowed", "The authenticator is blacklisted and is not allowed to be used for registration.", 400);
             }
-            if (configuredAuthenticators.Any(x => x.IsAllowed && x.AaGuid != success.Result!.AaGuid))
+
+            var whitelist = configuredAuthenticators.Where(x => x.IsAllowed).ToImmutableList();
+            if (whitelist.Any() && whitelist.All(x => x.AaGuid != success.Result!.AaGuid))
             {
-                throw new ApiException("authenticator_not_allowed", "The authenticator is not allowed to be used for registration", 400);
+                throw new ApiException("authenticator_not_allowed", "The authenticator is not found on the whitelist and is not allowed to be used for registration.", 400);
             }
         }
 

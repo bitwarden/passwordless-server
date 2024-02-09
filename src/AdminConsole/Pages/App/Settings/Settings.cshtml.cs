@@ -151,15 +151,13 @@ public class SettingsModel : BaseExtendedPageModel
     /// <summary>
     /// Handles the plan change.
     /// </summary>
-    /// <param name="app"></param>
     /// <param name="selectedPlan"></param>
     /// <returns></returns>
-    public async Task<IActionResult> OnPostChangePlanAsync(string app, string selectedPlan)
+    public async Task<IActionResult> OnPostChangePlanAsync(string selectedPlan)
     {
-
-        var redirectUrl = await _billingService.ChangePlanAsync(app, selectedPlan);
-
-        return Redirect(redirectUrl);
+        var appId = _currentContext.AppId!;
+        var redirectUrl = await _billingService.ChangePlanAsync(appId, selectedPlan);
+        return Redirect(redirectUrl!);
     }
 
     public async Task<IActionResult> OnPostLockApiKeyAsync()

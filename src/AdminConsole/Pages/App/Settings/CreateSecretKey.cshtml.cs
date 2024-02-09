@@ -73,7 +73,7 @@ public class CreateSecretKeyModel : BaseExtendedPageModel
             var encodedApiKey = Base64Url.Encode(Encoding.UTF8.GetBytes(apiKey.ApiKey));
             return RedirectToPage(
                 "/App/Settings/SecretKeyCreated",
-                new { App = _currentContext.AppId, EncodedApiKey = encodedApiKey });
+                new { AppId = _currentContext.AppId, EncodedApiKey = encodedApiKey });
         }
         catch (Exception)
         {

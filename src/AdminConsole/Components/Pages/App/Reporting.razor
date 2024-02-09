@@ -1,4 +1,4 @@
-@page "/app/{app}/Reporting"
+@page "/app/{AppId}/Reporting"
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
 
@@ -8,7 +8,7 @@
 @inject IHttpContextAccessor HttpContextAccessor;
 
 <HeadContent>
-    <BlazorScript Type="text/javascript" Src="lib/apexcharts/apexcharts.min.js" />
+    <SecureScript type="text/javascript" src="lib/apexcharts/apexcharts.min.js" />
 </HeadContent>
 
 <Page Title="Reporting">
