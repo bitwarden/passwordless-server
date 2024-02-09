@@ -8,6 +8,7 @@ using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
+using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
@@ -147,7 +148,7 @@ public class CreateApplicationModel : PageModel
         await _signInManager.RefreshSignInAsync(myUser);
 
         // TODO: Pass parameters in a better way
-        return RedirectToPage("/App/Onboarding/GetStarted", new { app = app.Id });
+        return RedirectToPage("/App/Onboarding/GetStarted", new ApplicationPageRoutingContext(app.Id));
     }
 
     private async Task InitializeAsync()
