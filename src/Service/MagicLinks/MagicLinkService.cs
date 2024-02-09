@@ -56,7 +56,9 @@ public class MagicLinkService(
             _emailsSentCacheKey,
             async cacheEntry =>
             {
-                cacheEntry.SetAbsoluteExpiration(now.AddDays(1).Date - now);
+                var expiration = now.AddDays(1).Date;
+                cacheEntry.SetAbsoluteExpiration(expiration);
+
                 return await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
             }
         );
@@ -108,8 +110,8 @@ public class MagicLinkService(
         // Update the cached tally of emails sent in the last 30 days
         if (cache.TryGetValue<int>(_emailsSentCacheKey, out var cachedValue))
         {
-            var now = timeProvider.GetUtcNow();
-            cache.Set(_emailsSentCacheKey, cachedValue + 1, now.AddDays(1).Date - now);
+            var expiration = timeProvider.GetUtcNow().AddDays(1).Date;
+            cache.Set(_emailsSentCacheKey, cachedValue + 1, expiration);
         }
     }
 }
