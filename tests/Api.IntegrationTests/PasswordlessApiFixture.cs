@@ -4,14 +4,11 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests;
 
-public class PasswordlessApiFixture : IAsyncLifetime, IAsyncDisposable
+public class PasswordlessApiFixture : IAsyncDisposable, IAsyncLifetime
 {
     private readonly MsSqlContainer _dbContainer = new MsSqlBuilder().Build();
 
-    public async Task InitializeAsync()
-    {
-        await _dbContainer.StartAsync();
-    }
+    public async Task InitializeAsync() => await _dbContainer.StartAsync();
 
     public async Task<PasswordlessApi> CreateApiAsync(ITestOutputHelper? testOutput = null)
     {

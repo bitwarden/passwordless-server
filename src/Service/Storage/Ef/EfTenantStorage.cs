@@ -159,9 +159,17 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task SetFeaturesAsync(SetFeaturesRequest features) =>
         await db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, existing => features.EnableManuallyGeneratedAuthenticationTokens ?? existing.IsGenerateSignInTokenEndpointEnabled)
-            .SetProperty(f => f.IsMagicLinksEnabled, existing => features.EnableMagicLinks ?? existing.IsMagicLinksEnabled)
-            .SetProperty(f => f.EventLoggingRetentionPeriod, existing => features.EventLoggingRetentionPeriod ?? existing.EventLoggingRetentionPeriod));
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled,
+                existing => features.EnableManuallyGeneratedAuthenticationTokens ??
+                            existing.IsGenerateSignInTokenEndpointEnabled
+            )
+            .SetProperty(f => f.IsMagicLinksEnabled,
+                existing => features.EnableMagicLinks ?? existing.IsMagicLinksEnabled
+            )
+            .SetProperty(f => f.EventLoggingRetentionPeriod,
+                existing => features.EventLoggingRetentionPeriod ?? existing.EventLoggingRetentionPeriod
+            )
+        );
 
     public async Task SetFeaturesAsync(ManageFeaturesRequest features)
     {

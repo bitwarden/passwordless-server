@@ -149,7 +149,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     }
 
     [Fact]
-    public async Task I_can_send_a_magic_link_email_to_an_admin_address_if_the_application_even_if_the_application_is_too_new()
+    public async Task I_can_send_a_magic_link_email_to_an_admin_address_even_if_the_application_is_too_new()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);

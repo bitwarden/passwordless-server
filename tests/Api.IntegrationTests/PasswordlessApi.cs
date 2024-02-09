@@ -32,9 +32,8 @@ public class PasswordlessApi : ITestOutputHelperAccessor, IDisposable, IAsyncDis
                     services.AddSingleton<TimeProvider>(Time);
                 }));
 
-        Services = _factory.Services;
-
         TestOutput = testOutput;
+        Services = _factory.Services;
     }
 
     public ITestOutputHelper? TestOutput { get; }
