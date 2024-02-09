@@ -190,7 +190,6 @@ void RunTheApp()
         app.ExecuteMigration();
     }
 
-    app.UseMiddleware<ContentSecurityPolicyMiddleware>();
     app.UseMiddleware<SecurityHeadersMiddleware>();
     app.UseHttpsRedirection();
     app.UseStaticFiles();
