@@ -104,6 +104,11 @@ public class MagicLinkService(
         });
 
         await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
-        cache.Remove(_emailsSentCacheKey);
+
+        // Update or invalidate the cached tally of emails sent in the last 30 days
+        if (cache.TryGetValue(_emailsSentCacheKey, out int cachedValue))
+            cache.Set(_emailsSentCacheKey, cachedValue + 1);
+        else
+            cache.Remove(_emailsSentCacheKey);
     }
 }
