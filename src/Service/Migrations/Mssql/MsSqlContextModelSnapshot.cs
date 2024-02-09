@@ -216,6 +216,10 @@ namespace Passwordless.Service.Migrations.Mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LinkTemplate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Tenant")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");

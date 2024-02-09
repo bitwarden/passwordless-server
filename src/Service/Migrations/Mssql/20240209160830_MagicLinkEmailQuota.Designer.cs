@@ -12,8 +12,8 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240208203233_DispatchedEmails")]
-    partial class DispatchedEmails
+    [Migration("20240209160830_MagicLinkEmailQuota")]
+    partial class MagicLinkEmailQuota
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -216,6 +216,10 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LinkTemplate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

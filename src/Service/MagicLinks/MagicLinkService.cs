@@ -103,7 +103,7 @@ public class MagicLinkService(
             MessageType = "magic-links"
         });
 
-        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
+        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address, dto.LinkTemplate);
 
         // Update or invalidate the cached tally of emails sent in the last 30 days
         if (cache.TryGetValue(_emailsSentCacheKey, out int cachedValue))

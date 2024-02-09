@@ -10,5 +10,7 @@ public class DispatchedEmail : PerTenant
 
     public required string EmailAddress { get; set; }
 
+    public required string LinkTemplate { get; set; }
+
     public virtual AccountMetaInformation? Application { get; set; }
 }

@@ -11,8 +11,8 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20240208203257_DispatchedEmails")]
-    partial class DispatchedEmails
+    [Migration("20240209160747_MagicLinkEmailQuota")]
+    partial class MagicLinkEmailQuota
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -211,6 +211,10 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LinkTemplate")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

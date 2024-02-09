@@ -297,7 +297,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             .CountAsync(x => x.CreatedAt >= from);
     }
 
-    public async Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress)
+    public async Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress, string linkTemplate)
     {
         var email = new DispatchedEmail
         {
@@ -305,7 +305,8 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             Id = Guid.NewGuid(),
             CreatedAt = timeProvider.GetUtcNow(),
             UserId = userId,
-            EmailAddress = emailAddress
+            EmailAddress = emailAddress,
+            LinkTemplate = linkTemplate
         };
 
         db.DispatchedEmails.Add(email);

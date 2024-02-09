@@ -211,6 +211,10 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("LinkTemplate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Tenant")
                         .IsRequired()
                         .HasColumnType("TEXT");

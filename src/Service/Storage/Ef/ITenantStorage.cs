@@ -36,7 +36,6 @@ public interface ITenantStorage
 
     Task<string> GetUserIdByAliasAsync(string alias);
 
-
     Task<int> GetUsersCount();
     Task<bool> HasUsersAsync();
     Task DeleteUser(string userId);
@@ -56,6 +55,6 @@ public interface ITenantStorage
 
     Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan window);
     Task<int> GetDispatchedEmailCountAsync(TimeSpan window);
-    Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress);
+    Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress, string linkTemplate);
     Task DeleteOldDispatchedEmailsAsync(TimeSpan age);
 }
