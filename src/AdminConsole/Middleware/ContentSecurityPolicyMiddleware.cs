@@ -20,7 +20,7 @@ public sealed class ContentSecurityPolicyMiddleware
         _logger = logger;
     }
 
-    public void Invoke(HttpContext context)
+    public Task Invoke(HttpContext context)
     {
         // random bytes
         var nonce = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
@@ -35,7 +35,7 @@ public sealed class ContentSecurityPolicyMiddleware
 
         var csp =
             "default-src 'self';" +
-            $"script-src 'self' 'nonce-{nonce}';" +
+            $"script-src 'self' 'unsafe-eval' 'nonce-{nonce}';" +
             $"connect-src 'self' {_options.ApiUrl};" +
             "style-src 'self' 'unsafe-inline';" +
             "img-src 'self' data:;" +
@@ -48,6 +48,6 @@ public sealed class ContentSecurityPolicyMiddleware
             new[] { csp }
         );
 
-        _next(context);
+        return _next(context);
     }
 }

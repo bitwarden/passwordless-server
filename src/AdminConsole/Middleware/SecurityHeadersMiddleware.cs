@@ -9,11 +9,11 @@ public sealed class SecurityHeadersMiddleware
         _next = next;
     }
 
-    public void Invoke(HttpContext context)
+    public Task Invoke(HttpContext context)
     {
         context.Response.Headers.Append("X-Content-Type-Options", new[] { "nosniff" });
         context.Response.Headers.Append("Referrer-Policy", new[] { "no-referrer" });
 
-        _next(context);
+        return _next(context);
     }
 }
