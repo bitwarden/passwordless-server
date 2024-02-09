@@ -107,7 +107,7 @@ services.AddScoped<IReportingService, ReportingService>();
 services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2Service, Fido2Service>();
 services.AddScoped<ITokenService, TokenService>();
-services.AddSingleton<ISystemClock, SystemClock>();
+services.AddSingleton<ISystemClock, TimeProviderSystemClockAdapter>();
 services.AddScoped<IRequestContext, RequestContext>();
 services.AddSingleton<IMetaDataService, MetaDataService>();
 
@@ -116,7 +116,7 @@ services.AddHostedService<DispatchedEmailCleanupService>();
 
 builder.AddMail();
 
-services.AddSingleton<Microsoft.Extensions.Internal.ISystemClock, Microsoft.Extensions.Internal.SystemClock>();
+services.AddSingleton<Microsoft.Extensions.Internal.ISystemClock, TimeProviderSystemClockAdapter>();
 services.AddMemoryCache();
 services.AddDistributedMemoryCache();
 builder.AddMetaDataService();
