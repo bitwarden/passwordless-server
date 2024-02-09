@@ -5,11 +5,10 @@ namespace Passwordless.AdminConsole.Components.Shared.Stats;
 public abstract class BaseCardStats : ComponentBase
 {
     [Parameter(CaptureUnmatchedValues = true)]
-    public IDictionary<string, object>? AdditionalAttributes { get; set; } = new Dictionary<string, object>();
+    public IDictionary<string, object> AdditionalAttributes { get; set; } = new Dictionary<string, object>();
 
     protected override void OnInitialized()
     {
-        if (AdditionalAttributes == null) return;
         if (AdditionalAttributes.TryGetValue("class", out var classAttribute))
         {
             Class = $"{Class} {classAttribute}";
