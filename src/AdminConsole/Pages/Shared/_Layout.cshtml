@@ -1,18 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@using Microsoft.CodeAnalysis.Classification
-@using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Components.Layouts
-@using Passwordless.AdminConsole.Components.Shared.Icons
-@using Passwordless.AdminConsole.Components.Shared.Links
 @using Passwordless.AdminConsole.Helpers
 @using Passwordless.AdminConsole.Identity
-@using Passwordless.AdminConsole.Middleware
-@using Passwordless.AdminConsole.TagHelpers
 @inject SignInManager<ConsoleAdmin> signinManager
-@inject UserManager<ConsoleAdmin> UserManager
-@inject IOptions<PasswordlessOptions> Options
-@inject ICurrentContext CurrentContext
+@inject IFileVersionProvider FileVersionProvider
 @{
     var signedIn = signinManager.IsSignedIn(User);
 }
@@ -79,7 +71,7 @@
     
 
 <script async src="@Url.Content("~/lib/es-module-shims/es-module-shims.js")" asp-append-version="true"></script>
-@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue/vue.esm-browser.js", "/lib/vue/vue.esm-browser.prod.js") });
+@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue/vue.esm-browser.js", "/lib/vue/vue.esm-browser.prod.js") }, FileVersionProvider);
 <script type="text/javascript" src="~/js/core.js" asp-append-version="true"></script>
 <script type="module" src="@Url.Content("~/js/elements/local-time.mjs")"></script>
 @await RenderSectionAsync("Scripts", false)
