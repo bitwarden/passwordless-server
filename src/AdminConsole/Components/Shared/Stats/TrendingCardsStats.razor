@@ -1,3 +1,4 @@
+@using System.Globalization
 @inherits BaseCardStats
 
 @if (Items.Count > 0)
@@ -44,11 +45,11 @@
             switch (type)
             {
                 case ValueTypes.Double:
-                    return value.ToString("N2");
+                    return value.ToString("N2", CultureInfo.InvariantCulture);
                 case ValueTypes.Integer:
-                    return value.ToString("N0");
+                    return value.ToString("N0", CultureInfo.InvariantCulture);
                 case ValueTypes.Percentage:
-                    return $"{value:P2}";
+                    return value.ToString("P2", CultureInfo.InvariantCulture);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
