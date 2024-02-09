@@ -190,8 +190,8 @@ void RunTheApp()
         app.ExecuteMigration();
     }
 
-    app.UseCSP();
-    app.UseSecurityHeaders();
+    app.UseMiddleware<ContentSecurityPolicyMiddleware>();
+    app.UseMiddleware<SecurityHeadersMiddleware>();
     app.UseHttpsRedirection();
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
