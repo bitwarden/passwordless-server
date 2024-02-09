@@ -1,0 +1,22 @@
+@using System.ComponentModel
+@inject IFileVersionProvider Version
+@inject IHttpContextAccessor HttpContextAccessor
+
+<script @attributes="AdditionalAttributes" nonce="@(HttpContextAccessor.HttpContext!.Items["csp-nonce"])"> @ChildContent </script>
+
+@code {
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; } = new();
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        if (AdditionalAttributes.ContainsKey("src"))
+        {
+            AdditionalAttributes["src"] = Version.Get(AdditionalAttributes["src"].ToString()!);
+        }
+    }
+}
