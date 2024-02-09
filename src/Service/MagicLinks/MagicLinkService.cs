@@ -14,6 +14,8 @@ public class MagicLinkService(
     IFido2Service fido2Service,
     IMailProvider mailProvider)
 {
+    private readonly string _emailsSentCacheKey = $"magic-link-emails-sent-30days-{tenantStorage.Tenant}";
+
     private async Task EnforceQuotaAsync(MagicLinkDTO dto)
     {
         var now = timeProvider.GetUtcNow();
@@ -51,7 +53,7 @@ public class MagicLinkService(
         );
 
         var emailsDispatchedIn30Days = await cache.GetOrCreateAsync(
-            $"magic-link-emails-sent-30days-{tenantStorage.Tenant}",
+            _emailsSentCacheKey,
             async cacheEntry =>
             {
                 cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(1));
@@ -102,5 +104,6 @@ public class MagicLinkService(
         });
 
         await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address);
+        cache.Remove(_emailsSentCacheKey);
     }
 }

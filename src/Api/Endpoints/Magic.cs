@@ -10,7 +10,7 @@ namespace Passwordless.Api.Endpoints;
 
 public static class MagicEndpoints
 {
-    private const string RateLimiterPolicy = nameof(MagicEndpoints);
+    public const string RateLimiterPolicy = nameof(MagicEndpoints);
 
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
         builder.AddFixedWindowLimiter(RateLimiterPolicy, limiter =>

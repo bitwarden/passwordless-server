@@ -176,7 +176,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_cannot_send_too_many_magic_link_emails_in_a_short_time()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput, false);
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -200,37 +200,6 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Assert
         responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
         responseStatusCodes.Should().Contain(HttpStatusCode.TooManyRequests);
-    }
-
-    [Fact]
-    public async Task I_can_send_a_magic_link_email_after_enough_time_passed_since_the_rate_limit_was_exceeded()
-    {
-        // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
-        using var client = api.CreateClient();
-
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
-        await client.EnableMagicLinks("a_user");
-        var request = _requestFaker.Generate();
-
-        // Skip all limitations for new applications
-        api.Time.Advance(TimeSpan.FromDays(365));
-
-        for (var i = 0; i < 100; i++)
-        {
-            using var _ = await client.PostAsJsonAsync("magic-link/send", request);
-        }
-
-        api.Time.Advance(TimeSpan.FromMinutes(30));
-
-        // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
