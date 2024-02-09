@@ -1,11 +1,16 @@
-@using System.ComponentModel
 @inject IFileVersionProvider Version
 @inject IHttpContextAccessor HttpContextAccessor
 
-<script @attributes="AdditionalAttributes" nonce="@Nonce"> @ChildContent </script>
+@if (ChildContent == null)
+{
+    <link rel="stylesheet" @attributes="AdditionalAttributes" />
+}
+else
+{
+    <style @attributes="AdditionalAttributes" nonce="@Nonce">@ChildContent</style>
+}
 
 @code {
-    
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object> AdditionalAttributes { get; set; } = new();
     
@@ -14,12 +19,12 @@
     
     protected override void OnInitialized()
     {
-        if (AdditionalAttributes.ContainsKey("src"))
+        if (AdditionalAttributes.ContainsKey("href"))
         {
-            AdditionalAttributes["src"] = Version.Get(AdditionalAttributes["src"].ToString()!);
+            AdditionalAttributes["href"] = Version.Get(AdditionalAttributes["href"].ToString()!);
         }
     }
-
+    
     public string? Nonce
     {
         get
