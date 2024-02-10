@@ -1,5 +1,6 @@
 using Bunit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
@@ -11,6 +12,7 @@ namespace Passwordless.AdminConsole.Tests.Components.Pages.App.ReportingComponen
 public class TotalCredentialsCountChartTests : TestContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
+    private readonly Mock<IFileVersionProvider> _fileVersionProviderMock = new();
 
     public TotalCredentialsCountChartTests()
     {
@@ -20,6 +22,7 @@ public class TotalCredentialsCountChartTests : TestContext
         _httpContextAccessorMock.SetupGet(x => x.HttpContext.Items).Returns(items);
 
         this.Services.AddSingleton(_httpContextAccessorMock.Object);
+        this.Services.AddSingleton(_fileVersionProviderMock.Object);
     }
 
     [Fact]

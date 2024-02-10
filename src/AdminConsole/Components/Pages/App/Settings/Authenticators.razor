@@ -1,4 +1,4 @@
-@page "/app/{app}/settings/authenticators"
+@page "/app/{AppId}/settings/authenticators"
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.MDS
 @using Passwordless.Common.Models.Authenticators
@@ -44,13 +44,13 @@
     {
         _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
         {
-            new("Settings", $"app/{App}/settings"),
-            new("Authenticators", $"app/{App}/settings/authenticators")
+            new("Settings", $"app/{AppId}/settings"),
+            new("Authenticators", $"app/{AppId}/settings/authenticators")
         };
         
         if (!CurrentContext.Features.AllowAttestation)
         {
-            NavigationManager.NavigateTo($"app/{App}/settings");
+            NavigationManager.NavigateTo($"app/{AppId}/settings");
             return;
         }
 
@@ -72,7 +72,7 @@
         switch (ManageWhitelistForm.Action)
         {
             case "manage":
-                NavigationManager.NavigateTo($"app/{App}/settings/authenticators/manage");
+                NavigationManager.NavigateTo($"app/{AppId}/settings/authenticators/manage");
                 break;
         }
     }

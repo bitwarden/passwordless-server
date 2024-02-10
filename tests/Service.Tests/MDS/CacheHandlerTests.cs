@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.Service.MDS;
@@ -8,12 +9,13 @@ namespace Passwordless.Service.Tests.MDS;
 
 public class CacheHandlerTests
 {
+    private readonly Mock<IConfiguration> _configurationMock;
     private readonly Mock<ILogger<CacheHandler>> _loggerMock;
 
     public CacheHandlerTests()
     {
+        _configurationMock = new Mock<IConfiguration>();
         _loggerMock = new Mock<ILogger<CacheHandler>>();
-        Directory.CreateDirectory(".mds-cache");
     }
 
     /// <summary>
@@ -25,12 +27,38 @@ public class CacheHandlerTests
     {
         // arrange
         var httpClient = new HttpClient
-            (new CacheHandler(new NotFoundResponseHandler(), _loggerMock.Object))
+            (new CacheHandler(new NotFoundResponseHandler(), _configurationMock.Object, _loggerMock.Object))
         {
             BaseAddress = new Uri("http://localhost:5001")
         };
 
-        using (var file = File.CreateText(".mds-cache/mds.jwt"))
+        using (var file = File.CreateText(CacheHandler.Path))
+        {
+            await file.WriteAsync("test");
+        }
+
+        // act
+        var actual = await httpClient.GetAsync("/api/mds");
+
+        // assert
+        Assert.Equal(HttpStatusCode.OK, actual.StatusCode);
+        Assert.Equal("test", await actual.Content.ReadAsStringAsync());
+    }
+
+    /// <summary>
+    /// Handle that the FIDO2 domain name cannot be resolved in offline scenario's.
+    /// </summary>
+    [Fact]
+    public async Task CacheHandler_Returns_ContentFromFile_WhenHttpRequestExceptionWasThrown()
+    {
+        // arrange
+        var httpClient = new HttpClient
+            (new CacheHandler(new HttpRequestExceptionResponseHandler(), _configurationMock.Object, _loggerMock.Object))
+        {
+            BaseAddress = new Uri("http://localhost:5001")
+        };
+
+        using (var file = File.CreateText(CacheHandler.Path))
         {
             await file.WriteAsync("test");
         }
@@ -51,18 +79,15 @@ public class CacheHandlerTests
     public async Task CacheHandler_Returns_ContentFromMDS_WhenReceivingSuccessfulStatusCode()
     {
         // arrange
-        string? originalContent;
-        try
+        using (var file = File.CreateText(CacheHandler.Path))
         {
-            originalContent = await File.ReadAllTextAsync(CacheHandler.Path);
+            await file.WriteAsync("test");
         }
-        catch (FileNotFoundException)
-        {
-            originalContent = null;
-        }
+        _configurationMock.Setup(x => x["fido2:mds:mode"]).Returns("Online");
 
+        var expectedContent = Guid.NewGuid().ToString();
         var httpClient = new HttpClient
-            (new CacheHandler(new OkResponseHandler(), _loggerMock.Object))
+            (new CacheHandler(new OkResponseHandler(expectedContent), _configurationMock.Object, _loggerMock.Object))
         {
             BaseAddress = new Uri("http://localhost:5001")
         };
@@ -75,8 +100,8 @@ public class CacheHandlerTests
         Assert.Equal(HttpStatusCode.OK, actual.StatusCode);
 
         var actualContent = await actual.Content.ReadAsStringAsync();
-        Assert.NotEqual(originalContent, actualContent);
-        Assert.Equal(actualContent, await File.ReadAllTextAsync(CacheHandler.Path));
+        Assert.NotEqual("test", actualContent);
+        Assert.Equal(expectedContent, actualContent);
     }
 
     private class NotFoundResponseHandler : HttpMessageHandler
@@ -91,12 +116,28 @@ public class CacheHandlerTests
 
     private class OkResponseHandler : HttpMessageHandler
     {
+        private readonly string _content;
+
+        public OkResponseHandler(string content)
+        {
+            _content = content;
+        }
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var stringContent = new StringContent(Guid.NewGuid().ToString(), Encoding.UTF8);
+            var stringContent = new StringContent(_content, Encoding.UTF8);
             var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = stringContent };
             return Task.FromResult(response);
+        }
+    }
+
+    private class HttpRequestExceptionResponseHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            throw new HttpRequestException();
         }
     }
 }

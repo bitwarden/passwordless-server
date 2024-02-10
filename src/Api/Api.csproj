@@ -26,8 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Do not delete, required for Attestation -->
-    <Folder Include=".mds-cache\" />
+    <None Update="mds.jwt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-
 </Project>

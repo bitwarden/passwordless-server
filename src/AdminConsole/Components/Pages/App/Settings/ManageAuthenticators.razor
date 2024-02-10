@@ -1,4 +1,4 @@
-@page "/app/{app}/settings/authenticators/manage"
+@page "/app/{AppId}/settings/authenticators/manage"
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.Authenticators
 @using Passwordless.Common.Models.MDS
@@ -104,7 +104,7 @@
     </Page>
 }
 
-<script type="text/javascript" nonce="@HttpContextAccessor.HttpContext!.Items["csp-nonce"]">
+<SecureScript type="text/javascript">
     document.addEventListener("change", (event) => {
         if (event.target.id === "attestation-types-select" || event.target.id === "certification-statuses-select") {
             document.getElementById("filter-form").submit();
@@ -129,7 +129,7 @@
             })
         }
     });
-</script>
+</SecureScript>
 
 @code {
     private bool _isInitialized;
@@ -147,14 +147,14 @@
     {
         _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
         {
-            new("Settings", $"app/{App}/settings"),
-            new("Authenticators", $"app/{App}/settings/authenticators"),
-            new("Allowed Authenticators", $"app/{App}/settings/authenticators/manage")
+            new("Settings", $"app/{AppId}/settings"),
+            new("Authenticators", $"app/{AppId}/settings/authenticators"),
+            new("Allowed Authenticators", $"app/{AppId}/settings/authenticators/manage")
         };
         
         if (!CurrentContext.Features.AllowAttestation)
         {
-            NavigationManager.NavigateTo($"app/{App}/settings");
+            NavigationManager.NavigateTo($"app/{AppId}/settings");
             return;
         }
         

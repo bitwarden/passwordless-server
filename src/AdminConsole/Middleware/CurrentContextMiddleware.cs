@@ -1,3 +1,4 @@
+using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
@@ -24,10 +25,10 @@ public class CurrentContextMiddleware
     {
         var name = httpContext.GetRouteData();
 
-        var hasAppRouteValue = name.Values.TryGetValue("app", out var appRouteValue);
+        var hasAppRouteValue = name.Values.TryGetValue(RouteParameters.AppId, out var appRouteValue);
         var appId = hasAppRouteValue && appRouteValue != null ? (string)appRouteValue : String.Empty;
 
-        var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == "OrgId");
+        var hasOrgIdClaim = httpContext.User.HasClaim(x => x.Type == CustomClaimTypes.OrgId);
 
         return hasOrgIdClaim
             ? InvokeCoreAsync(httpContext, appId, currentContext, dataService, passwordlessClient, organizationFeatureService)
