@@ -6,14 +6,14 @@ namespace Passwordless.Service;
 public class ReportingService : IReportingService
 {
 
-    private readonly ITenantStorageFactory _tenantStorageFactory;
+    private readonly ITenantStorage _tenantStorage;
     private readonly IGlobalStorageFactory _storageFactory;
 
     public ReportingService(
-        ITenantStorageFactory tenantStorageFactory,
+        ITenantStorage tenantStorage,
         IGlobalStorageFactory storageFactory)
     {
-        _tenantStorageFactory = tenantStorageFactory;
+        _tenantStorage = tenantStorage;
         _storageFactory = storageFactory;
     }
 
@@ -25,8 +25,7 @@ public class ReportingService : IReportingService
 
     public async Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest parameters)
     {
-        var storage = _tenantStorageFactory.Create();
-        var entities = await storage.GetPeriodicCredentialReportsAsync(parameters.From, parameters.To);
+        var entities = await _tenantStorage.GetPeriodicCredentialReportsAsync(parameters.From, parameters.To);
         return entities
             .Select(x => new PeriodicCredentialReportResponse(x.CreatedAt, x.UsersCount, x.CredentialsCount))
             .ToList();

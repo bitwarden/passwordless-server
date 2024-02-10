@@ -10,21 +10,23 @@ public class EfTenantStorage : ITenantStorage
 {
     private readonly DbTenantContext db;
     private readonly TimeProvider _timeProvider;
-
-    public string Tenant { get; }
+    private readonly ITenantProvider _tenantProvider;
 
     public EfTenantStorage(
         DbTenantContext db,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        ITenantProvider tenantProvider)
     {
         this.db = db;
-        Tenant = db.Tenant;
+        _tenantProvider = tenantProvider;
         _timeProvider = timeProvider;
     }
+    
+    public string Tenant => _tenantProvider.Tenant;
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
-        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, Tenant));
+        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, _tenantProvider.Tenant));
         await db.SaveChangesAsync();
     }
 
@@ -271,7 +273,7 @@ public class EfTenantStorage : ITenantStorage
                 AaGuid = x,
                 IsAllowed = isAllowed,
                 CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
-                Tenant = Tenant
+                Tenant = _tenantProvider.Tenant
             }).ToList();
 
         db.Authenticators.AddRange(newAuthenticators);
@@ -312,7 +314,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task StoreAlias(string userid, Dictionary<string, string> aliases)
     {
-        var pointers = aliases.Select(a => new AliasPointer() { Tenant = Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
+        var pointers = aliases.Select(a => new AliasPointer() { Tenant = _tenantProvider.Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
         db.Aliases.RemoveRange(db.Aliases.Where(ap => ap.UserId == userid));
         db.Aliases.AddRange(pointers);
         await db.SaveChangesAsync();
@@ -322,7 +324,7 @@ public class EfTenantStorage : ITenantStorage
     {
         var ak = new ApiKeyDesc
         {
-            Tenant = Tenant,
+            Tenant = _tenantProvider.Tenant,
             Id = pkpart,
             ApiKey = apikey,
             Scopes = scopes,

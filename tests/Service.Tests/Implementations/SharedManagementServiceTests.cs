@@ -14,7 +14,7 @@ namespace Passwordless.Service.Tests.Implementations;
 
 public class SharedManagementServiceTests
 {
-    private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
+    private readonly Mock<ITenantStorage> _tenantStorageMock = new();
     private readonly Mock<IGlobalStorageFactory> _storageFactoryMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
@@ -28,7 +28,7 @@ public class SharedManagementServiceTests
     public SharedManagementServiceTests()
     {
         _sut = new SharedManagementService(
-            _tenantStorageFactoryMock.Object,
+            _tenantStorageMock.Object,
             _storageFactoryMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
@@ -46,12 +46,8 @@ public class SharedManagementServiceTests
         const string deletedBy = "admin@example.com";
         const string baseUrl = "http://localhost:7001";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(null as AccountMetaInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl));
@@ -60,9 +56,9 @@ public class SharedManagementServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("App was not found.", actual.Message);
 
-        tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Never);
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
+        _tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Never);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
+        _tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
     }
 
     [Fact]
@@ -72,7 +68,6 @@ public class SharedManagementServiceTests
         const string deletedBy = "admin@example.com";
         const string baseUrl = "http://localhost:7001";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
@@ -81,20 +76,17 @@ public class SharedManagementServiceTests
             AdminEmails = new[] { deletedBy }
         };
 
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
 
-        tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Never);
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
+        _tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Never);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
+        _tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
     }
 
     [Fact]
@@ -104,8 +96,7 @@ public class SharedManagementServiceTests
         const string deletedBy = "admin@example.com";
         const string baseUrl = "http://localhost:7001";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
-        tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
+        _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
@@ -114,19 +105,16 @@ public class SharedManagementServiceTests
             AdminEmails = new[] { deletedBy }
         };
 
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);
 
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
+        _tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
     }
 
     [Fact]
@@ -136,8 +124,7 @@ public class SharedManagementServiceTests
         const string deletedBy = "admin@example.com";
         const string baseUrl = "http://localhost:7001";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
-        tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(false);
+        _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(false);
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
@@ -145,20 +132,17 @@ public class SharedManagementServiceTests
             Tenant = appId,
             AdminEmails = new[] { deletedBy }
         };
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
 
-        tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
+        _tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
+        _tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.IsAny<DateTime?>()), Times.Never);
     }
 
     [Fact]
@@ -168,8 +152,7 @@ public class SharedManagementServiceTests
         const string deletedBy = "admin@example.com";
         const string baseUrl = "http://localhost:7001";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
-        tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
+        _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
@@ -177,20 +160,17 @@ public class SharedManagementServiceTests
             Tenant = appId,
             AdminEmails = new[] { deletedBy }
         };
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.MarkDeleteApplicationAsync(appId, deletedBy, baseUrl);
 
         Assert.False(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);
 
-        tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
+        _tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
+        _tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
     }
     #endregion
 
@@ -200,12 +180,8 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(null as AccountMetaInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await _sut.DeleteApplicationAsync(appId));
@@ -214,7 +190,7 @@ public class SharedManagementServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("App was not found.", actual.Message);
 
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
     }
 
     [Fact]
@@ -222,7 +198,6 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
@@ -230,18 +205,15 @@ public class SharedManagementServiceTests
             Tenant = appId,
             AdminEmails = new[] { "admin@email.com" }
         };
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
 
         var actual = await _sut.DeleteApplicationAsync(appId);
 
         Assert.True(actual.IsDeleted);
         Assert.Equal(_systemClockMock.Object.UtcNow, actual.DeleteAt.Value);
 
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Once);
     }
 
     [Fact]
@@ -249,8 +221,7 @@ public class SharedManagementServiceTests
     {
         const string appId = "mockedAppId";
 
-        var tenantStorageMock = new Mock<ITenantStorage>();
-        tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
+        _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
             AcountName = appId,
@@ -258,12 +229,9 @@ public class SharedManagementServiceTests
             Tenant = appId,
             AdminEmails = new[] { "admin@email.com" }
         };
-        tenantStorageMock.Setup(x => x.GetAccountInformation())
+        _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        _tenantStorageFactoryMock
-            .Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(tenantStorageMock.Object);
-
+        
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await _sut.DeleteApplicationAsync(appId));
 
@@ -271,7 +239,7 @@ public class SharedManagementServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("App was not scheduled for deletion.", actual.Message);
 
-        tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
+        _tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
     }
     #endregion
 
@@ -288,7 +256,6 @@ public class SharedManagementServiceTests
 
         Assert.Equal(expected, actual);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Once);
         storageMock.Verify(x => x.GetApplicationsPendingDeletionAsync(), Times.Once);
     }
@@ -300,17 +267,14 @@ public class SharedManagementServiceTests
     public async Task SetFeaturesAsync_Throws_ApiException_WhenPayloadIsNull()
     {
         const string appId = "myappid";
-        var storageMock = new Mock<ITenantStorage>();
-        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
 
         var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(appId, null));
 
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("No 'body' or 'parameters' were passed.", actual.Message);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesRequest>()), Times.Never);
+        _tenantStorageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesRequest>()), Times.Never);
     }
 
     [Fact]
@@ -323,7 +287,6 @@ public class SharedManagementServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("'appId' is required.", actual.Message);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
     }
 
@@ -337,7 +300,6 @@ public class SharedManagementServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("'appId' is required.", actual.Message);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Never);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
     }
 
@@ -351,15 +313,11 @@ public class SharedManagementServiceTests
             EventLoggingRetentionPeriod = 7,
             MaxUsers = 69L
         };
-        var storageMock = new Mock<ITenantStorage>();
-        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))
-            .Returns(storageMock.Object);
 
         await _sut.SetFeaturesAsync(appId, payload);
 
-        _tenantStorageFactoryMock.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
         _storageFactoryMock.Verify(x => x.Create(), Times.Never);
-        storageMock.Verify(x => x.SetFeaturesAsync(
+        _tenantStorageMock.Verify(x => x.SetFeaturesAsync(
             It.Is<ManageFeaturesRequest>(p => p == payload)), Times.Once);
     }
     #endregion
@@ -370,9 +328,7 @@ public class SharedManagementServiceTests
     {
         // Arrange
         const string appId = "test";
-        var storageMock = new Mock<ITenantStorage>();
-        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
-        storageMock.Setup(x => x.GetAllApiKeys()).ReturnsAsync(new List<ApiKeyDesc>
+        _tenantStorageMock.Setup(x => x.GetAllApiKeys()).ReturnsAsync(new List<ApiKeyDesc>
         {
             new()
             {

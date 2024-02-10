@@ -29,7 +29,14 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
-            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantSqliteContext>>();
+            services.AddScoped<ITenantStorage>(sp =>
+            {
+                var tenantProvider = sp.GetRequiredService<ITenantProvider>();
+                var context = ActivatorUtilities.CreateInstance<DbTenantSqliteContext>(sp, tenantProvider);
+                var timeProvider = sp.GetRequiredService<TimeProvider>();
+
+                return new EfTenantStorage(context, timeProvider, tenantProvider);
+            });
         }
         else if (!string.IsNullOrEmpty(mssql))
         {
@@ -44,22 +51,21 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
-            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantMsSqlContext>>();
+            services.AddScoped<ITenantStorage>(sp =>
+            {
+                var tenantProvider = sp.GetRequiredService<ITenantProvider>();
+                var context = ActivatorUtilities.CreateInstance<DbTenantMsSqlContext>(sp, tenantProvider);
+                var timeProvider = sp.GetRequiredService<TimeProvider>();
+
+                return new EfTenantStorage(context, timeProvider, tenantProvider);
+            });
         }
         else
         {
             throw new InvalidOperationException("A database connection string must be supplied.");
         }
 
-        services.AddScoped<ITenantProvider>(sp =>
-        {
-            var context = sp.GetService<IHttpContextAccessor>()?.HttpContext;
-            var accountName = context?.User.FindFirstValue(CustomClaimTypes.AccountName);
-
-            return !string.IsNullOrEmpty(accountName)
-                ? new ManualTenantProvider(accountName)
-                : throw new InvalidOperationException("You should only request ITenantProvider from within an authenticated context");
-        });
+        services.AddScoped<ITenantProvider, TenantProvider>();
 
         // Add storage
         services.AddScoped<IGlobalStorage, EfGlobalGlobalStorage>();

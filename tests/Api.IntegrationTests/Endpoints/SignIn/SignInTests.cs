@@ -174,7 +174,7 @@ public class SignInTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         // Assert
         using var scope = _apiFactory.Services.CreateScope();
-        var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(applicationName).GetTokenKeys();
+        var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorage>().GetTokenKeys();
         tokenKeys.Should().NotBeNull();
         tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
         tokenKeys.Any(x => x.CreatedAt >= (DateTime.UtcNow.AddDays(-30))).Should().BeTrue();

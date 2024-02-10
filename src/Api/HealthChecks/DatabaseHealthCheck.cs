@@ -5,12 +5,12 @@ namespace Passwordless.Api.HealthChecks;
 
 public class DatabaseHealthCheck : IHealthCheck
 {
-    private readonly ITenantStorageFactory _tenantStorageFactory;
+    private readonly ITenantStorage _tenantStorage;
     private readonly ILogger<DatabaseHealthCheck> _logger;
 
-    public DatabaseHealthCheck(ITenantStorageFactory tenantStorageFactory, ILogger<DatabaseHealthCheck> logger)
+    public DatabaseHealthCheck(ITenantStorage tenantStorage, ILogger<DatabaseHealthCheck> logger)
     {
-        _tenantStorageFactory = tenantStorageFactory;
+        _tenantStorage = tenantStorage;
         _logger = logger;
     }
 
@@ -18,8 +18,7 @@ public class DatabaseHealthCheck : IHealthCheck
     {
         try
         {
-            var storage = _tenantStorageFactory.Create(null);
-            await storage.GetAccountInformation();
+            await _tenantStorage.GetAccountInformation();
         }
         catch
         {
