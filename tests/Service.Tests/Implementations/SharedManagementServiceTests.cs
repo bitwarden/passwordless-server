@@ -231,7 +231,7 @@ public class SharedManagementServiceTests
         };
         _tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
-        
+
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
             await _sut.DeleteApplicationAsync(appId));
 

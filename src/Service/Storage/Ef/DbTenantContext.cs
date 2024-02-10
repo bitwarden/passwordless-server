@@ -8,7 +8,7 @@ namespace Passwordless.Service.Storage.Ef;
 public abstract class DbTenantContext : DbGlobalContext
 {
     private readonly ITenantProvider _tenantProvider;
-    
+
     protected DbTenantContext(
         DbContextOptions options,
         ITenantProvider tenantProvider

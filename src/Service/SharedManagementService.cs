@@ -96,7 +96,7 @@ public class SharedManagementService : ISharedManagementService
         {
             throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
         }
-        
+
         if (await _tenantStorage.TenantExists())
         {
             throw new ApiException($"accountName '{accountName}' is not available", 409);
@@ -140,7 +140,8 @@ public class SharedManagementService : ISharedManagementService
     {
         var appId = GetAppId(secretKey);
 
-        var existingKey = await _tenantStorage.GetApiKeyAsync(secretKey);
+        var storage = _globalStorageFactory.Create();
+        var existingKey = await storage.GetApiKeyAsync(secretKey);
         if (existingKey != null)
         {
             if (existingKey.IsLocked)

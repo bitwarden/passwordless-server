@@ -21,7 +21,7 @@ public class EfTenantStorage : ITenantStorage
         _tenantProvider = tenantProvider;
         _timeProvider = timeProvider;
     }
-    
+
     public string Tenant => _tenantProvider.Tenant;
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Passwordless.Common.Utils;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -49,5 +50,12 @@ public class EfGlobalGlobalStorage : IGlobalStorage
         var rows = await _db.SaveChangesAsync();
 
         return rows;
+    }
+
+    public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
+    {
+        var appId = ApiKeyUtils.GetAppId(apiKey);
+        var pk = apiKey.Substring(apiKey.Length - 4);
+        return _db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk && e.Tenant == appId);
     }
 }
