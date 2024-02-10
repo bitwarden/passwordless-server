@@ -44,7 +44,7 @@ public class EfGlobalGlobalStorage : IGlobalStorage
                     CreatedAt = DateOnly.FromDateTime(_timeProvider.GetUtcNow().UtcDateTime)
                 });
 
-        await _db.PeriodicCredentialReports.AddRangeAsync(result);
+        _db.PeriodicCredentialReports.AddRange(result);
 
         var rows = await _db.SaveChangesAsync();
 
@@ -86,7 +86,7 @@ public class EfGlobalGlobalStorage : IGlobalStorage
                     CreatedAt = DateOnly.FromDateTime(_timeProvider.GetUtcNow().UtcDateTime)
                 });
 
-        await _db.PeriodicActiveUserReports.AddRangeAsync(result);
+        _db.PeriodicActiveUserReports.AddRange(result);
 
         return await _db.SaveChangesAsync();
     }
