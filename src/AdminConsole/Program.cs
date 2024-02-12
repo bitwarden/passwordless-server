@@ -8,6 +8,7 @@ using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Endpoints;
+using Passwordless.AdminConsole.HealthChecks;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
@@ -157,6 +158,7 @@ void RunTheApp()
     builder.Services.AddAntiforgery();
 
     builder.Services.AddRateLimiting();
+    builder.AddPasswordlessHealthChecks();
 
     WebApplication app;
     try
@@ -209,6 +211,8 @@ void RunTheApp()
 
     app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
+
+    app.MapPasswordlessHealthChecks();
 
     app.Run();
 }

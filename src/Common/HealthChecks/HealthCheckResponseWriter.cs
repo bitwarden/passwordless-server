@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Passwordless.Api.HealthChecks;
+namespace Passwordless.Common.HealthChecks;
 
 public static class HealthCheckResponseWriter
 {
