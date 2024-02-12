@@ -27,7 +27,6 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
-            services.AddScoped<ITenantStorage, EfTenantStorage>();
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantSqliteContext>>();
         }
         else if (!string.IsNullOrEmpty(mssql))
@@ -43,13 +42,13 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
-            services.AddScoped<ITenantStorage, EfTenantStorage>();
             services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantMsSqlContext>>();
         }
         else
         {
             throw new InvalidOperationException("A database connection string must be supplied.");
         }
+        services.AddScoped<ITenantStorage, EfTenantStorage>();
 
         services.AddScoped<ITenantProvider, TenantProvider>();
 
