@@ -164,7 +164,9 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         var organization = await db.Organizations
             .Include(x => x.Applications)
             .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+
         if (organization == null) return;
+
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
@@ -185,6 +187,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };
@@ -193,8 +196,6 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
     }
-
-
 }
 
 public record PricingCardModel(
