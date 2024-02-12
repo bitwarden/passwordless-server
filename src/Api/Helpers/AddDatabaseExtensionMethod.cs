@@ -35,6 +35,7 @@ public static class AddDatabaseExtensionMethod
 
                 return new EfTenantStorage(context, timeProvider, tenantProvider);
             });
+            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantSqliteContext>>();
         }
         else if (!string.IsNullOrEmpty(mssql))
         {
@@ -57,6 +58,7 @@ public static class AddDatabaseExtensionMethod
 
                 return new EfTenantStorage(context, timeProvider, tenantProvider);
             });
+            services.AddScoped<ITenantStorageFactory, EfTenantStorageFactory<DbTenantMsSqlContext>>();
         }
         else
         {
