@@ -146,6 +146,10 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        var details = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        details.Should().NotBeNull();
+        details!.Type.Should().Contain("magic_link_email_admin_address_only");
     }
 
     [Fact]
@@ -190,16 +194,26 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        var responseStatusCodes = new List<HttpStatusCode>();
-        for (var i = 0; i < 150; i++)
+        var unsuccessfulResponse = default(HttpResponseMessage);
+        for (var i = 0; i < 1_000_000; i++)
         {
-            using var response = await client.PostAsJsonAsync("magic-link/send", request);
-            responseStatusCodes.Add(response.StatusCode);
+            var response = await client.PostAsJsonAsync("magic-link/send", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                unsuccessfulResponse = response;
+                break;
+            }
+            else
+            {
+                response.Dispose();
+            }
         }
 
         // Assert
-        responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
-        responseStatusCodes.Should().Contain(HttpStatusCode.TooManyRequests);
+        unsuccessfulResponse.Should().NotBeNull();
+        unsuccessfulResponse!.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+
+        unsuccessfulResponse.Dispose();
     }
 
     [Fact]
@@ -220,17 +234,30 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        var responseStatusCodes = new List<HttpStatusCode>();
-        for (var i = 0; i < 1500; i++)
+        var unsuccessfulResponse = default(HttpResponseMessage);
+        for (var i = 0; i < 1_000_000; i++)
         {
-            using var response = await client.PostAsJsonAsync("magic-link/send", request);
+            var response = await client.PostAsJsonAsync("magic-link/send", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                unsuccessfulResponse = response;
+                break;
+            }
+            else
+            {
+                response.Dispose();
+            }
+
             api.Time.Advance(TimeSpan.FromMinutes(1));
-            responseStatusCodes.Add(response.StatusCode);
         }
 
         // Assert
-        responseStatusCodes.Should().Contain(HttpStatusCode.NoContent);
-        responseStatusCodes.Should().Contain(HttpStatusCode.TooManyRequests);
+        unsuccessfulResponse.Should().NotBeNull();
+        unsuccessfulResponse!.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+
+        var details = await unsuccessfulResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        details.Should().NotBeNull();
+        details!.Type.Should().Contain("magic_link_email_quota_exceeded");
     }
 
     [Fact]
@@ -250,13 +277,16 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Skip all limitations for new applications
         api.Time.Advance(TimeSpan.FromDays(365));
 
-        for (var i = 0; i < 1500; i++)
+        for (var i = 0; i < 1_000_000; i++)
         {
-            using var _ = await client.PostAsJsonAsync("magic-link/send", request);
+            using var initialResponse = await client.PostAsJsonAsync("magic-link/send", request);
+            if (!initialResponse.IsSuccessStatusCode)
+                break;
+
             api.Time.Advance(TimeSpan.FromMinutes(1));
         }
 
-        api.Time.Advance(TimeSpan.FromDays(30));
+        api.Time.Advance(TimeSpan.FromDays(31));
 
         // MemoryCache does not support time travel, So reset manually
         api.ResetCache();

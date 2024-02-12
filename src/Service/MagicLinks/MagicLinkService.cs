@@ -27,6 +27,7 @@ public class MagicLinkService(
             !account.AdminEmails.Contains(dto.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
+                "magic_link_email_admin_address_only",
                 "Because your application has been created less than 24 hours ago, " +
                 "you can only request magic links to the admin email address.",
                 403
@@ -66,6 +67,7 @@ public class MagicLinkService(
         if (emailsDispatchedIn30Days >= quota)
         {
             throw new ApiException(
+                "magic_link_email_quota_exceeded",
                 "You have reached your monthly quota for magic link emails. " +
                 "Please try again later.",
                 429
