@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.HealthChecks;
 
@@ -16,21 +17,10 @@ public static class HealthCheckBootstrap
         healthCheckBuilder.AddCheck<SimpleHealthCheck>(
             "http",
             tags: new[] { TagSimple });
-        healthCheckBuilder.AddCheck<DatabaseHealthCheck>(
-            "orm",
+
+        builder.Services.AddHealthChecks().AddDbContextCheck<DbGlobalContext>(
+            "db",
             tags: new[] { TagDatabase });
-
-        var sqlite = builder.Configuration.GetConnectionString("sqlite:api");
-        if (!string.IsNullOrEmpty(sqlite))
-        {
-            healthCheckBuilder.AddSqlite(sqlite, tags: new[] { TagDatabase });
-        }
-
-        var mssql = builder.Configuration.GetConnectionString("mssql:api");
-        if (!string.IsNullOrEmpty(mssql))
-        {
-            healthCheckBuilder.AddSqlServer(mssql, tags: new[] { TagDatabase });
-        }
 
         healthCheckBuilder.AddCheck<VersionHealthCheck>(
             "version",
