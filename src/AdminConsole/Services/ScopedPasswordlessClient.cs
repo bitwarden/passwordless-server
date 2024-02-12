@@ -13,6 +13,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 {
     Task<ApplicationEventLogResponse> GetApplicationEventLog(int pageNumber, int pageSize);
     Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest request);
+    Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest request);
 
     /// <summary>
     /// Returns a list of configured authenticators for the current app. If the list is empty, all authenticators are allowed.
@@ -41,7 +42,6 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
 {
     private readonly HttpClient _client;
-    private readonly ICurrentContext _currentContext;
 
     public ScopedPasswordlessClient(
         HttpClient httpClient,
@@ -54,7 +54,6 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         })
     {
         _client = httpClient;
-        _currentContext = context;
 
         // can be dropped when call below is moved to the SDK.
         _client.DefaultRequestHeaders.Remove("ApiSecret");
@@ -82,11 +81,30 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         }
 
         var q = queryBuilder.ToQueryString();
-        var response = await _client.GetAsync($"/apps/{_currentContext.AppId}/reporting/credentials/periodic{q}");
+        var response = await _client.GetAsync($"/reporting/credentials/periodic{q}");
         response.EnsureSuccessStatusCode();
 
         var rest = (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicCredentialReportResponse>>())!;
         return rest;
+    }
+
+    public async Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest request)
+    {
+        var queryBuilder = new QueryBuilder();
+        if (request.From.HasValue)
+        {
+            queryBuilder.Add("from", request.From.Value.ToString("yyyy-MM-dd"));
+        }
+        if (request.To.HasValue)
+        {
+            queryBuilder.Add("to", request.To.Value.ToString("yyyy-MM-dd"));
+        }
+
+        var q = queryBuilder.ToQueryString();
+        var response = await _client.GetAsync($"/reporting/active-users/periodic{q}");
+        response.EnsureSuccessStatusCode();
+
+        return (await response.Content.ReadFromJsonAsync<IEnumerable<PeriodicActiveUserReportResponse>>())!;
     }
 
     public async Task<IEnumerable<ConfiguredAuthenticatorResponse>> GetConfiguredAuthenticatorsAsync(ConfiguredAuthenticatorRequest request)

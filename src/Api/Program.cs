@@ -111,7 +111,6 @@ services.AddSingleton<ISystemClock, TimeProviderSystemClockAdapter>();
 services.AddScoped<IRequestContext, RequestContext>();
 services.AddSingleton<IMetaDataService, MetaDataService>();
 
-services.AddHostedService<PeriodicCredentialReportsBackgroundService>();
 services.AddHostedService<DispatchedEmailCleanupService>();
 
 builder.AddMail();

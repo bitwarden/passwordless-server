@@ -2,6 +2,8 @@ namespace Passwordless.Common.Background;
 
 public abstract class BasePeriodicBackgroundService : BackgroundService
 {
+    protected ILogger Logger;
+
     /// <summary>
     /// The time of day when the service should run.
     /// </summary>
@@ -27,11 +29,13 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
     protected BasePeriodicBackgroundService(
         TimeOnly executionTime,
         TimeSpan period,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        ILogger logger)
     {
         _executionTime = executionTime;
         _period = period;
         _timeProvider = timeProvider;
+        Logger = logger;
     }
 
     protected CancellationTokenSource CancellationToken { get; } = new();
@@ -39,7 +43,7 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var executionPlan = ExecutionPlanUtility.GetExecutionPlan(_executionTime, _period, _timeProvider);
-
+        Logger.LogInformation("Starting {BackgroundService} in {InitialDelay}.", GetType().Name, executionPlan.InitialDelay);
         _timer = new Timer(DoWork, null, executionPlan.InitialDelay, _period);
 
         return Task.CompletedTask;

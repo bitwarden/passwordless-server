@@ -23,8 +23,9 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
     public DbSet<Authenticator> Authenticators => Set<Authenticator>();
     public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
-    public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
     public DbSet<DispatchedEmail> DispatchedEmails => Set<DispatchedEmail>();
+    public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
+    public DbSet<PeriodicActiveUserReport> PeriodicActiveUserReports => Set<PeriodicActiveUserReport>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -106,6 +107,15 @@ public abstract class DbGlobalContext : DbContext
             builder.HasKey(x => x.Id);
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.DispatchedEmails)
+                .HasForeignKey(x => x.Tenant)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<PeriodicActiveUserReport>(builder =>
+        {
+            builder.HasKey(x => new { x.Tenant, x.CreatedAt });
+            builder.HasOne(x => x.Application)
+                .WithMany(x => x.PeriodicActiveUserReports)
                 .HasForeignKey(x => x.Tenant)
                 .IsRequired();
         });

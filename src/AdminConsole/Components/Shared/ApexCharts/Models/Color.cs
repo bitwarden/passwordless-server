@@ -9,6 +9,9 @@ namespace Passwordless.AdminConsole.Components.Shared.ApexCharts.Models;
 public class Color
 {
     public static readonly Color Default = new("#2563eb");
+    public static readonly Color AmberOrange = new("#FFBF00");
+    public static readonly Color MelonRed = new("#FF4E63");
+    public static readonly Color MediumPurple = new("#976FD9");
 
     public Color(string hex)
     {

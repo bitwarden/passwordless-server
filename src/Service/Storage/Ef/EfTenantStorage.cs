@@ -31,6 +31,8 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         await db.AccountInfo.ExecuteDeleteAsync();
         await db.AppFeatures.ExecuteDeleteAsync();
         await db.Authenticators.ExecuteDeleteAsync();
+        await db.PeriodicCredentialReports.ExecuteDeleteAsync();
+        await db.PeriodicActiveUserReports.ExecuteDeleteAsync();
     }
 
     public Task DeleteCredential(byte[] id)
@@ -226,6 +228,23 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         DateOnly? to)
     {
         var query = db.PeriodicCredentialReports.AsQueryable();
+        if (from.HasValue)
+        {
+            query = query.Where(x => x.CreatedAt >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(x => x.CreatedAt <= to.Value);
+        }
+        return await query
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<PeriodicActiveUserReport>> GetPeriodicActiveUserReportsAsync(DateOnly? from, DateOnly? to)
+    {
+        var query = db.PeriodicActiveUserReports.AsQueryable();
         if (from.HasValue)
         {
             query = query.Where(x => x.CreatedAt >= from.Value);

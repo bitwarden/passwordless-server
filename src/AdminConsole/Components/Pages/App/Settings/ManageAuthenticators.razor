@@ -7,13 +7,12 @@
 
 @inject IPasswordlessManagementClient ManagementClient
 @inject IScopedPasswordlessClient PasswordlessClient
-@inject IHttpContextAccessor HttpContextAccessor
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
 
 @if (_isInitialized)
 {
-    <Page Title="Allowed Authenticators" BreadCrumbItems="_breadCrumbs">
+    <Page Title="Allowlist" BreadCrumbItems="_breadCrumbs">
         <Panel Header="Manage">
             <EditForm id="filter-form" class="flex flex-col space-y-4" Model="FilterForm" FormName="filter-form">
                 <div class="grid grid-cols-2 gap-4">
@@ -149,7 +148,7 @@
         {
             new("Settings", $"app/{AppId}/settings"),
             new("Authenticators", $"app/{AppId}/settings/authenticators"),
-            new("Allowed Authenticators", $"app/{AppId}/settings/authenticators/manage")
+            new("Allowlist", $"app/{AppId}/settings/authenticators/manage")
         };
         
         if (!CurrentContext.Features.AllowAttestation)
