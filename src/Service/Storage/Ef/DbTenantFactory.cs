@@ -4,6 +4,13 @@ namespace Passwordless.Service.Storage.Ef;
 
 public interface ITenantStorageFactory
 {
+    /// <summary>
+    /// Use <see cref="ITenantStorage" /> instead when not calling from `ManagementKey` scope.
+    /// <see cref="ITenantStorage" /> uses the `accountName` claim in <see cref="TenantProvider" /> to determine the tenant when an authorization is successful.
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <returns></returns>
+    [Obsolete("Use injected `ITenantStorage` instead when not calling from `ManagementKey` scope.")]
     ITenantStorage Create(string appId);
 }
 
