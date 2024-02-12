@@ -70,8 +70,8 @@ public class SharedManagementService : ISharedManagementService
     public async Task<bool> IsAvailable(string accountName)
     {
         // check if tenant already exists
-        var tenantStorage = tenantFactory.Create(accountName);
-        return !await tenantStorage.TenantExists();
+        var storage = tenantFactory.Create(accountName);
+        return !await storage.TenantExists();
     }
 
     public async Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options)
@@ -101,17 +101,17 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
         }
 
-        var tenantStorage = tenantFactory.Create(appId);
-        if (await tenantStorage.TenantExists())
+        var storage = tenantFactory.Create(appId);
+        if (await storage.TenantExists())
         {
             throw new ApiException($"accountName '{accountName}' is not available", 409);
         }
 
-        string apiKey1 = await SetupApiKey(accountName, _tenantStorage);
-        string apiKey2 = await SetupApiKey(accountName, _tenantStorage);
+        string apiKey1 = await SetupApiKey(accountName, storage);
+        string apiKey2 = await SetupApiKey(accountName, storage);
 
-        (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, _tenantStorage);
-        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, _tenantStorage);
+        (string original, string hashed) apiSecret1 = await SetupApiSecret(accountName, storage);
+        (string original, string hashed) apiSecret2 = await SetupApiSecret(accountName, storage);
 
         var account = new AccountMetaInformation
         {
@@ -130,7 +130,7 @@ public class SharedManagementService : ISharedManagementService
             },
             Tenant = accountName
         };
-        await tenantStorage.SaveAccountInformation(account);
+        await storage.SaveAccountInformation(account);
         return new CreateAppResultDto
         {
             ApiKey1 = apiKey1,
