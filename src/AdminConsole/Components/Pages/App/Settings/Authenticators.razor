@@ -13,15 +13,15 @@
 @if (_isInitialized)
 {
     <Page Title="Authenticators" BreadCrumbItems="_breadCrumbs">
-        <Panel Header="Allowed Authenticators">
+        <Panel Header="Allowlist">
             <p><strong>All authenticators are allowed by default.</strong> If you wish, you can control what authenticators are allowed.</p>
-            <EditForm Model="ManageWhitelistForm" FormName="whitelist-form" OnSubmit="OnWhitelistFormSubmitted">
-                <button class="btn-primary" name="ManageWhitelistForm.Action" type="submit" value="manage">Choose allowed authenticators</button>
+            <EditForm Model="ManageAllowlistForm" FormName="allowlist-form" OnSubmit="OnAllowlistFormSubmitted">
+                <button class="btn-primary" name="ManageAllowlistForm.Action" type="submit" value="manage">Choose allowed authenticators</button>
             </EditForm>
-            @if (Whitelist.Any())
+            @if (Allowlist.Any())
             {
                 <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
-                    @foreach (var authenticator in Whitelist)
+                    @foreach (var authenticator in Allowlist)
                     {
                         <Card Title="@authenticator.Name" SubTitle="@authenticator.AaGuid.ToString()" />
                     }
@@ -34,9 +34,9 @@
 @code {
     private bool _isInitialized;
 
-    public IReadOnlyCollection<ConfiguredAuthenticatorViewModel> Whitelist { get; private set; } = new List<ConfiguredAuthenticatorViewModel>(0);
+    public IReadOnlyCollection<ConfiguredAuthenticatorViewModel> Allowlist { get; private set; } = new List<ConfiguredAuthenticatorViewModel>(0);
 
-    [SupplyParameterFromForm] public ManageWhitelistViewModel ManageWhitelistForm { get; private set; } = new();
+    [SupplyParameterFromForm] public ManageAllowlistViewModel ManageAllowlistForm { get; private set; } = new();
 
     private IReadOnlyCollection<BreadCrumb.BreadCrumbItem>? _breadCrumbs;
     
@@ -55,9 +55,9 @@
         }
 
         var mds = await ManagementClient.GetMetaDataStatementEntriesAsync(new EntriesRequest());
-        var whitelistRequest = new ConfiguredAuthenticatorRequest(true);
-        var whitelist = await Client.GetConfiguredAuthenticatorsAsync(whitelistRequest);
-        Whitelist = whitelist
+        var allowlistRequest = new ConfiguredAuthenticatorRequest(true);
+        var allowlist = await Client.GetConfiguredAuthenticatorsAsync(allowlistRequest);
+        Allowlist = allowlist
             .Select(x => new ConfiguredAuthenticatorViewModel(
                 x.AaGuid,
                 mds.First(m => m.AaGuid == x.AaGuid).Name))
@@ -67,9 +67,9 @@
 
     public record ConfiguredAuthenticatorViewModel(Guid AaGuid, string Name);
 
-    private void OnWhitelistFormSubmitted()
+    private void OnAllowlistFormSubmitted()
     {
-        switch (ManageWhitelistForm.Action)
+        switch (ManageAllowlistForm.Action)
         {
             case "manage":
                 NavigationManager.NavigateTo($"app/{AppId}/settings/authenticators/manage");
@@ -77,7 +77,7 @@
         }
     }
 
-    public class ManageWhitelistViewModel
+    public class ManageAllowlistViewModel
     {
         public string? Action { get; set; }
     }
