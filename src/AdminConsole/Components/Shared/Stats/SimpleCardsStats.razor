@@ -1,0 +1,45 @@
+@using System.Globalization
+@inherits BaseCardStats
+
+@if (Items.Count > 0)
+{
+    <dl class="@Class">
+        @foreach (var item in Items)
+        {
+            <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <dt class="truncate text-sm font-medium text-gray-500">@item.Label</dt>
+                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">@item.GetValue()</dd>
+            </div>
+        }
+    </dl>
+}
+
+@code {
+    [Parameter]
+    public required ICollection<Item> Items { get; set; }
+
+    public sealed record Item(string Label, double Value, ValueTypes Type)
+    {
+        public string GetValue()
+        {
+            switch (Type)
+            {
+                case ValueTypes.Double:
+                    return Value.ToString("N2", CultureInfo.InvariantCulture);
+                case ValueTypes.Integer:
+                    return Value.ToString("N0", CultureInfo.InvariantCulture);
+                case ValueTypes.Percentage:
+                    return Value.ToString("P2", CultureInfo.InvariantCulture);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    public enum ValueTypes
+    {
+        Double,
+        Integer,
+        Percentage
+    }
+}

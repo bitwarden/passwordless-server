@@ -12,6 +12,7 @@
 </HeadContent>
 
 <Page Title="Reporting">
+    <TrendingCardsStats class="col-span-2" Items="SummaryItems" />
     <Panel>
         <div class="flex flex-col space-y-4">
             @if (IsFilterDatePickerEnabled)
@@ -45,7 +46,7 @@
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
             @if (IsLoaded)
             {
-                <TotalCredentialsCountChart Data="PeriodicCredentialReports"  />
+                <TotalCredentialsCountChart Data="PeriodicCredentialReports" />
                 <TotalUsersCountChart Data="PeriodicCredentialReports" />
             }
         </div>
@@ -58,9 +59,13 @@
     [SupplyParameterFromForm] public FilterViewModel? Filter { get; set; }
     
     private EditContext? _filterContext;
-    
-    public IEnumerable<PeriodicCredentialReportResponse> PeriodicCredentialReports { get; set; }
 
+    public IEnumerable<PeriodicCredentialReportResponse> PeriodicCredentialReports { get; set; } = new List<PeriodicCredentialReportResponse>(0);
+    
+    public IEnumerable<PeriodicActiveUserReportResponse> PeriodicActiveUserReports { get; set; } = new List<PeriodicActiveUserReportResponse>(0);
+
+    public ICollection<TrendingCardsStats.Item> SummaryItems { get; set; } = new List<TrendingCardsStats.Item>(0);
+    
     public bool IsLoaded { get; private set; }    
 
     protected override async Task OnInitializedAsync()
@@ -94,8 +99,17 @@
 
     public async Task<bool> LoadAsync()
     {
-        var req = PeriodicCredentialReportRequest.Create(Filter.From, Filter.To);
-        PeriodicCredentialReports = await PasswordlessClient.GetPeriodicCredentialReportsAsync(req);
+        var periodicCredentialReportRequest = PeriodicCredentialReportRequest.Create(Filter.From, Filter.To);
+        PeriodicCredentialReports = await PasswordlessClient.GetPeriodicCredentialReportsAsync(periodicCredentialReportRequest);
+        var periodicActiveUserReportRequest = PeriodicActiveUserReportRequest.Create(Filter.From, Filter.To);
+        PeriodicActiveUserReports = await PasswordlessClient.GetPeriodicActiveUserReportsAsync(periodicActiveUserReportRequest);
+        var lastActiveUserReport = PeriodicActiveUserReports.LastOrDefault();
+        if (lastActiveUserReport != null)
+        {
+            double totalUsers = lastActiveUserReport.TotalUsers;
+            SummaryItems.Add(new TrendingCardsStats.Item("Daily Active Users", lastActiveUserReport.DailyActiveUsers, TrendingCardsStats.ValueTypes.Integer, "({0} of total)", lastActiveUserReport.DailyActiveUsers / totalUsers, TrendingCardsStats.ValueTypes.Percentage));
+            SummaryItems.Add(new TrendingCardsStats.Item("Weekly Active Users", lastActiveUserReport.WeeklyActiveUsers, TrendingCardsStats.ValueTypes.Integer, "({0} of total)", lastActiveUserReport.WeeklyActiveUsers / totalUsers, TrendingCardsStats.ValueTypes.Percentage));
+        }
         return true;
     }
 

@@ -1,0 +1,65 @@
+@using System.Globalization
+@inherits BaseCardStats
+
+@if (Items.Count > 0)
+{
+    <dl class="@Class">
+        @foreach (var item in Items)
+        {
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8">
+                <dt class="text-sm font-medium leading-6 text-gray-500">@item.Label</dt>
+                <dd class="text-xs font-medium text-gray-700">@string.Format(item.SubLabel, item.GetSubValue())</dd>
+                <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">@item.GetValue()</dd>
+            </div>
+        }
+    </dl>
+}
+
+@code {
+    [Parameter]
+    public required ICollection<Item> Items { get; set; }
+
+    /// <summary>
+    /// The content of a single card
+    /// </summary>
+    /// <param name="Label">The primary label</param>
+    /// <param name="Value">The primary value</param>
+    /// <param name="Type">The primary type, affects formatting of the displayed value.</param>
+    /// <param name="SubLabel">The sub label, should be of format "prefix {0} suffix" for the 'SubValue' to display correctly.</param>
+    /// <param name="SubValue">The sub value</param>
+    /// <param name="SubType">The sub type, affects formatting of the displayed value.</param>
+    public sealed record Item(
+        string Label,
+        double Value,
+        ValueTypes Type,
+        string SubLabel,
+        double SubValue,
+        ValueTypes SubType)
+    {
+        public string GetValue() => Format(Value, Type);
+        
+        public string GetSubValue() => Format(SubValue, SubType);
+        
+        private string Format(double value, ValueTypes type)
+        {
+            switch (type)
+            {
+                case ValueTypes.Double:
+                    return value.ToString("N2", CultureInfo.InvariantCulture);
+                case ValueTypes.Integer:
+                    return value.ToString("N0", CultureInfo.InvariantCulture);
+                case ValueTypes.Percentage:
+                    return value.ToString("P2", CultureInfo.InvariantCulture);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    public enum ValueTypes
+    {
+        Double,
+        Integer,
+        Percentage
+    }
+}

@@ -9,11 +9,13 @@ public static class ReportingEndpoints
 {
     public static void MapReportingEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/apps/{appId}/reporting")
+        var group = app.MapGroup("/reporting")
             .RequireSecretKey()
             .RequireCors("default");
 
         group.MapGet("/credentials/periodic", GetPeriodicCredentialReportsAsync);
+
+        group.MapGet("/active-users/periodic", GetPeriodicActiveUserReportsAsync);
     }
 
     public static async Task<IResult> GetPeriodicCredentialReportsAsync(
@@ -21,6 +23,14 @@ public static class ReportingEndpoints
         IReportingService reportingService)
     {
         var result = await reportingService.GetPeriodicCredentialReportsAsync(request);
+        return Ok(result);
+    }
+
+    public static async Task<IResult> GetPeriodicActiveUserReportsAsync(
+        [AsParameters] PeriodicActiveUserReportRequest request,
+        IReportingService reportingService)
+    {
+        var result = await reportingService.GetPeriodicActiveUserReportsAsync(request);
         return Ok(result);
     }
 }

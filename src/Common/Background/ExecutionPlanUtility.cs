@@ -25,6 +25,8 @@ public static class ExecutionPlanUtility
             initialDelay = initialDelay.Add(period.Multiply(multiplier));
         }
 
+        initialDelay = initialDelay.Subtract(period.Multiply(Math.Floor(initialDelay.Divide(period))));
+
         return new ExecutionPlan(initialDelay);
     }
 }
