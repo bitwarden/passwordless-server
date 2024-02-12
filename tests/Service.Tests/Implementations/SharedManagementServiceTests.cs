@@ -16,7 +16,7 @@ public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorage> _tenantStorageMock = new();
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
-    private readonly Mock<IGlobalStorageFactory> _storageFactoryMock = new();
+    private readonly Mock<IGlobalStorage> _storageMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
     private readonly Mock<IEventLogger> _eventLogger = new();
@@ -30,7 +30,7 @@ public class SharedManagementServiceTests
         _sut = new SharedManagementService(
             _tenantStorageMock.Object,
             _tenantStorageFactoryMock.Object,
-            _storageFactoryMock.Object,
+            _storageMock.Object,
             _systemClockMock.Object,
             _loggerMock.Object,
             _eventLogger.Object);
@@ -247,17 +247,14 @@ public class SharedManagementServiceTests
     [Fact]
     public async Task ListApplicationsPendingDeletionAsync_Returns_ExpectedResult()
     {
-        var storageMock = new Mock<IGlobalStorage>();
         var expected = new List<string> { "app1", "app2" };
-        storageMock.Setup(x => x.GetApplicationsPendingDeletionAsync()).ReturnsAsync(expected);
-        _storageFactoryMock.Setup(x => x.Create()).Returns(storageMock.Object);
+        _storageMock.Setup(x => x.GetApplicationsPendingDeletionAsync()).ReturnsAsync(expected);
 
         var actual = await _sut.GetApplicationsPendingDeletionAsync();
 
         Assert.Equal(expected, actual);
 
-        _storageFactoryMock.Verify(x => x.Create(), Times.Once);
-        storageMock.Verify(x => x.GetApplicationsPendingDeletionAsync(), Times.Once);
+        _storageMock.Verify(x => x.GetApplicationsPendingDeletionAsync(), Times.Once);
     }
 
     #endregion
@@ -273,7 +270,6 @@ public class SharedManagementServiceTests
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("No 'body' or 'parameters' were passed.", actual.Message);
 
-        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         _tenantStorageMock.Verify(x => x.SetFeaturesAsync(It.IsAny<ManageFeaturesRequest>()), Times.Never);
     }
 
@@ -286,8 +282,6 @@ public class SharedManagementServiceTests
 
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("'appId' is required.", actual.Message);
-
-        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
     }
 
     [Fact]
@@ -299,8 +293,6 @@ public class SharedManagementServiceTests
 
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("'appId' is required.", actual.Message);
-
-        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
     }
 
     [Fact]
@@ -318,7 +310,6 @@ public class SharedManagementServiceTests
 
         await _sut.SetFeaturesAsync(appId, payload);
 
-        _storageFactoryMock.Verify(x => x.Create(), Times.Never);
         _tenantStorageMock.Verify(x => x.SetFeaturesAsync(
             It.Is<ManageFeaturesRequest>(p => p == payload)), Times.Once);
     }

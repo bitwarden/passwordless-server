@@ -45,18 +45,18 @@ public class SharedManagementService : ISharedManagementService
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorage _tenantStorage;
     private readonly ITenantStorageFactory tenantFactory;
-    private readonly IGlobalStorageFactory _globalStorageFactory;
+    private readonly IGlobalStorage _storage;
 
     public SharedManagementService(ITenantStorage tenantStorage,
         ITenantStorageFactory tenantFactory,
-        IGlobalStorageFactory globalStorageFactory,
+        IGlobalStorage storage,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
         IEventLogger eventLogger)
     {
         _tenantStorage = tenantStorage;
         this.tenantFactory = tenantFactory;
-        _globalStorageFactory = globalStorageFactory;
+        _storage = storage;
         _systemClock = systemClock;
         _logger = logger;
         _eventLogger = eventLogger;
@@ -276,8 +276,7 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
     {
-        var storage = _globalStorageFactory.Create();
-        var tenants = await storage.GetApplicationsPendingDeletionAsync();
+        var tenants = await _storage.GetApplicationsPendingDeletionAsync();
         return tenants;
     }
 

@@ -7,20 +7,19 @@ public class ReportingService : IReportingService
 {
 
     private readonly ITenantStorage _tenantStorage;
-    private readonly IGlobalStorageFactory _storageFactory;
+    private readonly IGlobalStorage _storage;
 
     public ReportingService(
         ITenantStorage tenantStorage,
-        IGlobalStorageFactory storageFactory)
+        IGlobalStorage storage)
     {
         _tenantStorage = tenantStorage;
-        _storageFactory = storageFactory;
+        _storage = storage;
     }
 
     public Task<int> UpdatePeriodicCredentialReportsAsync()
     {
-        var storage = _storageFactory.Create();
-        return storage.UpdatePeriodicCredentialReportsAsync();
+        return _storage.UpdatePeriodicCredentialReportsAsync();
     }
 
     public async Task<IEnumerable<PeriodicCredentialReportResponse>> GetPeriodicCredentialReportsAsync(PeriodicCredentialReportRequest parameters)
@@ -32,8 +31,7 @@ public class ReportingService : IReportingService
 
     public Task<int> UpdatePeriodicActiveUserReportsAsync()
     {
-        var storage = _storageFactory.Create();
-        return storage.UpdatePeriodicActiveUserReportsAsync();
+        return _storage.UpdatePeriodicActiveUserReportsAsync();
     }
 
     public async Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest parameters)
