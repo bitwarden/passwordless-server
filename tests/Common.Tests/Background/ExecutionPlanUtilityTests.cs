@@ -46,7 +46,7 @@ public class ExecutionPlanUtilityTests
     public void GetExecutionPlan_WhenExecutionTimeIsAfterCurrentTime_ReturnsCorrectInitialDelay2()
     {
         // Arrange
-        var executionTime = new TimeSpan(22, 0, 0);
+        var executionTime = new TimeOnly(22, 0, 0);
         var period = new TimeSpan(0, 0, 0, 30);
 
         var timeProvider = new Mock<TimeProvider>();
