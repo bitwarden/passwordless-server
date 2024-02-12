@@ -103,7 +103,7 @@ services.AddSingleton<ISystemClock, SystemClock>();
 services.AddScoped<IRequestContext, RequestContext>();
 services.AddSingleton<IMetaDataService, MetaDataService>();
 
-services.AddHostedService<PeriodicCredentialReportsBackgroundService>();
+services.AddReportingBackgroundServices();
 
 builder.AddMail();
 

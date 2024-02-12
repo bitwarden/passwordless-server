@@ -4,14 +4,14 @@ using Passwordless.Service;
 
 namespace Passwordless.Api.Reporting.Background;
 
-public sealed class PeriodicCredentialReportsBackgroundService : BasePeriodicBackgroundService
+public sealed class ActiveUserReportingBackgroundService : BasePeriodicBackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public PeriodicCredentialReportsBackgroundService(
+    public ActiveUserReportingBackgroundService(
         IServiceProvider serviceProvider,
         TimeProvider timeProvider,
-        ILogger<PeriodicCredentialReportsBackgroundService> logger) : base(
+        ILogger<ActiveUserReportingBackgroundService> logger) : base(
         new TimeSpan(22, 0, 0),
         TimeSpan.FromDays(1),
         timeProvider,
@@ -22,19 +22,18 @@ public sealed class PeriodicCredentialReportsBackgroundService : BasePeriodicBac
 
     protected override async Task DoWorkAsync(CancellationToken cancellationToken)
     {
-        Logger.LogInformation($"{nameof(PeriodicCredentialReportsBackgroundService)} is executing.");
+        Logger.LogInformation($"{nameof(ActiveUserReportingBackgroundService)} is executing.");
         using IServiceScope scope = _serviceProvider.CreateScope();
         var reportingService = scope.ServiceProvider.GetRequiredService<IReportingService>();
         int result;
         try
         {
-            result = await reportingService.UpdatePeriodicCredentialReportsAsync();
+            result = await reportingService.UpdatePeriodicActiveUserReportsAsync();
         }
         catch (DBConcurrencyException)
         {
             return;
         }
-        Logger.LogInformation("{BackgroundService} updated {Records}.", nameof(PeriodicCredentialReportsBackgroundService), result);
-
+        Logger.LogInformation("{BackgroundService} updated {Records}.", nameof(ActiveUserReportingBackgroundService), result);
     }
 }

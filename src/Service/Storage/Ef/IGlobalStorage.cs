@@ -6,4 +6,5 @@ public interface IGlobalStorage
     Task<ApiKeyDesc> GetApiKeyAsync(string apiKey);
     Task<ICollection<string>> GetApplicationsPendingDeletionAsync();
     Task<int> UpdatePeriodicCredentialReportsAsync();
+    Task<int> UpdatePeriodicActiveUserReportsAsync();
 }

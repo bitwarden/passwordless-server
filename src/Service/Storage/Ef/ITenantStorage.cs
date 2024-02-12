@@ -50,6 +50,7 @@ public interface ITenantStorage
     Task UnlockApiKeyAsync(string apiKeyId);
     Task DeleteApiKeyAsync(string apiKeyId);
     Task<IEnumerable<PeriodicCredentialReport>> GetPeriodicCredentialReportsAsync(DateOnly? from, DateOnly? to);
+    Task<IEnumerable<PeriodicActiveUserReport>> GetPeriodicActiveUserReportsAsync(DateOnly? from, DateOnly? to);
     Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null);
     Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed);
     Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids);
