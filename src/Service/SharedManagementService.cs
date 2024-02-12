@@ -352,9 +352,9 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task LockApiKeyAsync(string appId, string apiKeyId)
     {
+        var storage = tenantFactory.Create(appId);
         try
         {
-            var storage = tenantFactory.Create(appId);
             await storage.LockApiKeyAsync(apiKeyId);
         }
         catch (ArgumentException)
@@ -366,9 +366,9 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task UnlockApiKeyAsync(string appId, string apiKeyId)
     {
+        var storage = tenantFactory.Create(appId);
         try
         {
-            var storage = tenantFactory.Create(appId);
             await storage.UnlockApiKeyAsync(apiKeyId);
         }
         catch (ArgumentException)
@@ -380,9 +380,9 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task DeleteApiKeyAsync(string appId, string apiKeyId)
     {
+        var storage = tenantFactory.Create(appId);
         try
         {
-            var storage = tenantFactory.Create(appId);
             await storage.DeleteApiKeyAsync(apiKeyId);
         }
         catch (ArgumentException)
