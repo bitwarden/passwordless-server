@@ -12,6 +12,8 @@ public class ApexChartOptions<TXValueType, TYValueType>
 
     public Xaxis<TXValueType>? Xaxis { get; set; }
 
+    public Yaxis Yaxis { get; } = new();
+
     public NoData NoData { get; set; } = new();
 
     public Legend Legend { get; set; } = new();
