@@ -81,8 +81,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         using var scope = _apiFactory.Services.CreateScope();
 
-        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorage>()
-            .GetAppFeaturesAsync();
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
 
         appFeature.Should().NotBeNull();
         appFeature!.Tenant.Should().Be(name);
@@ -113,7 +112,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         setFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var scope = _apiFactory.Services.CreateScope();
 
-        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorage>().GetAppFeaturesAsync();
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
         appFeature.Should().NotBeNull();
         appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
     }
@@ -160,7 +159,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
         manageFeatureResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var scope = _apiFactory.Services.CreateScope();
 
-        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorage>().GetAppFeaturesAsync();
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
         appFeature.Should().NotBeNull();
         appFeature!.EventLoggingRetentionPeriod.Should().Be(expectedEventLoggingRetentionPeriod);
         appFeature.EventLoggingIsEnabled.Should().BeTrue();

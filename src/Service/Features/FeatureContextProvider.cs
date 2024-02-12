@@ -8,14 +8,14 @@ public class FeatureContextProvider : IFeatureContextProvider
 {
     private readonly Lazy<Task<IFeaturesContext>> _lazyContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ITenantStorage _storage;
+    private readonly ITenantStorageFactory _tenantStorageFactory;
 
     public FeatureContextProvider(
         IHttpContextAccessor httpContextAccessor,
-        ITenantStorage storage)
+        ITenantStorageFactory tenantStorageFactory)
     {
         _httpContextAccessor = httpContextAccessor;
-        _storage = storage;
+        _tenantStorageFactory = tenantStorageFactory;
         this._lazyContext = new Lazy<Task<IFeaturesContext>>(async () =>
         {
             var httpContext = _httpContextAccessor?.HttpContext;
@@ -47,7 +47,8 @@ public class FeatureContextProvider : IFeatureContextProvider
 
             if (string.IsNullOrWhiteSpace(appId)) return new NullFeaturesContext();
 
-            var features = await _storage.GetAppFeaturesAsync();
+            var storage = _tenantStorageFactory.Create(appId);
+            var features = await storage.GetAppFeaturesAsync();
             if (features != null)
             {
                 return new FeaturesContext(

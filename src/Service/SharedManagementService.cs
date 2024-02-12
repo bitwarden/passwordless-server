@@ -170,7 +170,8 @@ public class SharedManagementService : ISharedManagementService
     {
         var appId = GetAppId(publicKey);
 
-        var existingKey = await _tenantStorage.GetApiKeyAsync(publicKey);
+        var storage = _globalStorageFactory.Create();
+        var existingKey = await storage.GetApiKeyAsync(publicKey);
         if (existingKey != null && existingKey.ApiKey == publicKey)
         {
             if (!existingKey.IsLocked)

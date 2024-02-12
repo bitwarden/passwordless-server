@@ -75,12 +75,6 @@ public class EfTenantStorage : ITenantStorage
         return res;
     }
 
-    public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
-    {
-        var pk = apiKey.Substring(apiKey.Length - 4);
-        return db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk);
-    }
-
     public async Task<StoredCredential> GetCredential(byte[] credentialId)
     {
         var res = await db.Credentials.FirstOrDefaultAsync(c => c.DescriptorId == credentialId);

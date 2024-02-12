@@ -15,6 +15,7 @@ namespace Passwordless.Service.Tests.Implementations;
 public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorage> _tenantStorageMock = new();
+    private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
     private readonly Mock<IGlobalStorageFactory> _storageFactoryMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<IConfiguration> _configurationMock = new();
@@ -29,6 +30,7 @@ public class SharedManagementServiceTests
     {
         _sut = new SharedManagementService(
             _tenantStorageMock.Object,
+            _tenantStorageFactoryMock.Object,
             _storageFactoryMock.Object,
             _configurationMock.Object,
             _systemClockMock.Object,
@@ -313,6 +315,8 @@ public class SharedManagementServiceTests
             EventLoggingRetentionPeriod = 7,
             MaxUsers = 69L
         };
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))
+            .Returns(_tenantStorageMock.Object);
 
         await _sut.SetFeaturesAsync(appId, payload);
 
@@ -328,6 +332,8 @@ public class SharedManagementServiceTests
     {
         // Arrange
         const string appId = "test";
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))
+            .Returns(_tenantStorageMock.Object);
         _tenantStorageMock.Setup(x => x.GetAllApiKeys()).ReturnsAsync(new List<ApiKeyDesc>
         {
             new()
