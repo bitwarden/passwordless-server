@@ -198,8 +198,13 @@ void RunTheApp()
     app.UseRouting();
     app.MapHealthEndpoints();
     app.UseAuthentication();
-    app.UseMiddleware<CurrentContextMiddleware>();
-    app.UseMiddleware<EventLogStorageCommitMiddleware>();
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/health"),
+        appBuilder =>
+        {
+            appBuilder.UseMiddleware<CurrentContextMiddleware>();
+            appBuilder.UseMiddleware<EventLogStorageCommitMiddleware>();
+        });
     app.UseAuthorization();
     app.UseAntiforgery();
     app.UseRateLimiter();
