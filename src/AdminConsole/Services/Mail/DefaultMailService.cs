@@ -71,9 +71,9 @@ public class DefaultMailService : IMailService
         {
             To = new List<string> { email },
             From = _fromEmail,
-            Subject = "You're email is already connected to an organization",
+            Subject = "Your e-mail is already connected to an organization",
             TextBody =
-                $"""You recently tried to sign up or join an organization. We regret to inform you that your email was already connected to an organization. Please use a unique email address to sign up or join an organization. """,
+                $"""You recently tried to sign up or join an organization. We regret to inform you that your e-mail was already connected to an organization. Please use a unique e-mail address to sign up or join an organization.""",
             Tag = "duplicate-email"
         };
 
