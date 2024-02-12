@@ -2,6 +2,7 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Utils;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -23,6 +24,14 @@ public class EfTenantStorage : ITenantStorage
     }
 
     public string Tenant => _tenantProvider.Tenant;
+
+
+    public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
+    {
+        var appId = ApiKeyUtils.GetAppId(apiKey);
+        var pk = apiKey.Substring(apiKey.Length - 4);
+        return db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk && e.Tenant == appId);
+    }
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {

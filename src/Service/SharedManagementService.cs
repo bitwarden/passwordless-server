@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
@@ -43,7 +42,6 @@ public class SharedManagementService : ISharedManagementService
 {
     private readonly ILogger _logger;
     private readonly IEventLogger _eventLogger;
-    private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorage _tenantStorage;
     private readonly ITenantStorageFactory tenantFactory;
@@ -52,7 +50,6 @@ public class SharedManagementService : ISharedManagementService
     public SharedManagementService(ITenantStorage tenantStorage,
         ITenantStorageFactory tenantFactory,
         IGlobalStorageFactory globalStorageFactory,
-        IConfiguration config,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
         IEventLogger eventLogger)
@@ -60,7 +57,6 @@ public class SharedManagementService : ISharedManagementService
         _tenantStorage = tenantStorage;
         this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
-        this.config = config;
         _systemClock = systemClock;
         _logger = logger;
         _eventLogger = eventLogger;
@@ -144,8 +140,7 @@ public class SharedManagementService : ISharedManagementService
     public async Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey)
     {
         var appId = GetAppId(secretKey);
-
-        var storage = _globalStorageFactory.Create();
+        var storage = tenantFactory.Create(appId);
         var existingKey = await storage.GetApiKeyAsync(secretKey);
         if (existingKey != null)
         {
@@ -169,8 +164,7 @@ public class SharedManagementService : ISharedManagementService
     public async Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey)
     {
         var appId = GetAppId(publicKey);
-
-        var storage = _globalStorageFactory.Create();
+        var storage = tenantFactory.Create(appId);
         var existingKey = await storage.GetApiKeyAsync(publicKey);
         if (existingKey != null && existingKey.ApiKey == publicKey)
         {

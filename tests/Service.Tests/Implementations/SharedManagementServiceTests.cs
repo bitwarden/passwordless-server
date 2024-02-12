@@ -18,7 +18,6 @@ public class SharedManagementServiceTests
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
     private readonly Mock<IGlobalStorageFactory> _storageFactoryMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
-    private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
     private readonly Mock<IEventLogger> _eventLogger = new();
 
@@ -32,7 +31,6 @@ public class SharedManagementServiceTests
             _tenantStorageMock.Object,
             _tenantStorageFactoryMock.Object,
             _storageFactoryMock.Object,
-            _configurationMock.Object,
             _systemClockMock.Object,
             _loggerMock.Object,
             _eventLogger.Object);
