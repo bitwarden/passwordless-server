@@ -46,9 +46,11 @@ public class SharedManagementService : ISharedManagementService
     private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorage _tenantStorage;
+    private readonly ITenantStorageFactory tenantFactory;
     private readonly IGlobalStorageFactory _globalStorageFactory;
 
     public SharedManagementService(ITenantStorage tenantStorage,
+        ITenantStorageFactory tenantFactory,
         IGlobalStorageFactory globalStorageFactory,
         IConfiguration config,
         ISystemClock systemClock,
@@ -56,6 +58,7 @@ public class SharedManagementService : ISharedManagementService
         IEventLogger eventLogger)
     {
         _tenantStorage = tenantStorage;
+        this.tenantFactory = tenantFactory;
         _globalStorageFactory = globalStorageFactory;
         this.config = config;
         _systemClock = systemClock;
@@ -67,7 +70,8 @@ public class SharedManagementService : ISharedManagementService
     public async Task<bool> IsAvailable(string accountName)
     {
         // check if tenant already exists
-        return !await _tenantStorage.TenantExists();
+        var tenantStorage = tenantFactory.Create(accountName);
+        return !await tenantStorage.TenantExists();
     }
 
     public async Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options)
@@ -97,7 +101,8 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
         }
 
-        if (await _tenantStorage.TenantExists())
+        var tenantStorage = tenantFactory.Create(appId);
+        if (await tenantStorage.TenantExists())
         {
             throw new ApiException($"accountName '{accountName}' is not available", 409);
         }
@@ -123,9 +128,9 @@ public class SharedManagementService : ISharedManagementService
                 AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
             },
-            Tenant = _tenantStorage.Tenant
+            Tenant = accountName
         };
-        await _tenantStorage.SaveAccountInformation(account);
+        await tenantStorage.SaveAccountInformation(account);
         return new CreateAppResultDto
         {
             ApiKey1 = apiKey1,
@@ -197,13 +202,15 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task FreezeAccount(string accountName)
     {
-        await _tenantStorage.LockAllApiKeys(true);
+        var tenantStorage = tenantFactory.Create(accountName);
+        await tenantStorage.LockAllApiKeys(true);
     }
 
     public async Task UnFreezeAccount(string accountName)
     {
-        await _tenantStorage.LockAllApiKeys(false);
-        await _tenantStorage.SetAppDeletionDate(null);
+        var tenantStorage = tenantFactory.Create(accountName);
+        await tenantStorage.LockAllApiKeys(false);
+        await tenantStorage.SetAppDeletionDate(null);
     }
 
     public async Task<AppDeletionResult> DeleteApplicationAsync(string appId)
@@ -291,12 +298,14 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException($"'{nameof(appId)}' is required.", 400);
         }
 
-        await _tenantStorage.SetFeaturesAsync(payload);
+        var tenantStorage = tenantFactory.Create(appId);
+        await tenantStorage.SetFeaturesAsync(payload);
     }
 
     public async Task<AppFeatureResponse> GetFeaturesAsync(string appId)
     {
-        var entity = await _tenantStorage.GetAppFeaturesAsync();
+        var tenantStorage = tenantFactory.Create(appId);
+        var entity = await tenantStorage.GetAppFeaturesAsync();
         var dto = entity.ToDto();
         return dto;
     }
@@ -308,7 +317,8 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("create_api_key_scopes_required", "Please select at least one scope.", 400);
         }
 
-        var publicKeyResult = await SetupApiKey(appId, _tenantStorage, payload.Scopes.ToArray());
+        var tenantStorage = tenantFactory.Create(appId);
+        var publicKeyResult = await SetupApiKey(appId, tenantStorage, payload.Scopes.ToArray());
         return new CreateApiKeyResponse(publicKeyResult);
     }
 
@@ -319,13 +329,15 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("create_api_key_scopes_required", "Please select at least one scope.", 400);
         }
 
-        var secretKeyResult = await SetupApiSecret(appId, _tenantStorage, payload.Scopes.ToArray());
+        var tenantStorage = tenantFactory.Create(appId);
+        var secretKeyResult = await SetupApiSecret(appId, tenantStorage, payload.Scopes.ToArray());
         return new CreateApiKeyResponse(secretKeyResult.original);
     }
 
     public async Task<IReadOnlyCollection<ApiKeyResponse>> ListApiKeysAsync(string appId)
     {
-        var keys = await _tenantStorage.GetAllApiKeys();
+        var tenantStorage = tenantFactory.Create(appId);
+        var keys = await tenantStorage.GetAllApiKeys();
         var dtos = keys.Select(x => new ApiKeyResponse(
             x.Id,
             x.CreatedAt,
@@ -342,7 +354,8 @@ public class SharedManagementService : ISharedManagementService
     {
         try
         {
-            await _tenantStorage.LockApiKeyAsync(apiKeyId);
+            var tenantStorage = tenantFactory.Create(appId);
+            await tenantStorage.LockApiKeyAsync(apiKeyId);
         }
         catch (ArgumentException)
         {
@@ -355,7 +368,8 @@ public class SharedManagementService : ISharedManagementService
     {
         try
         {
-            await _tenantStorage.UnlockApiKeyAsync(apiKeyId);
+            var tenantStorage = tenantFactory.Create(appId);
+            await tenantStorage.UnlockApiKeyAsync(apiKeyId);
         }
         catch (ArgumentException)
         {
@@ -368,7 +382,8 @@ public class SharedManagementService : ISharedManagementService
     {
         try
         {
-            await _tenantStorage.DeleteApiKeyAsync(apiKeyId);
+            var tenantStorage = tenantFactory.Create(appId);
+            await tenantStorage.DeleteApiKeyAsync(apiKeyId);
         }
         catch (ArgumentException)
         {

@@ -38,8 +38,7 @@ public class ReportingService : IReportingService
 
     public async Task<IEnumerable<PeriodicActiveUserReportResponse>> GetPeriodicActiveUserReportsAsync(PeriodicActiveUserReportRequest parameters)
     {
-        var storage = _tenantStorageFactory.Create();
-        var entities = await storage.GetPeriodicActiveUserReportsAsync(parameters.From, parameters.To);
+        var entities = await _tenantStorage.GetPeriodicActiveUserReportsAsync(parameters.From, parameters.To);
         return entities
             .Select(x => new PeriodicActiveUserReportResponse(x.CreatedAt, x.DailyActiveUsersCount, x.WeeklyActiveUsersCount, x.TotalUsersCount));
     }
