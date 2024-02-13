@@ -2,17 +2,40 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Utils;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
 public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : ITenantStorage
 {
-    public string Tenant { get; } = db.Tenant;
+    private readonly DbTenantContext db;
+    private readonly TimeProvider _timeProvider;
+    private readonly ITenantProvider _tenantProvider;
+
+    public EfTenantStorage(
+        DbTenantContext db,
+        TimeProvider timeProvider,
+        ITenantProvider tenantProvider)
+    {
+        this.db = db;
+        _tenantProvider = tenantProvider;
+        _timeProvider = timeProvider;
+    }
+
+    public string Tenant => _tenantProvider.Tenant;
+
+
+    public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
+    {
+        var appId = ApiKeyUtils.GetAppId(apiKey);
+        var pk = apiKey.Substring(apiKey.Length - 4);
+        return db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk && e.Tenant == appId);
+    }
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
-        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, Tenant));
+        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, _tenantProvider.Tenant));
         await db.SaveChangesAsync();
     }
 
@@ -59,12 +82,6 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
     {
         var res = await db.Aliases.Where(a => a.UserId == userid).ToListAsync();
         return res;
-    }
-
-    public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
-    {
-        var pk = apiKey.Substring(apiKey.Length - 4);
-        return db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk);
     }
 
     public async Task<StoredCredential> GetCredential(byte[] credentialId)
@@ -286,8 +303,8 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             {
                 AaGuid = x,
                 IsAllowed = isAllowed,
-                CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
-                Tenant = Tenant
+                CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+                Tenant = _tenantProvider.Tenant
             }).ToList();
 
         db.Authenticators.AddRange(newAuthenticators);
@@ -371,7 +388,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task StoreAlias(string userid, Dictionary<string, string> aliases)
     {
-        var pointers = aliases.Select(a => new AliasPointer() { Tenant = Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
+        var pointers = aliases.Select(a => new AliasPointer() { Tenant = _tenantProvider.Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
         db.Aliases.RemoveRange(db.Aliases.Where(ap => ap.UserId == userid));
         db.Aliases.AddRange(pointers);
         await db.SaveChangesAsync();
@@ -381,7 +398,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
     {
         var ak = new ApiKeyDesc
         {
-            Tenant = Tenant,
+            Tenant = _tenantProvider.Tenant,
             Id = pkpart,
             ApiKey = apikey,
             Scopes = scopes,

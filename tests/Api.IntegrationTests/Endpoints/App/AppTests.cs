@@ -80,9 +80,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
 
         using var scope = api.Services.CreateScope();
 
-        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>()
-            .Create(name)
-            .GetAppFeaturesAsync();
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
 
         appFeature.Should().NotBeNull();
         appFeature!.Tenant.Should().Be(name);

@@ -4,7 +4,13 @@ namespace Passwordless.Service.Storage.Ef;
 
 public interface ITenantStorageFactory
 {
-    ITenantStorage Create();
+    /// <summary>
+    /// Use <see cref="ITenantStorage" /> instead when not calling from `ManagementKey` scope.
+    /// <see cref="ITenantStorage" /> uses the `accountName` claim in <see cref="TenantProvider" /> to determine the tenant when an authorization is successful.
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <returns></returns>
+    [Obsolete("Use injected `ITenantStorage` instead when not calling from `ManagementKey` scope.")]
     ITenantStorage Create(string appId);
 }
 
@@ -20,17 +26,9 @@ public class EfTenantStorageFactory<TContext> : ITenantStorageFactory
         _timeProvider = timeProvider;
     }
 
-    public ITenantStorage Create()
-    {
-        var tenantProvider = _services.GetRequiredService<ITenantProvider>();
-        var context = ActivatorUtilities.CreateInstance<TContext>(_services, tenantProvider);
-
-        return new EfTenantStorage(context, _timeProvider);
-    }
-
     public ITenantStorage Create(string appId)
     {
         var context = ActivatorUtilities.CreateInstance<TContext>(_services, new ManualTenantProvider(appId));
-        return new EfTenantStorage(context, _timeProvider);
+        return new EfTenantStorage(context, _timeProvider, new ManualTenantProvider(appId));
     }
 }
