@@ -225,6 +225,8 @@ namespace Passwordless.Service.Migrations.Sqlite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("Tenant");
 
                     b.ToTable("DispatchedEmails");

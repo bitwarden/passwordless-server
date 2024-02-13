@@ -93,20 +93,21 @@ public abstract class DbGlobalContext : DbContext
                 .IsRequired();
         });
 
+        modelBuilder.Entity<DispatchedEmail>(builder =>
+        {
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.CreatedAt);
+            builder.HasOne(x => x.Application)
+                .WithMany(x => x.DispatchedEmails)
+                .HasForeignKey(x => x.Tenant)
+                .IsRequired();
+        });
+
         modelBuilder.Entity<PeriodicCredentialReport>(builder =>
         {
             builder.HasKey(x => new { x.Tenant, x.CreatedAt });
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.PeriodicCredentialReports)
-                .HasForeignKey(x => x.Tenant)
-                .IsRequired();
-        });
-
-        modelBuilder.Entity<DispatchedEmail>(builder =>
-        {
-            builder.HasKey(x => x.Id);
-            builder.HasOne(x => x.Application)
-                .WithMany(x => x.DispatchedEmails)
                 .HasForeignKey(x => x.Tenant)
                 .IsRequired();
         });
