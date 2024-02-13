@@ -8,6 +8,16 @@
 
 <SecureScript type="module">
     let options = @((MarkupString)JsonSerializer.Serialize(Options, ApexChartJsonSerializer.Options));
+    
+    @switch (YAxisFormatting) {
+        case LabelsFormattingTypes.Integer:
+            @((MarkupString)"options.yaxis.labels.formatter = (value) => parseInt(value).toLocaleString();")
+            break;
+        case LabelsFormattingTypes.Double:
+            @((MarkupString)"options.yaxis.labels.formatter = (value) => parseFloat(value).toFixed(2).toLocaleString();")
+            break;
+    }
+    
     let chart = new ApexCharts(document.querySelector("#@Id"), options);    
     chart.render();
 </SecureScript>
@@ -19,4 +29,7 @@
     
     [Parameter]
     public required ApexChartOptions<TXValueType, TYValueType> Options { get; set; }
+    
+    [Parameter]
+    public LabelsFormattingTypes? YAxisFormatting { get; set; }
 }

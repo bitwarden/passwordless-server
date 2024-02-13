@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Passwordless.AdminConsole.Db;
 using Passwordless.Common.HealthChecks;
-using Passwordless.Service.Storage.Ef;
 
-namespace Passwordless.Api.HealthChecks;
+namespace Passwordless.AdminConsole.HealthChecks;
 
 public static class HealthCheckBootstrap
 {
@@ -19,9 +19,10 @@ public static class HealthCheckBootstrap
             "http",
             tags: new[] { TagSimple });
 
-        builder.Services.AddHealthChecks().AddDbContextCheck<DbGlobalContext>(
+        healthCheckBuilder.AddDbContextCheck<ConsoleDbContext>(
             "db",
             tags: new[] { TagDatabase });
+
 
         healthCheckBuilder.AddCheck<VersionHealthCheck>(
             "version",

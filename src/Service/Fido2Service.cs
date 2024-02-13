@@ -201,13 +201,17 @@ public class Fido2Service : IFido2Service
             var blacklist = configuredAuthenticators.Where(x => !x.IsAllowed).ToImmutableList();
             if (blacklist.Any() && blacklist.Any(x => x.AaGuid == success.Result!.AaGuid))
             {
-                throw new ApiException("authenticator_not_allowed", "The authenticator is blacklisted and is not allowed to be used for registration.", 400);
+                throw new ApiException("authenticator_not_allowed", "The authenticator is on the blocklist and is not allowed to be used for registration.", 400);
             }
 
             var whitelist = configuredAuthenticators.Where(x => x.IsAllowed).ToImmutableList();
             if (whitelist.Any() && whitelist.All(x => x.AaGuid != success.Result!.AaGuid))
             {
-                throw new ApiException("authenticator_not_allowed", "The authenticator is not found on the whitelist and is not allowed to be used for registration.", 400);
+                if (session.Options.Attestation == AttestationConveyancePreference.None)
+                {
+                    throw new ApiException("attestation_required", "Attestation 'none' was used for registration, but an allowlist was configured. Please use a supported attestation method.", 400);
+                }
+                throw new ApiException("authenticator_not_allowed", "An allowlist was configured. The authenticator is not found on the allowlist and is not allowed to be used for registration.", 400);
             }
         }
 
