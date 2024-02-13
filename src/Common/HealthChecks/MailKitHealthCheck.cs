@@ -2,7 +2,7 @@ using MailKit.Net.Smtp;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Passwordless.Common.Services.Mail;
 
-namespace Passwordless.Api.HealthChecks;
+namespace Passwordless.Common.HealthChecks;
 
 public class MailKitHealthCheck : IHealthCheck
 {

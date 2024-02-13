@@ -2,7 +2,7 @@ using System.Reflection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Passwordless.Common.Extensions;
 
-namespace Passwordless.Api.HealthChecks;
+namespace Passwordless.Common.HealthChecks;
 
 public class VersionHealthCheck : IHealthCheck
 {
