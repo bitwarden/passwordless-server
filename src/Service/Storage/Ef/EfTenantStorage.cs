@@ -7,9 +7,9 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
-public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : ITenantStorage
+public class EfTenantStorage : ITenantStorage
 {
-    private readonly DbTenantContext db;
+    private readonly DbTenantContext _db;
     private readonly TimeProvider _timeProvider;
     private readonly ITenantProvider _tenantProvider;
 
@@ -18,7 +18,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         TimeProvider timeProvider,
         ITenantProvider tenantProvider)
     {
-        this.db = db;
+        _db = db;
         _tenantProvider = tenantProvider;
         _timeProvider = timeProvider;
     }
@@ -30,84 +30,84 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
     {
         var appId = ApiKeyUtils.GetAppId(apiKey);
         var pk = apiKey.Substring(apiKey.Length - 4);
-        return db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk && e.Tenant == appId);
+        return _db.ApiKeys.FirstOrDefaultAsync(e => e.Id == pk && e.Tenant == appId);
     }
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
-        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, _tenantProvider.Tenant));
-        await db.SaveChangesAsync();
+        _db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, _tenantProvider.Tenant));
+        await _db.SaveChangesAsync();
     }
 
     public async Task AddTokenKey(TokenKey tokenKey)
     {
-        db.TokenKeys.Add(tokenKey);
-        await db.SaveChangesAsync();
+        _db.TokenKeys.Add(tokenKey);
+        await _db.SaveChangesAsync();
     }
 
     public async Task DeleteAccount()
     {
-        await db.Aliases.ExecuteDeleteAsync();
-        await db.ApiKeys.ExecuteDeleteAsync();
-        await db.TokenKeys.ExecuteDeleteAsync();
-        await db.Credentials.ExecuteDeleteAsync();
-        await db.AccountInfo.ExecuteDeleteAsync();
-        await db.AppFeatures.ExecuteDeleteAsync();
-        await db.Authenticators.ExecuteDeleteAsync();
-        await db.PeriodicCredentialReports.ExecuteDeleteAsync();
-        await db.PeriodicActiveUserReports.ExecuteDeleteAsync();
+        await _db.Aliases.ExecuteDeleteAsync();
+        await _db.ApiKeys.ExecuteDeleteAsync();
+        await _db.TokenKeys.ExecuteDeleteAsync();
+        await _db.Credentials.ExecuteDeleteAsync();
+        await _db.AccountInfo.ExecuteDeleteAsync();
+        await _db.AppFeatures.ExecuteDeleteAsync();
+        await _db.Authenticators.ExecuteDeleteAsync();
+        await _db.PeriodicCredentialReports.ExecuteDeleteAsync();
+        await _db.PeriodicActiveUserReports.ExecuteDeleteAsync();
     }
 
     public Task DeleteCredential(byte[] id)
     {
-        return db.Credentials.Where(e => e.DescriptorId == id).ExecuteDeleteAsync();
+        return _db.Credentials.Where(e => e.DescriptorId == id).ExecuteDeleteAsync();
     }
 
     public Task<bool> ExistsAsync(byte[] credentialId)
     {
-        return db.Credentials.AnyAsync(e => e.DescriptorId == credentialId);
+        return _db.Credentials.AnyAsync(e => e.DescriptorId == credentialId);
     }
 
     public Task<AccountMetaInformation> GetAccountInformation()
     {
-        return db.AccountInfo.FirstOrDefaultAsync();
+        return _db.AccountInfo.FirstOrDefaultAsync();
     }
 
     public Task<AppFeature> GetAppFeaturesAsync()
     {
-        return db.AppFeatures.FirstOrDefaultAsync();
+        return _db.AppFeatures.FirstOrDefaultAsync();
     }
 
     public async Task<List<AliasPointer>> GetAliasesByUserId(string userid)
     {
-        var res = await db.Aliases.Where(a => a.UserId == userid).ToListAsync();
+        var res = await _db.Aliases.Where(a => a.UserId == userid).ToListAsync();
         return res;
     }
 
     public async Task<StoredCredential> GetCredential(byte[] credentialId)
     {
-        var res = await db.Credentials.FirstOrDefaultAsync(c => c.DescriptorId == credentialId);
+        var res = await _db.Credentials.FirstOrDefaultAsync(c => c.DescriptorId == credentialId);
 
         return res?.ToStoredCredential();
     }
 
     public async Task<List<StoredCredential>> GetCredentialsByUserIdAsync(string userId)
     {
-        var res = await db.Credentials.Where(c => c.UserId == userId).ToListAsync();
+        var res = await _db.Credentials.Where(c => c.UserId == userId).ToListAsync();
 
         return res.Select(c => c.ToStoredCredential()).ToList();
     }
 
     public async Task<List<StoredCredential>> GetCredentials(IEnumerable<byte[]> credentialIds)
     {
-        var res = await db.Credentials.Where(c => credentialIds.Contains(c.DescriptorId)).ToListAsync();
+        var res = await _db.Credentials.Where(c => credentialIds.Contains(c.DescriptorId)).ToListAsync();
 
         return res.Select(c => c.ToStoredCredential()).ToList();
     }
 
     public async Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByAliasAsync(string alias)
     {
-        var aliases = await db.Aliases.FirstOrDefaultAsync(a => a.Alias == alias);
+        var aliases = await _db.Aliases.FirstOrDefaultAsync(a => a.Alias == alias);
         if (aliases == null)
         {
             return new List<PublicKeyCredentialDescriptor>();
@@ -115,7 +115,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
         var userid = aliases.UserId;
         // Do we really need these AsNoTracking?
-        var descs = await db.Credentials.Where(c => c.UserId == userid).ToListAsync();
+        var descs = await _db.Credentials.Where(c => c.UserId == userid).ToListAsync();
 
         var pkcred = descs.Select(x => new PublicKeyCredentialDescriptor(x.DescriptorType.Value, x.DescriptorId, x.DescriptorTransports)).ToList();
         return pkcred;
@@ -124,7 +124,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
     public async Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByUserIdAsync(string userId, bool encodeBase64 = true)
     {
         // TODO: Returning a c.descriptor does not work.
-        var res = await db.Credentials.Where(c => c.UserId == userId).ToListAsync();
+        var res = await _db.Credentials.Where(c => c.UserId == userId).ToListAsync();
 
         var pkcred = res.Select(x => new PublicKeyCredentialDescriptor(x.DescriptorType.Value, x.DescriptorId, x.DescriptorTransports)).ToList();
 
@@ -133,51 +133,51 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public Task<List<TokenKey>> GetTokenKeys()
     {
-        return db.TokenKeys.ToListAsync();
+        return _db.TokenKeys.ToListAsync();
     }
 
     public async Task<string> GetUserIdByAliasAsync(string alias)
     {
-        var res = await db.Aliases.Where(a => a.Alias == alias).Select(a => a.UserId).FirstOrDefaultAsync();
+        var res = await _db.Aliases.Where(a => a.Alias == alias).Select(a => a.UserId).FirstOrDefaultAsync();
         return res;
     }
 
     public async Task<int> GetUsersCount()
     {
-        var res = await db.Credentials.Select(c => c.UserId).Distinct().CountAsync();
+        var res = await _db.Credentials.Select(c => c.UserId).Distinct().CountAsync();
 
         return res;
     }
 
     public async Task<bool> HasUsersAsync()
     {
-        var res = await db.Credentials.AnyAsync();
+        var res = await _db.Credentials.AnyAsync();
         return res;
     }
 
     public async Task DeleteUser(string userId)
     {
-        await db.Credentials.Where(c => c.UserId == userId).ExecuteDeleteAsync();
-        await db.Aliases.Where(c => c.UserId == userId).ExecuteDeleteAsync();
+        await _db.Credentials.Where(c => c.UserId == userId).ExecuteDeleteAsync();
+        await _db.Aliases.Where(c => c.UserId == userId).ExecuteDeleteAsync();
     }
 
     public Task<List<ApiKeyDesc>> GetAllApiKeys()
     {
-        return db.ApiKeys.ToListAsync();
+        return _db.ApiKeys.ToListAsync();
     }
 
     public async Task SetAppDeletionDate(DateTime? deletionAt)
     {
-        await db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));
+        await _db.AccountInfo.ExecuteUpdateAsync(x => x.SetProperty(a => a.DeleteAt, deletionAt));
     }
 
     public async Task<bool> CheckIfAliasIsAvailable(IEnumerable<string> aliases, string userId)
     {
-        return !await db.Aliases.AnyAsync(a => aliases.Contains(a.Alias) && a.UserId != userId);
+        return !await _db.Aliases.AnyAsync(a => aliases.Contains(a.Alias) && a.UserId != userId);
     }
 
     public async Task SetFeaturesAsync(SetFeaturesRequest features) =>
-        await db.AppFeatures.ExecuteUpdateAsync(x => x
+        await _db.AppFeatures.ExecuteUpdateAsync(x => x
             .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled,
                 existing => features.EnableManuallyGeneratedAuthenticationTokens ??
                             existing.IsGenerateSignInTokenEndpointEnabled
@@ -192,22 +192,22 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task SetFeaturesAsync(ManageFeaturesRequest features)
     {
-        var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
+        var existingEntity = await _db.AppFeatures.FirstOrDefaultAsync();
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
         existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
         existingEntity.MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota;
         existingEntity.MaxUsers = features.MaxUsers;
         existingEntity.AllowAttestation = features.AllowAttestation;
-        await db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
     }
 
     public async Task LockApiKeyAsync(string apiKeyId)
     {
-        var rows = await db.ApiKeys
+        var rows = await _db.ApiKeys
             .Where(x => x.Id == apiKeyId)
             .ExecuteUpdateAsync(apiKey => apiKey
                 .SetProperty(x => x.IsLocked, true)
-                .SetProperty(x => x.LastLockedAt, timeProvider.GetUtcNow().UtcDateTime)
+                .SetProperty(x => x.LastLockedAt, _timeProvider.GetUtcNow().UtcDateTime)
         );
         if (rows == 0)
         {
@@ -217,11 +217,11 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task UnlockApiKeyAsync(string apiKeyId)
     {
-        var rows = await db.ApiKeys
+        var rows = await _db.ApiKeys
             .Where(x => x.Id == apiKeyId)
             .ExecuteUpdateAsync(apiKey => apiKey
                 .SetProperty(x => x.IsLocked, false)
-                .SetProperty(x => x.LastUnlockedAt, timeProvider.GetUtcNow().UtcDateTime)
+                .SetProperty(x => x.LastUnlockedAt, _timeProvider.GetUtcNow().UtcDateTime)
             );
         if (rows == 0)
         {
@@ -231,7 +231,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task DeleteApiKeyAsync(string apiKeyId)
     {
-        var rows = await db.ApiKeys
+        var rows = await _db.ApiKeys
             .Where(x => x.Id == apiKeyId)
             .ExecuteDeleteAsync();
         if (rows == 0)
@@ -244,7 +244,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         DateOnly? from,
         DateOnly? to)
     {
-        var query = db.PeriodicCredentialReports.AsQueryable();
+        var query = _db.PeriodicCredentialReports.AsQueryable();
         if (from.HasValue)
         {
             query = query.Where(x => x.CreatedAt >= from.Value);
@@ -261,7 +261,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task<IEnumerable<PeriodicActiveUserReport>> GetPeriodicActiveUserReportsAsync(DateOnly? from, DateOnly? to)
     {
-        var query = db.PeriodicActiveUserReports.AsQueryable();
+        var query = _db.PeriodicActiveUserReports.AsQueryable();
         if (from.HasValue)
         {
             query = query.Where(x => x.CreatedAt >= from.Value);
@@ -278,7 +278,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null)
     {
-        IQueryable<Authenticator> query = db.Authenticators;
+        IQueryable<Authenticator> query = _db.Authenticators;
 
         if (isAllowed.HasValue)
         {
@@ -290,7 +290,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public async Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed)
     {
-        var existingAuthenticators = db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid));
+        var existingAuthenticators = _db.Authenticators.Where(x => aaGuids.Contains(x.AaGuid));
 
         await existingAuthenticators.ExecuteUpdateAsync(x => x
                 .SetProperty(entity => entity.IsAllowed, isAllowed)
@@ -307,29 +307,29 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
                 Tenant = _tenantProvider.Tenant
             }).ToList();
 
-        db.Authenticators.AddRange(newAuthenticators);
-        await db.SaveChangesAsync();
+        _db.Authenticators.AddRange(newAuthenticators);
+        await _db.SaveChangesAsync();
     }
 
     public Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids)
     {
-        return db.Authenticators
+        return _db.Authenticators
             .Where(x => aaGuids.Contains(x.AaGuid))
             .ExecuteDeleteAsync();
     }
 
     public async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan window)
     {
-        var from = timeProvider.GetUtcNow().UtcDateTime - window;
-        return await db.DispatchedEmails
+        var from = _timeProvider.GetUtcNow().UtcDateTime - window;
+        return await _db.DispatchedEmails
             .Where(x => x.CreatedAt >= from)
             .ToArrayAsync();
     }
 
     public async Task<int> GetDispatchedEmailCountAsync(TimeSpan window)
     {
-        var from = timeProvider.GetUtcNow().UtcDateTime - window;
-        return await db.DispatchedEmails
+        var from = _timeProvider.GetUtcNow().UtcDateTime - window;
+        return await _db.DispatchedEmails
             .CountAsync(x => x.CreatedAt >= from);
     }
 
@@ -339,31 +339,31 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
         {
             Tenant = Tenant,
             Id = Guid.NewGuid(),
-            CreatedAt = timeProvider.GetUtcNow(),
+            CreatedAt = _timeProvider.GetUtcNow(),
             UserId = userId,
             EmailAddress = emailAddress,
             LinkTemplate = linkTemplate
         };
 
-        db.DispatchedEmails.Add(email);
-        await db.SaveChangesAsync();
+        _db.DispatchedEmails.Add(email);
+        await _db.SaveChangesAsync();
 
         return email;
     }
 
     public async Task DeleteOldDispatchedEmailsAsync(TimeSpan age)
     {
-        var until = timeProvider.GetUtcNow().UtcDateTime - age;
-        await db.DispatchedEmails
+        var until = _timeProvider.GetUtcNow().UtcDateTime - age;
+        await _db.DispatchedEmails
             .Where(x => x.CreatedAt < until)
             .ExecuteDeleteAsync();
 
-        await db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)
     {
-        await db.ApiKeys.ExecuteUpdateAsync(x => x
+        await _db.ApiKeys.ExecuteUpdateAsync(x => x
             .SetProperty(k => k.IsLocked, isLocked)
             .SetProperty(k => isLocked ? k.LastLockedAt : k.LastUnlockedAt, DateTime.UtcNow)
         );
@@ -371,27 +371,27 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
 
     public Task RemoveTokenKey(int keyId)
     {
-        return db.TokenKeys.Where(k => k.KeyId == keyId).ExecuteDeleteAsync();
+        return _db.TokenKeys.Where(k => k.KeyId == keyId).ExecuteDeleteAsync();
     }
 
     public Task RemoveExpiredTokenKeys(CancellationToken cancellationToken)
     {
-        return db.TokenKeys.Where(x => x.CreatedAt < timeProvider.GetUtcNow().AddDays(-30).DateTime)
+        return _db.TokenKeys.Where(x => x.CreatedAt < _timeProvider.GetUtcNow().AddDays(-30).DateTime)
             .ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task SaveAccountInformation(AccountMetaInformation info)
     {
-        db.AccountInfo.Add(info);
-        await db.SaveChangesAsync();
+        _db.AccountInfo.Add(info);
+        await _db.SaveChangesAsync();
     }
 
     public async Task StoreAlias(string userid, Dictionary<string, string> aliases)
     {
         var pointers = aliases.Select(a => new AliasPointer() { Tenant = _tenantProvider.Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
-        db.Aliases.RemoveRange(db.Aliases.Where(ap => ap.UserId == userid));
-        db.Aliases.AddRange(pointers);
-        await db.SaveChangesAsync();
+        _db.Aliases.RemoveRange(_db.Aliases.Where(ap => ap.UserId == userid));
+        _db.Aliases.AddRange(pointers);
+        await _db.SaveChangesAsync();
     }
 
     public async Task StoreApiKey(string pkpart, string apikey, string[] scopes)
@@ -404,29 +404,29 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             Scopes = scopes,
             IsLocked = false
         };
-        db.ApiKeys.Add(ak);
-        await db.SaveChangesAsync();
+        _db.ApiKeys.Add(ak);
+        await _db.SaveChangesAsync();
     }
 
     public async Task<bool> TenantExists()
     {
-        return (await db.AccountInfo.FirstOrDefaultAsync()) != null;
+        return (await _db.AccountInfo.FirstOrDefaultAsync()) != null;
     }
 
     public async Task UpdateCredential(byte[] credentialId, uint counter, string country, string device)
     {
-        var c = await db.Credentials.Where(c => c.DescriptorId == credentialId).FirstOrDefaultAsync();
+        var c = await _db.Credentials.Where(c => c.DescriptorId == credentialId).FirstOrDefaultAsync();
         c.SignatureCounter = counter;
         c.Country = country;
         c.Device = device;
         c.LastUsedAt = DateTime.UtcNow;
-        db.Credentials.Update(c);
-        await db.SaveChangesAsync();
+        _db.Credentials.Update(c);
+        await _db.SaveChangesAsync();
     }
 
     public async Task<List<UserSummary>> GetUsers(string lastUserId)
     {
-        var credentialsPerUser = await db.Credentials
+        var credentialsPerUser = await _db.Credentials
             .OrderBy(c => c.CreatedAt)
             .GroupBy(c => c.UserId)
             .Select((g) =>
@@ -434,7 +434,7 @@ public class EfTenantStorage(DbTenantContext db, TimeProvider timeProvider) : IT
             .Take(1000)
             .ToListAsync();
 
-        var aliasesPerUser = await db.Aliases
+        var aliasesPerUser = await _db.Aliases
             .GroupBy(a => a.UserId)
             .Select((g) =>
                 new { UserId = g.Key, Count = g.Count(), Aliases = g.Select(a => a.Plaintext) })
