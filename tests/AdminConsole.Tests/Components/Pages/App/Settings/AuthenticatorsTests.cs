@@ -1,5 +1,7 @@
 using AutoFixture;
 using Bunit;
+using Bunit.TestDoubles;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Passwordless.AdminConsole.Components.Pages.App.Settings;
@@ -18,7 +20,6 @@ public class AuthenticatorsTests : TestContext
     private readonly Mock<ICurrentContext> _currentContextMock = new();
     private readonly Mock<IPasswordlessManagementClient> _passwordlessManagementClientMock = new();
     private readonly Mock<IScopedPasswordlessClient> _passwordlessClientMock = new();
-
     private readonly Fixture _fixture = new();
 
     public AuthenticatorsTests()
@@ -89,5 +90,28 @@ public class AuthenticatorsTests : TestContext
 
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find("div#allowlist"));
+    }
+
+    [Fact]
+    public void Authenticators_RedirectsTo_Settings_WhenAttestationIsNotAllowed()
+    {
+        // Arrange
+        var features = _fixture
+            .Build<ApplicationFeatureContext>()
+            .With(x => x.AllowAttestation, false)
+            .Create();
+        _currentContextMock.SetupGet(x => x.Features).Returns(features);
+        _passwordlessClientMock.Setup(x =>
+                x.GetConfiguredAuthenticatorsAsync(It.Is<ConfiguredAuthenticatorRequest>(p => p.IsAllowed == true)))
+            .ReturnsAsync(new List<ConfiguredAuthenticatorResponse>());
+        var nav = Services.GetRequiredService<FakeNavigationManager>();
+        var baseUriLength = nav.BaseUri.Length;
+
+        // Act
+        var cut = RenderComponent<Authenticators>(parameters =>
+            parameters.Add(p => p.AppId, "cb69481e-8ff7-4039-93ec-0a2729a154b1"));
+
+        // Assert
+        Assert.Equal("app/cb69481e-8ff7-4039-93ec-0a2729a154b1/settings", nav.Uri.Remove(0, baseUriLength));
     }
 }
