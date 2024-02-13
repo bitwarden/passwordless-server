@@ -167,12 +167,24 @@ if (isSelfHosted)
 app.UseCors("default");
 app.UseSecurityHeaders();
 app.UseStaticFiles();
-app.UseMiddleware<EventLogStorageCommitMiddleware>();
+app.UseWhen(o =>
+{
+    return !o.Request.Path.StartsWithSegments("/health");
+}, c =>
+{
+    c.UseMiddleware<EventLogStorageCommitMiddleware>();
+});
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
-app.UseMiddleware<EventLogContextMiddleware>();
+app.UseWhen(o =>
+{
+    return !o.Request.Path.StartsWithSegments("/health");
+}, c =>
+{
+    c.UseMiddleware<EventLogContextMiddleware>();
+});
 app.UseMiddleware<FriendlyExceptionsMiddleware>();
 app.MapSigninEndpoints();
 app.MapRegisterEndpoints();

@@ -1,8 +1,6 @@
 #nullable enable
 
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.Api.Authorization;
 using Passwordless.Service;
 using Passwordless.Service.Storage.Ef;
 
@@ -23,7 +21,6 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("sqlite:api"));
             });
-            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbGlobalSqliteContext>>();
             services.AddDbContext<DbTenantContext, DbTenantSqliteContext>((sp, builder) =>
             {
                 // resolving config from SP to avoid capturing
@@ -38,7 +35,6 @@ public static class AddDatabaseExtensionMethod
                 // resolving config from SP to avoid capturing
                 builder.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("mssql:api"));
             });
-            services.AddScoped<IGlobalStorageFactory, EfGlobalStorageFactory<DbGlobalMsSqlContext>>();
             services.AddDbContext<DbTenantContext, DbTenantMsSqlContext>((sp, builder) =>
             {
                 // resolving config from SP to avoid capturing
@@ -50,16 +46,9 @@ public static class AddDatabaseExtensionMethod
         {
             throw new InvalidOperationException("A database connection string must be supplied.");
         }
+        services.AddScoped<ITenantStorage, EfTenantStorage>();
 
-        services.AddScoped<ITenantProvider>(sp =>
-        {
-            var context = sp.GetService<IHttpContextAccessor>()?.HttpContext;
-            var accountName = context?.User.FindFirstValue(CustomClaimTypes.AccountName);
-
-            return !string.IsNullOrEmpty(accountName)
-                ? new ManualTenantProvider(accountName)
-                : throw new InvalidOperationException("You should only request ITenantProvider from within an authenticated context");
-        });
+        services.AddScoped<ITenantProvider, TenantProvider>();
 
         // Add storage
         services.AddScoped<IGlobalStorage, EfGlobalGlobalStorage>();

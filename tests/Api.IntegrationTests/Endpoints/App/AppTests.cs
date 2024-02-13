@@ -81,9 +81,7 @@ public class AppTests : IClassFixture<PasswordlessApiFactory>, IDisposable
 
         using var scope = _apiFactory.Services.CreateScope();
 
-        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>()
-            .Create(name)
-            .GetAppFeaturesAsync();
+        var appFeature = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(name).GetAppFeaturesAsync();
 
         appFeature.Should().NotBeNull();
         appFeature!.Tenant.Should().Be(name);
