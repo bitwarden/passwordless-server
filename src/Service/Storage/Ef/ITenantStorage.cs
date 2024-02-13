@@ -8,6 +8,7 @@ namespace Passwordless.Service.Storage.Ef;
 public interface ITenantStorage
 {
     string Tenant { get; }
+    Task<ApiKeyDesc> GetApiKeyAsync(string apiKey);
     Task AddCredentialToUser(Fido2User user, StoredCredential cred);
     Task AddTokenKey(TokenKey tokenKey);
     Task DeleteAccount();
@@ -15,7 +16,6 @@ public interface ITenantStorage
     Task<bool> ExistsAsync(byte[] credentialId);
     Task<AccountMetaInformation> GetAccountInformation();
     Task<AppFeature> GetAppFeaturesAsync();
-    Task<ApiKeyDesc> GetApiKeyAsync(string apiKey);
     Task<StoredCredential> GetCredential(byte[] credentialId);
     Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByAliasAsync(string alias);
     Task<List<PublicKeyCredentialDescriptor>> GetCredentialsByUserIdAsync(string userId, bool encodeBase64 = true);

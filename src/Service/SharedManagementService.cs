@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
@@ -43,21 +42,21 @@ public class SharedManagementService : ISharedManagementService
 {
     private readonly ILogger _logger;
     private readonly IEventLogger _eventLogger;
-    private readonly IConfiguration config;
     private readonly ISystemClock _systemClock;
+    private readonly ITenantStorage _tenantStorage;
     private readonly ITenantStorageFactory tenantFactory;
-    private readonly IGlobalStorageFactory _globalStorageFactory;
+    private readonly IGlobalStorage _storage;
 
-    public SharedManagementService(ITenantStorageFactory tenantFactory,
-        IGlobalStorageFactory globalStorageFactory,
-        IConfiguration config,
+    public SharedManagementService(ITenantStorage tenantStorage,
+        ITenantStorageFactory tenantFactory,
+        IGlobalStorage storage,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
         IEventLogger eventLogger)
     {
+        _tenantStorage = tenantStorage;
         this.tenantFactory = tenantFactory;
-        _globalStorageFactory = globalStorageFactory;
-        this.config = config;
+        _storage = storage;
         _systemClock = systemClock;
         _logger = logger;
         _eventLogger = eventLogger;
@@ -98,8 +97,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
         }
 
-        ITenantStorage storage = tenantFactory.Create(accountName);
-
+        var storage = tenantFactory.Create(appId);
         if (await storage.TenantExists())
         {
             throw new ApiException($"accountName '{accountName}' is not available", 409);
@@ -126,7 +124,7 @@ public class SharedManagementService : ISharedManagementService
                 AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
             },
-            Tenant = storage.Tenant
+            Tenant = accountName
         };
         await storage.SaveAccountInformation(account);
         return new CreateAppResultDto
@@ -143,7 +141,6 @@ public class SharedManagementService : ISharedManagementService
     {
         var appId = GetAppId(secretKey);
         var storage = tenantFactory.Create(appId);
-
         var existingKey = await storage.GetApiKeyAsync(secretKey);
         if (existingKey != null)
         {
@@ -168,7 +165,6 @@ public class SharedManagementService : ISharedManagementService
     {
         var appId = GetAppId(publicKey);
         var storage = tenantFactory.Create(appId);
-
         var existingKey = await storage.GetApiKeyAsync(publicKey);
         if (existingKey != null && existingKey.ApiKey == publicKey)
         {
@@ -214,8 +210,7 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<AppDeletionResult> DeleteApplicationAsync(string appId)
     {
-        var storage = tenantFactory.Create(appId);
-        var accountInformation = await storage.GetAccountInformation();
+        var accountInformation = await _tenantStorage.GetAccountInformation();
 
         if (accountInformation == null)
         {
@@ -227,7 +222,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
 
-        await storage.DeleteAccount();
+        await _tenantStorage.DeleteAccount();
 
         return new AppDeletionResult(
             $"The app '{accountInformation.AcountName}' was deleted.",
@@ -238,8 +233,7 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
     {
-        var storage = tenantFactory.Create(appId);
-        var accountInformation = await storage.GetAccountInformation();
+        var accountInformation = await _tenantStorage.GetAccountInformation();
         if (accountInformation == null)
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
@@ -254,12 +248,12 @@ public class SharedManagementService : ISharedManagementService
 
         if (!canDeleteImmediately)
         {
-            canDeleteImmediately = !(await storage.HasUsersAsync());
+            canDeleteImmediately = !(await _tenantStorage.HasUsersAsync());
         }
 
         if (canDeleteImmediately)
         {
-            await storage.DeleteAccount();
+            await _tenantStorage.DeleteAccount();
             return new AppDeletionResult(
                 $"The app '{accountInformation.AcountName}' was deleted.",
                 true,
@@ -268,10 +262,10 @@ public class SharedManagementService : ISharedManagementService
         }
 
         // Lock/Freeze all API keys that have been issued.
-        await storage.LockAllApiKeys(true);
+        await _tenantStorage.LockAllApiKeys(true);
 
         var deleteAt = _systemClock.UtcNow.AddMonths(1).UtcDateTime;
-        await storage.SetAppDeletionDate(deleteAt);
+        await _tenantStorage.SetAppDeletionDate(deleteAt);
 
         return new AppDeletionResult(
             $"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.",
@@ -282,8 +276,7 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync()
     {
-        var storage = _globalStorageFactory.Create();
-        var tenants = await storage.GetApplicationsPendingDeletionAsync();
+        var tenants = await _storage.GetApplicationsPendingDeletionAsync();
         return tenants;
     }
 
