@@ -206,7 +206,7 @@ jobs:
         run: >
           gh workflow run deploy-passwordless-server
           --repo bitwarden/passwordless-devops
-          --field source-repo=${{ github.repository.owner }}/${{ github.repository.name }}
+          --field repository=${{ github.repository.owner }}/${{ github.repository.name }}
           --field run-id=${{ github.run_id }}
           --field artifact=${{ matrix.app }}
           --field environment=devtest-${{ matrix.app }}
