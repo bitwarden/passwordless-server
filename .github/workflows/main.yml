@@ -210,3 +210,4 @@ jobs:
           --field run-id=${{ github.run_id }}
           --field artifact=${{ matrix.app }}
           --field environment=devtest-${{ matrix.app }}
+          --field version=${{ needs.version.outputs.version }}
