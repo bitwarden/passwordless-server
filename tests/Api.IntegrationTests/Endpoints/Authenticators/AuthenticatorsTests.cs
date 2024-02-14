@@ -8,14 +8,13 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Authenticators;
 
-public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
-    : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
-    private readonly HttpClient _client = passwordlessApiFactory.CreateClient();
-
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
         .RuleFor(x => x.DisplayName, x => x.Person.FullName)
@@ -32,15 +31,18 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_can_retrieve_configured_authenticators_when_attestation_is_allowed()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
+
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
-        await _client.EnableAttestation(applicationName);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        await client.EnableAttestation(applicationName);
 
         // Act
-        var actual = await _client.GetAsync("authenticators/list?isAllowed=true");
+        var actual = await client.GetAsync("authenticators/list?isAllowed=true");
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -50,20 +52,23 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_can_retrieve_configured_authenticators_with_expected_result()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
-        await _client.EnableAttestation(applicationName);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        await client.EnableAttestation(applicationName);
         var request = new AddAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
         }, true);
-        _ = await _client.PostAsJsonAsync("authenticators/add", request);
+        _ = await client.PostAsJsonAsync("authenticators/add", request);
 
         // Act
-        var actual = await _client.GetFromJsonAsync<IReadOnlyCollection<ConfiguredAuthenticatorResponse>>("authenticators/list?isAllowed=true");
+        var actual = await client.GetFromJsonAsync<IReadOnlyCollection<ConfiguredAuthenticatorResponse>>("authenticators/list?isAllowed=true");
 
         // Assert
         actual.Should().NotBeNull();
@@ -75,14 +80,17 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_receive_forbidden_when_retrieving_configured_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
         // Act
-        var actual = await _client.GetAsync("authenticators/list?isAllowed=true");
+        var actual = await client.GetAsync("authenticators/list?isAllowed=true");
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -92,12 +100,15 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_can_whitelist_authenticators_when_attestation_is_allowed()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
-        await _client.EnableAttestation(applicationName);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        await client.EnableAttestation(applicationName);
 
         var request = new AddAuthenticatorsRequest(new List<Guid>
         {
@@ -105,7 +116,7 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         }, true);
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/add", request);
+        var actual = await client.PostAsJsonAsync("authenticators/add", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -115,11 +126,14 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_receive_forbidden_when_whitelisting_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
         var request = new AddAuthenticatorsRequest(new List<Guid>
         {
@@ -127,7 +141,7 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         }, true);
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/add", request);
+        var actual = await client.PostAsJsonAsync("authenticators/add", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -137,23 +151,26 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_can_delist_authenticators_when_attestation_is_allowed()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
-        await _client.EnableAttestation(applicationName);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        await client.EnableAttestation(applicationName);
 
         var whitelistRequest = new AddAuthenticatorsRequest(new List<Guid>
         {
             Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
         }, true);
-        _ = await _client.PostAsJsonAsync("authenticators/add", whitelistRequest);
+        _ = await client.PostAsJsonAsync("authenticators/add", whitelistRequest);
         var request = new RemoveAuthenticatorsRequest(
             new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") });
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/remove", request);
+        var actual = await client.PostAsJsonAsync("authenticators/remove", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -163,11 +180,14 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
     public async Task I_receive_forbidden_when_delisting_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
         var request = new RemoveAuthenticatorsRequest(new List<Guid>
         {
@@ -175,14 +195,9 @@ public class AuthenticatorsTests(PasswordlessApiFactory passwordlessApiFactory)
         });
 
         // Act
-        var actual = await _client.PostAsJsonAsync("authenticators/remove", request);
+        var actual = await client.PostAsJsonAsync("authenticators/remove", request);
 
         // Assert
         actual.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    public void Dispose()
-    {
-        _client.Dispose();
     }
 }

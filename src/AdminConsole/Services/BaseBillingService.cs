@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
-using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
 
@@ -54,9 +53,11 @@ public class BaseBillingService
         {
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = plan.Features.MagicLinkEmailMonthlyQuota,
             MaxUsers = plan.Features.MaxUsers,
             AllowAttestation = plan.Features.AllowAttestation
         };
+
         await _passwordlessClient.SetFeaturesAsync(app, updateFeaturesRequest);
     }
 
@@ -64,9 +65,8 @@ public class BaseBillingService
     {
         var features = _billingOptions.Plans[planName].Features;
 
-
         // SetCustomerId on the Org
-        var org = await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync<Organization>(Db.Organizations, x => x.Id == orgId);
+        var org = await Db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
 
         if (org == null)
         {
@@ -78,11 +78,9 @@ public class BaseBillingService
             return;
         }
 
-
         org.BillingCustomerId = customerId;
         org.BecamePaidAt = subscriptionCreatedAt;
         org.BillingSubscriptionId = subscriptionId;
-
 
         // Increase the limits
         org.MaxAdmins = features.MaxAdmins;
@@ -94,14 +92,15 @@ public class BaseBillingService
         }
 
 
-        var applications = await Queryable
-            .Where<Application>(Db.Applications, a => a.OrganizationId == orgId)
+        var applications = await Db.Applications
+            .Where(a => a.OrganizationId == orgId)
             .ToListAsync();
 
         var setFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };
@@ -159,7 +158,9 @@ public class BaseBillingService
         var organization = await Db.Organizations
             .Include(x => x.Applications)
             .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+
         if (organization == null) return;
+
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
@@ -180,6 +181,7 @@ public class BaseBillingService
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };
@@ -188,8 +190,6 @@ public class BaseBillingService
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
     }
-
-
 }
 
 public record PricingCardModel(

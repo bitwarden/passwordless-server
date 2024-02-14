@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Email;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
-using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
@@ -84,6 +84,13 @@ services.AddCors(options
 services.AddHttpContextAccessor();
 services.AddScoped<ITenantProvider, TenantProvider>();
 
+services.AddRateLimiter(options =>
+{
+    // Reject with 429 instead of the default 503
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddMagicRateLimiterPolicy();
+});
+
 services.ConfigureHttpJsonOptions(options =>
 {
     // Already has the built in web defaults
@@ -99,15 +106,15 @@ services.AddScoped<IReportingService, ReportingService>();
 services.AddScoped<IApplicationService, ApplicationService>();
 services.AddScoped<IFido2Service, Fido2Service>();
 services.AddScoped<ITokenService, TokenService>();
-services.AddSingleton<ISystemClock, SystemClock>();
+services.AddSingleton<ISystemClock, TimeProviderSystemClockAdapter>();
 services.AddScoped<IRequestContext, RequestContext>();
 services.AddSingleton<IMetaDataService, MetaDataService>();
 
-services.AddReportingBackgroundServices();
+services.AddHostedService<DispatchedEmailCleanupService>();
 
 builder.AddMail();
 
-services.AddSingleton<Microsoft.Extensions.Internal.ISystemClock, Microsoft.Extensions.Internal.SystemClock>();
+services.AddSingleton<Microsoft.Extensions.Internal.ISystemClock, TimeProviderSystemClockAdapter>();
 services.AddMemoryCache();
 services.AddDistributedMemoryCache();
 builder.AddMetaDataService();
@@ -143,6 +150,8 @@ else
         () =>
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
+
+app.UseRateLimiter();
 
 if (isSelfHosted)
 {
@@ -192,7 +201,7 @@ app.MapAliasEndpoints();
 app.MapAccountEndpoints();
 app.MapCredentialsEndpoints();
 app.MapUsersEndpoints();
-if (app.Environment.IsDevelopment()) app.MapMagicEndpoints();
+app.MapMagicEndpoints();
 app.MapHealthEndpoints();
 app.MapEventLogEndpoints();
 app.MapReportingEndpoints();
@@ -203,6 +212,4 @@ app.MapPasswordlessHealthChecks();
 
 app.Run();
 
-public partial class Program
-{
-}
+public partial class Program;

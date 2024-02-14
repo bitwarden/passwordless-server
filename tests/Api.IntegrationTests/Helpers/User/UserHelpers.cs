@@ -24,8 +24,8 @@ public static class UserHelpers
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId
         };
         using var registrationBeginResponse = await httpClient.PostAsJsonAsync("/register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
@@ -33,8 +33,8 @@ public static class UserHelpers
         var authenticatorAttestationRawResponse = await driver.CreateCredentialsAsync(sessionResponse!.Data);
         return await httpClient.PostAsJsonAsync("/register/complete", new RegistrationCompleteDTO
         {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId,
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId,
             Session = sessionResponse.Session,
             Response = authenticatorAttestationRawResponse
         });
@@ -45,15 +45,15 @@ public static class UserHelpers
         if (!httpClient.HasPublicKey()) throw new Exception("ApiKey was not provided. Please add ApiKey to headers.");
         if (!httpClient.HasSecretKey()) throw new Exception("ApiSecret was not provided. Please add ApiSecret to headers.");
 
-        using var signInBeginResponse = await httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApiFactory.OriginUrl, RPID = PasswordlessApiFactory.RpId });
+        using var signInBeginResponse = await httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<AssertionOptions>>();
 
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         return await httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId,
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId,
             Response = authenticatorAssertionRawResponse,
             Session = signInBegin.Session
         });

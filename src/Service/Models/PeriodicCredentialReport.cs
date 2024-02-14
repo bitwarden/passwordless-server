@@ -14,6 +14,5 @@ public class PeriodicCredentialReport : PerTenant
     /// </summary>
     public int UsersCount { get; set; }
 
-    public virtual AccountMetaInformation Application { get; init; }
-
+    public virtual AccountMetaInformation? Application { get; set; }
 }

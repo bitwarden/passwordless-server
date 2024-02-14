@@ -10,14 +10,13 @@ using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
-public class RegisterAttestationTests(PasswordlessApiFactory passwordlessApiFactory)
-    : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class RegisterAttestationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
-    private readonly HttpClient _client = passwordlessApiFactory.CreateClient();
-
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
         .RuleFor(x => x.DisplayName, x => x.Person.FullName)
@@ -40,19 +39,22 @@ public class RegisterAttestationTests(PasswordlessApiFactory passwordlessApiFact
     public async Task I_can_use_supported_attestation_methods_to_register_a_new_user_when_attestation_is_allowed(string attestation, AttestationConveyancePreference expectedAttestation)
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
+
         var tokenRequest = TokenGenerator
             .RuleFor(x => x.Attestation, attestation)
             .Generate();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
-        await _client.EnableAttestation(applicationName);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        await client.EnableAttestation(applicationName);
 
         // Act
-        var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
 
         // Assert
         tokenResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -63,12 +65,12 @@ public class RegisterAttestationTests(PasswordlessApiFactory passwordlessApiFact
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId
         };
 
         // Act Begin
-        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
         // Assert Begin
         registrationBeginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -85,18 +87,21 @@ public class RegisterAttestationTests(PasswordlessApiFactory passwordlessApiFact
     public async Task I_can_use_supported_none_attestation_method_to_register_a_new_user_when_attestation_is_disallowed(string attestation, AttestationConveyancePreference expectedAttestation)
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
+
         var tokenRequest = TokenGenerator
             .RuleFor(x => x.Attestation, attestation)
             .Generate();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
         // Act
-        var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
 
         // Assert
         tokenResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -107,12 +112,12 @@ public class RegisterAttestationTests(PasswordlessApiFactory passwordlessApiFact
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId
         };
 
         // Act Begin
-        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
         // Assert Begin
         registrationBeginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -130,25 +135,23 @@ public class RegisterAttestationTests(PasswordlessApiFactory passwordlessApiFact
     public async Task I_cannot_use_other_than_none_attestation_method_to_register_a_new_user_when_attestation_is_disallowed(string attestation)
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient();
+
         var tokenRequest = TokenGenerator
             .RuleFor(x => x.Attestation, attestation)
             .Generate();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await _client.CreateApplicationAsync(applicationName);
+        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
         var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        _client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
+        client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
         // Act
-        var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
 
         // Assert
         tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    public void Dispose()
-    {
-        _client.Dispose();
     }
 }
