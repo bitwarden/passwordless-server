@@ -66,8 +66,7 @@ public class BaseBillingService
         var features = _billingOptions.Plans[planName].Features;
 
         // SetCustomerId on the Org
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var org = await db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
+        var org = await Db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
 
         if (org == null)
         {
@@ -93,7 +92,7 @@ public class BaseBillingService
         }
 
 
-        var applications = await db.Applications
+        var applications = await Db.Applications
             .Where(a => a.OrganizationId == orgId)
             .ToListAsync();
 
