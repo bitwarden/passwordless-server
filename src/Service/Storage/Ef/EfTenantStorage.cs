@@ -341,16 +341,6 @@ public class EfTenantStorage(
         return email;
     }
 
-    public async Task DeleteOldDispatchedEmailsAsync(TimeSpan age)
-    {
-        var until = timeProvider.GetUtcNow().UtcDateTime - age;
-        await db.DispatchedEmails
-            .Where(x => x.CreatedAt < until)
-            .ExecuteDeleteAsync();
-
-        await db.SaveChangesAsync();
-    }
-
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x

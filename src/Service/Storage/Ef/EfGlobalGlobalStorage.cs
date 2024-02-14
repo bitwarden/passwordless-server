@@ -90,4 +90,14 @@ public class EfGlobalGlobalStorage : IGlobalStorage
 
         return await _db.SaveChangesAsync();
     }
+
+    public async Task DeleteOldDispatchedEmailsAsync(TimeSpan age)
+    {
+        var until = _timeProvider.GetUtcNow().UtcDateTime - age;
+        await _db.DispatchedEmails
+            .Where(x => x.CreatedAt < until)
+            .ExecuteDeleteAsync();
+
+        await _db.SaveChangesAsync();
+    }
 }
