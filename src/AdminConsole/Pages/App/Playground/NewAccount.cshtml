@@ -5,7 +5,6 @@
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
-@using Microsoft.AspNetCore.Components
 @model NewAccountModel
 
 @{
@@ -14,7 +13,7 @@
 }
 
 
-<div id="xapp">
+<div>
     <div class="flex flex-1 flex-col justify-center lg:flex-non bg-gray-200 rounded-md p-6 max-w-fit">
         <div class="w-full max-w-sm lg:w-96">
             <div>
@@ -26,7 +25,7 @@
 
             <div class="mt-8">
                 <div class="mt-6">
-                    <form v-on:submit.prevent="createNewAccount">
+                    <form id="registration-form">
                         <fieldset id="registerCredentialFields" class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name (Visible in Browser UI)</label>
@@ -88,7 +87,7 @@
                             
 
                             <div>
-                                <button type="submit" btn-primary>Register</button>
+                                <button id="register-btn" class="btn-primary" type="button">Register</button>
                             </div>
                             
                             <div id="error-message-summary-container" class="hidden">
@@ -103,96 +102,59 @@
 </div>
 
 <partial name="Shared/_PasswordlessClientJs" />
-@section Scripts {
-    <script type="module">
-    import { createApp, ref } from 'vue';
-    createApp({
-        setup() {
-            const p = new Passwordless.Client({
-                apiUrl: "@Options.Value.ApiUrl",
-                apiKey: "@CurrentContext.ApiKey"
-            });
+<script>
+let p;
+document.addEventListener('DOMContentLoaded', function() {
+    p = new Passwordless.Client({
+        apiUrl: "@Options.Value.ApiUrl",
+        apiKey: "@CurrentContext.ApiKey"
+    });
+});
 
-            const createNewAccount = async (e) => {
+document.getElementById('register-btn').addEventListener('click', (e) => createNewAccount(e));
 
-                const data = new FormData(e.target);
-
-                var req = await fetch("?handler=token", {
-                    method: "post",
-                    body: data,
-                    headers: {
-                        RequestVerificationToken: "@requestToken"
-                    }
-                });
-
-                if (req.ok) {
-                    const { token } = await req.json();
-
-                    const nicknameForDevice = data.get("nickname");
-
-                    const { error } = await p.register(token , nicknameForDevice);
-                    if (error) {
-                        console.error(error);
-                        alert(error.title);
-                    }
-                    window.location.href = "../playground";
-                } else {
-                    const container = document.getElementById("error-message-summary-container");
-                    const field = container.getElementsByClassName("alert-box-message")[0];
-                    const body = await req.text();
-                    const problemDetails = JSON.parse(body);
-                    field.textContent = problemDetails.title;
-                    container.classList.remove("hidden");
-                }
-            }
-
-            const signins = ref([]);
-            const loginSubmit = async (e) => {
-                console.log("Login", e, e.target.alias.value);
-                const {token} = await p.signinWithAlias()
-
-                var result = await verifyWithBackend(token);
-                signins.value.push(result);
-
-                console.log(signins.value);
-            }
-
-            return {
-                loginSubmit,
-                createNewAccount,
-                signins
-            }
+const createNewAccount = async (e) => {
+    let form = document.getElementById("registration-form");
+    const data = new FormData(form);
+    
+    let req = await fetch("?handler=token", {
+        method: "post",
+        body: data,
+        headers: {
+            RequestVerificationToken: "@requestToken"
         }
-    }).mount('#xapp');
-
-    async function verifyWithBackend(token) {
-        console.warn("TOKEN", token);
-
-        var res = await fetch("", {
-            method: "POST",
-            body: new URLSearchParams({ token }),
-            headers: {
-                RequestVerificationToken: "@requestToken"
-            }
-        });
-        console.log("Result from post", res)
-
-        if (res.ok) {
-            return await res.json();
+    });
+    
+    if (req.ok) {
+        const { token } = await req.json();
+        const nicknameForDevice = data.get("nickname");
+        const { error } = await p.register(token , nicknameForDevice);
+        
+        if (error) {
+            console.error(error);
+            alert(error.title);
         }
-        return res;
+        
+        window.location.href = "../playground";
+    } else {
+        const container = document.getElementById("error-message-summary-container");
+        const field = container.getElementsByClassName("alert-box-message")[0];
+        const body = await req.text();
+        const problemDetails = JSON.parse(body);
+        field.textContent = problemDetails.title;
+        container.classList.remove("hidden");
     }
-    </script>
-    <script type="module">
-        const isSupported = Passwordless.isBrowserSupported();
-        if (!isSupported) {
-            const registerCredentialFields = document.getElementById("registerCredentialFields");
-            registerCredentialFields.disabled = true;
-            
-            const container = document.getElementById("error-message-summary-container");
-            const field = container.getElementsByClassName("alert-box-message")[0];
-            field.textContent = "WebAuthn is not supported in this browser.";
-            container.classList.remove("hidden");
-        }
-    </script>
 }
+                            
+const isSupported = Passwordless.isBrowserSupported();
+if (!isSupported) {
+    const registerCredentialFields = document.getElementById("registerCredentialFields");
+    registerCredentialFields.disabled = true;
+    
+    const container = document.getElementById("error-message-summary-container");
+    const field = container.getElementsByClassName("alert-box-message")[0];
+    field.textContent = "WebAuthn is not supported in this browser.";
+    container.classList.remove("hidden");
+}
+</script>
+

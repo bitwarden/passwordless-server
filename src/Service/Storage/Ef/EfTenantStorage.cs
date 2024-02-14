@@ -7,23 +7,13 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
 
-public class EfTenantStorage : ITenantStorage
+public class EfTenantStorage(
+    DbTenantContext db,
+    TimeProvider timeProvider,
+    ITenantProvider tenantProvider)
+    : ITenantStorage
 {
-    private readonly DbTenantContext db;
-    private readonly TimeProvider _timeProvider;
-    private readonly ITenantProvider _tenantProvider;
-
-    public EfTenantStorage(
-        DbTenantContext db,
-        TimeProvider timeProvider,
-        ITenantProvider tenantProvider)
-    {
-        this.db = db;
-        _tenantProvider = tenantProvider;
-        _timeProvider = timeProvider;
-    }
-
-    public string Tenant => _tenantProvider.Tenant;
+    public string Tenant => tenantProvider.Tenant;
 
 
     public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
@@ -35,7 +25,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task AddCredentialToUser(Fido2User user, StoredCredential cred)
     {
-        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, _tenantProvider.Tenant));
+        db.Credentials.Add(EFStoredCredential.FromStoredCredential(cred, tenantProvider.Tenant));
         await db.SaveChangesAsync();
     }
 
@@ -178,15 +168,24 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task SetFeaturesAsync(SetFeaturesRequest features) =>
         await db.AppFeatures.ExecuteUpdateAsync(x => x
-            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled, existing => features.EnableManuallyGeneratedAuthenticationTokens ?? existing.IsGenerateSignInTokenEndpointEnabled)
-            .SetProperty(f => f.IsMagicLinksEnabled, existing => features.EnableMagicLinks ?? existing.IsMagicLinksEnabled)
-            .SetProperty(f => f.EventLoggingRetentionPeriod, existing => features.EventLoggingRetentionPeriod ?? existing.EventLoggingRetentionPeriod));
+            .SetProperty(f => f.IsGenerateSignInTokenEndpointEnabled,
+                existing => features.EnableManuallyGeneratedAuthenticationTokens ??
+                            existing.IsGenerateSignInTokenEndpointEnabled
+            )
+            .SetProperty(f => f.IsMagicLinksEnabled,
+                existing => features.EnableMagicLinks ?? existing.IsMagicLinksEnabled
+            )
+            .SetProperty(f => f.EventLoggingRetentionPeriod,
+                existing => features.EventLoggingRetentionPeriod ?? existing.EventLoggingRetentionPeriod
+            )
+        );
 
     public async Task SetFeaturesAsync(ManageFeaturesRequest features)
     {
         var existingEntity = await db.AppFeatures.FirstOrDefaultAsync();
         existingEntity.EventLoggingIsEnabled = features.EventLoggingIsEnabled;
         existingEntity.EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod;
+        existingEntity.MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota;
         existingEntity.MaxUsers = features.MaxUsers;
         existingEntity.AllowAttestation = features.AllowAttestation;
         await db.SaveChangesAsync();
@@ -198,7 +197,7 @@ public class EfTenantStorage : ITenantStorage
             .Where(x => x.Id == apiKeyId)
             .ExecuteUpdateAsync(apiKey => apiKey
                 .SetProperty(x => x.IsLocked, true)
-                .SetProperty(x => x.LastLockedAt, _timeProvider.GetUtcNow().UtcDateTime)
+                .SetProperty(x => x.LastLockedAt, timeProvider.GetUtcNow().UtcDateTime)
         );
         if (rows == 0)
         {
@@ -212,7 +211,7 @@ public class EfTenantStorage : ITenantStorage
             .Where(x => x.Id == apiKeyId)
             .ExecuteUpdateAsync(apiKey => apiKey
                 .SetProperty(x => x.IsLocked, false)
-                .SetProperty(x => x.LastUnlockedAt, _timeProvider.GetUtcNow().UtcDateTime)
+                .SetProperty(x => x.LastUnlockedAt, timeProvider.GetUtcNow().UtcDateTime)
             );
         if (rows == 0)
         {
@@ -294,8 +293,8 @@ public class EfTenantStorage : ITenantStorage
             {
                 AaGuid = x,
                 IsAllowed = isAllowed,
-                CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
-                Tenant = _tenantProvider.Tenant
+                CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
+                Tenant = tenantProvider.Tenant
             }).ToList();
 
         db.Authenticators.AddRange(newAuthenticators);
@@ -307,6 +306,49 @@ public class EfTenantStorage : ITenantStorage
         return db.Authenticators
             .Where(x => aaGuids.Contains(x.AaGuid))
             .ExecuteDeleteAsync();
+    }
+
+    public async Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan window)
+    {
+        var from = timeProvider.GetUtcNow().UtcDateTime - window;
+        return await db.DispatchedEmails
+            .Where(x => x.CreatedAt >= from)
+            .ToArrayAsync();
+    }
+
+    public async Task<int> GetDispatchedEmailCountAsync(TimeSpan window)
+    {
+        var from = timeProvider.GetUtcNow().UtcDateTime - window;
+        return await db.DispatchedEmails
+            .CountAsync(x => x.CreatedAt >= from);
+    }
+
+    public async Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress, string linkTemplate)
+    {
+        var email = new DispatchedEmail
+        {
+            Tenant = Tenant,
+            Id = Guid.NewGuid(),
+            CreatedAt = timeProvider.GetUtcNow(),
+            UserId = userId,
+            EmailAddress = emailAddress,
+            LinkTemplate = linkTemplate
+        };
+
+        db.DispatchedEmails.Add(email);
+        await db.SaveChangesAsync();
+
+        return email;
+    }
+
+    public async Task DeleteOldDispatchedEmailsAsync(TimeSpan age)
+    {
+        var until = timeProvider.GetUtcNow().UtcDateTime - age;
+        await db.DispatchedEmails
+            .Where(x => x.CreatedAt < until)
+            .ExecuteDeleteAsync();
+
+        await db.SaveChangesAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)
@@ -324,7 +366,7 @@ public class EfTenantStorage : ITenantStorage
 
     public Task RemoveExpiredTokenKeys(CancellationToken cancellationToken)
     {
-        return db.TokenKeys.Where(x => x.CreatedAt < _timeProvider.GetUtcNow().AddDays(-30).DateTime)
+        return db.TokenKeys.Where(x => x.CreatedAt < timeProvider.GetUtcNow().AddDays(-30).DateTime)
             .ExecuteDeleteAsync(cancellationToken);
     }
 
@@ -336,7 +378,7 @@ public class EfTenantStorage : ITenantStorage
 
     public async Task StoreAlias(string userid, Dictionary<string, string> aliases)
     {
-        var pointers = aliases.Select(a => new AliasPointer() { Tenant = _tenantProvider.Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
+        var pointers = aliases.Select(a => new AliasPointer() { Tenant = tenantProvider.Tenant, UserId = userid, Alias = a.Key, Plaintext = a.Value });
         db.Aliases.RemoveRange(db.Aliases.Where(ap => ap.UserId == userid));
         db.Aliases.AddRange(pointers);
         await db.SaveChangesAsync();
@@ -346,7 +388,7 @@ public class EfTenantStorage : ITenantStorage
     {
         var ak = new ApiKeyDesc
         {
-            Tenant = _tenantProvider.Tenant,
+            Tenant = tenantProvider.Tenant,
             Id = pkpart,
             ApiKey = apikey,
             Scopes = scopes,

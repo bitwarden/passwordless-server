@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
-using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
 
@@ -14,29 +13,29 @@ namespace Passwordless.AdminConsole.Services;
 
 public record UsageItem(string BillingSubscriptionItemId, int Users);
 
-public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
+public class BaseBillingService
 {
-    protected readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    protected readonly ConsoleDbContext Db;
 
     protected readonly IPasswordlessManagementClient _passwordlessClient;
-    protected readonly ILogger<BaseBillingService<TDbContext>> _logger;
+    protected readonly ILogger<BaseBillingService> _logger;
     protected readonly BillingOptions _billingOptions;
     protected readonly IDataService _dataService;
     protected readonly IUrlHelperFactory _urlHelperFactory;
     protected readonly IActionContextAccessor _actionContextAccessor;
 
     public BaseBillingService(
-        IDbContextFactory<TDbContext> dbContextFactory,
+        ConsoleDbContext db,
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
-        ILogger<BaseBillingService<TDbContext>> logger,
+        ILogger<BaseBillingService> logger,
         IOptions<BillingOptions> billingOptions,
         IActionContextAccessor actionContextAccessor,
         IUrlHelperFactory urlHelperFactory
 
         )
     {
-        _dbContextFactory = dbContextFactory;
+        Db = db;
         _dataService = dataService;
         _passwordlessClient = passwordlessClient;
         _logger = logger;
@@ -54,9 +53,11 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         {
             EventLoggingIsEnabled = plan.Features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = plan.Features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = plan.Features.MagicLinkEmailMonthlyQuota,
             MaxUsers = plan.Features.MaxUsers,
             AllowAttestation = plan.Features.AllowAttestation
         };
+
         await _passwordlessClient.SetFeaturesAsync(app, updateFeaturesRequest);
     }
 
@@ -64,10 +65,8 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     {
         var features = _billingOptions.Plans[planName].Features;
 
-
         // SetCustomerId on the Org
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var org = await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync<Organization>(db.Organizations, x => x.Id == orgId);
+        var org = await Db.Organizations.FirstOrDefaultAsync(x => x.Id == orgId);
 
         if (org == null)
         {
@@ -79,11 +78,9 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             return;
         }
 
-
         org.BillingCustomerId = customerId;
         org.BecamePaidAt = subscriptionCreatedAt;
         org.BillingSubscriptionId = subscriptionId;
-
 
         // Increase the limits
         org.MaxAdmins = features.MaxAdmins;
@@ -95,14 +92,15 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
         }
 
 
-        var applications = await Queryable
-            .Where<Application>(db.Applications, a => a.OrganizationId == orgId)
+        var applications = await Db.Applications
+            .Where(a => a.OrganizationId == orgId)
             .ToListAsync();
 
         var setFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };
@@ -116,14 +114,12 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
 
-        await db.SaveChangesAsync();
+        await Db.SaveChangesAsync();
     }
 
     protected async Task<List<UsageItem>> GetUsageItems()
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-
-        var items = await db.Applications
+        var items = await Db.Applications
             .Where(a => a.BillingSubscriptionItemId != null)
             .GroupBy(a => new
             {
@@ -139,8 +135,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     /// <inheritdoc />
     public async Task<string?> GetCustomerIdAsync(int organizationId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var customerId = await db.Organizations
+        var customerId = await Db.Organizations
             .Where(o => o.Id == organizationId)
             .Select(o => o.BillingCustomerId)
             .FirstOrDefaultAsync();
@@ -149,8 +144,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
 
     public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        await db.Applications
+        await Db.Applications
             .Where(x => x.Id == applicationId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(p => p.BillingPlan, plan)
@@ -161,11 +155,12 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     /// <inheritdoc />
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var organization = await db.Organizations
+        var organization = await Db.Organizations
             .Include(x => x.Applications)
             .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
+
         if (organization == null) return;
+
         organization.BillingSubscriptionId = null;
         organization.BecamePaidAt = null;
 
@@ -180,12 +175,13 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             application.BillingPlan = _billingOptions.Store.Free;
         }
 
-        await db.SaveChangesAsync();
+        await Db.SaveChangesAsync();
 
         var setFeaturesRequest = new ManageFeaturesRequest
         {
             EventLoggingIsEnabled = features.EventLoggingIsEnabled,
             EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+            MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
             MaxUsers = features.MaxUsers,
             AllowAttestation = features.AllowAttestation
         };
@@ -194,8 +190,6 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
     }
-
-
 }
 
 public record PricingCardModel(

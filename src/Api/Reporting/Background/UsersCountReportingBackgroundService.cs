@@ -12,7 +12,7 @@ public sealed class PeriodicCredentialReportsBackgroundService : BasePeriodicBac
         IServiceProvider serviceProvider,
         TimeProvider timeProvider,
         ILogger<PeriodicCredentialReportsBackgroundService> logger) : base(
-        new TimeSpan(22, 0, 0),
+        new TimeOnly(22, 00, 00),
         TimeSpan.FromDays(1),
         timeProvider,
         logger)

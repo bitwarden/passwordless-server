@@ -6,6 +6,12 @@ public class FeaturesOptions
 
     public int EventLoggingRetentionPeriod { get; set; }
 
+    /// <summary>
+    /// Maximum allowed magic link emails sent for this application.
+    /// Depending on the age of the application, the actual limit may be lower.
+    /// </summary>
+    public int MagicLinkEmailMonthlyQuota { get; set; }
+
     public int MaxAdmins { get; set; }
 
     public int MaxApplications { get; set; }

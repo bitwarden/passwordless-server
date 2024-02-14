@@ -13,29 +13,22 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
-public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
-    private readonly HttpClient _client;
-
     private readonly Faker<RegisterToken> _tokenGenerator = RequestHelpers.GetRegisterTokenGeneratorRules();
-
-    public RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
-    {
-        apiFactory.TestOutput = testOutput;
-        _client = apiFactory.CreateClient()
-            .AddPublicKey()
-            .AddSecretKey()
-            .AddUserAgent();
-    }
 
     [Fact]
     public async Task I_can_retrieve_token_to_start_registration()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
         var request = _tokenGenerator.Generate();
 
         // Act
-        var response = await _client.PostAsJsonAsync("/register/token", request);
+        using var response = await client.PostAsJsonAsync("/register/token", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -48,19 +41,22 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_retrieve_the_credential_create_options_and_session_token_for_creating_a_new_user()
     {
         // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
         var tokenRequest = _tokenGenerator.Generate();
-        var tokenResponse = await _client.PostAsJsonAsync("/register/token", tokenRequest);
+        var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
 
         var registrationBeginRequest = new FidoRegistrationBeginDTO
         {
             Token = registerTokenResponse!.Token,
-            Origin = PasswordlessApiFactory.OriginUrl,
-            RPID = PasswordlessApiFactory.RpId
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId
         };
 
         // Act
-        using var registrationBeginResponse = await _client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await client.PostAsJsonAsync("/register/begin", registrationBeginRequest);
 
         // Assert
         registrationBeginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -74,19 +70,17 @@ public class RegisterTests : IClassFixture<PasswordlessApiFactory>, IDisposable
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        using var driver = WebDriverFactory.GetDriver(PasswordlessApiFactory.OriginUrl);
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
 
         // Act
-        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(_client, driver);
+        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(client, driver);
 
         // Assert
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var registerCompleteToken = await registerCompleteResponse.Content.ReadFromJsonAsync<TokenResponse>();
         registerCompleteToken!.Token.Should().StartWith("verify_");
-    }
-
-    public void Dispose()
-    {
-        _client.Dispose();
     }
 }
