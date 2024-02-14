@@ -1,20 +1,24 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Passwordless.AdminConsole.Services.MagicLinks;
 
 public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : class
 {
+    private readonly MagicClient _magicClient;
     private readonly IMagicLinkBuilder _magicLinkBuilder;
     private readonly IMailService _mailService;
     private readonly IEventLogger _eventLogger;
 
     public MagicLinkSignInManager(
+        MagicClient magicClient,
         IMagicLinkBuilder magicLinkBuilder,
         UserManager<TUser> userManager,
         IHttpContextAccessor contextAccessor,
@@ -27,6 +31,7 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         IEventLogger eventLogger)
         : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
     {
+        _magicClient = magicClient;
         _magicLinkBuilder = magicLinkBuilder;
         _mailService = mailService;
         _eventLogger = eventLogger;
@@ -34,63 +39,54 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
 
     public async Task<SignInResult> SendEmailForSignInAsync(string email, string? returnUrl)
     {
-        var magicLink = await _magicLinkBuilder.GetLinkAsync(email, returnUrl);
-        await _mailService.SendPasswordlessSignInAsync(magicLink, email);
-
         var user = await UserManager.FindByEmailAsync(email);
-        if (user is ConsoleAdmin admin)
-            _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
+        if (user is not ConsoleAdmin admin) return SignInResult.Success;
+        
+        var url = "https://localhost:8002/account/magic?token=<token>";
+        var urlTemplate = _magicLinkBuilder.GetUrlTemplate();
+        try
+        {
+            await _magicClient.SendMagicLinkAsync(admin.Id, admin.Email, url);
+        }
+        catch (PasswordlessApiException e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
+        _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
 
         return SignInResult.Success;
-    }
 
-    public async Task<SignInResult> PasswordlessSignInAsync(TUser user, string token, bool isPersistent)
-    {
-        if (user == null)
-        {
-            throw new ArgumentNullException(nameof(user));
-        }
-
-        var attempt = await CheckPasswordlessSignInAsync(user, token);
-        return attempt.Succeeded
-            ? await SignInOrTwoFactorAsync(user, isPersistent, bypassTwoFactor: true)
-            : attempt;
     }
 
     public async Task<SignInResult> PasswordlessSignInAsync(string email, string token, bool isPersistent)
     {
-        var user = await UserManager.FindByEmailAsync(email);
+        var verifiedUser = await _magicClient.VerifyTokenAsync(token);
+        // todo: error handling
+        
+        var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
         if (user == null)
         {
             return SignInResult.Failed;
         }
-
-        return await PasswordlessSignInAsync(user, token, isPersistent);
+        // SignInOrTwoFactorAsync
+        await SignInAsync(user, isPersistent, "magic");
+        return SignInResult.Success;
     }
+    
+        
+    // public async Task<SignInResult> OLD_METHOD(string email, string? returnUrl)
+    // {
+    //     // var magicLink = await _magicLinkBuilder.GetLinkAsync(email, returnUrl);
+    //     // await _mailService.SendPasswordlessSignInAsync(magicLink, email);
+    //     //
+    //     // var user = await UserManager.FindByEmailAsync(email);
+    //     // if (user is ConsoleAdmin admin)
+    //     //     _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
+    //     //
+    //     // return SignInResult.Success;
+    //
+    // }
 
-    public virtual async Task<SignInResult> CheckPasswordlessSignInAsync(TUser user, string token)
-    {
-        if (user == null)
-        {
-            throw new ArgumentNullException(nameof(user));
-        }
-
-        var error = await PreSignInCheck(user);
-        if (error != null)
-        {
-            return error;
-        }
-
-        // convert back from url safe
-        //token = token.Replace("-", "+").Replace("_", "/");
-        if (await UserManager.VerifyUserTokenAsync(user, Options.Tokens.PasswordResetTokenProvider,
-            SignInPurposes.MagicLink, token))
-        {
-            return SignInResult.Success;
-        }
-
-        Logger.LogWarning(2, "User {userId} failed to provide the correct token.",
-            await UserManager.GetUserIdAsync(user));
-        return SignInResult.Failed;
-    }
 }

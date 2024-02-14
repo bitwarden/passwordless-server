@@ -54,4 +54,13 @@ public class MagicLinkBuilder : IMagicLinkBuilder
 
         return uriBuilder.ToString();
     }
+
+    public string GetUrlTemplate(string? returnUrl = null)
+    {
+        var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+        
+        var url = urlBuilder.PageLink("/Account/Magic?", values: new { token="<token>" }) ?? urlBuilder.Content("~/");
+        
+        return url;
+    }
 }

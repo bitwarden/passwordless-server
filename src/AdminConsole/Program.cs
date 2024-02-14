@@ -130,6 +130,8 @@ void RunTheApp()
     services.AddHostedService<TimedHostedService>();
     services.AddHostedService<ApplicationDeletionBackgroundService>();
 
+    services.AddTransient<MagicClient, MagicClient>();
+    services.AddHttpClient<MagicClient, MagicClient>();
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
