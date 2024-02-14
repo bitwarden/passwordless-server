@@ -11,9 +11,9 @@
 <Panel Header="Api Keys">
     <p>To learn more about API key management, read more <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#api-key-management" target="_blank">here</a>. To delete an API key, first lock the API key.</p>
     
-    <EditForm class="flex space-x-4" Model="CreateForm" FormName="@(CreateApiKeyFormName)" OnSubmit="OnCreateFormSubmitted">
+    <EditForm class="flex" Model="CreateForm" FormName="@(CreateApiKeyFormName)" OnSubmit="OnCreateFormSubmitted">
         <button id="create-public-key-btn" class="btn-primary" name="CreateForm.Type" type="submit" value="public">Create Public Key</button>
-        <button id="create-secret-key-btn" class="btn-primary" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
+        <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
     </EditForm>
     
     <div class="table-container">
@@ -41,11 +41,11 @@
                 {
                     <tr>
                         <td>@apiKey.Value</td>
-                        <td><asp-local-time datetime="apiKey.CreatedAt"></asp-local-time></td>
+                        <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
                         <td>@apiKey.Type</td>
                         @if (apiKey.IsLocked)
                         {
-                            <td class="bg-red-50">Yes (<asp-local-time datetime="apiKey.LastLockedAt!.Value"></asp-local-time>)</td>
+                            <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
                         }
                         else
                         {
@@ -59,35 +59,28 @@
                                 }
                             </ul>
                         </td>
-                        <td class="flex space-x-2">
-                            @if (apiKey.IsLocked)
-                            {
-                                <form method="post" asp-page-handler="UnlockApiKey">
-                                    <input type="hidden" value="@apiKey.Id" name="SelectedApiKeyId" />
-                                    <button class="btn-warning flex items-center">
-                                        <component type="typeof(UnlockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/> Unlock
+                        <td>
+                            <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" OnSubmit="OnSelectedFormSubmitted">
+                                @if (apiKey.IsLocked)
+                                {
+                                    <button class="btn-warning flex items-center" value="unlock">
+                                        <LockIcon Class="h-6 w-6" /> Unlock
                                     </button>
-                                </form>
-        
-                            }
-                            else
-                            {
-                                <form method="post" asp-page-handler="LockApiKey">
-                                    <input type="hidden" value="@apiKey.Id" name="SelectedApiKeyId" />
-                                    <button class="btn-warning flex items-center">
-                                        <component type="typeof(LockIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/> Lock
+                                }
+                                else
+                                {
+                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
+                                        <UnlockIcon Class="h-6 w-6" /> Lock
                                     </button>
-                                </form>
-                            }
-                            @if (apiKey.CanDelete)
-                            {
-                                <form method="post" asp-page-handler="DeleteApiKey">
-                                    <input type="hidden" value="@apiKey.Id" name="SelectedApiKeyId" />
-                                    <button class="btn-danger">
-                                        <component type="typeof(DeleteIcon)" render-mode="Static" param-Class="@("h-6 w-6")"/>
+                                }
+                                @if (apiKey.CanDelete)
+                                {
+                                    <button class="btn-danger flex items-center" value="delete">
+                                        <DeleteIcon Class="h-6 w-6" /> Delete
                                     </button>
-                                </form>
-                            }
+                                }
+                                <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
+                            </EditForm>
                         </td>
                     </tr>
                 }

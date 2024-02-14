@@ -54,7 +54,7 @@ public class SettingsModel : BaseExtendedPageModel
     public Application? Application { get; private set; }
 
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
-    
+
     [BindProperty]
     public bool IsManualTokenGenerationEnabled { get; set; }
 
@@ -77,7 +77,7 @@ public class SettingsModel : BaseExtendedPageModel
     public async Task OnGet()
     {
         await InitializeAsync();
-        
+
         if (!Organization.HasSubscription)
         {
             AddPlan(_billingOptions.Store.Free);

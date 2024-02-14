@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -12,13 +11,16 @@ namespace Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsCompon
 public partial class ApiKeysSection : ComponentBase
 {
     public const string CreateApiKeyFormName = "create-api-key-form";
-    
-    public const string SelectedApiKeyIdField = "SelectedApiKeyId";
+    public const string SelectedApiKeyFormName = "selected-api-key-form";
 
     public string AppId => CurrentContext.AppId!;
-    
-    [SupplyParameterFromForm(FormName = CreateApiKeyFormName)] public CreateFormModel? CreateForm { get; set; }
-    
+
+    [SupplyParameterFromForm(FormName = CreateApiKeyFormName)]
+    public CreateFormModel? CreateForm { get; set; }
+
+    [SupplyParameterFromForm(FormName = SelectedApiKeyFormName)]
+    public SelectedFormModel? SelectedForm { get; set; }
+
     public IReadOnlyCollection<ApiKey>? ApiKeys { get; private set; }
 
     public record ApiKey(
@@ -53,104 +55,30 @@ public partial class ApiKeysSection : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         CreateForm ??= new CreateFormModel();
-        
-        if (HttpContextAccessor.IsRazorPages())
+        SelectedForm ??= new SelectedFormModel();
+
+        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {
-            if (CreateForm.Type == null)
+            var request = HttpContextAccessor.HttpContext!.Request;
+            switch (request.Form["_handler"])
             {
-                CreateForm.Type = HttpContextAccessor.HttpContext.Request.Form["CreateForm.Type"].ToString();
-                OnCreateFormSubmitted();
+                case CreateApiKeyFormName:
+                    CreateForm.Type = request.Form["CreateForm.Type"].ToString();
+                    OnCreateFormSubmitted();
+                    break;
+                case SelectedApiKeyFormName:
+                    SelectedForm.ApiKeyId = request.Form["SelectedForm.ApiKeyId"].ToString();
+                    SelectedForm.Action = request.Form["SelectedForm.Action"].ToString();
+                    await OnSelectedFormSubmitted();
+                    break;
             }
         }
-        
+
         var apiKeys = await ManagementClient.GetApiKeysAsync(AppId);
         ApiKeys = apiKeys
             .Select(x => ApiKey.FromDto(x, CurrentContext))
             .Where(x => !x.IsActiveManagementKey)
             .ToImmutableList();
-    }
-
-    public async Task OnLockAsync()
-    {
-        var selectedApiKeyId = HttpContextAccessor.HttpContext!.Request.Form[SelectedApiKeyIdField].ToString();
-        if (string.IsNullOrEmpty(selectedApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(selectedApiKeyId));
-        }
-
-        try
-        {
-            await ManagementClient.LockApiKeyAsync(AppId, selectedApiKeyId);
-
-            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
-                EventType.AdminApiKeyLocked,
-                $"Locked API key '{selectedApiKeyId}' for application {AppId}.",
-                Severity.Informational,
-                AppId,
-                CurrentContext.OrgId!.Value,
-                DateTime.UtcNow);
-            EventLogger.LogEvent(eventDto);
-        }
-        catch (Exception)
-        {
-            Logger.LogError("Failed to lock api key for application: {appId}", AppId);
-            throw;
-        }
-    }
-
-    public async Task OnUnlockAsync()
-    {
-        var selectedApiKeyId = HttpContextAccessor.HttpContext!.Request.Form["SelectedApiKeyId"].ToString();
-        if (string.IsNullOrEmpty(selectedApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(selectedApiKeyId));
-        }
-
-        try
-        {
-            await ManagementClient.UnlockApiKeyAsync(AppId, selectedApiKeyId);
-
-            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
-                EventType.AdminApiKeyUnlocked,
-                $"Unlocked API key '{selectedApiKeyId}' for application {AppId}.",
-                Severity.Informational,
-                AppId,
-                CurrentContext.OrgId!.Value,
-                DateTime.UtcNow);
-            EventLogger.LogEvent(eventDto);
-        }
-        catch (Exception)
-        {
-            Logger.LogError("Failed to unlock api key for application: {appId}", AppId);
-            throw;
-        }
-    }
-
-    public async Task OnDeleteAsync()
-    {
-        var selectedApiKeyId = HttpContextAccessor.HttpContext!.Request.Form["SelectedApiKeyId"].ToString();
-        if (string.IsNullOrEmpty(selectedApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(selectedApiKeyId));
-        }
-
-        try
-        {
-            await ManagementClient.DeleteApiKeyAsync(AppId, selectedApiKeyId);
-
-            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
-                EventType.AdminApiKeyDeleted,
-                $"Deleted API key '{selectedApiKeyId}' for application {AppId}.",
-                Severity.Informational,
-                AppId,
-                CurrentContext.OrgId!.Value,
-                DateTime.UtcNow);
-            EventLogger.LogEvent(eventDto);
-        }
-        catch (Exception)
-        {
-            Logger.LogError("Failed to delete api key for application: {appId}", AppId);
-        }
     }
 
     private void OnCreateFormSubmitted()
@@ -165,48 +93,100 @@ public partial class ApiKeysSection : ComponentBase
                 break;
         }
     }
-    
-    public async Task<IActionResult> OnPostLockApiKeyAsync()
+
+    private async Task OnSelectedFormSubmitted()
     {
-        try
+        if (string.IsNullOrEmpty(SelectedForm!.ApiKeyId))
         {
-            await ApiKeysModel.OnLockAsync();
-            return RedirectToPage();
+            throw new ArgumentNullException(nameof(SelectedForm.ApiKeyId));
         }
-        catch
+        switch (SelectedForm!.Action)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+            case "lock":
+                await LockSelectedAsync();
+                break;
+            case "unlock":
+                await UnlockSelectedAsync();
+                break;
+            case "delete":
+                await DeleteSelectedAsync();
+                break;
         }
     }
 
-    public async Task<IActionResult> OnPostUnlockApiKeyAsync()
+    private async Task LockSelectedAsync()
     {
         try
         {
-            await ApiKeysModel.OnUnlockAsync();
-            return RedirectToPage();
+            await ManagementClient.LockApiKeyAsync(AppId, SelectedForm!.ApiKeyId!);
+
+            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyLocked,
+                $"Locked API key '{SelectedForm.ApiKeyId}' for application {AppId}.",
+                Severity.Informational,
+                AppId,
+                CurrentContext.OrgId!.Value,
+                DateTime.UtcNow);
+            EventLogger.LogEvent(eventDto);
         }
-        catch
+        catch (Exception)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+            Logger.LogError("Failed to lock api key for application: {appId}", AppId);
+            throw;
         }
     }
 
-    public async Task<IActionResult> OnPostDeleteApiKeyAsync()
+    private async Task UnlockSelectedAsync()
     {
         try
         {
-            await ApiKeysModel.OnDeleteAsync();
-            return RedirectToPage();
+            await ManagementClient.UnlockApiKeyAsync(AppId, SelectedForm!.ApiKeyId!);
+
+            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyUnlocked,
+                $"Unlocked API key '{SelectedForm.ApiKeyId}' for application {AppId}.",
+                Severity.Informational,
+                AppId,
+                CurrentContext.OrgId!.Value,
+                DateTime.UtcNow);
+            EventLogger.LogEvent(eventDto);
         }
-        catch
+        catch (Exception)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
+            Logger.LogError("Failed to unlock api key for application: {appId}", AppId);
+            throw;
+        }
+    }
+
+    private async Task DeleteSelectedAsync()
+    {
+        try
+        {
+            await ManagementClient.DeleteApiKeyAsync(AppId, SelectedForm.ApiKeyId);
+
+            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyDeleted,
+                $"Deleted API key '{SelectedForm!.ApiKeyId}' for application {AppId}.",
+                Severity.Informational,
+                AppId,
+                CurrentContext.OrgId!.Value,
+                DateTime.UtcNow);
+            EventLogger.LogEvent(eventDto);
+        }
+        catch (Exception)
+        {
+            Logger.LogError("Failed to delete api key for application: {appId}", AppId);
         }
     }
 
     public sealed class CreateFormModel
     {
         public string? Type { get; set; }
+    }
+
+    public sealed class SelectedFormModel
+    {
+        public string? ApiKeyId { get; set; }
+        public string? Action { get; set; }
     }
 }
