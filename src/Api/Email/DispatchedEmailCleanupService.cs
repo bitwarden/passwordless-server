@@ -15,10 +15,10 @@ public class DispatchedEmailCleanupService(
     protected override async Task DoWorkAsync(CancellationToken cancellationToken)
     {
         var scope = serviceProvider.CreateScope();
-        var tenantStorage = scope.ServiceProvider.GetRequiredService<ITenantStorage>();
+        var storage = scope.ServiceProvider.GetRequiredService<IGlobalStorage>();
 
         // We only need 30 days worth of emails, but let's keep a small extra buffer just in case
-        await tenantStorage.DeleteOldDispatchedEmailsAsync(TimeSpan.FromDays(50));
+        await storage.DeleteOldDispatchedEmailsAsync(TimeSpan.FromDays(50));
 
     }
 }
