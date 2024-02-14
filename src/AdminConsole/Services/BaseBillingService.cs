@@ -13,29 +13,29 @@ namespace Passwordless.AdminConsole.Services;
 
 public record UsageItem(string BillingSubscriptionItemId, int Users);
 
-public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
+public class BaseBillingService
 {
-    protected readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    protected readonly ConsoleDbContext Db;
 
     protected readonly IPasswordlessManagementClient _passwordlessClient;
-    protected readonly ILogger<BaseBillingService<TDbContext>> _logger;
+    protected readonly ILogger<BaseBillingService> _logger;
     protected readonly BillingOptions _billingOptions;
     protected readonly IDataService _dataService;
     protected readonly IUrlHelperFactory _urlHelperFactory;
     protected readonly IActionContextAccessor _actionContextAccessor;
 
     public BaseBillingService(
-        IDbContextFactory<TDbContext> dbContextFactory,
+        ConsoleDbContext db,
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
-        ILogger<BaseBillingService<TDbContext>> logger,
+        ILogger<BaseBillingService> logger,
         IOptions<BillingOptions> billingOptions,
         IActionContextAccessor actionContextAccessor,
         IUrlHelperFactory urlHelperFactory
 
         )
     {
-        _dbContextFactory = dbContextFactory;
+        Db = db;
         _dataService = dataService;
         _passwordlessClient = passwordlessClient;
         _logger = logger;
@@ -115,14 +115,12 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             await _passwordlessClient.SetFeaturesAsync(application.Id, setFeaturesRequest);
         }
 
-        await db.SaveChangesAsync();
+        await Db.SaveChangesAsync();
     }
 
     protected async Task<List<UsageItem>> GetUsageItems()
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-
-        var items = await db.Applications
+        var items = await Db.Applications
             .Where(a => a.BillingSubscriptionItemId != null)
             .GroupBy(a => new
             {
@@ -138,8 +136,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     /// <inheritdoc />
     public async Task<string?> GetCustomerIdAsync(int organizationId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var customerId = await db.Organizations
+        var customerId = await Db.Organizations
             .Where(o => o.Id == organizationId)
             .Select(o => o.BillingCustomerId)
             .FirstOrDefaultAsync();
@@ -148,8 +145,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
 
     public async Task UpdateApplicationAsync(string applicationId, string plan, string subscriptionItemId, string priceId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        await db.Applications
+        await Db.Applications
             .Where(x => x.Id == applicationId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(p => p.BillingPlan, plan)
@@ -160,8 +156,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
     /// <inheritdoc />
     public async Task OnSubscriptionDeletedAsync(string subscriptionId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var organization = await db.Organizations
+        var organization = await Db.Organizations
             .Include(x => x.Applications)
             .SingleOrDefaultAsync(x => x.BillingSubscriptionId == subscriptionId);
 
@@ -181,7 +176,7 @@ public class BaseBillingService<TDbContext> where TDbContext : ConsoleDbContext
             application.BillingPlan = _billingOptions.Store.Free;
         }
 
-        await db.SaveChangesAsync();
+        await Db.SaveChangesAsync();
 
         var setFeaturesRequest = new ManageFeaturesRequest
         {

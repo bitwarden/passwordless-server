@@ -8,23 +8,23 @@ using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class ApplicationService<TDbContext> : IApplicationService where TDbContext : ConsoleDbContext
+public class ApplicationService : IApplicationService
 {
     private readonly IPasswordlessManagementClient _client;
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ConsoleDbContext _db;
     private readonly ISharedBillingService _billingService;
     private readonly IMailService _mailService;
     private readonly IMagicLinkBuilder _magicLinkBuilder;
 
     public ApplicationService(
         IPasswordlessManagementClient client,
-        IDbContextFactory<TDbContext> dbContextFactory,
+        ConsoleDbContext db,
         IMailService mailService,
         IMagicLinkBuilder magicLinkBuilder,
         ISharedBillingService billingService)
     {
         _client = client;
-        _dbContextFactory = dbContextFactory;
+        _db = db;
         _billingService = billingService;
         _mailService = mailService;
         _magicLinkBuilder = magicLinkBuilder;
@@ -34,8 +34,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
     {
         var response = await _client.MarkDeleteApplicationAsync(new MarkDeleteApplicationRequest(applicationId, userName));
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var application = await db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
+        var application = await _db.Applications.FirstOrDefaultAsync(x => x.Id == applicationId);
 
         if (application == null) return response;
 
@@ -47,7 +46,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
         else
         {
             application.DeleteAt = response.DeleteAt;
-            await db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
             var magicLink = await _magicLinkBuilder.GetLinkAsync(userName, "/organization/overview");
             await _mailService.SendApplicationToBeDeletedAsync(application, userName, magicLink, response.AdminEmails);
         }
@@ -59,30 +58,27 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
     {
         _ = await _client.CancelApplicationDeletionAsync(applicationId);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var application = await db.Applications
+        var application = await _db.Applications
             .Where(x => x.Id == applicationId)
             .FirstOrDefaultAsync();
 
         if (application == null) return;
 
         application.DeleteAt = null;
-        await db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
     }
 
     public async Task<Onboarding?> GetOnboardingAsync(string applicationId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        return await db.Onboardings.SingleOrDefaultAsync(x => x.ApplicationId == applicationId);
+        return await _db.Onboardings.SingleOrDefaultAsync(x => x.ApplicationId == applicationId);
     }
 
     public async Task DeleteAsync(string applicationId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var application = await db.Applications.SingleOrDefaultAsync(x => x.Id == applicationId);
+        var application = await _db.Applications.SingleOrDefaultAsync(x => x.Id == applicationId);
         if (application == null) return;
-        db.Applications.Remove(application);
-        var rows = await db.SaveChangesAsync();
+        _db.Applications.Remove(application);
+        var rows = await _db.SaveChangesAsync();
         if (rows > 0 && application.BillingSubscriptionItemId != null)
         {
             await _billingService.OnPostApplicationDeletedAsync(application.BillingSubscriptionItemId);
@@ -91,8 +87,7 @@ public class ApplicationService<TDbContext> : IApplicationService where TDbConte
 
     public async Task CreateApplicationAsync(Application application)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        db.Applications.Add(application);
-        await db.SaveChangesAsync();
+        _db.Applications.Add(application);
+        await _db.SaveChangesAsync();
     }
 }
