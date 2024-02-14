@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
@@ -6,21 +5,20 @@ using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class OrganizationFeatureService<TDbContext> : IOrganizationFeatureService where TDbContext : ConsoleDbContext
+public class OrganizationFeatureService : IOrganizationFeatureService
 {
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ConsoleDbContext _db;
     private readonly BillingOptions _options;
 
-    public OrganizationFeatureService(IDbContextFactory<TDbContext> dbContextFactory, IOptions<BillingOptions> options)
+    public OrganizationFeatureService(ConsoleDbContext db, IOptions<BillingOptions> options)
     {
-        _dbContextFactory = dbContextFactory;
+        _db = db;
         _options = options.Value;
     }
 
     public OrganizationFeaturesContext GetOrganizationFeatures(int orgId)
     {
-        using var db = _dbContextFactory.CreateDbContext();
-        var billingPlans = db.Applications
+        var billingPlans = _db.Applications
             .Where(x => x.OrganizationId == orgId)
             .GroupBy(x => x.BillingPlan)
             .Select(x => x.Key)

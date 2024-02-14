@@ -10,31 +10,30 @@ public interface IInternalEventLogStorageContext
     Task DeleteExpiredEvents(CancellationToken cancellationToken);
 }
 
-public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStorageContext where TDbContext : ConsoleDbContext
+public class InternalEventLogStorageContext : IInternalEventLogStorageContext
 {
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ConsoleDbContext _db;
     private readonly BillingOptions _planOptionsConfig;
     private readonly TimeProvider _timeProvider;
 
-    public InternalEventLogStorageContext(IDbContextFactory<TDbContext> dbContextFactory,
+    public InternalEventLogStorageContext(ConsoleDbContext db,
         IOptions<BillingOptions> planOptionsConfig,
         TimeProvider timeProvider)
     {
-        _dbContextFactory = dbContextFactory;
+        _db = db;
         _planOptionsConfig = planOptionsConfig.Value;
         _timeProvider = timeProvider;
     }
 
     public async Task DeleteExpiredEvents(CancellationToken cancellationToken)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var organizations = await db.OrganizationEvents
+        var organizations = await _db.OrganizationEvents
             .Select(x => x.OrganizationId)
             .Distinct()
             .Select(organization => new
             {
                 OrganizationId = organization,
-                BillingPlan = db.Applications
+                BillingPlan = _db.Applications
                     .Where(app => app.OrganizationId == organization)
                     .GroupBy(app => app.BillingPlan)
                     .Select(group => group.Key)
@@ -46,10 +45,10 @@ public class InternalEventLogStorageContext<TDbContext> : IInternalEventLogStora
         {
             var features = _planOptionsConfig.Plans[organization.BillingPlan].Features;
             var now = _timeProvider.GetUtcNow().UtcDateTime;
-            await db.OrganizationEvents
+            await _db.OrganizationEvents
                 .Where(x => x.OrganizationId == organization.OrganizationId && x.PerformedAt < now.AddDays(-features.EventLoggingRetentionPeriod))
                 .ExecuteDeleteAsync();
         }
-        await db.SaveChangesAsync(cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
     }
 }

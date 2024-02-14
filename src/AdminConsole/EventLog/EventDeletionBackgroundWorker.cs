@@ -5,14 +5,14 @@ namespace Passwordless.AdminConsole.EventLog;
 public class EventDeletionBackgroundWorker : BackgroundService
 {
     private readonly ILogger<EventDeletionBackgroundWorker> _logger;
-    private readonly IInternalEventLogStorageContext _internalEventLogStorageContext;
+    private readonly IServiceProvider _serviceProvider;
 
     public EventDeletionBackgroundWorker(
         ILogger<EventDeletionBackgroundWorker> logger,
-        IInternalEventLogStorageContext internalEventLogStorageContext)
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _internalEventLogStorageContext = internalEventLogStorageContext;
+        _serviceProvider = serviceProvider;
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -25,7 +25,9 @@ public class EventDeletionBackgroundWorker : BackgroundService
         {
             do
             {
-                await _internalEventLogStorageContext.DeleteExpiredEvents(stoppingToken);
+                using var scope = _serviceProvider.CreateScope();
+                var eventLogStorageContext = scope.ServiceProvider.GetRequiredService<IInternalEventLogStorageContext>();
+                await eventLogStorageContext.DeleteExpiredEvents(stoppingToken);
             } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException)
