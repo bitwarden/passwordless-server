@@ -16,8 +16,8 @@
         <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
     </EditForm>
     
-    <div class="table-container">
-        <table class="tbl-default min-w-full">
+    <div class="table-container overflow-x-auto">
+        <table class="tbl-default min-w-full overflow-x-auto">
             <thead>
             <tr>
                 <th>Api Key</th>
@@ -60,10 +60,10 @@
                             </ul>
                         </td>
                         <td>
-                            <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" OnSubmit="OnSelectedFormSubmitted">
+                            <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
                                 @if (apiKey.IsLocked)
                                 {
-                                    <button class="btn-warning flex items-center" value="unlock">
+                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
                                         <LockIcon Class="h-6 w-6" /> Unlock
                                     </button>
                                 }
@@ -75,7 +75,7 @@
                                 }
                                 @if (apiKey.CanDelete)
                                 {
-                                    <button class="btn-danger flex items-center" value="delete">
+                                    <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
                                         <DeleteIcon Class="h-6 w-6" /> Delete
                                     </button>
                                 }
@@ -88,4 +88,37 @@
             </tbody>
         </table>
     </div>
+    
+    @if (Modal != null)
+    {
+        <SimpleAlert Model="Modal" />
+        <SecureScript>
+            document.getElementById('@(Modal.ConfirmButtonId)').addEventListener('click', function () {
+                document.getElementById('@(Modal.Id)').classList.add('hidden');
+                
+                const url = '';
+                const formData = new FormData();
+                
+                const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
+                
+                formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
+                formData.append('ConfirmedSelectedForm.ApiKeyId', '@(SelectedForm.ApiKeyId)');
+                formData.append('ConfirmedSelectedForm.Action', '@(SelectedForm.Action)');
+                
+                fetch(url, {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                     'RequestVerificationToken': requestVerificationToken.value
+                  }
+                }).then(() => document.location = document.location)
+                .catch(error => {
+                    console.error('Error:', error);
+                })
+            });
+            document.getElementById('@(Modal.CancelButtonId)').addEventListener('click', function () {
+                document.getElementById('@(Modal.Id)').classList.add('hidden');
+            });
+        </SecureScript>
+    }
 </Panel>

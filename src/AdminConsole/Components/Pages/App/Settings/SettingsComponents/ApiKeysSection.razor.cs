@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.AspNetCore.Components;
+using Passwordless.AdminConsole.Components.Shared.Modals;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -12,16 +13,22 @@ public partial class ApiKeysSection : ComponentBase
 {
     public const string CreateApiKeyFormName = "create-api-key-form";
     public const string SelectedApiKeyFormName = "selected-api-key-form";
+    public const string ConfirmedSelectedApiKeyFormName = "confirmed-selected-api-key-form";
 
     public string AppId => CurrentContext.AppId!;
 
     [SupplyParameterFromForm(FormName = CreateApiKeyFormName)]
-    public CreateFormModel? CreateForm { get; set; }
+    public CreateFormModel CreateForm { get; set; } = new();
 
     [SupplyParameterFromForm(FormName = SelectedApiKeyFormName)]
-    public SelectedFormModel? SelectedForm { get; set; }
+    public SelectedFormModel SelectedForm { get; set; } = new();
+
+    [SupplyParameterFromForm(FormName = ConfirmedSelectedApiKeyFormName)]
+    public SelectedFormModel ConfirmedSelectedForm { get; set; } = new();
 
     public IReadOnlyCollection<ApiKey>? ApiKeys { get; private set; }
+
+    public SimpleAlert.SimpleAlertModel? Modal { get; set; }
 
     public record ApiKey(
         string Id,
@@ -54,9 +61,6 @@ public partial class ApiKeysSection : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        CreateForm ??= new CreateFormModel();
-        SelectedForm ??= new SelectedFormModel();
-
         if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {
             var request = HttpContextAccessor.HttpContext!.Request;
@@ -70,6 +74,11 @@ public partial class ApiKeysSection : ComponentBase
                     SelectedForm.ApiKeyId = request.Form["SelectedForm.ApiKeyId"].ToString();
                     SelectedForm.Action = request.Form["SelectedForm.Action"].ToString();
                     await OnSelectedFormSubmitted();
+                    break;
+                case ConfirmedSelectedApiKeyFormName:
+                    ConfirmedSelectedForm.ApiKeyId = request.Form["ConfirmedSelectedForm.ApiKeyId"].ToString();
+                    ConfirmedSelectedForm.Action = request.Form["ConfirmedSelectedForm.Action"].ToString();
+                    await OnSelectedFormConfirmed();
                     break;
             }
         }
@@ -103,26 +112,73 @@ public partial class ApiKeysSection : ComponentBase
         switch (SelectedForm!.Action)
         {
             case "lock":
-                await LockSelectedAsync();
+                Modal = new SimpleAlert.SimpleAlertModel
+                {
+                    Id = "selected-api-key-modal",
+                    Title = "Lock API Key",
+                    Description = "Are you sure you want to lock this API key?",
+                    ConfirmButtonId = "confirm-lock-api-key-btn",
+                    ConfirmText = "Lock",
+                    CancelButtonId = "cancel-lock-api-key-btn",
+                    IsHidden = false
+                };
                 break;
             case "unlock":
-                await UnlockSelectedAsync();
+                Modal = new SimpleAlert.SimpleAlertModel
+                {
+                    Id = "selected-api-key-modal",
+                    Title = "Unlock API Key",
+                    Description = "Are you sure you want to unlock this API key?",
+                    ConfirmButtonId = "confirm-unlock-api-key-btn",
+                    ConfirmText = "Unlock",
+                    CancelButtonId = "cancel-unlock-api-key-btn",
+                    IsHidden = false
+                };
                 break;
             case "delete":
-                await DeleteSelectedAsync();
+                Modal = new SimpleAlert.SimpleAlertModel
+                {
+                    Id = "selected-api-key-modal",
+                    Title = "Delete API Key",
+                    Description = "Are you sure you want to permanently delete this API key?",
+                    ConfirmButtonId = "confirm-delete-api-key-btn",
+                    ConfirmText = "Delete",
+                    CancelButtonId = "cancel-delete-api-key-btn",
+                    IsHidden = false
+                };
                 break;
         }
     }
 
-    private async Task LockSelectedAsync()
+    private async Task OnSelectedFormConfirmed()
+    {
+        if (string.IsNullOrEmpty(ConfirmedSelectedForm.ApiKeyId))
+        {
+            throw new ArgumentNullException(nameof(ConfirmedSelectedForm.ApiKeyId));
+        }
+        switch (ConfirmedSelectedForm.Action)
+        {
+            case "lock":
+                await LockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
+                break;
+            case "unlock":
+                await UnlockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
+                break;
+            case "delete":
+                await DeleteSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
+                break;
+        }
+    }
+
+    private async Task LockSelectedAsync(string apiKeyId)
     {
         try
         {
-            await ManagementClient.LockApiKeyAsync(AppId, SelectedForm!.ApiKeyId!);
+            await ManagementClient.LockApiKeyAsync(AppId, apiKeyId);
 
             var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyLocked,
-                $"Locked API key '{SelectedForm.ApiKeyId}' for application {AppId}.",
+                $"Locked API key '{apiKeyId}' for application {AppId}.",
                 Severity.Informational,
                 AppId,
                 CurrentContext.OrgId!.Value,
@@ -136,15 +192,15 @@ public partial class ApiKeysSection : ComponentBase
         }
     }
 
-    private async Task UnlockSelectedAsync()
+    private async Task UnlockSelectedAsync(string apiKeyId)
     {
         try
         {
-            await ManagementClient.UnlockApiKeyAsync(AppId, SelectedForm!.ApiKeyId!);
+            await ManagementClient.UnlockApiKeyAsync(AppId, apiKeyId);
 
             var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyUnlocked,
-                $"Unlocked API key '{SelectedForm.ApiKeyId}' for application {AppId}.",
+                $"Unlocked API key '{apiKeyId}' for application {AppId}.",
                 Severity.Informational,
                 AppId,
                 CurrentContext.OrgId!.Value,
@@ -158,15 +214,15 @@ public partial class ApiKeysSection : ComponentBase
         }
     }
 
-    private async Task DeleteSelectedAsync()
+    private async Task DeleteSelectedAsync(string apiKeyId)
     {
         try
         {
-            await ManagementClient.DeleteApiKeyAsync(AppId, SelectedForm.ApiKeyId);
+            await ManagementClient.DeleteApiKeyAsync(AppId, apiKeyId);
 
             var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
                 EventType.AdminApiKeyDeleted,
-                $"Deleted API key '{SelectedForm!.ApiKeyId}' for application {AppId}.",
+                $"Deleted API key '{apiKeyId}' for application {AppId}.",
                 Severity.Informational,
                 AppId,
                 CurrentContext.OrgId!.Value,
