@@ -24,8 +24,8 @@ public static class DatabaseBootstrap
         var migrating = builder.Configuration.GetValue<string>("ef_migrate");
         if (migrating == "1")
         {
-            builder.Services.AddDbContextFactory<MssqlConsoleDbContext>();
-            builder.Services.AddDbContextFactory<SqliteConsoleDbContext>();
+            builder.Services.AddDbContext<ConsoleDbContext, MssqlConsoleDbContext>();
+            builder.Services.AddDbContext<ConsoleDbContext, SqliteConsoleDbContext>();
         }
 
         // if name starts with sqlite, use sqlite, else use mssql
@@ -61,26 +61,20 @@ public static class DatabaseBootstrap
     private static void AddDatabaseContext<TDbContext>(this WebApplicationBuilder builder, Action<IServiceProvider, DbContextOptionsBuilder> action)
         where TDbContext : ConsoleDbContext
     {
-        builder.Services.AddPooledDbContextFactory<TDbContext>(action);
-        builder.Services.AddScoped<IDataService, DataService<TDbContext>>();
-        builder.Services.AddScoped<IUsageService, UsageService<TDbContext>>();
-        builder.Services.AddScoped<IInvitationService, InvitationService<TDbContext>>();
-        builder.Services.AddScoped<IApplicationService, ApplicationService<TDbContext>>();
-        builder.Services.AddScoped<IOrganizationFeatureService, OrganizationFeatureService<TDbContext>>();
-        builder.AddBilling<TDbContext>();
-        builder.Services.AddEventLogging<TDbContext>();
-
-        builder.Services.AddScoped<TDbContext>(sp =>
-        {
-            var dbContextFactory = sp.GetRequiredService<IDbContextFactory<TDbContext>>();
-            return dbContextFactory.CreateDbContext();
-        });
+        builder.Services.AddDbContext<ConsoleDbContext, TDbContext>(action);
+        builder.Services.AddScoped<IDataService, DataService>();
+        builder.Services.AddScoped<IUsageService, UsageService>();
+        builder.Services.AddScoped<IInvitationService, InvitationService>();
+        builder.Services.AddScoped<IApplicationService, ApplicationService>();
+        builder.Services.AddScoped<IOrganizationFeatureService, OrganizationFeatureService>();
+        builder.AddBilling();
+        builder.Services.AddEventLogging();
 
         // Identity
         builder.Services
             .AddIdentity<ConsoleAdmin, IdentityRole>()
             .AddEntityFrameworkStores<TDbContext>()
-            .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory<TDbContext>>()
+            .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
             .AddDefaultTokenProviders()
             .AddPasswordless(o =>
             {

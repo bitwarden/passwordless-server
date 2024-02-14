@@ -4,20 +4,19 @@ using Passwordless.AdminConsole.EventLog.DTOs;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;
 
-public class EventLoggerEfReadStorage<TDbContext> : IEventLoggerStorage where TDbContext : ConsoleDbContext
+public class EventLoggerEfReadStorage : IEventLoggerStorage
 {
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ConsoleDbContext _db;
 
-    public EventLoggerEfReadStorage(IDbContextFactory<TDbContext> dbContextFactory)
+    public EventLoggerEfReadStorage(ConsoleDbContext db)
     {
-        _dbContextFactory = dbContextFactory;
+        _db = db;
     }
 
     public async Task<IEnumerable<OrganizationEventDto>> GetOrganizationEvents(int organizationId, int pageNumber,
         int resultsPerPage)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        return (await db.OrganizationEvents
+        return (await _db.OrganizationEvents
                 .Where(x => x.OrganizationId == organizationId)
                 .OrderByDescending(x => x.PerformedAt)
                 .Skip(resultsPerPage * (pageNumber - 1))
@@ -29,8 +28,7 @@ public class EventLoggerEfReadStorage<TDbContext> : IEventLoggerStorage where TD
 
     public async Task<int> GetOrganizationEventCount(int organizationId)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        return await db.OrganizationEvents
+        return await _db.OrganizationEvents
             .CountAsync(x => x.OrganizationId == organizationId);
     }
 }

@@ -4,25 +4,21 @@ using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Services;
 
-internal class UsageService<TDbContext> : IUsageService where TDbContext : ConsoleDbContext
+internal class UsageService : IUsageService
 {
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
-    private readonly ILogger<UsageService<TDbContext>> _logger;
-    private readonly TimeProvider _timeProvider;
+    private readonly ConsoleDbContext _db;
+    private readonly ILogger<UsageService> _logger;
 
     public UsageService(
-        IDbContextFactory<TDbContext> dbContextFactory,
-        TimeProvider timeProvider,
-        ILogger<UsageService<TDbContext>> logger)
+        ConsoleDbContext db,
+        ILogger<UsageService> logger)
     {
-        _dbContextFactory = dbContextFactory;
-        _timeProvider = timeProvider;
+        _db = db;
         _logger = logger;
     }
     public async Task UpdateUsersCountAsync()
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync();
-        var apps = await db.Applications.ToListAsync();
+        var apps = await _db.Applications.ToListAsync();
         foreach (var app in apps)
         {
             if (app.DeleteAt.HasValue)
@@ -41,7 +37,7 @@ internal class UsageService<TDbContext> : IUsageService where TDbContext : Conso
             }
         }
 
-        await db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
     }
 
     private async Task<int> GetUsersCounts(Application app)
