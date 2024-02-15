@@ -47,6 +47,7 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         cut.MarkupMatches("");
+        _managementClientMock.Verify(x => x.GetApiKeysAsync(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -64,5 +65,56 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         cut.MarkupMatches("<div class=\"panel\" diff:ignoreChildren></div>");
+    }
+
+    [Fact]
+    public void ApiKeysSection_Renders_LockIcon_WhenApiKeyIsUnlocked()
+    {
+        // Arrange
+        _currentContext.SetupGet(x => x.IsPendingDelete).Returns(false);
+        _currentContext.SetupGet(x => x.AppId).Returns("myapp");
+        _currentContext.SetupGet(x => x.ApiKey).Returns("myapikey");
+        _currentContext.SetupGet(x => x.ApiSecret).Returns("myapisecret");
+        var expectedApiKeys = new List<ApiKeyResponse>
+        {
+            _fixture.Build<ApiKeyResponse>().With(x => x.IsLocked, false).Create()
+        };
+        _managementClientMock.Setup(x => x.GetApiKeysAsync(It.Is<string>(p => p == _currentContext.Object.AppId!)))
+            .ReturnsAsync(expectedApiKeys);
+        var cut = RenderComponent<ApiKeysSection>();
+
+        // Assert
+        var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
+        var actualForm = actualCell.Children.Single();
+        var actual = actualForm.Children.Single(x => x.NodeName == "BUTTON");
+        Assert.Contains(actual.Attributes, x => x.Name == "value" && x.Value == "lock");
+        actual.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Lock</button>");
+    }
+
+    [Fact]
+    public void ApiKeysSection_Renders_ExpectedIcons_WhenApiKeyIsLocked()
+    {
+        // Arrange
+        _currentContext.SetupGet(x => x.IsPendingDelete).Returns(false);
+        _currentContext.SetupGet(x => x.AppId).Returns("myapp");
+        _currentContext.SetupGet(x => x.ApiKey).Returns("myapikey");
+        _currentContext.SetupGet(x => x.ApiSecret).Returns("myapisecret");
+        var expectedApiKeys = new List<ApiKeyResponse>
+        {
+            _fixture.Build<ApiKeyResponse>().With(x => x.IsLocked, true).Create()
+        };
+        _managementClientMock.Setup(x => x.GetApiKeysAsync(It.Is<string>(p => p == _currentContext.Object.AppId!)))
+            .ReturnsAsync(expectedApiKeys);
+        var cut = RenderComponent<ApiKeysSection>();
+
+        // Assert
+        var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
+        var actualForm = actualCell.Children.Single();
+        var actualUnlockButton = actualForm.Children.First(x => x.NodeName == "BUTTON");
+        Assert.Contains(actualUnlockButton.Attributes, x => x.Name == "value" && x.Value == "unlock");
+        actualUnlockButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Unlock</button>");
+        var actualDeleteButton = actualForm.Children.Last(x => x.NodeName == "BUTTON");
+        Assert.Contains(actualDeleteButton.Attributes, x => x.Name == "value" && x.Value == "delete");
+        actualDeleteButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Delete</button>");
     }
 }
