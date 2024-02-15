@@ -409,7 +409,7 @@ public class Fido2Service : IFido2Service
     public async Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
-        token.Validate();
+
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
         return token;
