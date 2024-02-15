@@ -16,78 +16,76 @@
         <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
     </EditForm>
     
-    <div class="table-container">
-        <table class="tbl-default min-w-full">
-            <thead>
+    <Table>
+        <thead>
+                    <tr>
+                        <th>Api Key</th>
+                        <th>Created At</th>
+                        <th>Type</th>
+                        <th>Locked</th>
+                        <th>Scopes</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+        <tbody>
+        @if (ApiKeys == null || !ApiKeys.Any())
+        {
             <tr>
-                <th>Api Key</th>
-                <th>Created At</th>
-                <th>Type</th>
-                <th>Locked</th>
-                <th>Scopes</th>
-                <th></th>
+                <td colspan="5">This application has no API Keys or API Secrets.</td>
             </tr>
-            </thead>
-            <tbody>
-            @if (ApiKeys == null || !ApiKeys.Any())
+        }
+        else
+        {
+            @foreach (var apiKey in ApiKeys)
             {
                 <tr>
-                    <td colspan="5">This application has no API Keys or API Secrets.</td>
+                    <td>@apiKey.Value</td>
+                    <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
+                    <td>@apiKey.Type</td>
+                    @if (apiKey.IsLocked)
+                    {
+                        <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
+                    }
+                    else
+                    {
+                        <td>No</td>
+                    }
+                    <td>
+                        <ul>
+                            @foreach (var scope in apiKey.Scopes)
+                            {
+                                <li>@scope</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
+                            @if (apiKey.IsLocked)
+                            {
+                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
+                                    <LockIcon Class="h-6 w-6" /> Unlock
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
+                                    <UnlockIcon Class="h-6 w-6" /> Lock
+                                </button>
+                            }
+                            @if (apiKey.CanDelete)
+                            {
+                                <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
+                                    <DeleteIcon Class="h-6 w-6" /> Delete
+                                </button>
+                            }
+                            <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
+                        </EditForm>
+                    </td>
                 </tr>
             }
-            else
-            {
-                @foreach (var apiKey in ApiKeys)
-                {
-                    <tr>
-                        <td>@apiKey.Value</td>
-                        <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
-                        <td>@apiKey.Type</td>
-                        @if (apiKey.IsLocked)
-                        {
-                            <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
-                        }
-                        else
-                        {
-                            <td>No</td>
-                        }
-                        <td>
-                            <ul>
-                                @foreach (var scope in apiKey.Scopes)
-                                {
-                                    <li>@scope</li>
-                                }
-                            </ul>
-                        </td>
-                        <td>
-                            <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
-                                @if (apiKey.IsLocked)
-                                {
-                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
-                                        <LockIcon Class="h-6 w-6" /> Unlock
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
-                                        <UnlockIcon Class="h-6 w-6" /> Lock
-                                    </button>
-                                }
-                                @if (apiKey.CanDelete)
-                                {
-                                    <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
-                                        <DeleteIcon Class="h-6 w-6" /> Delete
-                                    </button>
-                                }
-                                <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
-                            </EditForm>
-                        </td>
-                    </tr>
-                }
-            }
-            </tbody>
-        </table>
-    </div>
+        }
+        </tbody>
+    </Table>
     
     @if (Modal != null)
     {
