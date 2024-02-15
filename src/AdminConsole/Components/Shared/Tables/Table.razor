@@ -14,6 +14,14 @@
                     </tr>
                     </thead>
                     <tbody>
+                    @if (!string.IsNullOrEmpty(EmptyMessage))
+                    {
+                        <tr class="hidden only:table-row">
+                            <td colspan="@ColumnHeaders.Count">
+                                @EmptyMessage
+                            </td>
+                        </tr>
+                    }
                     @ChildContent
                     </tbody>
                 </table>
@@ -28,4 +36,7 @@
     
     [Parameter]
     public required RenderFragment ChildContent { get; set; }
+    
+    [Parameter]
+    public string? EmptyMessage { get; set; }
 }
