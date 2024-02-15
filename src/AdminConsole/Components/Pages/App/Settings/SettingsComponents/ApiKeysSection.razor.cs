@@ -120,9 +120,7 @@ public partial class ApiKeysSection : ComponentBase
                     Id = "selected-api-key-modal",
                     Title = "Lock API Key",
                     Description = $"Are you sure you want to lock API key '{SelectedForm.ApiKeyId}'?",
-                    ConfirmButtonId = "confirm-lock-api-key-btn",
                     ConfirmText = "Lock",
-                    CancelButtonId = "cancel-lock-api-key-btn",
                     IsHidden = false
                 };
                 break;
@@ -132,9 +130,7 @@ public partial class ApiKeysSection : ComponentBase
                     Id = "selected-api-key-modal",
                     Title = "Unlock API Key",
                     Description = $"Are you sure you want to unlock API key '{SelectedForm.ApiKeyId}'?",
-                    ConfirmButtonId = "confirm-unlock-api-key-btn",
                     ConfirmText = "Unlock",
-                    CancelButtonId = "cancel-unlock-api-key-btn",
                     IsHidden = false
                 };
                 break;
@@ -144,9 +140,7 @@ public partial class ApiKeysSection : ComponentBase
                     Id = "selected-api-key-modal",
                     Title = "Delete API Key",
                     Description = $"Are you sure you want to permanently delete API key '{SelectedForm.ApiKeyId}'?",
-                    ConfirmButtonId = "confirm-delete-api-key-btn",
                     ConfirmText = "Delete",
-                    CancelButtonId = "cancel-delete-api-key-btn",
                     IsHidden = false
                 };
                 break;

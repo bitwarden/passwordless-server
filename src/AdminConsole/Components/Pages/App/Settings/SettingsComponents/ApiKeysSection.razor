@@ -75,7 +75,7 @@
         {
             <SimpleAlert Model="Modal" />
             <SecureScript>
-                document.getElementById('@(Modal.ConfirmButtonId)').addEventListener('click', function () {
+                document.getElementById('@(Modal.ConfirmId)').addEventListener('click', function () {
                     document.getElementById('@(Modal.Id)').classList.add('hidden');
                 
                     const url = '';
@@ -99,7 +99,7 @@
                     })
                 });
 
-                document.getElementById('@(Modal.CancelButtonId)').addEventListener('click', function () {
+                document.getElementById('@(Modal.CancelId)').addEventListener('click', function () {
                     document.getElementById('@(Modal.Id)').classList.add('hidden');
                 });
             </SecureScript>
