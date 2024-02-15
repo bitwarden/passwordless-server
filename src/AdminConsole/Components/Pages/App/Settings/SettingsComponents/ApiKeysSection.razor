@@ -76,30 +76,31 @@
             <SimpleAlert Model="Modal" />
             <SecureScript>
                 document.getElementById('@(Modal.ConfirmButtonId)').addEventListener('click', function () {
-                document.getElementById('@(Modal.Id)').classList.add('hidden');
+                    document.getElementById('@(Modal.Id)').classList.add('hidden');
                 
-                const url = '';
-                const formData = new FormData();
+                    const url = '';
+                    const formData = new FormData();
                 
-                const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
+                    const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
                 
-                formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
-                formData.append('ConfirmedSelectedForm.ApiKeyId', '@(SelectedForm.ApiKeyId)');
-                formData.append('ConfirmedSelectedForm.Action', '@(SelectedForm.Action)');
+                    formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
+                    formData.append('ConfirmedSelectedForm.ApiKeyId', '@(SelectedForm.ApiKeyId)');
+                    formData.append('ConfirmedSelectedForm.Action', '@(SelectedForm.Action)');
                 
-                fetch(url, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                'RequestVerificationToken': requestVerificationToken.value
-                }
-                }).then(() => document.location = document.location)
-                .catch(error => {
-                console.error('Error:', error);
-                })
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'RequestVerificationToken': requestVerificationToken.value
+                        }
+                    }).then(() => document.location = document.location)
+                    .catch(error => {
+                        console.error('Error:', error);
+                    })
                 });
+
                 document.getElementById('@(Modal.CancelButtonId)').addEventListener('click', function () {
-                document.getElementById('@(Modal.Id)').classList.add('hidden');
+                    document.getElementById('@(Modal.Id)').classList.add('hidden');
                 });
             </SecureScript>
         }
