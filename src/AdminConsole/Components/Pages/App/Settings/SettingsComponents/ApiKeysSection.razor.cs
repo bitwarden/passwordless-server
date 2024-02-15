@@ -61,6 +61,7 @@ public partial class ApiKeysSection : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
         if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {
             var request = HttpContextAccessor.HttpContext!.Request;
@@ -116,7 +117,7 @@ public partial class ApiKeysSection : ComponentBase
                 {
                     Id = "selected-api-key-modal",
                     Title = "Lock API Key",
-                    Description = "Are you sure you want to lock this API key?",
+                    Description = "Are you sure you want to lock this API key? Are you sure you want to lock this API key? Are you sure you want to lock this API key?",
                     ConfirmButtonId = "confirm-lock-api-key-btn",
                     ConfirmText = "Lock",
                     CancelButtonId = "cancel-lock-api-key-btn",
