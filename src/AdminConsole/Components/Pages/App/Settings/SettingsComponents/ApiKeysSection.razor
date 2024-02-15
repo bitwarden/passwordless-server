@@ -16,18 +16,7 @@
         <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
     </EditForm>
     
-    <Table>
-        <thead>
-                    <tr>
-                        <th>Api Key</th>
-                        <th>Created At</th>
-                        <th>Type</th>
-                        <th>Locked</th>
-                        <th>Scopes</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-        <tbody>
+    <Table ColumnHeaders="@(new []{ "Api Key", "Created At", "Type", "Locked", "Scopes", string.Empty })">
         @if (ApiKeys == null || !ApiKeys.Any())
         {
             <tr>
@@ -84,7 +73,6 @@
                 </tr>
             }
         }
-        </tbody>
     </Table>
     
     @if (Modal != null)

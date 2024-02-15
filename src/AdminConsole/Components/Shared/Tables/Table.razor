@@ -3,7 +3,19 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 flex flex-col space-y-4">
             <div class="overflow-y-hidden overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                 <table class="tbl-default min-w-full">
+                    <thead>
+                    <tr>
+                        @foreach (var columnHeader in ColumnHeaders)
+                        {
+                            <th>
+                                @columnHeader
+                            </th>
+                        }
+                    </tr>
+                    </thead>
+                    <tbody>
                     @ChildContent
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -11,6 +23,9 @@
 </div>
 
 @code {
+    [Parameter]
+    public required IReadOnlyCollection<string> ColumnHeaders { get; set; }
+    
     [Parameter]
     public required RenderFragment ChildContent { get; set; }
 }
