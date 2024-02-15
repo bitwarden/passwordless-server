@@ -63,10 +63,7 @@
     </div>
 </div>
 
-@if (!Model.PendingDelete)
-{
-    <component type="typeof(ApiKeysSection)" render-mode="Static" />
-}
+<component type="typeof(ApiKeysSection)" render-mode="Static" />
 
 <div class="panel">
     <form method="post" asp-page-handler="Settings">

@@ -61,6 +61,8 @@ public partial class ApiKeysSection : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        if (CurrentContext.IsPendingDelete) return;
+
         // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
         if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {

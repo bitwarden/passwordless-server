@@ -8,72 +8,74 @@
 @inject  NavigationManager NavigationManager;
 @inject  ILogger<ApiKeysSection> Logger;
 
-<Panel Header="Api Keys">
-    <p>To learn more about API key management, read more <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#api-key-management" target="_blank">here</a>. To delete an API key, first lock the API key.</p>
+@if (!CurrentContext.IsPendingDelete)
+{
+    <Panel Header="Api Keys">
+        <p>To learn more about API key management, read more <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#api-key-management" target="_blank">here</a>. To delete an API key, first lock the API key.</p>
     
-    <EditForm class="flex" Model="CreateForm" FormName="@(CreateApiKeyFormName)" OnSubmit="OnCreateFormSubmitted">
-        <button id="create-public-key-btn" class="btn-primary" name="CreateForm.Type" type="submit" value="public">Create Public Key</button>
-        <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
-    </EditForm>
+        <EditForm class="flex" Model="CreateForm" FormName="@(CreateApiKeyFormName)" OnSubmit="OnCreateFormSubmitted">
+            <button id="create-public-key-btn" class="btn-primary" name="CreateForm.Type" type="submit" value="public">Create Public Key</button>
+            <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
+        </EditForm>
     
-    <Table ColumnHeaders="@(new []{ "Api Key", "Created At", "Type", "Locked", "Scopes", string.Empty })" EmptyMessage="This application has no API Keys or API Secrets.">
-        @if (ApiKeys != null)
-        {
-            @foreach (var apiKey in ApiKeys)
+        <Table ColumnHeaders="@(new []{ "Api Key", "Created At", "Type", "Locked", "Scopes", string.Empty })" EmptyMessage="This application has no API Keys or API Secrets.">
+            @if (ApiKeys != null)
             {
-                <tr>
-                    <td>@apiKey.Value</td>
-                    <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
-                    <td>@apiKey.Type</td>
-                    @if (apiKey.IsLocked)
-                    {
-                        <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
-                    }
-                    else
-                    {
-                        <td>No</td>
-                    }
-                    <td>
-                        <ul>
-                            @foreach (var scope in apiKey.Scopes)
-                            {
-                                <li>@scope</li>
-                            }
-                        </ul>
-                    </td>
-                    <td>
-                        <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
-                            @if (apiKey.IsLocked)
-                            {
-                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
-                                    <LockIcon Class="h-6 w-6" /> Unlock
-                                </button>
-                            }
-                            else
-                            {
-                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
-                                    <UnlockIcon Class="h-6 w-6" /> Lock
-                                </button>
-                            }
-                            @if (apiKey.CanDelete)
-                            {
-                                <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
-                                    <DeleteIcon Class="h-6 w-6" /> Delete
-                                </button>
-                            }
-                            <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
-                        </EditForm>
-                    </td>
-                </tr>
+                @foreach (var apiKey in ApiKeys)
+                {
+                    <tr>
+                        <td>@apiKey.Value</td>
+                        <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
+                        <td>@apiKey.Type</td>
+                        @if (apiKey.IsLocked)
+                        {
+                            <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
+                        }
+                        else
+                        {
+                            <td>No</td>
+                        }
+                        <td>
+                            <ul>
+                                @foreach (var scope in apiKey.Scopes)
+                                {
+                                    <li>@scope</li>
+                                }
+                            </ul>
+                        </td>
+                        <td>
+                            <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
+                                @if (apiKey.IsLocked)
+                                {
+                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
+                                        <LockIcon Class="h-6 w-6" /> Unlock
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
+                                        <UnlockIcon Class="h-6 w-6" /> Lock
+                                    </button>
+                                }
+                                @if (apiKey.CanDelete)
+                                {
+                                    <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
+                                        <DeleteIcon Class="h-6 w-6" /> Delete
+                                    </button>
+                                }
+                                <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
+                            </EditForm>
+                        </td>
+                    </tr>
+                }
             }
-        }
-    </Table>
+        </Table>
     
-    @if (Modal != null)
-    {
-        <SimpleAlert Model="Modal" />
-        <SecureScript>
-            document.getElementById('@(Modal.ConfirmButtonId)').addEventListener('click', function () {
+        @if (Modal != null)
+        {
+            <SimpleAlert Model="Modal" />
+            <SecureScript>
+                document.getElementById('@(Modal.ConfirmButtonId)').addEventListener('click', function () {
                 document.getElementById('@(Modal.Id)').classList.add('hidden');
                 
                 const url = '';
@@ -86,19 +88,20 @@
                 formData.append('ConfirmedSelectedForm.Action', '@(SelectedForm.Action)');
                 
                 fetch(url, {
-                  method: 'POST',
-                  body: formData,
-                  headers: {
-                     'RequestVerificationToken': requestVerificationToken.value
-                  }
+                method: 'POST',
+                body: formData,
+                headers: {
+                'RequestVerificationToken': requestVerificationToken.value
+                }
                 }).then(() => document.location = document.location)
                 .catch(error => {
-                    console.error('Error:', error);
+                console.error('Error:', error);
                 })
-            });
-            document.getElementById('@(Modal.CancelButtonId)').addEventListener('click', function () {
+                });
+                document.getElementById('@(Modal.CancelButtonId)').addEventListener('click', function () {
                 document.getElementById('@(Modal.Id)').classList.add('hidden');
-            });
-        </SecureScript>
-    }
-</Panel>
+                });
+            </SecureScript>
+        }
+    </Panel>
+}
