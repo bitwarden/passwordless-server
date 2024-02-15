@@ -20,52 +20,52 @@
         @if (ApiKeys != null)
         {
             @foreach (var apiKey in ApiKeys)
+            {
+                <tr>
+                    <td>@apiKey.Value</td>
+                    <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
+                    <td>@apiKey.Type</td>
+                    @if (apiKey.IsLocked)
                     {
-                        <tr>
-                            <td>@apiKey.Value</td>
-                            <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
-                            <td>@apiKey.Type</td>
+                        <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
+                    }
+                    else
+                    {
+                        <td>No</td>
+                    }
+                    <td>
+                        <ul>
+                            @foreach (var scope in apiKey.Scopes)
+                            {
+                                <li>@scope</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
                             @if (apiKey.IsLocked)
                             {
-                                <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
+                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
+                                    <LockIcon Class="h-6 w-6" /> Unlock
+                                </button>
                             }
                             else
                             {
-                                <td>No</td>
+                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
+                                    <UnlockIcon Class="h-6 w-6" /> Lock
+                                </button>
                             }
-                            <td>
-                                <ul>
-                                    @foreach (var scope in apiKey.Scopes)
-                                    {
-                                        <li>@scope</li>
-                                    }
-                                </ul>
-                            </td>
-                            <td>
-                                <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
-                                    @if (apiKey.IsLocked)
-                                    {
-                                        <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
-                                            <LockIcon Class="h-6 w-6" /> Unlock
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
-                                            <UnlockIcon Class="h-6 w-6" /> Lock
-                                        </button>
-                                    }
-                                    @if (apiKey.CanDelete)
-                                    {
-                                        <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
-                                            <DeleteIcon Class="h-6 w-6" /> Delete
-                                        </button>
-                                    }
-                                    <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
-                                </EditForm>
-                            </td>
-                        </tr>
-                    }
+                            @if (apiKey.CanDelete)
+                            {
+                                <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
+                                    <DeleteIcon Class="h-6 w-6" /> Delete
+                                </button>
+                            }
+                            <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
+                        </EditForm>
+                    </td>
+                </tr>
+            }
         }
     </Table>
     

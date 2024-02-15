@@ -41,63 +41,38 @@
 
             <hr/>
             <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
-                <div class="overflow-y-hidden overflow-x-auto table-container">
-                    <table class="tbl-default min-w-full">
-                        <thead>
-                        <tr>
-                            <th class="relative px-7 sm:w-12 sm:px-6">Allowed</th>
-                            <th>Description</th>
-                            <th class="hidden xl:table-cell">AaGuid</th>
-                            <th>Attestation Types</th>
-                            <th>Certification Level</th>
-                        </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                        @if (Data!.Count == 0)
+                <Table ColumnHeaders="@(new []{ "Allowed", "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="All authenticators are currently allowed.">
+                    @if (Data != null)
+                    {
+                        @foreach (var item in Data)
                         {
                             <tr>
-                                <td colspan="5">All authenticators are currently allowed.</td>
+                                <td class="relative px-7 sm:w-12 sm:px-6">
+                                    <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid"/>
+                                </td>
+                                <td class="text-sm font-medium text-gray-900">@item.Name</td>
+                                <td class="whitespace-nowrap">@item.AaGuid</td>
+                                <td class="whitespace-nowrap">
+                                    <ul>
+                                        @foreach (var type in item.AttestationTypes)
+                                        {
+                                            <li>@type</li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    <ul>
+                                        @foreach (var level in item.CertificationStatuses)
+                                        {
+                                            <li>@level</li>
+                                        }
+                                    </ul>
+                                </td>
                             </tr>
                         }
-                        else
-                        {
-                            @foreach (var item in Data)
-                            {
-                                <tr>
-                                    <td class="relative px-7 sm:w-12 sm:px-6">
-                                        <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid" />
-                                    </td>
-                                    <td class="w-full max-w-0 py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
-                                        @item.Name
-                                        <dl class="font-normal xl:hidden">
-                                            <dt class="sr-only">AaGuid</dt>
-                                            <dd class="mt-1 truncate text-gray-500">@item.AaGuid</dd>
-                                        </dl>
-                                    </td>
-                                    <td class="hidden whitespace-nowrap xl:table-cell">@item.AaGuid</td>
-                                    <td class="whitespace-nowrap">
-                                        <ul>
-                                            @foreach (var type in item.AttestationTypes)
-                                            {
-                                                <li>@type</li>
-                                            }
-                                        </ul>
-                                    </td>
-                                    <td class="whitespace-nowrap">
-                                        <ul>
-                                            @foreach (var level in item.CertificationStatuses)
-                                            {
-                                                <li>@level</li>
-                                            }
-                                        </ul>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        </tbody>
-                    </table>
-                </div>
-
+                    }
+                    
+                </Table>
             </EditForm>
         </Panel>
     </Page>
