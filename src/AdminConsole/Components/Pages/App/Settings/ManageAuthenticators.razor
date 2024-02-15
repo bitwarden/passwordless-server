@@ -41,7 +41,7 @@
 
             <hr/>
             <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
-                <Table ColumnHeaders="@(new []{ "Allowed", "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="All authenticators are currently allowed.">
+                <Table ColumnHeaders="@(new []{ "Allowed", "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="No authenticators found using applied filters.">
                     @if (Data != null)
                     {
                         @foreach (var item in Data)
