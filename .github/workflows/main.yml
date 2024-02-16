@@ -188,12 +188,6 @@ jobs:
       - test
       - pack
 
-    strategy:
-        matrix:
-          app:
-            - Api
-            - AdminConsole
-
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -208,6 +202,7 @@ jobs:
           --repo bitwarden/passwordless-devops
           --field repository=${{ github.repository.owner }}/${{ github.repository.name }}
           --field run-id=${{ github.run_id }}
-          --field artifact=${{ matrix.app }}
+          --field api-artifact=Api
+          --field admin-console-artifact=AdminConsole
           --field environment=devtest-${{ matrix.app }}
           --field version=${{ needs.version.outputs.version }}
