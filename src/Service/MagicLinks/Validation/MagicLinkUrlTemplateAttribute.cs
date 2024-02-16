@@ -5,7 +5,7 @@ namespace Passwordless.Service.MagicLinks.Validation;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class MagicLinkTemplateUrlAttribute : ValidationAttribute
 {
-    private const string TokenTemplate = "<token>";
+    private const string TokenTemplate = "__TOKEN__";
 
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
@@ -13,7 +13,7 @@ public class MagicLinkTemplateUrlAttribute : ValidationAttribute
             return new ValidationResult($"You have provided a null or empty value for {validationContext.MemberName}.");
 
         if (!stringValue.Contains(TokenTemplate))
-            return new ValidationResult($"You have provided a {validationContext.MemberName} without a {TokenTemplate} template. Please include it like so: https://www.example.com?token=<token>");
+            return new ValidationResult($"You have provided a {validationContext.MemberName} without a {TokenTemplate} template. Please include it like so: https://www.example.com?token=__TOKEN__");
 
         if (!(Uri.TryCreate(stringValue, UriKind.Absolute, out var uriResult)
               && (uriResult.Scheme == Uri.UriSchemeHttp

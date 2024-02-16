@@ -93,7 +93,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         responseDetails.Should().NotBeNull();
         var magicLinkUrlError = responseDetails!.Errors.FirstOrDefault(x => x.Key.Equals(nameof(request.UrlTemplate), StringComparison.CurrentCultureIgnoreCase));
         magicLinkUrlError.Should().NotBeNull();
-        magicLinkUrlError.Value.Should().Contain($"You have provided a {nameof(request.UrlTemplate)} without a <token> template. Please include it like so: https://www.example.com?token=<token>");
+        magicLinkUrlError.Value.Should().Contain($"You have provided a {nameof(request.UrlTemplate)} without a __TOKEN__ template. Please include it like so: https://www.example.com?token=__TOKEN__");
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         client.AddSecretKey(appCreated!.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker
-            .RuleFor(x => x.UrlTemplate, () => "<token>")
+            .RuleFor(x => x.UrlTemplate, () => "__TOKEN__")
             .Generate();
 
         // Skip all limitations for new applications

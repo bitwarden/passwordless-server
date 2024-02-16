@@ -11,7 +11,7 @@ public class SendMagicLinkRequest
     public string EmailAddress { get; init; }
 
     [Required]
-    [MagicLinkTemplateUrlAttribute]
+    [MagicLinkTemplateUrl]
     public string UrlTemplate { get; init; }
 
     [Required]

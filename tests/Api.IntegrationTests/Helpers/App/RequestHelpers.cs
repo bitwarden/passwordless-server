@@ -9,7 +9,7 @@ public static class RequestHelpers
     public static Faker<SendMagicLinkRequest> GetMagicLinkRequestRules() => new Faker<SendMagicLinkRequest>()
         .RuleFor(x => x.UserId, () => Guid.NewGuid().ToString())
         .RuleFor(x => x.EmailAddress, faker => faker.Person.Email)
-        .RuleFor(x => x.UrlTemplate, faker => $"{faker.Internet.Url()}?token=<token>");
+        .RuleFor(x => x.UrlTemplate, faker => $"{faker.Internet.Url()}?token=__TOKEN__");
 
     public static Faker<RegisterToken> GetRegisterTokenGeneratorRules() => new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
@@ -18,7 +18,7 @@ public static class RequestHelpers
         .RuleFor(x => x.Attestation, "None")
         .RuleFor(x => x.Discoverable, true)
         .RuleFor(x => x.UserVerification, "Preferred")
-        .RuleFor(x => x.Aliases, x => new HashSet<string> { x.Person.FirstName })
+        .RuleFor(x => x.Aliases, x => [x.Person.FirstName])
         .RuleFor(x => x.AliasHashing, false)
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
