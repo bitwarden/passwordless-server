@@ -31,7 +31,7 @@ public class MagicLinkSignInManager<TUser>(
             return;
         };
 
-        var urlTemplate = magicLinkBuilder.GetUrlTemplate();
+        var urlTemplate = magicLinkBuilder.GetUrlTemplate(returnUrl);
         try
         {
             await magicClient.SendMagicLinkAsync(admin.Id, admin.Email, urlTemplate);
