@@ -1,6 +1,5 @@
 using System.Reflection;
 using Passwordless.AdminConsole.Authorization;
-using Passwordless.AdminConsole.Components.Pages.App;
 using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App;
