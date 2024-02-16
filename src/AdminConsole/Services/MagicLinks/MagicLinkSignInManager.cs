@@ -64,23 +64,8 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         {
             return SignInResult.Failed;
         }
-        // SignInOrTwoFactorAsync
+        
         await SignInAsync(user, isPersistent, "magic");
         return SignInResult.Success;
     }
-    
-        
-    // public async Task<SignInResult> OLD_METHOD(string email, string? returnUrl)
-    // {
-    //     // var magicLink = await _magicLinkBuilder.GetLinkAsync(email, returnUrl);
-    //     // await _mailService.SendPasswordlessSignInAsync(magicLink, email);
-    //     //
-    //     // var user = await UserManager.FindByEmailAsync(email);
-    //     // if (user is ConsoleAdmin admin)
-    //     //     _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
-    //     //
-    //     // return SignInResult.Success;
-    //
-    // }
-
 }
