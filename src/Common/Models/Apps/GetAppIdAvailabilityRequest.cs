@@ -1,6 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Passwordless.Common.Models.Apps;
 
-public class GetAppIdAvailabilityRequest
-{
-    public required string AppId { get; set; }
-}
+public record GetAppIdAvailabilityRequest([MinLength(3)] string AppId);
