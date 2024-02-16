@@ -9,7 +9,7 @@ public static class RequestHelpers
     public static Faker<SendMagicLinkRequest> GetMagicLinkRequestRules() => new Faker<SendMagicLinkRequest>()
         .RuleFor(x => x.UserId, () => Guid.NewGuid().ToString())
         .RuleFor(x => x.EmailAddress, faker => faker.Person.Email)
-        .RuleFor(x => x.UrlTemplate, faker => $"{faker.Internet.Url()}?token=__TOKEN__");
+        .RuleFor(x => x.UrlTemplate, faker => $"{faker.Internet.Url()}?token={SendMagicLinkRequest.TokenTemplate}");
 
     public static Faker<RegisterToken> GetRegisterTokenGeneratorRules() => new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
