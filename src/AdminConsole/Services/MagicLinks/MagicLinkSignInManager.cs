@@ -34,10 +34,16 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
 
     public async Task<SignInResult> SendEmailForSignInAsync(string email, string? returnUrl)
     {
+        var user = await UserManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            Logger.LogInformation("User {email} not found.", email);
+            return SignInResult.Failed;
+        }
+
         var magicLink = await _magicLinkBuilder.GetLinkAsync(email, returnUrl);
         await _mailService.SendPasswordlessSignInAsync(magicLink, email);
 
-        var user = await UserManager.FindByEmailAsync(email);
         if (user is ConsoleAdmin admin)
             _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
 

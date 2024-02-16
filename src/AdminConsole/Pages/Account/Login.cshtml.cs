@@ -37,6 +37,7 @@ public class LoginModel : PageModel
     {
         returnUrl = Url.Page("/Organization/Overview");
 
+
         try
         {
             // send magic link if we have a user like it
