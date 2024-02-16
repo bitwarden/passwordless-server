@@ -31,7 +31,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [InlineData("-1")]
     [InlineData(null)]
     [InlineData("")]
-    public async Task InvalidUserIdReturnsError(string userid)
+    public async Task InvalidUserIdReturnsError(string? userid)
     {
         // Arrange
         object payload = userid == "-1"
@@ -67,7 +67,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [InlineData("-1")]
     [InlineData(null)]
     [InlineData("")]
-    public async Task InvalidUsernameReturnsError(string input)
+    public async Task InvalidUsernameReturnsError(string? input)
     {
         // Arrange
         object payload = input == "-1"

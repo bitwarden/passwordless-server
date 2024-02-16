@@ -1,6 +1,5 @@
 using AutoFixture;
 using Bunit;
-using Passwordless.AdminConsole.Components.Shared;
 using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared;

@@ -1,5 +1,4 @@
 using Bunit;
-using Passwordless.AdminConsole.Components.Shared.Stats;
 using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Stats;
