@@ -40,7 +40,7 @@ public class LoginModel : PageModel
         try
         {
             // send magic link if we have a user like it
-            
+
             await signInManager.SendEmailForSignInAsync(email, returnUrl);
         }
         catch (ArgumentException)

@@ -2,12 +2,13 @@ using Microsoft.Extensions.Options;
 
 namespace Passwordless.AdminConsole.Services.MagicLinks;
 
-public class MagicClient : PasswordlessClient {
-    
+public class MagicClient : PasswordlessClient
+{
+
     private readonly HttpClient _http;
     private readonly PasswordlessOptions _options;
 
-    public MagicClient(HttpClient http, IOptions<PasswordlessOptions> options) : base(http, new PasswordlessOptions { ApiUrl = options.Value.ApiUrl, ApiSecret = options.Value.ApiSecret})
+    public MagicClient(HttpClient http, IOptions<PasswordlessOptions> options) : base(http, new PasswordlessOptions { ApiUrl = options.Value.ApiUrl, ApiSecret = options.Value.ApiSecret })
     {
         _http = new HttpClient(new PasswordlessHttpHandler(http, true), true)
         {
@@ -25,12 +26,14 @@ public class MagicClient : PasswordlessClient {
     {
         using var response = await _http.PostAsJsonAsync("/magic-link/send", new
         {
-            userId, emailAddress, urlTemplate
+            userId,
+            emailAddress,
+            urlTemplate
         });
-        
+
         var xx = response.Content.ReadAsStringAsync();
-        
+
         response.EnsureSuccessStatusCode();
     }
-    
+
 }

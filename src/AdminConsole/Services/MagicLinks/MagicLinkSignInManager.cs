@@ -27,7 +27,7 @@ public class MagicLinkSignInManager<TUser>(
         if (user is not ConsoleAdmin admin)
         {
             // naive noise against timing attacks
-            await Task.Delay(new Random().Next(100,300));
+            await Task.Delay(new Random().Next(100, 300));
             return;
         };
 
@@ -41,7 +41,7 @@ public class MagicLinkSignInManager<TUser>(
             Console.WriteLine(e);
             throw;
         }
-        
+
         eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
     }
 
@@ -50,13 +50,13 @@ public class MagicLinkSignInManager<TUser>(
         try
         {
             var verifiedUser = await magicClient.VerifyAuthenticationTokenAsync(token);
-            
+
             var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
             if (user == null)
             {
                 return SignInResult.Failed;
             }
-        
+
             await SignInAsync(user, isPersistent, "magic");
             return SignInResult.Success;
         }
