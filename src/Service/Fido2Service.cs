@@ -28,15 +28,16 @@ public class Fido2Service : IFido2Service
     private readonly IEventLogger _eventLogger;
     private readonly IFeatureContextProvider _featureContextProvider;
     private readonly IMetadataService _metadataService;
+    private readonly TimeProvider _timeProvider;
 
-    // Internal for testing
     public Fido2Service(ITenantProvider tenantProvider,
         ILogger log,
         ITenantStorage storage,
         ITokenService tokenService,
         IEventLogger eventLogger,
         IFeatureContextProvider featureContextProvider,
-        IMetadataService metadataService)
+        IMetadataService metadataService,
+        TimeProvider timeProvider)
     {
         _storage = storage;
         _tenantProvider = tenantProvider;
@@ -45,13 +46,14 @@ public class Fido2Service : IFido2Service
         _eventLogger = eventLogger;
         _featureContextProvider = featureContextProvider;
         _metadataService = metadataService;
+        _timeProvider = timeProvider;
     }
 
     public async Task<string> CreateRegisterToken(RegisterToken tokenProps)
     {
         if (tokenProps.ExpiresAt == default)
         {
-            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
+            tokenProps.ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120);
         }
 
         ValidateAliases(tokenProps.Aliases);
@@ -103,7 +105,7 @@ public class Fido2Service : IFido2Service
         var features = await _featureContextProvider.UseContext();
 
         var token = await _tokenService.DecodeTokenAsync<RegisterToken>(request.Token, "register_");
-        token.Validate();
+        token.Validate(_timeProvider);
 
         var userId = token.UserId;
 
@@ -236,7 +238,7 @@ public class Fido2Service : IFido2Service
             throw;
         }
 
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().DateTime;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
 
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
@@ -265,12 +267,12 @@ public class Fido2Service : IFido2Service
             Success = true,
             Origin = request.Origin,
             RpId = session.Options.Rp.Id,
-            Timestamp = DateTime.UtcNow,
+            Timestamp = _timeProvider.GetUtcNow().DateTime,
             CredentialId = success.Result.Id,
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
         };
@@ -292,8 +294,8 @@ public class Fido2Service : IFido2Service
         {
             Success = true,
             UserId = request.UserId,
-            Timestamp = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            Timestamp = _timeProvider.GetUtcNow().DateTime,
+            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "generated_signin",
             RpId = request.RPID,
@@ -388,12 +390,12 @@ public class Fido2Service : IFido2Service
             Success = true,
             Origin = request.Origin,
             RpId = request.RPID,
-            Timestamp = DateTime.UtcNow,
+            Timestamp = _timeProvider.GetUtcNow().DateTime,
             Device = device,
             Country = country,
             Nickname = credential.Nickname,
             CredentialId = credential.Descriptor.Id,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
         };
@@ -409,7 +411,7 @@ public class Fido2Service : IFido2Service
     public async Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
-        token.Validate();
+        token.Validate(_timeProvider);
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
         return token;

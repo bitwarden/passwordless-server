@@ -69,9 +69,10 @@ public class Token
     [Key(2)]
     public string Type { get; set; }
 
-    public void Validate()
+    public void Validate(TimeProvider timeProvider)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.GetUtcNow().DateTime;
+        
         if (ExpiresAt < now)
         {
             var drift = now - ExpiresAt;
