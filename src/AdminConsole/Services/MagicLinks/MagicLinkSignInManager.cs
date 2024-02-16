@@ -47,16 +47,23 @@ public class MagicLinkSignInManager<TUser>(
 
     public async Task<SignInResult> PasswordlessSignInAsync(string email, string token, bool isPersistent)
     {
-        var verifiedUser = await magicClient.VerifyAuthenticationTokenAsync(token);
-        // todo: error handling
-        
-        var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
-        if (user == null)
+        try
         {
+            var verifiedUser = await magicClient.VerifyAuthenticationTokenAsync(token);
+            
+            var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
+            if (user == null)
+            {
+                return SignInResult.Failed;
+            }
+        
+            await SignInAsync(user, isPersistent, "magic");
+            return SignInResult.Success;
+        }
+        catch (PasswordlessApiException e)
+        {
+            // Most likely the token had expired, we just return that it failed.
             return SignInResult.Failed;
         }
-        
-        await SignInAsync(user, isPersistent, "magic");
-        return SignInResult.Success;
     }
 }
