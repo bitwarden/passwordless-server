@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
-using Passwordless.AdminConsole.Services.Mail;
-using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Passwordless.AdminConsole.Services.MagicLinks;
@@ -14,7 +11,6 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
 {
     private readonly MagicClient _magicClient;
     private readonly IMagicLinkBuilder _magicLinkBuilder;
-    private readonly IMailService _mailService;
     private readonly IEventLogger _eventLogger;
 
     public MagicLinkSignInManager(
@@ -27,13 +23,12 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         ILogger<SignInManager<TUser>> logger,
         IAuthenticationSchemeProvider schemes,
         IUserConfirmation<TUser> confirmation,
-        IMailService mailService,
+
         IEventLogger eventLogger)
         : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
     {
         _magicClient = magicClient;
         _magicLinkBuilder = magicLinkBuilder;
-        _mailService = mailService;
         _eventLogger = eventLogger;
     }
 
@@ -42,11 +37,10 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
         var user = await UserManager.FindByEmailAsync(email);
         if (user is not ConsoleAdmin admin) return SignInResult.Success;
         
-        var url = "https://localhost:8002/account/magic?token=<token>";
         var urlTemplate = _magicLinkBuilder.GetUrlTemplate();
         try
         {
-            await _magicClient.SendMagicLinkAsync(admin.Id, admin.Email, url);
+            await _magicClient.SendMagicLinkAsync(admin.Id, admin.Email, urlTemplate);
         }
         catch (PasswordlessApiException e)
         {
@@ -62,7 +56,7 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
 
     public async Task<SignInResult> PasswordlessSignInAsync(string email, string token, bool isPersistent)
     {
-        var verifiedUser = await _magicClient.VerifyTokenAsync(token);
+        var verifiedUser = await _magicClient.VerifyAuthenticationTokenAsync(token);
         // todo: error handling
         
         var user = await UserManager.FindByIdAsync(verifiedUser.UserId);

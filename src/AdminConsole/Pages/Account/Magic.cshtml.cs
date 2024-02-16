@@ -14,7 +14,7 @@ public class Magic : PageModel
         _signInManager = signInManager;
     }
 
-    public async Task<IActionResult> OnGet(string token, string email, string? returnUrl)
+    public async Task<IActionResult> OnGet(string token, string? email, string? returnUrl)
     {
 
         if (User.Identity is { IsAuthenticated: true })
