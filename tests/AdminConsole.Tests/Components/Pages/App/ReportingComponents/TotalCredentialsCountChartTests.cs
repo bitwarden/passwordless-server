@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Passwordless.AdminConsole.Components.Pages.App.ReportingComponents;
 using Passwordless.Common.Models.Reporting;
 using Xunit;
 

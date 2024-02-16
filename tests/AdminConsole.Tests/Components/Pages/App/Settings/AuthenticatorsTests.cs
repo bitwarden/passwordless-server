@@ -4,6 +4,7 @@ using Bunit.TestDoubles;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Passwordless.AdminConsole.Components.Pages.App.Settings;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
