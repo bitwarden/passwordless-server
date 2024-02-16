@@ -35,7 +35,7 @@ public class MagicLinkBuilder(
     {
         var urlBuilder = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext ?? throw new InvalidOperationException("ActionContext is null"));
         
-        var url = urlBuilder.PageLink("/Account/Magic", values: new { token = "__token__" }) ?? urlBuilder.Content("~/");
+        var url = urlBuilder.PageLink("/Account/Magic", values: new { token = "$token" }) ?? urlBuilder.Content("~/");
         
         return url;
     }
