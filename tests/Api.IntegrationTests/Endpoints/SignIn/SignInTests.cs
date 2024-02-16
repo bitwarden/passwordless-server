@@ -212,7 +212,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-    
+
     [Fact]
     public async Task I_receive_an_api_exception_when_using_an_expired_token()
     {
@@ -236,12 +236,12 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         var generateToken = await signInGenerateTokenResponse.Content.ReadFromJsonAsync<SigninEndpoints.SigninTokenResponse>();
         generateToken.Should().NotBeNull();
         generateToken!.Token.Should().StartWith("verify_");
-        
+
         api.Time.Advance(TimeSpan.FromSeconds(timeToLive + 10));
 
         // Act
         var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
-        
+
         // Assert
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         var problemDetails = await verifySignInResponse.Content.ReadFromJsonAsync<ProblemDetails>();

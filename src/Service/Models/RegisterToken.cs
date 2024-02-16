@@ -72,7 +72,7 @@ public class Token
     public void Validate(TimeProvider timeProvider)
     {
         var now = timeProvider.GetUtcNow().DateTime;
-        
+
         if (ExpiresAt < now)
         {
             var drift = now - ExpiresAt;
