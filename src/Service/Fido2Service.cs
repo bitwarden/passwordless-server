@@ -295,7 +295,7 @@ public class Fido2Service : IFido2Service
             Success = true,
             UserId = request.UserId,
             Timestamp = _timeProvider.GetUtcNow().DateTime,
-            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(request.TimeToLive ?? 120),
             TokenId = Guid.NewGuid(),
             Type = "generated_signin",
             RpId = request.RPID,
