@@ -111,10 +111,8 @@ public class SharedManagementService : ISharedManagementService
 
         var account = new AccountMetaInformation
         {
-            AcountName = accountName,
             AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
-            SubscriptionTier = "Free",
             Features = new AppFeature
             {
                 Tenant = accountName,
@@ -225,7 +223,7 @@ public class SharedManagementService : ISharedManagementService
         await _tenantStorage.DeleteAccount();
 
         return new AppDeletionResult(
-            $"The app '{accountInformation.AcountName}' was deleted.",
+            $"The app '{accountInformation.Tenant}' was deleted.",
             true,
             _systemClock.UtcNow.UtcDateTime,
             accountInformation.AdminEmails);
@@ -255,7 +253,7 @@ public class SharedManagementService : ISharedManagementService
         {
             await _tenantStorage.DeleteAccount();
             return new AppDeletionResult(
-                $"The app '{accountInformation.AcountName}' was deleted.",
+                $"The app '{accountInformation.Tenant}' was deleted.",
                 true,
                 _systemClock.UtcNow.UtcDateTime,
                 accountInformation.AdminEmails);
@@ -268,7 +266,7 @@ public class SharedManagementService : ISharedManagementService
         await _tenantStorage.SetAppDeletionDate(deleteAt);
 
         return new AppDeletionResult(
-            $"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.",
+            $"The app '{accountInformation.Tenant}' will be deleted at '{deleteAt}'.",
             false,
             deleteAt,
             accountInformation.AdminEmails);

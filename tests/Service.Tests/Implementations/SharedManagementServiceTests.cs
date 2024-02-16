@@ -70,7 +70,6 @@ public class SharedManagementServiceTests
 
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
             CreatedAt = _now.AddDays(-1),
             Tenant = appId,
             AdminEmails = new[] { deletedBy }
@@ -99,7 +98,6 @@ public class SharedManagementServiceTests
         _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
             CreatedAt = _now.AddDays(-4),
             Tenant = appId,
             AdminEmails = new[] { deletedBy }
@@ -127,7 +125,6 @@ public class SharedManagementServiceTests
         _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(false);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
             CreatedAt = _now.AddDays(-365),
             Tenant = appId,
             AdminEmails = new[] { deletedBy }
@@ -155,7 +152,6 @@ public class SharedManagementServiceTests
         _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
             CreatedAt = _now.AddDays(-365),
             Tenant = appId,
             AdminEmails = new[] { deletedBy }
@@ -200,7 +196,6 @@ public class SharedManagementServiceTests
 
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
             DeleteAt = _now.AddDays(-1),
             Tenant = appId,
             AdminEmails = new[] { "admin@email.com" }
@@ -224,7 +219,6 @@ public class SharedManagementServiceTests
         _tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
             DeleteAt = _now.AddDays(1),
             Tenant = appId,
             AdminEmails = new[] { "admin@email.com" }

@@ -5,8 +5,6 @@ namespace Passwordless.Service.Models;
 
 public class AccountMetaInformation : PerTenant
 {
-    // Should probably be removed
-    public string? SubscriptionTier { get; set; }
     public required string[] AdminEmails { get; set; }
 
     public string AdminEmailsSerialized
@@ -21,8 +19,6 @@ public class AccountMetaInformation : PerTenant
         }
     }
 
-    // Should probably be removed
-    public required string AcountName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? DeleteAt { get; set; }
 

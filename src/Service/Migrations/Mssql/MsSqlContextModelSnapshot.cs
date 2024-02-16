@@ -65,7 +65,7 @@ namespace Passwordless.Service.Migrations.Mssql
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
-                    b.Property<string>("AcountName")
+                    b.Property<string>("Tenant")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AdminEmailsSerialized")
@@ -78,14 +78,7 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime?>("DeleteAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("SubscriptionTier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Tenant")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AcountName");
+                    b.HasKey("Tenant");
 
                     b.ToTable("AccountInfo");
                 });
