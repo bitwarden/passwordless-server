@@ -7,40 +7,34 @@ using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Passwordless.AdminConsole.Services.MagicLinks;
 
-public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : class
+public class MagicLinkSignInManager<TUser>(
+    MagicClient magicClient,
+    IMagicLinkBuilder magicLinkBuilder,
+    UserManager<TUser> userManager,
+    IHttpContextAccessor contextAccessor,
+    IUserClaimsPrincipalFactory<TUser> claimsFactory,
+    IOptions<IdentityOptions> optionsAccessor,
+    ILogger<SignInManager<TUser>> logger,
+    IAuthenticationSchemeProvider schemes,
+    IUserConfirmation<TUser> confirmation,
+    IEventLogger eventLogger)
+    : SignInManager<TUser>(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
+    where TUser : class
 {
-    private readonly MagicClient _magicClient;
-    private readonly IMagicLinkBuilder _magicLinkBuilder;
-    private readonly IEventLogger _eventLogger;
-
-    public MagicLinkSignInManager(
-        MagicClient magicClient,
-        IMagicLinkBuilder magicLinkBuilder,
-        UserManager<TUser> userManager,
-        IHttpContextAccessor contextAccessor,
-        IUserClaimsPrincipalFactory<TUser> claimsFactory,
-        IOptions<IdentityOptions> optionsAccessor,
-        ILogger<SignInManager<TUser>> logger,
-        IAuthenticationSchemeProvider schemes,
-        IUserConfirmation<TUser> confirmation,
-
-        IEventLogger eventLogger)
-        : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
-    {
-        _magicClient = magicClient;
-        _magicLinkBuilder = magicLinkBuilder;
-        _eventLogger = eventLogger;
-    }
-
-    public async Task<SignInResult> SendEmailForSignInAsync(string email, string? returnUrl)
+    public async Task SendEmailForSignInAsync(string email, string? returnUrl)
     {
         var user = await UserManager.FindByEmailAsync(email);
-        if (user is not ConsoleAdmin admin) return SignInResult.Success;
-        
-        var urlTemplate = _magicLinkBuilder.GetUrlTemplate();
+        if (user is not ConsoleAdmin admin)
+        {
+            // naive noise against timing attacks
+            await Task.Delay(new Random().Next(100,300));
+            return;
+        };
+
+        var urlTemplate = magicLinkBuilder.GetUrlTemplate();
         try
         {
-            await _magicClient.SendMagicLinkAsync(admin.Id, admin.Email, urlTemplate);
+            await magicClient.SendMagicLinkAsync(admin.Id, admin.Email, urlTemplate);
         }
         catch (PasswordlessApiException e)
         {
@@ -48,15 +42,12 @@ public class MagicLinkSignInManager<TUser> : SignInManager<TUser> where TUser : 
             throw;
         }
         
-        _eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
-
-        return SignInResult.Success;
-
+        eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
     }
 
     public async Task<SignInResult> PasswordlessSignInAsync(string email, string token, bool isPersistent)
     {
-        var verifiedUser = await _magicClient.VerifyAuthenticationTokenAsync(token);
+        var verifiedUser = await magicClient.VerifyAuthenticationTokenAsync(token);
         // todo: error handling
         
         var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
