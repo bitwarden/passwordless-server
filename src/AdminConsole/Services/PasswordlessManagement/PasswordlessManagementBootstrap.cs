@@ -19,13 +19,13 @@ public static class PasswordlessManagementBootstrap
             })
             .ValidateOnStart();
 
-        builder.Services.AddSingleton<ProblemDetailsDelegatingHandler>();
+        builder.Services.AddSingleton<PasswordlessHttpHandler>();
         builder.Services.AddHttpClient<IPasswordlessManagementClient, PasswordlessManagementClient>((sp, client) =>
         {
             var options = sp.GetRequiredService<IOptions<PasswordlessManagementOptions>>().Value;
 
             client.BaseAddress = new Uri(options.InternalApiUrl);
             client.DefaultRequestHeaders.Add("ManagementKey", options.ManagementKey);
-        }).AddHttpMessageHandler<ProblemDetailsDelegatingHandler>();
+        }).ConfigurePrimaryHttpMessageHandler<PasswordlessHttpHandler>();
     }
 }
