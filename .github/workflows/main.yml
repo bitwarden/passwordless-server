@@ -204,5 +204,5 @@ jobs:
           --field run-id=${{ github.run_id }}
           --field api-artifact=Api
           --field admin-console-artifact=AdminConsole
-          --field environment=devtest-${{ matrix.app }}
+          --field environment=devtest
           --field version=${{ needs.version.outputs.version }}
