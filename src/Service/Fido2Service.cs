@@ -302,7 +302,7 @@ public class Fido2Service : IFido2Service
 
         return await _tokenService.EncodeTokenAsync(tokenProps, "verify_");
     }
-    
+
     public async Task<string> CreateMagicLinkToken(MagicLinkTokenRequest request)
     {
         ValidateUserId(request.UserId);

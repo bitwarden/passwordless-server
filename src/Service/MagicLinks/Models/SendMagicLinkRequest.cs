@@ -17,7 +17,7 @@ public class SendMagicLinkRequest
 
     [Required]
     public string UserId { get; init; }
-    
+
     /// <summary>
     /// Number of seconds the magic link will be valid for.
     /// </summary>

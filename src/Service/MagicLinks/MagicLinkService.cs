@@ -116,7 +116,7 @@ public class MagicLinkService(
             var expiration = timeProvider.GetUtcNow().AddDays(1).Date;
             cache.Set(_emailsSentCacheKey, cachedValue + 1, expiration);
         }
-        
+
         eventLogger.LogMagicLinkCreatedEvent(request.UserId);
     }
 }

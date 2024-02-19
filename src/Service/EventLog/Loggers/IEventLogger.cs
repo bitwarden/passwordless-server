@@ -39,7 +39,7 @@ public static class EventLoggerExtensions
             TenantId = context.TenantId,
             ApiKeyId = context.AbbreviatedKey
         });
-    
+
     public static void LogMagicLinkCreatedEvent(this IEventLogger logger, string performedBy) =>
         logger.LogEvent(context => new EventDto
         {

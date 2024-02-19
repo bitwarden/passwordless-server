@@ -11,11 +11,11 @@ namespace Passwordless.Service.Models;
 /// <param name="timeToLive">Time span the magic link will be valid for. Default lifespan is 15 minutes.</param>
 public class MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate, TimeSpan timeToLive) : RequestBase
 {
-    public MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate) 
-        : this(userId, emailAddress, linkTemplate, new TimeSpan(0, 15, 0)) {}
-    public MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate, int timeToLive) 
-        : this(userId, emailAddress, linkTemplate, new TimeSpan(0, 0, timeToLive)) {}
-    
+    public MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate)
+        : this(userId, emailAddress, linkTemplate, new TimeSpan(0, 15, 0)) { }
+    public MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate, int timeToLive)
+        : this(userId, emailAddress, linkTemplate, new TimeSpan(0, 0, timeToLive)) { }
+
     public string UserId { get; } = userId;
     public MailAddress EmailAddress { get; } = emailAddress;
     public string LinkTemplate { get; } = linkTemplate;
