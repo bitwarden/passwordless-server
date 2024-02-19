@@ -80,10 +80,8 @@ public partial class ApiKeysSection : ComponentBase
         Modal = new SimpleAlert.SimpleAlertModel
         {
             Id = "selected-api-key-modal",
-            IsHidden = true,
-            Title = string.Empty
+            IsHidden = true
         };
-
 
         var apiKeys = await ManagementClient.GetApiKeysAsync(AppId);
         ApiKeys = apiKeys
