@@ -44,65 +44,31 @@
                             </ul>
                         </td>
                         <td>
-                            <EditForm confirm-submit="testing" class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
+                            <EditForm confirm-submit="testing" class="flex space-x-2 ml-0" Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
                                 @if (apiKey.IsLocked)
                                 {
-                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
+                                    <button type="submit" class="btn-warning flex items-center" name="ConfirmedSelectedForm.Action" value="unlock">
                                         <LockIcon Class="h-6 w-6" /> Unlock
                                     </button>
                                 }
                                 else
                                 {
-                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock">
+                                    <button type="submit" class="btn-warning flex items-center" name="ConfirmedSelectedForm.Action" value="lock">
                                         <UnlockIcon Class="h-6 w-6" /> Lock
                                     </button>
                                 }
                                 @if (apiKey.CanDelete)
                                 {
-                                    <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete">
+                                    <button type="submit" class="btn-danger flex items-center" name="ConfirmedSelectedForm.Action" value="delete">
                                         <DeleteIcon Class="h-6 w-6" /> Delete
                                     </button>
                                 }
-                                <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
+                                <input type="hidden" value="@apiKey.Id" name="ConfirmedSelectedForm.ApiKeyId" />
                             </EditForm>
                         </td>
                     </tr>
                 }
             }
         </Table>
-    
-        @if (Modal != null)
-        {
-            <SimpleAlert Model="Modal" />
-            <SecureScript>
-                document.getElementById('@(Modal.ConfirmId)').addEventListener('click', function () {
-                    document.getElementById('@(Modal.Id)').classList.add('hidden');
-                
-                    const url = '';
-                    const formData = new FormData();
-                
-                    const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
-                
-                    formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
-                    formData.append('ConfirmedSelectedForm.ApiKeyId', '@(SelectedForm.ApiKeyId)');
-                    formData.append('ConfirmedSelectedForm.Action', '@(SelectedForm.Action)');
-                
-                    fetch(url, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'RequestVerificationToken': requestVerificationToken.value
-                        }
-                    }).then(() => document.location = document.location)
-                    .catch(error => {
-                        console.error('Error:', error);
-                    })
-                });
-
-                document.getElementById('@(Modal.CancelId)').addEventListener('click', function () {
-                    document.getElementById('@(Modal.Id)').classList.add('hidden');
-                });
-            </SecureScript>
-        }
     </Panel>
 }

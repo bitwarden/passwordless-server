@@ -20,16 +20,11 @@ public partial class ApiKeysSection : ComponentBase
     [SupplyParameterFromForm(FormName = CreateApiKeyFormName)]
     public CreateFormModel CreateForm { get; set; } = new();
 
-    [SupplyParameterFromForm(FormName = SelectedApiKeyFormName)]
-    public SelectedFormModel SelectedForm { get; set; } = new();
-
     [SupplyParameterFromForm(FormName = ConfirmedSelectedApiKeyFormName)]
     public SelectedFormModel ConfirmedSelectedForm { get; set; } = new();
 
     public IReadOnlyCollection<ApiKey>? ApiKeys { get; private set; }
-
-    public SimpleAlert.SimpleAlertModel? Modal { get; set; }
-
+    
     public record ApiKey(
         string Id,
         DateTime CreatedAt,
@@ -73,11 +68,6 @@ public partial class ApiKeysSection : ComponentBase
                     CreateForm.Type = request.Form["CreateForm.Type"].ToString();
                     OnCreateFormSubmitted();
                     break;
-                case SelectedApiKeyFormName:
-                    SelectedForm.ApiKeyId = request.Form["SelectedForm.ApiKeyId"].ToString();
-                    SelectedForm.Action = request.Form["SelectedForm.Action"].ToString();
-                    await OnSelectedFormSubmitted();
-                    break;
                 case ConfirmedSelectedApiKeyFormName:
                     ConfirmedSelectedForm.ApiKeyId = request.Form["ConfirmedSelectedForm.ApiKeyId"].ToString();
                     ConfirmedSelectedForm.Action = request.Form["ConfirmedSelectedForm.Action"].ToString();
@@ -106,46 +96,7 @@ public partial class ApiKeysSection : ComponentBase
         }
     }
 
-    private async Task OnSelectedFormSubmitted()
-    {
-        if (string.IsNullOrEmpty(SelectedForm!.ApiKeyId))
-        {
-            throw new ArgumentNullException(nameof(SelectedForm.ApiKeyId));
-        }
-        switch (SelectedForm!.Action)
-        {
-            case "lock":
-                Modal = new SimpleAlert.SimpleAlertModel
-                {
-                    Id = "selected-api-key-modal",
-                    Title = "Lock API Key",
-                    Description = $"Are you sure you want to lock API key '{SelectedForm.ApiKeyId}'?",
-                    ConfirmText = "Lock",
-                    IsHidden = false
-                };
-                break;
-            case "unlock":
-                Modal = new SimpleAlert.SimpleAlertModel
-                {
-                    Id = "selected-api-key-modal",
-                    Title = "Unlock API Key",
-                    Description = $"Are you sure you want to unlock API key '{SelectedForm.ApiKeyId}'?",
-                    ConfirmText = "Unlock",
-                    IsHidden = false
-                };
-                break;
-            case "delete":
-                Modal = new SimpleAlert.SimpleAlertModel
-                {
-                    Id = "selected-api-key-modal",
-                    Title = "Delete API Key",
-                    Description = $"Are you sure you want to permanently delete API key '{SelectedForm.ApiKeyId}'?",
-                    ConfirmText = "Delete",
-                    IsHidden = false
-                };
-                break;
-        }
-    }
+    
 
     private async Task OnSelectedFormConfirmed()
     {
