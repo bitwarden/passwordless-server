@@ -108,10 +108,6 @@
                         .then(() => document.location = document.location)
                         .catch(error => {
                             console.error('Error:', error);
-                        })
-                        .finally(() => {
-                            selectedApiKeyId = null;
-                            selectedAction = null;
                         });
                     });
                 
