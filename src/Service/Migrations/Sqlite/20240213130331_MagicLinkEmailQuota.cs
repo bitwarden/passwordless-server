@@ -48,6 +48,9 @@ public partial class MagicLinkEmailQuota : Migration
             name: "IX_DispatchedEmails_Tenant",
             table: "DispatchedEmails",
             column: "Tenant");
+
+        migrationBuilder.Sql("UPDATE AppFeatures SET MagicLinkEmailMonthlyQuota = 100 WHERE MaxUsers = 10000;");
+        migrationBuilder.Sql("UPDATE AppFeatures SET MagicLinkEmailMonthlyQuota = 1000 WHERE MaxUsers IS NULL");
     }
 
     /// <inheritdoc />
