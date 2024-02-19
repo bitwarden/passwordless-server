@@ -44,25 +44,24 @@
                             </ul>
                         </td>
                         <td class="flex space-x-2 ml-0">
-                                @if (apiKey.IsLocked)
-                                {
-                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock" type="button" api-key-id="@apiKey.Id">
-                                        <LockIcon Class="h-6 w-6" /> Unlock
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button class="btn-warning flex items-center" name="SelectedForm.Action" value="lock" type="button" api-key-id="@apiKey.Id">
-                                        <UnlockIcon Class="h-6 w-6" /> Lock
-                                    </button>
-                                }
-                                @if (apiKey.CanDelete)
-                                {
-                                    <button class="btn-danger flex items-center" name="SelectedForm.Action" value="delete" type="button" api-key-id="@apiKey.Id">
-                                        <DeleteIcon Class="h-6 w-6" /> Delete
-                                    </button>
-                                }
-                                <input type="hidden" value="@apiKey.Id" name="SelectedForm.ApiKeyId" />
+                            @if (apiKey.IsLocked)
+                            {
+                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="@UnlockAction" type="button" api-key-id="@apiKey.Id">
+                                    <LockIcon Class="h-6 w-6" /> Unlock
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="@LockAction" type="button" api-key-id="@apiKey.Id">
+                                    <UnlockIcon Class="h-6 w-6" /> Lock
+                                </button>
+                            }
+                            @if (apiKey.CanDelete)
+                            {
+                                <button class="btn-danger flex items-center" name="SelectedForm.Action" value="@DeleteAction" type="button" api-key-id="@apiKey.Id">
+                                    <DeleteIcon Class="h-6 w-6" /> Delete
+                                </button>
+                            }
                         </td>
                     </tr>
                 }

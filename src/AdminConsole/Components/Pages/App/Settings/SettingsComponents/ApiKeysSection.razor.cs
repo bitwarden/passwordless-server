@@ -14,6 +14,10 @@ public partial class ApiKeysSection : ComponentBase
     public const string CreateApiKeyFormName = "create-api-key-form";
     public const string ConfirmedSelectedApiKeyFormName = "confirmed-selected-api-key-form";
 
+    public const string DeleteAction = "delete";
+    public const string LockAction = "lock";
+    public const string UnlockAction = "unlock";
+
     public string AppId => CurrentContext.AppId!;
 
     [SupplyParameterFromForm(FormName = CreateApiKeyFormName)]
@@ -111,13 +115,13 @@ public partial class ApiKeysSection : ComponentBase
         }
         switch (ConfirmedSelectedForm.Action)
         {
-            case "lock":
+            case LockAction:
                 await LockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
                 break;
-            case "unlock":
+            case UnlockAction:
                 await UnlockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
                 break;
-            case "delete":
+            case DeleteAction:
                 await DeleteSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
                 break;
         }
