@@ -43,7 +43,7 @@
                                 }
                             </ul>
                         </td>
-                        <td>
+                        <td class="flex space-x-2 ml-0">
                                 @if (apiKey.IsLocked)
                                 {
                                     <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock" type="button" api-key-id="@apiKey.Id">
@@ -69,54 +69,57 @@
             }
         </Table>
     
-        <SimpleAlert Model="Modal" />
-        <SecureScript>
-            let selectedApiKeyId = null;
-            let selectedAction = null;
-            
-            document.getElementsByName('SelectedForm.Action').forEach(function (element) {
-                element.addEventListener('click', function (event) {
-                    document.getElementById('@(Modal.ConfirmId)')
-                    selectedApiKeyId = event.target.getAttribute('api-key-id');
-                    selectedAction = event.target.value;
-                    document.getElementById('@(Modal.TitleId)').innerText = `${selectedAction[0].toUpperCase() + selectedAction.slice(1)} API Key ${selectedApiKeyId}`;
-                    document.getElementById('@(Modal.DescriptionId)').innerText = `Are you sure you want to ${selectedAction} API Key ${selectedApiKeyId}?`;
-                    document.getElementById('@(Modal.Id)').classList.remove('hidden');
-                });
-            });
-            
-            document.getElementById('@(Modal.ConfirmId)').addEventListener('click', function () {
-                document.getElementById('@(Modal.Id)').classList.add('hidden');
-            
-                const url = '';
-                const formData = new FormData();
-                        
-                const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
-                        
-                formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
-                formData.append('ConfirmedSelectedForm.ApiKeyId', selectedApiKeyId);
-                formData.append('ConfirmedSelectedForm.Action', selectedAction);
-                        
-                fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'RequestVerificationToken': requestVerificationToken.value
-                    }
-                })
-                .then(() => document.location = document.location)
-                .catch(error => {
-                    console.error('Error:', error);
-                })
-                .finally(() => {
-                    selectedApiKeyId = null;
-                    selectedAction = null;
-                });
-            });
-        
-            document.getElementById('@(Modal.CancelId)').addEventListener('click', function () {
-                document.getElementById('@(Modal.Id)').classList.add('hidden');
-            });
-        </SecureScript>
+        @if (Modal != null)
+        {
+            <SimpleAlert Model="Modal" />
+                <SecureScript>
+                    let selectedApiKeyId = null;
+                    let selectedAction = null;
+                    
+                    document.getElementsByName('SelectedForm.Action').forEach(function (element) {
+                        element.addEventListener('click', function (event) {
+                            document.getElementById('@(Modal.ConfirmId)')
+                            selectedApiKeyId = event.target.getAttribute('api-key-id');
+                            selectedAction = event.target.value;
+                            document.getElementById('@(Modal.TitleId)').innerText = `${selectedAction[0].toUpperCase() + selectedAction.slice(1)} API Key ${selectedApiKeyId}`;
+                            document.getElementById('@(Modal.DescriptionId)').innerText = `Are you sure you want to ${selectedAction} API Key ${selectedApiKeyId}?`;
+                            document.getElementById('@(Modal.Id)').classList.remove('hidden');
+                        });
+                    });
+                    
+                    document.getElementById('@(Modal.ConfirmId)').addEventListener('click', function () {
+                        document.getElementById('@(Modal.Id)').classList.add('hidden');
+                    
+                        const url = '';
+                        const formData = new FormData();
+                                
+                        const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
+                                
+                        formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
+                        formData.append('ConfirmedSelectedForm.ApiKeyId', selectedApiKeyId);
+                        formData.append('ConfirmedSelectedForm.Action', selectedAction);
+                                
+                        fetch(url, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'RequestVerificationToken': requestVerificationToken.value
+                            }
+                        })
+                        .then(() => document.location = document.location)
+                        .catch(error => {
+                            console.error('Error:', error);
+                        })
+                        .finally(() => {
+                            selectedApiKeyId = null;
+                            selectedAction = null;
+                        });
+                    });
+                
+                    document.getElementById('@(Modal.CancelId)').addEventListener('click', function () {
+                        document.getElementById('@(Modal.Id)').classList.add('hidden');
+                    });
+                </SecureScript>
+        }
     </Panel>
 }
