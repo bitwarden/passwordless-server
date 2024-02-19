@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using AutoFixture;
 using Bunit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -21,6 +22,7 @@ public class ApiKeysSectionTests : TestContext
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<IEventLogger> _eventLoggerMock = new();
     private readonly Mock<ILogger<ApiKeysSection>> _loggerMock = new();
+    private readonly Mock<IFileVersionProvider> _fileVersionProviderMock = new();
 
     private readonly Fixture _fixture = new();
 
@@ -29,6 +31,7 @@ public class ApiKeysSectionTests : TestContext
         Services.AddSingleton(_currentContext.Object);
         Services.AddSingleton(_managementClientMock.Object);
         Services.AddSingleton(_httpContextAccessorMock.Object);
+        Services.AddSingleton(_fileVersionProviderMock.Object);
 
         var httpContextItems = new Dictionary<object, object> { ["csp-nonce"] = "mocked-nonce-value" };
         _httpContextAccessorMock.SetupGet(x => x.HttpContext)
@@ -85,8 +88,7 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
-        var actualForm = actualCell.Children.Single();
-        var actual = actualForm.Children.Single(x => x.NodeName == "BUTTON");
+        var actual = actualCell.Children.Single(x => x.NodeName == "BUTTON");
         Assert.Contains(actual.Attributes, x => x.Name == "value" && x.Value == "lock");
         actual.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Lock</button>");
     }
@@ -109,11 +111,10 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
-        var actualForm = actualCell.Children.Single();
-        var actualUnlockButton = actualForm.Children.First(x => x.NodeName == "BUTTON");
+        var actualUnlockButton = actualCell.Children.First(x => x.NodeName == "BUTTON");
         Assert.Contains(actualUnlockButton.Attributes, x => x.Name == "value" && x.Value == "unlock");
         actualUnlockButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Unlock</button>");
-        var actualDeleteButton = actualForm.Children.Last(x => x.NodeName == "BUTTON");
+        var actualDeleteButton = actualCell.Children.Last(x => x.NodeName == "BUTTON");
         Assert.Contains(actualDeleteButton.Attributes, x => x.Name == "value" && x.Value == "delete");
         actualDeleteButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Delete</button>");
     }
