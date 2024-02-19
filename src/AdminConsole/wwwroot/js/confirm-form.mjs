@@ -14,22 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[confirm-submit]').forEach(function (element) {        
         element.addEventListener('submit', function (event) {
             event.preventDefault();
-            const form = event.target;
-                        
-            // add submitter name/value to form (submitting forms programmatically does not include the submitter button name/value)
-            const submitter = event.submitter;
-            if (submitter) {
-                const submitterName = submitter.getAttribute('name');
-                if (submitterName) {
-                    const submitterValue = submitter.getAttribute('value');
-                    const submitterInput = document.createElement('input');
-                    submitterInput.type = 'hidden';
-                    submitterInput.name = submitterName;
-                    submitterInput.value = submitterValue;
-                    form.appendChild(submitterInput);
-                }
-            }
-                       
+            const form = event.target;                       
+                                  
             // Not sure, but I think we need to run validate.
             form.checkValidity();
             
@@ -37,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showModal({
                 show: true,
                 form,
+                submitter: { name: event.submitter?.getAttribute("name"), value: event.submitter?.getAttribute("value")},
                 title: event.submitter.getAttribute('confirm-title') || 'Are you really sure?'
             });            
             
