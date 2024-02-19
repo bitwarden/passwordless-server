@@ -7,4 +7,6 @@ public class SigninTokenRequest(string userId, int? timeToLive = null) : Request
     /// Time to live is the number of seconds the token has before it expires.
     /// </summary>
     public int? TimeToLive { get; } = timeToLive;
+
+    public TimeSpan TimeToLiveTimeSpan => new(0, 0, 0, TimeToLive ?? 120);
 };
