@@ -248,6 +248,6 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         problemDetails.Should().NotBeNull();
         problemDetails!.Extensions["errorCode"]!.ToString().Should().Be("expired_token");
         problemDetails.Status.Should().Be(403);
-        problemDetails.Title.Should().Be("The token expired 00:00:10 ago.");
+        problemDetails.Title.Should().Be("The token expired 10 seconds ago.");
     }
 }

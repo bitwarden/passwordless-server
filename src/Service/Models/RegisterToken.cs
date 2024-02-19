@@ -1,5 +1,4 @@
 ﻿using MessagePack;
-using Passwordless.Service.Helpers;
 
 namespace Passwordless.Service.Models;
 
@@ -68,15 +67,4 @@ public class Token
 
     [Key(2)]
     public string Type { get; set; }
-
-    public void Validate(TimeProvider timeProvider)
-    {
-        var now = timeProvider.GetUtcNow().DateTime;
-
-        if (ExpiresAt < now)
-        {
-            var drift = now - ExpiresAt;
-            throw new ApiException("expired_token", $"The token expired {drift} ago.", 403);
-        }
-    }
 }
