@@ -1,7 +1,15 @@
 import {ref, computed} from "vue";
 
-//export const active = ref(false);
-//const title = ref('Are you sure?');
+const active = ref(false);
+const title = ref(null);
+const form = ref(null);
+
+export const showModal = (props) => {
+    active.value = props.show;
+    form.value = props.form;
+    title.value = props.title;
+} 
+
 export default {
     template: /*html*/`
       <div id="modal-div" v-if="active" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -31,22 +39,19 @@ export default {
           </div>
         </div>
       </div>
-    `,
-    props: ['form', 'active', 'title'],
-    setup(props) {
-        
-        const active = ref(props.active);
-        
-        const confirm = () => {
-            props.form.submit();
+    `,    
+    setup(props) {               
+        const confirm = () => {            
+            form.value.submit();
             active.value = false;
         };
         const deny = () => {
-            active.value = false;
+            active.value = false;            
         };
         
         return {
             active,
+            title,
             confirm,
             deny
         }
