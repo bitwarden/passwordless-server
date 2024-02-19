@@ -44,7 +44,7 @@
                             </ul>
                         </td>
                         <td>
-                            <EditForm class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
+                            <EditForm confirm-submit="testing" class="flex space-x-2 ml-0" Model="SelectedForm" FormName="@(SelectedApiKeyFormName)" name="@SelectedApiKeyFormName" OnSubmit="OnSelectedFormSubmitted">
                                 @if (apiKey.IsLocked)
                                 {
                                     <button class="btn-warning flex items-center" name="SelectedForm.Action" value="unlock">
