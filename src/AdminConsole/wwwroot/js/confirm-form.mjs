@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[confirm-submit]').forEach(function (element) {        
         element.addEventListener('submit', function (event) {
             event.preventDefault();
-            const form = event.target;                       
-                                  
+            const form = event.target;
+            
             // Not sure, but I think we need to run validate.
             form.checkValidity();
 
@@ -28,18 +28,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 submitterInput.name = submitterName;
                 submitterInput.value = event.submitter?.getAttribute("value");                
             }
-            
+                        
             // show the modal and set copy            
             showModal({
                 show: true,
                 onConfirm: () => {
                     // add submitter name/value to form (submitting forms programmatically does not include the submitter button name/value)
-                    form.appendChild(submitterInput);
+                    submitterInput && form.appendChild(submitterInput);
                     form.submit();
                 },
-                title: event.submitter.getAttribute('confirm-title') || 'Are you really sure?'
-            });            
-            
+                title: event.submitter.getAttribute('confirm-title') || 'Are you sure?'
+            });
             
             return false;
         });
