@@ -18,12 +18,25 @@ document.addEventListener('DOMContentLoaded', function () {
                                   
             // Not sure, but I think we need to run validate.
             form.checkValidity();
+
+            const submitterName = event.submitter?.getAttribute("name");
+            let submitterInput = null;
+            if(submitterName) {
+                // pollyfil form submittion with submitter button name/value
+                submitterInput = document.createElement('input');
+                submitterInput.type = 'hidden';
+                submitterInput.name = submitterName;
+                submitterInput.value = event.submitter?.getAttribute("value");                
+            }
             
             // show the modal and set copy            
             showModal({
                 show: true,
-                form,
-                submitter: { name: event.submitter?.getAttribute("name"), value: event.submitter?.getAttribute("value")},
+                onConfirm: () => {
+                    // add submitter name/value to form (submitting forms programmatically does not include the submitter button name/value)
+                    form.appendChild(submitterInput);
+                    form.submit();
+                },
                 title: event.submitter.getAttribute('confirm-title') || 'Are you really sure?'
             });            
             

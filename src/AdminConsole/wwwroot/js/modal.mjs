@@ -2,15 +2,13 @@ import {ref, computed} from "vue";
 
 const active = ref(false);
 const title = ref(null);
-const form = ref(null);
-const submitter = ref(null);
+
+let onConfirm = () => {};
 
 export const showModal = (props) => {
     active.value = props.show;
-    form.value = props.form;
-    title.value = props.title;
-    submitter.value = props.submitter;
-    
+    onConfirm = props.onConfirm;
+    title.value = props.title;    
 } 
 
 export default {
@@ -45,21 +43,11 @@ export default {
     `,    
     setup(props) {               
         const confirm = () => {
-            // add submitter name/value to form (submitting forms programmatically does not include the submitter button name/value)
-            
-            if(submitter.value) {
-                // pollyfil form submittion with submitter button name/value
-                const submitterInput = document.createElement('input');
-                submitterInput.type = 'hidden';
-                submitterInput.name = submitter.value.name;
-                submitterInput.value = submitter.value.value;
-                form.value.appendChild(submitterInput);
-            }
-            form.value.submit();
+            onConfirm && onConfirm();
             active.value = false;
         };
         const deny = () => {
-            active.value = false;            
+            active.value = false;
         };
         
         return {
