@@ -80,7 +80,7 @@ public class MagicLinkService(
         await EnforceQuotaAsync(dto);
 
         var token = await fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
-        var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
+        var link = new Uri(dto.LinkTemplate.Replace(SendMagicLinkRequest.TokenTemplate, token));
 
         await mailProvider.SendAsync(new MailMessage
         {
