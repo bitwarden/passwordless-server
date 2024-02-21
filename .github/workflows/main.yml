@@ -189,8 +189,6 @@ jobs:
       - pack
 
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
 
     steps:
       - name: Dispatch deployment
