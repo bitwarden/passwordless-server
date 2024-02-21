@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
 using static Microsoft.AspNetCore.Http.Results;
@@ -11,21 +12,25 @@ public static class ApplicationEndpoints
         var group = endpoints.MapGroup("/Applications");
 
         // The Blazor SSR sample uses the same solution for signing out, but we do not want to use all the endpoints.
-        group.MapGet("/{appId}/Available", async ([AsParameters] GetAppIdAvailabilityRequest request, IPasswordlessManagementClient client) =>
-        {
-            try
-            {
-                var result = await client.IsApplicationIdAvailableAsync(request);
-                return Ok(result);
-            }
-            catch (PasswordlessApiException e)
-            {
-                return Json(
-                    e.Details,
-                    contentType: "application/problem+json",
-                    statusCode: e.Details.Status);
-            }
-        }).RequireAuthorization();
+        group.MapGet("/{appId}/Available", IsAppIdAvailableAsync).RequireAuthorization();
         return endpoints;
+    }
+
+    public static async Task<IResult> IsAppIdAvailableAsync(
+        [AsParameters] GetAppIdAvailabilityRequest request,
+        [FromServices] IPasswordlessManagementClient client)
+    {
+        try
+        {
+            var result = await client.IsApplicationIdAvailableAsync(request);
+            return Ok(result);
+        }
+        catch (PasswordlessApiException e)
+        {
+            return Json(
+                e.Details,
+                contentType: "application/problem+json",
+                statusCode: e.Details.Status);
+        }
     }
 }
