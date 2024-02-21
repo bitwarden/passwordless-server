@@ -191,7 +191,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-      deployments: write
 
     steps:
       - name: Dispatch deployment
