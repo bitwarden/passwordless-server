@@ -6,7 +6,7 @@ namespace Passwordless.Service.MagicLinks.Models;
 
 public class SendMagicLinkRequest
 {
-    public const string TokenTemplate = "__TOKEN__";
+    public const string TokenTemplate = "$TOKEN";
 
     [Required]
     [EmailAddress]
