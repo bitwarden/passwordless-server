@@ -20,8 +20,9 @@ dotnet_diagnostic.CA2253.severity = warning
 dotnet_diagnostic.CA2254.severity = warning
 # CA1050: Declare types in namespaces
 dotnet_diagnostic.CA1050.severity = warning
-# IDE0005: Using directive is unnecessary.
-dotnet_diagnostic.IDE0005.severity = warning
+
+# IDE0005: Using directive is unnecessary. Disable temporarily due to a bug in .NET 8.0.2.
+dotnet_diagnostic.IDE0005.severity = silent
 
 #### Core EditorConfig Options ####
 
