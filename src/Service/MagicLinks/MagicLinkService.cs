@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -12,11 +12,12 @@ public class MagicLinkService(
     IMemoryCache cache,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
-    IMailProvider mailProvider)
+    IMailProvider mailProvider,
+    IEventLogger eventLogger)
 {
     private readonly string _emailsSentCacheKey = $"magic-link-emails-sent-30days-{tenantStorage.Tenant}";
 
-    private async Task EnforceQuotaAsync(MagicLinkDTO dto)
+    private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow();
         var account = await tenantStorage.GetAccountInformation();
@@ -24,7 +25,7 @@ public class MagicLinkService(
 
         // Applications created less than 24 hours ago can only send magic links to the admin email address
         if (accountAge < TimeSpan.FromHours(24) &&
-            !account.AdminEmails.Contains(dto.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
+            !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
                 "magic_link_email_admin_address_only",
@@ -75,16 +76,16 @@ public class MagicLinkService(
         }
     }
 
-    public async Task SendMagicLinkAsync(MagicLinkDTO dto)
+    public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {
-        await EnforceQuotaAsync(dto);
+        await EnforceQuotaAsync(request);
 
-        var token = await fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
-        var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
+        var token = await fido2Service.CreateMagicLinkToken(request);
+        var link = new Uri(request.LinkTemplate.Replace("<token>", token));
 
         await mailProvider.SendAsync(new MailMessage
         {
-            To = [dto.EmailAddress.ToString()],
+            To = [request.EmailAddress.ToString()],
             Subject = "Verify Email Address",
             TextBody = $"Please click the link or copy into your browser of choice to log in: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
@@ -107,7 +108,7 @@ public class MagicLinkService(
             MessageType = "magic-links"
         });
 
-        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address, dto.LinkTemplate);
+        await tenantStorage.AddDispatchedEmailAsync(request.UserId, request.EmailAddress.Address, request.LinkTemplate);
 
         // Update the cached tally of emails sent in the last 30 days
         if (cache.TryGetValue<int>(_emailsSentCacheKey, out var cachedValue))
@@ -115,5 +116,7 @@ public class MagicLinkService(
             var expiration = timeProvider.GetUtcNow().AddDays(1).Date;
             cache.Set(_emailsSentCacheKey, cachedValue + 1, expiration);
         }
+
+        eventLogger.LogMagicLinkCreatedEvent(request.UserId);
     }
 }

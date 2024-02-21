@@ -10,6 +10,7 @@ public interface IFido2Service
     Task<TokenResponse> RegisterComplete(RegistrationCompleteDTO request, string deviceInfo, string country);
 
     Task<string> CreateSigninToken(SigninTokenRequest request);
+    Task<string> CreateMagicLinkToken(MagicLinkTokenRequest request);
     Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request);
     Task<TokenResponse> SignInComplete(SignInCompleteDTO request, string device, string country);
     Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload);

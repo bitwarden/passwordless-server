@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
 using Passwordless.Service.MagicLinks.Validation;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Service.MagicLinks.Models;
 
@@ -17,10 +18,12 @@ public class SendMagicLinkRequest
     [Required]
     public string UserId { get; init; }
 
-    public MagicLinkDTO ToDto() => new()
-    {
-        UserId = UserId,
-        EmailAddress = new MailAddress(EmailAddress),
-        LinkTemplate = UrlTemplate
-    };
+    /// <summary>
+    /// Number of seconds the magic link will be valid for.
+    /// </summary>
+    public int? TimeToLive { get; init; }
+
+    public MagicLinkTokenRequest ToDto() => TimeToLive.HasValue
+        ? new MagicLinkTokenRequest(UserId, new MailAddress(EmailAddress), UrlTemplate, TimeToLive.Value)
+        : new MagicLinkTokenRequest(UserId, new MailAddress(EmailAddress), UrlTemplate);
 }

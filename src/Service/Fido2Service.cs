@@ -288,8 +288,6 @@ public class Fido2Service : IFido2Service
     {
         ValidateUserId(request.UserId);
 
-        _eventLogger.LogSigninTokenCreatedEvent(request.UserId);
-
         var tokenProps = new VerifySignInToken
         {
             Success = true,
@@ -298,6 +296,25 @@ public class Fido2Service : IFido2Service
             ExpiresAt = _timeProvider.GetUtcNow().DateTime.Add(request.TimeToLiveTimeSpan),
             TokenId = Guid.NewGuid(),
             Type = "generated_signin",
+            RpId = request.RPID,
+            Origin = request.Origin
+        };
+
+        return await _tokenService.EncodeTokenAsync(tokenProps, "verify_");
+    }
+
+    public async Task<string> CreateMagicLinkToken(MagicLinkTokenRequest request)
+    {
+        ValidateUserId(request.UserId);
+
+        var tokenProps = new VerifySignInToken
+        {
+            Success = true,
+            UserId = request.UserId,
+            Timestamp = _timeProvider.GetUtcNow().DateTime,
+            ExpiresAt = _timeProvider.GetUtcNow().DateTime.Add(request.TimeToLive),
+            TokenId = Guid.NewGuid(),
+            Type = "magic_link",
             RpId = request.RPID,
             Origin = request.Origin
         };
