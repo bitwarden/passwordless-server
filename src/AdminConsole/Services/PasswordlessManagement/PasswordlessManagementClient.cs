@@ -134,10 +134,10 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request) =>
-        (await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>(
-            $"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"
-        ))!;
+    public async Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request)
+    {
+        return (await http.GetFromJsonAsync<GetAppIdAvailabilityResponse>($"admin/apps/{Uri.EscapeDataString(request.AppId)}/available"))!;
+    }
 
     public async Task<IReadOnlyCollection<string>> GetAttestationTypesAsync()
     {
