@@ -105,7 +105,7 @@ public class Fido2Service : IFido2Service
         var features = await _featureContextProvider.UseContext();
 
         var token = await _tokenService.DecodeTokenAsync<RegisterToken>(request.Token, "register_");
-        token.Validate(_timeProvider);
+        token.Validate(_timeProvider.GetUtcNow());
 
         var userId = token.UserId;
 
@@ -428,7 +428,7 @@ public class Fido2Service : IFido2Service
     public async Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
-        token.Validate(_timeProvider);
+        token.Validate(_timeProvider.GetUtcNow());
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
         return token;

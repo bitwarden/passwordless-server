@@ -32,10 +32,8 @@ public static class RegisterTokenValidator
         }
     }
 
-    public static void Validate(this Token token, TimeProvider timeProvider)
+    public static void Validate(this Token token, DateTimeOffset now)
     {
-        var now = timeProvider.GetUtcNow().DateTime;
-
         if (token.ExpiresAt >= now)
         {
             return;
