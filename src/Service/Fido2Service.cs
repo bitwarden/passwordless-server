@@ -53,7 +53,7 @@ public class Fido2Service : IFido2Service
     {
         if (tokenProps.ExpiresAt == default)
         {
-            tokenProps.ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120);
+            tokenProps.ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120);
         }
 
         ValidateAliases(tokenProps.Aliases);
@@ -238,7 +238,7 @@ public class Fido2Service : IFido2Service
             throw;
         }
 
-        var now = _timeProvider.GetUtcNow().DateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
 
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
@@ -267,12 +267,12 @@ public class Fido2Service : IFido2Service
             Success = true,
             Origin = request.Origin,
             RpId = session.Options.Rp.Id,
-            Timestamp = _timeProvider.GetUtcNow().DateTime,
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             CredentialId = success.Result.Id,
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
-            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
         };
@@ -292,8 +292,8 @@ public class Fido2Service : IFido2Service
         {
             Success = true,
             UserId = request.UserId,
-            Timestamp = _timeProvider.GetUtcNow().DateTime,
-            ExpiresAt = _timeProvider.GetUtcNow().DateTime.Add(request.TimeToLive),
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.Add(request.TimeToLive),
             TokenId = Guid.NewGuid(),
             Type = "generated_signin",
             RpId = request.RPID,
@@ -311,8 +311,8 @@ public class Fido2Service : IFido2Service
         {
             Success = true,
             UserId = request.UserId,
-            Timestamp = _timeProvider.GetUtcNow().DateTime,
-            ExpiresAt = _timeProvider.GetUtcNow().DateTime.Add(request.TimeToLive),
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.Add(request.TimeToLive),
             TokenId = Guid.NewGuid(),
             Type = "magic_link",
             RpId = request.RPID,
@@ -407,12 +407,12 @@ public class Fido2Service : IFido2Service
             Success = true,
             Origin = request.Origin,
             RpId = request.RPID,
-            Timestamp = _timeProvider.GetUtcNow().DateTime,
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             Device = device,
             Country = country,
             Nickname = credential.Nickname,
             CredentialId = credential.Descriptor.Id,
-            ExpiresAt = _timeProvider.GetUtcNow().DateTime.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
         };
