@@ -1,12 +1,21 @@
+using System.Text.Json.Serialization;
+using Passwordless.Service.Extensions;
+
 namespace Passwordless.Service.Models;
 
-public class SigninTokenRequest(string userId, int? timeToLive = null) : RequestBase
+public class SigninTokenRequest : RequestBase
 {
-    public string UserId { get; } = userId;
+    private static readonly TimeSpan DefaultTimeToLive = TimeSpan.FromSeconds(120);
+    
+    public required string UserId { get; init; }
+    
     /// <summary>
     /// Time to live is the number of seconds the token has before it expires.
     /// </summary>
-    public int? TimeToLive { get; } = timeToLive;
+    [JsonPropertyName("timeToLive")]
+    [Obsolete("This property is only used for serialization.")]
+    public int? TimeToLiveSeconds { get; init; }
 
-    public TimeSpan TimeToLiveTimeSpan => new(0, 0, 0, TimeToLive ?? 120);
+    [JsonIgnore]
+    public TimeSpan TimeToLive => TimeToLiveSeconds.GetNullableTimeSpanFromSeconds() ?? DefaultTimeToLive;
 };

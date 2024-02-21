@@ -23,7 +23,5 @@ public class SendMagicLinkRequest
     /// </summary>
     public int? TimeToLive { get; init; }
 
-    public MagicLinkTokenRequest ToDto() => TimeToLive.HasValue
-        ? new MagicLinkTokenRequest(UserId, new MailAddress(EmailAddress), UrlTemplate, TimeToLive.Value)
-        : new MagicLinkTokenRequest(UserId, new MailAddress(EmailAddress), UrlTemplate);
+    public MagicLinkTokenRequest ToDto() => new(UserId, new MailAddress(EmailAddress), UrlTemplate, TimeToLive);
 }

@@ -197,8 +197,9 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
             .AddUserAgent();
 
         // Act
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(userId)
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest
         {
+            UserId = userId,
             Origin = PasswordlessApi.OriginUrl,
             RPID = PasswordlessApi.RpId
         });
@@ -228,8 +229,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         client.AddPublicKey(accountKeysCreation!.ApiKey1)
             .AddSecretKey(accountKeysCreation.ApiSecret1)
             .AddUserAgent();
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(userId, timeToLive)
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest
         {
+            UserId = userId,
+            TimeToLiveSeconds = timeToLive,
             Origin = PasswordlessApi.OriginUrl,
             RPID = PasswordlessApi.RpId
         });
