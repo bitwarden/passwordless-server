@@ -88,7 +88,8 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
-        var actual = actualCell.Children.Single(x => x.NodeName == "BUTTON");
+        var actualForm = actualCell.Children.First(x => x.NodeName == "FORM");
+        var actual = actualForm.Children.Single(x => x.NodeName == "BUTTON");
         Assert.Contains(actual.Attributes, x => x.Name == "value" && x.Value == "lock");
         actual.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Lock</button>");
     }
@@ -111,10 +112,11 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
-        var actualUnlockButton = actualCell.Children.First(x => x.NodeName == "BUTTON");
+        var actualForm = actualCell.Children.First(x => x.NodeName == "FORM");
+        var actualUnlockButton = actualForm.Children.First(x => x.NodeName == "BUTTON");
         Assert.Contains(actualUnlockButton.Attributes, x => x.Name == "value" && x.Value == "unlock");
         actualUnlockButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Unlock</button>");
-        var actualDeleteButton = actualCell.Children.Last(x => x.NodeName == "BUTTON");
+        var actualDeleteButton = actualForm.Children.Last(x => x.NodeName == "BUTTON");
         Assert.Contains(actualDeleteButton.Attributes, x => x.Name == "value" && x.Value == "delete");
         actualDeleteButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Delete</button>");
     }
