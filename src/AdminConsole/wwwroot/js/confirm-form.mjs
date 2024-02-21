@@ -37,7 +37,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     submitterInput && form.appendChild(submitterInput);
                     form.submit();
                 },
-                title: event.submitter.getAttribute('confirm-title') || 'Are you sure?'
+                title: event.submitter.getAttribute('confirm-title') || 'Are you sure?',
+                description: event.submitter.getAttribute('confirm-description') || 'Please confirm your action',
+                confirmButtonText: event.submitter.getAttribute('confirm-button-text') || 'Confirm',
+                cancelButtonText: event.submitter.getAttribute('cancel-button-text') || 'Cancel'
             });
             
             return false;

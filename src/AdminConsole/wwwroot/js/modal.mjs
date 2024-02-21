@@ -2,6 +2,9 @@ import {ref, computed} from "vue";
 
 const active = ref(false);
 const title = ref(null);
+const description = ref(null);
+const confirmButtonText = ref(null);
+const cancelButtonText = ref(null);
 
 let onConfirm = () => {};
 
@@ -9,6 +12,9 @@ export const showModal = (props) => {
     active.value = props.show;
     onConfirm = props.onConfirm;
     title.value = props.title;    
+    description.value = props.description;
+    confirmButtonText.value = props.confirmButtonText;
+    cancelButtonText.value = props.cancelButtonText;
 } 
 
 export default {
@@ -28,13 +34,13 @@ export default {
                 <div class="text-center sm:ml-4 sm:text-left">
                   <h3 class="text-base font-semibold leading-6 text-gray-900">{{title || "Are you sure?"}}</h3>
                   <div class="mt-2">
-                    <p class="text-sm text-gray-500">Please confirm your action</p>
+                    <p class="text-sm text-gray-500">{{description || "Please confirm your action"}}</p>
                   </div>
                 </div>
               </div>
               <div class="mt-5 sm:ml-10 sm:mt-4 sm:flex sm:pl-4">
-                <button @click="confirm" type="button" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto">Confirm</button>
-                <button @click="deny" type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:ml-3 sm:mt-0 sm:w-auto">Cancel</button>
+                <button @click="confirm" type="button" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto">{{confirmButtonText || "Confirm"}}</button>
+                <button @click="deny" type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:ml-3 sm:mt-0 sm:w-auto">{{cancelButtonText || "Cancel"}}</button>
               </div>
             </div>
           </div>
@@ -53,6 +59,9 @@ export default {
         return {
             active,
             title,
+            description,
+            confirmButtonText,
+            cancelButtonText,
             confirm,
             deny
         }

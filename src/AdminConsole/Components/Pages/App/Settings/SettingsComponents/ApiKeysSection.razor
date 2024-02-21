@@ -44,27 +44,48 @@
                             </ul>
                         </td>
                         <td>
-                            <EditForm confirm-submit="testing" class="flex space-x-2 ml-0" Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
+                            <ConfirmEditForm class="flex space-x-2 ml-0" Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
                                 @if (apiKey.IsLocked)
                                 {
-                                    <button type="submit" class="btn-warning flex items-center" name="ConfirmedSelectedForm.Action" value="unlock">
-                                        <LockIcon Class="h-6 w-6" /> Unlock
-                                    </button>
+                                    <ConfirmButton 
+                                        ConfirmTitle="Unlock API Key"
+                                        ConfirmDescription="Are you sure you want to unlock this API Key?"
+                                        ConfirmButtonText="Unlock"
+                                        class="btn-warning flex items-center"
+                                        name="ConfirmedSelectedForm.Action"
+                                        type="submit"
+                                        value="unlock">
+                                        <UnlockIcon Class="h-6 w-6"/> Unlock
+                                    </ConfirmButton>
                                 }
                                 else
                                 {
-                                    <button type="submit" class="btn-warning flex items-center" name="ConfirmedSelectedForm.Action" value="lock">
-                                        <UnlockIcon Class="h-6 w-6" /> Lock
-                                    </button>
+                                    <ConfirmButton 
+                                        ConfirmTitle="Lock API Key"
+                                        ConfirmDescription="Are you sure you want to lock this API Key?"
+                                        ConfirmButtonText="Lock"
+                                        class="btn-warning flex items-center"
+                                        name="ConfirmedSelectedForm.Action"
+                                        type="submit"
+                                        value="lock">
+                                        <LockIcon Class="h-6 w-6"/> Lock
+                                    </ConfirmButton>
                                 }
                                 @if (apiKey.CanDelete)
                                 {
-                                    <button type="submit" class="btn-danger flex items-center" name="ConfirmedSelectedForm.Action" value="delete">
-                                        <DeleteIcon Class="h-6 w-6" /> Delete
-                                    </button>
-                                }
-                                <input type="hidden" value="@apiKey.Id" name="ConfirmedSelectedForm.ApiKeyId" />
-                            </EditForm>
+                                    <ConfirmButton 
+                                        ConfirmTitle="Delete API Key"
+                                        ConfirmDescription="Are you sure you want to delete this API Key?"
+                                        ConfirmButtonText="Delete"
+                                        class="btn-danger flex items-center"
+                                        name="ConfirmedSelectedForm.Action"
+                                        type="submit"
+                                        value="delete">
+                                        <DeleteIcon Class="h-6 w-6"/> Delete
+                                    </ConfirmButton>
+                                }                   
+                                <input type="hidden" value="@apiKey.Id" name="ConfirmedSelectedForm.ApiKeyId"/>
+                            </ConfirmEditForm>
                         </td>
                     </tr>
                 }

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.AspNetCore.Components;
-using Passwordless.AdminConsole.Components.Shared.Modals;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -24,7 +23,7 @@ public partial class ApiKeysSection : ComponentBase
     public SelectedFormModel ConfirmedSelectedForm { get; set; } = new();
 
     public IReadOnlyCollection<ApiKey>? ApiKeys { get; private set; }
-    
+
     public record ApiKey(
         string Id,
         DateTime CreatedAt,
@@ -96,7 +95,7 @@ public partial class ApiKeysSection : ComponentBase
         }
     }
 
-    
+
 
     private async Task OnSelectedFormConfirmed()
     {
