@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.AspNetCore.Components;
-using Passwordless.AdminConsole.Components.Shared.Modals;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -12,11 +11,8 @@ namespace Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsCompon
 public partial class ApiKeysSection : ComponentBase
 {
     public const string CreateApiKeyFormName = "create-api-key-form";
+    public const string SelectedApiKeyFormName = "selected-api-key-form";
     public const string ConfirmedSelectedApiKeyFormName = "confirmed-selected-api-key-form";
-
-    public const string DeleteAction = "delete";
-    public const string LockAction = "lock";
-    public const string UnlockAction = "unlock";
 
     public string AppId => CurrentContext.AppId!;
 
@@ -27,8 +23,6 @@ public partial class ApiKeysSection : ComponentBase
     public SelectedFormModel ConfirmedSelectedForm { get; set; } = new();
 
     public IReadOnlyCollection<ApiKey>? ApiKeys { get; private set; }
-
-    public SimpleAlert.SimpleAlertModel Modal { get; set; }
 
     public record ApiKey(
         string Id,
@@ -81,12 +75,6 @@ public partial class ApiKeysSection : ComponentBase
             }
         }
 
-        Modal = new SimpleAlert.SimpleAlertModel
-        {
-            Id = "selected-api-key-modal",
-            IsHidden = true
-        };
-
         var apiKeys = await ManagementClient.GetApiKeysAsync(AppId);
         ApiKeys = apiKeys
             .Select(x => ApiKey.FromDto(x, CurrentContext))
@@ -107,6 +95,8 @@ public partial class ApiKeysSection : ComponentBase
         }
     }
 
+
+
     private async Task OnSelectedFormConfirmed()
     {
         if (string.IsNullOrEmpty(ConfirmedSelectedForm.ApiKeyId))
@@ -115,13 +105,13 @@ public partial class ApiKeysSection : ComponentBase
         }
         switch (ConfirmedSelectedForm.Action)
         {
-            case LockAction:
+            case "lock":
                 await LockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
                 break;
-            case UnlockAction:
+            case "unlock":
                 await UnlockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
                 break;
-            case DeleteAction:
+            case "delete":
                 await DeleteSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
                 break;
         }

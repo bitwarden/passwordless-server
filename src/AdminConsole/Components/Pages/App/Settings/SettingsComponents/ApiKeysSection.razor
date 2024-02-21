@@ -43,78 +43,53 @@
                                 }
                             </ul>
                         </td>
-                        <td class="flex space-x-2 ml-0">
-                            @if (apiKey.IsLocked)
-                            {
-                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="@UnlockAction" type="button" api-key-id="@apiKey.Id">
-                                    <LockIcon Class="h-6 w-6" /> Unlock
-                                </button>
-                            }
-                            else
-                            {
-                                <button class="btn-warning flex items-center" name="SelectedForm.Action" value="@LockAction" type="button" api-key-id="@apiKey.Id">
-                                    <UnlockIcon Class="h-6 w-6" /> Lock
-                                </button>
-                            }
-                            @if (apiKey.CanDelete)
-                            {
-                                <button class="btn-danger flex items-center" name="SelectedForm.Action" value="@DeleteAction" type="button" api-key-id="@apiKey.Id">
-                                    <DeleteIcon Class="h-6 w-6" /> Delete
-                                </button>
-                            }
+                        <td>
+                            <ConfirmEditForm class="flex space-x-2 ml-0" Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
+                                @if (apiKey.IsLocked)
+                                {
+                                    <ConfirmButton 
+                                        ConfirmTitle="Unlock API Key"
+                                        ConfirmDescription="Are you sure you want to unlock this API Key?"
+                                        ConfirmButtonText="Unlock"
+                                        class="btn-warning flex items-center"
+                                        name="ConfirmedSelectedForm.Action"
+                                        type="submit"
+                                        value="unlock">
+                                        <UnlockIcon Class="h-6 w-6"/> Unlock
+                                    </ConfirmButton>
+                                }
+                                else
+                                {
+                                    <ConfirmButton 
+                                        ConfirmTitle="Lock API Key"
+                                        ConfirmDescription="Are you sure you want to lock this API Key?"
+                                        ConfirmButtonText="Lock"
+                                        class="btn-warning flex items-center"
+                                        name="ConfirmedSelectedForm.Action"
+                                        type="submit"
+                                        value="lock">
+                                        <LockIcon Class="h-6 w-6"/> Lock
+                                    </ConfirmButton>
+                                }
+                                @if (apiKey.CanDelete)
+                                {
+                                    <ConfirmButton 
+                                        ConfirmTitle="Delete API Key"
+                                        ConfirmDescription="Are you sure you want to delete this API Key?"
+                                        ConfirmButtonText="Delete"
+                                        class="btn-danger flex items-center"
+                                        name="ConfirmedSelectedForm.Action"
+                                        type="submit"
+                                        value="delete">
+                                        <DeleteIcon Class="h-6 w-6"/> Delete
+                                    </ConfirmButton>
+                                }                   
+                                <input type="hidden" value="@apiKey.Id" name="ConfirmedSelectedForm.ApiKeyId"/>
+                            </ConfirmEditForm>
                         </td>
                     </tr>
                 }
             }
         </Table>
-    
-        @if (Modal != null)
-        {
-            <SimpleAlert Model="Modal" />
-                <SecureScript>
-                    let selectedApiKeyId = null;
-                    let selectedAction = null;
-                    
-                    document.getElementsByName('SelectedForm.Action').forEach(function (element) {
-                        element.addEventListener('click', function (event) {
-                            document.getElementById('@(Modal.ConfirmId)')
-                            selectedApiKeyId = event.target.getAttribute('api-key-id');
-                            selectedAction = event.target.value;
-                            document.getElementById('@(Modal.TitleId)').innerText = `${selectedAction[0].toUpperCase() + selectedAction.slice(1)} API Key ${selectedApiKeyId}`;
-                            document.getElementById('@(Modal.DescriptionId)').innerText = `Are you sure you want to ${selectedAction} API Key ${selectedApiKeyId}?`;
-                            document.getElementById('@(Modal.Id)').classList.remove('hidden');
-                        });
-                    });
-                    
-                    document.getElementById('@(Modal.ConfirmId)').addEventListener('click', function () {
-                        document.getElementById('@(Modal.Id)').classList.add('hidden');
-                    
-                        const url = '';
-                        const formData = new FormData();
-                                
-                        const requestVerificationToken = document.getElementsByName("__RequestVerificationToken")[0];
-                                
-                        formData.append('_handler', '@(ConfirmedSelectedApiKeyFormName)');
-                        formData.append('ConfirmedSelectedForm.ApiKeyId', selectedApiKeyId);
-                        formData.append('ConfirmedSelectedForm.Action', selectedAction);
-                                
-                        fetch(url, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'RequestVerificationToken': requestVerificationToken.value
-                            }
-                        })
-                        .then(() => document.location = document.location)
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                    });
-                
-                    document.getElementById('@(Modal.CancelId)').addEventListener('click', function () {
-                        document.getElementById('@(Modal.Id)').classList.add('hidden');
-                    });
-                </SecureScript>
-        }
     </Panel>
 }
