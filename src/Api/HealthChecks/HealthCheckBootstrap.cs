@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Passwordless.Common.HealthChecks;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Api.HealthChecks;

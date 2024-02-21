@@ -1,27 +1,88 @@
+using Microsoft.Extensions.Caching.Memory;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.MagicLinks;
 
-public class MagicLinkService
+public class MagicLinkService(
+    TimeProvider timeProvider,
+    IMemoryCache cache,
+    ITenantStorage tenantStorage,
+    IFido2Service fido2Service,
+    IMailProvider mailProvider)
 {
-    private readonly IFido2Service _fido2Service;
-    private readonly IMailProvider _mailProvider;
+    private readonly string _emailsSentCacheKey = $"magic-link-emails-sent-30days-{tenantStorage.Tenant}";
 
-    public MagicLinkService(IFido2Service fido2Service, IMailProvider mailProvider)
+    private async Task EnforceQuotaAsync(MagicLinkDTO dto)
     {
-        _fido2Service = fido2Service;
-        _mailProvider = mailProvider;
+        var now = timeProvider.GetUtcNow();
+        var account = await tenantStorage.GetAccountInformation();
+        var accountAge = now - account.CreatedAt;
+
+        // Applications created less than 24 hours ago can only send magic links to the admin email address
+        if (accountAge < TimeSpan.FromHours(24) &&
+            !account.AdminEmails.Contains(dto.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ApiException(
+                "magic_link_email_admin_address_only",
+                "Because your application has been created less than 24 hours ago, " +
+                "you can only request magic links to the admin email address.",
+                403
+            );
+        }
+
+        // Reduce the quota for newly created applications
+        var coefficient = accountAge.TotalDays switch
+        {
+            // App created <24 hours ago
+            < 1 => 0.2,
+            // App created <3 days ago
+            < 3 => 0.5,
+            // App created <30 days ago
+            < 30 => 0.75,
+            // App created >30 days ago
+            _ => 1
+        };
+
+        var quota = (int)Math.Max(
+            // Make sure the quota is at least 1
+            1,
+            coefficient * (account.Features?.MagicLinkEmailMonthlyQuota ?? 500)
+        );
+
+        var emailsDispatchedIn30Days = await cache.GetOrCreateAsync(
+            _emailsSentCacheKey,
+            async cacheEntry =>
+            {
+                var expiration = now.AddDays(1).Date;
+                cacheEntry.SetAbsoluteExpiration(expiration);
+
+                return await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
+            }
+        );
+
+        if (emailsDispatchedIn30Days >= quota)
+        {
+            throw new ApiException(
+                "magic_link_email_quota_exceeded",
+                "You have reached your monthly quota for magic link emails. " +
+                "Please try again later.",
+                429
+            );
+        }
     }
 
-    public async Task SendMagicLink(MagicLinkDTO dto)
+    public async Task SendMagicLinkAsync(MagicLinkDTO dto)
     {
-        var token = await _fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
+        await EnforceQuotaAsync(dto);
 
+        var token = await fido2Service.CreateSigninToken(new SigninTokenRequest(dto.UserId));
         var link = new Uri(dto.LinkTemplate.Replace("<token>", token));
 
-        await _mailProvider.SendAsync(new MailMessage
+        await mailProvider.SendAsync(new MailMessage
         {
             To = [dto.EmailAddress.ToString()],
             Subject = "Verify Email Address",
@@ -45,5 +106,14 @@ public class MagicLinkService
                  """,
             MessageType = "magic-links"
         });
+
+        await tenantStorage.AddDispatchedEmailAsync(dto.UserId, dto.EmailAddress.Address, dto.LinkTemplate);
+
+        // Update the cached tally of emails sent in the last 30 days
+        if (cache.TryGetValue<int>(_emailsSentCacheKey, out var cachedValue))
+        {
+            var expiration = timeProvider.GetUtcNow().AddDays(1).Date;
+            cache.Set(_emailsSentCacheKey, cachedValue + 1, expiration);
+        }
     }
 }

@@ -22,6 +22,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     @await RenderSectionAsync("Head", false)
+    @Html.RenderPartialSectionScripts()
 </head>
 
 <body class="h-full bg-gray-50">
@@ -75,6 +76,5 @@
 <script type="text/javascript" src="~/js/core.js" asp-append-version="true"></script>
 <script type="module" src="@Url.Content("~/js/elements/local-time.mjs")" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", false)
-@Html.RenderPartialSectionScripts()
 </body>
 </html>

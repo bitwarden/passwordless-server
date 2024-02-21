@@ -23,6 +23,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<AppFeature> AppFeatures => Set<AppFeature>();
     public DbSet<Authenticator> Authenticators => Set<Authenticator>();
     public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
+    public DbSet<DispatchedEmail> DispatchedEmails => Set<DispatchedEmail>();
     public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
     public DbSet<PeriodicActiveUserReport> PeriodicActiveUserReports => Set<PeriodicActiveUserReport>();
 
@@ -89,6 +90,16 @@ public abstract class DbGlobalContext : DbContext
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.Events)
                 .HasForeignKey(x => x.TenantId)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<DispatchedEmail>(builder =>
+        {
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.CreatedAt);
+            builder.HasOne(x => x.Application)
+                .WithMany(x => x.DispatchedEmails)
+                .HasForeignKey(x => x.Tenant)
                 .IsRequired();
         });
 

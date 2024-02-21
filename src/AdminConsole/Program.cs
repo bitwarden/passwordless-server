@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Endpoints;
+using Passwordless.AdminConsole.HealthChecks;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Middleware;
@@ -157,6 +157,7 @@ void RunTheApp()
     builder.Services.AddAntiforgery();
 
     builder.Services.AddRateLimiting();
+    builder.AddPasswordlessHealthChecks();
 
     WebApplication app;
     try
@@ -194,10 +195,14 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
-    app.MapHealthEndpoints();
     app.UseAuthentication();
-    app.UseMiddleware<CurrentContextMiddleware>();
-    app.UseMiddleware<EventLogStorageCommitMiddleware>();
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/health"),
+        appBuilder =>
+        {
+            appBuilder.UseMiddleware<CurrentContextMiddleware>();
+            appBuilder.UseMiddleware<EventLogStorageCommitMiddleware>();
+        });
     app.UseAuthorization();
     app.UseAntiforgery();
     app.UseRateLimiter();
@@ -209,6 +214,8 @@ void RunTheApp()
 
     app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
+
+    app.MapPasswordlessHealthChecks();
 
     app.Run();
 }

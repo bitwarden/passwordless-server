@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
@@ -14,17 +13,17 @@ using Stripe.Checkout;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class SharedStripeBillingService<TDbContext> : BaseBillingService<TDbContext>, ISharedBillingService where TDbContext : ConsoleDbContext
+public class SharedStripeBillingService : BaseBillingService, ISharedBillingService
 {
     public SharedStripeBillingService(
-        IDbContextFactory<TDbContext> dbContextFactory,
+        ConsoleDbContext db,
         IDataService dataService,
         IPasswordlessManagementClient passwordlessClient,
-        ILogger<SharedStripeBillingService<TDbContext>> logger,
+        ILogger<SharedStripeBillingService> logger,
         IOptions<BillingOptions> billingOptions,
         IActionContextAccessor actionContextAccessor,
         IUrlHelperFactory urlHelperFactory
-        ) : base(dbContextFactory, dataService, passwordlessClient, logger, billingOptions, actionContextAccessor, urlHelperFactory)
+        ) : base(db, dataService, passwordlessClient, logger, billingOptions, actionContextAccessor, urlHelperFactory)
     {
     }
 

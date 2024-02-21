@@ -1,24 +1,26 @@
 using System.Net.Http.Json;
-using Bogus;
 using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.App;
 
 public static class CreateAppHelpers
 {
-    public static readonly Faker<CreateAppDto> AppCreateGenerator = new Faker<CreateAppDto>()
-        .RuleFor(x => x.AdminEmail, x => x.Person.Email);
-
     public static string GetApplicationName() => $"test{Guid.NewGuid():N}";
 
-    public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client, string applicationName)
+    public static Task<HttpResponseMessage> CreateApplicationAsync(
+        this HttpClient client,
+        string applicationName,
+        string? adminEmail = null)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
         {
             client.AddManagementKey();
         }
 
-        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", AppCreateGenerator.Generate());
+        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", new CreateAppDto
+        {
+            AdminEmail = adminEmail ?? "test-admin@passwordless.dev"
+        });
     }
 
     public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client)

@@ -14,40 +14,34 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Credentials;
 
-public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposable
+public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
-    private readonly HttpClient _client;
     private readonly Faker<RegisterToken> _tokenGenerator = RequestHelpers.GetRegisterTokenGeneratorRules();
-
-    public CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFactory apiFactory)
-    {
-        apiFactory.TestOutput = testOutput;
-        _client = apiFactory.CreateClient()
-            .AddPublicKey()
-            .AddSecretKey()
-            .AddUserAgent();
-    }
 
     [Fact]
     public async Task I_can_view_a_list_of_registered_users_credentials()
     {
         // Arrange
-        const string originUrl = PasswordlessApiFactory.OriginUrl;
-        const string rpId = PasswordlessApiFactory.RpId;
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        const string originUrl = PasswordlessApi.OriginUrl;
+        const string rpId = PasswordlessApi.RpId;
         var tokenRequest = _tokenGenerator.Generate();
-        using var tokenResponse = await _client.PostAsJsonAsync("register/token", tokenRequest);
+        using var tokenResponse = await client.PostAsJsonAsync("register/token", tokenRequest);
         var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
         var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
-        using var registrationBeginResponse = await _client.PostAsJsonAsync("register/begin", registrationBeginRequest);
+        using var registrationBeginResponse = await client.PostAsJsonAsync("register/begin", registrationBeginRequest);
         var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
         var authenticatorAttestationRawResponse = await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
 
-        _ = await _client.PostAsJsonAsync("register/complete",
+        _ = await client.PostAsJsonAsync("register/complete",
             new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = authenticatorAttestationRawResponse });
 
         // Act
-        using var credentialsResponse = await _client.GetAsync($"credentials/list?userId={tokenRequest.UserId}");
+        using var credentialsResponse = await client.GetAsync($"credentials/list?userId={tokenRequest.UserId}");
 
         // Assert
         credentialsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -61,8 +55,12 @@ public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposab
     [Fact]
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_with_secret_key()
     {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
         // Act
-        using var credentialsResponse = await _client.GetAsync("credentials/list");
+        using var credentialsResponse = await client.GetAsync("credentials/list");
 
         // Assert
         credentialsResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -70,10 +68,5 @@ public class CredentialsTests : IClassFixture<PasswordlessApiFactory>, IDisposab
         var problemDetails = await credentialsResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         problemDetails.Should().NotBeNull();
         problemDetails!.Title.Should().Be("Please supply UserId in the query string value");
-    }
-
-    public void Dispose()
-    {
-        _client.Dispose();
     }
 }

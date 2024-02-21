@@ -12,7 +12,7 @@ public sealed class ActiveUserReportingBackgroundService : BasePeriodicBackgroun
         IServiceProvider serviceProvider,
         TimeProvider timeProvider,
         ILogger<ActiveUserReportingBackgroundService> logger) : base(
-        new TimeSpan(22, 0, 0),
+        new TimeOnly(22, 0, 0),
         TimeSpan.FromDays(1),
         timeProvider,
         logger)

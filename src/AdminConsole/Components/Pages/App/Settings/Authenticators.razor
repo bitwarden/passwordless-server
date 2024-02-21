@@ -20,7 +20,7 @@
             </EditForm>
             @if (Allowlist.Any())
             {
-                <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+                <div id="allowlist" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
                     @foreach (var authenticator in Allowlist)
                     {
                         <Card Title="@authenticator.Name" SubTitle="@authenticator.AaGuid.ToString()" />
@@ -61,6 +61,7 @@
             .Select(x => new ConfiguredAuthenticatorViewModel(
                 x.AaGuid,
                 mds.First(m => m.AaGuid == x.AaGuid).Name))
+            .OrderBy(x => x.Name)
             .ToList();
         _isInitialized = true;
     }

@@ -36,7 +36,6 @@ public interface ITenantStorage
 
     Task<string> GetUserIdByAliasAsync(string alias);
 
-
     Task<int> GetUsersCount();
     Task<bool> HasUsersAsync();
     Task DeleteUser(string userId);
@@ -54,4 +53,8 @@ public interface ITenantStorage
     Task<IReadOnlyCollection<Authenticator>> GetAuthenticatorsAsync(bool? isAllowed = null);
     Task AddAuthenticatorsAsync(IEnumerable<Guid> aaGuids, bool isAllowed);
     Task RemoveAuthenticatorsAsync(IEnumerable<Guid> aaGuids);
+
+    Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan window);
+    Task<int> GetDispatchedEmailCountAsync(TimeSpan window);
+    Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress, string linkTemplate);
 }

@@ -1,18 +1,17 @@
-using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Models;
 
 namespace Passwordless.AdminConsole.EventLog.Loggers;
 
-public class EventLoggerEfWriteStorage<TDbContext> : IEventLogger where TDbContext : ConsoleDbContext
+public class EventLoggerEfWriteStorage : IEventLogger
 {
     private readonly List<OrganizationEvent> _events = new();
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
+    private readonly ConsoleDbContext _db;
 
-    public EventLoggerEfWriteStorage(IDbContextFactory<TDbContext> dbContextFactory)
+    public EventLoggerEfWriteStorage(ConsoleDbContext db)
     {
-        _dbContextFactory = dbContextFactory;
+        _db = db;
     }
 
     public virtual void LogEvent(OrganizationEventDto @event)
@@ -24,9 +23,8 @@ public class EventLoggerEfWriteStorage<TDbContext> : IEventLogger where TDbConte
     {
         if (_events.Any())
         {
-            await using var db = await _dbContextFactory.CreateDbContextAsync();
-            db.OrganizationEvents.AddRange(_events);
-            await db.SaveChangesAsync();
+            _db.OrganizationEvents.AddRange(_events);
+            await _db.SaveChangesAsync();
         }
     }
 }

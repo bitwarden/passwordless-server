@@ -114,6 +114,7 @@ public class CreateApplicationModel : PageModel
                 AdminEmail = email,
                 EventLoggingIsEnabled = features.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = features.EventLoggingRetentionPeriod,
+                MagicLinkEmailMonthlyQuota = features.MagicLinkEmailMonthlyQuota,
                 MaxUsers = features.MaxUsers,
                 AllowAttestation = features.AllowAttestation
             };
