@@ -1,6 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Passwordless.Common.Models.Apps;
 
-public class GetAppIdAvailabilityRequest
-{
-    public required string AppId { get; set; }
-}
+public record GetAppIdAvailabilityRequest([MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,49}$")] string AppId);

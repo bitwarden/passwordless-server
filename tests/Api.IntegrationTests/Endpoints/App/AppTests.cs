@@ -515,7 +515,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var response = await client.GetAsync($"/admin/apps/{applicationName}/available");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
         result.Should().NotBeNull();
         result!.Available.Should().BeFalse();
