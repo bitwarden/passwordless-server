@@ -12,11 +12,6 @@
       "groupName": "npm minor",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"]
-    },
-    {
-      "groupName": "nuget minor",
-      "matchManagers": ["nuget"],
-      "matchUpdateTypes": ["minor", "patch"]
     }
   ],
   "ignoreDeps": ["Datadog.Trace"]
