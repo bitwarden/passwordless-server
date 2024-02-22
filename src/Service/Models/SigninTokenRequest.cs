@@ -17,5 +17,5 @@ public class SigninTokenRequest : RequestBase
     public int? TimeToLiveSeconds { get; init; }
 
     [JsonIgnore]
-    public TimeSpan TimeToLive => TimeToLiveSeconds.GetNullableTimeSpanFromSeconds() ?? DefaultTimeToLive;
+    public TimeSpan TimeToLive => TimeToLiveSeconds?.ToTimeSpanFromSeconds() ?? DefaultTimeToLive;
 };

@@ -2,8 +2,5 @@ namespace Passwordless.Service.Extensions;
 
 public static class ConversionFunctions
 {
-    public static TimeSpan? GetNullableTimeSpanFromSeconds(this int? seconds) =>
-        seconds.HasValue
-            ? TimeSpan.FromSeconds(seconds.Value)
-            : null;
+    public static TimeSpan? ToTimeSpanFromSeconds(this int seconds) => TimeSpan.FromSeconds(seconds);
 }
