@@ -6,12 +6,14 @@ namespace Passwordless.Service.MagicLinks.Models;
 
 public class SendMagicLinkRequest
 {
+    public const string TokenTemplate = "$TOKEN";
+
     [Required]
     [EmailAddress]
     public string EmailAddress { get; init; }
 
     [Required]
-    [MagicLinkTemplateUrlAttribute]
+    [MagicLinkTemplateUrl]
     public string UrlTemplate { get; init; }
 
     [Required]
