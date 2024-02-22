@@ -13,7 +13,7 @@ namespace Passwordless.Service.Models;
 public class MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate, TimeSpan? timeToLive) : RequestBase
 {
     private static readonly TimeSpan DefaultTimeToLive = TimeSpan.FromHours(1);
-    
+
     public MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate, int? timeToLive)
         : this(userId, emailAddress, linkTemplate, timeToLive?.ToTimeSpanFromSeconds()) { }
 
