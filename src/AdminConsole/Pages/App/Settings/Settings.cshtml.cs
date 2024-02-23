@@ -41,7 +41,6 @@ public class SettingsModel : BaseExtendedPageModel
         _billingService = billingService;
         _scopedPasswordlessClient = scopedPasswordlessClient;
         _billingOptions = billingOptions.Value;
-        ApiKeysModel = new ApiKeysModel(managementClient, currentContext, httpContextAccessor, eventLogger, logger);
     }
 
     public Models.Organization Organization { get; set; }
@@ -55,8 +54,6 @@ public class SettingsModel : BaseExtendedPageModel
     public Application? Application { get; private set; }
 
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
-
-    public ApiKeysModel ApiKeysModel { get; }
 
     [BindProperty]
     public bool IsManualTokenGenerationEnabled { get; set; }
@@ -80,8 +77,6 @@ public class SettingsModel : BaseExtendedPageModel
     public async Task OnGet()
     {
         await InitializeAsync();
-
-        await ApiKeysModel.OnInitializeAsync();
 
         if (!Organization.HasSubscription)
         {
@@ -158,45 +153,6 @@ public class SettingsModel : BaseExtendedPageModel
         var appId = _currentContext.AppId!;
         var redirectUrl = await _billingService.ChangePlanAsync(appId, selectedPlan);
         return Redirect(redirectUrl!);
-    }
-
-    public async Task<IActionResult> OnPostLockApiKeyAsync()
-    {
-        try
-        {
-            await ApiKeysModel.OnLockAsync();
-            return RedirectToPage();
-        }
-        catch
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
-        }
-    }
-
-    public async Task<IActionResult> OnPostUnlockApiKeyAsync()
-    {
-        try
-        {
-            await ApiKeysModel.OnUnlockAsync();
-            return RedirectToPage();
-        }
-        catch
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
-        }
-    }
-
-    public async Task<IActionResult> OnPostDeleteApiKeyAsync()
-    {
-        try
-        {
-            await ApiKeysModel.OnDeleteAsync();
-            return RedirectToPage();
-        }
-        catch
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Something unexpected occured. Please try again later." });
-        }
     }
 
     public async Task<IActionResult> OnPostSettingsAsync()
