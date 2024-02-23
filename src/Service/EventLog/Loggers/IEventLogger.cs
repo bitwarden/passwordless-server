@@ -40,6 +40,19 @@ public static class EventLoggerExtensions
             ApiKeyId = context.AbbreviatedKey
         });
 
+    public static void LogMagicLinkCreatedEvent(this IEventLogger logger, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            Message = $"Created signin token for {performedBy}",
+            Severity = Severity.Informational,
+            EventType = EventType.ApiUserMagicLinkCreated,
+            PerformedAt = context.PerformedAt,
+            PerformedBy = performedBy,
+            Subject = context.TenantId,
+            TenantId = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
     public static void LogRegistrationBeganEvent(this IEventLogger logger, string performedBy) =>
         logger.LogEvent(context => new EventDto
         {

@@ -1,3 +1,4 @@
+using Humanizer;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -29,5 +30,17 @@ public static class RegisterTokenValidator
         {
             throw new ApiException("attestation_not_supported_on_plan", "Attestation type not supported on your plan", 400);
         }
+    }
+
+    public static void Validate(this Token token, DateTimeOffset now)
+    {
+        if (token.ExpiresAt >= now)
+        {
+            return;
+        }
+
+        var drift = now - token.ExpiresAt;
+
+        throw new ApiException("expired_token", $"The token expired {drift.Humanize()} ago.", 403);
     }
 }

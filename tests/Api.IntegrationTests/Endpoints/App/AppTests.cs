@@ -383,8 +383,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token",
-            new SigninTokenRequest("some_user")
+            new SigninTokenRequest
             {
+                UserId = "some_user",
                 Origin = PasswordlessApi.OriginUrl,
                 RPID = PasswordlessApi.RpId
             });
@@ -415,8 +416,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token",
-            new SigninTokenRequest("some_user")
+            new SigninTokenRequest
             {
+                UserId = "some_user",
                 Origin = PasswordlessApi.OriginUrl,
                 RPID = PasswordlessApi.RpId
             });
