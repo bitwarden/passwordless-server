@@ -78,20 +78,17 @@
             Enable Manually Generated Verification Tokens
         </label>
         <br>
-        @if (Environment.IsDevelopment())
-        {
-            <h2>Magic Links</h2>
-            <p class="mt-3">
-                Magic Links provide a secure and user-friendly way to authenticate users in applications. While onboarding new
-                users into your application or in the event of account recovery, a Magic Link can be sent via email to gain access
-                to the system. This removes the friction of verifying users and resetting passkeys, enhancing the user experience.
-            </p>
-            <label asp-for="IsMagicLinksEnabled">
-                <input class="mr-1 my-4" type="checkbox" asp-for="IsMagicLinksEnabled"/>
-                Enable Magic Links
-            </label>
-            <br>
-        }
+        <h2>Magic Links</h2>
+        <p class="mt-3">
+            Magic Links provide a secure and user-friendly way to authenticate users in applications. While onboarding new
+            users into your application or in the event of account recovery, a Magic Link can be sent via email to gain access
+            to the system. This removes the friction of verifying users and resetting passkeys, enhancing the user experience.
+        </p>
+        <label asp-for="IsMagicLinksEnabled">
+            <input class="mr-1 my-4" type="checkbox" asp-for="IsMagicLinksEnabled"/>
+            Enable Magic Links
+        </label>
+        <br>
         <button id="btn-save-settings" class="btn-primary" type="submit">Save</button>
     </form>
 </div>
