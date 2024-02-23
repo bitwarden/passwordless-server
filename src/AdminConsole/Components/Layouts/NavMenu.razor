@@ -18,9 +18,9 @@
                     </NavLink>
                     @if (CurrentContext.InAppContext)
                     {
-                        <div class="nav-link-submenu">
+                        <div id="app-submenu" class="nav-link-submenu">
                             <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
-                            @if (!CurrentContext.IsFrozen)
+                            @if (!CurrentContext.IsPendingDelete)
                             {
                                 <NavLink class="nav-link" ActiveClass="nav-link-active" href="@OnboardingUrl">
                                     <StartIcon Class="nav-link-icon"/> Getting Started

@@ -1,0 +1,42 @@
+<div class="flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="min-w-full py-2 align-middle sm:px-6 lg:px-8 flex flex-col space-y-4">
+            <div class="overflow-y-hidden overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                <table class="tbl-default min-w-full">
+                    <thead>
+                    <tr>
+                        @foreach (var columnHeader in ColumnHeaders)
+                        {
+                            <th>
+                                @columnHeader
+                            </th>
+                        }
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (!string.IsNullOrEmpty(EmptyMessage))
+                    {
+                        <tr class="hidden only:table-row">
+                            <td colspan="@ColumnHeaders.Count">
+                                @EmptyMessage
+                            </td>
+                        </tr>
+                    }
+                    @ChildContent
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public required IReadOnlyCollection<string> ColumnHeaders { get; set; }
+    
+    [Parameter]
+    public required RenderFragment ChildContent { get; set; }
+    
+    [Parameter]
+    public string? EmptyMessage { get; set; }
+}
