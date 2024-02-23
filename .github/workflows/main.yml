@@ -134,7 +134,7 @@ jobs:
           fail-on-error: true
 
       - name: Upload coverage
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
+        uses: codecov/codecov-action@0cfda1dd0a4ad9efc75517f399d859cd1ea4ced1 # v4.0.2
 
   # Publish the apps
   pack:
