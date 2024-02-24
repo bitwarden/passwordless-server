@@ -26,7 +26,7 @@ public class ListModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await _api.VerifyAuthenticationTokenAsync(token);
+        var res = await _api.VerifyTokenAsync(token);
         return new JsonResult(res);
     }
 
