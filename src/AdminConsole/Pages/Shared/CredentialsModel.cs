@@ -30,7 +30,7 @@ public sealed class CredentialsModel
                     x.CreatedAt,
                     x.AaGuid,
                     x.LastUsedAt,
-                    x.RpId,
+                    x.RPID,
                     x.Origin,
                     x.Device,
                     x.Nickname,
