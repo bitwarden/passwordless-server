@@ -1,5 +1,6 @@
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.Models;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -29,6 +30,10 @@ public class EventLogService : IEventLogService
     public async Task<int> GetEventLogCount(int organizationId) =>
         await _storage.GetOrganizationEventCount(organizationId);
 
-    public async Task<ApplicationEventLogResponse> GetEventLogs(int pageNumber, int pageSize) =>
-        await _scopedPasswordlessClient.GetApplicationEventLog(pageNumber, pageSize);
+    public async Task<ApplicationEventLogResponse> GetEventLogs(int pageNumber, int pageSize)
+    {
+        var response = await _scopedPasswordlessClient.GetEventLogAsync(new GetEventLogRequest(pageNumber, pageSize));
+
+        return response.ToDto();
+    }
 }
