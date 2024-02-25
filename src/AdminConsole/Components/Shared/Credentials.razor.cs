@@ -68,10 +68,14 @@ public partial class Credentials : ComponentBase
     public async Task DeleteCredentialAsync()
     {
         var validationContext = new ValidationContext(DeleteCredentialForm);
-        Validator.ValidateObject(DeleteCredentialForm, validationContext);
-
+        var validationResult = Validator.TryValidateObject(DeleteCredentialForm, validationContext, null, true);
+        if (!validationResult)
+        {
+            throw new ArgumentException("The request is not valid.");
+        }
         await PasswordlessClient.DeleteCredentialAsync(DeleteCredentialForm.CredentialId);
         NavigationManager.NavigateTo(NavigationManager.Uri);
+
     }
 
     /// <summary>
@@ -203,7 +207,7 @@ public partial class Credentials : ComponentBase
 
     public sealed class DeleteCredentialFormModel
     {
-        [HexString]
+        [Base64Url]
         public string CredentialId { get; set; }
     }
 }
