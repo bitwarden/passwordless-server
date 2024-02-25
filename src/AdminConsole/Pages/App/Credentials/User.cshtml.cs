@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Pages.Shared;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.AuthenticatorData;
 
@@ -11,7 +10,7 @@ public class UserModel : PageModel
     private readonly ILogger<IndexModel> _logger;
     private readonly IScopedPasswordlessClient _passwordlessClient;
 
-    public CredentialsModel Credentials { get; }
+    public IReadOnlyCollection<Credential> Credentials { get; set; }
     public IReadOnlyCollection<AliasPointer> Aliases { get; set; }
 
     [BindProperty(SupportsGet = true)]
@@ -22,15 +21,13 @@ public class UserModel : PageModel
         ILogger<IndexModel> logger,
         IScopedPasswordlessClient api)
     {
-        Credentials = new CredentialsModel(authenticatorDataProvider);
         _logger = logger;
         _passwordlessClient = api;
     }
 
     public async Task OnGet()
     {
-        var items = await _passwordlessClient.ListCredentialsAsync(UserId);
-        Credentials.SetItems(items);
+        Credentials = await _passwordlessClient.ListCredentialsAsync(UserId);
         Aliases = await _passwordlessClient.ListAliasesAsync(UserId);
     }
 

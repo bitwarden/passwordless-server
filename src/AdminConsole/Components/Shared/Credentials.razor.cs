@@ -1,52 +1,46 @@
-using Passwordless.AdminConsole.Services.AuthenticatorData;
+using Microsoft.AspNetCore.Components;
 using Passwordless.Common.Extensions;
 
-namespace Passwordless.AdminConsole.Pages.Shared;
+namespace Passwordless.AdminConsole.Components.Shared;
 
-public sealed class CredentialsModel
+public partial class Credentials : ComponentBase
 {
-    private readonly IAuthenticatorDataProvider _authenticatorDataProvider;
-
-    public CredentialsModel(IAuthenticatorDataProvider authenticatorDataProvider)
-    {
-        _authenticatorDataProvider = authenticatorDataProvider;
-    }
-
     /// <summary>
     /// The list of credentials.
     /// </summary>
-    public IReadOnlyCollection<CredentialModel> Items { get; private set; } = new List<CredentialModel>();
+    [Parameter]
+    public required IReadOnlyCollection<Credential> Items { get; set; }
 
-    public void SetItems(IReadOnlyCollection<Credential> items)
+    public IReadOnlyCollection<CredentialModel> GetItems()
     {
-        Items = items
-            .Select(x =>
-            {
-                var viewModel = new CredentialModel(
-                    x.Descriptor.Id,
-                    x.PublicKey,
-                    x.SignatureCounter,
-                    x.AttestationFmt,
-                    x.CreatedAt,
-                    x.AaGuid,
-                    x.LastUsedAt,
-                    x.RPID,
-                    x.Origin,
-                    x.Device,
-                    x.Nickname,
-                    x.BackupState,
-                    x.IsBackupEligible,
-                    x.IsDiscoverable,
-                    _authenticatorDataProvider.GetName(x.AaGuid));
-                return viewModel;
-            }).ToList();
+        return Items.Select(x =>
+        {
+            var viewModel = new CredentialModel(
+                x.Descriptor.Id,
+                x.PublicKey,
+                x.SignatureCounter,
+                x.AttestationFmt,
+                x.CreatedAt,
+                x.AaGuid,
+                x.LastUsedAt,
+                x.RPID,
+                x.Origin,
+                x.Device,
+                x.Nickname,
+                x.BackupState,
+                x.IsBackupEligible,
+                x.IsDiscoverable,
+                AuthenticatorDataProvider.GetName(x.AaGuid));
+            return viewModel;
+        }).ToList();
     }
 
     /// <summary>
     /// Determines whether the details of the credentials should be hidden.
     /// </summary>
+    [Parameter]
     public bool HideDetails { get; set; }
-
+    
     /// <summary>
     /// Credential view model
     /// </summary>
