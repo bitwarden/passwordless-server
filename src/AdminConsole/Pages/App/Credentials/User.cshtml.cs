@@ -31,12 +31,6 @@ public class UserModel : PageModel
         Aliases = await _passwordlessClient.ListAliasesAsync(UserId);
     }
 
-    public async Task<IActionResult> OnPost(string token)
-    {
-        var res = await _passwordlessClient.VerifyTokenAsync(token);
-        return new JsonResult(res);
-    }
-
     public async Task<IActionResult> OnPostRemoveCredential(string credentialId)
     {
         await _passwordlessClient.DeleteCredentialAsync(credentialId);

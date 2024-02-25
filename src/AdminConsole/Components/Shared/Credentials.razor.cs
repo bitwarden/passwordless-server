@@ -1,10 +1,15 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.Common.Extensions;
+using Passwordless.Common.Validation;
 
 namespace Passwordless.AdminConsole.Components.Shared;
 
 public partial class Credentials : ComponentBase
 {
+    public const string RemoveCredentialFormName = "remove-credential-form";
+
     /// <summary>
     /// The list of credentials.
     /// </summary>
@@ -40,7 +45,35 @@ public partial class Credentials : ComponentBase
     /// </summary>
     [Parameter]
     public bool HideDetails { get; set; }
-    
+
+    [SupplyParameterFromForm(FormName = RemoveCredentialFormName)]
+    public DeleteCredentialFormModel DeleteCredentialForm { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
+        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
+        {
+            var request = HttpContextAccessor.HttpContext!.Request;
+            switch (request.Form["_handler"])
+            {
+                case RemoveCredentialFormName:
+                    DeleteCredentialForm.CredentialId = request.Form["DeleteCredentialForm.CredentialId"].ToString();
+                    await DeleteCredentialAsync();
+                    break;
+            }
+        }
+    }
+
+    public async Task DeleteCredentialAsync()
+    {
+        var validationContext = new ValidationContext(DeleteCredentialForm);
+        Validator.ValidateObject(DeleteCredentialForm, validationContext);
+
+        await PasswordlessClient.DeleteCredentialAsync(DeleteCredentialForm.CredentialId);
+        NavigationManager.NavigateTo(NavigationManager.Uri);
+    }
+
     /// <summary>
     /// Credential view model
     /// </summary>
@@ -166,5 +199,11 @@ public partial class Credentials : ComponentBase
             IsDiscoverable = isDiscoverable;
             AuthenticatorName = authenticatorName;
         }
+    }
+
+    public sealed class DeleteCredentialFormModel
+    {
+        [HexString]
+        public string CredentialId { get; set; }
     }
 }
