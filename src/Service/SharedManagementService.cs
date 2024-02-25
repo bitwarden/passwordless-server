@@ -114,7 +114,6 @@ public class SharedManagementService : ISharedManagementService
             AcountName = accountName,
             AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
-            SubscriptionTier = "Free",
             Features = new AppFeature
             {
                 Tenant = accountName,
