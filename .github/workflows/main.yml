@@ -196,11 +196,12 @@ jobs:
           - prod
 
     runs-on: ubuntu-latest
+    permissions: {} # no permissions required
 
     steps:
       - name: Dispatch deployment
         # Ideally this condition should be on the job itself, but the job's condition
-        # cannot reference matrix parameters
+        # cannot reference matrix parameters.
         if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
                 (matrix.environment == 'qa' && github.event_name == 'release') ||
                 (matrix.environment == 'prod' && github.event_name == 'release') }}
