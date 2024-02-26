@@ -4,10 +4,6 @@ public class ApiKeyDesc : PerTenant
 {
     public required string Id { get; set; }
 
-    // Should be removed
-    [Obsolete]
-    public string? AccountName { get; set; }
-
     public required string ApiKey { get; set; }
     public required string[] Scopes { get; set; }
 
