@@ -210,7 +210,8 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<AppDeletionResult> DeleteApplicationAsync(string appId)
     {
-        var accountInformation = await _tenantStorage.GetAccountInformation();
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
 
         if (accountInformation == null)
         {
@@ -233,7 +234,8 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
     {
-        var accountInformation = await _tenantStorage.GetAccountInformation();
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
         if (accountInformation == null)
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
