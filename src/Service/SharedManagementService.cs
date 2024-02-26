@@ -222,7 +222,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
 
-        await _tenantStorage.DeleteAccount();
+        await storage.DeleteAccount();
 
         return new AppDeletionResult(
             $"The app '{accountInformation.AcountName}' was deleted.",
@@ -249,12 +249,12 @@ public class SharedManagementService : ISharedManagementService
 
         if (!canDeleteImmediately)
         {
-            canDeleteImmediately = !(await _tenantStorage.HasUsersAsync());
+            canDeleteImmediately = !(await storage.HasUsersAsync());
         }
 
         if (canDeleteImmediately)
         {
-            await _tenantStorage.DeleteAccount();
+            await storage.DeleteAccount();
             return new AppDeletionResult(
                 $"The app '{accountInformation.AcountName}' was deleted.",
                 true,
@@ -263,10 +263,10 @@ public class SharedManagementService : ISharedManagementService
         }
 
         // Lock/Freeze all API keys that have been issued.
-        await _tenantStorage.LockAllApiKeys(true);
+        await storage.LockAllApiKeys(true);
 
         var deleteAt = _systemClock.UtcNow.AddMonths(1).UtcDateTime;
-        await _tenantStorage.SetAppDeletionDate(deleteAt);
+        await storage.SetAppDeletionDate(deleteAt);
 
         return new AppDeletionResult(
             $"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.",
