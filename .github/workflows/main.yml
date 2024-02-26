@@ -180,8 +180,18 @@ jobs:
 
   # Dispatches a separate deployment workflow in a private repository
   deploy:
-    # Don't run this job for PRs
-    if: ${{ github.event_name != 'pull_request' }}
+    strategy:
+      matrix:
+        environment:
+          - devtest
+          - qa
+          - prod
+  
+    # Run this job on appropriate events only
+    if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
+            (matrix.environment == 'qa' && github.event_name == 'release') ||
+            (matrix.environment == 'prod' && github.event_name != 'release') }}
+
     needs:
       - version
       - format
@@ -201,5 +211,5 @@ jobs:
           --field run-id=${{ github.run_id }}
           --field api-artifact=Api
           --field admin-console-artifact=AdminConsole
-          --field environment=devtest
+          --field environment=${{ matrix.environment }}
           --field version=${{ needs.version.outputs.version }}
