@@ -78,9 +78,6 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime?>("DeleteAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("SubscriptionTier")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Tenant")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -117,9 +114,6 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AccountName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ApiKey")
                         .IsRequired()
