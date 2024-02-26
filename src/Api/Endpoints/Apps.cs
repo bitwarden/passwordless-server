@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
@@ -20,7 +21,7 @@ public static class AppsEndpoints
             .WithParameterValidation();
 
         app.MapPost("/admin/apps/{appId}/create", async (
-                [FromRoute] string appId,
+                [FromRoute, MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")] string appId,
                 [FromBody] CreateAppDto payload,
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
@@ -31,6 +32,7 @@ public static class AppsEndpoints
 
                 return Ok(result);
             })
+            .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
 

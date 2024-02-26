@@ -166,13 +166,13 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required, MaxLength(60)]
+        [Required, MaxLength(60), MinLength(3), RegularExpression("^[a-zA-Z]{1}[a-zA-Z0-9 ]{2,59}$")]
         public string Name { get; set; }
 
-        [Required, MaxLength(62)]
+        [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
         public string Id { get; set; }
 
-        [Required, MaxLength(120)]
+        [Required, MaxLength(120), MinLength(3), RegularExpression("^[a-zA-Z]{1}[a-zA-Z0-9 ]{2,119}$")]
         public string Description { get; set; }
 
         [Required]
