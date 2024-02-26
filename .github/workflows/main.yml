@@ -180,28 +180,28 @@ jobs:
 
   # Dispatches a separate deployment workflow in a private repository
   deploy:
-    strategy:
-      matrix:
-        environment:
-          - devtest
-          - qa
-          - prod
-  
-    # Run this job on appropriate events only
-    if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
-            (matrix.environment == 'qa' && github.event_name == 'release') ||
-            (matrix.environment == 'prod' && github.event_name != 'release') }}
-
     needs:
       - version
       - format
       - test
       - pack
 
+    strategy:
+      matrix:
+        environment:
+          - devtest
+          - qa
+          - prod
+
     runs-on: ubuntu-latest
 
     steps:
       - name: Dispatch deployment
+        # Ideally this condition should be on the job itself, but the job's condition
+        # cannot reference matrix parameters
+        if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
+                (matrix.environment == 'qa' && github.event_name == 'release') ||
+                (matrix.environment == 'prod' && github.event_name == 'release') }}
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
         run: >
