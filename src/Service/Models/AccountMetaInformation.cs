@@ -5,8 +5,6 @@ namespace Passwordless.Service.Models;
 
 public class AccountMetaInformation : PerTenant
 {
-    // Should probably be removed
-    public string? SubscriptionTier { get; set; }
     public required string[] AdminEmails { get; set; }
 
     public string AdminEmailsSerialized
