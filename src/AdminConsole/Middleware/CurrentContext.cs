@@ -16,7 +16,7 @@ public class CurrentContext : ICurrentContext
     public string? ApiSecret { get; private set; }
 
     public string? ApiKey { get; private set; }
-    public bool IsFrozen { get; private set; }
+    public bool IsPendingDelete { get; private set; }
     public ApplicationFeatureContext Features { get; private set; }
     public Organization? Organization { get; private set; }
     public int? OrgId { get; private set; }
@@ -32,7 +32,7 @@ public class CurrentContext : ICurrentContext
         AppId = application.Id;
         ApiSecret = application.ApiSecret;
         ApiKey = application.ApiKey;
-        IsFrozen = application.DeleteAt.HasValue;
+        IsPendingDelete = application.DeleteAt.HasValue;
     }
 
     public void SetFeatures(ApplicationFeatureContext context)

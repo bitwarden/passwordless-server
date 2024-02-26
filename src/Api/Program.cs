@@ -9,6 +9,7 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
@@ -110,6 +111,7 @@ services.AddSingleton<ISystemClock, TimeProviderSystemClockAdapter>();
 services.AddScoped<IRequestContext, RequestContext>();
 services.AddSingleton<IMetaDataService, MetaDataService>();
 
+services.AddReportingBackgroundServices();
 services.AddHostedService<DispatchedEmailCleanupService>();
 
 builder.AddMail();

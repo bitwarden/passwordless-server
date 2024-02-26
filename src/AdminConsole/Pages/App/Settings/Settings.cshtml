@@ -1,5 +1,6 @@
 ﻿@page "/settings"
 @using Badge = Passwordless.AdminConsole.Components.Shared.Badge
+@using Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsComponents
 @model SettingsModel
 @inject IWebHostEnvironment Environment
 
@@ -62,10 +63,7 @@
     </div>
 </div>
 
-@if (!Model.PendingDelete)
-{
-    <partial name="_ApiKeys" model="Model.ApiKeysModel" />
-}
+<component type="typeof(ApiKeysSection)" render-mode="Static" />
 
 <div class="panel">
     <form method="post" asp-page-handler="Settings">
@@ -149,4 +147,5 @@
     }).mount('#deleteApplication');
 
     </script>
+    <script type="module" src="/js/confirm-form.mjs"></script>
 }
