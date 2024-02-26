@@ -166,7 +166,7 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required, MaxLength(60), MinLength(3), RegularExpression("^[a-zA-Z]{1}[a-zA-Z0-9 ]{2,59}$")]
+        [Required, MaxLength(60), MinLength(3), RegularExpression("^[a-zA-Z0-9 -.?!;:]{3,60}$")]
         public string Name { get; set; }
 
         [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
