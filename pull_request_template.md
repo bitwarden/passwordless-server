@@ -35,6 +35,7 @@ Thank you for contributing! Please follow the steps below to help us process you
 I did the following to ensure that my changes were tested thoroughly:
 - [ ] __
 - [ ] __
+
 I did the following to ensure that my changes did not introduce new security vulnerabilities:
 - [ ] __
 - [ ] __
