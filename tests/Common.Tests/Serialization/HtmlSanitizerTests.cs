@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-using FluentAssertions;
 using Passwordless.Common.Serialization;
 
 namespace Passwordless.Common.Tests.Serialization;
@@ -25,6 +23,20 @@ public class HtmlSanitizerTests
     [InlineData("<strong>hello</strong>")]
     [InlineData("<a><a>hello</a></a>")]
     public void Sanitize_WhenGivenHtmlWithAllowedTags_ShouldReturnSanitizedHtml(string input)
+    {
+        // Arrange
+
+        // Act
+        var actual = HtmlSanitizer.Sanitize(input);
+
+        // Assert
+        Assert.Equal("hello", actual);
+    }
+
+    [Theory]
+    [InlineData("https://hello")]
+    [InlineData("http://hello")]
+    public void Sanitize_WhenGivenStringContainingScheme_ShouldReturnSanitizedHtml(string input)
     {
         // Arrange
 

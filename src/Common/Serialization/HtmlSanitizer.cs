@@ -1,3 +1,4 @@
+using System.Text;
 using Ganss.Xss;
 
 namespace Passwordless.Common.Serialization;
@@ -14,6 +15,8 @@ public static class HtmlSanitizer
 
     public static string Sanitize(string input)
     {
-        return _htmlSanitizer.Sanitize(input);
+        var temp = new StringBuilder(_htmlSanitizer.Sanitize(input));
+        temp.Replace("https://", string.Empty).Replace("http://", string.Empty);
+        return temp.ToString();
     }
 }
