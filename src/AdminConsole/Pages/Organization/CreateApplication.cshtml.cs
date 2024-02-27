@@ -33,8 +33,7 @@ public class CreateApplicationModel : PageModel
         IApplicationService applicationService,
         IDataService dataService,
         IPasswordlessManagementClient managementClient,
-        IOptionsSnapshot<BillingOptions> billingOptions,
-        ISharedBillingService billingService)
+        IOptionsSnapshot<BillingOptions> billingOptions, ISharedBillingService billingService)
     {
         _dataService = dataService;
         _applicationService = applicationService;
