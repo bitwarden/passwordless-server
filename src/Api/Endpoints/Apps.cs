@@ -21,14 +21,13 @@ public static class AppsEndpoints
             .WithParameterValidation();
 
         app.MapPost("/admin/apps/{appId}/create", async (
-                [FromRoute, MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")] string appId,
-                [FromBody] CreateAppDto payload,
-                ISharedManagementService service,
-                IEventLogger eventLogger) =>
+                [AsParameters] CreateApplicationRequest request,
+                [FromServices] ISharedManagementService service,
+                [FromServices] IEventLogger eventLogger) =>
             {
-                var result = await service.GenerateAccount(appId, payload);
+                var result = await service.GenerateAccount(request.AppId, request.Payload);
 
-                eventLogger.LogApplicationCreatedEvent(payload.AdminEmail);
+                eventLogger.LogApplicationCreatedEvent(request.Payload.AdminEmail);
 
                 return Ok(result);
             })
