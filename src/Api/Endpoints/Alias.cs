@@ -15,7 +15,7 @@ public static class AliasEndpoints
                 IFido2Service fido2Service,
                 IEventLogger eventLogger) =>
             {
-                await fido2Service.SetAlias(payload);
+                await fido2Service.SetAliasAsync(payload);
 
                 eventLogger.LogUserAliasSetEvent(payload.UserId);
 

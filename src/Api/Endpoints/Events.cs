@@ -13,12 +13,12 @@ public static class EventLog
 {
     public static void MapEventLogEndpoints(this WebApplication app)
     {
-        app.MapGet("events", GetEventLogEvents)
+        app.MapGet("events", GetEventLogEventsAsync)
             .RequireSecretKey()
             .RequireCors("default");
     }
 
-    private static async Task<IResult> GetEventLogEvents(
+    private static async Task<IResult> GetEventLogEventsAsync(
         HttpRequest request,
         IEventLogStorage storage,
         IFeatureContextProvider provider,

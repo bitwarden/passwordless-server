@@ -25,7 +25,7 @@ public static class AppsEndpoints
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
-                var result = await service.GenerateAccount(appId, payload);
+                var result = await service.GenerateAccountAsync(appId, payload);
 
                 eventLogger.LogApplicationCreatedEvent(payload.AdminEmail);
 
@@ -38,7 +38,7 @@ public static class AppsEndpoints
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
-                await service.FreezeAccount(appId);
+                await service.FreezeAccountAsync(appId);
 
                 eventLogger.LogAppFrozenEvent();
 
@@ -51,7 +51,7 @@ public static class AppsEndpoints
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
-                await service.UnFreezeAccount(appId);
+                await service.UnFreezeAccountAsync(appId);
 
                 eventLogger.LogAppUnfrozenEvent();
 
@@ -118,7 +118,7 @@ public static class AppsEndpoints
 
     public static async Task<IResult> IsAppIdAvailableAsync([AsParameters] GetAppIdAvailabilityRequest payload, ISharedManagementService accountService)
     {
-        var result = await accountService.IsAvailable(payload.AppId);
+        var result = await accountService.IsAvailableAsync(payload.AppId);
         return Ok(new GetAppIdAvailabilityResponse(result));
     }
 
@@ -258,7 +258,7 @@ public static class AppsEndpoints
         ISharedManagementService service,
         IEventLogger eventLogger)
     {
-        await service.UnFreezeAccount(appId);
+        await service.UnFreezeAccountAsync(appId);
         var res = new CancelApplicationDeletionResponse("Your account will not be deleted since the process was aborted with the cancellation link");
 
         eventLogger.LogAppDeleteCancelledEvent();

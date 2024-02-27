@@ -18,7 +18,7 @@ public static class RegisterEndpoints
                 CancellationToken token
             ) =>
             {
-                var result = await fido2Service.CreateRegisterToken(registerToken);
+                var result = await fido2Service.CreateRegisterTokenAsync(registerToken);
                 return Ok(new RegisterTokenResponse(result));
             })
             .RequireAuthorization(SecretKeyScopes.TokenRegister)
@@ -30,7 +30,7 @@ public static class RegisterEndpoints
                 CancellationToken token
             ) =>
             {
-                var result = await fido2Service.RegisterBegin(payload);
+                var result = await fido2Service.RegisterBeginAsync(payload);
                 return Ok(result);
             })
             .RequireAuthorization(PublicKeyScopes.Register)
@@ -45,7 +45,7 @@ public static class RegisterEndpoints
             ) =>
             {
                 var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
-                var result = await fido2Service.RegisterComplete(payload, deviceInfo, country);
+                var result = await fido2Service.RegisterCompleteAsync(payload, deviceInfo, country);
 
                 // Avoid serializing the certificate
                 return Ok(result);
