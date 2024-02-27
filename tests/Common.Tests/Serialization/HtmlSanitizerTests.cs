@@ -13,24 +13,25 @@ public class HtmlSanitizerTests
         var input = "<script>alert('hello');</script>";
 
         // Act
-        var result = HtmlSanitizer.Sanitize(input);
+        var actual = HtmlSanitizer.Sanitize(input);
 
         // Assert
-        result.Should().BeEmpty();
+        Assert.Equal("alert('hello');", actual);
     }
 
     [Theory]
     [InlineData("<p>hello</p>")]
     [InlineData("<a href='https://example.com'>hello</a>")]
     [InlineData("<strong>hello</strong>")]
+    [InlineData("<a><a>hello</a></a>")]
     public void Sanitize_WhenGivenHtmlWithAllowedTags_ShouldReturnSanitizedHtml(string input)
     {
         // Arrange
 
         // Act
-        var result = HtmlSanitizer.Sanitize(input);
+        var actual = HtmlSanitizer.Sanitize(input);
 
         // Assert
-        result.Should().BeEmpty();
+        Assert.Equal("hello", actual);
     }
 }
