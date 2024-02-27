@@ -12,6 +12,7 @@ using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Serialization;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
@@ -32,7 +33,8 @@ public class CreateApplicationModel : PageModel
         IApplicationService applicationService,
         IDataService dataService,
         IPasswordlessManagementClient managementClient,
-        IOptionsSnapshot<BillingOptions> billingOptions, ISharedBillingService billingService)
+        IOptionsSnapshot<BillingOptions> billingOptions,
+        ISharedBillingService billingService)
     {
         _dataService = dataService;
         _applicationService = applicationService;
@@ -166,14 +168,38 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required, MaxLength(60), MinLength(3), RegularExpression("^[a-zA-Z0-9 -.?!;:]{3,60}$")]
-        public string Name { get; set; }
+        private string _name;
+
+        [Required, MaxLength(60), MinLength(3)]
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                _name = HtmlSanitizer.Sanitize(value);
+            }
+        }
 
         [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
         public string Id { get; set; }
 
-        [Required, MaxLength(120), MinLength(3), RegularExpression("^[a-zA-Z]{1}[a-zA-Z0-9 ]{2,119}$")]
-        public string Description { get; set; }
+        private string _description;
+
+        [Required, MaxLength(120), MinLength(3)]
+        public string Description
+        {
+            get
+            {
+                return _description;
+            }
+            set
+            {
+                _description = HtmlSanitizer.Sanitize(value);
+            }
+        }
 
         [Required]
         public string Plan { get; set; }
