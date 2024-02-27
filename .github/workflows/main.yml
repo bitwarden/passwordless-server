@@ -210,7 +210,7 @@ jobs:
         run: >
           gh workflow run deploy-passwordless-server
           --repo bitwarden/passwordless-devops
-          --field repository=${{ github.repository.owner }}/${{ github.repository.name }}
+          --field repository=${{ github.repository }}
           --field run-id=${{ github.run_id }}
           --field api-artifact=Api
           --field admin-console-artifact=AdminConsole
