@@ -208,7 +208,7 @@ jobs:
           - environment: prod
             is-release: false
 
-    # Specify the name of the job manually due to the matrix hack below
+    # Specify the name of the job manually due to the matrix hack above
     name: deploy (${{ matrix.environment }})
 
     runs-on: ubuntu-latest
