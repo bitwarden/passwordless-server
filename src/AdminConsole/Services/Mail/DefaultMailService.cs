@@ -1,3 +1,4 @@
+using System.Net;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.Common.Services.Mail;
@@ -52,13 +53,16 @@ public class DefaultMailService : IMailService
 
     public Task SendInviteAsync(Invite inv, string link)
     {
+        var organizationDisplayName = WebUtility.HtmlEncode(inv.TargetOrgName);
+        var invitedByDisplayName = WebUtility.HtmlEncode(inv.FromName);
+
         var message = new MailMessage
         {
             To = new List<string> { inv.ToEmail },
             From = _fromEmail,
             Subject = "You've been invited to join an organization in passwordless.dev",
             TextBody =
-                $"""You've been invited to join {inv.TargetOrgName} on passwordless.dev. {Environment.NewLine}The invite was sent by '{inv.FromName}' ({inv.FromEmail}).{Environment.NewLine}Please click the link to accept the invitation: {link}""",
+                $"""You've been invited to join {organizationDisplayName} on passwordless.dev. {Environment.NewLine}The invite was sent by '{invitedByDisplayName}' ({inv.FromEmail}).{Environment.NewLine}Please click the link to accept the invitation: {link}""",
             Tag = "admin-invite"
         };
 
@@ -82,13 +86,15 @@ public class DefaultMailService : IMailService
 
     public Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
     {
+        var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
+
         var message = new MailMessage
         {
             To = emails,
             From = _fromEmail,
-            Subject = $"Your organization '{organizationName}' was deleted.",
+            Subject = $"Your organization '{organizationDisplayName}' was deleted.",
             TextBody =
-                $"""Your organization '{organizationName}' was deleted by {deletedBy} at {deletedAt:F} UTC.""",
+                $"""Your organization '{organizationDisplayName}' was deleted by {deletedBy} at {deletedAt:F} UTC.""",
             Tag = "organization-deleted"
         };
 
@@ -99,24 +105,26 @@ public class DefaultMailService : IMailService
 
     public async Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails)
     {
+        var applicationDisplayName = WebUtility.HtmlEncode(application.Name);
+
         MailMessage message = new()
         {
             To = emails,
             From = _fromEmail,
             Bcc = new List<string> { "account-deletion@passwordless.dev" },
-            Subject = $"Your app '{application.Name}' has been deleted.",
+            Subject = $"Your app '{applicationDisplayName}' has been deleted.",
             TextBody =
-                $"Your app '{application.Name}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.",
+                $"Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.",
             HtmlBody =
                 $"""
                 <!doctype html>
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">
-                    <title>Your app '{application.Name}' has been deleted.</title>
+                    <title>Your app '{applicationDisplayName}' has been deleted.</title>
                   </head>
                   <body>
-                    <p>Your app '{application.Name}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.</p>
+                    <p>Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.</p>
                   </body>
                 </html>
                 """,
@@ -128,24 +136,26 @@ public class DefaultMailService : IMailService
 
     public async Task SendApplicationToBeDeletedAsync(Application application, string deletedBy, string cancellationLink, ICollection<string> emails)
     {
+        var applicationDisplayName = WebUtility.HtmlEncode(application.Name);
+
         MailMessage message = new()
         {
             To = emails,
             Bcc = new List<string> { "account-deletion@passwordless.dev" },
             From = _fromEmail,
-            Subject = $"Your app '{application.Name}' is scheduled for deletion in 30 days.",
+            Subject = $"Your app '{applicationDisplayName}' is scheduled for deletion in 30 days.",
             TextBody =
-                $"Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'. If this was unintentional, please visit the your administration console: {cancellationLink}.",
+                $"Your app '{applicationDisplayName}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'. If this was unintentional, please visit the your administration console: {cancellationLink}.",
             HtmlBody =
                 $"""
                 <!doctype html>
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">
-                    <title>Your app '{application.Name}' is scheduled for deletion in 30 days.</title>
+                    <title>Your app '{applicationDisplayName}' is scheduled for deletion in 30 days.</title>
                   </head>
                   <body>
-                    <p>Your app '{application.Name}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.</p>
+                    <p>Your app '{applicationDisplayName}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.</p>
                     <p>If this was unintentional, please visit the your administration console <a href="{cancellationLink}">this link</a></p>
                   </body>
                 </html>
