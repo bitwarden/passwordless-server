@@ -12,7 +12,7 @@ public static class CredentialsEndpoints
         app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload,
                 UserCredentialsService userCredentialsService) =>
         {
-            await userCredentialsService.DeleteCredential(payload.CredentialId);
+            await userCredentialsService.DeleteCredentialAsync(payload.CredentialId);
 
             return Results.NoContent();
         })
@@ -46,7 +46,7 @@ public static class CredentialsEndpoints
                 throw new ApiException("Please supply UserId in the query string value", 400);
             }
 
-            var result = await userCredentialService.GetAllCredentials(userId);
+            var result = await userCredentialService.GetAllCredentialsAsync(userId);
 
             var res = ListResponse.Create(result);
 

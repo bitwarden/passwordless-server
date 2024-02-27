@@ -22,10 +22,10 @@ public class FriendlyExceptionsMiddleware
 
     public Task InvokeAsync(HttpContext context)
     {
-        return SafeNext(context);
+        return SafeNextAsync(context);
     }
 
-    private async Task SafeNext(HttpContext context)
+    private async Task SafeNextAsync(HttpContext context)
     {
         var env = context.RequestServices.GetService<IWebHostEnvironment>();
 

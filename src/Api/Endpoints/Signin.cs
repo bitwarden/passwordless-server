@@ -22,7 +22,7 @@ public static class SigninEndpoints
             {
                 if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled) return Forbid();
 
-                var result = await fido2Service.CreateSigninToken(signinToken);
+                var result = await fido2Service.CreateSigninTokenAsync(signinToken);
 
                 return Ok(new SigninTokenResponse(result));
             })
@@ -34,7 +34,7 @@ public static class SigninEndpoints
                 IFido2Service fido2Service
             ) =>
             {
-                var result = await fido2Service.SignInBegin(payload);
+                var result = await fido2Service.SignInBeginAsync(payload);
 
                 return Ok(result);
             })
@@ -49,7 +49,7 @@ public static class SigninEndpoints
             ) =>
             {
                 var (deviceInfo, country) = request.GetDeviceInfo();
-                var result = await fido2Service.SignInComplete(payload, deviceInfo, country);
+                var result = await fido2Service.SignInCompleteAsync(payload, deviceInfo, country);
 
                 return Ok(result);
             })
@@ -62,7 +62,7 @@ public static class SigninEndpoints
                 IFido2Service fido2Service
             ) =>
             {
-                var result = await fido2Service.SignInVerify(payload);
+                var result = await fido2Service.SignInVerifyAsync(payload);
 
                 return Ok(result);
             })
