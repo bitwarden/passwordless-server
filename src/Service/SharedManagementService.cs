@@ -19,12 +19,12 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 
 public interface ISharedManagementService
 {
-    Task<bool> IsAvailable(string appId);
-    Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options);
-    Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey);
-    Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey);
-    Task FreezeAccount(string accountName);
-    Task UnFreezeAccount(string accountName);
+    Task<bool> IsAvailableAsync(string appId);
+    Task<CreateAppResultDto> GenerateAccountAsync(string appId, CreateAppDto options);
+    Task<ValidateSecretKeyDto> ValidateSecretKeyAsync(string secretKey);
+    Task<ValidatePublicKeyDto> ValidatePublicKeyAsync(string publicKey);
+    Task FreezeAccountAsync(string accountName);
+    Task UnFreezeAccountAsync(string accountName);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
@@ -63,14 +63,14 @@ public class SharedManagementService : ISharedManagementService
     }
 
 
-    public async Task<bool> IsAvailable(string accountName)
+    public async Task<bool> IsAvailableAsync(string accountName)
     {
         // check if tenant already exists
         var storage = tenantFactory.Create(accountName);
         return !await storage.TenantExists();
     }
 
-    public async Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options)
+    public async Task<CreateAppResultDto> GenerateAccountAsync(string appId, CreateAppDto options)
     {
         if (string.IsNullOrWhiteSpace(appId))
         {
@@ -136,7 +136,7 @@ public class SharedManagementService : ISharedManagementService
         };
     }
 
-    public async Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey)
+    public async Task<ValidateSecretKeyDto> ValidateSecretKeyAsync(string secretKey)
     {
         var appId = GetAppId(secretKey);
         var storage = tenantFactory.Create(appId);
@@ -160,7 +160,7 @@ public class SharedManagementService : ISharedManagementService
         throw new ApiException("ApiSecret was not valid", 401);
     }
 
-    public async Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey)
+    public async Task<ValidatePublicKeyDto> ValidatePublicKeyAsync(string publicKey)
     {
         var appId = GetAppId(publicKey);
         var storage = tenantFactory.Create(appId);
@@ -194,13 +194,13 @@ public class SharedManagementService : ISharedManagementService
         }
     }
 
-    public async Task FreezeAccount(string accountName)
+    public async Task FreezeAccountAsync(string accountName)
     {
         var storage = tenantFactory.Create(accountName);
         await storage.LockAllApiKeys(true);
     }
 
-    public async Task UnFreezeAccount(string accountName)
+    public async Task UnFreezeAccountAsync(string accountName)
     {
         var storage = tenantFactory.Create(accountName);
         await storage.LockAllApiKeys(false);

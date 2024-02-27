@@ -20,7 +20,7 @@ public class AppsEndpointsTests
     {
         var payload = new GetAppIdAvailabilityRequest("myapp");
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        sharedManagementServiceMock.Setup(x => x.IsAvailable(
+        sharedManagementServiceMock.Setup(x => x.IsAvailableAsync(
                 It.Is<string>(p => p == "myapp")))
             .ReturnsAsync(true);
 
@@ -31,7 +31,7 @@ public class AppsEndpointsTests
         Assert.Equal(typeof(Ok<GetAppIdAvailabilityResponse>), actual.GetType());
         var actualResult = (actual as Ok<GetAppIdAvailabilityResponse>)?.Value;
         Assert.True(actualResult!.Available);
-        sharedManagementServiceMock.Verify(x => x.IsAvailable(It.Is<string>(p => p == "myapp")), Times.Once());
+        sharedManagementServiceMock.Verify(x => x.IsAvailableAsync(It.Is<string>(p => p == "myapp")), Times.Once());
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class AppsEndpointsTests
     {
         var payload = new GetAppIdAvailabilityRequest("myapp");
         var sharedManagementServiceMock = new Mock<ISharedManagementService>();
-        sharedManagementServiceMock.Setup(x => x.IsAvailable(
+        sharedManagementServiceMock.Setup(x => x.IsAvailableAsync(
                 It.Is<string>(p => p == "myapp")))
             .ReturnsAsync(false);
 
@@ -50,7 +50,7 @@ public class AppsEndpointsTests
         Assert.Equal(typeof(Ok<GetAppIdAvailabilityResponse>), actual.GetType());
         var actualResult = (actual as Ok<GetAppIdAvailabilityResponse>)?.Value;
         Assert.False(actualResult!.Available);
-        sharedManagementServiceMock.Verify(x => x.IsAvailable(It.Is<string>(p => p == "myapp")), Times.Once());
+        sharedManagementServiceMock.Verify(x => x.IsAvailableAsync(It.Is<string>(p => p == "myapp")), Times.Once());
     }
     #endregion
 

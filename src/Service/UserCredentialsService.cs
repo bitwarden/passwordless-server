@@ -17,7 +17,7 @@ public class UserCredentialsService
         _eventLogger = eventLogger;
     }
 
-    public async Task<StoredCredential[]> GetAllCredentials(string userId)
+    public async Task<StoredCredential[]> GetAllCredentialsAsync(string userId)
     {
         if (string.IsNullOrEmpty(userId))
         {
@@ -29,7 +29,7 @@ public class UserCredentialsService
         return creds.ToArray();
     }
 
-    public async Task DeleteCredential(byte[] credentialId)
+    public async Task DeleteCredentialAsync(byte[] credentialId)
     {
         if (credentialId == null || credentialId.Length == 0)
         {
