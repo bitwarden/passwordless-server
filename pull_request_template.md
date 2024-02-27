@@ -7,21 +7,34 @@ Thank you for contributing! Please follow the steps below to help us process you
 
 <!-- Title format if there is a Jira Ticket: PAS-XXX | short pr description -->
 
-<!-- Jira ticket OR Github Issue -->
-[Jira Ticket PAS-378](https://bitwarden.atlassian.net/browse/PAS-378)
-
+### Ticket
+<!--
+    Link the corresponding GitHub Issue(s) and/or Jira Task(s)
+    that are addressed by this pull request.
+-->
+<!-- For GitHub Issues: -->
+- Closes #XXX
+<!-- For Jira Tasks: -->
+<!-- (remove if external contributor) -->
+- Closes [PAS-XXX](https://bitwarden.atlassian.net/browse/PAS-XXX)
 ### Description
-<!-- Introduction that should allow the reviewer to quickly be able to understand the reason for opening this PR. -->
-
-<!-- If this is a shape (i.e. architectural spec) uncomment the section below: -->
-<!-- ### Shape
-Give a brief overview of your approach, the pros/cons that were considered, etc.
-
- -->
-
+<!--
+    Introduction that should allow the reviewer to quickly be able to understand the reason for opening this PR.
+-->
+### Shape
+<!--
+    Give a high-level overview of the technical design involved in the implemented changes.
+    If the changes don't have any architectural impact, you can remove this section.
+-->
 ### Screenshots
-<!-- Include any screenshots if this is a UI change. Delete if N/A. -->
-
-I did the following to ensure that my changes were tested thoroughly to ensure safety:
+<!--
+    Include any relevant UI screenshots showcasing the before & after of your changes.
+    If the changes don't have any UI impact, you can remove this section.
+-->
+### Checklist
+I did the following to ensure that my changes were tested thoroughly:
+- [ ] __
+- [ ] __
+I did the following to ensure that my changes did not introduce new security vulnerabilities:
 - [ ] __
 - [ ] __
