@@ -196,20 +196,11 @@ jobs:
           - devtest
           - qa
           - prod
-        is-release:
-          - ${{ github.event_name == 'release' }}
-        # We can't have a dynamic job condition based on matrix parameters
-        # so we use this matrix hack as a workaround for that.
-        # The goal is to include qa/prod environments only when triggered
-        # by a release event.
         exclude:
-          - environment: qa
-            is-release: false
-          - environment: prod
-            is-release: false
-
-    # Specify the name of the job manually due to the matrix hack above
-    name: deploy (${{ matrix.environment }})
+          # Exclude QA and PROD if not triggered by a release event
+          # https://stackoverflow.com/questions/65384420/how-do-i-make-a-github-action-matrix-element-conditional
+          - environment: ${{ github.event_name != 'release' && 'qa' || '_' }}
+          - environment: ${{ github.event_name != 'release' && 'prod' || '_' }}
 
     runs-on: ubuntu-latest
     permissions: {} # no permissions required
