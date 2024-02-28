@@ -19,12 +19,12 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 
 public interface ISharedManagementService
 {
-    Task<bool> IsAvailable(string appId);
-    Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options);
-    Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey);
-    Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey);
-    Task FreezeAccount(string accountName);
-    Task UnFreezeAccount(string accountName);
+    Task<bool> IsAvailableAsync(string appId);
+    Task<CreateAppResultDto> GenerateAccountAsync(string appId, CreateAppDto options);
+    Task<ValidateSecretKeyDto> ValidateSecretKeyAsync(string secretKey);
+    Task<ValidatePublicKeyDto> ValidatePublicKeyAsync(string publicKey);
+    Task FreezeAccountAsync(string accountName);
+    Task UnFreezeAccountAsync(string accountName);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
@@ -63,14 +63,14 @@ public class SharedManagementService : ISharedManagementService
     }
 
 
-    public async Task<bool> IsAvailable(string accountName)
+    public async Task<bool> IsAvailableAsync(string accountName)
     {
         // check if tenant already exists
         var storage = tenantFactory.Create(accountName);
         return !await storage.TenantExists();
     }
 
-    public async Task<CreateAppResultDto> GenerateAccount(string appId, CreateAppDto options)
+    public async Task<CreateAppResultDto> GenerateAccountAsync(string appId, CreateAppDto options)
     {
         if (string.IsNullOrWhiteSpace(appId))
         {
@@ -114,7 +114,6 @@ public class SharedManagementService : ISharedManagementService
             AcountName = accountName,
             AdminEmails = new[] { adminEmail },
             CreatedAt = DateTime.UtcNow,
-            SubscriptionTier = "Free",
             Features = new AppFeature
             {
                 Tenant = accountName,
@@ -137,7 +136,7 @@ public class SharedManagementService : ISharedManagementService
         };
     }
 
-    public async Task<ValidateSecretKeyDto> ValidateSecretKey(string secretKey)
+    public async Task<ValidateSecretKeyDto> ValidateSecretKeyAsync(string secretKey)
     {
         var appId = GetAppId(secretKey);
         var storage = tenantFactory.Create(appId);
@@ -161,7 +160,7 @@ public class SharedManagementService : ISharedManagementService
         throw new ApiException("ApiSecret was not valid", 401);
     }
 
-    public async Task<ValidatePublicKeyDto> ValidatePublicKey(string publicKey)
+    public async Task<ValidatePublicKeyDto> ValidatePublicKeyAsync(string publicKey)
     {
         var appId = GetAppId(publicKey);
         var storage = tenantFactory.Create(appId);
@@ -195,13 +194,13 @@ public class SharedManagementService : ISharedManagementService
         }
     }
 
-    public async Task FreezeAccount(string accountName)
+    public async Task FreezeAccountAsync(string accountName)
     {
         var storage = tenantFactory.Create(accountName);
         await storage.LockAllApiKeys(true);
     }
 
-    public async Task UnFreezeAccount(string accountName)
+    public async Task UnFreezeAccountAsync(string accountName)
     {
         var storage = tenantFactory.Create(accountName);
         await storage.LockAllApiKeys(false);
@@ -210,7 +209,8 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<AppDeletionResult> DeleteApplicationAsync(string appId)
     {
-        var accountInformation = await _tenantStorage.GetAccountInformation();
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
 
         if (accountInformation == null)
         {
@@ -222,7 +222,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
         }
 
-        await _tenantStorage.DeleteAccount();
+        await storage.DeleteAccount();
 
         return new AppDeletionResult(
             $"The app '{accountInformation.AcountName}' was deleted.",
@@ -233,7 +233,8 @@ public class SharedManagementService : ISharedManagementService
 
     public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
     {
-        var accountInformation = await _tenantStorage.GetAccountInformation();
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
         if (accountInformation == null)
         {
             throw new ApiException("app_not_found", "App was not found.", 400);
@@ -248,12 +249,12 @@ public class SharedManagementService : ISharedManagementService
 
         if (!canDeleteImmediately)
         {
-            canDeleteImmediately = !(await _tenantStorage.HasUsersAsync());
+            canDeleteImmediately = !(await storage.HasUsersAsync());
         }
 
         if (canDeleteImmediately)
         {
-            await _tenantStorage.DeleteAccount();
+            await storage.DeleteAccount();
             return new AppDeletionResult(
                 $"The app '{accountInformation.AcountName}' was deleted.",
                 true,
@@ -262,10 +263,10 @@ public class SharedManagementService : ISharedManagementService
         }
 
         // Lock/Freeze all API keys that have been issued.
-        await _tenantStorage.LockAllApiKeys(true);
+        await storage.LockAllApiKeys(true);
 
         var deleteAt = _systemClock.UtcNow.AddMonths(1).UtcDateTime;
-        await _tenantStorage.SetAppDeletionDate(deleteAt);
+        await storage.SetAppDeletionDate(deleteAt);
 
         return new AppDeletionResult(
             $"The app '{accountInformation.AcountName}' will be deleted at '{deleteAt}'.",

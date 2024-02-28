@@ -13,7 +13,7 @@ public interface ICurrentContext
     string? AppId { get; }
     string? ApiSecret { get; }
     string? ApiKey { get; }
-    bool IsFrozen { get; }
+    bool IsPendingDelete { get; }
     ApplicationFeatureContext Features { get; }
     Organization? Organization { get; }
     int? OrgId { get; }

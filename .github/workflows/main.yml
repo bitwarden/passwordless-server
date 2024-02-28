@@ -126,7 +126,7 @@ jobs:
           DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: Report test results
-        uses: dorny/test-reporter@afe6793191b75b608954023a46831a3fe10048d4 # v1.7.0
+        uses: dorny/test-reporter@eaa763f6ffc21c7a37837f56cd5f9737f27fc6c8 # v1.8.0
         with:
           name: Test Results
           path: "**/*-test-results.trx"
@@ -134,7 +134,9 @@ jobs:
           fail-on-error: true
 
       - name: Upload coverage
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        uses: codecov/codecov-action@0cfda1dd0a4ad9efc75517f399d859cd1ea4ced1 # v4.0.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # Publish the apps
   pack:
@@ -159,7 +161,7 @@ jobs:
         uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
 
       - name: Install NodeJS
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: lts/*
 
@@ -173,15 +175,13 @@ jobs:
           --output src/${{ matrix.app }}/publish/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: ${{ matrix.app }}
           path: src/${{ matrix.app }}/publish/
 
-  # Deploy the apps
+  # Dispatches a separate deployment workflow in a private repository
   deploy:
-    # Don't run this job for PRs
-    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - version
       - format
@@ -189,54 +189,30 @@ jobs:
       - pack
 
     strategy:
-        matrix:
-          app:
-            - Api
-            - AdminConsole
-
-    environment: devtest-${{ matrix.app }}
-    concurrency: devtest-${{ matrix.app }}
+      matrix:
+        environment:
+          - devtest
+          - qa
+          - prod
 
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      deployments: write
+    permissions: {} # no permissions required
 
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        with:
-          name: ${{ matrix.app }}
-          path: ${{ matrix.app }}/
-
-      - name: Set DataDog version
+      - name: Dispatch deployment
+        # Ideally this condition should be on the job itself, but the job's condition
+        # cannot reference matrix parameters.
+        if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
+                (matrix.environment == 'qa' && github.event_name == 'release') ||
+                (matrix.environment == 'prod' && github.event_name == 'release') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
         run: >
-          cat <<<
-          $(jq '.DD_VERSION = "${{ needs.version.outputs.version }}"' ${{ matrix.app }}/datadog.json)
-          > ${{ matrix.app }}/datadog.json
-
-      - name: Push app
-        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 # v3.0.0
-        with:
-          app-name: ${{ env.AZURE_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }}
-          package: ${{ matrix.app }}
-
-  # Notify the Slack channel about the release
-  notify:
-    if: ${{ github.event_name == 'release' }}
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Send Slack message
-        uses: tyrrrz/action-http-request@64c70c67f5ebc54d4c7ea09cbe3553322778afd5 # 1.1.2
-        with:
-          url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          method: POST
-          headers: |
-            Content-Type: application/json; charset=UTF-8
-          body: |
-            {
-              "text": "*Passwordless-server* version `${{ github.event.release.name }}` has been released! 🎉\nDetails: ${{ github.event.release.html_url }}"
-            }
+          gh workflow run deploy-passwordless-server
+          --repo bitwarden/passwordless-devops
+          --field repository=${{ github.repository }}
+          --field run-id=${{ github.run_id }}
+          --field api-artifact=Api
+          --field admin-console-artifact=AdminConsole
+          --field environment=${{ matrix.environment }}
+          --field version=${{ needs.version.outputs.version }}

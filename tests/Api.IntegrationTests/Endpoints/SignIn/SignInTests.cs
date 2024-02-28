@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
@@ -196,8 +197,9 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
             .AddUserAgent();
 
         // Act
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest(userId)
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest
         {
+            UserId = userId,
             Origin = PasswordlessApi.OriginUrl,
             RPID = PasswordlessApi.RpId
         });
@@ -210,5 +212,45 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task I_receive_an_api_exception_when_using_an_expired_token()
+    {
+        // Arrange
+        const int timeToLive = 120;
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddManagementKey();
+        using var createApplicationMessage = await client.CreateApplicationAsync();
+        var userId = $"user{Guid.NewGuid():N}";
+        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        client.AddPublicKey(accountKeysCreation!.ApiKey1)
+            .AddSecretKey(accountKeysCreation.ApiSecret1)
+            .AddUserAgent();
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest
+        {
+            UserId = userId,
+            TimeToLiveSeconds = timeToLive,
+            Origin = PasswordlessApi.OriginUrl,
+            RPID = PasswordlessApi.RpId
+        });
+        var generateToken = await signInGenerateTokenResponse.Content.ReadFromJsonAsync<SigninEndpoints.SigninTokenResponse>();
+        generateToken.Should().NotBeNull();
+        generateToken!.Token.Should().StartWith("verify_");
+
+        api.Time.Advance(TimeSpan.FromSeconds(timeToLive + 10));
+
+        // Act
+        var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = generateToken.Token, Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
+
+        // Assert
+        verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        var problemDetails = await verifySignInResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Extensions["errorCode"]!.ToString().Should().Be("expired_token");
+        problemDetails.Status.Should().Be(403);
+        problemDetails.Title.Should().Be("The token expired 10 seconds ago.");
     }
 }

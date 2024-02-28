@@ -27,7 +27,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
 
     [Fact]
-    public async Task ValidateThatEndpointsHaveProtection()
+    public async Task ValidateThatEndpointsHaveProtectionAsync()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -61,7 +61,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     }
 
     [Fact]
-    public async Task ValidateThatMissingApiSecretThrows()
+    public async Task ValidateThatMissingApiSecretThrowsAsync()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -85,7 +85,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     }
 
     [Fact]
-    public async Task ValidateThatInvalidApiSecretThrows()
+    public async Task ValidateThatInvalidApiSecretThrowsAsync()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -118,7 +118,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [InlineData("", "A valid 'ApiSecret' header is required.")]
     [InlineData("missing", "A valid 'ApiSecret' header is required.")]
     [InlineData("public-header-instead", "A 'ApiKey' header was supplied when a 'ApiSecret' header should have been supplied.")]
-    public async Task ApiSecretGivesHelpfulAdvice(string input, string details)
+    public async Task ApiSecretGivesHelpfulAdviceAsync(string input, string details)
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -160,7 +160,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [InlineData("", "A valid 'ApiKey' header is required.")]
     [InlineData("missing", "A valid 'ApiKey' header is required.")]
     [InlineData("secret-header-instead", "A 'ApiSecret' header was supplied when a 'ApiKey' header should have been supplied.")]
-    public async Task ApiPublicGivesHelpfulAdvice(string input, string details)
+    public async Task ApiPublicGivesHelpfulAdviceAsync(string input, string details)
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);

@@ -14,6 +14,46 @@ public class AppsEndpointsTests
 {
     private readonly Fixture _fixture = new();
 
+    #region IsAppIdAvailableAsync
+    [Fact]
+    public async Task IsAppIdAvailableAsync_Returns_Ok_WhenAppIdIsAvailable()
+    {
+        var payload = new GetAppIdAvailabilityRequest("myapp");
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        sharedManagementServiceMock.Setup(x => x.IsAvailableAsync(
+                It.Is<string>(p => p == "myapp")))
+            .ReturnsAsync(true);
+
+        var actual = await AppsEndpoints.IsAppIdAvailableAsync(
+            payload,
+            sharedManagementServiceMock.Object);
+
+        Assert.Equal(typeof(Ok<GetAppIdAvailabilityResponse>), actual.GetType());
+        var actualResult = (actual as Ok<GetAppIdAvailabilityResponse>)?.Value;
+        Assert.True(actualResult!.Available);
+        sharedManagementServiceMock.Verify(x => x.IsAvailableAsync(It.Is<string>(p => p == "myapp")), Times.Once());
+    }
+
+    [Fact]
+    public async Task IsAppIdAvailableAsync_Returns_Ok_WhenAppIdIsUnavailable()
+    {
+        var payload = new GetAppIdAvailabilityRequest("myapp");
+        var sharedManagementServiceMock = new Mock<ISharedManagementService>();
+        sharedManagementServiceMock.Setup(x => x.IsAvailableAsync(
+                It.Is<string>(p => p == "myapp")))
+            .ReturnsAsync(false);
+
+        var actual = await AppsEndpoints.IsAppIdAvailableAsync(
+            payload,
+            sharedManagementServiceMock.Object);
+
+        Assert.Equal(typeof(Ok<GetAppIdAvailabilityResponse>), actual.GetType());
+        var actualResult = (actual as Ok<GetAppIdAvailabilityResponse>)?.Value;
+        Assert.False(actualResult!.Available);
+        sharedManagementServiceMock.Verify(x => x.IsAvailableAsync(It.Is<string>(p => p == "myapp")), Times.Once());
+    }
+    #endregion
+
     #region MarkDeleteApplicationAsync
     [Fact]
     public async Task MarkDeleteApplicationAsync_Returns_ExpectedResult()

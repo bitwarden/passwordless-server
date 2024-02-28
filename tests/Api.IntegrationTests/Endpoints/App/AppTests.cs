@@ -383,8 +383,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token",
-            new SigninTokenRequest("some_user")
+            new SigninTokenRequest
             {
+                UserId = "some_user",
                 Origin = PasswordlessApi.OriginUrl,
                 RPID = PasswordlessApi.RpId
             });
@@ -415,8 +416,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         enableResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token",
-            new SigninTokenRequest("some_user")
+            new SigninTokenRequest
             {
+                UserId = "some_user",
                 Origin = PasswordlessApi.OriginUrl,
                 RPID = PasswordlessApi.RpId
             });
@@ -515,7 +517,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var response = await client.GetAsync($"/admin/apps/{applicationName}/available");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
         result.Should().NotBeNull();
         result!.Available.Should().BeFalse();

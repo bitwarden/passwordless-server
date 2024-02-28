@@ -17,7 +17,7 @@ public static class AuthenticationBuilderExtensions
             options.HeaderName = "ApiKey";
             options.ClaimsCreator = async (managementService, apiKey) =>
             {
-                var validationResult = await managementService.ValidatePublicKey(apiKey);
+                var validationResult = await managementService.ValidatePublicKeyAsync(apiKey);
 
                 var claims = new List<Claim>
                 {
@@ -40,7 +40,7 @@ public static class AuthenticationBuilderExtensions
             options.HeaderName = "ApiSecret";
             options.ClaimsCreator = async (managementService, apiSecret) =>
             {
-                var validationResult = await managementService.ValidateSecretKey(apiSecret);
+                var validationResult = await managementService.ValidateSecretKeyAsync(apiSecret);
 
                 var claims = new List<Claim>
                 {

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
@@ -198,7 +197,6 @@ void RunTheApp()
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseRouting();
-    app.MapHealthEndpoints();
     app.UseAuthentication();
     app.UseWhen(
         context => !context.Request.Path.StartsWithSegments("/health"),

@@ -14,21 +14,10 @@ public static class AppsEndpoints
 {
     public static void MapAccountEndpoints(this WebApplication app)
     {
-        app.MapGet("/admin/apps/{appId}/available", async ([AsParameters] GetAppIdAvailabilityRequest payload, ISharedManagementService accountService) =>
-            {
-                if (payload.AppId.Length < 3)
-                {
-                    return Conflict(false);
-                }
-
-                var result = await accountService.IsAvailable(payload.AppId);
-
-                var res = new GetAppIdAvailabilityResponse(result);
-
-                return result ? Ok(res) : Conflict(res);
-            })
+        app.MapGet("/admin/apps/{appId}/available", IsAppIdAvailableAsync)
             .RequireManagementKey()
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithParameterValidation();
 
         app.MapPost("/admin/apps/{appId}/create", async (
                 [FromRoute] string appId,
@@ -36,7 +25,7 @@ public static class AppsEndpoints
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
-                var result = await service.GenerateAccount(appId, payload);
+                var result = await service.GenerateAccountAsync(appId, payload);
 
                 eventLogger.LogApplicationCreatedEvent(payload.AdminEmail);
 
@@ -49,7 +38,7 @@ public static class AppsEndpoints
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
-                await service.FreezeAccount(appId);
+                await service.FreezeAccountAsync(appId);
 
                 eventLogger.LogAppFrozenEvent();
 
@@ -62,7 +51,7 @@ public static class AppsEndpoints
                 ISharedManagementService service,
                 IEventLogger eventLogger) =>
             {
-                await service.UnFreezeAccount(appId);
+                await service.UnFreezeAccountAsync(appId);
 
                 eventLogger.LogAppUnfrozenEvent();
 
@@ -125,6 +114,12 @@ public static class AppsEndpoints
             .WithParameterValidation()
             .RequireSecretKey()
             .RequireCors("default");
+    }
+
+    public static async Task<IResult> IsAppIdAvailableAsync([AsParameters] GetAppIdAvailabilityRequest payload, ISharedManagementService accountService)
+    {
+        var result = await accountService.IsAvailableAsync(payload.AppId);
+        return Ok(new GetAppIdAvailabilityResponse(result));
     }
 
     public static async Task<IResult> CreatePublicKeyAsync(
@@ -263,7 +258,7 @@ public static class AppsEndpoints
         ISharedManagementService service,
         IEventLogger eventLogger)
     {
-        await service.UnFreezeAccount(appId);
+        await service.UnFreezeAccountAsync(appId);
         var res = new CancelApplicationDeletionResponse("Your account will not be deleted since the process was aborted with the cancellation link");
 
         eventLogger.LogAppDeleteCancelledEvent();

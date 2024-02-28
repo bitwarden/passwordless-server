@@ -73,9 +73,6 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<DateTime?>("DeleteAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SubscriptionTier")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Tenant")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -111,9 +108,6 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AccountName")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ApiKey")

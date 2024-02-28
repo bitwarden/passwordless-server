@@ -28,15 +28,16 @@ public class Fido2Service : IFido2Service
     private readonly IEventLogger _eventLogger;
     private readonly IFeatureContextProvider _featureContextProvider;
     private readonly IMetadataService _metadataService;
+    private readonly TimeProvider _timeProvider;
 
-    // Internal for testing
     public Fido2Service(ITenantProvider tenantProvider,
         ILogger log,
         ITenantStorage storage,
         ITokenService tokenService,
         IEventLogger eventLogger,
         IFeatureContextProvider featureContextProvider,
-        IMetadataService metadataService)
+        IMetadataService metadataService,
+        TimeProvider timeProvider)
     {
         _storage = storage;
         _tenantProvider = tenantProvider;
@@ -45,13 +46,14 @@ public class Fido2Service : IFido2Service
         _eventLogger = eventLogger;
         _featureContextProvider = featureContextProvider;
         _metadataService = metadataService;
+        _timeProvider = timeProvider;
     }
 
-    public async Task<string> CreateRegisterToken(RegisterToken tokenProps)
+    public async Task<string> CreateRegisterTokenAsync(RegisterToken tokenProps)
     {
         if (tokenProps.ExpiresAt == default)
         {
-            tokenProps.ExpiresAt = DateTime.UtcNow.AddSeconds(120);
+            tokenProps.ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120);
         }
 
         ValidateAliases(tokenProps.Aliases);
@@ -98,12 +100,12 @@ public class Fido2Service : IFido2Service
         return token;
     }
 
-    public async Task<SessionResponse<CredentialCreateOptions>> RegisterBegin(FidoRegistrationBeginDTO request)
+    public async Task<SessionResponse<CredentialCreateOptions>> RegisterBeginAsync(FidoRegistrationBeginDTO request)
     {
         var features = await _featureContextProvider.UseContext();
 
         var token = await _tokenService.DecodeTokenAsync<RegisterToken>(request.Token, "register_");
-        token.Validate();
+        token.Validate(_timeProvider.GetUtcNow());
 
         var userId = token.UserId;
 
@@ -175,7 +177,7 @@ public class Fido2Service : IFido2Service
         }
     }
 
-    public async Task<TokenResponse> RegisterComplete(RegistrationCompleteDTO request, string deviceInfo, string country)
+    public async Task<TokenResponse> RegisterCompleteAsync(RegistrationCompleteDTO request, string deviceInfo, string country)
     {
         var session = await _tokenService.DecodeTokenAsync<RegisterSession>(request.Session, "session_", true);
 
@@ -222,7 +224,7 @@ public class Fido2Service : IFido2Service
         {
             if (session.Aliases != null && session.Aliases.Any())
             {
-                await SetAlias(new AliasPayload
+                await SetAliasAsync(new AliasPayload
                 {
                     Aliases = session.Aliases,
                     Hashing = session.AliasHashing,
@@ -236,7 +238,7 @@ public class Fido2Service : IFido2Service
             throw;
         }
 
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
 
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
@@ -265,12 +267,12 @@ public class Fido2Service : IFido2Service
             Success = true,
             Origin = request.Origin,
             RpId = session.Options.Rp.Id,
-            Timestamp = DateTime.UtcNow,
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             CredentialId = success.Result.Id,
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
         };
@@ -282,18 +284,16 @@ public class Fido2Service : IFido2Service
         return new TokenResponse(token);
     }
 
-    public async Task<string> CreateSigninToken(SigninTokenRequest request)
+    public async Task<string> CreateSigninTokenAsync(SigninTokenRequest request)
     {
         ValidateUserId(request.UserId);
-
-        _eventLogger.LogSigninTokenCreatedEvent(request.UserId);
 
         var tokenProps = new VerifySignInToken
         {
             Success = true,
             UserId = request.UserId,
-            Timestamp = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.Add(request.TimeToLive),
             TokenId = Guid.NewGuid(),
             Type = "generated_signin",
             RpId = request.RPID,
@@ -303,7 +303,26 @@ public class Fido2Service : IFido2Service
         return await _tokenService.EncodeTokenAsync(tokenProps, "verify_");
     }
 
-    public async Task<SessionResponse<AssertionOptions>> SignInBegin(SignInBeginDTO request)
+    public async Task<string> CreateMagicLinkTokenAsync(MagicLinkTokenRequest request)
+    {
+        ValidateUserId(request.UserId);
+
+        var tokenProps = new VerifySignInToken
+        {
+            Success = true,
+            UserId = request.UserId,
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.Add(request.TimeToLive),
+            TokenId = Guid.NewGuid(),
+            Type = "magic_link",
+            RpId = request.RPID,
+            Origin = request.Origin
+        };
+
+        return await _tokenService.EncodeTokenAsync(tokenProps, "verify_");
+    }
+
+    public async Task<SessionResponse<AssertionOptions>> SignInBeginAsync(SignInBeginDTO request)
     {
         var fido2 = new Fido2(new Fido2Configuration
         {
@@ -347,7 +366,7 @@ public class Fido2Service : IFido2Service
         return new SessionResponse<AssertionOptions> { Data = options, Session = session };
     }
 
-    public async Task<TokenResponse> SignInComplete(SignInCompleteDTO request, string device, string country)
+    public async Task<TokenResponse> SignInCompleteAsync(SignInCompleteDTO request, string device, string country)
     {
         var fido2 = new Fido2(new Fido2Configuration
         {
@@ -388,12 +407,12 @@ public class Fido2Service : IFido2Service
             Success = true,
             Origin = request.Origin,
             RpId = request.RPID,
-            Timestamp = DateTime.UtcNow,
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             Device = device,
             Country = country,
             Nickname = credential.Nickname,
             CredentialId = credential.Descriptor.Id,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(120),
+            ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_signin"
         };
@@ -406,10 +425,10 @@ public class Fido2Service : IFido2Service
         return new TokenResponse(token);
     }
 
-    public async Task<VerifySignInToken> SignInVerify(SignInVerifyDTO payload)
+    public async Task<VerifySignInToken> SignInVerifyAsync(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
-
+        token.Validate(_timeProvider.GetUtcNow());
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
         return token;
@@ -439,7 +458,7 @@ public class Fido2Service : IFido2Service
         return _storage.GetAliasesByUserId(userId);
     }
 
-    public async Task SetAlias(AliasPayload data)
+    public async Task SetAliasAsync(AliasPayload data)
     {
         if (data.UserId.IsNullOrEmpty())
         {
