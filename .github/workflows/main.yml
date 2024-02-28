@@ -182,6 +182,8 @@ jobs:
 
   # Dispatches a separate deployment workflow in a private repository
   deploy:
+    if: ${{ github.event_name != 'pull_request' }}
+  
     needs:
       - version
       - format
@@ -194,17 +196,17 @@ jobs:
           - devtest
           - qa
           - prod
+        exclude:
+          # Exclude QA and PROD if not triggered by a release event
+          # https://stackoverflow.com/questions/65384420/how-do-i-make-a-github-action-matrix-element-conditional
+          - environment: ${{ github.event_name != 'release' && 'qa' }}
+          - environment: ${{ github.event_name != 'release' && 'prod' }}
 
     runs-on: ubuntu-latest
     permissions: {} # no permissions required
 
     steps:
       - name: Dispatch deployment
-        # Ideally this condition should be on the job itself, but the job's condition
-        # cannot reference matrix parameters.
-        if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
-                (matrix.environment == 'qa' && github.event_name == 'release') ||
-                (matrix.environment == 'prod' && github.event_name == 'release') }}
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
         run: >
