@@ -414,6 +414,7 @@ public class SharedManagementServiceTests
         Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
         Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);
     }
+
     #endregion
 
     #region CreatePublicKeyAsync
@@ -457,6 +458,7 @@ public class SharedManagementServiceTests
             .Should()
             .ThrowAsync<ApiException>("create_api_key_scopes_required", "Please select at least one scope.", 400);
     }
+
     #endregion
 
     #region CreateSecretKeyAsync
@@ -480,7 +482,7 @@ public class SharedManagementServiceTests
             .Should()
             .Be("appId:secret:");
     }
-    
+
     [Fact]
     public async Task CreateSecretKeyAsync_Throws_ApiException()
     {
@@ -500,5 +502,6 @@ public class SharedManagementServiceTests
             .Should()
             .ThrowAsync<ApiException>("create_api_key_scopes_required", "Please select at least one scope.", 400);
     }
+
     #endregion
 }
