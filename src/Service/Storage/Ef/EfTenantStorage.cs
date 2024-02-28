@@ -328,7 +328,7 @@ public class EfTenantStorage(
         {
             Tenant = Tenant,
             Id = Guid.NewGuid(),
-            CreatedAt = timeProvider.GetUtcNow(),
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             UserId = userId,
             EmailAddress = emailAddress,
             LinkTemplate = linkTemplate
