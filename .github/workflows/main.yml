@@ -199,8 +199,8 @@ jobs:
         exclude:
           # Exclude QA and PROD if not triggered by a release event
           # https://stackoverflow.com/questions/65384420/how-do-i-make-a-github-action-matrix-element-conditional
-          - environment: ${{ github.event_name != 'release' && 'qa' || '_' }}
-          - environment: ${{ github.event_name != 'release' && 'prod' || '_' }}
+          - environment: ${{ github.event_name != 'release' && 'qa' }}
+          - environment: ${{ github.event_name != 'release' && 'prod' }}
 
     runs-on: ubuntu-latest
     permissions: {} # no permissions required
