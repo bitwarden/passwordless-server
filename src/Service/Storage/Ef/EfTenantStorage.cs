@@ -15,7 +15,6 @@ public class EfTenantStorage(
 {
     public string Tenant => tenantProvider.Tenant;
 
-
     public Task<ApiKeyDesc> GetApiKeyAsync(string apiKey)
     {
         var appId = ApiKeyUtils.GetAppId(apiKey);

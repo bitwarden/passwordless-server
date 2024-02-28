@@ -134,7 +134,9 @@ jobs:
           fail-on-error: true
 
       - name: Upload coverage
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
+        uses: codecov/codecov-action@0cfda1dd0a4ad9efc75517f399d859cd1ea4ced1 # v4.0.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # Publish the apps
   pack:
@@ -178,10 +180,8 @@ jobs:
           name: ${{ matrix.app }}
           path: src/${{ matrix.app }}/publish/
 
-  # Deploy the apps
+  # Dispatches a separate deployment workflow in a private repository
   deploy:
-    # Don't run this job for PRs
-    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - version
       - format
@@ -189,54 +189,30 @@ jobs:
       - pack
 
     strategy:
-        matrix:
-          app:
-            - Api
-            - AdminConsole
-
-    environment: devtest-${{ matrix.app }}
-    concurrency: devtest-${{ matrix.app }}
+      matrix:
+        environment:
+          - devtest
+          - qa
+          - prod
 
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      deployments: write
+    permissions: {} # no permissions required
 
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
-        with:
-          name: ${{ matrix.app }}
-          path: ${{ matrix.app }}/
-
-      - name: Set DataDog version
+      - name: Dispatch deployment
+        # Ideally this condition should be on the job itself, but the job's condition
+        # cannot reference matrix parameters.
+        if: ${{ (matrix.environment == 'devtest' && github.event_name != 'pull_request') ||
+                (matrix.environment == 'qa' && github.event_name == 'release') ||
+                (matrix.environment == 'prod' && github.event_name == 'release') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
         run: >
-          cat <<<
-          $(jq '.DD_VERSION = "${{ needs.version.outputs.version }}"' ${{ matrix.app }}/datadog.json)
-          > ${{ matrix.app }}/datadog.json
-
-      - name: Push app
-        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 # v3.0.0
-        with:
-          app-name: ${{ env.AZURE_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE  }}
-          package: ${{ matrix.app }}
-
-  # Notify the Slack channel about the release
-  notify:
-    if: ${{ github.event_name == 'release' }}
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Send Slack message
-        uses: tyrrrz/action-http-request@64c70c67f5ebc54d4c7ea09cbe3553322778afd5 # 1.1.2
-        with:
-          url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          method: POST
-          headers: |
-            Content-Type: application/json; charset=UTF-8
-          body: |
-            {
-              "text": "*Passwordless-server* version `${{ github.event.release.name }}` has been released! 🎉\nDetails: ${{ github.event.release.html_url }}"
-            }
+          gh workflow run deploy-passwordless-server
+          --repo bitwarden/passwordless-devops
+          --field repository=${{ github.repository }}
+          --field run-id=${{ github.run_id }}
+          --field api-artifact=Api
+          --field admin-console-artifact=AdminConsole
+          --field environment=${{ matrix.environment }}
+          --field version=${{ needs.version.outputs.version }}
