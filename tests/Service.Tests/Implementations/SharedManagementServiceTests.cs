@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -38,6 +39,7 @@ public class SharedManagementServiceTests
     }
 
     #region MarkDeleteApplicationAsync
+
     [Fact]
     public async Task MarkDeleteApplicationAsync_Throws_ApiException_WhenAppNotFound()
     {
@@ -74,10 +76,7 @@ public class SharedManagementServiceTests
         var tenantStorageMock = new Mock<ITenantStorage>();
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
-            CreatedAt = _now.AddDays(-1),
-            Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AcountName = appId, CreatedAt = _now.AddDays(-1), Tenant = appId, AdminEmails = new[] { deletedBy }
         };
 
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -107,10 +106,7 @@ public class SharedManagementServiceTests
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
-            CreatedAt = _now.AddDays(-4),
-            Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AcountName = appId, CreatedAt = _now.AddDays(-4), Tenant = appId, AdminEmails = new[] { deletedBy }
         };
 
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -125,7 +121,9 @@ public class SharedManagementServiceTests
         Assert.Equal(_systemClockMock.Object.UtcNow.AddMonths(1), actual.DeleteAt.Value);
 
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
+        tenantStorageMock.Verify(
+            x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))),
+            Times.Once);
     }
 
     [Fact]
@@ -139,10 +137,7 @@ public class SharedManagementServiceTests
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(false);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
-            CreatedAt = _now.AddDays(-365),
-            Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AcountName = appId, CreatedAt = _now.AddDays(-365), Tenant = appId, AdminEmails = new[] { deletedBy }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -171,10 +166,7 @@ public class SharedManagementServiceTests
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId,
-            CreatedAt = _now.AddDays(-365),
-            Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AcountName = appId, CreatedAt = _now.AddDays(-365), Tenant = appId, AdminEmails = new[] { deletedBy }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -189,11 +181,15 @@ public class SharedManagementServiceTests
 
         tenantStorageMock.Verify(x => x.HasUsersAsync(), Times.Once);
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
-        tenantStorageMock.Verify(x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))), Times.Once);
+        tenantStorageMock.Verify(
+            x => x.SetAppDeletionDate(It.Is<DateTime>(p => p == _systemClockMock.Object.UtcNow.AddMonths(1))),
+            Times.Once);
     }
+
     #endregion
 
     #region DeleteApplicationAsync
+
     [Fact]
     public async Task DeleteApplicationAsync_Throws_ApiException_WhenAppNotFound()
     {
@@ -272,9 +268,11 @@ public class SharedManagementServiceTests
 
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
     }
+
     #endregion
 
     #region ListApplicationsPendingDeletionAsync
+
     [Fact]
     public async Task ListApplicationsPendingDeletionAsync_Returns_ExpectedResult()
     {
@@ -292,6 +290,7 @@ public class SharedManagementServiceTests
     #endregion
 
     #region SetFeaturesAsync
+
     [Fact]
     public async Task SetFeaturesAsync_Throws_ApiException_WhenPayloadIsNull()
     {
@@ -326,7 +325,8 @@ public class SharedManagementServiceTests
     {
         var payload = new ManageFeaturesRequest();
 
-        var actual = await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(string.Empty, payload));
+        var actual =
+            await Assert.ThrowsAsync<ApiException>(async () => await _sut.SetFeaturesAsync(string.Empty, payload));
 
         Assert.Equal(400, actual.StatusCode);
         Assert.Equal("'appId' is required.", actual.Message);
@@ -340,9 +340,7 @@ public class SharedManagementServiceTests
         const string appId = "myappid";
         var payload = new ManageFeaturesRequest
         {
-            EventLoggingIsEnabled = true,
-            EventLoggingRetentionPeriod = 7,
-            MaxUsers = 69L
+            EventLoggingIsEnabled = true, EventLoggingRetentionPeriod = 7, MaxUsers = 69L
         };
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))
@@ -354,9 +352,11 @@ public class SharedManagementServiceTests
         storageMock.Verify(x => x.SetFeaturesAsync(
             It.Is<ManageFeaturesRequest>(p => p == payload)), Times.Once);
     }
+
     #endregion
 
     #region ListApiKeysAsync
+
     [Fact]
     public async Task ListApiKeysAsync_Returns_ExpectedResult()
     {
@@ -413,6 +413,92 @@ public class SharedManagementServiceTests
         Assert.Equal(2, actualSecretKey.Scopes.Count);
         Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
         Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);
+    }
+    #endregion
+
+    #region CreatePublicKeyAsync
+
+    [Fact]
+    public async Task CreatePublicKeyAsync_CreatesPublicKey()
+    {
+        // arrange 
+        const string appId = "appId";
+        var scopes = new HashSet<PublicKeyScopes>() { PublicKeyScopes.Register, PublicKeyScopes.Login };
+        var createPublicKey = new CreatePublicKeyRequest(scopes);
+
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
+
+        // act
+        var actual = await _sut.CreateApiKeyAsync(appId, createPublicKey);
+
+        // assert
+        actual.ApiKey[..13]
+            .Should()
+            .Be("appId:public:");
+    }
+
+    [Fact]
+    public async Task CreatePublicKeyAsync_Throws_ApiException()
+    {
+        // arrange 
+        const string appId = "appId";
+        var scopes = new HashSet<PublicKeyScopes>();
+        var createPublicKey = new CreatePublicKeyRequest(scopes);
+
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
+
+        // act
+        var actual = () => _sut.CreateApiKeyAsync(appId, createPublicKey);
+
+        // assert
+        await actual
+            .Should()
+            .ThrowAsync<ApiException>("create_api_key_scopes_required", "Please select at least one scope.", 400);
+    }
+    #endregion
+
+    #region CreateSecretKeyAsync
+
+    [Fact]
+    public async Task CreateSecretKeyAsync_CreatesSecretKey()
+    {
+        // arrange 
+        const string appId = "appId";
+        var scopes = new HashSet<SecretKeyScopes>() { SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify };
+        var createSecretKey = new CreateSecretKeyRequest(scopes);
+
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
+
+        // act
+        var actual = await _sut.CreateApiKeyAsync(appId, createSecretKey);
+
+        // assert
+        actual.ApiKey[..13]
+            .Should()
+            .Be("appId:secret:");
+    }
+    
+    [Fact]
+    public async Task CreateSecretKeyAsync_Throws_ApiException()
+    {
+        // arrange 
+        const string appId = "appId";
+        var scopes = new HashSet<SecretKeyScopes>();
+        var createPublicKey = new CreateSecretKeyRequest(scopes);
+
+        var storageMock = new Mock<ITenantStorage>();
+        _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
+
+        // act
+        var actual = () => _sut.CreateApiKeyAsync(appId, createPublicKey);
+
+        // assert
+        await actual
+            .Should()
+            .ThrowAsync<ApiException>("create_api_key_scopes_required", "Please select at least one scope.", 400);
     }
     #endregion
 }
