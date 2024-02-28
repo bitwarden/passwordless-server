@@ -13,6 +13,7 @@ using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Serialization;
+using Passwordless.Common.Validation;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
@@ -167,38 +168,18 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        private string _name;
+        private readonly string _name;
 
-        [Required, MaxLength(60), MinLength(3)]
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = HtmlSanitizer.Sanitize(value);
-            }
-        }
+        [Required, MaxLength(60), MinLength(3), NoForbiddenContent]
+        public string Name { get; set; }
 
         [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
         public string Id { get; set; }
 
-        private string _description;
+        private readonly string _description;
 
-        [Required, MaxLength(120), MinLength(3)]
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-            set
-            {
-                _description = HtmlSanitizer.Sanitize(value);
-            }
-        }
+        [Required, MaxLength(120), MinLength(3), NoForbiddenContent]
+        public string Description { get; set; }
 
         [Required]
         public string Plan { get; set; }
