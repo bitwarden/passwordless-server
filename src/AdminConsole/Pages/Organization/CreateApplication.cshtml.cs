@@ -173,7 +173,7 @@ public class CreateApplicationModel : PageModel
 
         [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
         public string Id { get; set; }
-        
+
         [Required, MaxLength(120), MinLength(3), NoForbiddenContent]
         public string Description { get; set; }
 
