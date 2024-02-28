@@ -25,7 +25,7 @@ public static class AppsEndpoints
                 [FromServices] ISharedManagementService service,
                 [FromServices] IEventLogger eventLogger) =>
             {
-                var result = await service.GenerateAccount(request.AppId, request.Payload);
+                var result = await service.GenerateAccountAsync(request.AppId, request.Payload);
 
                 eventLogger.LogApplicationCreatedEvent(request.Payload.AdminEmail);
 
