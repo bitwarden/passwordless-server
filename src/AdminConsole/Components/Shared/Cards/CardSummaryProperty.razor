@@ -1,14 +1,14 @@
 <div class="summary-property">
-    <dt class="property-label">Created:</dt>
-    <dd class="property-label">
+    <dt class="property-label">@Label</dt>
+    <dd class="property-value">
         @if (Value is DateTime)
         {
             <LocalDateTime Value="@((DateTime)Value)" />
         }
-        else{
+        else
+        {
             @Value
         }
-        
     </dd>
 </div>
 
