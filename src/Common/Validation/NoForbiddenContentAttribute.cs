@@ -14,12 +14,11 @@ public class NoForbiddenContentAttribute()
             return true;
         }
 
-        if (!(value is string))
+        if (value is not string valueString)
         {
             throw new ArgumentException("This attribute can only be applied to strings.");
         }
 
-        var valueString = (string)value;
         var sanitizedValue = HtmlSanitizer.Sanitize(valueString);
         return sanitizedValue == valueString;
     }
