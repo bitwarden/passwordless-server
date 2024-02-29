@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
@@ -20,17 +21,17 @@ public static class AppsEndpoints
             .WithParameterValidation();
 
         app.MapPost("/admin/apps/{appId}/create", async (
-                [FromRoute] string appId,
-                [FromBody] CreateAppDto payload,
-                ISharedManagementService service,
-                IEventLogger eventLogger) =>
+                [AsParameters] CreateApplicationRequest request,
+                [FromServices] ISharedManagementService service,
+                [FromServices] IEventLogger eventLogger) =>
             {
-                var result = await service.GenerateAccountAsync(appId, payload);
+                var result = await service.GenerateAccountAsync(request.AppId, request.Payload);
 
-                eventLogger.LogApplicationCreatedEvent(payload.AdminEmail);
+                eventLogger.LogApplicationCreatedEvent(request.Payload.AdminEmail);
 
                 return Ok(result);
             })
+            .WithParameterValidation()
             .RequireManagementKey()
             .RequireCors("default");
 

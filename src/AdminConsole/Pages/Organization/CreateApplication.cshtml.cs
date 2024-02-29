@@ -12,6 +12,8 @@ using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Serialization;
+using Passwordless.Common.Validation;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
@@ -166,13 +168,13 @@ public class CreateApplicationModel : PageModel
 
     public class CreateApplicationForm
     {
-        [Required, MaxLength(60)]
+        [Required, MaxLength(60), MinLength(3), NoForbiddenContent]
         public string Name { get; set; }
 
-        [Required, MaxLength(62)]
+        [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
         public string Id { get; set; }
 
-        [Required, MaxLength(120)]
+        [Required, MaxLength(120), MinLength(3), NoForbiddenContent]
         public string Description { get; set; }
 
         [Required]
