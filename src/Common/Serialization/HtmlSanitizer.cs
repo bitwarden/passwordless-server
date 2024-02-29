@@ -5,7 +5,7 @@ namespace Passwordless.Common.Serialization;
 
 public static class HtmlSanitizer
 {
-    private static readonly Ganss.Xss.HtmlSanitizer _htmlSanitizer = new(new HtmlSanitizerOptions
+    private static readonly Ganss.Xss.HtmlSanitizer Instance = new(new HtmlSanitizerOptions
     {
         AllowedTags = new HashSet<string>(0)
     })
@@ -15,7 +15,7 @@ public static class HtmlSanitizer
 
     public static string Sanitize(string input)
     {
-        var temp = new StringBuilder(_htmlSanitizer.Sanitize(input));
+        var temp = new StringBuilder(Instance.Sanitize(input));
         temp.Replace("https://", string.Empty).Replace("http://", string.Empty);
         return temp.ToString();
     }
