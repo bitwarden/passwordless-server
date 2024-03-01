@@ -25,7 +25,7 @@ public interface ITenantStorage
     Task RemoveTokenKey(int keyId);
     Task RemoveExpiredTokenKeys(CancellationToken cancellationToken);
     Task SaveAccountInformation(AccountMetaInformation info);
-    Task StoreApiKey(string pkpart, string apikey, string[] scopes);
+    Task StoreApiKeyAsync(string pkpart, string apikey, string[] scopes);
     Task<bool> TenantExists();
     Task UpdateCredential(byte[] credentialId, uint counter, string country, string device);
     Task<List<UserSummary>> GetUsers(string lastUserId);

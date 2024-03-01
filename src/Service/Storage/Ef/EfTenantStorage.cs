@@ -373,7 +373,7 @@ public class EfTenantStorage(
         await db.SaveChangesAsync();
     }
 
-    public async Task StoreApiKey(string pkpart, string apikey, string[] scopes)
+    public async Task StoreApiKeyAsync(string pkpart, string apikey, string[] scopes)
     {
         var ak = new ApiKeyDesc
         {
