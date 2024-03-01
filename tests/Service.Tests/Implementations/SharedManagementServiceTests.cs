@@ -77,7 +77,10 @@ public class SharedManagementServiceTests
         var tenantStorageMock = new Mock<ITenantStorage>();
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId, CreatedAt = _now.AddDays(-1), Tenant = appId, AdminEmails = new[] { deletedBy }
+            AcountName = appId,
+            CreatedAt = _now.AddDays(-1),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
 
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -107,7 +110,10 @@ public class SharedManagementServiceTests
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId, CreatedAt = _now.AddDays(-4), Tenant = appId, AdminEmails = new[] { deletedBy }
+            AcountName = appId,
+            CreatedAt = _now.AddDays(-4),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
 
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -138,7 +144,10 @@ public class SharedManagementServiceTests
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(false);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId, CreatedAt = _now.AddDays(-365), Tenant = appId, AdminEmails = new[] { deletedBy }
+            AcountName = appId,
+            CreatedAt = _now.AddDays(-365),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -167,7 +176,10 @@ public class SharedManagementServiceTests
         tenantStorageMock.Setup(x => x.HasUsersAsync()).ReturnsAsync(true);
         var accountInformation = new AccountMetaInformation
         {
-            AcountName = appId, CreatedAt = _now.AddDays(-365), Tenant = appId, AdminEmails = new[] { deletedBy }
+            AcountName = appId,
+            CreatedAt = _now.AddDays(-365),
+            Tenant = appId,
+            AdminEmails = new[] { deletedBy }
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -341,7 +353,9 @@ public class SharedManagementServiceTests
         const string appId = "myappid";
         var payload = new ManageFeaturesRequest
         {
-            EventLoggingIsEnabled = true, EventLoggingRetentionPeriod = 7, MaxUsers = 69L
+            EventLoggingIsEnabled = true,
+            EventLoggingRetentionPeriod = 7,
+            MaxUsers = 69L
         };
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId)))
@@ -430,7 +444,7 @@ public class SharedManagementServiceTests
 
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
-     
+
         // act
         var actual = await _sut.CreateApiKeyAsync(appId, createPublicKey);
 
@@ -438,9 +452,9 @@ public class SharedManagementServiceTests
         actual.ApiKey[..13]
             .Should()
             .Be("appId:public:");
-        
+
         storageMock.Verify(x => x.StoreApiKeyAsync(It.IsAny<string>(), It.IsAny<string>(),
-            It.Is<string[]>(p => p == scopes.Select(s=>s.GetValue()).ToArray())), Times.Once);
+            It.Is<string[]>(p => p == scopes.Select(s => s.GetValue()).ToArray())), Times.Once);
     }
 
     [Fact]
