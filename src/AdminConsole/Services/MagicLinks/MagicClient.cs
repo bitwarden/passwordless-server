@@ -13,7 +13,8 @@ public class MagicClient : PasswordlessClient
     {
         _http = new HttpClient(new PasswordlessHttpHandler(http, true), true)
         {
-            BaseAddress = new Uri(options.Value.ApiUrl), DefaultRequestHeaders = { { "ApiSecret", options.Value.ApiSecret } }
+            BaseAddress = new Uri(options.Value.ApiUrl),
+            DefaultRequestHeaders = { { "ApiSecret", options.Value.ApiSecret } }
         };
 
         _options = options.Value;
@@ -24,8 +25,8 @@ public class MagicClient : PasswordlessClient
         using var response = await _http.PostAsJsonAsync("magic-link/send",
             new SendMagicLinkRequest
             {
-                UserId = userId, 
-                EmailAddress = emailAddress, 
+                UserId = userId,
+                EmailAddress = emailAddress,
                 UrlTemplate = urlTemplate
             });
 
