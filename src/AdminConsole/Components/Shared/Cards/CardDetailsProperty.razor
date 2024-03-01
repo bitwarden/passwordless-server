@@ -1,0 +1,41 @@
+@using System.Text
+
+<div class="@ClassBuilder.ToString()">
+    <dt class="property-label">@Label</dt>
+    <dd class="property-value">
+        @if (Value is DateTime)
+        {
+            <LocalDateTime Value="@((DateTime)Value)" />
+        }
+        else
+        {
+            @Value
+        }
+        
+    </dd>
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter] public required string Label { get; set; }
+
+    [Parameter] public required object Value { get; set; }
+    
+    public StringBuilder ClassBuilder { get; } = new ("details-property");
+    
+    protected override void OnInitialized()
+    {
+        if (AdditionalAttributes != null)
+        {
+            if (AdditionalAttributes.ContainsKey("class"))
+            {
+                ClassBuilder.Append(" ");
+                ClassBuilder.Append(AdditionalAttributes["class"]);
+                AdditionalAttributes.Remove("class");
+            }
+        }
+    }
+
+}

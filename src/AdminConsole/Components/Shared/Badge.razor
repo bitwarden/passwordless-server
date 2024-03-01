@@ -1,10 +1,13 @@
 @using Passwordless.AdminConsole.TagHelpers
 @inherits BaseRazorComponent
 
-<span class="@Class">@Message</span>
+<span @attributes="AdditionalAttributes" class="@Class">@Message</span>
 
 @code {
     public const string BaseClass = "rounded-md px-2 py-1 text-xs font-semibold";
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
     
     [Parameter]
     public ColorVariant? Variant { get; set; }

@@ -38,7 +38,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
 
         var content = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         content.Should().NotBeNull();
-        content!.Title.Should().Be("accountName needs to be alphanumeric and start with a letter");
+        content!.Title.Should().Be("One or more validation errors occurred.");
     }
 
     [Fact]

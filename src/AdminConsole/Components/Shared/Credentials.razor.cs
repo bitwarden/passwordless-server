@@ -1,51 +1,82 @@
-using Passwordless.AdminConsole.Services.AuthenticatorData;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Components;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.Common.Extensions;
+using Passwordless.Common.Validation;
 
-namespace Passwordless.AdminConsole.Pages.Shared;
+namespace Passwordless.AdminConsole.Components.Shared;
 
-public sealed class CredentialsModel
+public partial class Credentials : ComponentBase
 {
-    private readonly IAuthenticatorDataProvider _authenticatorDataProvider;
-
-    public CredentialsModel(IAuthenticatorDataProvider authenticatorDataProvider)
-    {
-        _authenticatorDataProvider = authenticatorDataProvider;
-    }
+    public const string RemoveCredentialFormName = "remove-credential-form";
 
     /// <summary>
     /// The list of credentials.
     /// </summary>
-    public IReadOnlyCollection<CredentialModel> Items { get; private set; } = new List<CredentialModel>();
+    [Parameter]
+    public required IReadOnlyCollection<Credential> Items { get; set; }
 
-    public void SetItems(IReadOnlyCollection<Credential> items)
+    public IReadOnlyCollection<CredentialModel> GetItems()
     {
-        Items = items
-            .Select(x =>
-            {
-                var viewModel = new CredentialModel(
-                    x.Descriptor.Id,
-                    x.PublicKey,
-                    x.SignatureCounter,
-                    x.AttestationFmt,
-                    x.CreatedAt,
-                    x.AaGuid,
-                    x.LastUsedAt,
-                    x.RPID,
-                    x.Origin,
-                    x.Device,
-                    x.Nickname,
-                    x.BackupState,
-                    x.IsBackupEligible,
-                    x.IsDiscoverable,
-                    _authenticatorDataProvider.GetName(x.AaGuid));
-                return viewModel;
-            }).ToList();
+        return Items.Select(x =>
+        {
+            var viewModel = new CredentialModel(
+                x.Descriptor.Id,
+                x.PublicKey,
+                x.SignatureCounter,
+                x.AttestationFmt,
+                x.CreatedAt,
+                x.AaGuid,
+                x.LastUsedAt,
+                x.RPID,
+                x.Origin,
+                x.Device,
+                x.Nickname,
+                x.BackupState,
+                x.IsBackupEligible,
+                x.IsDiscoverable,
+                AuthenticatorDataProvider.GetName(x.AaGuid));
+            return viewModel;
+        }).ToList();
     }
 
     /// <summary>
     /// Determines whether the details of the credentials should be hidden.
     /// </summary>
+    [Parameter]
     public bool HideDetails { get; set; }
+
+    [SupplyParameterFromForm(FormName = RemoveCredentialFormName)]
+    public DeleteCredentialFormModel DeleteCredentialForm { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
+        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
+        {
+            var request = HttpContextAccessor.HttpContext!.Request;
+            switch (request.Form["_handler"])
+            {
+                case RemoveCredentialFormName:
+                    DeleteCredentialForm.CredentialId = request.Form["DeleteCredentialForm.CredentialId"].ToString();
+                    await DeleteCredentialAsync();
+                    break;
+            }
+        }
+    }
+
+    public async Task DeleteCredentialAsync()
+    {
+        var validationContext = new ValidationContext(DeleteCredentialForm);
+        var validationResult = Validator.TryValidateObject(DeleteCredentialForm, validationContext, null, true);
+        if (!validationResult)
+        {
+            throw new ArgumentException("The request is not valid.");
+        }
+        await PasswordlessClient.DeleteCredentialAsync(DeleteCredentialForm.CredentialId);
+        NavigationManager.NavigateTo(NavigationManager.Uri);
+
+    }
 
     /// <summary>
     /// Credential view model
@@ -172,5 +203,11 @@ public sealed class CredentialsModel
             IsDiscoverable = isDiscoverable;
             AuthenticatorName = authenticatorName;
         }
+    }
+
+    public sealed class DeleteCredentialFormModel
+    {
+        [Base64Url]
+        public string CredentialId { get; set; }
     }
 }
