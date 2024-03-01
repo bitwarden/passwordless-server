@@ -34,7 +34,7 @@ public class MagicLinkSignInManager<TUser>(
         var urlTemplate = magicLinkBuilder.GetUrlTemplate(returnUrl);
         try
         {
-            await magicClient.SendMagicLinkAsync(admin.Id, admin.Email, urlTemplate);
+            await magicClient.SendMagicLinkAsync(admin.Id, admin.Email!, urlTemplate);
         }
         catch (PasswordlessApiException e)
         {
