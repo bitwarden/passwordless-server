@@ -10,7 +10,7 @@
 
 <div class="panel">
     <h2>Passkeys</h2>   
-    <partial name="_Credentials" model="Model.Credentials"/>
+    <component type="typeof(Credentials)" render-mode="Static" param-Items="@(Model.Credentials)" param-HideDetails="@(false)" />
     <partial name="Shared/_PasswordlessClientJs"/>
     <partial name="Shared/_AddPasskeys"/>
 </div>

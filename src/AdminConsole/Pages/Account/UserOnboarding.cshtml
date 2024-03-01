@@ -9,7 +9,7 @@
     <p class="v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
     <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
     
-    <partial name="_Credentials" model="Model.Credentials"/>
+    <component type="typeof(Credentials)" render-mode="Static" param-Items="@(Model.Credentials)" param-HideDetails="@(true)" />
     <partial name="Shared/_PasswordlessClientJs" />
     <partial name="Shared/_AddPasskeys" />
 </panel>

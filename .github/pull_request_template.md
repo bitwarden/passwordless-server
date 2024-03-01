@@ -17,20 +17,24 @@ Thank you for contributing! Please follow the steps below to help us process you
 <!-- For Jira Tasks: -->
 <!-- (remove if external contributor) -->
 - Closes [PAS-XXX](https://bitwarden.atlassian.net/browse/PAS-XXX)
+
 ### Description
 <!--
     Introduction that should allow the reviewer to quickly be able to understand the reason for opening this PR.
 -->
+
 ### Shape
 <!--
     Give a high-level overview of the technical design involved in the implemented changes.
     If the changes don't have any architectural impact, you can remove this section.
 -->
+
 ### Screenshots
 <!--
     Include any relevant UI screenshots showcasing the before & after of your changes.
     If the changes don't have any UI impact, you can remove this section.
 -->
+
 ### Checklist
 I did the following to ensure that my changes were tested thoroughly:
 - [ ] __
