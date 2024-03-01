@@ -28,7 +28,7 @@ public class Magic : PageModel
             return Page();
         }
 
-        var res = await _signInManager.PasswordlessSignInAsync(email, token, true);
+        var res = await _signInManager.PasswordlessSignInAsync(token, true);
 
         if (res.Succeeded)
         {

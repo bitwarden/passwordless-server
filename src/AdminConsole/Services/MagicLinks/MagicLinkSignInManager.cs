@@ -45,7 +45,7 @@ public class MagicLinkSignInManager<TUser>(
         eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
     }
 
-    public async Task<SignInResult> PasswordlessSignInAsync(string email, string token, bool isPersistent)
+    public async Task<SignInResult> PasswordlessSignInAsync(string token, bool isPersistent)
     {
         try
         {
