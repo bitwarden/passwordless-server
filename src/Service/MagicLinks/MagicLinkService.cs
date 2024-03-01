@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
+using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 

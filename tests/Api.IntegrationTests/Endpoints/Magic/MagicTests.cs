@@ -5,8 +5,8 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
+using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.MagicLinks.Models;
 using Xunit;
 using Xunit.Abstractions;
 
