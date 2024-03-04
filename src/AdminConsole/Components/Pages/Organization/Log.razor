@@ -1,0 +1,115 @@
+@page "/organization/log"
+@using Passwordless.AdminConsole.EventLog.DTOs
+@using Passwordless.AdminConsole.Pages.Components
+@using System.Collections.Immutable
+@using Passwordless.AdminConsole.Models
+
+@inject NavigationManager NavigationManager
+@inject IEventLogService EventLogService
+@inject IDataService DataService
+@inject ICurrentContext CurrentContext
+
+<Page Title="Organization Events">
+    <Panel>
+        <p>See events regarding admins of the organization.</p>
+        @if (Events != null)
+        {
+            <Table ColumnHeaders="@(ColumnHeaders)" EmptyMessage="@EmptyMessage">
+                @foreach (var logEvent in Events)
+                {
+                    <tr>
+                        <td class="whitespace-nowrap td-indent td-strong">
+                            <LocalDateTime Value="@logEvent.PerformedAt" />
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.PerformedBy
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.Severity
+                        </td>
+                        <td>
+                            @logEvent.Message
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.Subject
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.EventType
+                        </td>
+                    </tr>
+                }
+            </Table>
+            @if (PageList!.TotalPages > 1)
+            {
+                <div class="flex justify-center space-x-4">
+                    @if (PageList.HasPreviousPage)
+                    {
+                        <a class="btn-primary" href="organization/log?pageNumber=@(PageList!.CurrentIndex - 1)">Prev</a>
+
+                    }
+
+                    @foreach (var page in PageList!.Pages)
+                    {
+                        <a class="link-blue" href="organization/log?pageNumber=@(page)">@(page)</a>
+                    }
+
+                    @if (PageList.HasNextPage)
+                    {
+                        <a class="btn-primary" href="organization/log?pageNumber=@(PageList.CurrentIndex + 1)">Next</a>
+                    }
+                </div>
+            }
+        }
+    </Panel>
+</Page>
+
+@code {
+    public readonly ImmutableArray<string> ColumnHeaders =
+    [
+        "Performed At",
+        "Performed By",
+        "Severity",
+        "Message",
+        "Subject",
+        "Event Type"
+    ];
+    
+    [SupplyParameterFromQuery] public int? PageNumber { get; set; }
+
+    [SupplyParameterFromQuery] public int? NumberOfResults { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PageNumber ??= 1;
+        NumberOfResults ??= 100;
+        
+        var features = CurrentContext.OrganizationFeatures;
+        
+        if (!features.EventLoggingIsEnabled)
+        {
+            NavigationManager.NavigateTo("organization/overview");
+        }
+
+        RetentionPeriod = features.EventLoggingRetentionPeriod;
+        Organization = await DataService.GetOrganizationAsync();
+
+        // need to revisit this:
+        // - infinite scroll/paging over current approach?
+        var result = await EventLogService.GetOrganizationEventLogsAsync(PageNumber.Value, NumberOfResults.Value);
+        
+        Events = result.Events;
+        var itemCount = await EventLogService.GetOrganizationEventLogCountAsync();
+
+        PageList = new PagedList(itemCount, PageNumber.Value, NumberOfResults.Value);
+    }
+    
+    public Organization? Organization { get; set; }
+    
+    public IEnumerable<EventLogEvent>? Events { get; set; }
+    
+    public PagedList? PageList { get; set; }
+    
+    public int RetentionPeriod { get; private set; }
+
+    public string EmptyMessage => $"This organization has no events from the past {RetentionPeriod} days.";
+}
