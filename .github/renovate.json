@@ -12,7 +12,6 @@
       "groupName": "Fido2",
       "matchPackageNames": ["Fido2*"]
     }
-]
   ],
   "ignoreDeps": ["Datadog.Trace"]
 }
