@@ -2,8 +2,8 @@
 
   <ItemGroup>
     <PackageReference Include="Fido2" Version="4.0.0-beta.12" />
-    <PackageReference Include="Fido2.AspNet" Version="4.0.0-beta.11" />
-    <PackageReference Include="Fido2.Models" Version="4.0.0-beta.11" />
+    <PackageReference Include="Fido2.AspNet" Version="4.0.0-beta.12" />
+    <PackageReference Include="Fido2.Models" Version="4.0.0-beta.12" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="MessagePack" Version="2.5.140" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.5.140">
