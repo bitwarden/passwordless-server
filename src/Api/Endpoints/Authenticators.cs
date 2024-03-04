@@ -53,7 +53,7 @@ public static class AuthenticatorsEndpoints
         }
 
         await service.AddAuthenticatorsAsync(request);
-        eventLogger.LogAuthenticatorsWhitelistedEvent();
+        eventLogger.LogAuthenticatorsAllowlistedEvent();
         return NoContent();
     }
 
