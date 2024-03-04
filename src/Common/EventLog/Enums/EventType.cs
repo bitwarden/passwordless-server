@@ -23,7 +23,7 @@ public enum EventType
     ApiManagementAppCreated = 1202,
     ApiManagementAppFrozen = 1203,
     ApiManagementAppUnfrozen = 1204,
-    ApiAuthenticatorsWhitelisted = 1300,
+    ApiAuthenticatorsAllowlisted = 1300,
     ApiAuthenticatorsBlacklisted = 1301,
     ApiAuthenticatorsDelisted = 1302,
     AdminOrganizationCreated = 7000,
