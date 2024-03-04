@@ -7,7 +7,12 @@
       "groupName": "gh minor",
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "Fido2",
+      "matchPackageNames": ["Fido2*"]
     }
+]
   ],
   "ignoreDeps": ["Datadog.Trace"]
 }
