@@ -1,0 +1,117 @@
+@page "/app/{AppId}/logs"
+@using System.Collections.Immutable
+@using Passwordless.AdminConsole.Pages.Components
+@using Passwordless.AdminConsole.EventLog.DTOs
+@inherits BaseApplicationPage
+
+@inject NavigationManager NavigationManager
+@inject IEventLogService EventLogService
+@inject ICurrentContext CurrentContext
+@inject ILogger<Log> Logger
+
+<Page Title="Application Events">
+    <Panel>
+        <p>See events regarding admins of the application.</p>
+        @if (Events != null)
+        {
+            <Table ColumnHeaders="@(ColumnHeaders)" EmptyMessage="@EmptyMessage">
+                @foreach (var logEvent in Events)
+                {
+                    <tr>
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                            <LocalDateTime Value="logEvent.PerformedAt" />
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.PerformedBy
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.Severity
+                        </td>
+                        <td>
+                            @logEvent.Message
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.Subject
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @logEvent.EventType
+                        </td>
+                        <td class="whitespace-nowrap">
+                            @(string.IsNullOrEmpty(logEvent.ApiKeyId) ? "" : string.Concat("***", logEvent.ApiKeyId))
+                        </td>
+                    </tr>
+                }
+            </Table>
+            @if (PageList!.TotalPages > 1)
+            {
+                <div class="flex justify-center space-x-4">
+                    @if (PageList.HasPreviousPage)
+                    {
+                        <a class="btn-primary" href="@($"/app/{AppId}/logs?pageNumber={PageList.CurrentIndex - 1}")">Prev</a>
+
+                    }
+
+                    @foreach (var page in PageList.Pages)
+                    {
+                        <a class="link-blue" href="@($"/app/{AppId}/logs?pageNumber={page}")">@(page)</a>
+                    }
+
+                    @if (PageList.HasNextPage)
+                    {
+                        <a class="btn-primary" href="@($"/app/{AppId}/logs?pageNumber={PageList.CurrentIndex + 1}")">Next</a>
+                    }
+                </div>
+            }
+        }
+    </Panel>
+</Page>
+
+@code {
+    public readonly ImmutableArray<string> ColumnHeaders =
+    [
+        "Performed At",
+        "Performed By",
+        "Severity",
+        "Message",
+        "Subject",
+        "Event Type",
+        "Api Key"
+    ];
+    
+    [SupplyParameterFromQuery] public int? PageNumber { get; set; }
+
+    [SupplyParameterFromQuery] public int? NumberOfResults { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PageNumber ??= 1;
+        NumberOfResults ??= 100;
+
+        var features = CurrentContext.Features;
+
+        if (features.EventLoggingIsEnabled == false)
+        {
+            NavigationManager.NavigateTo($"/app/{AppId}/onboarding/get-started");
+            return;
+        }
+        
+        try
+        {
+            var eventsResponse = await EventLogService.GetEventLogs(PageNumber.Value, NumberOfResults.Value);
+            PageList = new PagedList(eventsResponse.TotalEventCount, PageNumber.Value, NumberOfResults.Value);
+            Events = eventsResponse.Events;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error retrieving event logs for {appId}", CurrentContext.AppId);
+            throw new Exception("Something unexpected happened.", ex);
+        }
+    }
+    
+    public IEnumerable<EventLogEvent>? Events { get; private set; }
+    
+    public PagedList? PageList { get; private set; }
+    
+    public string EmptyMessage => $"This application has no events from the past {CurrentContext.Features.EventLoggingRetentionPeriod} days.";
+
+}
