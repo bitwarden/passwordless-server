@@ -46,7 +46,8 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
                     x.AaGuid!.Value,
                     x.MetadataStatement.Description,
                     x.StatusReports.Select(statusReport => statusReport.Status.ToString()),
-                    x.MetadataStatement.AttestationTypes)
+                    x.MetadataStatement.AttestationTypes,
+                    x.MetadataStatement.Icon)
             );
 
         if (request.AttestationTypes != null && request.AttestationTypes.Any())
