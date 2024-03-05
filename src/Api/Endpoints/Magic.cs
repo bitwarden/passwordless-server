@@ -1,11 +1,11 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
+using Passwordless.Service;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
 using Passwordless.Service.MagicLinks.Models;
-using Passwordless.Service.Storage.Ef;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -18,7 +18,7 @@ public static class MagicEndpoints
         builder.AddPolicy(RateLimiterPolicy, context =>
         {
             using var scope = context.RequestServices.CreateScope();
-            var tenant = scope.ServiceProvider.GetRequiredService<ITenantStorage>().Tenant;
+            var tenant = scope.ServiceProvider.GetRequiredService<ITenantProvider>().Tenant;
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
                 new FixedWindowRateLimiterOptions
