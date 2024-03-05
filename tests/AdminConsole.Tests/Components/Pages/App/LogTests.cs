@@ -1,5 +1,7 @@
 using AutoFixture;
 using Bunit;
+using Bunit.TestDoubles;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -26,7 +28,7 @@ public class LogTests : TestContext
         this.Services.AddSingleton(_eventLogServiceMock.Object);
         this.Services.AddSingleton(_loggerMock.Object);
     }
-    
+
     [Fact]
     public void LogPage_DoesRendersEmptyTable_WhenEventsIsEmpty()
     {
@@ -38,12 +40,14 @@ public class LogTests : TestContext
             .Create();
         _currentContextMock.SetupGet(x => x.Features).Returns(expectedFeatures);
         _currentContextMock.SetupGet(x => x.AppId).Returns("myapp");
+
         var expectedEvents = new ApplicationEventLogResponse("myapp", new List<EventLogEvent>(0), 0);
         _eventLogServiceMock.Setup(x => x.GetEventLogs(
                 It.Is<int>(p => p == 1),
                 It.Is<int>(p => p == 100)))
             .ReturnsAsync(expectedEvents);
-        
+
+        // Act
         var cut = RenderComponent<Log>(p => p
             .Add(param => param.AppId, "myapp"));
 
