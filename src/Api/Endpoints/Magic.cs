@@ -17,7 +17,8 @@ public static class MagicEndpoints
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
         builder.AddPolicy(RateLimiterPolicy, context =>
         {
-            var tenant = context.RequestServices.GetRequiredService<ITenantStorage>().Tenant;
+            using var scope = context.RequestServices.CreateScope();
+            var tenant = scope.ServiceProvider.GetRequiredService<ITenantStorage>().Tenant;
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
                 new FixedWindowRateLimiterOptions
