@@ -27,7 +27,8 @@ public class MagicClient : PasswordlessClient
             {
                 UserId = userId,
                 EmailAddress = emailAddress,
-                UrlTemplate = urlTemplate
+                UrlTemplate = urlTemplate,
+                TimeToLive = Convert.ToInt32(TimeSpan.FromHours(2).TotalSeconds)
             });
 
         var xx = response.Content.ReadAsStringAsync();
