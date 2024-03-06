@@ -13,7 +13,7 @@ public static class BackupBootstrap
     {
         services.AddScoped<IBackupSerializer, CsvBackupSerializer>();
         services.AddScoped<IBackupUtility, BackupUtility>();
-        
+
         services.AddTransient<ClassMap<AccountMetaInformation>, EntityFrameworkMap<AccountMetaInformation>>();
         services.AddTransient<ClassMap<ApiKeyDesc>, EntityFrameworkMap<ApiKeyDesc>>();
         services.AddTransient<ClassMap<AppFeature>, EntityFrameworkMap<AppFeature>>();

@@ -11,9 +11,9 @@ public class BackupUtility : IBackupUtility
      * 4. Authenticator
      * 5. AliasPointer
      * 6. EFStoredCredential
-     * L. ApplicationEvent
-     * L. PeriodicCredentialReport
-     * L. PeriodicActiveUserReport
+     * Last. ApplicationEvent
+     * Last. PeriodicCredentialReport
+     * Last. PeriodicActiveUserReport
      * Ignore: DispatchedEmail
      * Ignore: TokenKey
      */

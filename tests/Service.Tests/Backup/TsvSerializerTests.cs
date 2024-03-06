@@ -21,7 +21,7 @@ public class TsvSerializerTests
             .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
     }
-    
+
     [Fact]
     public void Deserialize_WhenDataIsNull_ThrowsArgumentNullException()
     {
@@ -35,7 +35,7 @@ public class TsvSerializerTests
             .Without(x => x.Authenticators)
             .Without(x => x.Application)
             .CreateMany(3);
-        
+
 
         // Act
         var actual = serializer.Serialize(appFeatures.ToImmutableList());
@@ -43,7 +43,7 @@ public class TsvSerializerTests
         // Assert
         actual.Should().NotBeNullOrEmpty();
     }
-    
+
     public class DbGlobalInMemoryContext : DbGlobalContext
     {
         public DbGlobalInMemoryContext(DbContextOptions<DbGlobalContext> options) : base(options)
