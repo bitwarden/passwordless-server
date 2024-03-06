@@ -18,6 +18,7 @@ public class CsvBackupSerializer : IBackupSerializer
         InjectionOptions = InjectionOptions.Exception,
         Mode = CsvMode.RFC4180,
         Encoding = Encoding.UTF8,
+        IgnoreReferences = true
     };
 
     private readonly IServiceProvider _serviceProvider;
@@ -34,9 +35,9 @@ public class CsvBackupSerializer : IBackupSerializer
     public string Serialize<TEntity>(ImmutableList<TEntity> entities)
     {
         using (var writer = new StringWriter())
-        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        using (var csv = new CsvWriter(writer, _configuration))
         {
-            var classMap = GetClassMap<ClassMap<TEntity>>();
+            var classMap = GetClassMap<TEntity>();
             csv.Context.RegisterClassMap(classMap);
             csv.WriteRecords(entities);
             return writer.ToString();
@@ -48,7 +49,7 @@ public class CsvBackupSerializer : IBackupSerializer
         using (var reader = new StringReader(input))
         using (var csv = new CsvReader(reader, _configuration))
         {
-            var classMap = GetClassMap<ClassMap<TEntity>>();
+            var classMap = GetClassMap<TEntity>();
             csv.Context.RegisterClassMap(classMap);
             var records = csv.GetRecords<TEntity>();
             return records.ToList();
@@ -61,10 +62,10 @@ public class CsvBackupSerializer : IBackupSerializer
         {
             return _serviceProvider.GetRequiredService<ClassMap<TEntity>>();
         }
-        catch (Exception e)
+        catch (InvalidOperationException)
         {
-            _logger.LogError(e, "Failed to get class map for {EntityType}", typeof(TEntity).Name);
-            throw;
+            _logger.LogError("Failed to get class map for {EntityType}", typeof(TEntity).Name);
+            throw new ConfigurationException($"Failed to get class map for {typeof(TEntity).Name}. Did you add an entity and register the class map in the service provider?");
         }
     }
 }

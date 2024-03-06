@@ -15,6 +15,7 @@ using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
 using Passwordless.Service;
+using Passwordless.Service.Backup;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
 using Passwordless.Service.MDS;
@@ -127,6 +128,7 @@ services.AddSingleton(sp =>
 
 services.AddScoped<IFeatureContextProvider, FeatureContextProvider>();
 services.AddEventLogging();
+services.AddBackup();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -211,6 +213,8 @@ app.MapMetaDataServiceEndpoints();
 app.MapAuthenticatorsEndpoints();
 
 app.MapPasswordlessHealthChecks();
+
+app.MapBackupEndpoints();
 
 app.Run();
 
