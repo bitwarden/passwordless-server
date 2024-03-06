@@ -26,6 +26,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<DispatchedEmail> DispatchedEmails => Set<DispatchedEmail>();
     public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
     public DbSet<PeriodicActiveUserReport> PeriodicActiveUserReports => Set<PeriodicActiveUserReport>();
+    public DbSet<Archive> Archives => Set<Archive>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -117,6 +118,15 @@ public abstract class DbGlobalContext : DbContext
             builder.HasKey(x => new { x.Tenant, x.CreatedAt });
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.PeriodicActiveUserReports)
+                .HasForeignKey(x => x.Tenant)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<Archive>(builder =>
+        {
+            builder.HasKey(x => new { x.Tenant, x.CreatedAt });
+            builder.HasOne(x => x.Application)
+                .WithMany(x => x.Archives)
                 .HasForeignKey(x => x.Tenant)
                 .IsRequired();
         });

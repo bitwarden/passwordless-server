@@ -1,20 +1,58 @@
+using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Backup;
+using Passwordless.Service.EventLog.Models;
+using Passwordless.Service.Models;
+using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Backup;
 
 public class BackupUtility : IBackupUtility
 {
-    /**
-     * 1. AccountMetaInformation
-     * 2. ApiKeyDesc
-     * 3. AppFeature
-     * 4. Authenticator
-     * 5. AliasPointer
-     * 6. EFStoredCredential
-     * Last. ApplicationEvent
-     * Last. PeriodicCredentialReport
-     * Last. PeriodicActiveUserReport
-     * Ignore: DispatchedEmail
-     * Ignore: TokenKey
-     */
+    private readonly IBackupSerializer _backupSerializer;
+    private readonly DbTenantContext _dbContext;
+    private readonly TimeProvider _timeProvider;
+    private readonly ITenantProvider _tenantProvider;
+
+    public BackupUtility(
+        IBackupSerializer backupSerializer,
+        DbTenantContext dbContext,
+        TimeProvider timeProvider,
+        ITenantProvider tenantProvider)
+    {
+        _backupSerializer = backupSerializer;
+        _dbContext = dbContext;
+        _timeProvider = timeProvider;
+        _tenantProvider = tenantProvider;
+    }
+
+    public async Task BackupAsync()
+    {
+        var groupId = Guid.NewGuid();
+        await BackupEntityAsync<AccountMetaInformation>(groupId);
+        await BackupEntityAsync<ApiKeyDesc>(groupId);
+        await BackupEntityAsync<AppFeature>(groupId);
+        await BackupEntityAsync<Authenticator>(groupId);
+        await BackupEntityAsync<AliasPointer>(groupId);
+        await BackupEntityAsync<EFStoredCredential>(groupId);
+        await BackupEntityAsync<ApplicationEvent>(groupId);
+        await BackupEntityAsync<PeriodicCredentialReport>(groupId);
+        await BackupEntityAsync<PeriodicActiveUserReport>(groupId);
+    }
+
+    private async Task BackupEntityAsync<TEntity>(Guid groupId) where TEntity : class
+    {
+        var entities = await _dbContext.Set<TEntity>().ToListAsync();
+        var data = _backupSerializer.Serialize(entities);
+        var archive = new Archive
+        {
+            Id = Guid.NewGuid(),
+            GroupId = groupId,
+            CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+            Entity = typeof(TEntity).Name,
+            Data = data,
+            Tenant = _tenantProvider.Tenant
+        };
+        _dbContext.Archives.Add(archive);
+        await _dbContext.SaveChangesAsync();
+    }
 }

@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using CsvHelper;
@@ -32,7 +31,7 @@ public class CsvBackupSerializer : IBackupSerializer
         _logger = logger;
     }
 
-    public string Serialize<TEntity>(ImmutableList<TEntity> entities)
+    public string Serialize<TEntity>(IReadOnlyCollection<TEntity> entities)
     {
         using (var writer = new StringWriter())
         using (var csv = new CsvWriter(writer, _configuration))

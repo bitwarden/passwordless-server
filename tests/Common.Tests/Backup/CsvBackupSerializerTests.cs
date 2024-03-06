@@ -79,10 +79,10 @@ public class CsvBackupSerializerTests
 
         // Act
         var temp = _sut.Serialize(cars);
-        var actual = _sut.Deserialize<Car>(temp);
+        var actual = _sut.Deserialize<Car>(temp).ToImmutableList();
 
         // Assert
-        Assert.Equal(2, actual.Count());
+        Assert.Equal(2, actual.Count);
         Assert.Equal(1, actual.First().Id);
         Assert.Equal(1, actual.First().OwnerId);
         Assert.Equal("Ford,", actual.First().Make);
