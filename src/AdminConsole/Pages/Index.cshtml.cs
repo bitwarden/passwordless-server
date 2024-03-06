@@ -17,7 +17,7 @@ public class IndexModel(ILogger<IndexModel> logger, ConsoleDbContext dbContext) 
 
             return RedirectToPage("/Organization/overview");
         }
-        
+
         logger.LogInformation("Database does not exist. Starting initialization process.");
 
         return RedirectToPage("/Initialize");

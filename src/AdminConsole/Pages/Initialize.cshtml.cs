@@ -40,7 +40,7 @@ public class Initialize(ConsoleDbContext dbContext, IPasswordlessManagementClien
 
         using var http = new HttpClient
         {
-            BaseAddress = new Uri(ApiUrl), 
+            BaseAddress = new Uri(ApiUrl),
             DefaultRequestHeaders = { { "ManagementKey", ManagementKey } }
         };
 
