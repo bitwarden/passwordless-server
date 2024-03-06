@@ -41,7 +41,7 @@
 
             <hr/>
             <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
-                <Table ColumnHeaders="@(new []{ "Allowed", "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="No authenticators found using applied filters.">
+                <Table ColumnHeaders="@(new []{ "Allowed", string.Empty, "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="No authenticators found using applied filters.">
                     @if (Data != null)
                     {
                         @foreach (var item in Data)
@@ -49,6 +49,9 @@
                             <tr>
                                 <td class="relative px-7 sm:w-12 sm:px-6">
                                     <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid"/>
+                                </td>
+                                <td class="block">
+                                    <img class="w-8" src="@item.Icon" alt="@item.AaGuid" />
                                 </td>
                                 <td class="text-sm font-medium text-gray-900">@item.Name</td>
                                 <td class="whitespace-nowrap">@item.AaGuid</td>
@@ -197,13 +200,14 @@
         Guid AaGuid,
         string Name,
         IEnumerable<string> CertificationStatuses,
-        IEnumerable<string> AttestationTypes)
+        IEnumerable<string> AttestationTypes,
+        string Icon)
     {
         public bool IsSelected { get; set; }
 
         public static ListViewModel FromDto(EntryResponse dto)
         {
-            return new ListViewModel(dto.AaGuid, dto.Name, dto.CertificationStatuses, dto.AttestationTypes);
+            return new ListViewModel(dto.AaGuid, dto.Name, dto.CertificationStatuses, dto.AttestationTypes, dto.Icon);
         }
     }
 }
