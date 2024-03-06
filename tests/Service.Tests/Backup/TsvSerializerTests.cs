@@ -3,6 +3,7 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.Common.Backup;
 using Passwordless.Service.Models;
@@ -25,7 +26,9 @@ public class TsvSerializerTests
     public void Deserialize_WhenDataIsNull_ThrowsArgumentNullException()
     {
         // Arrange
-        var serializer = new CsvBackupSerializer();
+        var sp = new Mock<IServiceProvider>();
+        var logger = new Mock<ILogger<CsvBackupSerializer>>();
+        var serializer = new CsvBackupSerializer(sp.Object, logger.Object);
         var db = new DbGlobalInMemoryContext(_contextOptions);
         var f = new Fixture();
         var appFeatures = f.Build<AppFeature>()

@@ -6,5 +6,5 @@ public interface IBackupSerializer
 {
     string Serialize<TEntity>(ImmutableList<TEntity> entities);
     
-    IEnumerable<T>? Deserialize<T>(string data);
+    IEnumerable<TEntity>? Deserialize<TEntity>(string data);
 }
