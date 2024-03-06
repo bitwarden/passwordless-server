@@ -1,0 +1,31 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@model Passwordless.AdminConsole.Pages.Initialize
+@attribute [AllowAnonymous]
+
+To initialize AdminConsole please complete the below form:
+<form method="post">
+    <label asp-for="ManagementKey">
+        <input asp-for="ManagementKey" type="text"/>
+    </label>
+    <label asp-for="AdminEmail">
+        <input asp-for="AdminEmail" type="email"/>
+    </label>
+    <label asp-for="ApiUrl">
+        <input asp-for="ApiUrl" type="url"/>
+    </label>
+    <button type="submit"></button>
+</form>
+
+Paste these values into where you configure your AdminConsole
+<code lang="json">
+  "Passwordless": {
+    "ApiUrl": "@Model.ApiUrl",
+    "ApiKey": "@Model.CreateAppResultDto.ApiKey1",
+    "ApiSecret": "@Model.CreateAppResultDto.ApiSecret1"
+  },
+  "PasswordlessManagement": {
+    "ApiUrl": "@Model.ApiUrl",
+    "ManagementKey": "@Model.ManagementKey"
+  }
+</code>
