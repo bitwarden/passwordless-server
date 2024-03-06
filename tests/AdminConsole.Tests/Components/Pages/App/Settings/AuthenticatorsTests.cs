@@ -35,9 +35,9 @@ public class AuthenticatorsTests : TestContext
         // Arrange
         var mds = new List<EntryResponse>
         {
-            new (Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154b1"), "Bitwarden Authenticator", new[] { "FIDO_CERTIFIED", "FIDO_CERTIFIED_L1" }, new[] { "basic_full" }),
-            new (Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154a9"), "Authenticator #2", new[] { "FIDO_CERTIFIED", "FIDO_CERTIFIED_L1" }, new[] { "basic_full" }),
-            new (Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154a8"), "Authenticator #1", new[] { "FIDO_CERTIFIED_L2" }, new[] { "basic_full" })
+            new (Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154b1"), "Bitwarden Authenticator", new[] { "FIDO_CERTIFIED", "FIDO_CERTIFIED_L1" }, new[] { "basic_full" }, "icon1"),
+            new (Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154a9"), "Authenticator #2", new[] { "FIDO_CERTIFIED", "FIDO_CERTIFIED_L1" }, new[] { "basic_full" }, "icon2"),
+            new (Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154a8"), "Authenticator #1", new[] { "FIDO_CERTIFIED_L2" }, new[] { "basic_full" }, "icon3")
         };
         var features = _fixture
             .Build<ApplicationFeatureContext>()

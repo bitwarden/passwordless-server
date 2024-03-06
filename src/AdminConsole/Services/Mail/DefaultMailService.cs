@@ -21,13 +21,14 @@ public class DefaultMailService : IMailService
 
     public async Task SendPasswordlessSignInAsync(string magicLink, string email)
     {
-        MailMessage message = new()
+        var message = new MailMessage
         {
-            To = new List<string> { email },
+            To = [email],
             From = _fromEmail,
             Subject = "Verify your passwordless.dev account",
             TextBody =
                 $"Please click the link below to verify your account: {magicLink}",
+            // lang=html
             HtmlBody =
                 $"""
                 <!doctype html>
@@ -58,11 +59,15 @@ public class DefaultMailService : IMailService
 
         var message = new MailMessage
         {
-            To = new List<string> { inv.ToEmail },
+            To = [inv.ToEmail],
             From = _fromEmail,
             Subject = "You've been invited to join an organization in passwordless.dev",
             TextBody =
-                $"""You've been invited to join {organizationDisplayName} on passwordless.dev. {Environment.NewLine}The invite was sent by '{invitedByDisplayName}' ({inv.FromEmail}).{Environment.NewLine}Please click the link to accept the invitation: {link}""",
+                $"""
+                You've been invited to join {organizationDisplayName} on passwordless.dev.
+                The invite was sent by '{invitedByDisplayName}' ({inv.FromEmail}).
+                Please click the link to accept the invitation: {link}
+                """,
             Tag = "admin-invite"
         };
 
@@ -73,11 +78,15 @@ public class DefaultMailService : IMailService
     {
         var message = new MailMessage
         {
-            To = new List<string> { email },
+            To = [email],
             From = _fromEmail,
             Subject = "Your e-mail is already connected to an organization",
             TextBody =
-                $"""You recently tried to sign up or join an organization. We regret to inform you that your e-mail was already connected to an organization. Please use a unique e-mail address to sign up or join an organization.""",
+                """
+                You recently tried to sign up or join an organization.
+                We regret to inform you that your e-mail was already connected to an organization.
+                Please use a unique e-mail address to sign up or join an organization.
+                """,
             Tag = "duplicate-email"
         };
 
@@ -94,28 +103,31 @@ public class DefaultMailService : IMailService
             From = _fromEmail,
             Subject = $"Your organization '{organizationDisplayName}' was deleted.",
             TextBody =
-                $"""Your organization '{organizationDisplayName}' was deleted by {deletedBy} at {deletedAt:F} UTC.""",
+                $"""
+                Your organization '{organizationDisplayName}' was deleted by {deletedBy} at {deletedAt:F} UTC.
+                """,
             Tag = "organization-deleted"
         };
 
         return _provider.SendAsync(message);
     }
 
-
-
     public async Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails)
     {
         var applicationDisplayName = WebUtility.HtmlEncode(application.Name);
 
-        MailMessage message = new()
+        var message = new MailMessage
         {
             To = emails,
             From = _fromEmail,
-            Bcc = new List<string> { "account-deletion@passwordless.dev" },
+            Bcc = ["account-deletion@passwordless.dev"],
             Subject = $"Your app '{applicationDisplayName}' has been deleted.",
             TextBody =
-                $"Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.",
+                $"""
+                Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.
+                """,
             HtmlBody =
+                // lang=html
                 $"""
                 <!doctype html>
                 <html lang="en">
@@ -138,15 +150,19 @@ public class DefaultMailService : IMailService
     {
         var applicationDisplayName = WebUtility.HtmlEncode(application.Name);
 
-        MailMessage message = new()
+        var message = new MailMessage
         {
             To = emails,
-            Bcc = new List<string> { "account-deletion@passwordless.dev" },
+            Bcc = ["account-deletion@passwordless.dev"],
             From = _fromEmail,
             Subject = $"Your app '{applicationDisplayName}' is scheduled for deletion in 30 days.",
             TextBody =
-                $"Your app '{applicationDisplayName}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'. If this was unintentional, please visit the your administration console: {cancellationLink}.",
+                $"""
+                Your app '{applicationDisplayName}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.
+                If this was unintentional, please visit the your administration console: {cancellationLink}.
+                """,
             HtmlBody =
+                // lang=html
                 $"""
                 <!doctype html>
                 <html lang="en">
