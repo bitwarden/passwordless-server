@@ -153,6 +153,8 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
+app.UseRateLimiter();
+
 if (isSelfHosted)
 {
     app.UseMiddleware<HttpOverridesMiddleware>();
@@ -185,7 +187,6 @@ app.UseWhen(o =>
 });
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseWhen(o =>
