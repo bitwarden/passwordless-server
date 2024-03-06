@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 
 namespace Passwordless.Common.Backup;
 
 public interface IBackupSerializer
 {
-    string Serialize<TDbContext, TEntity>(TDbContext dbContext, IEnumerable<TEntity> entities)
-        where TDbContext : DbContext;
+    string Serialize<TEntity>(ImmutableList<TEntity> entities);
     
     IEnumerable<T>? Deserialize<T>(string data);
 }

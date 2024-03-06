@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ public class TsvSerializerTests
     public void Deserialize_WhenDataIsNull_ThrowsArgumentNullException()
     {
         // Arrange
-        var serializer = new TsvBackupSerializer();
+        var serializer = new CsvBackupSerializer();
         var db = new DbGlobalInMemoryContext(_contextOptions);
         var f = new Fixture();
         var appFeatures = f.Build<AppFeature>()
@@ -34,7 +35,7 @@ public class TsvSerializerTests
         
 
         // Act
-        var actual = serializer.Serialize(db, appFeatures);
+        var actual = serializer.Serialize(appFeatures.ToImmutableList());
 
         // Assert
         actual.Should().NotBeNullOrEmpty();

@@ -28,6 +28,11 @@ public class TsvBackupSerializer : IBackupSerializer
         return stringBuilder.ToString();
     }
 
+    public string Serialize<TEntity>(ImmutableList<TEntity> entities)
+    {
+        throw new NotImplementedException();
+    }
+
     public IEnumerable<T>? Deserialize<T>(string data)
     {
         throw new NotImplementedException();
