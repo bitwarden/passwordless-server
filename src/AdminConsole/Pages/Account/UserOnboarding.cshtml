@@ -1,6 +1,8 @@
 @page
 @model Passwordless.AdminConsole.Pages.Account.UserOnboarding
 
+@inject IPasswordlessClient PasswordlessClient
+
 @{
     ViewBag.Title = "Let's get you set up";
 }
@@ -9,10 +11,10 @@
     <h2>Passkeys</h2>
     <p class="v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
     <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
-
-    <component type="typeof(Credentials)" render-mode="Static" param-Items="@(Model.Credentials)" param-HideDetails="@(true)"/>
-    <partial name="Shared/_PasswordlessClientJs"/>
-    <partial name="Shared/_AddPasskeys"/>
+    
+    <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@(true)" param-PasswordlessClient="@(PasswordlessClient)" param-UserId="@Model.UserId" />
+    <partial name="Shared/_PasswordlessClientJs" />
+    <partial name="Shared/_AddPasskeys" />
 </div>
 
 <panel header="Create your first application">
