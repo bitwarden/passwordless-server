@@ -14,7 +14,7 @@ public class CsvBackupSerializer : IBackupSerializer
         HasHeaderRecord = true,
         IgnoreBlankLines = true,
         IncludePrivateMembers = false,
-        InjectionOptions = InjectionOptions.Exception,
+        InjectionOptions = InjectionOptions.None,
         Mode = CsvMode.RFC4180,
         Encoding = Encoding.UTF8,
         IgnoreReferences = true

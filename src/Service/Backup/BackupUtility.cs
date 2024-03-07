@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Passwordless.Common.Backup;
 using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
@@ -12,17 +13,20 @@ public class BackupUtility : IBackupUtility
     private readonly DbTenantContext _dbContext;
     private readonly TimeProvider _timeProvider;
     private readonly ITenantProvider _tenantProvider;
+    private readonly ILogger<BackupUtility> _logger;
 
     public BackupUtility(
         IBackupSerializer backupSerializer,
         DbTenantContext dbContext,
         TimeProvider timeProvider,
-        ITenantProvider tenantProvider)
+        ITenantProvider tenantProvider,
+        ILogger<BackupUtility> logger)
     {
         _backupSerializer = backupSerializer;
         _dbContext = dbContext;
         _timeProvider = timeProvider;
         _tenantProvider = tenantProvider;
+        _logger = logger;
     }
 
     public async Task BackupAsync()
@@ -43,6 +47,7 @@ public class BackupUtility : IBackupUtility
     {
         var entities = await _dbContext.Set<TEntity>().ToListAsync();
         var data = _backupSerializer.Serialize(entities);
+        _logger.LogInformation(data);
         var archive = new Archive
         {
             Id = Guid.NewGuid(),
@@ -52,7 +57,7 @@ public class BackupUtility : IBackupUtility
             Data = data,
             Tenant = _tenantProvider.Tenant
         };
-        _dbContext.Archives.Add(archive);
-        await _dbContext.SaveChangesAsync();
+        //_dbContext.Archives.Add(archive);
+        //await _dbContext.SaveChangesAsync();
     }
 }
