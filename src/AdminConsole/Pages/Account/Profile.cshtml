@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Antiforgery
 @model Passwordless.AdminConsole.Pages.Account.Profile
 @inject IAntiforgery Antiforgery
+@inject IPasswordlessClient PasswordlessClient
 
 @{
     ViewData["Title"] = "Profile Settings";
@@ -10,7 +11,7 @@
 
 <div class="panel">
     <h2>Passkeys</h2>   
-    <component type="typeof(Credentials)" render-mode="Static" param-Items="@(Model.Credentials)" param-HideDetails="@(false)" />
+    <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@false" param-PasswordlessClient="@PasswordlessClient" param-UserId="@Model.UserId" />
     <partial name="Shared/_PasswordlessClientJs"/>
     <partial name="Shared/_AddPasskeys"/>
 </div>
