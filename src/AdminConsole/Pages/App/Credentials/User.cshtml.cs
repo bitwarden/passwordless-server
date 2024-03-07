@@ -12,9 +12,7 @@ public class UserModel : PageModel
     [BindProperty(SupportsGet = true)]
     public string UserId { get; set; }
 
-    public UserModel(
-        IAuthenticatorDataProvider authenticatorDataProvider,
-        IScopedPasswordlessClient api)
+    public UserModel(IScopedPasswordlessClient api)
     {
         PasswordlessClient = api;
     }
