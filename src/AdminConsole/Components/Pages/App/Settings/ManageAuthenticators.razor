@@ -50,14 +50,14 @@
                                 <td class="relative px-7 sm:w-12 sm:px-6">
                                     <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid"/>
                                 </td>
-                                <td class="table-cell min-w-16 w-16">
+                                <td class="table-cell">
                                     @if (string.IsNullOrEmpty(item.Icon))
                                     {
-                                        <Fido2AuthenticatorIcon class="fill-blue-400 w-full" />
+                                        <Fido2AuthenticatorIcon class="fill-blue-400 w-16 max-h-16" />
                                     }
                                     else
                                     {
-                                        <img class="w-full" src="@item.Icon" alt="@item.AaGuid"/>
+                                        <img class="w-16" src="@item.Icon" alt="@item.AaGuid"/>
                                     }
                                 </td>
                                 <td class="text-sm font-medium text-gray-900">@item.Name</td>
