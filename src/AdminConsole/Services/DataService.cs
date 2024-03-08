@@ -98,13 +98,10 @@ public class DataService : IDataService
 
     public async Task CleanUpOnboardingAsync()
     {
-        _db.Onboardings
+        await _db.Onboardings
             .Where(o => !string.IsNullOrEmpty(o.ApiSecret) && o.SensitiveInfoExpireAt < DateTime.UtcNow)
-            .ToList().ForEach(o =>
-            {
-                o.ApiSecret = string.Empty;
-            });
-        await _db.SaveChangesAsync();
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(p => p.ApiSecret, string.Empty));
     }
 
     public async Task CreateOrganizationAsync(Organization organization)
