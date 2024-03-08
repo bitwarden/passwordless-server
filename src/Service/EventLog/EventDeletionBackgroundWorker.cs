@@ -1,57 +1,47 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Passwordless.Common.Background;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.EventLog;
 
-public class EventDeletionBackgroundWorker : BackgroundService
+public sealed class EventDeletionBackgroundWorker : BasePeriodicBackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ISystemClock _systemClock;
-    private readonly ILogger<EventDeletionBackgroundWorker> _logger;
 
-    public EventDeletionBackgroundWorker(IServiceProvider serviceProvider, ISystemClock systemClock, ILogger<EventDeletionBackgroundWorker> logger)
+    public EventDeletionBackgroundWorker(
+        IServiceProvider serviceProvider,
+        TimeProvider timeProvider,
+        ILogger<EventDeletionBackgroundWorker> logger) : base(
+        new TimeOnly(0, 0, 0),
+        TimeSpan.FromDays(1),
+        timeProvider,
+        logger)
     {
         _serviceProvider = serviceProvider;
-        _systemClock = systemClock;
-        _logger = logger;
     }
 
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task DoWorkAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting Event Log Deletion Worker");
-
-        using PeriodicTimer timer = new(TimeSpan.FromDays(1));
-
+        using var serviceScope = _serviceProvider.CreateScope();
         try
         {
-            do
-            {
-                await DeleteExpiredEventLogs(stoppingToken);
-            } while (await timer.WaitForNextTickAsync(stoppingToken));
+            var dbContext = serviceScope.ServiceProvider.GetRequiredService<DbGlobalContext>();
+
+            var eventsToDelete = await dbContext.ApplicationEvents
+                .Where(x => x.PerformedAt <= TimeProvider.GetUtcNow().UtcDateTime.AddDays(-x.Application.Features.EventLoggingRetentionPeriod))
+                .ExecuteDeleteAsync(cancellationToken);
+
+            Logger.LogInformation("{eventsDeleted} events deleted from EventLogging", eventsToDelete);
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Event Log Deletion Worker was cancelled.");
+            Logger.LogInformation("Event Log Deletion Worker was cancelled.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Event Log Deletion failed.");
+            Logger.LogError(ex, "Event Log Deletion failed.");
         }
-    }
-
-    private async Task DeleteExpiredEventLogs(CancellationToken cancellationToken)
-    {
-        using var serviceScope = _serviceProvider.CreateScope();
-        var dbContext = serviceScope.ServiceProvider.GetRequiredService<DbGlobalContext>();
-
-        var eventsToDelete = await dbContext.ApplicationEvents
-            .Where(x => x.PerformedAt <= _systemClock.UtcNow.UtcDateTime.AddDays(-x.Application.Features.EventLoggingRetentionPeriod))
-            .ExecuteDeleteAsync(cancellationToken);
-
-        _logger.LogInformation("{eventsDeleted} events deleted from EventLogging", eventsToDelete);
     }
 }
