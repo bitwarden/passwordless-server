@@ -1,0 +1,204 @@
+@page "/initialize"
+@using Passwordless.AdminConsole.Helpers
+@using Passwordless.AdminConsole.Identity
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Passwordless.Common.Models.Apps
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.AdminConsole.Db
+@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.Models
+@using System.ComponentModel.DataAnnotations
+@inject IOptions<PasswordlessManagementOptions> ManagementOptions
+@inject ConsoleDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject IApplicationService ApplicationService
+@inject IDataService DataService
+@inject TimeProvider TimeProvider
+@inject UserManager<ConsoleAdmin> UserManager
+@inject ILogger<Initialize> Logger
+@attribute [AllowAnonymous]
+<h3>Initialize</h3>
+
+<div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+    <p>
+        To initialize AdminConsole please enter a name to be associated with the admin console. This will create an 
+        organization and application for the AdminConsole to use for passkey login. You will then be sent a magic link 
+        to log into the newly initialized admin console.
+    </p>
+    <p>
+        NOTE: The email used here will be locked to the AdminConsole organization and will not be able to create a new 
+        organization.
+    </p>
+    <EditForm
+        Model="Form"
+        FormName="AdminConsoleCreateForm"
+        OnValidSubmit="OnAdminConsoleCreateFormSubmitted"
+        class="space-y-6">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 my-2">
+            <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Email">
+                Admin Email: <InputText id="Email" @bind-Value="@Form.AdminEmail" type="email"/>
+            </label>
+            <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Name">
+                Admin Name: <InputText id="Name" @bind-Value="@Form.AdminName"/>
+            </label>
+            <button class="btn-primary m-2" type="submit">Submit</button>
+        </div>
+    </EditForm>
+
+    @if (IsFormSubmitted)
+    {
+        <p>@ProcessMessage</p>
+    }
+
+    @if (AppKeys is not null)
+    {
+        <p>Paste these values into where you configure your AdminConsole</p>
+        <code style="white-space: pre;" lang="json">
+            "Passwordless": {
+                "ApiUrl": "@ManagementOptions.Value.ApiUrl",
+                "ApiKey": "@AppKeys.ApiKey1",
+                "ApiSecret": "@AppKeys.ApiSecret1"
+            }
+        </code>
+    
+        <p>
+            After doing this, you will need to restart the application and enter the Admin Email used here to into the 
+            login form. This will send you a magic link to log in and you can proceed to set up your passkey to log in.
+        </p>
+    }
+
+</div>
+
+@code {
+
+    [SupplyParameterFromForm(FormName = "AdminConsoleCreateForm")]
+    public AdminConsoleCreateForm Form { get; set; } = new();
+
+    public bool IsFormSubmitted { get; set; }
+    public string ProcessMessage { get; set; } = string.Empty;
+
+    public CreateAppResultDto? AppKeys { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await DbContext.HaveAnyMigrationsEverBeenAppliedAsync())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private async Task OnAdminConsoleCreateFormSubmitted()
+    {
+        if (await DbContext.HaveAnyMigrationsEverBeenAppliedAsync())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
+        IsFormSubmitted = true;
+
+        Models.Organization organization;
+        var now = TimeProvider.GetUtcNow().UtcDateTime;
+
+        // create app in api
+        try
+        {
+            using var http = new HttpClient();
+            http.BaseAddress = new Uri(ManagementOptions.Value.ApiUrl);
+            http.DefaultRequestHeaders.Add("ManagementKey", ManagementOptions.Value.ManagementKey);
+
+            using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto
+            {
+                AdminEmail = Form.AdminEmail
+            });
+
+            AppKeys = (await response.Content.ReadFromJsonAsync<CreateAppResultDto>())!;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create app in Api.");
+            ProcessMessage = "Failed to create app in Api. Please see Console for a detailed error message";
+            return;
+        }
+
+        await DbContext.Database.MigrateAsync();
+
+        // create org
+        try
+        {
+            organization = new Models.Organization
+            {
+                Name = "Admin Console",
+                InfoOrgType = "company",
+                InfoUseCase = "both",
+                CreatedAt = now
+            };
+            await DataService.CreateOrganizationAsync(organization);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create org.");
+            ProcessMessage = "Failed to create org. Please see Console for a detailed error message.";
+            return;
+        }
+
+        // create admin
+        try
+        {
+            var user = new ConsoleAdmin
+            {
+                UserName = Form.AdminEmail,
+                Email = Form.AdminEmail,
+                OrganizationId = organization.Id,
+                Name = Form.AdminName
+            };
+            
+            await UserManager.SetUserNameAsync(user, Form.AdminEmail);
+            await UserManager.SetEmailAsync(user, Form.AdminEmail);
+            await UserManager.CreateAsync(user);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create admin.");
+            ProcessMessage = "Failed to create admin. Please see Console for a detailed error message.";
+            return;
+        }
+
+        // create app in org
+        try
+        {
+            await ApplicationService.CreateApplicationAsync(new Application
+            {
+                Id = "adminconsole",
+                Name = "Admin Console",
+                Description = "This is the AdminConsole application within AdminConsole.",
+                CreatedAt = now,
+                OrganizationId = organization.Id,
+                ApiKey = AppKeys.ApiKey2,
+                ApiSecret = AppKeys.ApiSecret2,
+                ApiUrl = ManagementOptions.Value.ApiUrl,
+                Onboarding = new Onboarding
+                {
+                    ApiKey = AppKeys.ApiKey1,
+                    ApiSecret = AppKeys.ApiSecret1,
+                    SensitiveInfoExpireAt = now.AddDays(7)
+                },
+                BillingPlan = "Free"
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create app in AdminConsole.");
+            ProcessMessage = "Failed to create app in AdminConsole. Please see Console for a detailed error message.";
+        }
+
+        ProcessMessage = "Admin Console has been initialized successfully.";
+    }
+
+    public sealed class AdminConsoleCreateForm
+    {
+        [Required] public string AdminName { get; set; } = string.Empty;
+        [Required, EmailAddress] public string AdminEmail { get; set; } = string.Empty;
+    }
+
+}
