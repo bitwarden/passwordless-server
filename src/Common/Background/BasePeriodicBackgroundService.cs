@@ -18,7 +18,7 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
 
     private Task? _executingTask;
 
-    private readonly TimeProvider _timeProvider;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     ///
@@ -34,7 +34,7 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
     {
         _executionTime = executionTime;
         _period = period;
-        _timeProvider = timeProvider;
+        TimeProvider = timeProvider;
         Logger = logger;
     }
 
@@ -42,7 +42,7 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var executionPlan = ExecutionPlanUtility.GetExecutionPlan(_executionTime, _period, _timeProvider);
+        var executionPlan = ExecutionPlanUtility.GetExecutionPlan(_executionTime, _period, TimeProvider);
         Logger.LogInformation("Starting {BackgroundService} in {InitialDelay}.", GetType().Name, executionPlan.InitialDelay);
         _timer = new Timer(DoWork, null, executionPlan.InitialDelay, _period);
 
