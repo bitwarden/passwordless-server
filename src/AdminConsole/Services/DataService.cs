@@ -78,9 +78,7 @@ public class DataService : IDataService
 
     public async Task<bool> DeleteOrganizationAsync()
     {
-        var rowsAffected = await _db.Organizations
-            .Where(x => x.Id == _orgId)
-            .ExecuteDeleteAsync();
+        var rowsAffected = await _db.Organizations.Where(x => x.Id == _orgId).ExecuteDeleteAsync();
         return rowsAffected > 0;
     }
 
