@@ -10,10 +10,6 @@ public partial class Credentials : ComponentBase
 {
     public const string RemoveCredentialFormName = "remove-credential-form";
 
-    /// <summary>
-    /// The list of credentials.
-    /// </summary>
-    [Parameter]
     public required IReadOnlyCollection<Credential> Items { get; set; }
 
     public IReadOnlyCollection<CredentialModel> GetItems()
@@ -46,11 +42,18 @@ public partial class Credentials : ComponentBase
     [Parameter]
     public bool HideDetails { get; set; }
 
+    [Parameter]
+    public required IPasswordlessClient PasswordlessClient { get; set; }
+
+    [Parameter]
+    public required string UserId { get; set; }
+
     [SupplyParameterFromForm(FormName = RemoveCredentialFormName)]
     public DeleteCredentialFormModel DeleteCredentialForm { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
+        Items = await PasswordlessClient.ListCredentialsAsync(UserId);
         // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
         if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {

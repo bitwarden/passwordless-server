@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
 using Passwordless.Common.MagicLinks.Models;
@@ -14,12 +16,19 @@ public static class MagicEndpoints
     public const string RateLimiterPolicy = nameof(MagicEndpoints);
 
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
-        builder.AddFixedWindowLimiter(RateLimiterPolicy, limiter =>
+        builder.AddPolicy(RateLimiterPolicy, context =>
         {
-            limiter.Window = TimeSpan.FromMinutes(5);
-            limiter.PermitLimit = 10;
-            limiter.QueueLimit = 0;
-            limiter.AutoReplenishment = true;
+            var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
+
+            return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
+                new FixedWindowRateLimiterOptions
+                {
+                    Window = TimeSpan.FromMinutes(5),
+                    PermitLimit = 10,
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                }
+            );
         });
 
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)

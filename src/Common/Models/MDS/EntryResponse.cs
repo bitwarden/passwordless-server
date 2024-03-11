@@ -10,4 +10,4 @@ public record EntryResponse(
     string Name,
     IEnumerable<string> CertificationStatuses,
     IEnumerable<string> AttestationTypes,
-    string Icon);
+    string? Icon);
