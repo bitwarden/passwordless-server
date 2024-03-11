@@ -1,25 +1,9 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Services.AuthenticatorData;
+using Passwordless.AdminConsole.Helpers;
 
 namespace Passwordless.AdminConsole.Pages.Account;
 
 public class UserOnboarding : PageModel
 {
-    private readonly IPasswordlessClient _passwordlessClient;
-
-    public UserOnboarding(
-        IPasswordlessClient passwordlessClient,
-        IAuthenticatorDataProvider authenticatorDataProvider)
-    {
-        _passwordlessClient = passwordlessClient;
-    }
-
-    public IReadOnlyCollection<Credential> Credentials { get; set; }
-
-    public async Task OnGet()
-    {
-        Credentials = await _passwordlessClient.ListCredentialsAsync(HttpContext.User.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-    }
+    public string UserId => HttpContext.User.GetId();
 }
