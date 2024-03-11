@@ -6,6 +6,9 @@ public class Archive : PerTenant
 {
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The identifier of the backup job that created this archive.
+    /// </summary>
     public Guid JobId { get; set; }
 
     public DateTime CreatedAt { get; set; }

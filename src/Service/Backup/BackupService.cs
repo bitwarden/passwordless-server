@@ -31,6 +31,11 @@ public class BackupService : IBackupService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Schedules a new backup to be created.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ApiException">Thrown when there is already a pending job.</exception>
     public async Task<Guid> ScheduleAsync()
     {
         if (await _dbContext.ArchiveJobs.AnyAsync(x => x.Status == JobStatus.Pending || x.Status == JobStatus.Running))
@@ -51,6 +56,11 @@ public class BackupService : IBackupService
         return id;
     }
 
+    /// <summary>
+    /// Retrieves all the background jobs.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ApiException">Thrown when the job is not found.</exception>
     public async Task<IReadOnlyCollection<StatusResponse>> GetJobsAsync()
     {
         var jobs = await _dbContext.ArchiveJobs
@@ -79,10 +89,15 @@ public class BackupService : IBackupService
         return result;
     }
 
+    /// <summary>
+    /// Backup the data for the given job.
+    /// </summary>
+    /// <param name="id">The identifier of the backup job.</param>
+    /// <exception cref="ApiException">Thrown when the job is not found.</exception>
     public async Task BackupAsync(Guid id)
     {
         var job = await _dbContext.ArchiveJobs.FirstOrDefaultAsync(x => x.Id == id);
-        if (job == null) throw new InvalidOperationException("Job not found");
+        if (job == null) throw new ApiException("Job not found", 404);
 
         job.Status = JobStatus.Running;
         job.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
