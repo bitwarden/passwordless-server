@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Passwordless.Service.Migrations.Sqlite;
+namespace Passwordless.Service.Migrations.Mssql;
 
 /// <inheritdoc />
 public partial class AddBackupTables : Migration
@@ -15,11 +15,11 @@ public partial class AddBackupTables : Migration
             name: "ArchiveJobs",
             columns: table => new
             {
-                Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                Status = table.Column<short>(type: "INTEGER", nullable: false),
-                Tenant = table.Column<string>(type: "TEXT", nullable: false)
+                Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                Status = table.Column<short>(type: "smallint", nullable: false),
+                Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false)
             },
             constraints: table =>
             {
@@ -36,12 +36,13 @@ public partial class AddBackupTables : Migration
             name: "Archives",
             columns: table => new
             {
-                Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                JobId = table.Column<Guid>(type: "TEXT", nullable: false),
-                CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                Entity = table.Column<string>(type: "TEXT", nullable: true),
-                Data = table.Column<byte[]>(type: "BLOB", maxLength: 104857600, nullable: false),
-                Tenant = table.Column<string>(type: "TEXT", nullable: false)
+                Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                JobId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                Entity = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                Data = table.Column<byte[]>(type: "varbinary(max)", maxLength: 104857600, nullable: false),
+                ArchiveJobId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                Tenant = table.Column<string>(type: "nvarchar(450)", nullable: false)
             },
             constraints: table =>
             {
@@ -53,11 +54,10 @@ public partial class AddBackupTables : Migration
                     principalColumn: "AcountName",
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
-                    name: "FK_Archives_ArchiveJobs_JobId",
-                    column: x => x.JobId,
+                    name: "FK_Archives_ArchiveJobs_ArchiveJobId",
+                    column: x => x.ArchiveJobId,
                     principalTable: "ArchiveJobs",
-                    principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
+                    principalColumn: "Id");
             });
 
         migrationBuilder.CreateIndex(
@@ -66,9 +66,9 @@ public partial class AddBackupTables : Migration
             column: "Tenant");
 
         migrationBuilder.CreateIndex(
-            name: "IX_Archives_JobId",
+            name: "IX_Archives_ArchiveJobId",
             table: "Archives",
-            column: "JobId");
+            column: "ArchiveJobId");
 
         migrationBuilder.CreateIndex(
             name: "IX_Archives_Tenant_JobId_Id",

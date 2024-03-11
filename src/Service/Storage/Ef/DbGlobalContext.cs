@@ -143,11 +143,6 @@ public abstract class DbGlobalContext : DbContext
                 .HasForeignKey(x => x.Tenant)
                 .IsRequired();
 
-            builder.HasOne(x => x.Job)
-                .WithMany(x => x.Archives)
-                .HasForeignKey(x => x.JobId)
-                .IsRequired();
-
             builder.HasIndex(x => new { x.Tenant, x.JobId, x.Id });
         });
 

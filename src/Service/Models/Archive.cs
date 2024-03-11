@@ -8,8 +8,6 @@ public class Archive : PerTenant
 
     public Guid JobId { get; set; }
 
-    public ArchiveJob Job { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public Type? Entity { get; set; }

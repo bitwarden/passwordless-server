@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20240311141635_AddBackupTables")]
+    [Migration("20240311143910_AddBackupTables")]
     partial class AddBackupTables
     {
         /// <inheritdoc />
@@ -182,6 +182,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("ArchiveJobId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -202,7 +205,7 @@ namespace Passwordless.Service.Migrations.Sqlite
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobId");
+                    b.HasIndex("ArchiveJobId");
 
                     b.HasIndex("Tenant", "JobId", "Id");
 
@@ -446,11 +449,9 @@ namespace Passwordless.Service.Migrations.Sqlite
 
             modelBuilder.Entity("Passwordless.Service.Models.Archive", b =>
                 {
-                    b.HasOne("Passwordless.Service.Models.ArchiveJob", "Job")
+                    b.HasOne("Passwordless.Service.Models.ArchiveJob", null)
                         .WithMany("Archives")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ArchiveJobId");
 
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
                         .WithMany("Archives")
@@ -459,8 +460,6 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .IsRequired();
 
                     b.Navigation("Application");
-
-                    b.Navigation("Job");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.ArchiveJob", b =>

@@ -12,7 +12,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240311141619_AddBackupTables")]
+    [Migration("20240311143810_AddBackupTables")]
     partial class AddBackupTables
     {
         /// <inheritdoc />
@@ -187,6 +187,9 @@ namespace Passwordless.Service.Migrations.Mssql
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ArchiveJobId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -207,7 +210,7 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobId");
+                    b.HasIndex("ArchiveJobId");
 
                     b.HasIndex("Tenant", "JobId", "Id");
 
@@ -451,11 +454,9 @@ namespace Passwordless.Service.Migrations.Mssql
 
             modelBuilder.Entity("Passwordless.Service.Models.Archive", b =>
                 {
-                    b.HasOne("Passwordless.Service.Models.ArchiveJob", "Job")
+                    b.HasOne("Passwordless.Service.Models.ArchiveJob", null)
                         .WithMany("Archives")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ArchiveJobId");
 
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
                         .WithMany("Archives")
@@ -464,8 +465,6 @@ namespace Passwordless.Service.Migrations.Mssql
                         .IsRequired();
 
                     b.Navigation("Application");
-
-                    b.Navigation("Job");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.ArchiveJob", b =>
