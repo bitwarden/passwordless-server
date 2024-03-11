@@ -178,6 +178,65 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.ToTable("AppFeatures");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.Archive", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasMaxLength(104857600)
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Entity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("Tenant", "JobId", "Id");
+
+                    b.ToTable("Archives");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.ArchiveJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Tenant");
+
+                    b.ToTable("ArchiveJobs");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
                 {
                     b.Property<string>("Tenant")
@@ -387,6 +446,36 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Navigation("Application");
                 });
 
+            modelBuilder.Entity("Passwordless.Service.Models.Archive", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.ArchiveJob", "Job")
+                        .WithMany("Archives")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("Archives")
+                        .HasForeignKey("Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+
+                    b.Navigation("Job");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.ArchiveJob", b =>
+                {
+                    b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
+                        .WithMany("ArchiveJobs")
+                        .HasForeignKey("Tenant")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+                });
+
             modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
                 {
                     b.HasOne("Passwordless.Service.Models.AppFeature", "AppFeature")
@@ -433,6 +522,10 @@ namespace Passwordless.Service.Migrations.Mssql
 
             modelBuilder.Entity("Passwordless.Service.Models.AccountMetaInformation", b =>
                 {
+                    b.Navigation("ArchiveJobs");
+
+                    b.Navigation("Archives");
+
                     b.Navigation("DispatchedEmails");
 
                     b.Navigation("Events");
@@ -447,6 +540,11 @@ namespace Passwordless.Service.Migrations.Mssql
             modelBuilder.Entity("Passwordless.Service.Models.AppFeature", b =>
                 {
                     b.Navigation("Authenticators");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.ArchiveJob", b =>
+                {
+                    b.Navigation("Archives");
                 });
 #pragma warning restore 612, 618
         }
