@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using System.Text;
+using System.Text.Unicode;
 using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,14 +53,7 @@ public class CsvBackupSerializerTests
         var actual = _sut.Serialize(cars);
 
         // Assert
-        Assert.Equal("Id,Make,OwnerId\r\n1,Ford,1\r\n2,Chevy,2\r\n", actual);
-
-        var rows = actual.Split("\r\n").Where(x => x.Length > 0);
-        foreach (var row in rows)
-        {
-            var columns = row.Split(',');
-            Assert.Equal(3, columns.Length);
-        }
+        Assert.Equal("Id,Make,OwnerId\r\n1,Ford,1\r\n2,Chevy,2\r\n"u8.ToArray(), actual);
     }
 
     [Fact]
@@ -79,7 +74,7 @@ public class CsvBackupSerializerTests
 
         // Act
         var temp = _sut.Serialize(cars);
-        var actual = _sut.Deserialize<Car>(temp).ToImmutableList();
+        var actual = _sut.Deserialize<Car>(temp).ToList();
 
         // Assert
         Assert.Equal(2, actual.Count);
@@ -111,14 +106,7 @@ public class CsvBackupSerializerTests
         var actual = _sut.Serialize(people);
 
         // Assert
-        Assert.Equal("Id,Name\r\n1,Ford Person\r\n2,Chevy Person\r\n", actual);
-
-        var rows = actual.Split("\r\n").Where(x => x.Length > 0);
-        foreach (var row in rows)
-        {
-            var columns = row.Split(',');
-            Assert.Equal(2, columns.Length);
-        }
+        Assert.Equal("Id,Name\r\n1,Ford Person\r\n2,Chevy Person\r\n"u8.ToArray(), actual);
     }
 
     [Fact]
@@ -131,7 +119,7 @@ public class CsvBackupSerializerTests
         var actual = _sut.Serialize(emptyCollection);
 
         // Assert
-        Assert.Equal("Id,Make,OwnerId\r\n", actual);
+        Assert.Equal("Id,Make,OwnerId\r\n"u8.ToArray(), actual);
     }
 
     [Fact]
@@ -151,7 +139,7 @@ public class CsvBackupSerializerTests
     public void Deserialize_WhenDeserializingCars_ReturnsExpectedResult()
     {
         // Arrange
-        var input = "Id,Make,OwnerId\r\n1,Ford,1\r\n2,Chevy,3\r\n";
+        var input = "Id,Make,OwnerId\r\n1,Ford,1\r\n2,Chevy,3\r\n"u8.ToArray();
 
         // Act
         var actual = _sut.Deserialize<Car>(input);
@@ -171,7 +159,7 @@ public class CsvBackupSerializerTests
     public void Deserialize_WhenEntityDoesNotHaveMapper_ThrowsInvalidOperationException()
     {
         // Arrange
-        var input = "Id\r\n1\r\n2\r\n";
+        var input = "Id\r\n1\r\n2\r\n"u8.ToArray();
 
         // Act
         var actual = Assert.Throws<ConfigurationException>(() => _sut.Deserialize<Motorcycle>(input));

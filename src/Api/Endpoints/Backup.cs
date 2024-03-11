@@ -1,6 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
-using Passwordless.Common.Backup;
-using Passwordless.Service.Storage.Ef;
+using Passwordless.Common.Models.Backup;
+using Passwordless.Service.Backup;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -13,14 +14,30 @@ public static class BackupEndpoints
             .RequireSecretKey()
             .RequireCors("default");
 
-        group.MapGet("/export", CreateBackupAsync);
+        group.MapPost("/schedule", ScheduleAsync);
+
+        group.MapGet("/jobs", GetJobsAsync);
     }
 
-    public static async Task<IResult> CreateBackupAsync(
-        IBackupUtility service,
-        DbGlobalContext dbGlobalContext)
+    /// <summary>
+    /// Schedules a new backup to be created.
+    /// </summary>
+    /// <param name="service"></param>
+    /// <returns></returns>
+    public static async Task<IResult> ScheduleAsync([FromServices] IBackupService service)
     {
-        await service.BackupAsync();
-        return NoContent();
+        var id = await service.ScheduleAsync();
+        return Ok(new ScheduleBackupResponse(id));
+    }
+
+    /// <summary>
+    /// Retrieves all the background jobs.
+    /// </summary>
+    /// <param name="service"></param>
+    /// <returns></returns>
+    public static async Task<IResult> GetJobsAsync([FromServices] IBackupService service)
+    {
+        var result = await service.GetJobsAsync();
+        return Ok(result);
     }
 }

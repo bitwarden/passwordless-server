@@ -31,28 +31,26 @@ public class CsvBackupSerializer : IBackupSerializer
         _logger = logger;
     }
 
-    public string Serialize<TEntity>(IReadOnlyCollection<TEntity> entities)
+    public byte[] Serialize<TEntity>(IReadOnlyCollection<TEntity> entities)
     {
-        using (var writer = new StringWriter())
-        using (var csv = new CsvWriter(writer, _configuration))
-        {
-            var classMap = GetClassMap<TEntity>();
-            csv.Context.RegisterClassMap(classMap);
-            csv.WriteRecords(entities);
-            return writer.ToString();
-        }
+        using var memoryStream = new MemoryStream();
+        using var writer = new StreamWriter(memoryStream, new UTF8Encoding(false));
+        writer.AutoFlush = true;
+        using var csv = new CsvWriter(writer, _configuration);
+        var classMap = GetClassMap<TEntity>();
+        csv.Context.RegisterClassMap(classMap);
+        csv.WriteRecords(entities);
+        return memoryStream.ToArray();
     }
 
-    public IEnumerable<TEntity> Deserialize<TEntity>(string input)
+    public IEnumerable<TEntity> Deserialize<TEntity>(byte[] input)
     {
-        using (var reader = new StringReader(input))
-        using (var csv = new CsvReader(reader, _configuration))
-        {
-            var classMap = GetClassMap<TEntity>();
-            csv.Context.RegisterClassMap(classMap);
-            var records = csv.GetRecords<TEntity>();
-            return records.ToList();
-        }
+        using var reader = new StreamReader(new MemoryStream(input));
+        using var csv = new CsvReader(reader, _configuration);
+        var classMap = GetClassMap<TEntity>();
+        csv.Context.RegisterClassMap(classMap);
+        var records = csv.GetRecords<TEntity>();
+        return records.ToList();
     }
 
     private ClassMap<TEntity> GetClassMap<TEntity>()

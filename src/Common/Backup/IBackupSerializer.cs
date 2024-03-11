@@ -1,10 +1,8 @@
-using System.Collections.Immutable;
-
 namespace Passwordless.Common.Backup;
 
 public interface IBackupSerializer
 {
-    string Serialize<TEntity>(IReadOnlyCollection<TEntity> entities);
+    byte[] Serialize<TEntity>(IReadOnlyCollection<TEntity> entities);
 
-    IEnumerable<TEntity>? Deserialize<TEntity>(string data);
+    IEnumerable<TEntity>? Deserialize<TEntity>(byte[] data);
 }

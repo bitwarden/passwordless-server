@@ -29,5 +29,6 @@ public class AccountMetaInformation : PerTenant
     public virtual IReadOnlyCollection<DispatchedEmail>? DispatchedEmails { get; set; }
     public virtual IReadOnlyCollection<PeriodicCredentialReport>? PeriodicCredentialReports { get; set; }
     public virtual IReadOnlyCollection<PeriodicActiveUserReport>? PeriodicActiveUserReports { get; set; }
-    public virtual IReadOnlyCollection<Archive>? Archives { get; set; }
+    public List<ArchiveJob> ArchiveJobs { get; set; } = new();
+    public List<Archive> Archives { get; set; } = new();
 }
