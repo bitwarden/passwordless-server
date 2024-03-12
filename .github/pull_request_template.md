@@ -6,13 +6,12 @@ Thank you for contributing! Please follow the steps below to help us process you
 -->
 
 ### Ticket
-<!-- Link the corresponding GitHub Issue(s) and/or Jira Task(s) that are addressed by this pull request. -->
+<!-- For Jira Tasks: (remove if external contributor)  -->
+- Closes [PAS-XXX](https://bitwarden.atlassian.net/browse/PAS-XXX)
 
 <!-- For GitHub Issues: -->
 <!-- - Closes #XXX -->
 
-<!-- For Jira Tasks: (remove if external contributor)  -->
-- Closes [PAS-XXX](https://bitwarden.atlassian.net/browse/PAS-XXX)
 
 ### Description
 <!--
