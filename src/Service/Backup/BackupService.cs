@@ -83,7 +83,7 @@ public class BackupService : IBackupService
                 JobStatus.Running => JobStatusResponse.Running,
                 _ => throw new ArgumentOutOfRangeException()
             };
-            result.Add(new StatusResponse(job.Id, statusDto));
+            result.Add(new StatusResponse(job.Id, job.CreatedAt, statusDto, job.UpdatedAt));
         }
 
         return result;
