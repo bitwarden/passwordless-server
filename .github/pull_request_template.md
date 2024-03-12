@@ -1,21 +1,17 @@
 <!--
 Thank you for contributing! Please follow the steps below to help us process your PR quickly.
-- 📝 Use a meaningful title for the pull request.
+- 📝 Use a meaningful title for the pull request, e.g: "PAS-XXX | short pr description"
 - 💭 Write a clear description and share screenshots (if applicable) to help describe your change.
 - 🔍 Not all sections below will apply to you and are mostly for our internal team. It's okay to delete them if they are not applicable. 
 -->
 
-<!-- Title format if there is a Jira Ticket: PAS-XXX | short pr description -->
-
 ### Ticket
-<!--
-    Link the corresponding GitHub Issue(s) and/or Jira Task(s)
-    that are addressed by this pull request.
--->
+<!-- Link the corresponding GitHub Issue(s) and/or Jira Task(s) that are addressed by this pull request. -->
+
 <!-- For GitHub Issues: -->
-- Closes #XXX
-<!-- For Jira Tasks: -->
-<!-- (remove if external contributor) -->
+<!-- - Closes #XXX -->
+
+<!-- For Jira Tasks: (remove if external contributor)  -->
 - Closes [PAS-XXX](https://bitwarden.atlassian.net/browse/PAS-XXX)
 
 ### Description
@@ -37,9 +33,9 @@ Thank you for contributing! Please follow the steps below to help us process you
 
 ### Checklist
 I did the following to ensure that my changes were tested thoroughly:
-- [ ] __
-- [ ] __
+* __
+* __
 
-I did the following to ensure that my changes did not introduce new security vulnerabilities:
-- [ ] __
-- [ ] __
+I did the following to ensure that my changes do not introduce security vulnerabilities:
+* __
+* __
