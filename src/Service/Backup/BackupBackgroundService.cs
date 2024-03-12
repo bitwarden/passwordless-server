@@ -28,6 +28,7 @@ public class BackupBackgroundService : BackgroundService
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Starting {BackgroundService}.", GetType().Name);
         do
         {
             using var scope = _serviceProvider.CreateScope();
@@ -47,7 +48,7 @@ public class BackupBackgroundService : BackgroundService
 
                 pendingJob.Status = JobStatus.Running;
                 pendingJob.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-                await dbContext.SaveChangesAsync(stoppingToken);
+                await dbContext.SaveChangesAsync();
 
                 var backupService = scope.ServiceProvider.GetRequiredService<IBackupService>();
 
@@ -55,21 +56,23 @@ public class BackupBackgroundService : BackgroundService
 
                 pendingJob.Status = JobStatus.Completed;
                 pendingJob.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
+                await dbContext.SaveChangesAsync();
+                _logger.LogInformation("{BackgroundService}: {Job} completed.", GetType().Name, pendingJob.Id);
+
             }
             catch (Exception)
             {
                 pendingJob!.Status = JobStatus.Failed;
                 pendingJob.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-            }
-            finally
-            {
-                await dbContext.SaveChangesAsync(stoppingToken);
+                await dbContext.SaveChangesAsync();
+
             }
         } while (await _timer.WaitForNextTickAsync(stoppingToken));
     }
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Stopping {BackgroundService}.", GetType().Name);
         _timer.Dispose();
         return base.StopAsync(cancellationToken);
     }

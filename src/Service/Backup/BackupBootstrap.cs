@@ -24,5 +24,7 @@ public static class BackupBootstrap
         services.AddTransient<ClassMap<ApplicationEvent>, EntityFrameworkMap<ApplicationEvent, DbGlobalContext>>();
         services.AddTransient<ClassMap<PeriodicCredentialReport>, EntityFrameworkMap<PeriodicCredentialReport, DbGlobalContext>>();
         services.AddTransient<ClassMap<PeriodicActiveUserReport>, EntityFrameworkMap<PeriodicActiveUserReport, DbGlobalContext>>();
+
+        services.AddHostedService<BackupBackgroundService>();
     }
 }
