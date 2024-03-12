@@ -41,7 +41,7 @@
 
             <hr/>
             <EditForm id="manage-form-id" class="flex-col space-y-4" Model="Data" FormName="manage-form" OnSubmit="OnAuthenticatorModified">
-                <Table ColumnHeaders="@(new []{ "Allowed", "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="No authenticators found using applied filters.">
+                <Table ColumnHeaders="@(new []{ "Allow", string.Empty, "Description", "AaGuid", "Attestation Types", "Certification Level"})" EmptyMessage="No authenticators found using applied filters.">
                     @if (Data != null)
                     {
                         @foreach (var item in Data)
@@ -50,8 +50,18 @@
                                 <td class="relative px-7 sm:w-12 sm:px-6">
                                     <input name="ManageForm.Selected" type="checkbox" checked="@item.IsSelected" value="@item.AaGuid"/>
                                 </td>
+                                <td class="table-cell">
+                                    @if (string.IsNullOrEmpty(item.Icon))
+                                    {
+                                        <Fido2AuthenticatorIcon class="fill-blue-400 w-16 max-h-16" />
+                                    }
+                                    else
+                                    {
+                                        <img class="w-16" src="@item.Icon" alt="@item.AaGuid"/>
+                                    }
+                                </td>
                                 <td class="text-sm font-medium text-gray-900">@item.Name</td>
-                                <td class="whitespace-nowrap">@item.AaGuid</td>
+                                <td class="whitespace-nowrap font-mono">@item.AaGuid</td>
                                 <td class="whitespace-nowrap">
                                     <ul>
                                         @foreach (var type in item.AttestationTypes)
@@ -107,16 +117,19 @@
 
 @code {
     private bool _isInitialized;
-    
-    [SupplyParameterFromForm(FormName = "filter-form")] public FilterViewModel FilterForm { get; set; } = new();
-    [SupplyParameterFromForm(FormName = "manage-form")] public ManageViewModel ManageForm { get; set; } = new();
-    
+
+    [SupplyParameterFromForm(FormName = "filter-form")]
+    public FilterViewModel FilterForm { get; set; } = new();
+
+    [SupplyParameterFromForm(FormName = "manage-form")]
+    public ManageViewModel ManageForm { get; set; } = new();
+
     public IEnumerable<string>? AttestationTypes { get; private set; }
     public IEnumerable<string>? CertificationLevels { get; private set; }
     public IReadOnlyCollection<ListViewModel>? Data { get; private set; }
-    
+
     private IReadOnlyCollection<BreadCrumb.BreadCrumbItem>? _breadCrumbs;
-    
+
     protected override async Task OnInitializedAsync()
     {
         _breadCrumbs = new List<BreadCrumb.BreadCrumbItem>
@@ -125,15 +138,15 @@
             new("Authenticators", $"app/{AppId}/settings/authenticators"),
             new("Allowlist", $"app/{AppId}/settings/authenticators/manage")
         };
-        
+
         if (!CurrentContext.Features.AllowAttestation)
         {
             NavigationManager.NavigateTo($"app/{AppId}/settings");
             return;
         }
-        
-        
-        
+
+
+
         AttestationTypes = await ManagementClient.GetAttestationTypesAsync();
         CertificationLevels = await ManagementClient.GetCertificationStatusesAsync();
 
@@ -141,7 +154,7 @@
 
         var configuredAuthenticatorsRequest = new ConfiguredAuthenticatorRequest(true);
         var allowedAuthenticators = await PasswordlessClient.GetConfiguredAuthenticatorsAsync(configuredAuthenticatorsRequest);
-        
+
         Data = data.Select(x =>
         {
             var viewModel = ListViewModel.FromDto(x);
@@ -176,7 +189,7 @@
         public string? AttestationType { get; set; }
 
         public string? CertificationStatus { get; set; }
-        
+
         public EntriesRequest ToDto()
         {
             return new EntriesRequest
@@ -197,13 +210,14 @@
         Guid AaGuid,
         string Name,
         IEnumerable<string> CertificationStatuses,
-        IEnumerable<string> AttestationTypes)
+        IEnumerable<string> AttestationTypes,
+        string? Icon)
     {
         public bool IsSelected { get; set; }
 
         public static ListViewModel FromDto(EntryResponse dto)
         {
-            return new ListViewModel(dto.AaGuid, dto.Name, dto.CertificationStatuses, dto.AttestationTypes);
+            return new ListViewModel(dto.AaGuid, dto.Name, dto.CertificationStatuses, dto.AttestationTypes, dto.Icon);
         }
     }
 }

@@ -1,13 +1,14 @@
 @using Passwordless.Common.Models.Reporting
 @using Passwordless.AdminConsole.Components.Shared.ApexCharts.Models
 
-<ApexChart Id="total-users-count-chart" Options="_options" YAxisFormatting="LabelsFormattingTypes.Integer" />
+<ApexChart Id="@Id" Options="_options" YAxisFormatting="LabelsFormattingTypes.Integer" />
 
 @code {
     [Parameter]
     public required IEnumerable<PeriodicCredentialReportResponse> Data { get; set; }
 
     private const int MinDataPoints = 3;
+    private const string Id = "total-users-count-chart";
 
     private ApexChartOptions<DateTime, int>? _options;
     
@@ -22,6 +23,10 @@
         {
             Chart = new Chart
             {
+                Toolbar = new Toolbar
+                {
+                    Export = new Export()
+                },
                 Type = ChartTypes.Line
             },
             Series = new List<Series<int>>
@@ -42,5 +47,6 @@
                 Categories = Data.Select(x => x.CreatedAt.ToDateTime(new TimeOnly(0, 0)))
             }
         };
+        _options.Chart.Toolbar.Export.SetFilename(Id);
     }
 }

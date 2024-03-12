@@ -78,10 +78,7 @@ public class DataService : IDataService
 
     public async Task<bool> DeleteOrganizationAsync()
     {
-        var organization = await _db.Organizations.FirstOrDefaultAsync(x => x.Id == _orgId);
-        if (organization == null) return false;
-        _db.Organizations.Remove(organization);
-        var rowsAffected = await _db.SaveChangesAsync();
+        var rowsAffected = await _db.Organizations.Where(x => x.Id == _orgId).ExecuteDeleteAsync();
         return rowsAffected > 0;
     }
 
@@ -98,13 +95,10 @@ public class DataService : IDataService
 
     public async Task CleanUpOnboardingAsync()
     {
-        _db.Onboardings
+        await _db.Onboardings
             .Where(o => !string.IsNullOrEmpty(o.ApiSecret) && o.SensitiveInfoExpireAt < DateTime.UtcNow)
-            .ToList().ForEach(o =>
-            {
-                o.ApiSecret = string.Empty;
-            });
-        await _db.SaveChangesAsync();
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(p => p.ApiSecret, string.Empty));
     }
 
     public async Task CreateOrganizationAsync(Organization organization)

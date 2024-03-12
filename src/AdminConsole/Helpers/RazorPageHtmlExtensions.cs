@@ -11,17 +11,14 @@ namespace Passwordless.AdminConsole.Helpers;
 
 public static class RazorPageHtmlExtensions
 {
-    public static IHtmlContent ImportMap(this IHtmlHelper html, Dictionary<string, (string Dev, string Prod)> importMaps, IFileVersionProvider fileVersionProvider, string? nonce = null)
+    public static IHtmlContent ImportMap(this IHtmlHelper html, Dictionary<string, string> importMaps, IFileVersionProvider fileVersionProvider, string? nonce = null)
     {
         var map = new Dictionary<string, object>();
         var imports = new Dictionary<string, object> { ["imports"] = map };
 
-        // check if we are in development environment
-        var isDev = html.ViewContext.HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
-
         foreach (var importMap in importMaps)
         {
-            map[importMap.Key] = isDev ? importMap.Value.Dev : importMap.Value.Prod;
+            map[importMap.Key] = importMap.Value;
             map[importMap.Key] = fileVersionProvider.AddFileVersionToPath(html.ViewContext.HttpContext.Request.PathBase, map[importMap.Key].ToString());
         }
 
@@ -68,5 +65,4 @@ public static class RazorPageHtmlExtensions
         }
         return contentBuilder;
     }
-
 }

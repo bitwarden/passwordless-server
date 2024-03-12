@@ -5,6 +5,8 @@
 @using Passwordless.AdminConsole.Identity
 @inject SignInManager<ConsoleAdmin> signinManager
 @inject IFileVersionProvider FileVersionProvider
+@inject IHttpContextAccessor HttpContextAccessor
+
 @{
     var signedIn = signinManager.IsSignedIn(User);
 }
@@ -21,8 +23,10 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
+    @Html.ImportMap(new Dictionary<string, string> { ["vue"] = "/lib/vue/vue.mjs" }, FileVersionProvider)
     @await RenderSectionAsync("Head", false)
     @Html.RenderPartialSectionScripts()
+    <script async src="@Url.Content("~/lib/es-module-shims/es-module-shims.js")" asp-append-version="true"></script>
 </head>
 
 <body class="h-full bg-gray-50">
@@ -70,9 +74,6 @@
     }
 </div>
     
-
-<script async src="@Url.Content("~/lib/es-module-shims/es-module-shims.js")" asp-append-version="true"></script>
-@Html.ImportMap(new Dictionary<string, (string Dev, string Prod)> { ["vue"] = ("/lib/vue/vue.esm-browser.js", "/lib/vue/vue.esm-browser.prod.js") }, FileVersionProvider);
 <script type="text/javascript" src="~/js/core.js" asp-append-version="true"></script>
 <script type="module" src="@Url.Content("~/js/elements/local-time.mjs")" asp-append-version="true"></script>
 <script type="module" src="/js/confirm-form.mjs" asp-append-version="true"></script>
