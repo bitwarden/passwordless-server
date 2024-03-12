@@ -14,20 +14,17 @@ public class BackupWorkerService : IBackupWorkerService
     private readonly IBackupSerializer _backupSerializer;
     private readonly DbGlobalContext _dbContext;
     private readonly TimeProvider _timeProvider;
-    private readonly ITenantProvider _tenantProvider;
     private readonly ILogger<BackupService> _logger;
 
     public BackupWorkerService(
         IBackupSerializer backupSerializer,
         DbGlobalContext dbContext,
         TimeProvider timeProvider,
-        ITenantProvider tenantProvider,
         ILogger<BackupService> logger)
     {
         _backupSerializer = backupSerializer;
         _dbContext = dbContext;
         _timeProvider = timeProvider;
-        _tenantProvider = tenantProvider;
         _logger = logger;
     }
 
@@ -88,7 +85,7 @@ public class BackupWorkerService : IBackupWorkerService
             CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
             Entity = typeof(TEntity),
             Data = data,
-            Tenant = _tenantProvider.Tenant
+            Tenant = tenant
         };
 
         _dbContext.Archives.Add(archive);
