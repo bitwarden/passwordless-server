@@ -2,7 +2,7 @@ using Passwordless.Common.EventLog.Enums;
 
 namespace Passwordless.Common.EventLog.Models;
 
-public class Event
+public class Event : IEvent
 {
     public Guid Id { get; init; }
     public DateTime PerformedAt { get; init; }

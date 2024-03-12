@@ -15,10 +15,4 @@ public interface IBackupService
     /// </summary>
     /// <returns></returns>
     Task<IReadOnlyCollection<StatusResponse>> GetJobsAsync();
-
-    /// <summary>
-    /// Creates a new backup.
-    /// </summary>
-    /// <param name="id">The identifier of the backup job.</param>
-    Task BackupAsync(Guid id);
 }

@@ -14,6 +14,7 @@ public static class BackupBootstrap
     {
         services.AddScoped<IBackupSerializer, CsvBackupSerializer>();
         services.AddScoped<IBackupService, BackupService>();
+        services.AddScoped<IBackupWorkerService, BackupWorkerService>();
 
         services.AddTransient<ClassMap<AccountMetaInformation>, EntityFrameworkMap<AccountMetaInformation, DbGlobalContext>>();
         services.AddTransient<ClassMap<ApiKeyDesc>, EntityFrameworkMap<ApiKeyDesc, DbGlobalContext>>();

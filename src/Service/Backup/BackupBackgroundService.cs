@@ -11,18 +11,15 @@ namespace Passwordless.Service.Backup;
 public class BackupBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly TimeProvider _timeProvider;
     private readonly ILogger<BackupBackgroundService> _logger;
 
     private readonly PeriodicTimer _timer = new(TimeSpan.FromMinutes(15));
 
     public BackupBackgroundService(
         IServiceProvider serviceProvider,
-        TimeProvider timeProvider,
         ILogger<BackupBackgroundService> logger)
     {
         _serviceProvider = serviceProvider;
-        _timeProvider = timeProvider;
         _logger = logger;
     }
 
@@ -46,26 +43,15 @@ public class BackupBackgroundService : BackgroundService
                     continue;
                 }
 
-                pendingJob.Status = JobStatus.Running;
-                pendingJob.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-                await dbContext.SaveChangesAsync();
+                var worker = scope.ServiceProvider.GetRequiredService<IBackupWorkerService>();
+                await worker.BackupAsync(pendingJob.Id);
 
-                var backupService = scope.ServiceProvider.GetRequiredService<IBackupService>();
-
-                await backupService.BackupAsync(pendingJob.Id);
-
-                pendingJob.Status = JobStatus.Completed;
-                pendingJob.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-                await dbContext.SaveChangesAsync();
                 _logger.LogInformation("{BackgroundService}: {Job} completed.", GetType().Name, pendingJob.Id);
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                pendingJob!.Status = JobStatus.Failed;
-                pendingJob.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-                await dbContext.SaveChangesAsync();
-
+                _logger.LogError(e, "{BackgroundService}: {Job} failed.", GetType().Name, pendingJob?.Id);
             }
         } while (await _timer.WaitForNextTickAsync(stoppingToken));
     }

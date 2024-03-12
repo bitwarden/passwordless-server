@@ -47,13 +47,14 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TenantId")
+                    b.Property<string>("Tenant")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("TenantId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("Tenant");
 
                     b.ToTable("ApplicationEvents");
                 });
@@ -426,7 +427,7 @@ namespace Passwordless.Service.Migrations.Sqlite
                 {
                     b.HasOne("Passwordless.Service.Models.AccountMetaInformation", "Application")
                         .WithMany("Events")
-                        .HasForeignKey("TenantId")
+                        .HasForeignKey("Tenant")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

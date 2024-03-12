@@ -9,7 +9,7 @@ public static class EventExtensions
         dbEvent.PerformedAt,
         dbEvent.Message,
         dbEvent.PerformedBy,
-        dbEvent.TenantId,
+        dbEvent.Tenant,
         dbEvent.EventType,
         dbEvent.Severity,
         dbEvent.Subject,
@@ -25,7 +25,7 @@ public static class EventExtensions
         Severity = eventDto.Severity,
         PerformedBy = eventDto.PerformedBy,
         Subject = eventDto.Subject,
-        TenantId = eventDto.TenantId,
+        Tenant = eventDto.TenantId,
         ApiKeyId = eventDto.ApiKeyId
     };
 }

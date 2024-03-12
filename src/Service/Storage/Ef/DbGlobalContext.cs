@@ -90,9 +90,10 @@ public abstract class DbGlobalContext : DbContext
         modelBuilder.Entity<ApplicationEvent>(builder =>
         {
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Tenant).HasColumnName("TenantId");
             builder.HasOne(x => x.Application)
                 .WithMany(x => x.Events)
-                .HasForeignKey(x => x.TenantId)
+                .HasForeignKey(x => x.Tenant)
                 .IsRequired();
         });
 
