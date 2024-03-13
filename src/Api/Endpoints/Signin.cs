@@ -76,6 +76,7 @@ public static class SigninEndpoints
                 TimeProvider timeProvider,
                 IEventLogger eventLogger) =>
             {
+                
                 var token = await tokenService.EncodeTokenAsync(new StepUpToken
                 {
                     ExpiresAt = default,
@@ -95,6 +96,7 @@ public static class SigninEndpoints
 
                 return Ok(token);
             })
+            .WithParameterValidation()
             .RequirePublicKey()
             .RequireCors();
     }
