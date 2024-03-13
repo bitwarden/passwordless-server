@@ -7,7 +7,6 @@ using Fido2NetLib.Objects;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
@@ -16,8 +15,6 @@ using Passwordless.Service.Storage.Ef;
 using Passwordless.Service.Validation;
 
 namespace Passwordless.Service;
-
-using Aliases = HashSet<string>;
 
 public class Fido2Service : IFido2Service
 {
@@ -56,10 +53,6 @@ public class Fido2Service : IFido2Service
             tokenProps.ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120);
         }
 
-        ValidateAliases(tokenProps.Aliases);
-        ValidateUserId(tokenProps.UserId);
-        ValidateUsername(tokenProps.Username);
-
         var features = await _featureContextProvider.UseContext();
         if (features.MaxUsers.HasValue)
         {
@@ -81,8 +74,6 @@ public class Fido2Service : IFido2Service
         // check if aliases is available
         if (tokenProps.Aliases != null)
         {
-            ValidateAliases(tokenProps.Aliases);
-
             var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenantProvider.Tenant));
 
             // todo: check if alias exists and belongs to different user.
@@ -224,12 +215,7 @@ public class Fido2Service : IFido2Service
         {
             if (session.Aliases != null && session.Aliases.Any())
             {
-                await SetAliasAsync(new AliasPayload
-                {
-                    Aliases = session.Aliases,
-                    Hashing = session.AliasHashing,
-                    UserId = userId
-                });
+                await SetAliasAsync(new AliasPayload(userId, session.Aliases, session.AliasHashing));
             }
         }
         catch (Exception e)
@@ -286,8 +272,6 @@ public class Fido2Service : IFido2Service
 
     public async Task<string> CreateSigninTokenAsync(SigninTokenRequest request)
     {
-        ValidateUserId(request.UserId);
-
         var tokenProps = new VerifySignInToken
         {
             Success = true,
@@ -305,8 +289,6 @@ public class Fido2Service : IFido2Service
 
     public async Task<string> CreateMagicLinkTokenAsync(MagicLinkTokenRequest request)
     {
-        ValidateUserId(request.UserId);
-
         var tokenProps = new VerifySignInToken
         {
             Success = true,
@@ -434,25 +416,6 @@ public class Fido2Service : IFido2Service
         return token;
     }
 
-    private static void ValidateAliases(Aliases aliases, bool throwIfNull = false)
-    {
-        try
-        {
-            if (throwIfNull && aliases == null) { throw new ArgumentException("Aliases was null"); }
-            if (aliases == null) return;
-            if (aliases.Count > 10) { throw new ArgumentException("Too many aliases, maximum is 10"); }
-            foreach (var alias in aliases)
-            {
-                if (string.IsNullOrWhiteSpace(alias)) { throw new ArgumentException("Alias must be a non empty/whitepsace string"); }
-                if (alias.Length > 250) { throw new ArgumentException("Alias was is too long, maximum is 250"); }
-            }
-        }
-        catch (ArgumentException ex)
-        {
-            throw new ApiException("Alias validation failed: " + ex.Message, 400);
-        }
-    }
-
     public Task<List<AliasPointer>> GetAliases(string userId)
     {
         return _storage.GetAliasesByUserId(userId);
@@ -460,13 +423,6 @@ public class Fido2Service : IFido2Service
 
     public async Task SetAliasAsync(AliasPayload data)
     {
-        if (data.UserId.IsNullOrEmpty())
-        {
-            throw new ApiException("userId most not be null", 400);
-        }
-
-        ValidateAliases(data.Aliases);
-
         var values = new Dictionary<string, string>();
         foreach (var alias in data.Aliases)
         {
@@ -488,22 +444,6 @@ public class Fido2Service : IFido2Service
             {
                 throw new ApiException("alias_conflict", "Alias is already in use by another userid", 409);
             }
-        }
-    }
-
-    private void ValidateUserId(string userId)
-    {
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            throw new ApiException("Invalid UserId: UserId cannot be null or empty", 400);
-        }
-    }
-
-    private void ValidateUsername(string username)
-    {
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            throw new ApiException("Invalid Username: Username cannot be null or empty", 400);
         }
     }
 

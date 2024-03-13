@@ -22,7 +22,8 @@ public static class AliasEndpoints
                 return Results.NoContent();
             })
             .RequireSecretKey()
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithParameterValidation();
 
         app.MapGet("/alias/list", async (string userId, IFido2Service fido2Service) =>
         {
