@@ -18,7 +18,7 @@ public static class HttpRequestExtensions
 
     public static string? GetTenantName(this HttpRequest httpRequest) =>
         GetTenantNameFromKey(httpRequest) ?? httpRequest.RouteValues["appId"]?.ToString();
-    
+
     public static (string deviceInfo, string country) GetDeviceInfo(this HttpRequest req)
     {
         var uap = Parser.GetDefault();

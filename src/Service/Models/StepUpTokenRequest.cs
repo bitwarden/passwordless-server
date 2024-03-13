@@ -16,18 +16,18 @@ public record StepUpOptions(int TimeToLive, string Context);
 public class StepUpToken : Token
 {
     private const string StepUp = "step_up";
-    
+
     public StepUpToken()
     {
         Type = StepUp;
     }
-    
+
     [MessagePack.Key(10)]
     public required string UserId { get; set; }
-    
+
     [MessagePack.Key(11)]
     public required DateTimeOffset CreatedAt { get; set; }
-    
+
     [MessagePack.Key(12)]
     public required string RpId { get; set; }
 

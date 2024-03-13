@@ -92,7 +92,7 @@ public static class SigninEndpoints
 
 
                 eventLogger.LogStepUpTokenCreated(request);
-                
+
                 return Ok(token);
             })
             .RequirePublicKey()
