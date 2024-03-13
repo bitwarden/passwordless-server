@@ -17,7 +17,15 @@ public static class CreateAppHelpers
             client.AddManagementKey();
         }
 
-        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", options ?? new CreateAppDto());
+        var actualOptions = options ?? new CreateAppDto();
+
+        if (string.IsNullOrWhiteSpace(actualOptions.AdminEmail))
+            actualOptions.AdminEmail = "admin@email.com";
+
+        if (actualOptions.MagicLinkEmailMonthlyQuota == 0)
+            actualOptions.MagicLinkEmailMonthlyQuota = 1000;
+
+        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", actualOptions);
     }
 
     public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client)
