@@ -18,4 +18,4 @@ public class SigninTokenRequest : RequestBase
 
     [JsonIgnore]
     public TimeSpan TimeToLive => TimeToLiveSeconds?.ToTimeSpanFromSeconds() ?? DefaultTimeToLive;
-};
+}

@@ -16,6 +16,9 @@ public static class GeneralExtensions
         return builder.RequireAuthorization(Constants.ManagementKeyPolicy);
     }
 
+    public static TBuilder RequirePublicKey<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder =>
+        builder.RequireAuthorization(Constants.PublicKeyPolicy);
+
     public static TBuilder RequireAuthorization<TBuilder>(this TBuilder builder, PublicKeyScopes scope) where TBuilder : IEndpointConventionBuilder
     {
         return builder.RequireAuthorization(scope.GetValue());

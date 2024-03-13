@@ -1,4 +1,5 @@
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Extensions;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Models;
@@ -44,7 +45,7 @@ public static class RegisterEndpoints
                 CancellationToken token
             ) =>
             {
-                var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
+                var (deviceInfo, country) = request.GetDeviceInfo();
                 var result = await fido2Service.RegisterCompleteAsync(payload, deviceInfo, country);
 
                 // Avoid serializing the certificate
