@@ -7,7 +7,12 @@ namespace Passwordless.AdminConsole.EventLog.Loggers;
 
 public interface IInternalEventLogStorageContext
 {
-    Task DeleteExpiredEvents(CancellationToken cancellationToken);
+    /// <summary>
+    /// Deletes expired events.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>The amount of deleted events.</returns>
+    Task<int> DeleteExpiredEventsAsync(CancellationToken cancellationToken);
 }
 
 public class InternalEventLogStorageContext : IInternalEventLogStorageContext
@@ -25,7 +30,7 @@ public class InternalEventLogStorageContext : IInternalEventLogStorageContext
         _timeProvider = timeProvider;
     }
 
-    public async Task DeleteExpiredEvents(CancellationToken cancellationToken)
+    public async Task<int> DeleteExpiredEventsAsync(CancellationToken cancellationToken)
     {
         var organizations = await _db.OrganizationEvents
             .Select(x => x.OrganizationId)
@@ -49,6 +54,6 @@ public class InternalEventLogStorageContext : IInternalEventLogStorageContext
                 .Where(x => x.OrganizationId == organization.OrganizationId && x.PerformedAt < now.AddDays(-features.EventLoggingRetentionPeriod))
                 .ExecuteDeleteAsync();
         }
-        await _db.SaveChangesAsync(cancellationToken);
+        return await _db.SaveChangesAsync(cancellationToken);
     }
 }
