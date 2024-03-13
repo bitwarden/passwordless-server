@@ -17,7 +17,7 @@ public static class CreateAppHelpers
             client.AddManagementKey();
         }
 
-        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", options);
+        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", options ?? new CreateAppDto());
     }
 
     public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client)
