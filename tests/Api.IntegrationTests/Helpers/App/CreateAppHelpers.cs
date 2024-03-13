@@ -10,17 +10,14 @@ public static class CreateAppHelpers
     public static Task<HttpResponseMessage> CreateApplicationAsync(
         this HttpClient client,
         string applicationName,
-        string? adminEmail = null)
+        CreateAppDto? options = null)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
         {
             client.AddManagementKey();
         }
 
-        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", new CreateAppDto
-        {
-            AdminEmail = adminEmail ?? "test-admin@passwordless.dev"
-        });
+        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", options);
     }
 
     public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client)
