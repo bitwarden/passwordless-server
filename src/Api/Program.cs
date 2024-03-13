@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
@@ -23,6 +24,20 @@ using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(x =>
+{
+    x.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        var authorizationAttribute = (AuthorizeAttribute?)apiDesc.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizeAttribute));
+        if (authorizationAttribute == null)
+        {
+            return false;
+        }
+        return authorizationAttribute.Policy != Constants.ManagementKeyPolicy;
+    });
+});
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
 
@@ -152,6 +167,9 @@ else
         () =>
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 if (isSelfHosted)
 {
