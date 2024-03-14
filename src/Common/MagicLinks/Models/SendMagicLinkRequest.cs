@@ -15,7 +15,7 @@ public class SendMagicLinkRequest
     [MagicLinkTemplateUrl]
     public string UrlTemplate { get; init; }
 
-    [Required]
+    [Required(AllowEmptyStrings = false)]
     public string UserId { get; init; }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
 using Passwordless.Service.Extensions;
 
@@ -17,7 +18,9 @@ public class MagicLinkTokenRequest(string userId, MailAddress emailAddress, stri
     public MagicLinkTokenRequest(string userId, MailAddress emailAddress, string linkTemplate, int? timeToLive)
         : this(userId, emailAddress, linkTemplate, timeToLive?.ToTimeSpanFromSeconds()) { }
 
+    [Required(AllowEmptyStrings = false)]
     public string UserId { get; } = userId;
+
     public MailAddress EmailAddress { get; } = emailAddress;
     public string LinkTemplate { get; } = linkTemplate;
     public TimeSpan TimeToLive { get; } = timeToLive ?? DefaultTimeToLive;

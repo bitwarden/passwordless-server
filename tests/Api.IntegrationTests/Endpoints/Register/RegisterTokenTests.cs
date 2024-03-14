@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using Bogus;
 using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Service.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,21 +30,21 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     }
 
     [Theory]
-    [InlineData("-1")]
     [InlineData(null)]
     [InlineData("")]
     public async Task InvalidUserIdReturnsError(string userid)
     {
         // Arrange
-        object payload = userid == "-1"
-            ? new { }
-            : new { UserId = userid };
+        Faker<RegisterToken> registerTokenGenerator = new Faker<RegisterToken>();
+        registerTokenGenerator.RuleFor(x => x.Username, "username");
+        registerTokenGenerator.RuleFor(x => x.UserId, userid);
+        var registerToken = registerTokenGenerator.Generate();
 
         await using var api = await apiFixture.CreateApiAsync(testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
-        using var response = await client.PostAsJsonAsync("register/token", payload);
+        using var response = await client.PostAsJsonAsync("register/token", registerToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -53,32 +55,25 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         AssertHelper.AssertEqualJson(
             // lang=json
-            """
-            {
-              "type": "https://docs.passwordless.dev/guide/errors.html#",
-              "title": "Invalid UserId: UserId cannot be null or empty",
-              "status": 400,
-              "errorCode": null
-            }
-            """, body);
+            """{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"userId":["The UserId field is required."]}}""", body);
     }
 
     [Theory]
-    [InlineData("-1")]
     [InlineData(null)]
     [InlineData("")]
     public async Task InvalidUsernameReturnsError(string input)
     {
         // Arrange
-        object payload = input == "-1"
-            ? new { UserID = "1" }
-            : new { UserId = "1", Username = input };
+        Faker<RegisterToken> registerTokenGenerator = new Faker<RegisterToken>();
+        registerTokenGenerator.RuleFor(x => x.UserId, "userId");
+        registerTokenGenerator.RuleFor(x => x.Username, input);
+        var registerToken = registerTokenGenerator.Generate();
 
         await using var api = await apiFixture.CreateApiAsync(testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
-        using var response = await client.PostAsJsonAsync("register/token", payload);
+        using var response = await client.PostAsJsonAsync("register/token", registerToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -87,14 +82,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         AssertHelper.AssertEqualJson(
             // lang=json
-            """
-            {
-              "type": "https://docs.passwordless.dev/guide/errors.html#",
-              "title": "Invalid Username: Username cannot be null or empty",
-              "status": 400,
-              "errorCode": null
-            }
-            """, body);
+            """{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"username":["The Username field is required."]}}""", body);
     }
 
     [Theory]
@@ -135,7 +123,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task NoneAssertionIsAccepted(string attestation)
     {
         // Arrange
-        var payload = new { UserId = "1", Username = "test", attestation };
+        var payload = new RegisterToken
+        {
+            UserId = "1",
+            Username = "test",
+            Attestation = attestation
+        };
 
         await using var api = await apiFixture.CreateApiAsync(testOutput);
         using var client = api.CreateClient().AddSecretKey();
@@ -144,6 +137,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         using var response = await client.PostAsJsonAsync("register/token", payload);
 
         // Assert
+        var content = await response.Content.ReadAsStringAsync();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

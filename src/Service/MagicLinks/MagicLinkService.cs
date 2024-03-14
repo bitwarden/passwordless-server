@@ -36,8 +36,10 @@ public class MagicLinkService(
             );
         }
 
+        var maxQuota = (await tenantStorage.GetAppFeaturesAsync()).MagicLinkEmailMonthlyQuota;
+
         // Reduce the quota for newly created applications
-        var coefficient = accountAge.TotalDays switch
+        var quotaModifier = accountAge.TotalDays switch
         {
             // App created <24 hours ago
             < 1 => 0.2,
@@ -49,11 +51,7 @@ public class MagicLinkService(
             _ => 1
         };
 
-        var quota = (int)Math.Max(
-            // Make sure the quota is at least 1
-            1,
-            coefficient * (account.Features?.MagicLinkEmailMonthlyQuota ?? 500)
-        );
+        var quota = (int)(maxQuota * quotaModifier);
 
         var emailsDispatchedIn30Days = await cache.GetOrCreateAsync(
             _emailsSentCacheKey,
