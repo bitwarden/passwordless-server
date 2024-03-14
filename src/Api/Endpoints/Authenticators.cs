@@ -34,7 +34,6 @@ public static class AuthenticatorsEndpoints
     /// <param name="request"></param>
     /// <param name="service"></param>
     /// <param name="featureContextProvider"></param>
-    /// <param name="eventLogger"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
