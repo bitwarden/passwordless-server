@@ -85,7 +85,7 @@ public class MagicLinkService(
         await mailProvider.SendAsync(new MailMessage
         {
             To = [request.EmailAddress.ToString()],
-            Subject = $"Sign In to {link.Host}",
+            Subject = $"Sign in to {link.Host}",
             TextBody = $"Please click the link or copy into your browser of choice to log in to {link.Host}: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
                 //lang=html
