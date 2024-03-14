@@ -33,8 +33,7 @@ public class MailKitSmtpMailProvider : IMailProvider
     public async Task SendAsync(MailMessage message)
     {
         var mimeMessage = new MimeMessage();
-        var from = _fromEmail ?? message.From;
-        mimeMessage.From.Add(MailboxAddress.Parse(from));
+        mimeMessage.From.Add(GetFromAddress(message));
         mimeMessage.Subject = message.Subject;
         var toAddresses = message.To.Select(MailboxAddress.Parse).ToList();
         mimeMessage.To.AddRange(toAddresses);
@@ -51,13 +50,20 @@ public class MailKitSmtpMailProvider : IMailProvider
         builder.HtmlBody = message.HtmlBody;
         mimeMessage.Body = builder.ToMessageBody();
 
-        using var client = await GetClient();
+        using var client = await GetClientAsync();
 
         await client.SendAsync(mimeMessage);
         await client.DisconnectAsync(true);
     }
 
-    public async Task<SmtpClient> GetClient()
+    private MailboxAddress GetFromAddress(MailMessage message)
+    {
+        var from = (_fromEmail ?? message.From)!;
+        
+        return string.IsNullOrEmpty(message.FromDisplayName) ? MailboxAddress.Parse(from) : new MailboxAddress(message.FromDisplayName, from);
+    }
+
+    public async Task<SmtpClient> GetClientAsync()
     {
         var client = new SmtpClient();
         if (_smtpTrustServer)
