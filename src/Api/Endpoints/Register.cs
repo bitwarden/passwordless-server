@@ -22,7 +22,8 @@ public static class RegisterEndpoints
                 return Ok(new RegisterTokenResponse(result));
             })
             .RequireAuthorization(SecretKeyScopes.TokenRegister)
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithParameterValidation();
 
         app.MapPost("/register/begin", async (
                 FidoRegistrationBeginDTO payload,

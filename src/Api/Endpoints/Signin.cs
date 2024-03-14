@@ -27,7 +27,8 @@ public static class SigninEndpoints
                 return Ok(new SigninTokenResponse(result));
             })
             .RequireAuthorization(SecretKeyScopes.TokenVerify)
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithParameterValidation();
 
         app.MapPost("/signin/begin", async (
                 SignInBeginDTO payload,
