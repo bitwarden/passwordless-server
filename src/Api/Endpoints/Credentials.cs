@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
+using Passwordless.Api.OpenApi;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
 
@@ -9,18 +10,20 @@ public static class CredentialsEndpoints
 {
     public static void MapCredentialsEndpoints(this WebApplication app)
     {
-        app.MapPost("/credentials/delete", async (CredentialsDeleteDTO payload,
+        var group = app.MapGroup("/credentials")
+            .RequireCors("default")
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.Credentials);
+
+        group.MapPost("/delete", async (CredentialsDeleteDTO payload,
                 UserCredentialsService userCredentialsService) =>
         {
             await userCredentialsService.DeleteCredentialAsync(payload.CredentialId);
 
             return Results.NoContent();
-        })
-            .RequireSecretKey()
-            .RequireCors("default");
+        });
 
-
-        app.MapMethods("/credentials/list", new[] { "post", "get" }, async (HttpRequest req, UserCredentialsService userCredentialService) =>
+        group.MapMethods("/list", new[] { "post", "get" }, async (HttpRequest req, UserCredentialsService userCredentialService) =>
         {
             string? userId;
             if (req.Method == "POST")
@@ -51,8 +54,6 @@ public static class CredentialsEndpoints
             var res = ListResponse.Create(result);
 
             return Results.Ok(res);
-        })
-            .RequireSecretKey()
-            .RequireCors("default");
+        });
     }
 }

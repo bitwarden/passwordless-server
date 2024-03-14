@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Features;
@@ -15,7 +16,11 @@ public static class SigninEndpoints
 
     public static void MapSigninEndpoints(this WebApplication app)
     {
-        app.MapPost("/signin/generate-token", async (
+        var group = app.MapGroup("/signin")
+            .RequireCors("default")
+            .WithTags(OpenApiTags.SignIn);
+
+        group.MapPost("/generate-token", async (
                 SigninTokenRequest signinToken,
                 IFeatureContextProvider provider,
                 IFido2Service fido2Service
@@ -30,10 +35,9 @@ public static class SigninEndpoints
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireSecretKey(SecretKeyScopes.TokenVerify)
-            .RequireCors("default");
+            .RequireSecretKey(SecretKeyScopes.TokenVerify);
 
-        app.MapPost("/signin/begin", async (
+        group.MapPost("/begin", async (
                 SignInBeginDTO payload,
                 IFido2Service fido2Service
             ) =>
@@ -46,7 +50,7 @@ public static class SigninEndpoints
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/signin/complete", async (
+        group.MapPost("/complete", async (
                 SignInCompleteDTO payload,
                 HttpRequest request,
                 IFido2Service fido2Service
@@ -58,10 +62,9 @@ public static class SigninEndpoints
                 return Ok(result);
             })
             .RequirePublicKey(PublicKeyScopes.Login)
-            .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/signin/verify", async (
+        group.MapPost("/verify", async (
                 SignInVerifyDTO payload,
                 IFido2Service fido2Service
             ) =>
@@ -70,7 +73,6 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireSecretKey(SecretKeyScopes.TokenVerify)
-            .RequireCors("default");
+            .RequireSecretKey(SecretKeyScopes.TokenVerify);
     }
 }

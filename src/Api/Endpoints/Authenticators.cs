@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
@@ -15,7 +16,8 @@ public static class AuthenticatorsEndpoints
     {
         var group = app.MapGroup("/authenticators")
             .RequireCors("default")
-            .RequireSecretKey();
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.Authenticators);
 
         group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
 
