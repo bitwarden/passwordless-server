@@ -32,8 +32,7 @@ Thank you for contributing! Please follow the steps below to help us process you
 
 ### Checklist
 I did the following to ensure that my changes were tested thoroughly:
-* __
-* __
+- __
 
 I did the following to ensure that my changes do not introduce security vulnerabilities:
 * __
