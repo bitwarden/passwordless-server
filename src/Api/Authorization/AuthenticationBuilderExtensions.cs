@@ -10,19 +10,19 @@ namespace Passwordless.Api.Authorization;
 
 public static class AuthenticationBuilderExtensions
 {
-    public static AuthenticationBuilder AddCustomSchemes(this AuthenticationBuilder builder)
+    public static void AddCustomSchemes(this AuthenticationBuilder builder)
     {
-        builder.AddHeaderScheme<ISharedManagementService>("ApiKey", options =>
+        builder.AddHeaderScheme<ISharedManagementService>(Constants.PublicKeyAuthenticationScheme, c =>
         {
-            options.HeaderName = "ApiKey";
-            options.ClaimsCreator = async (managementService, apiKey) =>
+            c.HeaderName = Constants.PublicKeyHeaderName;
+            c.ClaimsCreator = async (managementService, apiKey) =>
             {
                 var validationResult = await managementService.ValidatePublicKeyAsync(apiKey);
 
                 var claims = new List<Claim>
                 {
                     new (CustomClaimTypes.AccountName, validationResult.ApplicationId),
-                    new (CustomClaimTypes.KeyType, "public")
+                    new (CustomClaimTypes.KeyType, Constants.PublicKeyType)
                 };
 
                 foreach (var scope in validationResult.Scopes)
@@ -32,20 +32,20 @@ public static class AuthenticationBuilderExtensions
 
                 return claims.ToArray();
             };
-            options.ProblemDetailWriter = new DefaultProblemDetailWriter("ApiSecret");
+            c.ProblemDetailWriter = new DefaultProblemDetailWriter(Constants.SecretKeyHeaderName);
         });
 
-        builder.AddHeaderScheme<ISharedManagementService>("ApiSecret", options =>
+        builder.AddHeaderScheme<ISharedManagementService>(Constants.SecretKeyAuthenticationScheme, c =>
         {
-            options.HeaderName = "ApiSecret";
-            options.ClaimsCreator = async (managementService, apiSecret) =>
+            c.HeaderName = Constants.SecretKeyHeaderName;
+            c.ClaimsCreator = async (managementService, apiSecret) =>
             {
                 var validationResult = await managementService.ValidateSecretKeyAsync(apiSecret);
 
                 var claims = new List<Claim>
                 {
                     new (CustomClaimTypes.AccountName, validationResult.ApplicationId),
-                    new (CustomClaimTypes.KeyType, "secret")
+                    new (CustomClaimTypes.KeyType, Constants.SecretKeyType)
                 };
 
                 foreach (var scope in validationResult.Scopes)
@@ -55,13 +55,13 @@ public static class AuthenticationBuilderExtensions
 
                 return claims.ToArray();
             };
-            options.ProblemDetailWriter = new DefaultProblemDetailWriter("ApiKey");
+            c.ProblemDetailWriter = new DefaultProblemDetailWriter(Constants.PublicKeyHeaderName);
         });
 
-        builder.AddHeaderScheme<IOptions<ManagementOptions>>("ManagementKey", options =>
+        builder.AddHeaderScheme<IOptions<ManagementOptions>>(Constants.ManagementKeyAuthenticationScheme, c =>
         {
-            options.HeaderName = "ManagementKey";
-            options.ClaimsCreator = (optionsAccessor, key) =>
+            c.HeaderName = Constants.ManagementKeyHeaderName;
+            c.ClaimsCreator = (optionsAccessor, key) =>
             {
                 var options = optionsAccessor.Value;
 
@@ -74,12 +74,10 @@ public static class AuthenticationBuilderExtensions
 
                 return Task.FromResult(new[]
                 {
-                    new Claim(CustomClaimTypes.KeyType, "management"),
+                    new Claim(CustomClaimTypes.KeyType, Constants.ManagementKeyType),
                 });
             };
         });
-
-        return builder;
     }
 
     private static AuthenticationBuilder AddHeaderScheme<TDep>(

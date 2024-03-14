@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
@@ -33,7 +34,12 @@ public static class MagicEndpoints
 
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("magic-link/send", async (
+        var group = app.MapGroup("/magic-link")
+            .RequireCors("default")
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.MagicLinks);
+
+        group.MapPost("/send", async (
                 SendMagicLinkRequest request,
                 IFeatureContextProvider provider,
                 MagicLinkService magicLinkService
@@ -46,8 +52,6 @@ public static class MagicEndpoints
 
                 return NoContent();
             })
-            .WithParameterValidation()
-            .RequireSecretKey()
-            .RequireCors("default");
+            .WithParameterValidation();
     }
 }

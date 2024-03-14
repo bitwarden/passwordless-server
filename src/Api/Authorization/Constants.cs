@@ -2,10 +2,17 @@ namespace Passwordless.Api.Authorization;
 
 public static class Constants
 {
-    public const string Scheme = "ApiKey";
-    public const string PublicKeyPolicy = "PublicKey";
-    public const string SecretKeyPolicy = "SecretKey";
-    public const string ManagementKeyPolicy = "ManagementKey";
+    public const string PublicKeyAuthenticationScheme = "ApiKey";
+    public const string SecretKeyAuthenticationScheme = "ApiSecret";
+    public const string ManagementKeyAuthenticationScheme = "ManagementKey";
+
+    public const string PublicKeyType = "public";
+    public const string SecretKeyType = "secret";
+    public const string ManagementKeyType = "management";
+
+    public const string PublicKeyHeaderName = "ApiKey";
+    public const string SecretKeyHeaderName = "ApiSecret";
+    public const string ManagementKeyHeaderName = "ManagementKey";
 }
 
 public static class CustomClaimTypes

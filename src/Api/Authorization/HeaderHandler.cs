@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -15,11 +16,6 @@ public class HeaderOptions<TDep> : AuthenticationSchemeOptions
     public string HeaderName { get; set; } = null!;
     public Func<TDep, string, Task<Claim[]>> ClaimsCreator { get; set; } = null!;
     public IProblemDetailWriter? ProblemDetailWriter { get; set; }
-}
-
-public interface IProblemDetailWriter
-{
-    IEnumerable<string> GetDetails(HttpContext context, string headerName);
 }
 
 public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
@@ -94,20 +90,37 @@ public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
         };
 
         var endpoint = Context.GetEndpoint();
-        if (endpoint != null)
+        if (endpoint == null)
         {
-            var policies = endpoint
-                .Metadata
-                .Where(x => x is AuthorizeAttribute)
-                .Cast<AuthorizeAttribute>()
-                .ToList();
-
-            if (policies.Count > 0)
-            {
-                context.ProblemDetails.Detail =
-                    $"You are unable to access this resource because you do not have the required permissions. Required scopes: {string.Join(", ", policies.Select(x => x.Policy))}";
-            }
+            await _problemDetailsService.WriteAsync(context);
+            return;
         }
+
+        var policy = endpoint
+            .Metadata
+            .Where(x => x is AuthorizationPolicy)
+            .Cast<AuthorizationPolicy>()
+            .SingleOrDefault();
+
+        if (policy == null)
+        {
+            await _problemDetailsService.WriteAsync(context);
+            return;
+        }
+
+        var scopeRequirement = policy?.Requirements
+            .Where(x => x is ClaimsAuthorizationRequirement)
+            .Cast<ClaimsAuthorizationRequirement>()
+            .SingleOrDefault(x => x.ClaimType == CustomClaimTypes.Scopes);
+
+        if (scopeRequirement == null || scopeRequirement.AllowedValues == null)
+        {
+            await _problemDetailsService.WriteAsync(context);
+            return;
+        }
+
+        context.ProblemDetails.Detail =
+            $"You are unable to access this resource because you do not have the required permissions. Required scopes: {string.Join(", ", scopeRequirement.AllowedValues)}";
 
         await _problemDetailsService.WriteAsync(context);
     }

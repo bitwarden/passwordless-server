@@ -1,8 +1,10 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Features;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -14,23 +16,29 @@ public static class SigninEndpoints
 
     public static void MapSigninEndpoints(this WebApplication app)
     {
-        app.MapPost("/signin/generate-token", async (
+        var group = app.MapGroup("/signin")
+            .RequireCors("default")
+            .WithTags(OpenApiTags.SignIn);
+
+        group.MapPost("/generate-token", async (
                 SigninTokenRequest signinToken,
                 IFeatureContextProvider provider,
                 IFido2Service fido2Service
             ) =>
             {
-                if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled) return Forbid();
+                if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled)
+                {
+                    throw new ApiException("The 'POST /signin/generate-token' endpoint is disabled", 403);
+                }
 
                 var result = await fido2Service.CreateSigninTokenAsync(signinToken);
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
-            .RequireCors("default")
+            .RequireSecretKey(SecretKeyScopes.TokenVerify)
             .WithParameterValidation();
 
-        app.MapPost("/signin/begin", async (
+        group.MapPost("/begin", async (
                 SignInBeginDTO payload,
                 IFido2Service fido2Service
             ) =>
@@ -39,11 +47,11 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Login)
+            .RequirePublicKey(PublicKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/signin/complete", async (
+        group.MapPost("/complete", async (
                 SignInCompleteDTO payload,
                 HttpRequest request,
                 IFido2Service fido2Service
@@ -54,11 +62,10 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Login)
-            .RequireCors("default")
+            .RequirePublicKey(PublicKeyScopes.Login)
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/signin/verify", async (
+        group.MapPost("/verify", async (
                 SignInVerifyDTO payload,
                 IFido2Service fido2Service
             ) =>
@@ -67,7 +74,6 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
-            .RequireCors("default");
+            .RequireSecretKey(SecretKeyScopes.TokenVerify);
     }
 }
