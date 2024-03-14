@@ -7,6 +7,12 @@ namespace Passwordless.Api.Authorization;
 
 public static class EndpointConventionBuilderExtensions
 {
+    /// <summary>
+    /// Requires a `ManagementKey` header to access the endpoint.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TBuilder"></typeparam>
+    /// <returns></returns>
     public static TBuilder RequireManagementKey<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder
     {
         var requirements = new List<IAuthorizationRequirement>
@@ -19,6 +25,13 @@ public static class EndpointConventionBuilderExtensions
         return builder.RequireAuthorization(pol);
     }
 
+    /// <summary>
+    /// Requires a `ApiKey` header to access the endpoint.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="scope">When provided, requires the `ApiKey` to have the specified scope.</param>
+    /// <typeparam name="TBuilder"></typeparam>
+    /// <returns></returns>
     public static TBuilder RequirePublicKey<TBuilder>(this TBuilder builder, PublicKeyScopes? scope = null) where TBuilder : IEndpointConventionBuilder
     {
         var requirements = new List<IAuthorizationRequirement>
@@ -37,6 +50,13 @@ public static class EndpointConventionBuilderExtensions
         return builder.RequireAuthorization(pol);
     }
 
+    /// <summary>
+    /// Requires a `ApiSecret` header to access the endpoint.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="scope">When provided, requires the `ApiSecret` to have the specified scope.</param>
+    /// <typeparam name="TBuilder"></typeparam>
+    /// <returns></returns>
     public static TBuilder RequireSecretKey<TBuilder>(this TBuilder builder, SecretKeyScopes? scope = null) where TBuilder : IEndpointConventionBuilder
     {
         var requirements = new List<IAuthorizationRequirement>
