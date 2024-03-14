@@ -3,6 +3,7 @@ using Passwordless.Api.Extensions;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Features;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
@@ -20,7 +21,10 @@ public static class SigninEndpoints
                 IFido2Service fido2Service
             ) =>
             {
-                if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled) return Forbid();
+                if (!(await provider.UseContext()).IsGenerateSignInTokenEndpointEnabled)
+                {
+                    throw new ApiException("The 'POST /signin/generate-token' endpoint is disabled", 403);
+                }
 
                 var result = await fido2Service.CreateSigninTokenAsync(signinToken);
 

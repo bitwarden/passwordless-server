@@ -89,7 +89,7 @@ var services = builder.Services;
 
 services.AddProblemDetails();
 services
-    .AddAuthentication(Constants.PublicKeyAuthenticationScheme)
+    .AddAuthentication()
     .AddCustomSchemes();
 
 services.AddAuthorization();
