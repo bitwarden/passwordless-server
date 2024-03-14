@@ -19,7 +19,12 @@ public static class AuthenticatorsEndpoints
             .RequireSecretKey()
             .WithTags(OpenApiTags.Authenticators);
 
-        group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
+        group.MapGet("/list", ListConfiguredAuthenticatorsAsync)
+            .WithOpenApi(o =>
+            {
+                o.Parameters.First(p => p.Name == nameof(ConfiguredAuthenticatorRequest.IsAllowed)).Description = "When 'true', all authenticators on the allowlist are returned. When 'false', all authenticators on the blocklist are returned.";
+                return o;
+            });
 
         group.MapPost("/add", AddAuthenticatorsAsync)
             .WithParameterValidation();
