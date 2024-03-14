@@ -46,15 +46,10 @@ builder.Services.AddSwaggerGen(swagger =>
     {
         Version = "v4",
         Title = "Passwordless.dev API",
-        Description = "The Passwordless.dev API is used by your frontend & backend to initiate key registrations, verify sign-ins, retrieve keys for end-users, and more.",
         TermsOfService = new Uri("https://bitwarden.com/terms/"),
         Contact = new OpenApiContact
         {
-            Name = "Sales",
-            Url = new Uri("https://bitwarden.com/contact-sales/")
-        },
-        License = new OpenApiLicense
-        {
+            Email = "support@passwordless.dev",
             Name = "Support",
             Url = new Uri("https://bitwarden.com/contact/")
         }
