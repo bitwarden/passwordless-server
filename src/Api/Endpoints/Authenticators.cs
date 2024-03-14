@@ -29,7 +29,7 @@ public static class AuthenticatorsEndpoints
     }
 
     /// <summary>
-    /// List configured authenticators on the allowlist or blocklist. (Requires the `Enterprise` plan.)
+    /// List configured authenticators on the allowlist or blocklist. When the list is empty, all authenticators are allowed. (Requires the `Enterprise` plan.)
     /// </summary>
     /// <param name="request"></param>
     /// <param name="service"></param>
