@@ -1,42 +1,35 @@
 using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.Common.Background;
 
 namespace Passwordless.AdminConsole.EventLog;
 
-public class EventDeletionBackgroundWorker : BackgroundService
+public class EventDeletionBackgroundWorker : BasePeriodicBackgroundService
 {
-    private readonly ILogger<EventDeletionBackgroundWorker> _logger;
     private readonly IServiceProvider _serviceProvider;
 
     public EventDeletionBackgroundWorker(
-        ILogger<EventDeletionBackgroundWorker> logger,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        TimeProvider timeProvider,
+        ILogger<EventDeletionBackgroundWorker> logger)
+        : base(new TimeOnly(0), TimeSpan.FromDays(1), timeProvider, logger)
     {
-        _logger = logger;
         _serviceProvider = serviceProvider;
     }
 
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task DoWorkAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting Event Log Deletion Worker");
-
-        using PeriodicTimer timer = new(TimeSpan.FromDays(1));
+        Logger.LogInformation("Starting Event Log Deletion Worker");
 
         try
         {
-            do
-            {
-                using var scope = _serviceProvider.CreateScope();
-                var eventLogStorageContext = scope.ServiceProvider.GetRequiredService<IInternalEventLogStorageContext>();
-                await eventLogStorageContext.DeleteExpiredEvents(stoppingToken);
-            } while (await timer.WaitForNextTickAsync(stoppingToken));
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Event Log Deletion Worker was cancelled.");
+            using var scope = _serviceProvider.CreateScope();
+            var eventLogStorageContext = scope.ServiceProvider.GetRequiredService<IInternalEventLogStorageContext>();
+            var result = await eventLogStorageContext.DeleteExpiredEventsAsync(cancellationToken);
+            Logger.LogInformation("{BackgroundService} deleted {Records}.", nameof(EventDeletionBackgroundWorker), result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Event Log Deletion failed.");
+            Logger.LogError(ex, "Event Log Deletion failed.");
         }
     }
 }
