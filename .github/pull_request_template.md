@@ -35,5 +35,4 @@ I did the following to ensure that my changes were tested thoroughly:
 - __
 
 I did the following to ensure that my changes do not introduce security vulnerabilities:
-* __
-* __
+- __
