@@ -26,7 +26,7 @@ public static class SigninEndpoints
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
+            .RequireSecretKey(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
 
         app.MapPost("/signin/begin", async (
@@ -38,7 +38,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Login)
+            .RequirePublicKey(PublicKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -53,7 +53,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Login)
+            .RequirePublicKey(PublicKeyScopes.Login)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -66,7 +66,7 @@ public static class SigninEndpoints
 
                 return Ok(result);
             })
-            .RequireAuthorization(SecretKeyScopes.TokenVerify)
+            .RequireSecretKey(SecretKeyScopes.TokenVerify)
             .RequireCors("default");
     }
 }

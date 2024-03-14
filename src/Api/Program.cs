@@ -10,6 +10,7 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
@@ -26,17 +27,18 @@ using Serilog.Sinks.Datadog.Logs;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(x =>
+builder.Services.AddSwaggerGen(swagger =>
 {
-    x.DocInclusionPredicate((docName, apiDesc) =>
+    swagger.DocInclusionPredicate((docName, apiDesc) =>
     {
-        var authorizationAttribute = (AuthorizeAttribute?)apiDesc.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizeAttribute));
-        if (authorizationAttribute == null)
+        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
+        if (policy == null)
         {
             return false;
         }
-        return authorizationAttribute.Policy != Constants.ManagementKeyPolicy;
+        return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
     });
+    swagger.OperationFilter<AuthorizationOperationFilter>();
 });
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
@@ -87,10 +89,10 @@ var services = builder.Services;
 
 services.AddProblemDetails();
 services
-    .AddAuthentication(Constants.Scheme)
+    .AddAuthentication(Constants.PublicKeyAuthenticationScheme)
     .AddCustomSchemes();
 
-services.AddAuthorization(options => options.AddPasswordlessPolicies());
+services.AddAuthorization();
 services.AddOptions<ManagementOptions>()
     .BindConfiguration("PasswordlessManagement");
 

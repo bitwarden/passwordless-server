@@ -21,7 +21,7 @@ public static class RegisterEndpoints
                 var result = await fido2Service.CreateRegisterTokenAsync(registerToken);
                 return Ok(new RegisterTokenResponse(result));
             })
-            .RequireAuthorization(SecretKeyScopes.TokenRegister)
+            .RequireSecretKey(SecretKeyScopes.TokenRegister)
             .RequireCors("default");
 
         app.MapPost("/register/begin", async (
@@ -33,7 +33,7 @@ public static class RegisterEndpoints
                 var result = await fido2Service.RegisterBeginAsync(payload);
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Register)
+            .RequirePublicKey(PublicKeyScopes.Register)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
@@ -51,7 +51,7 @@ public static class RegisterEndpoints
                 return Ok(result);
             })
             .WithParameterValidation()
-            .RequireAuthorization(PublicKeyScopes.Register)
+            .RequirePublicKey(PublicKeyScopes.Register)
             .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
     }

@@ -17,11 +17,6 @@ public class HeaderOptions<TDep> : AuthenticationSchemeOptions
     public IProblemDetailWriter? ProblemDetailWriter { get; set; }
 }
 
-public interface IProblemDetailWriter
-{
-    IEnumerable<string> GetDetails(HttpContext context, string headerName);
-}
-
 public class HeaderHandler<TDep> : AuthenticationHandler<HeaderOptions<TDep>>
 {
     private readonly IProblemDetailsService _problemDetailsService;
