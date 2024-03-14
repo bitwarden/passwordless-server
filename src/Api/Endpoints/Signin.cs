@@ -35,7 +35,8 @@ public static class SigninEndpoints
 
                 return Ok(new SigninTokenResponse(result));
             })
-            .RequireSecretKey(SecretKeyScopes.TokenVerify);
+            .RequireSecretKey(SecretKeyScopes.TokenVerify)
+            .WithParameterValidation();
 
         group.MapPost("/begin", async (
                 SignInBeginDTO payload,

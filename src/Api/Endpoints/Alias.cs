@@ -26,7 +26,8 @@ public static class AliasEndpoints
                 eventLogger.LogUserAliasSetEvent(payload.UserId);
 
                 return Results.NoContent();
-            });
+            })
+            .WithParameterValidation();
 
         group.MapGet("/list", async (string userId, IFido2Service fido2Service) =>
         {

@@ -26,7 +26,8 @@ public static class RegisterEndpoints
                 var result = await fido2Service.CreateRegisterTokenAsync(registerToken);
                 return Ok(new RegisterTokenResponse(result));
             })
-            .RequireSecretKey(SecretKeyScopes.TokenRegister);
+            .RequireSecretKey(SecretKeyScopes.TokenRegister)
+            .WithParameterValidation();
 
         group.MapPost("/begin", async (
                 FidoRegistrationBeginDTO payload,
