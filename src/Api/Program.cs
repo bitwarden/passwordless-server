@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Email;
@@ -29,6 +30,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swagger =>
 {
+    swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
     swagger.DocInclusionPredicate((docName, apiDesc) =>
     {
         var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
@@ -40,7 +42,23 @@ builder.Services.AddSwaggerGen(swagger =>
     });
     swagger.OperationFilter<AuthorizationOperationFilter>();
     swagger.SupportNonNullableReferenceTypes();
-
+    swagger.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v4",
+        Title = "Passwordless.dev API",
+        Description = "The Passwordless.dev API is used by your frontend & backend to initiate key registrations, verify sign-ins, retrieve keys for end-users, and more.",
+        TermsOfService = new Uri("https://bitwarden.com/terms/"),
+        Contact = new OpenApiContact
+        {
+            Name = "Sales",
+            Url = new Uri("https://bitwarden.com/contact-sales/")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "Support",
+            Url = new Uri("https://bitwarden.com/contact/")
+        }
+    });
 });
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");

@@ -28,6 +28,15 @@ public static class AuthenticatorsEndpoints
             .WithParameterValidation();
     }
 
+    /// <summary>
+    /// List configured authenticators on the allowlist or blocklist. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
+    /// <param name="featureContextProvider"></param>
+    /// <param name="eventLogger"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
         IApplicationService service,
@@ -42,6 +51,15 @@ public static class AuthenticatorsEndpoints
         return Ok(result);
     }
 
+    /// <summary>
+    /// Adds authenticators to the allowlist or blocklist for use with attestation. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
+    /// <param name="featureContextProvider"></param>
+    /// <param name="eventLogger"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> AddAuthenticatorsAsync(
         [FromBody] AddAuthenticatorsRequest request,
         IApplicationService service,
@@ -59,6 +77,15 @@ public static class AuthenticatorsEndpoints
         return NoContent();
     }
 
+    /// <summary>
+    /// Removes authenticators from the allowlist or blocklist. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
+    /// <param name="featureContextProvider"></param>
+    /// <param name="eventLogger"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> RemoveAuthenticatorsAsync(
         [FromBody] RemoveAuthenticatorsRequest request,
         IApplicationService service,
