@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
+using Passwordless.Api.OpenApi;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -11,7 +12,12 @@ public static class AliasEndpoints
 {
     public static void MapAliasEndpoints(this WebApplication app)
     {
-        app.MapPost("/alias", async (AliasPayload payload,
+        var group = app.MapGroup("/alias")
+            .RequireCors("default")
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.Aliases);
+
+        group.MapPost("", async (AliasPayload payload,
                 IFido2Service fido2Service,
                 IEventLogger eventLogger) =>
             {
@@ -21,11 +27,9 @@ public static class AliasEndpoints
 
                 return Results.NoContent();
             })
-            .RequireSecretKey()
-            .RequireCors("default")
             .WithParameterValidation();
 
-        app.MapGet("/alias/list", async (string userId, IFido2Service fido2Service) =>
+        group.MapGet("/list", async (string userId, IFido2Service fido2Service) =>
         {
             // if payload is empty, throw exception
             if (string.IsNullOrEmpty(userId))
@@ -37,8 +41,6 @@ public static class AliasEndpoints
 
             var res = ListResponse.Create(aliases);
             return Results.Ok(res);
-        })
-            .RequireSecretKey()
-            .RequireCors("default");
+        });
     }
 }
