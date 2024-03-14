@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
+using Passwordless.Api.OpenApi;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
@@ -11,7 +12,8 @@ public static class UsersEndpoints
     public static void MapUsersEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/users")
-            .RequireSecretKey();
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.Users);
 
         group.MapMethods("/list", new[] { "get" }, async (UserCredentialsService userService) =>
         {
