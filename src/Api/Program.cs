@@ -39,6 +39,8 @@ builder.Services.AddSwaggerGen(swagger =>
         return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
     });
     swagger.OperationFilter<AuthorizationOperationFilter>();
+    swagger.SupportNonNullableReferenceTypes();
+
 });
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
