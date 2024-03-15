@@ -59,7 +59,7 @@ public class MailKitSmtpMailProvider : IMailProvider
     private MailboxAddress GetFromAddress(MailMessage message)
     {
         var from = (_fromEmail ?? message.From)!;
-        
+
         return string.IsNullOrEmpty(message.FromDisplayName) ? MailboxAddress.Parse(from) : new MailboxAddress(message.FromDisplayName, from);
     }
 

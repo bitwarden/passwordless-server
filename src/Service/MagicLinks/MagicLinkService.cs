@@ -109,7 +109,7 @@ public class MagicLinkService(
                  </html>
                  """,
             MessageType = "magic-links",
-            FromDisplayName = $"sign-in@{link.Host}"
+            FromDisplayName = $"Sign in to {link.Host}"
         });
 
         await tenantStorage.AddDispatchedEmailAsync(request.UserId, request.EmailAddress.Address, request.LinkTemplate);
