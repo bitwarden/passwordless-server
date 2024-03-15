@@ -22,7 +22,7 @@ public static class EventLog
     }
 
     /// <summary>
-    /// Returns event logs. (Requires the `Enterprise` plan.)
+    /// Lists event logs. (Requires the `Enterprise` plan.)
     /// </summary>
     /// <param name="request"></param>
     /// <param name="storage"></param>
