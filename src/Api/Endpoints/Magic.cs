@@ -45,7 +45,7 @@ public static class MagicEndpoints
     }
 
     /// <summary>
-    /// Sends email containing a magic link template allowing users to login.
+    /// Sends an e-mail containing a magic link template allowing users to login.
     ///
     /// Warning: Verify the e-mail address matches the user identifier in your backend.
     /// </summary>
