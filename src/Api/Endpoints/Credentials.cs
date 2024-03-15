@@ -35,7 +35,7 @@ public static class CredentialsEndpoints
     /// <returns></returns>
     public static async Task<IResult> DeleteCredentialAsync(
         [FromBody] CredentialsDeleteDTO payload,
-        UserCredentialsService userCredentialsService)
+        [FromServices] UserCredentialsService userCredentialsService)
     {
         await userCredentialsService.DeleteCredentialAsync(payload.CredentialId);
 
