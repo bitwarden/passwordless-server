@@ -17,7 +17,8 @@ public static class EventLog
         app.MapGet("events", GetEventLogEventsAsync)
             .RequireSecretKey()
             .RequireCors("default")
-            .WithTags(OpenApiTags.EventLogging);
+            .WithTags(OpenApiTags.EventLogging)
+            .WithParameterValidation();
     }
 
     /// <summary>
@@ -55,6 +56,7 @@ public static class EventLog
 
     private struct GetEventLogEventsRequest
     {
+        [Range(1, int.MaxValue)]
         public int PageNumber { get; set; }
 
         [Range(1, 1000)]
