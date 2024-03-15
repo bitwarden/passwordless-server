@@ -40,7 +40,8 @@ public static class MagicEndpoints
             .WithTags(OpenApiTags.MagicLinks);
 
         group.MapPost("/send", SendMagicLinkAsync)
-            .WithParameterValidation();
+            .WithParameterValidation()
+            .RequireRateLimiting(RateLimiterPolicy);
     }
 
     /// <summary>
