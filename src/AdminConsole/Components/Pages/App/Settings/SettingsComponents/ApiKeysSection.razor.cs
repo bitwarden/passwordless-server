@@ -95,8 +95,6 @@ public partial class ApiKeysSection : ComponentBase
         }
     }
 
-
-
     private async Task OnSelectedFormConfirmed()
     {
         if (string.IsNullOrEmpty(ConfirmedSelectedForm.ApiKeyId))

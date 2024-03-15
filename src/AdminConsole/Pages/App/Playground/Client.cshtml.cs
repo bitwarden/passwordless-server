@@ -21,7 +21,7 @@ public class ClientModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await _passwordlessClient.VerifyTokenAsync(token);
+        var res = await _passwordlessClient.VerifyAuthenticationTokenAsync(token);
         return new JsonResult(res);
     }
 }
