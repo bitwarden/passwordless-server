@@ -18,53 +18,59 @@
 @inject UserManager<ConsoleAdmin> UserManager
 @inject ILogger<Initialize> Logger
 @attribute [AllowAnonymous]
-<h3>Initialize</h3>
+<h3>🚀 Let's set up the Admin Console</h3>
+<InfoAlert class="mt-5">Admin Console is configured to use the API at <strong>@ManagementOptions.Value.ApiUrl</strong></InfoAlert>
+
 
 <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-    <p>
-        To initialize AdminConsole please enter a name to be associated with the admin console. This will create an 
-        organization and application for the AdminConsole to use for passkey login. You will then be sent a magic link 
-        to log into the newly initialized admin console.
-    </p>
-    <p>
-        NOTE: The email used here will be locked to the AdminConsole organization and will not be able to create a new 
-        organization.
-    </p>
-    <EditForm
-        Model="Form"
-        FormName="AdminConsoleCreateForm"
-        OnValidSubmit="OnAdminConsoleCreateFormSubmitted"
-        class="space-y-6">
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 my-2">
-            <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Email">
-                Admin Email: <InputText id="Email" @bind-Value="@Form.AdminEmail" type="email"/>
-            </label>
-            <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Name">
-                Admin Name: <InputText id="Name" @bind-Value="@Form.AdminName"/>
-            </label>
-            <button class="btn-primary m-2" type="submit">Submit</button>
-        </div>
-    </EditForm>
+    @if (!IsFormSubmitted)
+    {
+        <p class="mb-3">
+            Since the Admin Console is missing either migrations or ApiKeys to the Passwordles API, we'll need to do some setup using the form below.
+        </p>
+
+        <p class="mb-">
+            Submitting the form will create an organization and application for the Admin Console to use for passkeys and magic links.
+        </p>
+        <EditForm
+            Model="Form"
+            FormName="AdminConsoleCreateForm"
+            OnValidSubmit="OnAdminConsoleCreateFormSubmitted"
+            class="space-y-6">
+            <div class="sm:w-full sm:max-w-md">
+                <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Name">
+                    Admin Name
+                    <InputText id="Name" @bind-Value="@Form.AdminName" class="text-input" placeholder="Hubert J. Farnsworth"/>
+                </label>
+                <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Email">
+                    Admin Email
+                    <InputText id="Email" @bind-Value="@Form.AdminEmail" type="email" class="text-input" placeholder="hubert@planetexpress.com"/>
+                </label>
+                <p class="mt-3 text-sm leading-6 text-gray-600">This email will be limited to the admin organisation and cannot be used to create another organisation later.</p>
+
+                <button class="btn-primary mt-3" type="submit">Initialize the Admin Console</button>
+            </div>
+        </EditForm>
+    }
 
     @if (IsFormSubmitted)
     {
-        <p>@ProcessMessage</p>
+        <p class="mt-3">@ProcessMessage</p>
     }
 
     @if (AppKeys is not null)
     {
-        <p>Paste these values into where you configure your AdminConsole</p>
+        <p class="mt-3 mb-3"><strong>Keep these values secret</strong>. Add these values to your Admin Console configuration:</p>
         <code style="white-space: pre;" lang="json">
             "Passwordless": {
-                "ApiUrl": "@ManagementOptions.Value.ApiUrl",
-                "ApiKey": "@AppKeys.ApiKey1",
-                "ApiSecret": "@AppKeys.ApiSecret1"
+            "ApiUrl": "@ManagementOptions.Value.ApiUrl",
+            "ApiKey": "@AppKeys.ApiKey1",
+            "ApiSecret": "@AppKeys.ApiSecret1"
             }
         </code>
-    
-        <p>
-            After doing this, you will need to restart the application and enter the Admin Email used here to into the 
-            login form. This will send you a magic link to log in and you can proceed to set up your passkey to log in.
+
+        <p class="mt-3">
+            After doing this, you will need to restart the application, refresh this page and enter the Admin Email used here to receive a magic link. 
         </p>
     }
 
@@ -112,6 +118,8 @@
                 AdminEmail = Form.AdminEmail
             });
 
+            response.EnsureSuccessStatusCode();
+            
             AppKeys = (await response.Content.ReadFromJsonAsync<CreateAppResultDto>())!;
         }
         catch (Exception ex)
@@ -152,7 +160,7 @@
                 OrganizationId = organization.Id,
                 Name = Form.AdminName
             };
-            
+
             await UserManager.SetUserNameAsync(user, Form.AdminEmail);
             await UserManager.SetEmailAsync(user, Form.AdminEmail);
             await UserManager.CreateAsync(user);
