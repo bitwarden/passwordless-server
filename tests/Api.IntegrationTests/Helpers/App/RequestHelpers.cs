@@ -1,5 +1,5 @@
 using Bogus;
-using Passwordless.Service.MagicLinks.Models;
+using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.App;

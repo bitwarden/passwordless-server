@@ -19,7 +19,7 @@ public class MailKitHealthCheck : IHealthCheck
         bool hasErrors = false;
         try
         {
-            client = await _mailProvider.GetClient();
+            client = await _mailProvider.GetClientAsync();
         }
         catch
         {

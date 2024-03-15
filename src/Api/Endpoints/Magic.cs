@@ -3,10 +3,11 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
+using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
-using Passwordless.Service.MagicLinks.Models;
+using Passwordless.Service.MagicLinks.Extensions;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -51,6 +52,9 @@ public static class MagicEndpoints
 
                 return NoContent();
             })
-            .WithParameterValidation();
+            .WithParameterValidation()
+            .RequireSecretKey()
+            .RequireCors("default")
+            .RequireRateLimiting(RateLimiterPolicy);
     }
 }
