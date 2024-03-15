@@ -18,7 +18,7 @@ public class PostmarkMailProvider(PostmarkMailProviderConfiguration configuratio
         PostmarkMessage pm = new PostmarkMessage
         {
             To = string.Join(',', message.To),
-            From = configuredClient.From?.ToString() ?? message.From,
+            From = GetFromAddress(configuredClient, message),
             Subject = message.Subject,
             TextBody = message.TextBody,
             HtmlBody = message.HtmlBody,
@@ -28,5 +28,12 @@ public class PostmarkMailProvider(PostmarkMailProviderConfiguration configuratio
         };
 
         IEnumerable<PostmarkResponse>? res = await configuredClient.Client.SendMessagesAsync(pm);
+    }
+
+    private string GetFromAddress(ConfiguredPostmarkClient client, MailMessage message)
+    {
+        var address = client.From?.ToString() ?? message.From;
+
+        return string.IsNullOrEmpty(message.FromDisplayName) ? address! : $"{message.FromDisplayName} <{address}>";
     }
 }

@@ -14,7 +14,7 @@ public class Magic : PageModel
         _signInManager = signInManager;
     }
 
-    public async Task<IActionResult> OnGet(string token, string email, string? returnUrl)
+    public async Task<IActionResult> OnGet(string token, string? email, string? returnUrl)
     {
 
         if (User.Identity is { IsAuthenticated: true })
@@ -28,7 +28,7 @@ public class Magic : PageModel
             return Page();
         }
 
-        var res = await _signInManager.PasswordlessSignInAsync(email, token, true);
+        var res = await _signInManager.PasswordlessSignInAsync(token, true);
 
         if (res.Succeeded)
         {
