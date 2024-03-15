@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
@@ -38,19 +39,30 @@ public static class MagicEndpoints
             .RequireSecretKey()
             .WithTags(OpenApiTags.MagicLinks);
 
-        group.MapPost("/send", async (
-                SendMagicLinkRequest request,
-                IFeatureContextProvider provider,
-                MagicLinkService magicLinkService
-            ) =>
-            {
-                if (!(await provider.UseContext()).IsMagicLinksEnabled)
-                    throw new ApiException("You must enable Magic Links in settings in order to use this feature.", 403);
-
-                await magicLinkService.SendMagicLinkAsync(request.ToDto());
-
-                return NoContent();
-            })
+        group.MapPost("/send", SendMagicLinkAsync)
             .WithParameterValidation();
+    }
+
+    /// <summary>
+    /// Sends email containing a magic link template allowing users to login.
+    ///
+    /// Warning: Verify the e-mail address matches the user identifier in your backend.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="provider"></param>
+    /// <param name="magicLinkService"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
+    public static async Task<IResult> SendMagicLinkAsync(
+        [FromBody] SendMagicLinkRequest request,
+        [FromServices] IFeatureContextProvider provider,
+        [FromServices] MagicLinkService magicLinkService)
+    {
+        if (!(await provider.UseContext()).IsMagicLinksEnabled)
+            throw new ApiException("You must enable Magic Links in settings in order to use this feature.", 403);
+
+        await magicLinkService.SendMagicLinkAsync(request.ToDto());
+
+        return NoContent();
     }
 }
