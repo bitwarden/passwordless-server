@@ -24,11 +24,6 @@ public static class EventLog
     /// <summary>
     /// Lists event logs. (Requires the `Enterprise` plan.)
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="storage"></param>
-    /// <param name="provider"></param>
-    /// <param name="getEventLogEventsRequest"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     private static async Task<IResult> GetEventLogEventsAsync(
         HttpRequest request,
