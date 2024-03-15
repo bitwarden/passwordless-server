@@ -17,8 +17,7 @@ public static class EventLog
         app.MapGet("events", GetEventLogEventsAsync)
             .RequireSecretKey()
             .RequireCors("default")
-            .WithTags(OpenApiTags.EventLogging)
-            .WithParameterValidation();
+            .WithTags(OpenApiTags.EventLogging);
     }
 
     private static async Task<IResult> GetEventLogEventsAsync(
