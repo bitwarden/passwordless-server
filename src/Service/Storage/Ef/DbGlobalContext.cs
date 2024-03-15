@@ -1,12 +1,14 @@
 using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef.Converters;
+using Passwordless.Service.Storage.Ef.ValueComparers;
 
 namespace Passwordless.Service.Storage.Ef;
 
@@ -39,7 +41,8 @@ public abstract class DbGlobalContext : DbContext
             b.HasKey(x => new { x.Tenant, x.DescriptorId });
             b.Property(x => x.DescriptorTransports).HasConversion(
                 v => JsonSerializer.Serialize(v, jsonOptions),
-                v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions));
+                v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions))
+                .Metadata.SetValueComparer(new NullableArrayValueComparer<AuthenticatorTransport>());
         });
 
         modelBuilder.Entity<TokenKey>()
@@ -55,7 +58,8 @@ public abstract class DbGlobalContext : DbContext
             b.Property(x => x.Scopes)
                 .HasConversion(
                     v => string.Join(',', v),
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .Metadata.SetValueComparer(new ArrayValueComparer<string>());
         });
 
         modelBuilder.Entity<AliasPointer>()

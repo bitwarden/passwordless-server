@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Email;
@@ -9,6 +11,7 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
@@ -24,6 +27,35 @@ using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(swagger =>
+{
+    swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
+    swagger.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
+        if (policy == null)
+        {
+            return false;
+        }
+        return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
+    });
+    swagger.OperationFilter<AuthorizationOperationFilter>();
+    swagger.SupportNonNullableReferenceTypes();
+    swagger.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v4",
+        Title = "Passwordless.dev API",
+        TermsOfService = new Uri("https://bitwarden.com/terms/"),
+        Contact = new OpenApiContact
+        {
+            Email = "support@passwordless.dev",
+            Name = "Support",
+            Url = new Uri("https://bitwarden.com/contact/")
+        }
+    });
+});
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
 
@@ -73,10 +105,10 @@ var services = builder.Services;
 
 services.AddProblemDetails();
 services
-    .AddAuthentication(Constants.Scheme)
+    .AddAuthentication()
     .AddCustomSchemes();
 
-services.AddAuthorization(options => options.AddPasswordlessPolicies());
+services.AddAuthorization();
 services.AddOptions<ManagementOptions>()
     .BindConfiguration("PasswordlessManagement");
 
@@ -154,6 +186,9 @@ else
         () =>
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 if (isSelfHosted)
 {

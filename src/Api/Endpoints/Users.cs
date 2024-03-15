@@ -1,5 +1,6 @@
 ﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
+using Passwordless.Api.OpenApi;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
@@ -10,7 +11,11 @@ public static class UsersEndpoints
 {
     public static void MapUsersEndpoints(this WebApplication app)
     {
-        app.MapMethods("/users/list", new[] { "get" }, async (UserCredentialsService userService) =>
+        var group = app.MapGroup("/users")
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.Users);
+
+        group.MapMethods("/list", new[] { "get" }, async (UserCredentialsService userService) =>
         {
             //userId = req.Query["userId"];
             // todo: Add Include credentials
@@ -20,26 +25,23 @@ public static class UsersEndpoints
             var response = ListResponse.Create(result);
             return Ok(response);
         })
-            .RequireSecretKey()
             .RequireCors("default");
 
-        app.MapMethods("/users/count", new[] { "get" }, async (HttpRequest req, UserCredentialsService userService) =>
+        group.MapMethods("/count", new[] { "get" }, async (HttpRequest req, UserCredentialsService userService) =>
         {
             var res = await userService.GetUsersCount();
 
             return Ok(new CoundRecord(res));
-        })
-            .RequireSecretKey();
+        });
 
-        app.MapPost("/users/delete", async (UserDeletePayload payload, UserCredentialsService userService, IEventLogger eventLogger) =>
+        group.MapPost("/delete", async (UserDeletePayload payload, UserCredentialsService userService, IEventLogger eventLogger) =>
         {
             await userService.DeleteUser(payload.UserId);
 
             eventLogger.LogDeletedUserEvent(payload.UserId);
 
             return Ok();
-        })
-            .RequireSecretKey();
+        });
     }
 
     public record CoundRecord(int Count);

@@ -10,17 +10,22 @@ public static class CreateAppHelpers
     public static Task<HttpResponseMessage> CreateApplicationAsync(
         this HttpClient client,
         string applicationName,
-        string? adminEmail = null)
+        CreateAppDto? options = null)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
         {
             client.AddManagementKey();
         }
 
-        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", new CreateAppDto
-        {
-            AdminEmail = adminEmail ?? "test-admin@passwordless.dev"
-        });
+        var actualOptions = options ?? new CreateAppDto();
+
+        if (string.IsNullOrWhiteSpace(actualOptions.AdminEmail))
+            actualOptions.AdminEmail = "admin@email.com";
+
+        if (actualOptions.MagicLinkEmailMonthlyQuota == 0)
+            actualOptions.MagicLinkEmailMonthlyQuota = 1000;
+
+        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", actualOptions);
     }
 
     public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client)
