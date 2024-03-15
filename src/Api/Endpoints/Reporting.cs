@@ -1,5 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
-using Passwordless.Api.Authorization;
+﻿using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Reporting;
 using Passwordless.Service;
