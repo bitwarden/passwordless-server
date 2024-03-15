@@ -54,6 +54,7 @@ builder.Services.AddSwaggerGen(swagger =>
             Url = new Uri("https://bitwarden.com/contact/")
         }
     });
+    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
 });
 
 bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
@@ -186,7 +187,10 @@ else
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(o =>
+{
+    o.ConfigObject.ShowCommonExtensions = true;
+});
 
 if (isSelfHosted)
 {
