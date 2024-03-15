@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
+using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.MagicLinks.Models;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -74,26 +74,31 @@ public class MagicLinkService(
         await mailProvider.SendAsync(new MailMessage
         {
             To = [request.EmailAddress.ToString()],
-            Subject = "Verify Email Address",
-            TextBody = $"Please click the link or copy into your browser of choice to log in: {link}. If you did not request this email, it is safe to ignore.",
+            Subject = $"Sign in to {link.Host}",
+            TextBody = $"Please click the link or copy into your browser of choice to log in to {link.Host}: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
                 //lang=html
                 $"""
-                 <!DOCTYPE html>
+                 <!DOCTYPE html5>
                  <html lang="en">
                     <head>
                         <title>Sign-In With Link Request</title>
                     </head>
-                    <body style="background-color: white;font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;font-size: 1rem;">
-                        <h3 style="text-align: center;">Hello</h3>
-                        <p style="text-align: center;">Please click the button below to log in.</p>
-                        <a href="{link}" style="width: 2.5rem; margin-left: auto; margin-right: auto; padding: .75rem 1.5rem; background-color: rgb(18 82 163); border-radius: 999px; color: white; text-align: center; text-decoration: none; display: block; cursor: pointer;">Login</a>
-                        <p>Having trouble? Copy this link to your browser: {link}</p>
-                        <p style="text-align: center;">If you did not request this email, it is safe to ignore.</p>
+                    <body style="background-color: white;
+                                    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+                                    font-size: 16px;
+                                    text-align: center;
+                                    ">
+                        <h3>Hello</h3>
+                        <p style="padding-bottom: 4px">Please click the button below to sign in to {link.Host}</p>
+                        <a href="{link}" style="width: auto; margin: auto; padding: 10px 25px; background-color: #1252A3; border-radius: 999px; color: white; text-decoration: none;">Click here to sign in</a>
+                        <p style="padding-top: 4px">Having trouble? Copy this link to your browser: {link}</p>
+                        <p>If you did not request this email, it is safe to ignore.</p>
                     </body>
                  </html>
                  """,
-            MessageType = "magic-links"
+            MessageType = "magic-links",
+            FromDisplayName = $"Sign in to {link.Host}"
         });
 
         await tenantStorage.AddDispatchedEmailAsync(request.UserId, request.EmailAddress.Address, request.LinkTemplate);

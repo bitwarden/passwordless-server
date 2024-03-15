@@ -1,28 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
 
 namespace Passwordless.AdminConsole.Pages;
 
-public class IndexModel : PageModel
+public class IndexModel(ILogger<IndexModel> logger, ConsoleDbContext dbContext) : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
-
-    public IndexModel(ILogger<IndexModel> logger)
+    public async Task<IActionResult> OnGetAsync()
     {
-        _logger = logger;
-    }
-
-    public IActionResult OnGet()
-    {
-        if (!HttpContext.User.Identity.IsAuthenticated)
+        if (await dbContext.HaveAnyMigrationsEverBeenAppliedAsync())
         {
-            return RedirectToPage("/account/login");
-        }
-        else
-        {
-            return RedirectToPage("/Organization/overview");
+            return RedirectToPage(HttpContext.User.Identity!.IsAuthenticated ? "/account/login" : "/Organization/overview");
         }
 
-        return Page();
+        logger.LogInformation("Database has not been initialized. Starting initialization process.");
+
+        return Redirect("/initialize");
     }
 }
