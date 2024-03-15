@@ -115,7 +115,8 @@
 
             using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto
             {
-                AdminEmail = Form.AdminEmail
+                AdminEmail = Form.AdminEmail,
+                MagicLinkEmailMonthlyQuota = 2000
             });
 
             response.EnsureSuccessStatusCode();
