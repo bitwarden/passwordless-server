@@ -30,9 +30,6 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Deletes a credential.
     /// </summary>
-    /// <param name="payload"></param>
-    /// <param name="userCredentialsService"></param>
-    /// <returns></returns>
     public static async Task<IResult> DeleteCredentialAsync(
         [FromBody] CredentialsDeleteDTO payload,
         [FromServices] UserCredentialsService userCredentialsService)
@@ -45,10 +42,6 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Lists credentials for a given user.
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="service"></param>
-    /// <returns></returns>
-    /// <exception cref="ApiException"></exception>
     public static Task<IResult> ListGetCredentialsAsync(
         [AsParameters] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)
@@ -59,10 +52,6 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Lists credentials for a given user.
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="service"></param>
-    /// <returns></returns>
-    /// <exception cref="ApiException"></exception>
     public static Task<IResult> ListPostCredentialsAsync(
         [FromBody] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)

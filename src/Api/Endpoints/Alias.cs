@@ -28,10 +28,6 @@ public static class AliasEndpoints
     /// <summary>
     /// Sets one or more aliases for an existing user and removes existing aliases that are not included in the request.
     /// </summary>
-    /// <param name="payload"></param>
-    /// <param name="fido2Service"></param>
-    /// <param name="eventLogger"></param>
-    /// <returns></returns>
     public static async Task<IResult> SetAliasAsync(
         [FromBody] AliasPayload payload,
         IFido2Service fido2Service,
@@ -47,10 +43,6 @@ public static class AliasEndpoints
     /// <summary>
     /// Lists all aliases for a given user.
     /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="fido2Service"></param>
-    /// <returns></returns>
-    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> ListAliasesAsync(
         [FromQuery] string userId,
         IFido2Service fido2Service)

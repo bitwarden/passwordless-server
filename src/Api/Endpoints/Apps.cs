@@ -128,10 +128,6 @@ public static class AppsEndpoints
     /// <summary>
     /// Creates a new public key with given scopes.
     /// </summary>
-    /// <param name="appId"></param>
-    /// <param name="payload"></param>
-    /// <param name="service"></param>
-    /// <param name="eventLogger"></param>
     /// <returns></returns>
     public static async Task<IResult> CreatePublicKeyAsync(
         [FromRoute] string appId,
@@ -147,10 +143,6 @@ public static class AppsEndpoints
     /// <summary>
     /// Creates a new secret key with given scopes.
     /// </summary>
-    /// <param name="appId"></param>
-    /// <param name="payload"></param>
-    /// <param name="service"></param>
-    /// <param name="eventLogger"></param>
     /// <returns></returns>
     public static async Task<IResult> CreateSecretKeyAsync(
         [FromRoute] string appId,
@@ -166,10 +158,6 @@ public static class AppsEndpoints
     /// <summary>
     /// List all public keys and secret keys.
     /// </summary>
-    /// <param name="appId"></param>
-    /// <param name="service"></param>
-    /// <param name="eventLogger"></param>
-    /// <returns></returns>
     public static async Task<IResult> ListApiKeysAsync(
         [FromRoute] string appId,
         ISharedManagementService service,
@@ -183,11 +171,6 @@ public static class AppsEndpoints
     /// <summary>
     /// Lock a public key or secret key.
     /// </summary>
-    /// <param name="appId"></param>
-    /// <param name="apiKeyId"></param>
-    /// <param name="service"></param>
-    /// <param name="eventLogger"></param>
-    /// <returns></returns>
     public static async Task<IResult> LockApiKeyAsync(
         [FromRoute] string appId,
         [FromRoute] string apiKeyId,
@@ -202,11 +185,6 @@ public static class AppsEndpoints
     /// <summary>
     /// Unlock a public key or secret key.
     /// </summary>
-    /// <param name="appId"></param>
-    /// <param name="apiKeyId"></param>
-    /// <param name="service"></param>
-    /// <param name="eventLogger"></param>
-    /// <returns></returns>
     public static async Task<IResult> UnlockApiKeyAsync(
         [FromRoute] string appId,
         [FromRoute] string apiKeyId,
@@ -221,11 +199,6 @@ public static class AppsEndpoints
     /// <summary>
     /// Delete a public key or secret key.
     /// </summary>
-    /// <param name="appId"></param>
-    /// <param name="apiKeyId"></param>
-    /// <param name="service"></param>
-    /// <param name="eventLogger"></param>
-    /// <returns></returns>
     public static async Task<IResult> DeleteApiKeyAsync(
         [FromRoute] string appId,
         [FromRoute] string apiKeyId,
@@ -249,9 +222,6 @@ public static class AppsEndpoints
     /// <summary>
     /// Change the configuration or features.
     /// </summary>
-    /// <param name="payload"></param>
-    /// <param name="service"></param>
-    /// <returns></returns>
     public static async Task<IResult> SetFeaturesAsync(
         SetFeaturesRequest payload,
         IApplicationService service)
