@@ -49,11 +49,6 @@ public static class MagicEndpoints
     ///
     /// Warning: Verify the e-mail address matches the user identifier in your backend.
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="provider"></param>
-    /// <param name="magicLinkService"></param>
-    /// <returns></returns>
-    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> SendMagicLinkAsync(
         [FromBody] SendMagicLinkRequest request,
         [FromServices] IFeatureContextProvider provider,

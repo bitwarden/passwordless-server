@@ -21,15 +21,6 @@ public static class EventLog
             .WithParameterValidation();
     }
 
-    /// <summary>
-    /// Lists event logs. (Requires the `Enterprise` plan.)
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="storage"></param>
-    /// <param name="provider"></param>
-    /// <param name="getEventLogEventsRequest"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     private static async Task<IResult> GetEventLogEventsAsync(
         HttpRequest request,
         IEventLogStorage storage,
@@ -56,7 +47,6 @@ public static class EventLog
 
     private struct GetEventLogEventsRequest
     {
-        [Range(1, int.MaxValue)]
         public int PageNumber { get; set; }
 
         [Range(1, 1000)]
