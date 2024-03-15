@@ -17,12 +17,7 @@
                     <div v-cloak :class="{ invisible: !appId }" class=" small">
                         <input asp-for="Form.Id" type="hidden" :value="parsedAppId"/>
                         Your app id is:
-                        <span   
-                            class="parsed_tenant_name">
-                            {{
-                            parsedAppId
-                            }}
-                        </span>
+                        <span class="parsed_tenant_name">{{parsedAppId}}</span>
                         <span v-if="availability == 'available'"> ✅ Available</span>
                         <span v-if="availability == 'not-available'"> ⚠️ Unavailable</span>
 
@@ -99,7 +94,12 @@
                         "Content-Type": "application/json",
                     }
                 });
-                return res.ok;
+                const data = await res.json();
+                if (!res.ok) {
+                    console.error("An unexpected error occurred. Cannot verify whether appid is available.")
+                    return false;
+                }
+                return data.available === true;
             }
 
             watch(appId, async () => {

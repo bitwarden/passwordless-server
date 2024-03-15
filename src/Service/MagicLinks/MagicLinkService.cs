@@ -16,8 +16,6 @@ public class MagicLinkService(
     IMailProvider mailProvider,
     IEventLogger eventLogger)
 {
-    private readonly string _emailsSentCacheKey = $"magic-link-emails-sent-30days-{tenantStorage.Tenant}";
-
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow();
@@ -53,16 +51,7 @@ public class MagicLinkService(
 
         var quota = (int)(maxQuota * quotaModifier);
 
-        var emailsDispatchedIn30Days = await cache.GetOrCreateAsync(
-            _emailsSentCacheKey,
-            async cacheEntry =>
-            {
-                var expiration = now.AddDays(1).Date;
-                cacheEntry.SetAbsoluteExpiration(expiration);
-
-                return await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
-            }
-        );
+        var emailsDispatchedIn30Days = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
 
         if (emailsDispatchedIn30Days >= quota)
         {
@@ -113,14 +102,6 @@ public class MagicLinkService(
         });
 
         await tenantStorage.AddDispatchedEmailAsync(request.UserId, request.EmailAddress.Address, request.LinkTemplate);
-
-        // Update the cached tally of emails sent in the last 30 days
-        if (cache.TryGetValue<int>(_emailsSentCacheKey, out var cachedValue))
-        {
-            var expiration = timeProvider.GetUtcNow().AddDays(1).Date;
-            cache.Set(_emailsSentCacheKey, cachedValue + 1, expiration);
-        }
-
         eventLogger.LogMagicLinkCreatedEvent(request.UserId);
     }
 }

@@ -52,6 +52,9 @@ public static class MagicEndpoints
 
                 return NoContent();
             })
-            .WithParameterValidation();
+            .WithParameterValidation()
+            .RequireSecretKey()
+            .RequireCors("default")
+            .RequireRateLimiting(RateLimiterPolicy);
     }
 }
