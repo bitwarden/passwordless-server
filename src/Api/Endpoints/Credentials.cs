@@ -20,7 +20,8 @@ public static class CredentialsEndpoints
 
         group.MapPost("/delete", DeleteCredentialAsync);
 
-        group.MapGet("/list", ListGetCredentialsAsync);
+        group.MapGet("/list", ListGetCredentialsAsync)
+            .WithParameterValidation();
 
         group.MapPost("/list", ListPostCredentialsAsync)
             .WithParameterValidation();
@@ -44,24 +45,15 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Lists credentials for a given user.
     /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="userCredentialService"></param>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
-    public static async Task<IResult> ListGetCredentialsAsync(
-        [FromQuery] string userId,
-        [FromServices] UserCredentialsService userCredentialService)
+    public static Task<IResult> ListGetCredentialsAsync(
+        [AsParameters] GetCredentialsRequest request,
+        [FromServices] UserCredentialsService service)
     {
-        if (userId == null)
-        {
-            throw new ApiException("Please supply UserId in the query string value", 400);
-        }
-
-        var result = await userCredentialService.GetAllCredentialsAsync(userId);
-
-        var res = ListResponse.Create(result);
-
-        return Ok(res);
+        return ListCredentialsAsync(request, service);
     }
 
     /// <summary>
@@ -75,6 +67,15 @@ public static class CredentialsEndpoints
         [FromBody] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)
     {
-        return ListGetCredentialsAsync(request.UserId, service);
+        return ListCredentialsAsync(request, service);
+    }
+
+    private static async Task<IResult> ListCredentialsAsync(
+        GetCredentialsRequest request,
+        UserCredentialsService service)
+    {
+        var result = await service.GetAllCredentialsAsync(request.UserId);
+        var res = ListResponse.Create(result);
+        return Ok(res);
     }
 }

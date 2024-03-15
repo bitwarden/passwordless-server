@@ -54,7 +54,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     }
 
     [Fact]
-    public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_with_secret_key()
+    public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_get_with_secret_key()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -68,7 +68,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
 
         var problemDetails = await credentialsResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         problemDetails.Should().NotBeNull();
-        problemDetails!.Title.Should().Be("Required parameter \"string userId\" was not provided from query string.");
+        problemDetails!.Title.Should().Be("Required parameter \"string UserId\" was not provided from query string.");
         problemDetails.Status.Should().Be((int)HttpStatusCode.BadRequest);
     }
 
