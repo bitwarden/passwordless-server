@@ -59,8 +59,35 @@
     @if (IsFormSubmitted)
     {
         <p class="mt-3">@ProcessMessage</p>
+        
+        <SecureScript>
+            async function getSetupStatus() {
+                const response = await fetch("/setup/status")
+                    .then(response => response.json())
+                    .catch(() => console.error("Failed to fetch setup status."));
+                
+                const success = response.hasSetupCompleted;
+                document.getElementById("setup-status").innerText = success ? "✅ Configuration complete." : "⏳ Configuration incomplete (automatically refreshing every 5 seconds).";   
+                
+                if (success) {
+                    return true;
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                return false;
+            }
+            
+            (async () => {
+              while (true) {
+                let result = await getSetupStatus();
+                if (result === true) {
+                  break;
+                }
+              }
+            })();
+        </SecureScript>
     }
-
+    
     @if (AppKeys is not null)
     {
         <p class="mt-3 mb-3"><strong>Keep these values secret</strong>. Add these values to your Admin Console configuration:</p>
@@ -75,21 +102,6 @@
         @if (IsFormSubmitted)
         {
             <p id="setup-status" class="mt-3"><strong>Status:</strong> Configuration incomplete (automatically refreshing every 5 seconds).</p>
-            <SecureScript>
-                let setupComplete = false;
-                while (setupComplete === false) {
-                    setTimeout(() => {
-                        fetch('/setup/status')
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.hasSetupCompleted === true) {
-                                    document.getElementById('setup-status').innerText = '✅ Configuration verified.';
-                                    setupComplete = true;
-                                }
-                            });
-                    }, 5000);
-                }
-            </SecureScript>
         }
         
         <p class="mt-3">
@@ -129,7 +141,7 @@
         try
         {
             using var http = new HttpClient();
-            http.BaseAddress = new Uri(ManagementOptions.Value.ApiUrl);
+            http.BaseAddress = new Uri(ManagementOptions.Value.InternalApiUrl);
             http.DefaultRequestHeaders.Add("ManagementKey", ManagementOptions.Value.ManagementKey);
 
             using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto
@@ -221,7 +233,7 @@
 
         ProcessMessage = "✅ Admin Console has been initialized successfully.";
     }
-
+    
     public sealed class AdminConsoleCreateForm
     {
         [Required] public string AdminName { get; set; } = string.Empty;

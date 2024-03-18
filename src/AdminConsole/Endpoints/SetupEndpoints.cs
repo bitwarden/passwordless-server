@@ -17,7 +17,8 @@ public static class SetupEndpoints
 
     public static async Task<IResult> GetStatusAsync(
         [FromServices] IOptions<PasswordlessOptions> options,
-        [FromServices] IApplicationService applicationService)
+        [FromServices] IApplicationService applicationService,
+        [FromServices] TimeProvider timeProvider)
     {
         var apiKey = options.Value.ApiKey;
         var apiSecret = options.Value.ApiSecret;
@@ -37,13 +38,20 @@ public static class SetupEndpoints
 
         var onboarding = await applicationService.GetOnboardingAsync(publicAppId);
 
+        // If onboarding doesn't exist, then likely the api keys don't have a matching application.
         if (onboarding == null)
         {
-            // Onboarding record does not exist, we're 7 days beyond the setup phase.
+            return Ok(new StatusResponse(false));
+        }
+
+        // If ApiKey and ApiSecret matches, then setup is completed.
+        if (onboarding.ApiKey == apiKey && onboarding.ApiSecret == apiSecret)
+        {
             return Ok(new StatusResponse(true));
         }
 
-        if (onboarding.ApiKey == apiKey && onboarding.ApiSecret == apiSecret)
+        // If ApiKey and ApiSecret doesn't match, then onboarding could have expired.
+        if (onboarding.SensitiveInfoExpireAt < timeProvider.GetUtcNow().DateTime)
         {
             return Ok(new StatusResponse(true));
         }

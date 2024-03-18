@@ -195,10 +195,7 @@ if (builder.Configuration.IsSelfHosted())
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
 
-    if (await dbContext.HasAppliedMigrationsAsync())
-    {
-        dbContext.Database.Migrate();
-    }
+    dbContext.Database.Migrate();
 }
 
 app.UseCors("default");
