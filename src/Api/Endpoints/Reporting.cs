@@ -1,4 +1,6 @@
-﻿using Passwordless.Api.Authorization;
+﻿using Microsoft.OpenApi.Models;
+using Passwordless.Api.Authorization;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Reporting;
 using Passwordless.Service;
 using static Microsoft.AspNetCore.Http.Results;
@@ -11,7 +13,8 @@ public static class ReportingEndpoints
     {
         var group = app.MapGroup("/reporting")
             .RequireSecretKey()
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithTags(OpenApiTags.Reporting);
 
         group.MapGet("/credentials/periodic", GetPeriodicCredentialReportsAsync);
 

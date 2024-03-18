@@ -1,5 +1,5 @@
 using Passwordless.Api.Authorization;
-using Passwordless.Api.Extensions;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.Models;
@@ -13,7 +13,11 @@ public static class RegisterEndpoints
 
     public static void MapRegisterEndpoints(this WebApplication app)
     {
-        app.MapPost("/register/token", async (
+        var group = app.MapGroup("/register")
+            .RequireCors("default")
+            .WithTags(OpenApiTags.Registration);
+
+        group.MapPost("/token", async (
                 RegisterToken registerToken,
                 IFido2Service fido2Service,
                 CancellationToken token
@@ -22,10 +26,10 @@ public static class RegisterEndpoints
                 var result = await fido2Service.CreateRegisterTokenAsync(registerToken);
                 return Ok(new RegisterTokenResponse(result));
             })
-            .RequireAuthorization(SecretKeyScopes.TokenRegister)
-            .RequireCors("default");
+            .RequireSecretKey(SecretKeyScopes.TokenRegister)
+            .WithParameterValidation();
 
-        app.MapPost("/register/begin", async (
+        group.MapPost("/begin", async (
                 FidoRegistrationBeginDTO payload,
                 IFido2Service fido2Service,
                 CancellationToken token
@@ -34,11 +38,10 @@ public static class RegisterEndpoints
                 var result = await fido2Service.RegisterBeginAsync(payload);
                 return Ok(result);
             })
-            .RequireAuthorization(PublicKeyScopes.Register)
-            .RequireCors("default")
+            .RequirePublicKey(PublicKeyScopes.Register)
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
-        app.MapPost("/register/complete", async (
+        group.MapPost("/complete", async (
                 RegistrationCompleteDTO payload,
                 HttpRequest request,
                 IFido2Service fido2Service,
@@ -52,8 +55,7 @@ public static class RegisterEndpoints
                 return Ok(result);
             })
             .WithParameterValidation()
-            .RequireAuthorization(PublicKeyScopes.Register)
-            .RequireCors("default")
+            .RequirePublicKey(PublicKeyScopes.Register)
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
     }
 }

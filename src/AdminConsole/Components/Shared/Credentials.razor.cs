@@ -24,7 +24,7 @@ public partial class Credentials : ComponentBase
                 x.CreatedAt,
                 x.AaGuid,
                 x.LastUsedAt,
-                x.RPID,
+                x.RpId,
                 x.Origin,
                 x.Device,
                 x.Nickname,

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
@@ -114,7 +115,8 @@ public static class AppsEndpoints
         app.MapPost("/apps/features", SetFeaturesAsync)
             .WithParameterValidation()
             .RequireSecretKey()
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithTags(OpenApiTags.Applications);
     }
 
     public static async Task<IResult> IsAppIdAvailableAsync([AsParameters] GetAppIdAvailabilityRequest payload, ISharedManagementService accountService)

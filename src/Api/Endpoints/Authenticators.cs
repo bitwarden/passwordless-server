@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
@@ -15,7 +16,8 @@ public static class AuthenticatorsEndpoints
     {
         var group = app.MapGroup("/authenticators")
             .RequireCors("default")
-            .RequireSecretKey();
+            .RequireSecretKey()
+            .WithTags(OpenApiTags.Authenticators);
 
         group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
 
@@ -26,6 +28,14 @@ public static class AuthenticatorsEndpoints
             .WithParameterValidation();
     }
 
+    /// <summary>
+    /// List configured authenticators on the allowlist or blocklist. When the list is empty, all authenticators are allowed. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
+    /// <param name="featureContextProvider"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
         IApplicationService service,
@@ -40,6 +50,15 @@ public static class AuthenticatorsEndpoints
         return Ok(result);
     }
 
+    /// <summary>
+    /// Adds authenticators to the allowlist or blocklist for use with attestation. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
+    /// <param name="featureContextProvider"></param>
+    /// <param name="eventLogger"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> AddAuthenticatorsAsync(
         [FromBody] AddAuthenticatorsRequest request,
         IApplicationService service,
@@ -57,6 +76,15 @@ public static class AuthenticatorsEndpoints
         return NoContent();
     }
 
+    /// <summary>
+    /// Removes authenticators from the allowlist or blocklist. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="service"></param>
+    /// <param name="featureContextProvider"></param>
+    /// <param name="eventLogger"></param>
+    /// <returns></returns>
+    /// <exception cref="ApiException"></exception>
     public static async Task<IResult> RemoveAuthenticatorsAsync(
         [FromBody] RemoveAuthenticatorsRequest request,
         IApplicationService service,

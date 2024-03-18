@@ -1,10 +1,15 @@
-﻿namespace Passwordless.Service.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Passwordless.Common.Validation;
 
-using Aliases = HashSet<string>;
+namespace Passwordless.Service.Models;
 
-public class AliasPayload
-{
-    public string UserId { get; set; }
-    public Aliases Aliases { get; set; }
-    public bool Hashing { get; set; } = true;
-}
+public record AliasPayload
+(
+    [Required(AllowEmptyStrings = false)]
+    string UserId,
+
+    [MaxLength(10), MaxLengthCollection(250), RequiredCollection(AllowEmptyStrings = false)]
+    HashSet<string> Aliases,
+
+    bool Hashing = true
+);
