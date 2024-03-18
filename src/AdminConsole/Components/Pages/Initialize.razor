@@ -55,33 +55,6 @@
     @if (IsFormSubmitted)
     {
         <p>@ProcessMessage</p>
-        
-        <SecureScript>
-            async function getSetupStatus() {
-                const response = await fetch("/setup/status")
-                    .then(response => response.json())
-                    .catch(() => console.error("Failed to fetch setup status."));
-                
-                const success = response.hasSetupCompleted;
-                document.getElementById("setup-status").innerText = success ? "✅ Configuration complete." : "⏳ Configuration incomplete (automatically refreshing every 5 seconds).";   
-                
-                if (success) {
-                    return true;
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                return false;
-            }
-            
-            (async () => {
-              while (true) {
-                let result = await getSetupStatus();
-                if (result === true) {
-                  break;
-                }
-              }
-            })();
-        </SecureScript>
     }
     
     @if (PasswordlessOptions is not null)
@@ -90,10 +63,7 @@
         
         <code style="white-space: pre;" lang="json">@JsonSerializer.Serialize(PasswordlessOptions, _jsonSerializerOptions)</code>
         
-        @if (IsFormSubmitted)
-        {
-            <p id="setup-status" class="mt-3"><strong>Status:</strong> Configuration incomplete (automatically refreshing every 5 seconds).</p>
-        }
+        <p>When self-hosting, make sure to mount a persistent volume to write your configuration. Read more <a href="https://docs.passwordless.dev/guide/self-hosting/configuration.html#volumes">here</a>.</p>
         
         <p>After doing this, you will need to restart the application, refresh this page and enter the Admin Email used here to receive a magic link.</p>
     }
@@ -244,5 +214,4 @@
         [Required] public string AdminName { get; set; } = string.Empty;
         [Required, EmailAddress] public string AdminEmail { get; set; } = string.Empty;
     }
-
 }
