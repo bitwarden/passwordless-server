@@ -14,6 +14,7 @@ using Passwordless.Api.Middleware;
 using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
@@ -56,9 +57,7 @@ builder.Services.AddSwaggerGen(swagger =>
     });
 });
 
-bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
-
-if (isSelfHosted)
+if (builder.Configuration.IsSelfHosted())
 {
     builder.AddSelfHostingConfiguration();
 }
@@ -188,23 +187,17 @@ else
 app.UseSwagger();
 app.UseSwaggerUI();
 
-if (isSelfHosted)
+if (builder.Configuration.IsSelfHosted())
 {
     app.UseMiddleware<HttpOverridesMiddleware>();
 
-    // When self-hosting. Migrate latest database changes during startup
+    // When self-hosting. Migrate latest database changes during startup.
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
-    dbContext.Database.Migrate();
 
-    if (!await dbContext.ApiKeys.AnyAsync())
+    if (await dbContext.HasAppliedMigrationsAsync())
     {
-        var passwordlessConfiguration = builder.Configuration.GetRequiredSection("Passwordless");
-        var apiKey = passwordlessConfiguration.GetValue<string>("ApiKey");
-        var apiSecret = passwordlessConfiguration.GetValue<string>("ApiSecret");
-        var appName = ApiKeyUtils.GetAppId(apiKey);
-        await dbContext.SeedDefaultApplicationAsync(appName, apiKey, apiSecret);
-        await dbContext.SaveChangesAsync();
+        dbContext.Database.Migrate();
     }
 }
 
@@ -213,6 +206,10 @@ app.UseSecurityHeaders();
 app.UseStaticFiles();
 app.UseWhen(o =>
 {
+    if (o.Request.Path == "/")
+    {
+        return false;
+    }
     return !o.Request.Path.StartsWithSegments("/health");
 }, c =>
 {
@@ -225,6 +222,10 @@ app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseWhen(o =>
 {
+    if (o.Request.Path == "/")
+    {
+        return false;
+    }
     return !o.Request.Path.StartsWithSegments("/health");
 }, c =>
 {

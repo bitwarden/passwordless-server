@@ -146,7 +146,24 @@ public abstract class DbGlobalContext : DbContext
             Scopes = [SecretKeyScopes.TokenRegister.GetValue(), SecretKeyScopes.TokenVerify.GetValue()]
         });
 
-        AccountInfo.Add(new AccountMetaInformation { Tenant = appName, AcountName = appName, AdminEmails = ["test@test.com"] });
+        var application = new AccountMetaInformation
+        {
+            Tenant = appName,
+            AcountName = appName,
+            AdminEmails = ["test@test.com"],
+            Features = new AppFeature
+            {
+                AllowAttestation = false,
+                EventLoggingIsEnabled = false,
+                IsGenerateSignInTokenEndpointEnabled = true,
+                IsMagicLinksEnabled = true,
+                MagicLinkEmailMonthlyQuota = 2000,
+                MaxUsers = null,
+                Tenant = appName,
+            }
+        };
+
+        AccountInfo.Add(application);
 
         return Task.CompletedTask;
     }
