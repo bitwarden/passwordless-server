@@ -24,17 +24,13 @@
 <h3>🚀 Let's set up the Admin Console</h3>
 <InfoAlert class="mt-5">Admin Console is configured to use the API at <strong>@ManagementOptions.Value.ApiUrl</strong></InfoAlert>
 
-
-<div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+<Panel>
     @if (!IsFormSubmitted)
     {
-        <p class="mb-3">
-            Since the Admin Console is missing either migrations or ApiKeys to the Passwordles API, we'll need to do some setup using the form below.
-        </p>
+        <p>Since the Admin Console is missing either migrations or ApiKeys to the Passwordles API, we'll need to do some setup using the form below.</p>
 
-        <p class="mb-">
-            Submitting the form will create an organization and application for the Admin Console to use for passkeys and magic links.
-        </p>
+        <p>Submitting the form will create an organization and application for the Admin Console to use for passkeys and magic links.</p>
+        
         <EditForm
             Model="Form"
             FormName="AdminConsoleCreateForm"
@@ -58,7 +54,7 @@
 
     @if (IsFormSubmitted)
     {
-        <p class="mt-3">@ProcessMessage</p>
+        <p>@ProcessMessage</p>
         
         <SecureScript>
             async function getSetupStatus() {
@@ -88,38 +84,37 @@
         </SecureScript>
     }
     
-    @if (AppKeys is not null)
+    @if (PasswordlessOptions is not null)
     {
-        <p class="mt-3 mb-3"><strong>Keep these values secret</strong>. Add these values to your Admin Console configuration:</p>
-        <code style="white-space: pre;" lang="json">
-            "Passwordless": {
-            "ApiUrl": "@ManagementOptions.Value.ApiUrl",
-            "ApiKey": "@AppKeys.ApiKey1",
-            "ApiSecret": "@AppKeys.ApiSecret1"
-            }
-        </code>
+        <p><strong>Keep these values secret</strong>. Add these values to your Admin Console configuration:</p>
+        
+        <code style="white-space: pre;" lang="json">@JsonSerializer.Serialize(PasswordlessOptions, _jsonSerializerOptions)</code>
         
         @if (IsFormSubmitted)
         {
             <p id="setup-status" class="mt-3"><strong>Status:</strong> Configuration incomplete (automatically refreshing every 5 seconds).</p>
         }
         
-        <p class="mt-3">
-            After doing this, you will need to restart the application, refresh this page and enter the Admin Email used here to receive a magic link. 
-        </p>
+        <p>After doing this, you will need to restart the application, refresh this page and enter the Admin Email used here to receive a magic link.</p>
     }
 
-</div>
+</Panel>
 
 @code {
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new ()
+    {
+        WriteIndented = true
+    };
 
     [SupplyParameterFromForm(FormName = "AdminConsoleCreateForm")]
     public AdminConsoleCreateForm Form { get; set; } = new();
 
     public bool IsFormSubmitted { get; set; }
+    
     public string ProcessMessage { get; set; } = string.Empty;
-
-    public CreateAppResultDto? AppKeys { get; set; }
+    
+    public PasswordlessOptions? PasswordlessOptions { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,6 +132,8 @@
         Models.Organization organization;
         var now = TimeProvider.GetUtcNow().UtcDateTime;
 
+        CreateAppResultDto? appCreationResult = null;
+        
         // create app in api
         try
         {
@@ -151,7 +148,7 @@
 
             response.EnsureSuccessStatusCode();
             
-            AppKeys = (await response.Content.ReadFromJsonAsync<CreateAppResultDto>())!;
+            appCreationResult = (await response.Content.ReadFromJsonAsync<CreateAppResultDto>())!;
         }
         catch (Exception ex)
         {
@@ -213,13 +210,13 @@
                 Description = "This is the AdminConsole application within AdminConsole.",
                 CreatedAt = now,
                 OrganizationId = organization.Id,
-                ApiKey = AppKeys.ApiKey2,
-                ApiSecret = AppKeys.ApiSecret2,
+                ApiKey = appCreationResult.ApiKey2,
+                ApiSecret = appCreationResult.ApiSecret2,
                 ApiUrl = ManagementOptions.Value.ApiUrl,
                 Onboarding = new Onboarding
                 {
-                    ApiKey = AppKeys.ApiKey1,
-                    ApiSecret = AppKeys.ApiSecret1,
+                    ApiKey = appCreationResult.ApiKey1,
+                    ApiSecret = appCreationResult.ApiSecret1,
                     SensitiveInfoExpireAt = now.AddDays(7)
                 },
                 BillingPlan = "Free"
@@ -229,7 +226,15 @@
         {
             Logger.LogError(ex, "Failed to create app in AdminConsole.");
             ProcessMessage = "Failed to create app in AdminConsole. Please see Console for a detailed error message.";
+            return;
         }
+
+        PasswordlessOptions = new PasswordlessOptions
+        {
+            ApiUrl = ManagementOptions.Value.ApiUrl,
+            ApiKey = appCreationResult.ApiKey1,
+            ApiSecret = appCreationResult.ApiSecret1
+        };
 
         ProcessMessage = "✅ Admin Console has been initialized successfully.";
     }
