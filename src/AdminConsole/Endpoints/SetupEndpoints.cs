@@ -16,7 +16,7 @@ public static class SetupEndpoints
     }
 
     public static async Task<IResult> GetStatusAsync(
-        [FromServices] IOptions<PasswordlessOptions> options,
+        [FromServices] IOptionsSnapshot<PasswordlessOptions> options,
         [FromServices] IApplicationService applicationService,
         [FromServices] TimeProvider timeProvider)
     {
