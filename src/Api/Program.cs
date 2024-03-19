@@ -34,7 +34,7 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
     swagger.DocInclusionPredicate((docName, apiDesc) =>
     {
-        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
+        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.FirstOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
         if (policy == null)
         {
             return false;
@@ -185,7 +185,11 @@ else
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.ConfigObject.ShowExtensions = true;
+    c.ConfigObject.ShowCommonExtensions = true;
+});
 
 if (builder.Configuration.IsSelfHosted())
 {
