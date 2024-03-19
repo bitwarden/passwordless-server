@@ -40,7 +40,7 @@ public static class RegisterEndpoints
         [FromServices] IFido2Service fido2Service)
     {
         var result = await fido2Service.CreateRegisterTokenAsync(request);
-        return Ok(result);
+        return Ok(new RegisterTokenResponse(result));
     }
 
     /// <summary>
