@@ -135,10 +135,10 @@ salt_token=$(jq -r '.SALT_TOKEN' "$mounted_config")
 
 if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key" == "null" ] || [ "$salt_token" == "null" ]; then
   if [ "$api_key" == "null" ]; then
-    api_key="test:public:$(generate_random_hex)"
+    api_key="replaceme:public:00000000000000000000000000000000"
   fi
   if [ "$api_secret" == "null" ]; then
-    api_secret="test:secret:$(generate_random_hex)"
+    api_secret="replaceme:secret:00000000000000000000000000000000"
   fi
   if [ "$management_key" == "null" ]; then
     management_key=$(generate_random_hex)
