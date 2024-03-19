@@ -10,6 +10,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Passwordless.AdminConsole.Models
 @using System.ComponentModel.DataAnnotations
+@using Passwordless.AdminConsole.Billing.Configuration
 
 @inject ISetupService SetupService
 @inject IOptions<PasswordlessManagementOptions> ManagementOptions
@@ -110,10 +111,13 @@
             using var http = new HttpClient();
             http.BaseAddress = new Uri(ManagementOptions.Value.InternalApiUrl);
             http.DefaultRequestHeaders.Add("ManagementKey", ManagementOptions.Value.ManagementKey);
-
+            
             using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto
             {
-                AdminEmail = Form.AdminEmail
+                AdminEmail = Form.AdminEmail,
+                MagicLinkEmailMonthlyQuota = 2000,
+                AllowAttestation = false,
+                EventLoggingIsEnabled = false
             });
 
             response.EnsureSuccessStatusCode();
