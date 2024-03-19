@@ -16,7 +16,6 @@ public class Magic : PageModel
 
     public async Task<IActionResult> OnGet(string token, string? email, string? returnUrl)
     {
-
         if (User.Identity is { IsAuthenticated: true })
         {
             return RedirectToPage("/Organization/Overview");
