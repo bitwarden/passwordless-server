@@ -187,7 +187,11 @@ else
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.ConfigObject.ShowExtensions = true;
+    c.ConfigObject.ShowCommonExtensions = true;
+});
 
 if (isSelfHosted)
 {
