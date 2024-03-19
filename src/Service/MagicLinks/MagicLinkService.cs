@@ -22,18 +22,6 @@ public class MagicLinkService(
         var account = await tenantStorage.GetAccountInformation();
         var accountAge = now - account.CreatedAt;
 
-        // Applications created less than 24 hours ago can only send magic links to the admin email address
-        if (accountAge < TimeSpan.FromHours(24) &&
-            !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
-        {
-            throw new ApiException(
-                "magic_link_email_admin_address_only",
-                "Because your application has been created less than 24 hours ago, " +
-                "you can only request magic links to the admin email address.",
-                403
-            );
-        }
-
         var maxQuota = (await tenantStorage.GetAppFeaturesAsync()).MagicLinkEmailMonthlyQuota;
 
         // Reduce the quota for newly created applications
