@@ -1,11 +1,10 @@
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Newtonsoft.Json;
-using NuGet.Protocol;
 
 namespace Passwordless.AdminConsole.Helpers;
 
@@ -23,7 +22,7 @@ public static class RazorPageHtmlExtensions
         }
 
         nonce ??= (html.ViewContext.HttpContext?.Items["csp-nonce"])?.ToString();
-        var script = $"<script type=\"importmap\" nonce={nonce}>\n{imports.ToJson(Formatting.Indented)}\n</script>";
+        var script = $"<script type=\"importmap\" nonce={nonce}>\n{JsonSerializer.Serialize(imports)}\n</script>";
         return html.Raw(script);
     }
 
