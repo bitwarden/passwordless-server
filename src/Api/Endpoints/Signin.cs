@@ -71,7 +71,7 @@ public static class SigninEndpoints
     /// </summary>
     public static async Task<IResult> CompleteAsync(
         [FromBody] SignInCompleteDTO payload,
-        [FromServices] HttpRequest request,
+        HttpRequest request,
         [FromServices] IFido2Service fido2Service)
     {
         var (deviceInfo, country) = request.GetDeviceInfo();
