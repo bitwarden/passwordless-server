@@ -49,7 +49,6 @@ public static class SigninEndpoints
                 return Ok(result);
             })
             .RequirePublicKey(PublicKeyScopes.Login)
-            .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
         group.MapPost("/complete", async (
@@ -104,7 +103,7 @@ public static class SigninEndpoints
                 return Ok(token);
             })
             .WithParameterValidation()
-            .RequirePublicKey()
-            .RequireCors();
+            .RequireCors()
+            .RequirePublicKey();
     }
 }

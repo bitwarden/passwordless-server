@@ -1,4 +1,5 @@
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
 using Passwordless.Service;

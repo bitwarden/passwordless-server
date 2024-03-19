@@ -408,13 +408,13 @@ public static class EventLoggerExtensions
     public static void LogStepUpTokenCreated(this IEventLogger logger, StepUpTokenRequest request) =>
         logger.LogEvent(context => new EventDto
         {
-            PerformedAt = context.PerformedAt,
-            Message = $"StepUp token created for {request.UserId} for {request.Options.Context}.",
-            PerformedBy = string.IsNullOrWhiteSpace(request.UserId) ? "Unknown User" : request.UserId,
-            TenantId = context.TenantId,
-            EventType = EventType.ApiUserStepUpTokenCreated,
-            Severity = Severity.Informational,
-            Subject = context.TenantId,
-            ApiKeyId = context.AbbreviatedKey
+            // PerformedAt = context.PerformedAt,
+            // Message = $"StepUp token created for {request.UserId} for {request.Options.Context}.",
+            // PerformedBy = string.IsNullOrWhiteSpace(request.UserId) ? "Unknown User" : request.UserId,
+            // TenantId = context.TenantId,
+            // EventType = EventType.ApiUserStepUpTokenCreated,
+            // Severity = Severity.Informational,
+            // Subject = context.TenantId,
+            // ApiKeyId = context.AbbreviatedKey
         });
 }

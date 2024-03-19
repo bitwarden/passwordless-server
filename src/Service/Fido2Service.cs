@@ -392,7 +392,7 @@ public class Fido2Service : IFido2Service
             Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             Device = device,
             Country = country,
-            Nickname = credential.Nickname,
+            Nickname = credential.Nickname ?? string.Empty,
             CredentialId = credential.Descriptor.Id,
             ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
