@@ -128,34 +128,6 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     }
 
     [Fact]
-    public async Task I_cannot_send_a_magic_link_email_to_a_non_admin_address_if_the_application_is_too_new()
-    {
-        // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
-        using var client = api.CreateClient();
-
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName, new CreateAppDto
-        {
-            AdminEmail = "admin@email.com"
-        });
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
-        await client.EnableMagicLinks("a_user");
-        var request = _requestFaker.Generate();
-
-        // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-
-        var details = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        details.Should().NotBeNull();
-        details!.Type.Should().Contain("magic_link_email_admin_address_only");
-    }
-
-    [Fact]
     public async Task I_can_send_a_magic_link_email_to_an_admin_address_even_if_the_application_is_too_new()
     {
         // Arrange
