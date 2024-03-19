@@ -59,7 +59,7 @@ public static class RegisterEndpoints
     /// </summary>
     public static async Task<IResult> RegisterCompleteAsync(
         [FromBody] RegistrationCompleteDTO payload,
-        [FromServices] HttpRequest request,
+        HttpRequest request,
         [FromServices] IFido2Service fido2Service)
     {
         var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
