@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Fido2NetLib;
 using MessagePack;
+using Passwordless.Service.Helpers;
+using Passwordless.Service.Validation;
 
 namespace Passwordless.Service.Models;
 
@@ -49,4 +51,18 @@ public class StepUpToken : Token
 
     [MessagePack.Key(17)]
     public required string Context { get; set; }
+}
+
+public record StepUpVerifyRequest(string Token, string Context);
+
+public static class StepUpTokenValidator
+{
+    public static void Validate(this StepUpToken token, DateTimeOffset now, string context)
+    {
+        token.Validate(now);
+
+        if (string.Equals(token.Context, context, StringComparison.OrdinalIgnoreCase)) return;
+
+        throw new ApiException("invalid_context", $"The token was not for the given context ({context})", 403);
+    }
 }

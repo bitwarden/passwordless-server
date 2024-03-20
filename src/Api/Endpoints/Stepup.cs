@@ -34,7 +34,7 @@ public static class StepUpEndpoints
         return Results.Ok(response);
     }
 
-    private static async Task<IResult> StepUpVerifyAsync(StepUpValidateRequest request)
+    private static async Task<IResult> StepUpVerifyAsync(StepUpVerifyRequest request)
     {
         // validate the token sent
         // return verified user
@@ -42,5 +42,4 @@ public static class StepUpEndpoints
         return Results.Ok();
     }
 
-    private record StepUpValidateRequest(StepUpToken Token);
 }

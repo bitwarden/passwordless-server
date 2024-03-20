@@ -463,6 +463,17 @@ public class Fido2Service : IFido2Service
         return token;
     }
 
+    public async Task<StepUpToken> StepUpVerifyAsync(StepUpVerifyRequest request)
+    {
+        var token = await _tokenService.DecodeTokenAsync<StepUpToken>(request.Token, "verify_");
+
+        token.Validate(_timeProvider.GetUtcNow(), request.Context);
+
+        _eventLogger.LogUserStepUpTokenVerifiedEvent(token, request.Context);
+
+        return token;
+    }
+
     public Task<List<AliasPointer>> GetAliases(string userId)
     {
         return _storage.GetAliasesByUserId(userId);

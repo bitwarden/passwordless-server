@@ -417,4 +417,17 @@ public static class EventLoggerExtensions
             // Subject = context.TenantId,
             // ApiKeyId = context.AbbreviatedKey
         });
+
+    public static void LogUserStepUpTokenVerifiedEvent(this IEventLogger logger, StepUpToken token, string context) =>
+        logger.LogEvent(eventLogContext => new EventDto
+        {
+            PerformedAt = eventLogContext.PerformedAt,
+            Message = $"Step up token verified for {token.UserId} for {context}",
+            PerformedBy = token.UserId,
+            TenantId = eventLogContext.TenantId,
+            EventType = EventType.ApiUserStepUpVerified,
+            Severity = Severity.Informational,
+            Subject = eventLogContext.TenantId,
+            ApiKeyId = eventLogContext.AbbreviatedKey
+        });
 }
