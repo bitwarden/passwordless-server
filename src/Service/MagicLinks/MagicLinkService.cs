@@ -15,7 +15,7 @@ public class MagicLinkService(
     IEventLogger eventLogger)
 {
     private static readonly string[] AdminConsole = ["admin", "adminconsole"];
-    
+
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow();
