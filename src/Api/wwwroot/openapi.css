@@ -1079,59 +1079,18 @@
 }
 
 .swagger-ui .parameter__name.required:after {
-    font-size: 10px;
-    position: relative;
-    top: -6px;
-    padding: 5px;
     content: "required";
     color: #ff4e63;
 }
 
 .swagger-ui .parameter__in {
-    font-size: 12px;
-    font-style: italic;
     font-family: Source Code Pro, monospace;
-    font-weight: 600;
     color: #888
 }
 
-.swagger-ui .table-container {
-    padding: 20px
-}
-
-.swagger-ui .topbar .topbar-wrapper {
-    -ms-flex-align: center
-}
-
-.swagger-ui .topbar .topbar-wrapper, .swagger-ui .topbar a {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center
-}
-
 .swagger-ui .topbar a {
-    font-size: 1.5em;
-    font-weight: 700;
-    text-decoration: none;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
-    -ms-flex-align: center;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #fff
-}
-
-.swagger-ui .topbar a span {
-    margin: 0;
-    padding: 0 10px
-}
-
-.swagger-ui .topbar .download-url-wrapper {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex
 }
 
 .swagger-ui .topbar .download-url-wrapper input[type=text] {
@@ -1143,9 +1102,6 @@
 }
 
 .swagger-ui .topbar .download-url-wrapper .download-url-button {
-    font-size: 16px;
-    font-weight: 700;
-    padding: 4px 40px;
     border: none;
     border-radius: 0 4px 4px 0;
     background: #175ddc;
@@ -1181,9 +1137,6 @@
 }
 
 .swagger-ui .info a {
-    font-size: 14px;
-    -webkit-transition: all .4s;
-    transition: all .4s;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #175ddc;
 }
@@ -1205,22 +1158,7 @@
 }
 
 .swagger-ui .info .title {
-    font-size: 36px;
-    margin: 0;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .info .title small {
-    font-size: 10px;
-    position: relative;
-    top: -5px;
-    display: inline-block;
-    margin: 0 0 0 5px;
-    padding: 2px 4px;
-    vertical-align: super;
-    border-radius: 57px;
-    background: #7d8492
 }
 
 .swagger-ui .info .title small pre {
@@ -1229,55 +1167,12 @@
     color: #fff
 }
 
-.swagger-ui .auth-btn-wrapper {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 10px 0;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    justify-content: center
-}
-
-.swagger-ui .auth-wrapper {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
-    -webkit-box-pack: end;
-    -ms-flex-pack: end;
-    justify-content: flex-end
-}
-
-.swagger-ui .auth-wrapper .authorize {
-    padding-right: 20px
-}
-
 .swagger-ui .auth-container {
-    margin: 0 0 10px;
-    padding: 10px 20px;
     border-bottom: 1px solid #ebebeb
 }
 
 .swagger-ui .auth-container:last-of-type {
-    margin: 0;
-    padding: 10px 20px;
     border: 0
-}
-
-.swagger-ui .auth-container h4 {
-    margin: 5px 0 15px!important
-}
-
-.swagger-ui .auth-container .wrapper {
-    margin: 0;
-    padding: 0
-}
-
-.swagger-ui .auth-container input[type=password], .swagger-ui .auth-container input[type=text] {
-    min-width: 230px
 }
 
 .swagger-ui .auth-container .errors {
