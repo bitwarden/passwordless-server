@@ -327,113 +327,11 @@
 }
 
 .swagger-ui .scheme-container .schemes>label {
-    font-size: 12px;
-    font-weight: 700;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    margin: -20px 15px 0 0;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .scheme-container .schemes>label select {
-    min-width: 130px;
-    text-transform: uppercase
-}
-
-.swagger-ui .loading-container {
-    padding: 40px 0 60px
-}
-
-.swagger-ui .loading-container .loading {
-    position: relative
-}
-
-.swagger-ui .loading-container .loading:after {
-    font-size: 10px;
-    font-weight: 700;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    content: "loading";
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    text-transform: uppercase;
-    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .loading-container .loading:before {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    display: block;
-    width: 60px;
-    height: 60px;
-    margin: -30px;
-    content: "";
-    -webkit-animation: rotation 1s infinite linear, opacity .5s;
-    animation: rotation 1s infinite linear, opacity .5s;
-    opacity: 1;
-    border: 2px solid rgba(85, 85, 85, .1);
-    border-top-color: rgba(0, 0, 0, .6);
-    border-radius: 100%;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden
-}
-
-@-webkit-keyframes rotation {
-    to {
-        -webkit-transform: rotate(1turn);
-        transform: rotate(1turn)
-    }
-}
-
-@keyframes rotation {
-    to {
-        -webkit-transform: rotate(1turn);
-        transform: rotate(1turn)
-    }
-}
-
-@-webkit-keyframes blinker {
-    50% {
-        opacity: 0
-    }
-}
-
-@keyframes blinker {
-    50% {
-        opacity: 0
-    }
 }
 
 .swagger-ui .btn {
-    font-size: 14px;
-    font-weight: 700;
-    padding: 5px 23px;
-    -webkit-transition: all .3s;
-    transition: all .3s;
-    border: 2px solid #888;
-    border-radius: 4px;
-    background: transparent;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .btn[disabled] {
-    cursor: not-allowed;
-    opacity: .3;
-}
-
-.swagger-ui .btn:hover {
-    box-shadow: 0 0 5px rgba(0, 0, 0, .3);
 }
 
 .swagger-ui .btn.cancel {
@@ -443,15 +341,8 @@
 }
 
 .swagger-ui .btn.authorize {
-    line-height: 1;
-    display: inline;
     color: #175ddc;
     border-color: #175ddc;
-}
-
-.swagger-ui .btn.authorize span {
-    float: left;
-    padding: 4px 20px 0 0;
 }
 
 .swagger-ui .btn.authorize svg {
