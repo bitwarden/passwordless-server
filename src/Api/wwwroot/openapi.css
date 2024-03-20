@@ -193,30 +193,17 @@
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
 }
 
-.swagger-ui .btn {
-    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-}
-
-.swagger-ui .btn.cancel {
-    border-color: #ff4e63;
-    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #ff4e63;
-}
-
+.swagger-ui .btn,
+.swagger-ui .btn.execute,
 .swagger-ui .btn.authorize {
-    color: #175ddc;
+    background: #ffffff;
+    color: black;
     border-color: #175ddc;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
 }
 
 .swagger-ui .btn.authorize svg {
     fill: #175ddc;
-}
-
-.swagger-ui .btn.execute {
-    -webkit-animation: pulse 2s infinite;
-    animation: pulse 2s infinite;
-    color: #fff;
-    border-color: #4990e2;
 }
 
 @-webkit-keyframes pulse {
