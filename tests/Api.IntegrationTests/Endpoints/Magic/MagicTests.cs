@@ -188,7 +188,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_cannot_send_too_many_magic_link_emails_in_a_short_time()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput, false);
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -240,6 +240,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         });
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddSecretKey(appCreated!.ApiSecret1);
+        client.AddRateLimitBypass();
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
@@ -289,6 +290,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddSecretKey(appCreated!.ApiSecret1);
+        client.AddRateLimitBypass();
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 

@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Helpers;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Service.Features;
@@ -17,10 +18,20 @@ public static class MagicEndpoints
 {
     public const string RateLimiterPolicy = nameof(MagicEndpoints);
 
+    /// <summary>
+    /// Adds rate limiting policy for magic link endpoints.
+    /// </summary>
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
         builder.AddPolicy(RateLimiterPolicy, context =>
         {
             var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
+
+            var isRateLimitBypassed =
+                context.RequestServices.GetRequiredService<IConfiguration>().IsRateLimitBypassEnabled() &&
+                context.Request.IsRateLimitBypassRequested();
+
+            if (isRateLimitBypassed)
+                return RateLimitPartition.GetNoLimiter(tenant);
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
                 new FixedWindowRateLimiterOptions
@@ -33,6 +44,9 @@ public static class MagicEndpoints
             );
         });
 
+    /// <summary>
+    /// Maps magic link endpoints.
+    /// </summary>
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/magic-link")
@@ -47,9 +61,10 @@ public static class MagicEndpoints
 
     /// <summary>
     /// Sends an e-mail containing a magic link template allowing users to login.
-    ///
-    /// Warning: Verify the e-mail address matches the user identifier in your backend.
     /// </summary>
+    /// <remarks>
+    /// Warning: Verify the e-mail address matches the user identifier in your backend.
+    /// </remarks>
     public static async Task<IResult> SendMagicLinkAsync(
         [FromBody] SendMagicLinkRequest request,
         [FromServices] IFeatureContextProvider provider,
