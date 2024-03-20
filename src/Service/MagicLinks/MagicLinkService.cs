@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.EventLog.Loggers;
@@ -10,12 +9,13 @@ namespace Passwordless.Service.MagicLinks;
 
 public class MagicLinkService(
     TimeProvider timeProvider,
-    IMemoryCache cache,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
     IMailProvider mailProvider,
     IEventLogger eventLogger)
 {
+    private static readonly string[] AdminConsole = ["admin", "adminconsole"];
+    
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow();
@@ -24,6 +24,7 @@ public class MagicLinkService(
 
         // Applications created less than 24 hours ago can only send magic links to the admin email address
         if (accountAge < TimeSpan.FromHours(24) &&
+            !IsAdminConsole(account) &&
             !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
@@ -63,6 +64,8 @@ public class MagicLinkService(
             );
         }
     }
+
+    private static bool IsAdminConsole(AccountMetaInformation account) => AdminConsole.Contains(account.Tenant);
 
     public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {
