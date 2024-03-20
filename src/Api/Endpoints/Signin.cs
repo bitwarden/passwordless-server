@@ -3,7 +3,6 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
-using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -75,35 +74,5 @@ public static class SigninEndpoints
                 return Ok(result);
             })
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
-
-        app.MapPost("/stepup", async (
-                StepUpTokenRequest request,
-                ITokenService tokenService,
-                TimeProvider timeProvider,
-                IEventLogger eventLogger) =>
-            {
-                
-                var token = await tokenService.EncodeTokenAsync(new StepUpToken
-                {
-                    ExpiresAt = default,
-                    TokenId = default,
-                    Type = null,
-                    UserId = null,
-                    CreatedAt = default,
-                    RpId = null,
-                    Origin = null,
-                    Success = false,
-                    Device = null,
-                    Country = null
-                }, "verify_");
-
-
-                eventLogger.LogStepUpTokenCreated(request);
-
-                return Ok(token);
-            })
-            .WithParameterValidation()
-            .RequireCors()
-            .RequirePublicKey();
     }
 }

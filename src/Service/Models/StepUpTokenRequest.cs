@@ -46,4 +46,7 @@ public class StepUpToken : Token
 
     [MessagePack.Key(16)]
     public string Country { get; set; }
+
+    [MessagePack.Key(17)]
+    public required string Context { get; set; }
 }
