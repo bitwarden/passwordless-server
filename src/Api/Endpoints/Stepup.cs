@@ -1,7 +1,7 @@
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
 using Passwordless.Service;
-using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Endpoints;
@@ -24,29 +24,14 @@ public static class StepUpEndpoints
 
     private static async Task<IResult> StepUpAsync(
         StepUpTokenRequest request,
-        ITokenService tokenService,
-        TimeProvider timeProvider,
-        IEventLogger eventLogger)
+        HttpRequest httpRequest,
+        IFido2Service fido2Service)
     {
-        var token = await tokenService.EncodeTokenAsync(new StepUpToken
-        {
-            ExpiresAt = default,
-            TokenId = default,
-            Type = null,
-            UserId = null,
-            CreatedAt = default,
-            RpId = null,
-            Origin = null,
-            Success = false,
-            Device = null,
-            Country = null,
-            Context = request.Context.Context
-        }, "verify_");
+        var (device, country) = httpRequest.GetDeviceInfo();
 
+        var response = await fido2Service.StepUpCompleteAsync(request, device, country);
 
-        eventLogger.LogStepUpTokenCreated(request);
-
-        return Results.Ok(token);
+        return Results.Ok(response);
     }
 
     private static async Task<IResult> StepUpVerifyAsync(StepUpValidateRequest request)

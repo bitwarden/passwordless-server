@@ -30,7 +30,7 @@ public class StepUpToken : Token
     public required string UserId { get; set; }
 
     [MessagePack.Key(11)]
-    public required DateTimeOffset CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
 
     [MessagePack.Key(12)]
     public required string RpId { get; set; }

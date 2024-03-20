@@ -407,6 +407,53 @@ public class Fido2Service : IFido2Service
         return new TokenResponse(token);
     }
 
+    public async Task<TokenResponse> StepUpCompleteAsync(StepUpTokenRequest request, string device, string country)
+    {
+        var now = _timeProvider.GetUtcNow();
+
+        var fido2 = new Fido2(new Fido2Configuration
+        {
+            ServerDomain = request.RPID,
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, _metadataService);
+
+        var credential = await _storage.GetCredential(request.Response.Id);
+        if (credential == null)
+        {
+            throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
+        }
+
+        var res = await fido2.MakeAssertionAsync(
+            request.Response,
+            await _tokenService.DecodeTokenAsync<AssertionOptions>(request.Session, "session_", true),
+            credential.PublicKey,
+            (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList(),
+            credential.SignatureCounter,
+            (args, _) => Task.FromResult(credential.UserHandle.SequenceEqual(args.UserHandle)));
+
+        await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
+
+        var userId = Encoding.UTF8.GetString(credential.UserHandle);
+
+        _eventLogger.LogStepUpTokenCreated(request);
+
+        return new TokenResponse(await _tokenService.EncodeTokenAsync(new StepUpToken
+        {
+            ExpiresAt = now.Add(TimeSpan.FromSeconds(request.Context.TimeToLive)).UtcDateTime,
+            TokenId = Guid.NewGuid(),
+            UserId = userId,
+            CreatedAt = now.UtcDateTime,
+            RpId = request.RPID,
+            Origin = request.Origin,
+            Success = true,
+            Device = device,
+            Country = country,
+            Context = request.Context.Context
+        }, "verify_"));
+    }
+
     public async Task<VerifySignInToken> SignInVerifyAsync(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
