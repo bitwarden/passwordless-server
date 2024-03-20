@@ -14,47 +14,11 @@
 }
 
 .swagger-ui body {
-    margin: 0;
-    background: #fafafa
+    background: #ffffff;
 }
 
 .swagger-ui .info .title small.version-stamp {
     background-color: #ffbf00;
-}
-
-.swagger-ui .wrapper {
-    width: 100%;
-    max-width: 1460px;
-    margin: 0 auto;
-    padding: 0 20px
-}
-
-.swagger-ui .opblock-tag-section {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column
-}
-
-.swagger-ui .opblock-tag {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 10px 20px 10px 10px;
-    cursor: pointer;
-    -webkit-transition: all .2s;
-    transition: all .2s;
-    border-bottom: 1px solid rgba(59, 65, 81, .3);
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
-}
-
-.swagger-ui .opblock-tag:hover {
-    background: rgba(0, 0, 0, .02)
 }
 
 .swagger-ui .opblock-tag {
@@ -64,61 +28,8 @@
     color: #3b4151
 }
 
-.swagger-ui .opblock-tag.no-desc span {
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1
-}
-
-.swagger-ui .opblock-tag svg {
-    -webkit-transition: all .4s;
-    transition: all .4s
-}
-
 .swagger-ui .opblock-tag small {
-    font-size: 14px;
-    font-weight: 400;
-    padding: 0 10px;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .parаmeter__type {
-    font-size: 12px;
-    padding: 5px 0;
-    font-family: Source Code Pro, monospace;
-    font-weight: 600;
-    color: #3b4151
-}
-
-.swagger-ui .view-line-link {
-    position: relative;
-    top: 3px;
-    width: 20px;
-    margin: 0 5px;
-    cursor: pointer;
-    -webkit-transition: all .5s;
-    transition: all .5s
-}
-
-.swagger-ui .opblock {
-    margin: 0 0 15px;
-    border: 1px solid #000;
-    border-radius: 4px;
-    box-shadow: 0 0 3px rgba(0, 0, 0, .19)
-}
-
-.swagger-ui .opblock.is-open .opblock-summary {
-    border-bottom: 1px solid #000
-}
-
-.swagger-ui .opblock .opblock-section-header {
-    padding: 8px 20px;
-    background: hsla(0, 0%, 100%, .8);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .1)
 }
 
 .swagger-ui .opblock .opblock-section-header, .swagger-ui .opblock .opblock-section-header label {
@@ -199,23 +110,7 @@
 }
 
 .swagger-ui .opblock .opblock-summary-description {
-    font-size: 13px;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .opblock .opblock-summary {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 5px;
-    cursor: pointer;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
 }
 
 .swagger-ui .opblock.opblock-delete,
@@ -1426,53 +1321,12 @@
     color: #3b4151
 }
 
-.swagger-ui .errors-wrapper hgroup {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
-}
-
 .swagger-ui .errors-wrapper hgroup h4 {
-    font-size: 20px;
-    margin: 0;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
 }
 
-@-webkit-keyframes scaleUp {
-    0% {
-        -webkit-transform: scale(.8);
-        transform: scale(.8);
-        opacity: 0
-    }
-    to {
-        -webkit-transform: scale(1);
-        transform: scale(1);
-        opacity: 1
-    }
-}
-
-@keyframes scaleUp {
-    0% {
-        -webkit-transform: scale(.8);
-        transform: scale(.8);
-        opacity: 0
-    }
-    to {
-        -webkit-transform: scale(1);
-        transform: scale(1);
-        opacity: 1
-    }
-}
-
-.swagger-ui .Resizer.vertical.disabled {
-    display: none
+.swagger-ui table.model tr.property-row .star {
+    color: #ff4e63;
 }
 
 .swagger-ui .topbar {
