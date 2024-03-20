@@ -34,12 +34,12 @@ public static class StepUpEndpoints
         return Results.Ok(response);
     }
 
-    private static async Task<IResult> StepUpVerifyAsync(StepUpVerifyRequest request)
+    private static async Task<IResult> StepUpVerifyAsync(StepUpVerifyRequest request,
+        IFido2Service fido2Service)
     {
-        // validate the token sent
-        // return verified user
+        var response = await fido2Service.StepUpVerifyAsync(request);
 
-        return Results.Ok();
+        return Results.Ok(response);
     }
 
 }
