@@ -22,8 +22,6 @@
 }
 
 .swagger-ui .opblock-tag {
-    font-size: 24px;
-    margin: 0 0 5px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
@@ -32,44 +30,18 @@
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
 }
 
-.swagger-ui .opblock .opblock-section-header, .swagger-ui .opblock .opblock-section-header label {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
-}
-
 .swagger-ui .opblock .opblock-section-header label {
-    font-size: 12px;
-    font-weight: 700;
-    margin: 0;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
 
-.swagger-ui .opblock .opblock-section-header label span {
-    padding: 0 10px 0 0
-}
 
 .swagger-ui .opblock .opblock-section-header h4 {
-    font-size: 14px;
-    margin: 0;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
 
 .swagger-ui .opblock .opblock-summary-method {
-    font-size: 14px;
-    font-weight: 700;
-    min-width: 80px;
-    padding: 6px 15px;
-    text-align: center;
-    border-radius: 3px;
     background: #000;
     text-shadow: 0 1px 0 rgba(0, 0, 0, .1);
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
@@ -77,36 +49,8 @@
 }
 
 .swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
-    font-size: 16px;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 0 10px;
     font-family: Source Code Pro, monospace;
-    font-weight: 600;
     color: #3b4151;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
-}
-
-.swagger-ui .opblock .opblock-summary-path .view-line-link, .swagger-ui .opblock .opblock-summary-path__deprecated .view-line-link {
-    position: relative;
-    top: 2px;
-    width: 0;
-    margin: 0;
-    cursor: pointer;
-    -webkit-transition: all .5s;
-    transition: all .5s
-}
-
-.swagger-ui .opblock .opblock-summary-path:hover .view-line-link, .swagger-ui .opblock .opblock-summary-path__deprecated:hover .view-line-link {
-    width: 18px;
-    margin: 0 5px
-}
-
-.swagger-ui .opblock .opblock-summary-path__deprecated {
-    text-decoration: line-through
 }
 
 .swagger-ui .opblock .opblock-summary-description {
