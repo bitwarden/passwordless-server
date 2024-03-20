@@ -65,7 +65,9 @@ public class MagicLinkService(
         }
     }
 
-    private static bool IsAdminConsole(AccountMetaInformation account) => AdminConsole.Contains(account.Tenant);
+    private static bool IsAdminConsole(AccountMetaInformation account) =>
+        string.Equals(account.Tenant, "admin", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(account.Tenant, "adminconsole", StringComparison.OrdinalIgnoreCase);
 
     public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {
