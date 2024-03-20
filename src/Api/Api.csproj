@@ -33,4 +33,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="OpenApi\swagger.html" />
+    <EmbeddedResource Include="OpenApi\swagger.html" />
+  </ItemGroup>
 </Project>
