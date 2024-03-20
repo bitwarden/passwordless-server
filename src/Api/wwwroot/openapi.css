@@ -192,10 +192,6 @@
     background: rgba(0, 0, 0, .2)
 }
 
-.swagger-ui .tab li.active {
-    font-weight: 700
-}
-
 .swagger-ui .opblock.opblock-delete .tab-header .tab-item.active h4 span:after,
 .swagger-ui .opblock.opblock-get .tab-header .tab-item.active h4 span:after,
 .swagger-ui .opblock.opblock-post .tab-header .tab-item.active h4 span:after,
@@ -203,90 +199,35 @@
     background-color: #175ddc;
 }
 
-.swagger-ui .opblock-description-wrapper, .swagger-ui .opblock-title_normal {
-    padding: 15px 20px
-}
-
 .swagger-ui .opblock-description-wrapper, .swagger-ui .opblock-description-wrapper h4, .swagger-ui .opblock-title_normal, .swagger-ui .opblock-title_normal h4 {
-    font-size: 12px;
-    margin: 0 0 5px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
 
 .swagger-ui .opblock-description-wrapper p, .swagger-ui .opblock-title_normal p {
-    font-size: 14px;
-    margin: 0;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
 
-.swagger-ui .execute-wrapper {
-    padding: 20px;
-    text-align: right
-}
-
-.swagger-ui .execute-wrapper .btn {
-    width: 100%;
-    padding: 8px 40px
-}
-
-.swagger-ui .body-param-options {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column
-}
-
-.swagger-ui .body-param-options .body-param-edit {
-    padding: 10px 0
-}
-
-.swagger-ui .body-param-options label {
-    padding: 8px 0
-}
-
-.swagger-ui .body-param-options label select {
-    margin: 3px 0 0
-}
-
-.swagger-ui .responses-inner {
-    padding: 20px
-}
-
 .swagger-ui .responses-inner h4, .swagger-ui .responses-inner h5 {
-    font-size: 12px;
-    margin: 10px 0 5px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
 
 .swagger-ui .response-col_status {
-    font-size: 14px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
     color: #3b4151
 }
 
 .swagger-ui .response-col_status .response-undocumented {
-    font-size: 11px;
     font-family: Source Code Pro, monospace;
     font-weight: 600;
     color: #999
 }
 
 .swagger-ui .response-col_description__inner span {
-    font-size: 12px;
-    font-style: italic;
-    display: block;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 4px;
     background: #41444e;
     font-family: Source Code Pro, monospace;
-    font-weight: 600;
     color: #fff
 }
 
@@ -295,35 +236,13 @@
 }
 
 .swagger-ui .opblock-body pre {
-    font-size: 12px;
-    margin: 0;
-    padding: 10px;
-    white-space: pre-wrap;
-    border-radius: 4px;
     background: #41444e;
     font-family: Source Code Pro, monospace;
-    font-weight: 600;
     color: #fff
 }
 
 .swagger-ui .opblock-body pre span {
     color: #fff!important
-}
-
-.swagger-ui .scheme-container {
-    margin: 0 0 20px;
-    padding: 30px 0;
-    background: #fff;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .15)
-}
-
-.swagger-ui .scheme-container .schemes {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
 }
 
 .swagger-ui .scheme-container .schemes>label {
