@@ -16,11 +16,13 @@ namespace Passwordless.Api.Endpoints;
 
 public static class MagicEndpoints
 {
+    private const string RateLimiterPolicy = nameof(MagicEndpoints);
+
     /// <summary>
     /// Adds rate limiting policy for magic link endpoints.
     /// </summary>
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
-        builder.AddPolicy(nameof(MagicEndpoints), context =>
+        builder.AddPolicy(RateLimiterPolicy, context =>
         {
             var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
 
@@ -54,7 +56,7 @@ public static class MagicEndpoints
 
         group.MapPost("/send", SendMagicLinkAsync)
             .WithParameterValidation()
-            .RequireRateLimiting(nameof(MagicEndpoints));
+            .RequireRateLimiting(RateLimiterPolicy);
     }
 
     /// <summary>
