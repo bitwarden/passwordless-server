@@ -1,15 +1,14 @@
 @page "/initialize"
-@attribute [AllowAnonymous]
-
-@using Passwordless.AdminConsole.Identity
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-@using Passwordless.Common.Models.Apps
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.Common.Models.Apps
 @using Passwordless.AdminConsole.Db
+@using Passwordless.AdminConsole.Identity
 @using Microsoft.AspNetCore.Identity
 @using Passwordless.AdminConsole.Models
 @using System.ComponentModel.DataAnnotations
+@attribute [AllowAnonymous]
 
 @inject ISetupService SetupService
 @inject IOptions<PasswordlessManagementOptions> ManagementOptions
@@ -113,7 +112,8 @@
 
             using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto
             {
-                AdminEmail = Form.AdminEmail
+                AdminEmail = Form.AdminEmail,
+                MagicLinkEmailMonthlyQuota = 2000
             });
 
             response.EnsureSuccessStatusCode();
