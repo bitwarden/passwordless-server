@@ -667,184 +667,32 @@
     border: 2px solid #175ddc;
 }
 
-.swagger-ui textarea.curl {
-    font-size: 12px;
-    min-height: 100px;
-    margin: 0;
-    padding: 10px;
-    resize: none;
-    border-radius: 4px;
-    background: #41444e;
-    font-family: Source Code Pro, monospace;
-    font-weight: 600;
-    color: #fff
-}
-
 .swagger-ui .checkbox {
-    padding: 5px 0 10px;
-    -webkit-transition: opacity .5s;
-    transition: opacity .5s;
     color: #333
 }
 
-.swagger-ui .checkbox label {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex
-}
-
 .swagger-ui .checkbox p {
-    font-weight: 400 !important;
-    font-style: italic;
-    margin: 0 !important;
     font-family: Source Code Pro, monospace;
-    color: #3b4151
-}
-
-.swagger-ui .checkbox input[type=checkbox] {
-    display: none
-}
-
-.swagger-ui .checkbox input[type=checkbox]+label>.item {
-    position: relative;
-    top: 3px;
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin: 0 8px 0 0;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 1px;
-    background: #e8e8e8;
-    box-shadow: 0 0 0 2px #e8e8e8;
-    -webkit-box-flex: 0;
-    -ms-flex: none;
-    flex: none
-}
-
-.swagger-ui .checkbox input[type=checkbox]+label>.item:active {
-    -webkit-transform: scale(.9);
-    transform: scale(.9)
 }
 
 .swagger-ui .checkbox input[type=checkbox]:checked+label>.item {
     background: #e8e8e8 url("data:image/svg+xml;charset=utf-8,%3Csvg width='10' height='8' viewBox='3 7 10 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%2341474E' fill-rule='evenodd' d='M6.333 15L3 11.667l1.333-1.334 2 2L11.667 7 13 8.333z'/%3E%3C/svg%3E") 50% no-repeat
 }
 
-.swagger-ui .dialog-ux {
-    position: fixed;
-    z-index: 9999;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0
-}
-
-.swagger-ui .dialog-ux .backdrop-ux {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(0, 0, 0, .8)
-}
-
-.swagger-ui .dialog-ux .modal-ux {
-    position: absolute;
-    z-index: 9999;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    min-width: 300px;
-    max-width: 650px;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    border: 1px solid #ebebeb;
-    border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 10px 30px 0 rgba(0, 0, 0, .2)
-}
-
-.swagger-ui .dialog-ux .modal-ux-content {
-    overflow-y: auto;
-    max-height: 540px;
-    padding: 20px
-}
-
 .swagger-ui .dialog-ux .modal-ux-content p {
-    font-size: 12px;
-    margin: 0 0 5px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
 }
 
 .swagger-ui .dialog-ux .modal-ux-content h4 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 15px 0 0;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .dialog-ux .modal-ux-header {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 12px 0;
-    border-bottom: 1px solid #ebebeb;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center
-}
-
-.swagger-ui .dialog-ux .modal-ux-header .close-modal {
-    padding: 0 10px;
-    border: none;
-    background: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none
 }
 
 .swagger-ui .dialog-ux .modal-ux-header h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-    padding: 0 20px;
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
 }
 
 .swagger-ui .model {
-    font-size: 12px;
     font-family: Source Code Pro, monospace;
-    font-weight: 600;
-    color: #3b4151
-}
-
-.swagger-ui .model-toggle {
-    font-size: 10px;
-    position: relative;
-    top: 6px;
-    display: inline-block;
-    margin: auto .3em;
-    cursor: pointer;
-    -webkit-transition: -webkit-transform .15s ease-in;
-    transition: -webkit-transform .15s ease-in;
-    transition: transform .15s ease-in;
-    transition: transform .15s ease-in, -webkit-transform .15s ease-in;
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg);
-    -webkit-transform-origin: 50% 50%;
-    transform-origin: 50% 50%
-}
-
-.swagger-ui .model-toggle.collapsed {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg)
 }
 
 .swagger-ui .model-toggle:after {
@@ -854,25 +702,6 @@
     content: "";
     background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E") 50% no-repeat;
     background-size: 100%
-}
-
-.swagger-ui .model-jump-to-path {
-    position: relative;
-    cursor: pointer
-}
-
-.swagger-ui .model-jump-to-path .view-line-link {
-    position: absolute;
-    top: -.4em;
-    cursor: pointer
-}
-
-.swagger-ui .model-title {
-    position: relative
-}
-
-.swagger-ui .model-title:hover .model-hint {
-    visibility: visible
 }
 
 .swagger-ui .model-hint {
@@ -890,10 +719,6 @@
     margin: 30px 0;
     border: 1px solid rgba(59, 65, 81, .3);
     border-radius: 4px
-}
-
-.swagger-ui section.models.is-open {
-    padding: 0 0 20px
 }
 
 .swagger-ui section.models.is-open h4 {
@@ -921,17 +746,6 @@
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center
-}
-
-.swagger-ui section.models h4 svg {
-    -webkit-transition: all .4s;
-    transition: all .4s
-}
-
-.swagger-ui section.models h4 span {
-    -webkit-box-flex: 1;
-    -ms-flex: 1;
-    flex: 1
 }
 
 .swagger-ui section.models h4:hover {
