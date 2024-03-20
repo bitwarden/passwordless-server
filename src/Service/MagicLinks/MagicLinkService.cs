@@ -14,8 +14,6 @@ public class MagicLinkService(
     IMailProvider mailProvider,
     IEventLogger eventLogger)
 {
-    private static readonly string[] AdminConsole = ["admin", "adminconsole"];
-
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow();
@@ -65,9 +63,9 @@ public class MagicLinkService(
         }
     }
 
-    private static bool IsAdminConsole(AccountMetaInformation account) =>
-        string.Equals(account.Tenant, "admin", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(account.Tenant, "adminconsole", StringComparison.OrdinalIgnoreCase);
+    private static bool IsAdminConsole(PerTenant account) =>
+        string.Equals(account.Tenant, "admin", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(account.Tenant, "adminconsole", StringComparison.OrdinalIgnoreCase);
 
     public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {
