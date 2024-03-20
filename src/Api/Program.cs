@@ -247,6 +247,7 @@ app.MapEventLogEndpoints();
 app.MapReportingEndpoints();
 app.MapMetaDataServiceEndpoints();
 app.MapAuthenticatorsEndpoints();
+app.MapStepupEndpoints();
 
 app.MapPasswordlessHealthChecks();
 
