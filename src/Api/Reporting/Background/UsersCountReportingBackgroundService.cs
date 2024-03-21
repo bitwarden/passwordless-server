@@ -30,8 +30,9 @@ public sealed class PeriodicCredentialReportsBackgroundService : BasePeriodicBac
         {
             result = await reportingService.UpdatePeriodicCredentialReportsAsync();
         }
-        catch (DBConcurrencyException)
+        catch (Exception e)
         {
+            Logger.LogError(e, "Error updating periodic credential reports.");
             return;
         }
         Logger.LogInformation("{BackgroundService} updated {Records}.", nameof(PeriodicCredentialReportsBackgroundService), result);
