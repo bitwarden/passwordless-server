@@ -55,6 +55,7 @@ builder.Services.AddSwaggerGen(swagger =>
             Url = new Uri("https://bitwarden.com/contact/")
         }
     });
+    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
 });
 
 if (builder.Configuration.IsSelfHosted())

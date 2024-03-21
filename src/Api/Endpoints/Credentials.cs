@@ -1,8 +1,11 @@
-﻿using Passwordless.Api.Authorization;
+﻿using Microsoft.AspNetCore.Mvc;
+using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Api.OpenApi;
+using Passwordless.Common.Models.Credentials;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
+using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -15,45 +18,53 @@ public static class CredentialsEndpoints
             .RequireSecretKey()
             .WithTags(OpenApiTags.Credentials);
 
-        group.MapPost("/delete", async (CredentialsDeleteDTO payload,
-                UserCredentialsService userCredentialsService) =>
-        {
-            await userCredentialsService.DeleteCredentialAsync(payload.CredentialId);
+        group.MapPost("/delete", DeleteCredentialAsync);
 
-            return Results.NoContent();
-        });
+        group.MapGet("/list", ListGetCredentialsAsync)
+            .WithParameterValidation();
 
-        group.MapMethods("/list", new[] { "post", "get" }, async (HttpRequest req, UserCredentialsService userCredentialService) =>
-        {
-            string? userId;
-            if (req.Method == "POST")
-            {
-                var payload = await req.ReadFromJsonAsync<CredentialsListDTO>();
+        group.MapPost("/list", ListPostCredentialsAsync)
+            .WithParameterValidation();
+    }
 
-                // if payload is empty, throw exception
-                if (payload == null)
-                {
-                    throw new ApiException("Payload is empty", 400);
-                }
+    /// <summary>
+    /// Deletes a credential.
+    /// </summary>
+    public static async Task<IResult> DeleteCredentialAsync(
+        [FromBody] CredentialsDeleteDTO payload,
+        [FromServices] UserCredentialsService userCredentialsService)
+    {
+        await userCredentialsService.DeleteCredentialAsync(payload.CredentialId);
 
-                userId = payload.UserId;
-            }
-            else
-            {
-                userId = req.Query["userId"].SingleOrDefault();
-            }
+        return NoContent();
+    }
 
-            // if payload is empty, throw exception
-            if (userId == null)
-            {
-                throw new ApiException("Please supply UserId in the query string value", 400);
-            }
+    /// <summary>
+    /// Lists credentials for a given user.
+    /// </summary>
+    public static Task<IResult> ListGetCredentialsAsync(
+        [AsParameters] GetCredentialsRequest request,
+        [FromServices] UserCredentialsService service)
+    {
+        return ListCredentialsAsync(request, service);
+    }
 
-            var result = await userCredentialService.GetAllCredentialsAsync(userId);
+    /// <summary>
+    /// Lists credentials for a given user.
+    /// </summary>
+    public static Task<IResult> ListPostCredentialsAsync(
+        [FromBody] GetCredentialsRequest request,
+        [FromServices] UserCredentialsService service)
+    {
+        return ListCredentialsAsync(request, service);
+    }
 
-            var res = ListResponse.Create(result);
-
-            return Results.Ok(res);
-        });
+    private static async Task<IResult> ListCredentialsAsync(
+        GetCredentialsRequest request,
+        UserCredentialsService service)
+    {
+        var result = await service.GetAllCredentialsAsync(request.UserId);
+        var res = ListResponse.Create(result);
+        return Ok(res);
     }
 }
