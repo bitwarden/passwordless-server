@@ -14,12 +14,12 @@ namespace Passwordless.AdminConsole.Pages.Billing;
 public class Webhook : PageModel
 {
     private readonly ISharedBillingService _sharedBillingService;
-    private readonly BillingOptions _billingOptions;
+    private readonly IOptionsSnapshot<BillingOptions> _billingOptions;
 
-    public Webhook(ISharedBillingService sharedBillingService, IOptions<BillingOptions> billingOptions)
+    public Webhook(ISharedBillingService sharedBillingService, IOptionsSnapshot<BillingOptions> billingOptions)
     {
         _sharedBillingService = sharedBillingService;
-        _billingOptions = billingOptions.Value;
+        _billingOptions = billingOptions;
     }
 
     public async Task<IActionResult> OnPost()
@@ -31,7 +31,7 @@ public class Webhook : PageModel
             stripeEvent = EventUtility.ConstructEvent(
                 json,
                 Request.Headers["Stripe-Signature"],
-                _billingOptions.WebhookSecret
+                _billingOptions.Value.WebhookSecret
             );
             Console.WriteLine($"Webhook notification with type: {stripeEvent.Type} found for {stripeEvent.Id}");
         }
