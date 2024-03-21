@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using NSwag.Generation.AspNetCore;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Email;
@@ -11,13 +11,10 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
-using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
-using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
-using Passwordless.Common.Utils;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
@@ -25,36 +22,61 @@ using Passwordless.Service.MDS;
 using Passwordless.Service.Storage.Ef;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
+using OpenApiHeader = NSwag.OpenApiHeader;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(swagger =>
+builder.Services.AddOpenApiDocument(c =>
 {
-    swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
-    swagger.DocInclusionPredicate((docName, apiDesc) =>
+    c.AddOperationFilter(context =>
     {
-        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.FirstOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
-        if (policy == null)
-        {
-            return false;
-        }
+        if (context is not AspNetCoreOperationProcessorContext aspContext) return false;
+        var policy = (AuthorizationPolicy?)aspContext.ApiDescription.ActionDescriptor.EndpointMetadata.FirstOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
+        if (policy == null) return false;
         return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
     });
-    swagger.OperationFilter<AuthorizationOperationFilter>();
-    swagger.SupportNonNullableReferenceTypes();
-    swagger.SwaggerDoc("v1", new OpenApiInfo
+    c.AddOperationFilter(context =>
     {
-        Version = "v4",
-        Title = "Passwordless.dev API",
-        TermsOfService = new Uri("https://bitwarden.com/terms/"),
-        Contact = new OpenApiContact
+        if (context is not AspNetCoreOperationProcessorContext aspContext) return false;
+        var policy =
+            (AuthorizationPolicy?)aspContext.ApiDescription.ActionDescriptor.EndpointMetadata.FirstOrDefault(x =>
+                x.GetType() == typeof(AuthorizationPolicy));
+        if (policy == null) return false;
+        switch (policy.AuthenticationSchemes.SingleOrDefault())
         {
-            Email = "support@passwordless.dev",
-            Name = "Support",
-            Url = new Uri("https://bitwarden.com/contact/")
+            case Constants.PublicKeyAuthenticationScheme:
+                context.OperationDescription.Operation.Parameters.Add(
+                    new OpenApiHeader
+                    {
+                        Name = Constants.PublicKeyHeaderName,
+                        Type = NJsonSchema.JsonObjectType.String,
+                        IsRequired = false,
+                        Description = $"Your '{Constants.PublicKeyHeaderName}' for use in your client.",
+                        Default = $"yourappid:public:{Guid.Empty:N}"
+                    });
+                break;
+            case Constants.SecretKeyAuthenticationScheme:
+                context.OperationDescription.Operation.Parameters.Add(
+                    new OpenApiHeader
+                    {
+                        Name = Constants.SecretKeyHeaderName,
+                        Type = NJsonSchema.JsonObjectType.String,
+                        IsRequired = false,
+                        Description = $"Your '{Constants.SecretKeyHeaderName}' for use in your server or backend.",
+                        Default = $"yourappid:secret:{Guid.Empty:N}"
+                    });
+                break;
         }
+
+        return true;
     });
+    c.SchemaSettings.GenerateEnumMappingDescription = true;
+    c.SchemaSettings.ResolveExternalXmlDocumentation = true;
+    c.SchemaSettings.UseXmlDocumentation = true;
+    c.Title = "Passwordless.dev API";
+    c.UseControllerSummaryAsTagDescription = true;
+    c.Version = "v4";
 });
 
 if (builder.Configuration.IsSelfHosted())
@@ -184,7 +206,8 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseSwagger();
+app.UseOpenApi();
+//app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.ConfigObject.ShowExtensions = true;

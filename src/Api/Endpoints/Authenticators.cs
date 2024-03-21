@@ -36,6 +36,7 @@ public static class AuthenticatorsEndpoints
     /// <param name="featureContextProvider"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    /// <response code="400">test</response>
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
         IApplicationService service,

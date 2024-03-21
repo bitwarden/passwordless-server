@@ -20,6 +20,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="MinimalApis.Extensions" Version="0.11.0" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.0.3" />
       <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
       <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
       <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
