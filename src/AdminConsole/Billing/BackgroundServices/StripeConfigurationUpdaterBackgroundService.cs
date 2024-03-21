@@ -5,7 +5,8 @@ using Stripe;
 namespace Passwordless.AdminConsole.Billing.BackgroundServices;
 
 public class StripeConfigurationUpdaterBackgroundService(
-    IOptionsMonitor<BillingOptions> OptionsMonitor) : BackgroundService
+    IOptionsMonitor<BillingOptions> OptionsMonitor,
+    ILogger<StripeConfigurationUpdaterBackgroundService> Logger) : BackgroundService
 {
     private IDisposable? _onChangeListener;
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -17,7 +18,11 @@ public class StripeConfigurationUpdaterBackgroundService(
 
     private void OnOptionsChanged(BillingOptions options, string? arg2)
     {
-        StripeConfiguration.ApiKey = options.ApiKey;
+        if (StripeConfiguration.ApiKey != options.ApiKey)
+        {
+            StripeConfiguration.ApiKey = options.ApiKey;
+            Logger.LogInformation("Stripe API key updated.");
+        }
     }
 
     public override void Dispose()
