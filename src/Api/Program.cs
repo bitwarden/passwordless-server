@@ -207,11 +207,9 @@ else
 }
 
 app.UseOpenApi();
-//app.UseSwagger();
-app.UseSwaggerUI(c =>
+app.UseSwaggerUi(c =>
 {
-    c.ConfigObject.ShowExtensions = true;
-    c.ConfigObject.ShowCommonExtensions = true;
+    c.CustomStylesheetPath = "/openapi.css";
 });
 
 if (builder.Configuration.IsSelfHosted())

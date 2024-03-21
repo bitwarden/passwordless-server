@@ -1,0 +1,681 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+}
+
+.swagger-ui html {
+    box-sizing: border-box
+}
+
+.swagger-ui *, .swagger-ui :after, .swagger-ui :before {
+    box-sizing: inherit
+}
+
+.swagger-ui body {
+    background: #ffffff;
+}
+
+.swagger-ui .info .title small.version-stamp {
+    background-color: #ffbf00;
+}
+
+.swagger-ui .opblock-tag {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .opblock-tag small {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock .opblock-section-header label {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+
+.swagger-ui .opblock .opblock-section-header h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+    background: #000;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #fff
+}
+
+.swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
+    font-family: Source Code Pro, monospace;
+    color: #3b4151;
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock.opblock-delete,
+.swagger-ui .opblock.opblock-get,
+.swagger-ui .opblock.opblock-head,
+.swagger-ui .opblock.opblock-options,
+.swagger-ui .opblock.opblock-patch,
+.swagger-ui .opblock.opblock-post,
+.swagger-ui .opblock.opblock-put {
+    border-color: #175ddc;
+    background: #f3f6f9;
+}
+
+.swagger-ui .opblock.opblock-deprecated {
+    border-color: #f3f6f9;
+    background: #f3f6f9;
+    opacity: 0.6;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method,
+.swagger-ui .opblock.opblock-get .opblock-summary-method,
+.swagger-ui .opblock.opblock-head .opblock-summary-method,
+.swagger-ui .opblock.opblock-options .opblock-summary-method,
+.swagger-ui .opblock.opblock-patch .opblock-summary-method,
+.swagger-ui .opblock.opblock-post .opblock-summary-method,
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+    background: #175ddc;
+}
+
+.swagger-ui .opblock.opblock-deprecated .opblock-summary-method {
+    background: #f3f6f9;
+    color: #3b4151;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary,
+.swagger-ui .opblock.opblock-get .opblock-summary,
+.swagger-ui .opblock.opblock-head .opblock-summary,
+.swagger-ui .opblock.opblock-options .opblock-summary,
+.swagger-ui .opblock.opblock-patch .opblock-summary,
+.swagger-ui .opblock.opblock-post .opblock-summary,
+.swagger-ui .opblock.opblock-put .opblock-summary {
+    border-color: #175ddc;
+}
+
+.swagger-ui .opblock.opblock-deprecated .opblock-summary {
+    border-color: #ebebeb;
+}
+
+.swagger-ui .opblock.opblock-delete .tab-header .tab-item.active h4 span:after,
+.swagger-ui .opblock.opblock-get .tab-header .tab-item.active h4 span:after,
+.swagger-ui .opblock.opblock-post .tab-header .tab-item.active h4 span:after,
+.swagger-ui .opblock.opblock-put .tab-header .tab-item.active h4 span:after{
+    background-color: #175ddc;
+}
+
+.swagger-ui .opblock-description-wrapper, .swagger-ui .opblock-description-wrapper h4, .swagger-ui .opblock-title_normal, .swagger-ui .opblock-title_normal h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .opblock-description-wrapper p, .swagger-ui .opblock-title_normal p {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .responses-inner h4, .swagger-ui .responses-inner h5 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .response-col_status {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .response-col_status .response-undocumented {
+    font-family: Source Code Pro, monospace;
+    font-weight: 600;
+    color: #999
+}
+
+.swagger-ui .response-col_description__inner span {
+    background: #41444e;
+    font-family: Source Code Pro, monospace;
+    color: #fff
+}
+
+.swagger-ui .response-col_description__inner span p {
+    margin: 0
+}
+
+.swagger-ui .opblock-body pre {
+    background: #41444e;
+    font-family: Source Code Pro, monospace;
+    color: #fff
+}
+
+.swagger-ui .opblock-body pre span {
+    color: #fff!important
+}
+
+.swagger-ui .scheme-container .schemes>label {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .btn,
+.swagger-ui .btn.execute,
+.swagger-ui .btn.authorize {
+    background: #ffffff;
+    color: black;
+    border-color: #175ddc;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: #175ddc;
+}
+
+@-webkit-keyframes pulse {
+    0% {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, .8)
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(73, 144, 226, 0)
+    }
+    to {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, 0)
+    }
+}
+
+@keyframes pulse {
+    0% {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, .8)
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(73, 144, 226, 0)
+    }
+    to {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, 0)
+    }
+}
+
+.swagger-ui .btn-group {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 30px
+}
+
+.swagger-ui .btn-group .btn {
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1
+}
+
+.swagger-ui .btn-group .btn:first-child {
+    border-radius: 4px 0 0 4px
+}
+
+.swagger-ui .btn-group .btn:last-child {
+    border-radius: 0 4px 4px 0
+}
+
+.swagger-ui .authorization__btn {
+    padding: 0 10px;
+    border: none;
+    background: none
+}
+
+.swagger-ui .authorization__btn.locked {
+    opacity: 1
+}
+
+.swagger-ui .authorization__btn.unlocked {
+    opacity: .4
+}
+
+.swagger-ui .expand-methods, .swagger-ui .expand-operation {
+    border: none;
+    background: none
+}
+
+.swagger-ui .expand-methods svg, .swagger-ui .expand-operation svg {
+    width: 20px;
+    height: 20px
+}
+
+.swagger-ui .expand-methods {
+    padding: 0 10px
+}
+
+.swagger-ui .expand-methods:hover svg {
+    fill: #444
+}
+
+.swagger-ui .expand-methods svg {
+    -webkit-transition: all .3s;
+    transition: all .3s;
+    fill: #777
+}
+
+.swagger-ui button {
+    border: none;
+    background-color: transparent;
+}
+
+.swagger-ui select {
+    font-size: 14px;
+    font-weight: 700;
+    padding: 5px 40px 5px 10px;
+    border: 2px solid #41444e;
+    border-radius: 4px;
+    background: #f7f7f7 url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+ICAgIDxwYXRoIGQ9Ik0xMy40MTggNy44NTljLjI3MS0uMjY4LjcwOS0uMjY4Ljk3OCAwIC4yNy4yNjguMjcyLjcwMSAwIC45NjlsLTMuOTA4IDMuODNjLS4yNy4yNjgtLjcwNy4yNjgtLjk3OSAwbC0zLjkwOC0zLjgzYy0uMjctLjI2Ny0uMjctLjcwMSAwLS45NjkuMjcxLS4yNjguNzA5LS4yNjguOTc4IDBMMTAgMTFsMy40MTgtMy4xNDF6Ii8+PC9zdmc+) right 10px center no-repeat;
+    background-size: 20px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .25);
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none
+}
+
+.swagger-ui select[multiple] {
+    margin: 5px 0;
+    padding: 5px;
+    background: #f7f7f7
+}
+
+.swagger-ui .opblock-body select {
+    min-width: 230px
+}
+
+.swagger-ui label {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui input[type=email], .swagger-ui input[type=password], .swagger-ui input[type=search], .swagger-ui input[type=text] {
+    border: 1px solid #d9d9d9;
+    background: #fff
+}
+
+.swagger-ui input[type=email].invalid, .swagger-ui input[type=password].invalid, .swagger-ui input[type=search].invalid, .swagger-ui input[type=text].invalid {
+    border-color: #ff4e63;
+    background: #feebeb
+}
+
+.swagger-ui textarea {
+    font-family: Source Code Pro, monospace;
+}
+
+.swagger-ui textarea:focus {
+    border: 2px solid #175ddc;
+}
+
+.swagger-ui .checkbox {
+    color: #333
+}
+
+.swagger-ui .checkbox p {
+    font-family: Source Code Pro, monospace;
+}
+
+.swagger-ui .checkbox input[type=checkbox]:checked+label>.item {
+    background: #e8e8e8 url("data:image/svg+xml;charset=utf-8,%3Csvg width='10' height='8' viewBox='3 7 10 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%2341474E' fill-rule='evenodd' d='M6.333 15L3 11.667l1.333-1.334 2 2L11.667 7 13 8.333z'/%3E%3C/svg%3E") 50% no-repeat
+}
+
+.swagger-ui .dialog-ux .modal-ux-content p {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .dialog-ux .modal-ux-content h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .model {
+    font-family: Source Code Pro, monospace;
+}
+
+.swagger-ui .model-toggle:after {
+    display: block;
+    width: 20px;
+    height: 20px;
+    content: "";
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E") 50% no-repeat;
+    background-size: 100%
+}
+
+.swagger-ui .model-hint {
+    color: #ebebeb;
+    background: rgba(0, 0, 0, .7)
+}
+
+.swagger-ui section.models {
+    border: 1px solid rgba(59, 65, 81, .3);
+}
+
+.swagger-ui section.models.is-open h4 {
+    border-bottom: 1px solid rgba(59, 65, 81, .3)
+}
+
+.swagger-ui section.models h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #777;
+}
+
+.swagger-ui section.models h4:hover {
+    background: rgba(0, 0, 0, .02)
+}
+
+.swagger-ui section.models h5 {
+    font-size: 16px;
+    margin: 0 0 10px;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #777
+}
+
+.swagger-ui section.models .model-jump-to-path {
+    position: relative;
+    top: 5px
+}
+
+.swagger-ui section.models .model-container {
+    margin: 0 20px 15px;
+    -webkit-transition: all .5s;
+    transition: all .5s;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, .05)
+}
+
+.swagger-ui section.models .model-container:hover {
+    background: rgba(0, 0, 0, .07)
+}
+
+.swagger-ui section.models .model-container:first-of-type {
+    margin: 20px
+}
+
+.swagger-ui section.models .model-container:last-of-type {
+    margin: 0 20px
+}
+
+.swagger-ui section.models .model-box {
+    background: none
+}
+
+.swagger-ui .model-box {
+    padding: 10px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, .1)
+}
+
+.swagger-ui .model-box .model-jump-to-path {
+    position: relative;
+    top: 4px
+}
+
+.swagger-ui .model-title {
+    font-size: 16px;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #555
+}
+
+.swagger-ui span>span.model, .swagger-ui span>span.model .brace-close {
+    padding: 0 0 0 10px
+}
+
+.swagger-ui .prop-type {
+    color: #1A41AC;
+}
+
+.swagger-ui .prop-enum {
+    display: block
+}
+
+.swagger-ui .prop-format {
+    color: #999
+}
+
+.swagger-ui table {
+    width: 100%;
+    padding: 0 10px;
+    border-collapse: collapse
+}
+
+.swagger-ui table.model tbody tr td {
+    padding: 0;
+    vertical-align: top
+}
+
+.swagger-ui table.model tbody tr td:first-of-type {
+    width: 100px;
+    padding: 0
+}
+
+.swagger-ui table.headers td {
+    font-size: 12px;
+    vertical-align: middle;
+    font-family: Source Code Pro, monospace;
+    font-weight: 600;
+    color: #3b4151
+}
+
+.swagger-ui table tbody tr td {
+    padding: 10px 0 0;
+    vertical-align: top
+}
+
+.swagger-ui table tbody tr td:first-of-type {
+    width: 20%;
+    padding: 10px 0
+}
+
+.swagger-ui table thead tr td, .swagger-ui table thead tr th {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(59, 65, 81, .2);
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .parameters-col_description p {
+    font-size: 14px;
+    margin: 0;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .parameters-col_description input[type=text] {
+    width: 100%;
+    max-width: 340px
+}
+
+.swagger-ui .parameter__name {
+    font-size: 16px;
+    font-weight: 400;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .parameter__name.required {
+    font-weight: 700
+}
+
+.swagger-ui .parameter__name.required span {
+    color: #ff4e63;
+}
+
+.swagger-ui .parameter__name.required:after {
+    content: "required";
+    color: #ff4e63;
+}
+
+.swagger-ui .parameter__in {
+    font-family: Source Code Pro, monospace;
+    color: #888
+}
+
+.swagger-ui .topbar a {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #fff
+}
+
+.swagger-ui .topbar .download-url-wrapper input[type=text] {
+    min-width: 350px;
+    margin: 0;
+    border: 2px solid #175ddc;
+    border-radius: 4px 0 0 4px;
+    outline: none
+}
+
+.swagger-ui .topbar .download-url-wrapper .download-url-button {
+    border: none;
+    border-radius: 0 4px 4px 0;
+    background: #175ddc;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #fff
+}
+
+.swagger-ui .info {
+    margin: 50px 0
+}
+
+.swagger-ui .info hgroup.main {
+    margin: 0 0 20px
+}
+
+.swagger-ui .info hgroup.main a {
+    font-size: 12px
+}
+
+.swagger-ui .info p {
+    font-size: 14px;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .info code {
+    padding: 3px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, .05);
+    font-family: Source Code Pro, monospace;
+    font-weight: 600;
+    color: #9012fe
+}
+
+.swagger-ui .info a {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #175ddc;
+}
+
+.swagger-ui .info a:hover {
+    color: #175ddc;
+}
+
+.swagger-ui .info>div {
+    margin: 0;
+}
+
+.swagger-ui .info .base-url {
+    font-size: 12px;
+    font-weight: 300 !important;
+    margin: 0;
+    font-family: Source Code Pro, monospace;
+    color: #3b4151
+}
+
+.swagger-ui .info .title {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .info .title small pre {
+    margin: 0;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #fff
+}
+
+.swagger-ui .auth-container {
+    border-bottom: 1px solid #ebebeb
+}
+
+.swagger-ui .auth-container:last-of-type {
+    border: 0
+}
+
+.swagger-ui .auth-container .errors {
+    font-size: 12px;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: Source Code Pro, monospace;
+    font-weight: 600;
+    color: #3b4151
+}
+
+.swagger-ui .scopes h2 {
+    font-size: 14px;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #3b4151
+}
+
+.swagger-ui .scope-def {
+    padding: 0 0 20px
+}
+
+.swagger-ui .errors-wrapper {
+    margin: 20px;
+    padding: 10px 20px;
+    -webkit-animation: scaleUp .5s;
+    animation: scaleUp .5s;
+    border: 2px solid #ff4e63;
+    border-radius: 4px;
+    background: rgba(249, 62, 62, .1)
+}
+
+.swagger-ui .errors-wrapper .error-wrapper {
+    margin: 0 0 10px
+}
+
+.swagger-ui .errors-wrapper .errors h4 {
+    font-size: 14px;
+    margin: 0;
+    font-family: Source Code Pro, monospace;
+    font-weight: 600;
+    color: #3b4151
+}
+
+.swagger-ui .errors-wrapper hgroup h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui table.model tr.property-row .star {
+    color: #ff4e63;
+}
+
+.swagger-ui .topbar {
+    padding: 8px 30px;
+    background-color: #175ddc;
+}
+
+.swagger-ui .topbar .download-url-wrapper .select-label select {
+    border: 2px solid white;
+}
+
+img[alt="Swagger UI"] {
+    display: block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    content: url('./passwordless-light.svg');
+    max-width: 100%;
+    max-height: 100%;
+}
