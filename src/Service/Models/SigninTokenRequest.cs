@@ -16,6 +16,7 @@ public class SigninTokenRequest : RequestBase
     /// </summary>
     [JsonPropertyName("timeToLive")]
     [Obsolete("This property is only used for serialization.")]
+    [Range(1, 604800)]
     public int? TimeToLiveSeconds { get; init; }
 
     [JsonIgnore]

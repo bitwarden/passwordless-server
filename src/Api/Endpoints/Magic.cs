@@ -15,24 +15,29 @@ namespace Passwordless.Api.Endpoints;
 
 public static class MagicEndpoints
 {
+    /// <summary>
+    /// Name of the Magic Links Rate Limiter Policy
+    /// </summary>
     public const string RateLimiterPolicy = nameof(MagicEndpoints);
 
+    /// <summary>
+    /// Adds a rate limiter policy for the MagicEndpoints. Each tenant will have its own partition.
+    /// </summary>
+    /// <param name="builder">The RateLimiterOptions builder.</param>
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
         builder.AddPolicy(RateLimiterPolicy, context =>
         {
             var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
-                new FixedWindowRateLimiterOptions
-                {
-                    Window = TimeSpan.FromMinutes(5),
-                    PermitLimit = 10,
-                    QueueLimit = 0,
-                    AutoReplenishment = true
-                }
+                new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(5), PermitLimit = 10, QueueLimit = 0, AutoReplenishment = true }
             );
         });
 
+    /// <summary>
+    /// Maps the magic link endpoints.
+    /// </summary>
+    /// <param name="app">The <see cref="IEndpointRouteBuilder"/> object.</param>
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/magic-link")

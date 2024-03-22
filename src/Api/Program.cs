@@ -55,6 +55,7 @@ builder.Services.AddSwaggerGen(swagger =>
             Url = new Uri("https://bitwarden.com/contact/")
         }
     });
+    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
 });
 
 if (builder.Configuration.IsSelfHosted())
@@ -189,6 +190,8 @@ app.UseSwaggerUI(c =>
 {
     c.ConfigObject.ShowExtensions = true;
     c.ConfigObject.ShowCommonExtensions = true;
+    c.IndexStream = () => typeof(Program).Assembly.GetManifestResourceStream("Passwordless.Api.OpenApi.swagger.html");
+    c.InjectStylesheet("/openapi.css");
 });
 
 if (builder.Configuration.IsSelfHosted())

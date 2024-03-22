@@ -19,7 +19,11 @@ public class SendMagicLinkRequest
     public string UserId { get; init; }
 
     /// <summary>
-    /// Number of seconds the magic link will be valid for.
+    /// Represents the time to live (TTL) of a magic link in seconds.
     /// </summary>
+    /// <remarks>
+    /// The TTL is the lifespan of a magic link, i.e., the duration for which the link is valid.
+    /// </remarks>
+    [Range(1, 604800)]
     public int? TimeToLive { get; init; }
 }
