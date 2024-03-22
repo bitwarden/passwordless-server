@@ -405,17 +405,17 @@ public static class EventLoggerExtensions
             ApiKeyId = string.Empty
         });
 
-    public static void LogStepUpTokenCreated(this IEventLogger logger, StepUpTokenRequest request) =>
+    public static void LogStepUpTokenCreated(this IEventLogger logger, StepUpTokenRequest request, string userId) =>
         logger.LogEvent(context => new EventDto
         {
-            // PerformedAt = context.PerformedAt,
-            // Message = $"StepUp token created for {request.UserId} for {request.Options.Context}.",
-            // PerformedBy = string.IsNullOrWhiteSpace(request.UserId) ? "Unknown User" : request.UserId,
-            // TenantId = context.TenantId,
-            // EventType = EventType.ApiUserStepUpTokenCreated,
-            // Severity = Severity.Informational,
-            // Subject = context.TenantId,
-            // ApiKeyId = context.AbbreviatedKey
+            PerformedAt = context.PerformedAt,
+            Message = $"StepUp token created for {userId} for {request.Context}.",
+            PerformedBy = string.IsNullOrWhiteSpace(userId) ? "Unknown User" : userId,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiUserStepUpTokenCreated,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
         });
 
     public static void LogUserStepUpTokenVerifiedEvent(this IEventLogger logger, StepUpToken token, string context) =>

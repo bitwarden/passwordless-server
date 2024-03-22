@@ -411,21 +411,13 @@ public class Fido2Service : IFido2Service
     {
         var now = _timeProvider.GetUtcNow();
 
-        var fido2 = new Fido2(new Fido2Configuration
-        {
-            ServerDomain = request.RPID,
-            Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID,
-            MDSCacheDirPath = ".mds-cache"
-        }, _metadataService);
-
         var credential = await _storage.GetCredential(request.Response.Id);
         if (credential == null)
         {
             throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
         }
 
-        var res = await fido2.MakeAssertionAsync(
+        var res = await GetFido2Instance(request, _metadataService).MakeAssertionAsync(
             request.Response,
             await _tokenService.DecodeTokenAsync<AssertionOptions>(request.Session, "session_", true),
             credential.PublicKey,
@@ -437,11 +429,11 @@ public class Fido2Service : IFido2Service
 
         var userId = Encoding.UTF8.GetString(credential.UserHandle);
 
-        _eventLogger.LogStepUpTokenCreated(request);
+        _eventLogger.LogStepUpTokenCreated(request, userId);
 
         return new TokenResponse(await _tokenService.EncodeTokenAsync(new StepUpToken
         {
-            ExpiresAt = now.Add(TimeSpan.FromSeconds(request.Context.TimeToLive)).UtcDateTime,
+            ExpiresAt = now.Add(TimeSpan.FromSeconds(request.Context.TimeToLive ?? 900)).UtcDateTime,
             TokenId = Guid.NewGuid(),
             UserId = userId,
             CreatedAt = now.UtcDateTime,
@@ -514,4 +506,13 @@ public class Fido2Service : IFido2Service
 
         return hashedUsername;
     }
+
+    private static Fido2 GetFido2Instance(RequestBase request, IMetadataService metadataService) =>
+        new(new Fido2Configuration
+        {
+            ServerDomain = request.RPID,
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, metadataService);
 }
