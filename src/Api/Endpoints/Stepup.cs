@@ -15,11 +15,10 @@ public static class StepUpEndpoints
     {
         var group = app.MapGroup("/stepup")
             .RequireCors("default")
-            .WithParameterValidation()
             .WithTags(OpenApiTags.Stepup);
 
-        group.MapPost("/", StepUpAsync).RequirePublicKey();
-        group.MapPost("/verify", StepUpVerifyAsync).RequireSecretKey();
+        group.MapPost("/", StepUpAsync).WithParameterValidation().RequirePublicKey();
+        group.MapPost("/verify", StepUpVerifyAsync).WithParameterValidation().RequireSecretKey();
     }
 
     private static async Task<IResult> StepUpAsync(
@@ -34,7 +33,8 @@ public static class StepUpEndpoints
         return Results.Ok(response);
     }
 
-    private static async Task<IResult> StepUpVerifyAsync(StepUpVerifyRequest request,
+    private static async Task<IResult> StepUpVerifyAsync(
+        StepUpVerifyRequest request, 
         IFido2Service fido2Service)
     {
         var response = await fido2Service.StepUpVerifyAsync(request);
