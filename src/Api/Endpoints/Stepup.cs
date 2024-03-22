@@ -34,7 +34,7 @@ public static class StepUpEndpoints
     }
 
     private static async Task<IResult> StepUpVerifyAsync(
-        StepUpVerifyRequest request, 
+        StepUpVerifyRequest request,
         IFido2Service fido2Service)
     {
         var response = await fido2Service.StepUpVerifyAsync(request);
