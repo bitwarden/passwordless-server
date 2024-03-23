@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
@@ -42,6 +44,8 @@ public static class AuthenticatorsEndpoints
     /// <param name="featureContextProvider"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    [ProducesResponseType(typeof(IEnumerable<ConfiguredAuthenticatorResponse>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
         IApplicationService service,
@@ -65,6 +69,9 @@ public static class AuthenticatorsEndpoints
     /// <param name="eventLogger"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.Forbidden, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> AddAuthenticatorsAsync(
         [FromBody] AddAuthenticatorsRequest request,
         IApplicationService service,
@@ -91,6 +98,9 @@ public static class AuthenticatorsEndpoints
     /// <param name="eventLogger"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.Forbidden, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> RemoveAuthenticatorsAsync(
         [FromBody] RemoveAuthenticatorsRequest request,
         IApplicationService service,

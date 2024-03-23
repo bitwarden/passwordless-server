@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Api.OpenApi;
+using Passwordless.Common.Constants;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -28,6 +32,9 @@ public static class AliasEndpoints
     /// <summary>
     /// Sets one or more aliases for an existing user and removes existing aliases that are not included in the request.
     /// </summary>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesErrorResponseType(typeof(ProblemDetails))]
     public static async Task<IResult> SetAliasAsync(
         [FromBody] AliasPayload payload,
         IFido2Service fido2Service,
@@ -43,6 +50,8 @@ public static class AliasEndpoints
     /// <summary>
     /// Lists all aliases for a given user.
     /// </summary>
+    [ProducesResponseType(typeof(ListResponse<AliasPointer>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> ListAliasesAsync(
         [FromQuery] string userId,
         IFido2Service fido2Service)
