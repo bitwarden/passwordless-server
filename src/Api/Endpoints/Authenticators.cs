@@ -71,7 +71,6 @@ public static class AuthenticatorsEndpoints
     /// <exception cref="ApiException"></exception>
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.Forbidden, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> AddAuthenticatorsAsync(
         [FromBody] AddAuthenticatorsRequest request,
         IApplicationService service,
@@ -100,7 +99,6 @@ public static class AuthenticatorsEndpoints
     /// <exception cref="ApiException"></exception>
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.Forbidden, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> RemoveAuthenticatorsAsync(
         [FromBody] RemoveAuthenticatorsRequest request,
         IApplicationService service,
