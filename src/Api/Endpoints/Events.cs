@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using MiniValidation;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
+using Passwordless.Api.OpenApi;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.EventLog.Mappings;
 using Passwordless.Service.EventLog.Models;
@@ -15,9 +16,15 @@ public static class EventLog
     {
         app.MapGet("events", GetEventLogEventsAsync)
             .RequireSecretKey()
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithTags(OpenApiTags.EventLogging)
+            .WithParameterValidation();
     }
 
+    /// <summary>
+    /// Lists event logs. (Requires the `Enterprise` plan.)
+    /// </summary>
+    /// <returns></returns>
     private static async Task<IResult> GetEventLogEventsAsync(
         HttpRequest request,
         IEventLogStorage storage,
@@ -44,6 +51,7 @@ public static class EventLog
 
     private struct GetEventLogEventsRequest
     {
+        [Range(1, int.MaxValue)]
         public int PageNumber { get; set; }
 
         [Range(1, 1000)]

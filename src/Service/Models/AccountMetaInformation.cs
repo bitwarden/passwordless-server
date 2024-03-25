@@ -15,7 +15,7 @@ public class AccountMetaInformation : PerTenant
         }
         set
         {
-            AdminEmails = JsonSerializer.Deserialize<string[]>(value);
+            AdminEmails = ParseAdminEmails(value);
         }
     }
 
@@ -29,4 +29,16 @@ public class AccountMetaInformation : PerTenant
     public virtual IReadOnlyCollection<DispatchedEmail>? DispatchedEmails { get; set; }
     public virtual IReadOnlyCollection<PeriodicCredentialReport>? PeriodicCredentialReports { get; set; }
     public virtual IReadOnlyCollection<PeriodicActiveUserReport>? PeriodicActiveUserReports { get; set; }
+
+    private static string[] ParseAdminEmails(string adminEmails)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<string[]>(adminEmails) ?? Array.Empty<string>();
+        }
+        catch (JsonException)
+        {
+            return Array.Empty<string>();
+        }
+    }
 }

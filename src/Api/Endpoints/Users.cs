@@ -1,5 +1,8 @@
-﻿using Passwordless.Api.Authorization;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
+using Passwordless.Api.OpenApi;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
@@ -10,39 +13,59 @@ public static class UsersEndpoints
 {
     public static void MapUsersEndpoints(this WebApplication app)
     {
-        app.MapMethods("/users/list", new[] { "get" }, async (UserCredentialsService userService) =>
-        {
-            //userId = req.Query["userId"];
-            // todo: Add Include credentials
-            // todo: Add Include Aliases
-
-            var result = await userService.GetAllUsers(null);
-            var response = ListResponse.Create(result);
-            return Ok(response);
-        })
+        var group = app.MapGroup("/users")
             .RequireSecretKey()
+            .WithTags(OpenApiTags.Users);
+
+        group.MapGet("/list", GetUsersAsync)
             .RequireCors("default");
 
-        app.MapMethods("/users/count", new[] { "get" }, async (HttpRequest req, UserCredentialsService userService) =>
-        {
-            var res = await userService.GetUsersCount();
+        group.MapGet("/count", GetUsersCountAsync);
 
-            return Ok(new CoundRecord(res));
-        })
-            .RequireSecretKey();
-
-        app.MapPost("/users/delete", async (UserDeletePayload payload, UserCredentialsService userService, IEventLogger eventLogger) =>
-        {
-            await userService.DeleteUser(payload.UserId);
-
-            eventLogger.LogDeletedUserEvent(payload.UserId);
-
-            return Ok();
-        })
-            .RequireSecretKey();
+        group.MapPost("/delete", DeleteUserAsync)
+            .WithParameterValidation();
     }
 
-    public record CoundRecord(int Count);
+    /// <summary>
+    /// Get a list of users.
+    /// </summary>
+    public static async Task<IResult> GetUsersAsync(
+        [FromServices] UserCredentialsService userService)
+    {
+        var result = await userService.GetAllUsers(null!);
+        var response = ListResponse.Create(result);
+        return Ok(response);
+    }
 
-    public record UserDeletePayload(string UserId);
+    /// <summary>
+    /// Get the amount of users.
+    /// </summary>
+    public static async Task<IResult> GetUsersCountAsync(
+        [FromServices] UserCredentialsService userService)
+    {
+        var res = await userService.GetUsersCount();
+
+        return Ok(new CountRecord(res));
+    }
+
+    /// <summary>
+    /// Deletes a user.
+    /// </summary>
+    public static async Task<IResult> DeleteUserAsync(
+        [FromBody] UserDeletePayload payload,
+        [FromServices] UserCredentialsService userService,
+        [FromServices] IEventLogger eventLogger)
+    {
+        await userService.DeleteUser(payload.UserId);
+
+        eventLogger.LogDeletedUserEvent(payload.UserId);
+
+        return Ok();
+    }
+
+    public record CountRecord(int Count);
+
+    public record UserDeletePayload(
+        [MinLength(1), Required]
+        string UserId);
 }

@@ -1,0 +1,10 @@
+<svg @attributes="@AdditionalAttributes" viewBox="0 0 176 176" width="176" height="176" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="0">
+    <path d="M 92.7 152.92 L 45.7 152.92 C 38.301 152.986 32.251 147.039 32.19 139.64 L 32.19 36.36 C 32.256 28.971 38.291 23.03 45.68 23.08 L 92.68 23.08 C 100.077 23.019 106.124 28.963 106.19 36.36 L 106.19 139.64 C 106.13 147.031 100.092 152.975 92.7 152.92 Z M 45.68 29.81 C 42 29.76 38.975 32.7 38.92 36.38 L 38.92 139.64 C 38.975 143.32 42 146.26 45.68 146.21 L 92.68 146.21 C 96.36 146.26 99.385 143.32 99.44 139.64 L 99.44 36.36 C 99.375 32.696 96.365 29.771 92.7 29.81 L 45.68 29.81 Z" style="transform-origin: 69.19px 88px;" transform="matrix(0, -1, 1, 0, -0.000003814697, 0)"  fill-rule="evenodd" />
+    <path d="M 174.42 105.74 L 133.56 105.74 C 131.705 105.74 130.2 104.235 130.2 102.38 L 130.2 70.26 L 136.92 70.26 L 136.92 99.01 L 171.07 99.01 L 171.07 70.26 L 177.78 70.26 L 177.78 102.38 C 177.78 104.235 176.276 105.74 174.42 105.74 Z" style="transform-origin: 153.99px 88px;" transform="matrix(0, -1, 1, 0, 0, 0)" fill-rule="evenodd" />
+    <text style="font-family: Arial, sans-serif; font-size: 31px; font-weight: 700; white-space: pre;" x="22.997" y="100.121">FIDO2</text>
+</svg>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}

@@ -1,4 +1,5 @@
 ﻿using Passwordless.Api.Authorization;
+using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Reporting;
 using Passwordless.Service;
 using static Microsoft.AspNetCore.Http.Results;
@@ -11,13 +12,20 @@ public static class ReportingEndpoints
     {
         var group = app.MapGroup("/reporting")
             .RequireSecretKey()
-            .RequireCors("default");
+            .RequireCors("default")
+            .WithTags(OpenApiTags.Reporting);
 
         group.MapGet("/credentials/periodic", GetPeriodicCredentialReportsAsync);
 
         group.MapGet("/active-users/periodic", GetPeriodicActiveUserReportsAsync);
     }
 
+    /// <summary>
+    /// Returns a list of reports, every report mentions how many credentials and users are registered for a given day.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="reportingService"></param>
+    /// <returns></returns>
     public static async Task<IResult> GetPeriodicCredentialReportsAsync(
         [AsParameters] PeriodicCredentialReportRequest request,
         IReportingService reportingService)
@@ -26,6 +34,13 @@ public static class ReportingEndpoints
         return Ok(result);
     }
 
+    /// <summary>
+    /// Returns a list of active user reports, every report mentions how many users were active in the last day and week
+    /// for a given day.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="reportingService"></param>
+    /// <returns></returns>
     public static async Task<IResult> GetPeriodicActiveUserReportsAsync(
         [AsParameters] PeriodicActiveUserReportRequest request,
         IReportingService reportingService)

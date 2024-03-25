@@ -1,32 +1,28 @@
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Newtonsoft.Json;
-using NuGet.Protocol;
 
 namespace Passwordless.AdminConsole.Helpers;
 
 public static class RazorPageHtmlExtensions
 {
-    public static IHtmlContent ImportMap(this IHtmlHelper html, Dictionary<string, (string Dev, string Prod)> importMaps, IFileVersionProvider fileVersionProvider, string? nonce = null)
+    public static IHtmlContent ImportMap(this IHtmlHelper html, Dictionary<string, string> importMaps, IFileVersionProvider fileVersionProvider, string? nonce = null)
     {
         var map = new Dictionary<string, object>();
         var imports = new Dictionary<string, object> { ["imports"] = map };
 
-        // check if we are in development environment
-        var isDev = html.ViewContext.HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
-
         foreach (var importMap in importMaps)
         {
-            map[importMap.Key] = isDev ? importMap.Value.Dev : importMap.Value.Prod;
+            map[importMap.Key] = importMap.Value;
             map[importMap.Key] = fileVersionProvider.AddFileVersionToPath(html.ViewContext.HttpContext.Request.PathBase, map[importMap.Key].ToString());
         }
 
         nonce ??= (html.ViewContext.HttpContext?.Items["csp-nonce"])?.ToString();
-        var script = $"<script type=\"importmap\" nonce={nonce}>\n{imports.ToJson(Formatting.Indented)}\n</script>";
+        var script = $"<script type=\"importmap\" nonce={nonce}>\n{JsonSerializer.Serialize(imports)}\n</script>";
         return html.Raw(script);
     }
 
@@ -68,5 +64,4 @@ public static class RazorPageHtmlExtensions
         }
         return contentBuilder;
     }
-
 }

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Passwordless.Api;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Email;
@@ -9,8 +11,10 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Utils;
@@ -24,9 +28,37 @@ using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(swagger =>
+{
+    swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
+    swagger.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.FirstOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
+        if (policy == null)
+        {
+            return false;
+        }
+        return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
+    });
+    swagger.OperationFilter<AuthorizationOperationFilter>();
+    swagger.SupportNonNullableReferenceTypes();
+    swagger.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v4",
+        Title = "Passwordless.dev API",
+        TermsOfService = new Uri("https://bitwarden.com/terms/"),
+        Contact = new OpenApiContact
+        {
+            Email = "support@passwordless.dev",
+            Name = "Support",
+            Url = new Uri("https://bitwarden.com/contact/")
+        }
+    });
+    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
+});
 
-if (isSelfHosted)
+if (builder.Configuration.IsSelfHosted())
 {
     builder.AddSelfHostingConfiguration();
 }
@@ -72,10 +104,10 @@ var services = builder.Services;
 
 services.AddProblemDetails();
 services
-    .AddAuthentication(Constants.Scheme)
+    .AddAuthentication()
     .AddCustomSchemes();
 
-services.AddAuthorization(options => options.AddPasswordlessPolicies());
+services.AddAuthorization();
 services.AddOptions<ManagementOptions>()
     .BindConfiguration("PasswordlessManagement");
 
@@ -153,26 +185,24 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseRateLimiter();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.ConfigObject.ShowExtensions = true;
+    c.ConfigObject.ShowCommonExtensions = true;
+    c.IndexStream = () => typeof(Program).Assembly.GetManifestResourceStream("Passwordless.Api.OpenApi.swagger.html");
+    c.InjectStylesheet("/openapi.css");
+});
 
-if (isSelfHosted)
+if (builder.Configuration.IsSelfHosted())
 {
     app.UseMiddleware<HttpOverridesMiddleware>();
 
-    // When self-hosting. Migrate latest database changes during startup
+    // When self-hosting. Migrate latest database changes during startup.
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
-    dbContext.Database.Migrate();
 
-    if (!await dbContext.ApiKeys.AnyAsync())
-    {
-        var passwordlessConfiguration = builder.Configuration.GetRequiredSection("Passwordless");
-        var apiKey = passwordlessConfiguration.GetValue<string>("ApiKey");
-        var apiSecret = passwordlessConfiguration.GetValue<string>("ApiSecret");
-        var appName = ApiKeyUtils.GetAppId(apiKey);
-        await dbContext.SeedDefaultApplicationAsync(appName, apiKey, apiSecret);
-        await dbContext.SaveChangesAsync();
-    }
+    dbContext.Database.Migrate();
 }
 
 app.UseCors("default");
@@ -180,6 +210,10 @@ app.UseSecurityHeaders();
 app.UseStaticFiles();
 app.UseWhen(o =>
 {
+    if (o.Request.Path == "/")
+    {
+        return false;
+    }
     return !o.Request.Path.StartsWithSegments("/health");
 }, c =>
 {
@@ -187,10 +221,15 @@ app.UseWhen(o =>
 });
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseWhen(o =>
 {
+    if (o.Request.Path == "/")
+    {
+        return false;
+    }
     return !o.Request.Path.StartsWithSegments("/health");
 }, c =>
 {

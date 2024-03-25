@@ -5,8 +5,8 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
+using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.MagicLinks.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -135,7 +135,10 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName, "definitely-not@what-faker-will.generate");
+        using var appCreateResponse = await client.CreateApplicationAsync(applicationName, new CreateAppDto
+        {
+            AdminEmail = "admin@email.com"
+        });
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddSecretKey(appCreated!.ApiSecret1);
         await client.EnableMagicLinks("a_user");
@@ -161,7 +164,10 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
 
         const string emailAddress = "admin@email.com";
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName, emailAddress);
+        using var appCreateResponse = await client.CreateApplicationAsync(applicationName, new CreateAppDto
+        {
+            AdminEmail = emailAddress
+        });
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddSecretKey(appCreated!.ApiSecret1);
         await client.EnableMagicLinks("a_user");
@@ -176,7 +182,9 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
-    [Fact]
+    // Test assumes that the quota will eventually be exhausted.
+    // Timeout is used as fallback in case that assumption fails.
+    [Fact(Timeout = 60_000)]
     public async Task I_cannot_send_too_many_magic_link_emails_in_a_short_time()
     {
         // Arrange
@@ -194,8 +202,8 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        var unsuccessfulResponse = default(HttpResponseMessage);
-        for (var i = 0; i < 1_000_000; i++)
+        HttpResponseMessage unsuccessfulResponse;
+        while (true)
         {
             var response = await client.PostAsJsonAsync("magic-link/send", request);
             if (!response.IsSuccessStatusCode)
@@ -216,7 +224,9 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         unsuccessfulResponse.Dispose();
     }
 
-    [Fact]
+    // Test assumes that the quota will eventually be exhausted.
+    // Timeout is used as fallback in case that assumption fails.
+    [Fact(Timeout = 60_000)]
     public async Task I_cannot_send_too_many_magic_link_emails_in_a_month()
     {
         // Arrange
@@ -224,7 +234,10 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
+        using var appCreateResponse = await client.CreateApplicationAsync(applicationName, new CreateAppDto
+        {
+            MagicLinkEmailMonthlyQuota = 1000
+        });
         var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         client.AddSecretKey(appCreated!.ApiSecret1);
         await client.EnableMagicLinks("a_user");
@@ -234,8 +247,9 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        var unsuccessfulResponse = default(HttpResponseMessage);
-        for (var i = 0; i < 1_000_000; i++)
+        var successfulResponseCount = 0;
+        HttpResponseMessage unsuccessfulResponse;
+        while (true)
         {
             var response = await client.PostAsJsonAsync("magic-link/send", request);
             if (!response.IsSuccessStatusCode)
@@ -249,9 +263,11 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
             }
 
             api.Time.Advance(TimeSpan.FromMinutes(1));
+            successfulResponseCount++;
         }
 
         // Assert
+        successfulResponseCount.Should().Be(1000);
         unsuccessfulResponse.Should().NotBeNull();
         unsuccessfulResponse!.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
 
@@ -260,7 +276,9 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         details!.Type.Should().Contain("magic_link_email_quota_exceeded");
     }
 
-    [Fact]
+    // Test assumes that the quota will eventually be exhausted.
+    // Timeout is used as fallback in case that assumption fails.
+    [Fact(Timeout = 60_000)]
     public async Task I_can_send_a_magic_link_email_after_enough_time_passed_since_the_monthly_quota_was_exceeded()
     {
         // Arrange
@@ -277,7 +295,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Skip all limitations for new applications
         api.Time.Advance(TimeSpan.FromDays(365));
 
-        for (var i = 0; i < 1_000_000; i++)
+        while (true)
         {
             using var initialResponse = await client.PostAsJsonAsync("magic-link/send", request);
             if (!initialResponse.IsSuccessStatusCode)

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Passwordless.Service.Extensions;
 
@@ -7,6 +8,7 @@ public class SigninTokenRequest : RequestBase
 {
     private static readonly TimeSpan DefaultTimeToLive = TimeSpan.FromSeconds(120);
 
+    [Required(AllowEmptyStrings = false)]
     public required string UserId { get; init; }
 
     /// <summary>
@@ -14,6 +16,7 @@ public class SigninTokenRequest : RequestBase
     /// </summary>
     [JsonPropertyName("timeToLive")]
     [Obsolete("This property is only used for serialization.")]
+    [Range(1, 604800)]
     public int? TimeToLiveSeconds { get; init; }
 
     [JsonIgnore]

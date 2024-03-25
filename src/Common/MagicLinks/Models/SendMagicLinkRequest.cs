@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using System.Net.Mail;
-using Passwordless.Service.MagicLinks.Validation;
-using Passwordless.Service.Models;
+using Passwordless.Common.MagicLinks.Validation;
 
-namespace Passwordless.Service.MagicLinks.Models;
+namespace Passwordless.Common.MagicLinks.Models;
 
 public class SendMagicLinkRequest
 {
@@ -17,13 +15,15 @@ public class SendMagicLinkRequest
     [MagicLinkTemplateUrl]
     public string UrlTemplate { get; init; }
 
-    [Required]
+    [Required(AllowEmptyStrings = false)]
     public string UserId { get; init; }
 
     /// <summary>
-    /// Number of seconds the magic link will be valid for.
+    /// Represents the time to live (TTL) of a magic link in seconds.
     /// </summary>
+    /// <remarks>
+    /// The TTL is the lifespan of a magic link, i.e., the duration for which the link is valid.
+    /// </remarks>
+    [Range(1, 604800)]
     public int? TimeToLive { get; init; }
-
-    public MagicLinkTokenRequest ToDto() => new(UserId, new MailAddress(EmailAddress), UrlTemplate, TimeToLive);
 }

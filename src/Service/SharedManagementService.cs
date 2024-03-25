@@ -112,13 +112,14 @@ public class SharedManagementService : ISharedManagementService
         var account = new AccountMetaInformation
         {
             AcountName = accountName,
-            AdminEmails = new[] { adminEmail },
+            AdminEmails = [adminEmail],
             CreatedAt = DateTime.UtcNow,
             Features = new AppFeature
             {
                 Tenant = accountName,
                 EventLoggingIsEnabled = options.EventLoggingIsEnabled,
                 EventLoggingRetentionPeriod = options.EventLoggingRetentionPeriod,
+                MagicLinkEmailMonthlyQuota = options.MagicLinkEmailMonthlyQuota,
                 MaxUsers = options.MaxUsers,
                 AllowAttestation = options.AllowAttestation,
                 IsGenerateSignInTokenEndpointEnabled = true
