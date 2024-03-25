@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Db;
-using Passwordless.AdminConsole.Helpers;
+using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages;
 
-public class IndexModel(ILogger<IndexModel> logger, ConsoleDbContext dbContext) : PageModel
+public class IndexModel(ILogger<IndexModel> logger, ISetupService setupService) : PageModel
 {
     public async Task<IActionResult> OnGetAsync()
     {
-        if (await dbContext.HaveAnyMigrationsEverBeenAppliedAsync())
+        if (await setupService.HasSetupCompletedAsync())
         {
             return RedirectToPage(HttpContext.User.Identity!.IsAuthenticated ? "/account/login" : "/Organization/overview");
         }

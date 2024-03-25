@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
+using Passwordless.Api.OpenApi.Extensions;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
@@ -19,7 +20,12 @@ public static class AuthenticatorsEndpoints
             .RequireSecretKey()
             .WithTags(OpenApiTags.Authenticators);
 
-        group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
+        group.MapGet("/list", ListConfiguredAuthenticatorsAsync)
+            .WithOpenApi(o =>
+            {
+                o.Parameters.Get(nameof(ConfiguredAuthenticatorRequest.IsAllowed)).Description = "When 'true', all authenticators on the allowlist are returned. When 'false', all authenticators on the blocklist are returned.";
+                return o;
+            });
 
         group.MapPost("/add", AddAuthenticatorsAsync)
             .WithParameterValidation();
