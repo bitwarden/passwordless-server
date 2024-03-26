@@ -45,8 +45,10 @@
     color: #fff
 }
 
-.swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
-
+.swagger-ui .opblock .opblock-summary-operation-id, .swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
+    color: #000000;
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .swagger-ui .opblock .opblock-summary-description {
@@ -97,6 +99,10 @@
 
 .swagger-ui .opblock.opblock-deprecated .opblock-summary {
     border-color: #ebebeb;
+}
+
+.swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus, .swagger-ui .opblock-summary-control:focus {
+    outline: 0;
 }
 
 .swagger-ui .opblock.opblock-delete .tab-header .tab-item.active h4 span:after,
