@@ -49,7 +49,7 @@
 }
 
 .swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
-    font-family: Source Code Pro, monospace;
+
     color: #3b4151;
 }
 
@@ -131,14 +131,14 @@
 }
 
 .swagger-ui .response-col_status .response-undocumented {
-    font-family: Source Code Pro, monospace;
+
     font-weight: 600;
     color: #999
 }
 
 .swagger-ui .response-col_description__inner span {
     background: #41444e;
-    font-family: Source Code Pro, monospace;
+
     color: #fff
 }
 
@@ -148,7 +148,7 @@
 
 .swagger-ui .opblock-body pre {
     background: #41444e;
-    font-family: Source Code Pro, monospace;
+
     color: #fff
 }
 
@@ -310,7 +310,7 @@
 }
 
 .swagger-ui textarea {
-    font-family: Source Code Pro, monospace;
+
 }
 
 .swagger-ui textarea:focus {
@@ -322,7 +322,7 @@
 }
 
 .swagger-ui .checkbox p {
-    font-family: Source Code Pro, monospace;
+
 }
 
 .swagger-ui .checkbox input[type=checkbox]:checked+label>.item {
@@ -342,7 +342,7 @@
 }
 
 .swagger-ui .model {
-    font-family: Source Code Pro, monospace;
+
 }
 
 .swagger-ui .model-toggle:after {
@@ -464,7 +464,7 @@
 .swagger-ui table.headers td {
     font-size: 12px;
     vertical-align: middle;
-    font-family: Source Code Pro, monospace;
+
     font-weight: 600;
     color: #3b4151
 }
@@ -496,20 +496,8 @@
     color: #3b4151
 }
 
-.swagger-ui .parameters-col_description input[type=text] {
-    width: 100%;
-    max-width: 340px
-}
-
 .swagger-ui .parameter__name {
-    font-size: 16px;
-    font-weight: 400;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .parameter__name.required {
-    font-weight: 700
 }
 
 .swagger-ui .parameter__name.required span {
@@ -522,7 +510,6 @@
 }
 
 .swagger-ui .parameter__in {
-    font-family: Source Code Pro, monospace;
     color: #888
 }
 
@@ -533,45 +520,16 @@
 
 .swagger-ui .topbar .download-url-wrapper input[type=text] {
     min-width: 350px;
-    margin: 0;
     border: 2px solid #175ddc;
-    border-radius: 4px 0 0 4px;
-    outline: none
 }
 
 .swagger-ui .topbar .download-url-wrapper .download-url-button {
-    border: none;
-    border-radius: 0 4px 4px 0;
     background: #175ddc;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #fff
-}
-
-.swagger-ui .info {
-    margin: 50px 0
-}
-
-.swagger-ui .info hgroup.main {
-    margin: 0 0 20px
-}
-
-.swagger-ui .info hgroup.main a {
-    font-size: 12px
 }
 
 .swagger-ui .info p {
-    font-size: 14px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .info code {
-    padding: 3px 5px;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, .05);
-    font-family: Source Code Pro, monospace;
-    font-weight: 600;
-    color: #9012fe
 }
 
 .swagger-ui .info a {
@@ -583,16 +541,8 @@
     color: #175ddc;
 }
 
-.swagger-ui .info>div {
+.swagger-ui .info > div {
     margin: 0;
-}
-
-.swagger-ui .info .base-url {
-    font-size: 12px;
-    font-weight: 300 !important;
-    margin: 0;
-    font-family: Source Code Pro, monospace;
-    color: #3b4151
 }
 
 .swagger-ui .info .title {
@@ -600,36 +550,11 @@
 }
 
 .swagger-ui .info .title small pre {
-    margin: 0;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #fff
-}
-
-.swagger-ui .auth-container {
-    border-bottom: 1px solid #ebebeb
-}
-
-.swagger-ui .auth-container:last-of-type {
-    border: 0
-}
-
-.swagger-ui .auth-container .errors {
-    font-size: 12px;
-    padding: 10px;
-    border-radius: 4px;
-    font-family: Source Code Pro, monospace;
-    font-weight: 600;
-    color: #3b4151
 }
 
 .swagger-ui .scopes h2 {
-    font-size: 14px;
     font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
-    color: #3b4151
-}
-
-.swagger-ui .scope-def {
-    padding: 0 0 20px
 }
 
 .swagger-ui .errors-wrapper {
@@ -640,18 +565,6 @@
     border: 2px solid #ff4e63;
     border-radius: 4px;
     background: rgba(249, 62, 62, .1)
-}
-
-.swagger-ui .errors-wrapper .error-wrapper {
-    margin: 0 0 10px
-}
-
-.swagger-ui .errors-wrapper .errors h4 {
-    font-size: 14px;
-    margin: 0;
-    font-family: Source Code Pro, monospace;
-    font-weight: 600;
-    color: #3b4151
 }
 
 .swagger-ui .errors-wrapper hgroup h4 {
