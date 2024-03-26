@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Credentials;
 using Passwordless.Service;
 using Passwordless.Service.Helpers;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -30,6 +33,8 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Deletes a credential.
     /// </summary>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> DeleteCredentialAsync(
         [FromBody] CredentialsDeleteDTO payload,
         [FromServices] UserCredentialsService userCredentialsService)
@@ -42,6 +47,8 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Lists credentials for a given user.
     /// </summary>
+    [ProducesResponseType(typeof(ListResponse<StoredCredential>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static Task<IResult> ListGetCredentialsAsync(
         [AsParameters] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)
@@ -52,6 +59,8 @@ public static class CredentialsEndpoints
     /// <summary>
     /// Lists credentials for a given user.
     /// </summary>
+    [ProducesResponseType(typeof(ListResponse<StoredCredential>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static Task<IResult> ListPostCredentialsAsync(
         [FromBody] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)

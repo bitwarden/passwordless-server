@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
@@ -20,12 +22,7 @@ public static class AuthenticatorsEndpoints
             .RequireSecretKey()
             .WithTags(OpenApiTags.Authenticators);
 
-        group.MapGet("/list", ListConfiguredAuthenticatorsAsync)
-            .WithOpenApi(o =>
-            {
-                o.Parameters.Get(nameof(ConfiguredAuthenticatorRequest.IsAllowed)).Description = "When 'true', all authenticators on the allowlist are returned. When 'false', all authenticators on the blocklist are returned.";
-                return o;
-            });
+        group.MapGet("/list", ListConfiguredAuthenticatorsAsync);
 
         group.MapPost("/add", AddAuthenticatorsAsync)
             .WithParameterValidation();
@@ -42,6 +39,8 @@ public static class AuthenticatorsEndpoints
     /// <param name="featureContextProvider"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    [ProducesResponseType(typeof(IEnumerable<ConfiguredAuthenticatorResponse>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> ListConfiguredAuthenticatorsAsync(
         [AsParameters] ConfiguredAuthenticatorRequest request,
         IApplicationService service,
@@ -65,6 +64,8 @@ public static class AuthenticatorsEndpoints
     /// <param name="eventLogger"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> AddAuthenticatorsAsync(
         [FromBody] AddAuthenticatorsRequest request,
         IApplicationService service,
@@ -91,6 +92,8 @@ public static class AuthenticatorsEndpoints
     /// <param name="eventLogger"></param>
     /// <returns></returns>
     /// <exception cref="ApiException"></exception>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> RemoveAuthenticatorsAsync(
         [FromBody] RemoveAuthenticatorsRequest request,
         IApplicationService service,
