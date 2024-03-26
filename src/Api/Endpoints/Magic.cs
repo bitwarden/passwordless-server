@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +11,7 @@ using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
 using Passwordless.Service.MagicLinks.Extensions;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -55,6 +58,8 @@ public static class MagicEndpoints
     ///
     /// Warning: Verify the e-mail address matches the user identifier in your backend.
     /// </summary>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> SendMagicLinkAsync(
         [FromBody] SendMagicLinkRequest request,
         [FromServices] IFeatureContextProvider provider,

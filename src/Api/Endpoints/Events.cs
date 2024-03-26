@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Mvc;
 using MiniValidation;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
@@ -7,6 +10,7 @@ using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.EventLog.Mappings;
 using Passwordless.Service.EventLog.Models;
 using Passwordless.Service.Features;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -25,6 +29,10 @@ public static class EventLog
     /// Lists event logs. (Requires the `Enterprise` plan.)
     /// </summary>
     /// <returns></returns>
+    [ProducesResponseType(typeof(GetEventLogEventsResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.Forbidden, MediaTypeNames.Application.ProblemJson)]
+
     private static async Task<IResult> GetEventLogEventsAsync(
         HttpRequest request,
         IEventLogStorage storage,
