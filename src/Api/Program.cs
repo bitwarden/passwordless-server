@@ -185,7 +185,11 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseSwagger();
+app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+{
+    httpReq.HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+}));
+
 app.UseSwaggerUI(c =>
 {
     c.ConfigObject.ShowExtensions = true;

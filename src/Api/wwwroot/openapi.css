@@ -2,7 +2,7 @@
 
 @font-face {
     font-family: "DM Sans";
-    src: url("DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+    src: url("./DMSans-VariableFont_opsz,wght.ttf") format("truetype");
 }
 
 .swagger-ui html {
