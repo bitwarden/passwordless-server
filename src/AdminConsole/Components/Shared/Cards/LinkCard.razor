@@ -1,0 +1,29 @@
+<a href="@Model.Link" target="_blank">
+    <div class="relative flex rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+        <div class="flex-auto flex flex-col space-y-1">
+            <span class="block text-sm font-medium text-gray-900">@Model.Title</span>
+            <span class="flex items-center text-sm text-gray-500">@Model.Description</span>
+        </div>
+        
+        @if (Model.Image != null)
+        {
+            <DynamicComponent Type="@Model.Image" Parameters="@(new Dictionary<string, object> { { "class", "flex-none w-10 h-10" } })"/>
+        }
+        else
+        {
+            @if (Model.Link != null)
+            {
+                <div class="flex-none flex items-end">
+                    <p class="link-blue"><span>Learn more</span><span aria-hidden="true">→</span></p>
+                </div>
+            }
+        }
+    </div>
+</a>
+
+@code {
+    [Parameter] public required LinkCardModel Model { get; set; }
+
+    public record LinkCardModel(string Title, string Description, Type? Image, Uri? Link = null);
+
+}

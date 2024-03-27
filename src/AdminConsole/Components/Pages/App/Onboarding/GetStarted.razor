@@ -1,0 +1,86 @@
+@page "/app/{AppId}/onboarding/get-started"
+
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Microsoft.Extensions.Options
+
+@inherits BaseApplicationPage
+
+@inject IApplicationService ApplicationService;
+@inject IConfiguration Configuration;
+@inject IOptionsSnapshot<PasswordlessManagementOptions> PasswordlessOptions
+
+@if (_isInitialized)
+{
+    <Page>
+        <Panel Header="1. Your API Keys">
+            <div class="flex flex-col space-y-4 mt-2 max-w-xl text-sm text-gray-500">
+                <p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="link-blue">documentation</a>.</p>
+            
+                <p>Here are your API keys. You will use these to access the Passwordless api. The Api Key is used client side and is safe to share, while the ApiSecret is used on your backend and should never be exposed.</p>
+            </div>
+            
+            <div class="mt-5 max-w-3xl rounded-md bg-gray-50 px-6 py-5 sm:flex sm:items-start sm:justify-between">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 sm:ml-4 sm:mt-0">
+                        <CopyInputField Value="@PasswordlessOptions.Value.ApiUrl" Title="API Url" />
+                        <CopyInputField Value="@PublicApiKey" Title="Public API Key" />
+                        <CopyInputField Value="@PrivateApiKey" Title="Private API Key" />
+
+                        <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
+                    </div>
+                </div>
+                <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
+                    <form id="downloadForm" method="get" action="/Applications/@AppId/DownloadOnboarding">
+                        <button type="submit" class="btn-primary btn-icon"><DownloadIcon/> Download</button>
+                    </form>
+                </div>
+            </div>
+            
+        </Panel>
+
+        <Panel Header="2. Backend language">
+            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we've made official packages, sdks and examples.</p>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
+                @foreach (var card in BackendCards)
+                {
+                    <LinkCard Model="@card" />
+                }
+            </div>
+
+            <div class="mt-6 flex gap-10">
+                <a target="_blank" href="https://docs.passwordless.dev/guide/backend/" class="link-blue">View the backend examples <span aria-hidden="true">&rarr;</span></a>
+                <a target="_blank" href="https://docs.passwordless.dev/guide/api-documentation.html" class="link-blue">Read the API docs <span aria-hidden="true">&rarr;</span></a>
+            </div>
+        </Panel>
+
+        <Panel Header="3. Frontend framework">
+            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                <p>Passwordless.dev uses a little bit of javascript and html. It works regardless if you're using a framework or not! For some frameworks, we've made official packages, sdks and examples.</p>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
+                @foreach (var card in FrontendCards)
+                {
+                    <LinkCard Model="@card" />
+                }
+            </div>
+
+            
+            <PanelFooter>
+                <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="link-blue">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
+            </PanelFooter>
+        </Panel>
+
+        <Panel Header="4. Let's start coding!">
+            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                <p>Please take a look at our Getting Started guide to learn how register your first credential. Or you can use the <a class="link-blue" href="/app/playground/client">Playground</a> here in the admin console to experiment.</p>
+            </div>
+            <PanelFooter>
+                <a target="_blank" href="https://docs.passwordless.dev/guide/get-started.html" class="link-blue">View the Getting Started guide <span aria-hidden="true">&rarr;</span></a>
+            </PanelFooter>
+        </Panel>
+    </Page>
+}

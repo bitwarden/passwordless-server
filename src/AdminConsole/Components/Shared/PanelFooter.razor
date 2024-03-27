@@ -1,0 +1,8 @@
+<div class="mt-6 flex">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public required RenderFragment ChildContent { get; set; }
+}
