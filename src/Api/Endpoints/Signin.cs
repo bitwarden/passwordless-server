@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using System.Net.Mime;
+using Fido2NetLib;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
@@ -38,6 +41,8 @@ public static class SigninEndpoints
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
     }
 
+    [ProducesResponseType(typeof(SigninTokenRequest), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> GenerateTokenAsync(
         [FromBody] SigninTokenRequest signinToken,
         [FromServices] IFeatureContextProvider provider,
@@ -57,6 +62,8 @@ public static class SigninEndpoints
     /// <summary>
     /// Signin (Step 1 - Client)
     /// </summary>
+    [ProducesResponseType(typeof(SessionResponse<AssertionOptions>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> BeginAsync(
         [FromBody] SignInBeginDTO payload,
         [FromServices] IFido2Service fido2Service)
@@ -69,6 +76,8 @@ public static class SigninEndpoints
     /// <summary>
     /// Signin (Step 2 - Client)
     /// </summary>
+    [ProducesResponseType(typeof(TokenResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> CompleteAsync(
         [FromBody] SignInCompleteDTO payload,
         HttpRequest request,
@@ -83,6 +92,8 @@ public static class SigninEndpoints
     /// <summary>
     /// Signin (Step 3 - Server)
     /// </summary>
+    [ProducesResponseType(typeof(VerifySignInToken), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> VerifyAsync(
         [FromBody] SignInVerifyDTO payload,
         [FromServices] IFido2Service fido2Service)

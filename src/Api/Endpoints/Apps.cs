@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Helpers;
@@ -222,6 +224,8 @@ public static class AppsEndpoints
     /// <summary>
     /// Change the configuration or features.
     /// </summary>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> SetFeaturesAsync(
         SetFeaturesRequest payload,
         IApplicationService service)

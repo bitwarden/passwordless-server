@@ -1,7 +1,11 @@
-﻿using Passwordless.Api.Authorization;
+﻿using System.Net;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Mvc;
+using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Reporting;
 using Passwordless.Service;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -26,6 +30,8 @@ public static class ReportingEndpoints
     /// <param name="request"></param>
     /// <param name="reportingService"></param>
     /// <returns></returns>
+    [ProducesResponseType(typeof(PeriodicCredentialReportResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> GetPeriodicCredentialReportsAsync(
         [AsParameters] PeriodicCredentialReportRequest request,
         IReportingService reportingService)
@@ -41,6 +47,8 @@ public static class ReportingEndpoints
     /// <param name="request"></param>
     /// <param name="reportingService"></param>
     /// <returns></returns>
+    [ProducesResponseType(typeof(IEnumerable<PeriodicActiveUserReportResponse>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> GetPeriodicActiveUserReportsAsync(
         [AsParameters] PeriodicActiveUserReportRequest request,
         IReportingService reportingService)

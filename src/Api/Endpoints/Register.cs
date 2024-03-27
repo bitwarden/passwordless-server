@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.Mime;
+using Fido2NetLib;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
@@ -35,6 +38,8 @@ public static class RegisterEndpoints
     /// <summary>
     /// Registration (Step 1 - Server)
     /// </summary>
+    [ProducesResponseType(typeof(RegisterTokenResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> RegisterAsync(
         [FromBody] RegisterToken request,
         [FromServices] IFido2Service fido2Service)
@@ -46,6 +51,8 @@ public static class RegisterEndpoints
     /// <summary>
     /// Registration (Step 2 - Client): Get credential creation options.
     /// </summary>
+    [ProducesResponseType(typeof(SessionResponse<CredentialCreateOptions>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> RegisterBeginAsync(
         [FromBody] FidoRegistrationBeginDTO payload,
         [FromServices] IFido2Service fido2Service)
@@ -57,6 +64,8 @@ public static class RegisterEndpoints
     /// <summary>
     /// Registration (Step 3 - Client): Stores the created public key.
     /// </summary>
+    [ProducesResponseType(typeof(TokenResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> RegisterCompleteAsync(
         [FromBody] RegistrationCompleteDTO payload,
         HttpRequest request,

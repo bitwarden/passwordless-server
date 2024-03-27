@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.Models;
 using Passwordless.Api.OpenApi;
 using Passwordless.Service;
 using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -29,6 +32,8 @@ public static class UsersEndpoints
     /// <summary>
     /// Get a list of users.
     /// </summary>
+    [ProducesResponseType(typeof(ListResponse<UserSummary>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> GetUsersAsync(
         [FromServices] UserCredentialsService userService)
     {
@@ -40,6 +45,8 @@ public static class UsersEndpoints
     /// <summary>
     /// Get the amount of users.
     /// </summary>
+    [ProducesResponseType(typeof(CountRecord), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> GetUsersCountAsync(
         [FromServices] UserCredentialsService userService)
     {
@@ -51,6 +58,8 @@ public static class UsersEndpoints
     /// <summary>
     /// Deletes a user.
     /// </summary>
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> DeleteUserAsync(
         [FromBody] UserDeletePayload payload,
         [FromServices] UserCredentialsService userService,
