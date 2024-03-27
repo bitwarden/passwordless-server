@@ -21,6 +21,10 @@
     .panel-content {
         @apply flex flex-col space-y-4;
     }
+    
+    .panel-footer {
+        @apply mt-6 flex gap-10;
+    }
 
     .btn {
         @apply rounded py-1 px-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 inline-block;
