@@ -15,16 +15,16 @@
         <Panel Header="1. Your API Keys">
             <div class="flex flex-col space-y-4 mt-2 max-w-xl text-sm text-gray-500">
                 <p>Let's get set up using Passwordless.dev. Please feel free to read all the <a target="_blank" href="https://docs.passwordless.dev" class="link-blue">documentation</a>.</p>
-            
-                <p>Here are your API keys. You will use these to access the Passwordless api. The Api Key is used client side and is safe to share, while the ApiSecret is used on your backend and should never be exposed.</p>
+
+                <p>Here are your API keys. You will use these to access the Passwordless api. The public API key is used client side and is safe to share, while the private API key is used on your backend and should never be exposed.</p>
             </div>
-            
+
             <div class="mt-5 max-w-3xl rounded-md bg-gray-50 px-6 py-5 sm:flex sm:items-start sm:justify-between">
                 <div class="sm:flex sm:items-start">
                     <div class="mt-3 sm:ml-4 sm:mt-0">
-                        <CopyInputField Value="@PasswordlessOptions.Value.ApiUrl" Title="API Url" />
-                        <CopyInputField Value="@PublicApiKey" Title="Public API Key" />
-                        <CopyInputField Value="@PrivateApiKey" Title="Private API Key" />
+                        <CopyInputField Value="@PasswordlessOptions.Value.ApiUrl" Title="API Url"/>
+                        <CopyInputField Value="@PublicApiKey" Title="Public API Key"/>
+                        <CopyInputField Value="@PrivateApiKey" Title="Private API Key"/>
 
                         <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
                     </div>
@@ -39,13 +39,13 @@
 
         <Panel Header="2. Backend language">
             <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we've made official packages, sdks and examples.</p>
+                <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we provide official packages, SDKs and examples.</p>
             </div>
 
             <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
-                @foreach (var card in BackendCards)
+                @foreach (var card in _backendCards!)
                 {
-                    <LinkCard Model="@card" />
+                    <LinkCard Model="@card"/>
                 }
             </div>
 
@@ -57,16 +57,16 @@
 
         <Panel Header="3. Frontend framework">
             <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Passwordless.dev uses a little bit of javascript and html. It works regardless if you're using a framework or not! For some frameworks, we've made official packages, sdks and examples.</p>
+                <p>Passwordless.dev uses a little bit of JavaScript and HTML. It works regardless if you're using a framework or not! For some frameworks, we provide official packages, SDKs and examples.</p>
             </div>
 
             <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
-                @foreach (var card in FrontendCards)
+                @foreach (var card in _frontendCards!)
                 {
-                    <LinkCard Model="@card" />
+                    <LinkCard Model="@card"/>
                 }
             </div>
-            
+
             <PanelFooter>
                 <a target="_blank" href="https://docs.passwordless.dev/guide/frontend/javascript.html#installation" class="link-blue">View the frontend docs <span aria-hidden="true">&rarr;</span></a>
             </PanelFooter>
