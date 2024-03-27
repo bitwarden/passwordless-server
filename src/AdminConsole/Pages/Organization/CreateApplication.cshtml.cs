@@ -150,8 +150,7 @@ public class CreateApplicationModel : PageModel
         var myUser = await _signInManager.UserManager.GetUserAsync(User);
         await _signInManager.RefreshSignInAsync(myUser);
 
-        // TODO: Pass parameters in a better way
-        return RedirectToPage("/App/Onboarding/GetStarted", new ApplicationPageRoutingContext(app.Id));
+        return Redirect($"/app/{app.Id}/onboarding/get-started");
     }
 
     private async Task InitializeAsync()
