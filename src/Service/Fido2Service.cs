@@ -295,32 +295,13 @@ public class Fido2Service : IFido2Service
     public async Task<SessionResponse<AssertionOptions>> SignInBeginAsync(SignInBeginDTO request)
     {
         var fido2 = GetFido2Instance(request, _metadataService);
-        
-        var existingCredentials = new List<PublicKeyCredentialDescriptor>();
-        var userId = request.UserId;
 
-        if (!string.IsNullOrEmpty(userId))
-        {
-            // Get registered credentials from database
-            existingCredentials = (await _storage.GetCredentialsByUserIdAsync(userId)).Select(c => c.Descriptor).ToList();
-            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenantProvider, "userid");
-        }
-        else if (!string.IsNullOrEmpty(request.Alias))
-        {
-            var hashedAlias = HashAlias(request.Alias, _tenantProvider.Tenant);
-
-            existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
-            _log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenantProvider, "alias", existingCredentials.Count);
-        }
-        else
-        {
-            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenantProvider, "empty");
-        }
+        var existingCredentials = await GetExistingCredentialsAsync(request);
 
         // Create options
         var uv = string.IsNullOrEmpty(request.UserVerification) ? UserVerificationRequirement.Preferred : request.UserVerification.ToEnum<UserVerificationRequirement>();
         var options = fido2.GetAssertionOptions(
-            existingCredentials,
+            existingCredentials.ToList(),
             uv
         );
 
@@ -328,6 +309,28 @@ public class Fido2Service : IFido2Service
 
         // Return options to client
         return new SessionResponse<AssertionOptions> { Data = options, Session = session };
+    }
+
+    private async Task<IEnumerable<PublicKeyCredentialDescriptor>> GetExistingCredentialsAsync(SignInBeginDTO request)
+    {
+        if (!string.IsNullOrEmpty(request.UserId))
+        {
+            _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenantProvider, "userid");
+            return (await _storage.GetCredentialsByUserIdAsync(request.UserId)).Select(c => c.Descriptor);
+        }
+
+        if (!string.IsNullOrEmpty(request.Alias))
+        {
+            var hashedAlias = HashAlias(request.Alias, _tenantProvider.Tenant);
+
+            var existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
+            _log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenantProvider, "alias", existingCredentials.Count);
+            
+            return existingCredentials;
+        }
+
+        _log.LogInformation("event=signin/begin account={account} arg={arg}", _tenantProvider, "empty");
+        return Array.Empty<PublicKeyCredentialDescriptor>();
     }
 
     public async Task<TokenResponse> SignInCompleteAsync(SignInCompleteDTO request, string device, string country)
