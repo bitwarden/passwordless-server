@@ -40,7 +40,7 @@ EXPOSE $ASPNETCORE_HTTP_PORTS
 # Alpine image doesn't come with the ICU libraries pre-installed, so we need to install them manually.
 # Technically, we shouldn't need globalization support in the API, but some EF queries fail without it at the moment.
 # `libsodium` is required by the `NSec.Cryptography` package.
-RUN apk add --no-cache icu-libs libsodium
+RUN apk add --no-cache icu-libs libsodium gcompat
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Use the default non-root user for the app.
