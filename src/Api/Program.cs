@@ -12,6 +12,7 @@ using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Api.OpenApi.Filters;
+using Passwordless.Api.RateLimiting;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.Middleware.SelfHosting;
@@ -115,12 +116,7 @@ services.AddCors(options
 services.AddHttpContextAccessor();
 services.AddScoped<ITenantProvider, TenantProvider>();
 
-services.AddRateLimiter(options =>
-{
-    // Reject with 429 instead of the default 503
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddMagicRateLimiterPolicy();
-});
+services.AddRateLimiting();
 
 services.ConfigureHttpJsonOptions(options =>
 {

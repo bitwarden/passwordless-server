@@ -8,19 +8,13 @@ namespace Passwordless.AdminConsole.Pages;
 
 [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 [IgnoreAntiforgeryToken]
-public class ErrorModel : PageModel
+public class ErrorModel(ILogger<ErrorModel> logger) : PageModel
 {
     public string? RequestId { get; set; }
 
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
     public string Message { get; set; }
-
-    private readonly ILogger<ErrorModel> _logger;
-
-    public ErrorModel(ILogger<ErrorModel> logger)
-    {
-        _logger = logger;
-    }
 
     public ProblemDetails? ProblemDetails { get; set; }
 
@@ -30,12 +24,9 @@ public class ErrorModel : PageModel
         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 
         var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();
-        if (exceptionHandlerPathFeature?.Error is not PasswordlessApiException)
-        {
+        if (exceptionHandlerPathFeature?.Error is not PasswordlessApiException exception)
             return;
-        }
 
-        var exception = (PasswordlessApiException)exceptionHandlerPathFeature?.Error;
-        ProblemDetails = exception?.Details;
+        ProblemDetails = exception.Details;
     }
 }

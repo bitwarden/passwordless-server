@@ -155,8 +155,8 @@ void RunTheApp()
     builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
     builder.Services.AddAntiforgery();
-
     builder.Services.AddRateLimiting();
+
     builder.AddPasswordlessHealthChecks();
 
     services.AddScoped<ISetupService, SetupService>();
