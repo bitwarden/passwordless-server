@@ -100,13 +100,7 @@ public class Fido2Service : IFido2Service
 
         var userId = token.UserId;
 
-        var fido2 = new Fido2(new Fido2Configuration
-        {
-            ServerDomain = request.RPID,
-            Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID,
-            MDSCacheDirPath = ".mds-cache"
-        }, _metadataService);
+        var fido2 = GetFido2Instance(request, _metadataService);
 
         if (string.IsNullOrEmpty(userId))
         {
@@ -172,13 +166,7 @@ public class Fido2Service : IFido2Service
     {
         var session = await _tokenService.DecodeTokenAsync<RegisterSession>(request.Session, "session_", true);
 
-        var fido2 = new Fido2(new Fido2Configuration
-        {
-            ServerDomain = request.RPID,
-            Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID,
-            MDSCacheDirPath = ".mds-cache"
-        }, _metadataService);
+        var fido2 = GetFido2Instance(request, _metadataService);
 
         var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
         {
@@ -306,14 +294,8 @@ public class Fido2Service : IFido2Service
 
     public async Task<SessionResponse<AssertionOptions>> SignInBeginAsync(SignInBeginDTO request)
     {
-        var fido2 = new Fido2(new Fido2Configuration
-        {
-            ServerDomain = request.RPID,
-            Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID,
-            MDSCacheDirPath = ".mds-cache"
-        }, _metadataService);
-
+        var fido2 = GetFido2Instance(request, _metadataService);
+        
         var existingCredentials = new List<PublicKeyCredentialDescriptor>();
         var userId = request.UserId;
 
@@ -350,13 +332,7 @@ public class Fido2Service : IFido2Service
 
     public async Task<TokenResponse> SignInCompleteAsync(SignInCompleteDTO request, string device, string country)
     {
-        var fido2 = new Fido2(new Fido2Configuration
-        {
-            ServerDomain = request.RPID,
-            Origins = new HashSet<string> { request.Origin },
-            ServerName = request.RPID,
-            MDSCacheDirPath = ".mds-cache"
-        }, _metadataService);
+        var fido2 = GetFido2Instance(request, _metadataService);
 
         // Get the assertion options we sent the client
         var options = await _tokenService.DecodeTokenAsync<AssertionOptions>(request.Session, "session_", true);
@@ -456,4 +432,14 @@ public class Fido2Service : IFido2Service
 
         return hashedUsername;
     }
+    
+    private static Fido2 GetFido2Instance(RequestBase request, IMetadataService metadataService) =>
+        new(new Fido2Configuration
+            {
+                ServerDomain = request.RPID, 
+                Origins = new HashSet<string> { request.Origin }, 
+                ServerName = request.RPID, 
+                MDSCacheDirPath = ".mds-cache"
+            },
+            metadataService);
 }
