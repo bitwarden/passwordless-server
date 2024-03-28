@@ -27,7 +27,7 @@ RUN dotnet publish src/Api/ \
 # ** Run
 
 # Use `runtime-deps` instead of `runtime` because we have a self-contained assembly
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim AS run
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:8.0 AS run
 
 LABEL org.opencontainers.image.title="Passwordless API Test Server"
 LABEL org.opencontainers.image.description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
