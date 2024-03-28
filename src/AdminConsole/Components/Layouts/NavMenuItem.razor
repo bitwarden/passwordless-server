@@ -1,0 +1,19 @@
+<NavLink class="nav-link" ActiveClass="nav-link-active" href="@Href">
+    <DynamicComponent Type="@Icon" Parameters="@IconParameters" /> @Label
+</NavLink>
+
+@code {
+    public IDictionary<string, object> IconParameters { get; } = new Dictionary<string, object>
+    {
+        { "class", "nav-link-icon" }
+    };
+    
+    [Parameter]
+    public required string Href { get; set; }
+    
+    [Parameter]
+    public required Type Icon { get; set; }
+    
+    [Parameter]
+    public required string Label { get; set; }
+}
