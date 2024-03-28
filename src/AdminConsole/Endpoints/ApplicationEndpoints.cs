@@ -54,12 +54,12 @@ public static class ApplicationEndpoints
             return NotFound();
         }
 
-        using var memory = new MemoryStream();
-        await using var writer = new StreamWriter(memory);
-        writer.WriteLine($"API Url: {options.Value.ApiUrl}");
-        writer.WriteLine($"Public ApiKey: {onboarding.ApiKey}");
-        writer.WriteLine($"Private ApiSecret: {onboarding.ApiSecret}");
-        writer.Flush();
-        return File(memory.ToArray(), "application/octet-stream", $"passwordless-onboarding-{appId}.txt");
+        var contentBuilder = new StringBuilder();
+        contentBuilder.AppendLine($"API Url: {options.Value.ApiUrl}");
+        contentBuilder.AppendLine($"Public ApiKey: {onboarding.ApiKey}");
+        contentBuilder.AppendLine($"Private ApiSecret: {onboarding.ApiSecret}");
+
+        var byteArray = Encoding.UTF8.GetBytes(contentBuilder.ToString());
+        return File(byteArray, "application/octet-stream", $"passwordless-onboarding-{appId}.txt");
     }
 }
