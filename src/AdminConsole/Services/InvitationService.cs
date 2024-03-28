@@ -26,7 +26,7 @@ public class InvitationService : IInvitationService
 
     public async Task SendInviteAsync(string toEmail, int targetOrgId, string targetOrgName, string fromEmail, string fromName)
     {
-        var inv = new Invite()
+        var inv = new Invite
         {
             ToEmail = toEmail,
             TargetOrgId = targetOrgId,
