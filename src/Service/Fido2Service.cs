@@ -392,7 +392,7 @@ public class Fido2Service : IFido2Service
             Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             Device = device,
             Country = country,
-            Nickname = credential.Nickname,
+            Nickname = credential.Nickname ?? string.Empty,
             CredentialId = credential.Descriptor.Id,
             ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
@@ -407,11 +407,61 @@ public class Fido2Service : IFido2Service
         return new TokenResponse(token);
     }
 
+    public async Task<TokenResponse> StepUpCompleteAsync(StepUpTokenRequest request, string device, string country)
+    {
+        var now = _timeProvider.GetUtcNow();
+
+        var credential = await _storage.GetCredential(request.Response.Id);
+        if (credential == null)
+        {
+            throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
+        }
+
+        var res = await GetFido2Instance(request, _metadataService).MakeAssertionAsync(
+            request.Response,
+            await _tokenService.DecodeTokenAsync<AssertionOptions>(request.Session, "session_", true),
+            credential.PublicKey,
+            (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList(),
+            credential.SignatureCounter,
+            (args, _) => Task.FromResult(credential.UserHandle.SequenceEqual(args.UserHandle)));
+
+        await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
+
+        var userId = Encoding.UTF8.GetString(credential.UserHandle);
+
+        _eventLogger.LogStepUpTokenCreated(request, userId);
+
+        return new TokenResponse(await _tokenService.EncodeTokenAsync(new StepUpToken
+        {
+            ExpiresAt = now.Add(TimeSpan.FromSeconds(request.Context.TimeToLive ?? 900)).UtcDateTime,
+            TokenId = Guid.NewGuid(),
+            UserId = userId,
+            CreatedAt = now.UtcDateTime,
+            RpId = request.RPID,
+            Origin = request.Origin,
+            Success = true,
+            Device = device,
+            Country = country,
+            Context = request.Context.Context
+        }, "verify_"));
+    }
+
     public async Task<VerifySignInToken> SignInVerifyAsync(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
         token.Validate(_timeProvider.GetUtcNow());
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
+
+        return token;
+    }
+
+    public async Task<StepUpToken> StepUpVerifyAsync(StepUpVerifyRequest request)
+    {
+        var token = await _tokenService.DecodeTokenAsync<StepUpToken>(request.Token, "verify_");
+
+        token.Validate(_timeProvider.GetUtcNow(), request.Context);
+
+        _eventLogger.LogUserStepUpTokenVerifiedEvent(token, request.Context);
 
         return token;
     }
@@ -456,4 +506,13 @@ public class Fido2Service : IFido2Service
 
         return hashedUsername;
     }
+
+    private static Fido2 GetFido2Instance(RequestBase request, IMetadataService metadataService) =>
+        new(new Fido2Configuration
+        {
+            ServerDomain = request.RPID,
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        }, metadataService);
 }

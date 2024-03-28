@@ -12,4 +12,5 @@ public static class OpenApiTags
     public const string Reporting = "Reporting";
     public const string SignIn = "Sign In";
     public const string Users = "Users";
+    public const string Stepup = "Step Up";
 }

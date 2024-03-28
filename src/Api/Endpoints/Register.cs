@@ -3,6 +3,7 @@ using System.Net.Mime;
 using Fido2NetLib;
 using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.Authorization;
+using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
 using Passwordless.Service;
@@ -71,7 +72,7 @@ public static class RegisterEndpoints
         HttpRequest request,
         [FromServices] IFido2Service fido2Service)
     {
-        var (deviceInfo, country) = Extensions.Helpers.GetDeviceInfo(request);
+        var (deviceInfo, country) = request.GetDeviceInfo();
         var result = await fido2Service.RegisterCompleteAsync(payload, deviceInfo, country);
 
         // Avoid serializing the certificate

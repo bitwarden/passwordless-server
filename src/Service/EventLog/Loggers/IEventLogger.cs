@@ -2,6 +2,7 @@ using Passwordless.Common.EventLog.Enums;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
 using Passwordless.Service.EventLog.Models;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Service.EventLog.Loggers;
 
@@ -402,5 +403,31 @@ public static class EventLoggerExtensions
             Severity = Severity.Alert,
             Subject = context.TenantId,
             ApiKeyId = string.Empty
+        });
+
+    public static void LogStepUpTokenCreated(this IEventLogger logger, StepUpTokenRequest request, string userId) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"StepUp token created for {userId} for {request.Context}.",
+            PerformedBy = string.IsNullOrWhiteSpace(userId) ? "Unknown User" : userId,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiUserStepUpTokenCreated,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = context.AbbreviatedKey
+        });
+
+    public static void LogUserStepUpTokenVerifiedEvent(this IEventLogger logger, StepUpToken token, string context) =>
+        logger.LogEvent(eventLogContext => new EventDto
+        {
+            PerformedAt = eventLogContext.PerformedAt,
+            Message = $"Step up token verified for {token.UserId} for {context}",
+            PerformedBy = token.UserId,
+            TenantId = eventLogContext.TenantId,
+            EventType = EventType.ApiUserStepUpVerified,
+            Severity = Severity.Informational,
+            Subject = eventLogContext.TenantId,
+            ApiKeyId = eventLogContext.AbbreviatedKey
         });
 }

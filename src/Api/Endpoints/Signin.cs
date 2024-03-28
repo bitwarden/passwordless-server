@@ -30,7 +30,6 @@ public static class SigninEndpoints
 
         group.MapPost("/begin", BeginAsync)
             .RequirePublicKey(PublicKeyScopes.Login)
-            .RequireCors("default")
             .WithMetadata(new HttpMethodMetadata(new[] { "POST" }, acceptCorsPreflight: true));
 
         group.MapPost("/complete", CompleteAsync)

@@ -17,4 +17,6 @@ public interface IFido2Service
 
     Task<List<AliasPointer>> GetAliases(string userId);
     Task SetAliasAsync(AliasPayload data);
+    Task<TokenResponse> StepUpCompleteAsync(StepUpTokenRequest request, string device, string country);
+    Task<StepUpToken> StepUpVerifyAsync(StepUpVerifyRequest request);
 }

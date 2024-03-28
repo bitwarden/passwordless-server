@@ -18,6 +18,8 @@ public enum EventType
     ApiUserDeleted = 1105,
     ApiUserSigninTokenCreated = 1106,
     ApiUserMagicLinkCreated = 1107,
+    ApiUserStepUpTokenCreated = 1108,
+    ApiUserStepUpVerified = 1109,
     ApiManagementAppMarkedForDeletion = 1200,
     ApiManagementAppDeletionCancelled = 1201,
     ApiManagementAppCreated = 1202,
