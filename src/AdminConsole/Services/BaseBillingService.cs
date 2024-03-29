@@ -23,7 +23,7 @@ public class BaseBillingService
     protected readonly BillingOptions _billingOptions;
     protected readonly IDataService _dataService;
     protected readonly IUrlHelperFactory _urlHelperFactory;
-    protected readonly IActionContextAccessor _actionContextAccessor;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
 
     public BaseBillingService(
         ConsoleDbContext db,
@@ -31,7 +31,7 @@ public class BaseBillingService
         IPasswordlessManagementClient passwordlessClient,
         ILogger<BaseBillingService> logger,
         IOptions<BillingOptions> billingOptions,
-        IActionContextAccessor actionContextAccessor,
+        IHttpContextAccessor httpContextAccessor,
         IUrlHelperFactory urlHelperFactory
 
         )
@@ -42,7 +42,7 @@ public class BaseBillingService
         _logger = logger;
         _billingOptions = billingOptions.Value;
         _urlHelperFactory = urlHelperFactory;
-        _actionContextAccessor = actionContextAccessor;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     protected async Task SetPlanOnApp(string app, string selectedPlan, string subscriptionItemId, string priceId)

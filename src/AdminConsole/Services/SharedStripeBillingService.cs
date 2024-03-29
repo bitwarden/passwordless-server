@@ -8,6 +8,7 @@ using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Extensions;
 using Stripe;
 using Stripe.Checkout;
 
@@ -21,9 +22,9 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedStripeBillingService> logger,
         IOptions<BillingOptions> billingOptions,
-        IActionContextAccessor actionContextAccessor,
+        IHttpContextAccessor httpContextAccessor,
         IUrlHelperFactory urlHelperFactory
-        ) : base(db, dataService, passwordlessClient, logger, billingOptions, actionContextAccessor, urlHelperFactory)
+        ) : base(db, dataService, passwordlessClient, logger, billingOptions, httpContextAccessor, urlHelperFactory)
     {
     }
 
@@ -56,7 +57,7 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
     public async Task<string> GetManagementUrl(int orgId)
     {
         var customerId = await this.GetCustomerIdAsync(orgId);
-        var returnUrl = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext).PageLink("/Billing/Manage");
+        var returnUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/billing/manage";
 
         var options = new Stripe.BillingPortal.SessionCreateOptions
         {
@@ -74,15 +75,13 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
     {
         selectedPlan ??= _billingOptions.Store.Pro;
 
-        var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-
         var organization = await _dataService.GetOrganizationWithDataAsync();
         if (!organization.HasSubscription)
         {
-            var successUrl = urlBuilder.PageLink("/Billing/Success");
+            var successUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/billing/success";
             successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-            var cancelUrl = urlBuilder.PageLink("/Billing/Cancelled");
-            var sessionUrl = await this.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, _actionContextAccessor.ActionContext.HttpContext.User.GetEmail(), selectedPlan, successUrl, cancelUrl);
+            var cancelUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/billing/cancelled";
+            var sessionUrl = await this.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, _httpContextAccessor.HttpContext.User.GetEmail(), selectedPlan, successUrl, cancelUrl);
             return sessionUrl;
         }
 

@@ -90,7 +90,10 @@ public partial class Manage : ComponentBase
         }
     }
 
-    public class UpgradeProFormModel;
+    public class UpgradeProFormModel
+    {
+        public string Action { get; set; }
+    }
 
     public sealed class ApplicationsFormModel
     {
