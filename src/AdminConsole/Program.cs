@@ -216,6 +216,7 @@ void RunTheApp()
 
     app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
+    app.MapBillingEndpoints();
 
     app.MapPasswordlessHealthChecks();
 
