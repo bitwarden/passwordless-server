@@ -20,11 +20,11 @@
                     {
                         if (plan.IsOutdated)
                         {
-                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Warning)" param-Message="@("New Available")" />
+                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ContextualStyles.Warning)" param-Message="@("New Available")" />
                         }
                         else
                         {
-                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Primary)" param-Message="@("Active")" />
+                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ContextualStyles.Primary)" param-Message="@("Active")" />
                         }
                     }
                     else

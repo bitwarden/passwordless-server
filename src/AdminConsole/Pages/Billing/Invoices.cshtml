@@ -32,11 +32,11 @@
                             <td>
                                 @if (invoice.Paid)
                                 {
-                                    <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Success)" param-Message="@("Paid")" />
+                                    <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ContextualStyles.Success)" param-Message="@("Paid")" />
                                 }
                                 else
                                 {
-                                    <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ColorVariant.Danger)" param-Message="@("Pending")" />
+                                    <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ContextualStyles.Danger)" param-Message="@("Pending")" />
                                 }
                             </td>
                             <td>
