@@ -15,6 +15,9 @@ public static class BillingEndpoints
         builder.MapPost("/billing/webhook", ReceiveWebhookAsync);
     }
 
+    /// <summary>
+    /// Processes the Stripe webhook notification.
+    /// </summary>
     public static async Task<IResult> ReceiveWebhookAsync(
         [FromServices] ISharedBillingService billingService,
         [FromServices] IHttpContextAccessor httpContextAccessor,
@@ -32,14 +35,13 @@ public static class BillingEndpoints
                 request.Headers["Stripe-Signature"],
                 billingOptions.Value.WebhookSecret
             );
-            logger.LogInformation($"Webhook notification with type: {stripeEvent.Type} found for {stripeEvent.Id}");
+            logger.LogInformation("Webhook notification with type: {StripeEvent} found for {StripeEventId}", stripeEvent.Type, stripeEvent.Id);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Failed to process webhook");
             return BadRequest();
         }
-
 
         switch (stripeEvent.Type)
         {
