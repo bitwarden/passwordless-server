@@ -20,8 +20,6 @@ public partial class Manage : ComponentBase
 
     public ICollection<ApplicationModel>? Applications { get; set; }
 
-    public Models.Organization? Organization { get; set; }
-
     public IReadOnlyCollection<PaymentMethodModel>? PaymentMethods { get; private set; }
 
     [SupplyParameterFromForm(FormName = UpgradeProFormName)] public UpgradeProFormModel UpgradeProForm { get; set; } = new();
@@ -37,11 +35,9 @@ public partial class Manage : ComponentBase
             .Select(x => ApplicationModel.FromEntity(x, BillingOptions.Value.Plans[x.BillingPlan]))
             .ToList();
 
-        Organization = await DataService.GetOrganizationAsync();
-
-        if (Organization.HasSubscription)
+        if (CurrentContext.Organization!.HasSubscription)
         {
-            PaymentMethods = await BillingService.GetPaymentMethods(Organization.BillingCustomerId);
+            PaymentMethods = await BillingService.GetPaymentMethods(CurrentContext.Organization!.BillingCustomerId);
         }
 
         _isInitialized = true;
@@ -74,7 +70,7 @@ public partial class Manage : ComponentBase
 
     public async Task OnChangePaymentMethodFormSubmittedAsync()
     {
-        var manageUrl = await BillingService.GetManagementUrl(Organization!.Id);
+        var manageUrl = await BillingService.GetManagementUrl(CurrentContext.Organization!.Id);
         NavigationManager.NavigateTo(manageUrl);
     }
 

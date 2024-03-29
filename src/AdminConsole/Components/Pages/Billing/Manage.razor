@@ -7,11 +7,12 @@
 @inject IDataService DataService;
 @inject IOptions<BillingOptions> BillingOptions;
 @inject NavigationManager NavigationManager;
+@inject ICurrentContext CurrentContext;
 
 <Page Title="Manage Billing">
     @if (_isInitialized)
     {
-        @if (!Organization!.HasSubscription)
+        @if (!CurrentContext.Organization!.HasSubscription)
         {
             <Panel Header="Upgrade to add multiple applications">
                 <p>Your Free Organization includes 1 Trial app (up to 10k users) and 1 console administrator.</p>
@@ -47,7 +48,7 @@
             </EditForm>
         </Panel>
 
-        @if (Organization.HasSubscription)
+        @if (CurrentContext.Organization.HasSubscription)
         {
             <Panel Header="Payment Methods">
                 <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:grid sm:grid-cols-1">
@@ -80,7 +81,7 @@
             </Panel>
         }
 
-        @if (Organization.HasSubscription)
+        @if (CurrentContext.Organization.HasSubscription)
         {
             <Panel Header="Subscription Cancellation">
                 <Alert Style="@ContextualStyles.Info">
