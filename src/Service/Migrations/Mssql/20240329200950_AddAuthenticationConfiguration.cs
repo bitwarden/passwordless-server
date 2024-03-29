@@ -2,34 +2,33 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Passwordless.Service.Migrations.Mssql
+namespace Passwordless.Service.Migrations.Mssql;
+
+/// <inheritdoc />
+public partial class AddAuthenticationConfiguration : Migration
 {
     /// <inheritdoc />
-    public partial class AddAuthenticationConfiguration : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.CreateTable(
-                name: "AuthenticationConfigurations",
-                columns: table => new
-                {
-                    Purpose = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    UserVerificationRequirement = table.Column<int>(type: "int", nullable: false),
-                    TimeToLive = table.Column<TimeSpan>(type: "time", nullable: false),
-                    Tenant = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuthenticationConfigurations", x => x.Purpose);
-                });
-        }
+        migrationBuilder.CreateTable(
+            name: "AuthenticationConfigurations",
+            columns: table => new
+            {
+                Purpose = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                UserVerificationRequirement = table.Column<int>(type: "int", nullable: false),
+                TimeToLive = table.Column<TimeSpan>(type: "time", nullable: false),
+                Tenant = table.Column<string>(type: "nvarchar(max)", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_AuthenticationConfigurations", x => x.Purpose);
+            });
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "AuthenticationConfigurations");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropTable(
+            name: "AuthenticationConfigurations");
     }
 }

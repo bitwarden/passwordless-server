@@ -13,7 +13,7 @@ public class DbTenantSqliteContext : DbTenantContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<AuthenticationConfiguration>()
             .Property(c => c.TimeToLive)
             .HasConversion(

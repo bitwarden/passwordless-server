@@ -295,7 +295,7 @@ public class Fido2Service : IFido2Service
     public async Task<SessionResponse<AssertionOptions>> SignInBeginAsync(SignInBeginDTO request)
     {
         var fido2 = GetFido2Instance(request, _metadataService);
-        
+
         var existingCredentials = await GetExistingCredentialsAsync(request);
 
         var signInConfiguration = await _storage.GetAuthenticationConfigurationAsync(request.Purpose);
@@ -304,7 +304,7 @@ public class Fido2Service : IFido2Service
             existingCredentials.ToList(),
             signInConfiguration.UserVerificationRequirement
         );
-        
+
         var sessionOptions = new AuthenticationSessionConfiguration
         {
             Options = options,
@@ -330,7 +330,7 @@ public class Fido2Service : IFido2Service
 
             var existingCredentials = await _storage.GetCredentialsByAliasAsync(hashedAlias);
             _log.LogInformation("event=signin/begin account={account} arg={arg} foundCredentials={foundCredentials}", _tenantProvider, "alias", existingCredentials.Count);
-            
+
             return existingCredentials;
         }
 
@@ -368,7 +368,7 @@ public class Fido2Service : IFido2Service
         await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
 
         var config = await _storage.GetAuthenticationConfigurationAsync(authenticationSessionConfiguration.Purpose);
-        
+
         var userId = Encoding.UTF8.GetString(credential.UserHandle);
 
         var tokenData = new VerifySignInToken
@@ -444,14 +444,14 @@ public class Fido2Service : IFido2Service
 
         return hashedUsername;
     }
-    
+
     private static Fido2 GetFido2Instance(RequestBase request, IMetadataService metadataService) =>
         new(new Fido2Configuration
-            {
-                ServerDomain = request.RPID, 
-                Origins = new HashSet<string> { request.Origin }, 
-                ServerName = request.RPID, 
-                MDSCacheDirPath = ".mds-cache"
-            },
+        {
+            ServerDomain = request.RPID,
+            Origins = new HashSet<string> { request.Origin },
+            ServerName = request.RPID,
+            MDSCacheDirPath = ".mds-cache"
+        },
             metadataService);
 }

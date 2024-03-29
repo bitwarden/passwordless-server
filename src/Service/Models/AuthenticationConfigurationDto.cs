@@ -7,9 +7,9 @@ public class AuthenticationConfigurationDto
     public required SignInPurpose Purpose { get; set; }
     public UserVerificationRequirement UserVerificationRequirement { get; set; }
     public TimeSpan TimeToLive { get; set; }
-    
+
     public required string Tenant { get; set; }
-    
+
     public static AuthenticationConfigurationDto Default(string tenant) =>
         new()
         {
