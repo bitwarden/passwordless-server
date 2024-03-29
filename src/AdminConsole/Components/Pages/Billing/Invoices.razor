@@ -1,0 +1,53 @@
+@page "/billing/invoices"
+@using Passwordless.Common.Configuration
+
+@inject IConfiguration Configuration
+@inject ISharedBillingService BillingService
+
+<Page Title="Invoices - Billing">
+    <Panel Header="History">
+        @if (Data != null)
+        {
+            <Table ColumnHeaders="@Headers" EmptyMessage="@EmptyMessage">
+                @foreach (var invoice in Data)
+                {
+                    <tr>
+                        <td>@invoice.Number</td>
+                        <td><LocalDateTime Value="invoice.Date" /></td>
+                        <td>@invoice.Amount</td>
+                        <td>
+                            @if (invoice.Paid)
+                            {
+                                <Badge Variant="ContextualStyles.Success" Message="Paid" />
+                            }
+                            else
+                            {
+                                <Badge Variant="ContextualStyles.Danger" Message="Pending" />
+                            }
+                        </td>
+                        <td>
+                            <a href="@invoice.Pdf" target="_blank"><DownloadIcon class="h-6 w-6" /></a>
+                        </td>
+                    </tr>
+                }
+            </Table>
+        }
+    </Panel>
+</Page>
+
+@code {
+    public readonly string[] Headers = [ "Invoice Number", "Date", "Amount", "Status", string.Empty ];
+    public const string EmptyMessage = "No invoices found.";
+    
+    public IReadOnlyCollection<InvoiceModel>? Data { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Configuration.IsSelfHosted())
+        {
+            throw new UnauthorizedAccessException("This page is not available in self-hosted mode.");
+        }
+        
+        Data = await BillingService.GetInvoicesAsync();
+    }
+}
