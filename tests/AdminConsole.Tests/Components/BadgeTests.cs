@@ -30,11 +30,11 @@ public class BadgeTests : TestContext
 
     public static IEnumerable<object[]> BackgroundClassData = new List<object[]>
     {
-        new object[] {ColorVariant.Primary, "bg-blue-600"},
-        new object[] {ColorVariant.Success, "bg-green-600"},
-        new object[] {ColorVariant.Danger, "bg-red-600"},
-        new object[] {ColorVariant.Warning, "bg-yellow-600"},
-        new object[] {ColorVariant.Info, "bg-blue-600"}
+        new object[] {ContextualStyles.Primary, "bg-blue-600"},
+        new object[] {ContextualStyles.Success, "bg-green-600"},
+        new object[] {ContextualStyles.Danger, "bg-red-600"},
+        new object[] {ContextualStyles.Warning, "bg-yellow-600"},
+        new object[] {ContextualStyles.Info, "bg-blue-600"}
     };
 
     [Theory]

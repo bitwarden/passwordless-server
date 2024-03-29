@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Components.Shared.Icons.PaymentMethods;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
@@ -209,39 +210,21 @@ public record PricingCardModel(
 
 public record PaymentMethodModel(string Brand, string Number, DateTime ExpirationDate)
 {
-    public string CardIcon
+    public Type CardIcon
     {
         get
         {
-            var path = new StringBuilder("Shared/Icons/PaymentMethods/");
-            switch (Brand)
+            return Brand switch
             {
-                case "amex":
-                    path.Append("Amex");
-                    break;
-                case "diners":
-                    path.Append("Diners");
-                    break;
-                case "discover":
-                    path.Append("Discover");
-                    break;
-                case "jcb":
-                    path.Append("Jcb");
-                    break;
-                case "mastercard":
-                    path.Append("MasterCard");
-                    break;
-                case "unionpay":
-                    path.Append("UnionPay");
-                    break;
-                case "visa":
-                    path.Append("Visa");
-                    break;
-                default:
-                    path.Append("UnknownCard");
-                    break;
-            }
-            return path.ToString();
+                "amex" => typeof(AmexIcon),
+                "diners" => typeof(DinersIcon),
+                "discover" => typeof(DiscoverIcon),
+                "jcb" => typeof(JcbIcon),
+                "mastercard" => typeof(MasterCardIcon),
+                "unionpay" => typeof(UnionPayIcon),
+                "visa" => typeof(VisaIcon),
+                _ => typeof(UnknownCardIcon)
+            };
         }
     }
 }
