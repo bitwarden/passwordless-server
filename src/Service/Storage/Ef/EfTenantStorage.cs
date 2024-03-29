@@ -3,6 +3,7 @@ using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Utils;
+using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Storage.Ef;
@@ -338,6 +339,15 @@ public class EfTenantStorage(
         await db.SaveChangesAsync();
 
         return email;
+    }
+
+    public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose)
+    {
+        var configuration = await db.AuthenticationConfigurations.FirstOrDefaultAsync(c => c.Purpose == requestPurpose.Value);
+
+        return configuration == null
+            ? AuthenticationConfigurationDto.Default(Tenant)
+            : configuration.ToDto();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

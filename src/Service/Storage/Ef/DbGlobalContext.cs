@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Utils;
@@ -28,6 +27,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<DispatchedEmail> DispatchedEmails => Set<DispatchedEmail>();
     public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
     public DbSet<PeriodicActiveUserReport> PeriodicActiveUserReports => Set<PeriodicActiveUserReport>();
+    public DbSet<AuthenticationConfiguration> AuthenticationConfigurations => Set<AuthenticationConfiguration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -123,6 +123,11 @@ public abstract class DbGlobalContext : DbContext
                 .WithMany(x => x.PeriodicActiveUserReports)
                 .HasForeignKey(x => x.Tenant)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<AuthenticationConfiguration>(builder =>
+        {
+            builder.HasKey(x => x.Purpose);
         });
 
         base.OnModelCreating(modelBuilder);

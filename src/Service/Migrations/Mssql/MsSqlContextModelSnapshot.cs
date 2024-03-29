@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "8.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -176,6 +176,27 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.HasKey("Tenant");
 
                     b.ToTable("AppFeatures");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AuthenticationConfiguration", b =>
+                {
+                    b.Property<string>("Purpose")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Tenant")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("TimeToLive")
+                        .HasColumnType("time");
+
+                    b.Property<int>("UserVerificationRequirement")
+                        .HasColumnType("int");
+
+                    b.HasKey("Purpose");
+
+                    b.ToTable("AuthenticationConfigurations");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>
