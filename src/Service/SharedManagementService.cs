@@ -178,7 +178,7 @@ public class SharedManagementService : ISharedManagementService
         }
 
         _eventLogger.LogInvalidPublicKeyUsedEvent(_systemClock.UtcNow.UtcDateTime, appId, new ApplicationPublicKey(publicKey));
-        _logger.LogWarning("Apikey was not valid. {AppId} {ApiKey}", appId, publicKey);
+        _logger.LogInformation("Apikey was not valid. {AppId} {ApiKey}", appId, publicKey);
         throw new ApiException("Apikey was not valid", 401);
     }
 
