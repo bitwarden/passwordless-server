@@ -30,7 +30,7 @@ public class AuthenticationScopeService(ITenantStorage storage) : IAuthenticatio
 
         if (result.All(IsNotStepUpConfiguration)) result.Add(AuthenticationConfigurationDto.StepUp(storage.Tenant));
 
-        if (result.All(IsNotSignInConfiguration)) result.Add(AuthenticationConfigurationDto.Default(storage.Tenant));
+        if (result.All(IsNotSignInConfiguration)) result.Add(AuthenticationConfigurationDto.SignIn(storage.Tenant));
 
         return result;
     }

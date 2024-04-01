@@ -346,8 +346,15 @@ public class EfTenantStorage(
         var configuration = await db.AuthenticationConfigurations.FirstOrDefaultAsync(c => c.Purpose == requestPurpose.Value);
 
         return configuration == null
-            ? AuthenticationConfigurationDto.Default(Tenant)
+            ? GetDefault(requestPurpose)
             : configuration.ToDto();
+    }
+
+    private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose)
+    {
+        return purpose == SignInPurposes.StepUp
+            ? AuthenticationConfigurationDto.StepUp(Tenant)
+            : AuthenticationConfigurationDto.SignIn(Tenant);
     }
 
     public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync()

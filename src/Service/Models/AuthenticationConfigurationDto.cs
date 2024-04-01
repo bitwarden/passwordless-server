@@ -10,7 +10,7 @@ public class AuthenticationConfigurationDto
 
     public required string Tenant { get; set; }
 
-    public static AuthenticationConfigurationDto Default(string tenant) =>
+    public static AuthenticationConfigurationDto SignIn(string tenant) =>
         new()
         {
             Purpose = SignInPurposes.SignIn,

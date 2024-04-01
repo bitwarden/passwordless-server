@@ -32,7 +32,7 @@ public class AuthenticationScopeServiceTests
 
         var defaultConfigurations = new List<AuthenticationConfigurationDto>
         {
-            AuthenticationConfigurationDto.Default(Tenant),
+            AuthenticationConfigurationDto.SignIn(Tenant),
             AuthenticationConfigurationDto.StepUp(Tenant)
         };
 
@@ -60,7 +60,7 @@ public class AuthenticationScopeServiceTests
         var actualList = actual.ToList();
         actualList.Should().ContainSingle(x => x.Purpose.Value == SignInPurposes.SignIn.Value);
         var signInConfiguration = actualList.First(x => x.Purpose.Value == SignInPurposes.SignIn.Value);
-        signInConfiguration.Should().NotBeSameAs(AuthenticationConfigurationDto.Default(Tenant));
+        signInConfiguration.Should().NotBeSameAs(AuthenticationConfigurationDto.SignIn(Tenant));
     }
 
     [Fact]
