@@ -6,11 +6,13 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
+using AuthenticationConfiguration = Passwordless.Common.Models.Apps.AuthenticationConfiguration;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -39,6 +41,13 @@ public static class SigninEndpoints
 
         group.MapPost("/verify", VerifyAsync)
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
+
+        group.MapGet("/scopes", GetAuthenticationScopesAsync).RequireSecretKey();
+
+        group.MapPost("/scopes", CreateAuthenticationScopeAsync).RequireSecretKey();
+
+        group.MapPut("/scopes", SetAuthenticationScopeAsync).RequireSecretKey();
+
     }
 
     [ProducesResponseType(typeof(SigninTokenRequest), (int)HttpStatusCode.OK)]
@@ -100,5 +109,41 @@ public static class SigninEndpoints
     {
         var result = await fido2Service.SignInVerifyAsync(payload);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// A list of authentication scope configurations for your application. This will include the two default scopes of SignIn and StepUp.
+    /// </summary>
+    /// <returns>Result containing a list of AuthenticationConfigurations</returns>
+    [ProducesResponseType(typeof(GetAuthenticationScopesResult), StatusCodes.Status200OK)]
+    public static async Task<IResult> GetAuthenticationScopesAsync(
+        [FromServices] IAuthenticationScopeService authenticationScopeService)
+    {
+        var configurations = await authenticationScopeService.GetAuthenticationScopesAsync();
+
+        return Ok(new GetAuthenticationScopesResult
+        {
+            Scopes = configurations
+                .Select(x =>
+                    new AuthenticationConfiguration(
+                        x.Purpose.Value,
+                        Convert.ToInt32(x.TimeToLive.TotalSeconds),
+                        x.UserVerificationRequirement.ToEnumMemberValue()))
+        });
+    }
+
+
+    public static Task CreateAuthenticationScopeAsync(
+        [FromBody] SetAuthenticationScopeRequest request,
+        [FromServices] IAuthenticationScopeService authenticationScopeService)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static Task SetAuthenticationScopeAsync(
+        [FromBody] SetAuthenticationScopeRequest request,
+        [FromServices] IAuthenticationScopeService authenticationScopeService)
+    {
+        throw new NotImplementedException();
     }
 }

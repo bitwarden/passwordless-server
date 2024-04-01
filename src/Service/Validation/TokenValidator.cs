@@ -5,7 +5,7 @@ using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Validation;
 
-public static class RegisterTokenValidator
+public static class TokenValidator
 {
     /// <summary>
     /// Validates the register token request.
@@ -34,10 +34,7 @@ public static class RegisterTokenValidator
 
     public static void Validate(this Token token, DateTimeOffset now)
     {
-        if (token.ExpiresAt >= now)
-        {
-            return;
-        }
+        if (token.ExpiresAt >= now) return;
 
         var drift = now - token.ExpiresAt;
 

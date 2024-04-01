@@ -18,4 +18,13 @@ public class AuthenticationConfigurationDto
             Tenant = tenant,
             TimeToLive = TimeSpan.FromMinutes(2)
         };
+
+    public static AuthenticationConfigurationDto StepUp(string tenant) =>
+        new()
+        {
+            Purpose = SignInPurposes.StepUp,
+            UserVerificationRequirement = UserVerificationRequirement.Preferred,
+            Tenant = tenant,
+            TimeToLive = TimeSpan.FromMinutes(2)
+        };
 }

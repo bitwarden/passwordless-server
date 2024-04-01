@@ -350,6 +350,13 @@ public class EfTenantStorage(
             : configuration.ToDto();
     }
 
+    public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync()
+    {
+        var configurations = await db.AuthenticationConfigurations.ToListAsync();
+
+        return configurations.Select(x => x.ToDto());
+    }
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x

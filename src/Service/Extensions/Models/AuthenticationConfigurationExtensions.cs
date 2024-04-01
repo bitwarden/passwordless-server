@@ -7,7 +7,7 @@ public static class AuthenticationConfigurationExtensions
     public static AuthenticationConfigurationDto ToDto(this AuthenticationConfiguration configuration) =>
         new()
         {
-            Purpose = new SignInPurpose { Value = configuration.Purpose },
+            Purpose = new SignInPurpose(configuration.Purpose),
             UserVerificationRequirement = configuration.UserVerificationRequirement,
             TimeToLive = configuration.TimeToLive,
             Tenant = configuration.Tenant

@@ -69,7 +69,7 @@ public class Fido2Service : IFido2Service
 
         // Attestation
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
-        RegisterTokenValidator.ValidateAttestation(tokenProps, features);
+        TokenValidator.ValidateAttestation(tokenProps, features);
 
         // check if aliases is available
         if (tokenProps.Aliases != null)
@@ -135,7 +135,7 @@ public class Fido2Service : IFido2Service
 
             // Attestation
             if (string.IsNullOrEmpty(token.Attestation)) token.Attestation = "none";
-            RegisterTokenValidator.ValidateAttestation(token, features);
+            TokenValidator.ValidateAttestation(token, features);
 
             var attestation = token.Attestation.ToEnum<AttestationConveyancePreference>();
 
@@ -384,7 +384,8 @@ public class Fido2Service : IFido2Service
             CredentialId = credential.Descriptor.Id,
             ExpiresAt = _timeProvider.GetUtcNow().UtcDateTime.Add(config.TimeToLive),
             TokenId = Guid.NewGuid(),
-            Type = "passkey_signin"
+            Type = "passkey_signin",
+            Purpose = config.Purpose.Value
         };
 
         _eventLogger.LogUserSignInCompletedEvent(userId);
@@ -398,7 +399,9 @@ public class Fido2Service : IFido2Service
     public async Task<VerifySignInToken> SignInVerifyAsync(SignInVerifyDTO payload)
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
+
         token.Validate(_timeProvider.GetUtcNow());
+
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
         return token;

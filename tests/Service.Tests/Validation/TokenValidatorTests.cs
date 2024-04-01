@@ -6,7 +6,7 @@ using Passwordless.Service.Validation;
 
 namespace Passwordless.Service.Tests.Validation;
 
-public class RegisterTokenValidatorTests
+public class TokenValidatorTests
 {
     [Fact]
     public void ValidateAttestation_Throws_ApiException_WhenAttestationTypeIsEnterprise()
@@ -20,7 +20,7 @@ public class RegisterTokenValidatorTests
         var features = new FeaturesContext(false, 0, null, null, true, false, false);
 
         // act
-        var actual = Record.Exception(() => RegisterTokenValidator.ValidateAttestation(token, features));
+        var actual = Record.Exception(() => TokenValidator.ValidateAttestation(token, features));
 
         // assert
         Assert.IsType<ApiException>(actual);
@@ -41,7 +41,7 @@ public class RegisterTokenValidatorTests
         var features = new FeaturesContext(false, 0, null, null, false, false, false);
 
         // act
-        var actual = Record.Exception(() => RegisterTokenValidator.ValidateAttestation(token, features));
+        var actual = Record.Exception(() => TokenValidator.ValidateAttestation(token, features));
 
         // assert
         Assert.IsType<ApiException>(actual);

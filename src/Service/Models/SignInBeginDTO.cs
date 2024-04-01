@@ -7,7 +7,4 @@ public class SignInBeginDTO : RequestBase
     public SignInPurpose Purpose { get; set; } = SignInPurposes.SignIn;
 }
 
-public class SignInPurpose
-{
-    public required string Value { get; init; }
-}
+public record SignInPurpose(string Value);
