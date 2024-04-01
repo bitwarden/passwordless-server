@@ -189,9 +189,10 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v4/swagger.json", "v4");
     c.ConfigObject.ShowExtensions = true;
     c.ConfigObject.ShowCommonExtensions = true;
+    c.DefaultModelsExpandDepth(-1);
     c.IndexStream = () => typeof(Program).Assembly.GetManifestResourceStream("Passwordless.Api.OpenApi.swagger.html");
     c.InjectStylesheet("/openapi.css");
-    c.DefaultModelsExpandDepth(-1);
+    c.SupportedSubmitMethods();
 });
 
 if (builder.Configuration.IsSelfHosted())
