@@ -43,7 +43,7 @@ public static class MagicEndpoints
     /// <param name="app">The <see cref="IEndpointRouteBuilder"/> object.</param>
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/magic-link")
+        var group = app.MapGroup("/magic-links")
             .RequireCors("default")
             .RequireSecretKey()
             .WithTags(OpenApiTags.MagicLinks);
