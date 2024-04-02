@@ -452,7 +452,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         api.Time.Advance(TimeSpan.FromDays(365));
 
         var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("magic-links/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
     }
 
@@ -481,7 +481,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
 
         var magicLinkRequest = RequestHelpers.GetMagicLinkRequestRules().Generate();
 
-        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("magic-link/send", magicLinkRequest);
+        using var signInGenerateTokenResponse = await client.PostAsJsonAsync("magic-links/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 

@@ -11,7 +11,6 @@ using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
 using Passwordless.Service.MagicLinks.Extensions;
-using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -43,7 +42,7 @@ public static class MagicEndpoints
     /// <param name="app">The <see cref="IEndpointRouteBuilder"/> object.</param>
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/magic-link")
+        var group = app.MapGroup("/magic-links")
             .RequireCors("default")
             .RequireSecretKey()
             .WithTags(OpenApiTags.MagicLinks);
