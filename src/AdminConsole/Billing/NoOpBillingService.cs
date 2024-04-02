@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
@@ -19,9 +18,9 @@ public class NoOpBillingService : BaseBillingService, ISharedBillingService
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedStripeBillingService> logger,
         IOptions<BillingOptions> billingOptions,
-        IActionContextAccessor actionContextAccessor,
+        IHttpContextAccessor httpContextAccessor,
         IUrlHelperFactory urlHelperFactory
-    ) : base(db, dataService, passwordlessClient, logger, billingOptions, actionContextAccessor, urlHelperFactory)
+    ) : base(db, dataService, passwordlessClient, logger, billingOptions, httpContextAccessor, urlHelperFactory)
     {
     }
 

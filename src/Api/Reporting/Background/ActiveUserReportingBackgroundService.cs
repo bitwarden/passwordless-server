@@ -30,8 +30,9 @@ public sealed class ActiveUserReportingBackgroundService : BasePeriodicBackgroun
         {
             result = await reportingService.UpdatePeriodicActiveUserReportsAsync();
         }
-        catch (DBConcurrencyException)
+        catch (Exception e)
         {
+            Logger.LogError(e, "Error updating periodic active user reports.");
             return;
         }
         Logger.LogInformation("{BackgroundService} updated {Records}.", nameof(ActiveUserReportingBackgroundService), result);

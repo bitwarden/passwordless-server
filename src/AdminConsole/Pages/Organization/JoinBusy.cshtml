@@ -1,4 +1,5 @@
 @page
+@using Passwordless.AdminConsole.Components.Shared.Forms
 @model Passwordless.AdminConsole.Pages.Organization.JoinBusy
  
 @{
@@ -8,39 +9,5 @@
     <p>Hi there! We noticed that you're already logged in and part of an organization.</p>
     <p>If you want to join a new one, please open your invite in a different browser or <a href="@Url.Page("/Account/logout")" class="link-blue">sign out</a></p>
 
-    
-    <div class="mt-2 flex" id="copyLink" v-cloak>
-        <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
-            <input
-                ref="input"
-                type="text" name="invite" id="invite" value="@Model.InviteLink"
-                class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
-        </div>
-        <button type="submit" class="btn-secondary" v-on:click="copy" v-text="txt">
-            Copy
-        </button>
-    </div>
+    <component type="typeof(CopyInputField)" param-Type="@("text")" param-Value="@Model.InviteLink" render-mode="Static" />
 </div>
-
-@section Scripts {
-    <script type="module">
-    import { createApp, ref } from 'vue';
-    createApp({
-        setup() {
-            const txt = ref('Copy');
-            const input = ref();
-            const copy = async () => {
-                const el = input.value;
-                el.select();
-                await navigator.clipboard.writeText(el.value);            
-                txt.value = "Copied!";                
-            };
-            return {
-                input, 
-                copy,
-                txt
-            };
-        }
-    }).mount('#copyLink');
-</script>
-}

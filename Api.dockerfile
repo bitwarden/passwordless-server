@@ -1,6 +1,6 @@
 # ** Build
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
 
 # Expose the target architecture set by the `docker build --platform` option, so that
 # we can build the assembly for the correct platform.
@@ -27,7 +27,7 @@ RUN dotnet publish src/Api/ \
 # ** Run
 
 # Use `runtime-deps` instead of `runtime` because we have a self-contained assembly
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine AS run
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:8.0 AS run
 
 LABEL org.opencontainers.image.title="Passwordless API Test Server"
 LABEL org.opencontainers.image.description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."
@@ -39,7 +39,8 @@ EXPOSE $ASPNETCORE_HTTP_PORTS
 
 # Alpine image doesn't come with the ICU libraries pre-installed, so we need to install them manually.
 # Technically, we shouldn't need globalization support in the API, but some EF queries fail without it at the moment.
-RUN apk add --no-cache icu-libs
+# `libsodium` is required by the `NSec.Cryptography` package.
+# RUN apk add --no-cache icu-libs libsodium gcompat
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Use the default non-root user for the app.

@@ -35,7 +35,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -59,7 +59,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -85,7 +85,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -116,7 +116,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.Time.Advance(TimeSpan.FromDays(365));
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -145,7 +145,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         var request = _requestFaker.Generate();
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -176,7 +176,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
             .Generate();
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -205,7 +205,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         HttpResponseMessage unsuccessfulResponse;
         while (true)
         {
-            var response = await client.PostAsJsonAsync("magic-link/send", request);
+            var response = await client.PostAsJsonAsync("magic-links/send", request);
             if (!response.IsSuccessStatusCode)
             {
                 unsuccessfulResponse = response;
@@ -251,7 +251,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         HttpResponseMessage unsuccessfulResponse;
         while (true)
         {
-            var response = await client.PostAsJsonAsync("magic-link/send", request);
+            var response = await client.PostAsJsonAsync("magic-links/send", request);
             if (!response.IsSuccessStatusCode)
             {
                 unsuccessfulResponse = response;
@@ -297,7 +297,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
 
         while (true)
         {
-            using var initialResponse = await client.PostAsJsonAsync("magic-link/send", request);
+            using var initialResponse = await client.PostAsJsonAsync("magic-links/send", request);
             if (!initialResponse.IsSuccessStatusCode)
                 break;
 
@@ -310,7 +310,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         api.ResetCache();
 
         // Act
-        using var response = await client.PostAsJsonAsync("magic-link/send", request);
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);

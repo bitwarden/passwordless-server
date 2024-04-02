@@ -19,7 +19,7 @@ public class MagicClient : PasswordlessClient
 
     public async Task SendMagicLinkAsync(string userId, string emailAddress, string urlTemplate)
     {
-        using var response = await _http.PostAsJsonAsync("magic-link/send",
+        using var response = await _http.PostAsJsonAsync("magic-links/send",
             new SendMagicLinkRequest
             {
                 UserId = userId,

@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,16 +12,20 @@ using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
 using Passwordless.Service.MagicLinks.Extensions;
+using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
 
 public static class MagicEndpoints
 {
+    /// <summary>
+    /// Name of the Magic Links Rate Limiter Policy
+    /// </summary>
     public const string RateLimiterPolicy = nameof(MagicEndpoints);
 
     /// <summary>
-    /// Adds rate limiting policy for magic link endpoints.
+    /// Adds a rate limiter policy for the MagicEndpoints. Each tenant will have its own partition.
     /// </summary>
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
         builder.AddPolicy(RateLimiterPolicy, context =>
@@ -36,22 +42,16 @@ public static class MagicEndpoints
                 return RateLimitPartition.GetNoLimiter(tenant);
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
-                new FixedWindowRateLimiterOptions
-                {
-                    Window = TimeSpan.FromMinutes(5),
-                    PermitLimit = 10,
-                    QueueLimit = 0,
-                    AutoReplenishment = true
-                }
+                new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(5), PermitLimit = 10, QueueLimit = 0, AutoReplenishment = true }
             );
         });
 
     /// <summary>
-    /// Maps magic link endpoints.
+    /// Maps the magic link endpoints.
     /// </summary>
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/magic-link")
+        var group = app.MapGroup("/magic-links")
             .RequireCors("default")
             .RequireSecretKey()
             .WithTags(OpenApiTags.MagicLinks);
@@ -64,9 +64,8 @@ public static class MagicEndpoints
     /// <summary>
     /// Sends an e-mail containing a magic link template allowing users to login.
     /// </summary>
-    /// <remarks>
-    /// Warning: Verify the e-mail address matches the user identifier in your backend.
-    /// </remarks>
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> SendMagicLinkAsync(
         [FromBody] SendMagicLinkRequest request,
         [FromServices] IFeatureContextProvider provider,

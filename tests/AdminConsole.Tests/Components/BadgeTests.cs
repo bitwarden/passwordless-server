@@ -1,4 +1,5 @@
 using Bunit;
+using Passwordless.AdminConsole.Components.Shared;
 using Passwordless.AdminConsole.TagHelpers;
 using Xunit;
 using Badge = Passwordless.AdminConsole.Components.Shared.Badge;
@@ -9,12 +10,12 @@ public class BadgeTests : TestContext
 {
     #region Class
     [Theory]
-    [InlineData(ColorVariant.Primary)]
-    [InlineData(ColorVariant.Success)]
-    [InlineData(ColorVariant.Danger)]
-    [InlineData(ColorVariant.Warning)]
-    [InlineData(ColorVariant.Info)]
-    public void Badge_Renders_WhiteText(ColorVariant variant)
+    [InlineData(ContextualStyles.Primary)]
+    [InlineData(ContextualStyles.Success)]
+    [InlineData(ContextualStyles.Danger)]
+    [InlineData(ContextualStyles.Warning)]
+    [InlineData(ContextualStyles.Info)]
+    public void Badge_Renders_WhiteText(ContextualStyles variant)
     {
         // Arrange
         var cut = RenderComponent<Badge>(parameters => parameters
@@ -29,16 +30,16 @@ public class BadgeTests : TestContext
 
     public static IEnumerable<object[]> BackgroundClassData = new List<object[]>
     {
-        new object[] {ColorVariant.Primary, "bg-blue-600"},
-        new object[] {ColorVariant.Success, "bg-green-600"},
-        new object[] {ColorVariant.Danger, "bg-red-600"},
-        new object[] {ColorVariant.Warning, "bg-yellow-600"},
-        new object[] {ColorVariant.Info, "bg-blue-600"}
+        new object[] {ContextualStyles.Primary, "bg-blue-600"},
+        new object[] {ContextualStyles.Success, "bg-green-600"},
+        new object[] {ContextualStyles.Danger, "bg-red-600"},
+        new object[] {ContextualStyles.Warning, "bg-yellow-600"},
+        new object[] {ContextualStyles.Info, "bg-blue-600"}
     };
 
     [Theory]
     [MemberData(nameof(BackgroundClassData))]
-    public void Badge_Renders_ExpectedBackground_Variant(ColorVariant variant, string expectedClass)
+    public void Badge_Renders_ExpectedBackground_Variant(ContextualStyles variant, string expectedClass)
     {
         // Arrange
         var cut = RenderComponent<Badge>(parameters => parameters

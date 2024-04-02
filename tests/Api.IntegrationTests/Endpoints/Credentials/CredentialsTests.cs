@@ -8,6 +8,7 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.Models;
+using Passwordless.Common.Models.Credentials;
 using Passwordless.Service.Models;
 using Xunit;
 using Xunit.Abstractions;
@@ -53,7 +54,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     }
 
     [Fact]
-    public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_with_secret_key()
+    public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_get_with_secret_key()
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(testOutput);
@@ -67,6 +68,28 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
 
         var problemDetails = await credentialsResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         problemDetails.Should().NotBeNull();
-        problemDetails!.Title.Should().Be("Please supply UserId in the query string value");
+        problemDetails!.Title.Should().Be("Required parameter \"string UserId\" was not provided from query string.");
+        problemDetails.Status.Should().Be((int)HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_post_with_secret_key()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        var request = new GetCredentialsRequest(null!);
+
+        // Act
+        using var credentialsResponse = await client.PostAsJsonAsync("credentials/list", request);
+
+        // Assert
+        credentialsResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var problemDetails = await credentialsResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Title.Should().Be("One or more validation errors occurred.");
+        problemDetails.Status.Should().Be((int)HttpStatusCode.BadRequest);
     }
 }

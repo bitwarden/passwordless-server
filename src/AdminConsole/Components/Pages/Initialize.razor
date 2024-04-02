@@ -21,7 +21,7 @@
 @inject ILogger<Initialize> Logger
 
 <h3>🚀 Let's set up the Admin Console</h3>
-<InfoAlert class="mt-5">Admin Console is configured to use the API at <strong>@ManagementOptions.Value.ApiUrl</strong></InfoAlert>
+<Alert Style="@ContextualStyles.Warning" class="mt-5">Admin Console is configured to use the API at <strong>@ManagementOptions.Value.ApiUrl</strong></Alert>
 
 <Panel>
     @if (!IsFormSubmitted)

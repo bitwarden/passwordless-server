@@ -12,12 +12,11 @@ using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
 using Passwordless.Api.OpenApi.Filters;
+using Passwordless.Api.RateLimiting;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
-using Passwordless.Common.Extensions;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
-using Passwordless.Common.Utils;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
@@ -43,7 +42,7 @@ builder.Services.AddSwaggerGen(swagger =>
     });
     swagger.OperationFilter<AuthorizationOperationFilter>();
     swagger.SupportNonNullableReferenceTypes();
-    swagger.SwaggerDoc("v1", new OpenApiInfo
+    swagger.SwaggerDoc("v4", new OpenApiInfo
     {
         Version = "v4",
         Title = "Passwordless.dev API",
@@ -55,6 +54,7 @@ builder.Services.AddSwaggerGen(swagger =>
             Url = new Uri("https://bitwarden.com/contact/")
         }
     });
+    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
 });
 
 if (builder.Configuration.IsSelfHosted())
@@ -116,12 +116,7 @@ services.AddCors(options
 services.AddHttpContextAccessor();
 services.AddScoped<ITenantProvider, TenantProvider>();
 
-services.AddRateLimiter(options =>
-{
-    // Reject with 429 instead of the default 503
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddMagicRateLimiterPolicy();
-});
+services.AddRateLimiting();
 
 services.ConfigureHttpJsonOptions(options =>
 {
@@ -184,11 +179,20 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseSwagger();
+app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+{
+    httpReq.HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+}));
+
 app.UseSwaggerUI(c =>
 {
+    c.SwaggerEndpoint("/swagger/v4/swagger.json", "v4");
     c.ConfigObject.ShowExtensions = true;
     c.ConfigObject.ShowCommonExtensions = true;
+    c.DefaultModelsExpandDepth(-1);
+    c.IndexStream = () => typeof(Program).Assembly.GetManifestResourceStream("Passwordless.Api.OpenApi.swagger.html");
+    c.InjectStylesheet("/openapi.css");
+    c.SupportedSubmitMethods();
 });
 
 if (builder.Configuration.IsSelfHosted())
