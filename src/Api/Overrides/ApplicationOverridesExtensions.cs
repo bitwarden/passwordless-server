@@ -12,6 +12,6 @@ public static class ApplicationOverridesExtensions
         this IConfiguration configuration,
         string applicationId) =>
         configuration
-            .Get<ApplicationOverrides[]>()
-            ?.FirstOrDefault(o => o.ApplicationId == applicationId);
+            .GetSection(applicationId)
+            .Get<ApplicationOverrides>();
 }
