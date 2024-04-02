@@ -3,8 +3,8 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
-using Passwordless.Api.Helpers;
 using Passwordless.Api.OpenApi;
+using Passwordless.Api.Overrides;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
@@ -16,7 +16,7 @@ namespace Passwordless.Api.Endpoints;
 
 public static class MagicEndpoints
 {
-    private const string RateLimiterPolicy = nameof(MagicEndpoints);
+    public const string RateLimiterPolicy = nameof(MagicEndpoints);
 
     /// <summary>
     /// Adds rate limiting policy for magic link endpoints.
@@ -26,9 +26,11 @@ public static class MagicEndpoints
         {
             var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
 
-            var isRateLimitBypassed =
-                context.RequestServices.GetRequiredService<IConfiguration>().IsRateLimitBypassEnabled() &&
-                context.Request.IsRateLimitBypassRequested();
+            var isRateLimitBypassed = context.RequestServices
+                .GetRequiredService<IConfiguration>()
+                .GetSection("ApplicationOverrides")
+                .TryGetApplicationOverrides(tenant)
+                ?.IsRateLimitBypassEnabled == true;
 
             if (isRateLimitBypassed)
                 return RateLimitPartition.GetNoLimiter(tenant);

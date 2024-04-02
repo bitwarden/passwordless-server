@@ -54,10 +54,4 @@ public static class HttpClientTestExtensions
         client.DefaultRequestHeaders.Add("Accept", "application/json");
         return client;
     }
-
-    public static HttpClient AddRateLimitBypass(this HttpClient client)
-    {
-        client.DefaultRequestHeaders.Add("X-RateLimit-Bypass", "true");
-        return client;
-    }
 }

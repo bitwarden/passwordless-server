@@ -1,13 +1,16 @@
 using MartinCostello.Logging.XUnit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
+using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Common.Services.Mail;
 using Xunit.Abstractions;
@@ -23,7 +26,8 @@ public class PasswordlessApi : ITestOutputHelperAccessor, IDisposable, IAsyncDis
 
     public PasswordlessApi(
         ITestOutputHelper? testOutput,
-        string databaseConnectionString)
+        string databaseConnectionString,
+        bool disableRateLimiting)
     {
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(host => host
@@ -35,6 +39,24 @@ public class PasswordlessApi : ITestOutputHelperAccessor, IDisposable, IAsyncDis
                 {
                     // Disable background services
                     services.RemoveAll<IHostedService>();
+
+                    // Disable rate limiting
+                    if (disableRateLimiting)
+                    {
+                        services.RemoveAll<IOptions<RateLimiterOptions>>();
+                        services.AddSingleton<IOptions<RateLimiterOptions>>(_ =>
+                            Options.Create(
+                                // Have to re-add all the rate limiter policies, because they are referenced
+                                // by the endpoints.
+                                new RateLimiterOptions()
+                                    .AddFixedWindowLimiter(MagicEndpoints.RateLimiterPolicy, limiter =>
+                                    {
+                                        limiter.PermitLimit = int.MaxValue;
+                                        limiter.Window = TimeSpan.FromSeconds(1);
+                                    })
+                            )
+                        );
+                    }
 
                     // Replace time
                     services.RemoveAll<TimeProvider>();
