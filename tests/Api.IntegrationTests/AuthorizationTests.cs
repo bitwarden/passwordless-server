@@ -30,7 +30,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ValidateThatEndpointsHaveProtectionAsync()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         // Act
@@ -64,7 +64,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ValidateThatMissingApiSecretThrowsAsync()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         // Act
@@ -88,7 +88,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ValidateThatInvalidApiSecretThrowsAsync()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         // Act
@@ -121,7 +121,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ApiSecretGivesHelpfulAdviceAsync(string input, string details)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         using var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
@@ -163,7 +163,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ApiPublicGivesHelpfulAdviceAsync(string input, string details)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");

@@ -22,7 +22,7 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_retrieve_token_to_start_registration()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var request = _tokenGenerator.Generate();
@@ -41,7 +41,7 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_retrieve_the_credential_create_options_and_session_token_for_creating_a_new_user()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var tokenRequest = _tokenGenerator.Generate();
@@ -70,7 +70,7 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);

@@ -24,7 +24,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_can_view_a_list_of_registered_users_credentials()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         const string originUrl = PasswordlessApi.OriginUrl;
@@ -57,7 +57,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_get_with_secret_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         // Act
@@ -76,7 +76,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_post_with_secret_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var request = new GetCredentialsRequest(null!);

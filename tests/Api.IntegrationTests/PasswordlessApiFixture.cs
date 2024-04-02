@@ -11,13 +11,13 @@ public class PasswordlessApiFixture : IAsyncDisposable, IAsyncLifetime
     public async Task InitializeAsync() => await _dbContainer.StartAsync();
 
     public async Task<PasswordlessApi> CreateApiAsync(
-        ITestOutputHelper? testOutput = null,
-        bool disableRateLimiting = true)
+        IReadOnlyDictionary<string, string?> settings = null,
+        ITestOutputHelper? testOutput = null)
     {
         var api = new PasswordlessApi(
-            testOutput,
             _dbContainer.GetConnectionString(),
-            disableRateLimiting
+            settings,
+            testOutput
         );
 
         // Perform migrations and make sure the API is ready to receive requests

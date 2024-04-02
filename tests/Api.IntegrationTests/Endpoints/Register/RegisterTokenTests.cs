@@ -19,7 +19,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         // Arrange
         var payload = new { UserId = "1", Username = "test" };
 
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -40,7 +40,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         registerTokenGenerator.RuleFor(x => x.UserId, userid);
         var registerToken = registerTokenGenerator.Generate();
 
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -69,7 +69,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         registerTokenGenerator.RuleFor(x => x.Username, input);
         var registerToken = registerTokenGenerator.Generate();
 
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -93,7 +93,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         var payload = new { UserId = "1", Username = "test", attestation };
 
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -130,7 +130,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
             Attestation = attestation
         };
 
-        await using var api = await apiFixture.CreateApiAsync(testOutput);
+        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
