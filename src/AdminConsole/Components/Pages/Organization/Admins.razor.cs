@@ -120,23 +120,19 @@ public partial class Admins : ComponentBase
     {
         Invites = await InvitationService.GetInvitesAsync(CurrentContext.OrgId!.Value);
 
-        var inviteToCancel = Invites.FirstOrDefault(x => x.HashedCode == CancelInviteForm.HashedCode);
+        var invite = Invites.FirstOrDefault(x => x.HashedCode == CancelInviteForm.HashedCode);
 
-        if (inviteToCancel is null)
+        if (invite is null)
         {
             InviteAdminModelState = new ModelState("Failed to find an invite to cancel.");
             return;
         }
 
-        await InvitationService.CancelInviteAsync(inviteToCancel);
+        await InvitationService.CancelInviteAsync(invite);
 
         var performedBy = await DataService.GetUserAsync();
 
-        EventLogger.LogCancelAdminInviteEvent(
-            performedBy,
-            inviteToCancel.ToEmail,
-            TimeProvider.GetUtcNow().UtcDateTime
-        );
+        EventLogger.LogCancelAdminInviteEvent(performedBy, invite.ToEmail, TimeProvider.GetUtcNow().UtcDateTime);
 
         NavigationManager.Refresh();
     }
