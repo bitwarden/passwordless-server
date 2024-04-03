@@ -60,7 +60,7 @@
         Allowlist = allowlist
             .Select(x => new ConfiguredAuthenticatorViewModel(
                 x.AaGuid,
-                mds.FirstOrDefault(m => m.AaGuid == x.AaGuid)?.Name ?? "Authenticator"))
+                mds.First(m => m.AaGuid == x.AaGuid).Name))
             .OrderBy(x => x.Name)
             .ToList();
         _isInitialized = true;

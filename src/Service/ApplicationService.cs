@@ -2,7 +2,6 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.MDS;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
@@ -11,16 +10,11 @@ public class ApplicationService : IApplicationService
 {
     private readonly ITenantStorage _storage;
     private readonly IEventLogger _eventLogger;
-    private readonly IMetaDataService _metaDataService;
 
-    public ApplicationService(
-        ITenantStorage storage,
-        IEventLogger eventLogger,
-        IMetaDataService metaDataService)
+    public ApplicationService(ITenantStorage storage, IEventLogger eventLogger)
     {
         _storage = storage;
         _eventLogger = eventLogger;
-        _metaDataService = metaDataService;
     }
 
     public async Task SetFeaturesAsync(SetFeaturesRequest features)
@@ -46,14 +40,9 @@ public class ApplicationService : IApplicationService
         return entities.Select(x => new ConfiguredAuthenticatorResponse(x.AaGuid, x.CreatedAt)).ToList();
     }
 
-    public async Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
+    public Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
     {
-        if (!(await _metaDataService.IsExistsAsync(request.AaGuids)))
-        {
-            throw new ApiException("One or more authenticators do not exist in the FIDO2 MDS.", 400);
-        }
-
-        await _storage.AddAuthenticatorsAsync(request.AaGuids, request.IsAllowed);
+        return _storage.AddAuthenticatorsAsync(request.AaGuids, request.IsAllowed);
     }
 
     public Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request)
