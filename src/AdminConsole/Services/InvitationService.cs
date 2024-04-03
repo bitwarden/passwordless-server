@@ -1,11 +1,9 @@
 using System.Security.Cryptography;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services.Mail;
+using Passwordless.Common.Extensions;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -13,15 +11,13 @@ public class InvitationService : IInvitationService
 {
     private readonly ConsoleDbContext _db;
     private readonly IMailService _mailService;
-    private readonly IUrlHelperFactory _urlHelperFactory;
-    private readonly IActionContextAccessor _actionContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public InvitationService(ConsoleDbContext db, IMailService mailService, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor)
+    public InvitationService(ConsoleDbContext db, IMailService mailService, IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
         _mailService = mailService;
-        _urlHelperFactory = urlHelperFactory;
-        _actionContextAccessor = actionContextAccessor;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task SendInviteAsync(string toEmail, int targetOrgId, string targetOrgName, string fromEmail, string fromName)
@@ -49,8 +45,8 @@ public class InvitationService : IInvitationService
         _db.Invites.Add(inv);
         await _db.SaveChangesAsync();
 
-        var urlBuilder = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-        string link = urlBuilder.PageLink("/organization/join", values: new { code = Convert.ToBase64String(code) });
+        var link = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/organization/join?code=" + Convert.ToBase64String(code);
+
         // send email
         await _mailService.SendInviteAsync(inv, link);
     }
