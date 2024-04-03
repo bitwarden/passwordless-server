@@ -31,7 +31,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_retrieve_configured_authenticators_when_attestation_is_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -52,7 +52,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_retrieve_configured_authenticators_with_expected_result()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -61,14 +61,14 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         await client.EnableAttestation(applicationName);
-        var request = new AddAuthenticatorsRequest(new List<Guid>
-        {
-            Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        }, true);
+        var request =
+            new AddAuthenticatorsRequest(new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") }, true);
         _ = await client.PostAsJsonAsync("authenticators/add", request);
 
         // Act
-        var actual = await client.GetFromJsonAsync<IReadOnlyCollection<ConfiguredAuthenticatorResponse>>("authenticators/list?isAllowed=true");
+        var actual =
+            await client.GetFromJsonAsync<IReadOnlyCollection<ConfiguredAuthenticatorResponse>>(
+                "authenticators/list?isAllowed=true");
 
         // Assert
         actual.Should().NotBeNull();
@@ -80,7 +80,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_receive_forbidden_when_retrieving_configured_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -100,7 +100,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_whitelist_authenticators_when_attestation_is_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -110,10 +110,8 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         await client.EnableAttestation(applicationName);
 
-        var request = new AddAuthenticatorsRequest(new List<Guid>
-        {
-            Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        }, true);
+        var request =
+            new AddAuthenticatorsRequest(new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") }, true);
 
         // Act
         var actual = await client.PostAsJsonAsync("authenticators/add", request);
@@ -126,7 +124,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_receive_forbidden_when_whitelisting_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -135,10 +133,8 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
 
-        var request = new AddAuthenticatorsRequest(new List<Guid>
-        {
-            Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        }, true);
+        var request =
+            new AddAuthenticatorsRequest(new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") }, true);
 
         // Act
         var actual = await client.PostAsJsonAsync("authenticators/add", request);
@@ -151,7 +147,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_delist_authenticators_when_attestation_is_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -161,10 +157,8 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         client.AddPublicKey(accountKeysCreation!.ApiKey1);
         await client.EnableAttestation(applicationName);
 
-        var whitelistRequest = new AddAuthenticatorsRequest(new List<Guid>
-        {
-            Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F")
-        }, true);
+        var whitelistRequest =
+            new AddAuthenticatorsRequest(new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") }, true);
         _ = await client.PostAsJsonAsync("authenticators/add", whitelistRequest);
         var request = new RemoveAuthenticatorsRequest(
             new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") });
@@ -180,7 +174,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_receive_forbidden_when_delisting_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 

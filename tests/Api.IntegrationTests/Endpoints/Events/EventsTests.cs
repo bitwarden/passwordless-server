@@ -21,7 +21,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_a_user_retrieving_the_api_keys()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -36,7 +36,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeysEnumerated.ToString());
@@ -46,7 +47,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_a_user_creating_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -62,7 +63,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyCreated.ToString());
@@ -72,7 +74,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_locking_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -90,7 +92,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyLocked.ToString());
@@ -100,7 +103,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_unlocking_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -119,7 +122,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyUnlocked.ToString());
@@ -129,7 +133,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_deleting_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -147,7 +151,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.AdminApiKeyDeleted.ToString());
@@ -157,7 +162,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_enabling_the_generate_sign_in_token_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -173,10 +178,12 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
-        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminGenerateSignInTokenEndpointEnabled.ToString());
+        var enabledEvent = applicationEvents.Events.FirstOrDefault(x =>
+            x.EventType == EventType.AdminGenerateSignInTokenEndpointEnabled.ToString());
         enabledEvent.Should().NotBeNull();
         enabledEvent!.PerformedBy.Should().Be(user);
     }
@@ -185,7 +192,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_disabling_the_generate_sign_in_token_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -201,10 +208,12 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
-        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminGenerateSignInTokenEndpointDisabled.ToString());
+        var enabledEvent = applicationEvents.Events.FirstOrDefault(x =>
+            x.EventType == EventType.AdminGenerateSignInTokenEndpointDisabled.ToString());
         enabledEvent.Should().NotBeNull();
         enabledEvent!.PerformedBy.Should().Be(user);
     }
@@ -213,7 +222,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_enabling_magic_links()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -229,10 +238,12 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
-        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminMagicLinksEnabled.ToString());
+        var enabledEvent =
+            applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminMagicLinksEnabled.ToString());
         enabledEvent.Should().NotBeNull();
         enabledEvent!.PerformedBy.Should().Be(user);
     }
@@ -241,7 +252,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_disabling_magic_links()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -257,10 +268,12 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
-        var enabledEvent = applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminMagicLinksDisabled.ToString());
+        var enabledEvent =
+            applicationEvents.Events.FirstOrDefault(x => x.EventType == EventType.AdminMagicLinksDisabled.ToString());
         enabledEvent.Should().NotBeNull();
         enabledEvent!.PerformedBy.Should().Be(user);
     }
@@ -269,7 +282,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_using_a_disabled_api_secret()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -288,17 +301,19 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
-        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthDisabledSecretKeyUsed.ToString());
+        applicationEvents.Events.Should()
+            .Contain(x => x.EventType == EventType.ApiAuthDisabledSecretKeyUsed.ToString());
     }
 
     [Fact]
     public async Task I_can_view_the_event_for_using_a_disabled_public_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -311,7 +326,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.ApiKey.EndsWith(accountKeysCreation.ApiKey1.GetLast(4)));
         _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
-        _ = await client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
+        _ = await client.PostAsJsonAsync("/signin/begin",
+            new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
 
         // Act
@@ -319,17 +335,19 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
-        applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthDisabledPublicKeyUsed.ToString());
+        applicationEvents.Events.Should()
+            .Contain(x => x.EventType == EventType.ApiAuthDisabledPublicKeyUsed.ToString());
     }
 
     [Fact]
     public async Task I_can_view_the_event_for_using_a_non_existent_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -338,14 +356,16 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         client.AddSecretKey(accountKeysCreation!.ApiSecret1);
         client.AddPublicKey($"{applicationName}:public:invalid-public-key");
         await client.EnableEventLogging(applicationName);
-        _ = await client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
+        _ = await client.PostAsJsonAsync("/signin/begin",
+            new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthInvalidPublicKeyUsed.ToString());
@@ -355,7 +375,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_using_a_non_existent_api_secret()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -372,7 +392,8 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         getApplicationEventsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationEvents = await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
+        var applicationEvents =
+            await getApplicationEventsResponse.Content.ReadFromJsonAsync<EventLog.GetEventLogEventsResponse>();
         applicationEvents.Should().NotBeNull();
         applicationEvents!.Events.Should().NotBeEmpty();
         applicationEvents.Events.Should().Contain(x => x.EventType == EventType.ApiAuthInvalidSecretKeyUsed.ToString());

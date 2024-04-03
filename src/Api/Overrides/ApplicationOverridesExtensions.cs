@@ -8,10 +8,10 @@ public static class ApplicationOverridesExtensions
     /// <summary>
     /// Gets overrides for the specified application from the configuration.
     /// </summary>
-    public static ApplicationOverrides? TryGetApplicationOverrides(
+    public static ApplicationOverrides GetApplicationOverrides(
         this IConfiguration configuration,
         string applicationId) =>
         configuration
             .GetSection(applicationId)
-            .Get<ApplicationOverrides>();
+            .Get<ApplicationOverrides>() ?? new ApplicationOverrides();
 }

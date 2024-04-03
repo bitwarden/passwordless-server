@@ -10,15 +10,18 @@ public class PasswordlessApiFixture : IAsyncDisposable, IAsyncLifetime
 
     public async Task InitializeAsync() => await _dbContainer.StartAsync();
 
-    public async Task<PasswordlessApi> CreateApiAsync(
-        IReadOnlyDictionary<string, string?> settings = null,
-        ITestOutputHelper? testOutput = null)
+    public async Task<PasswordlessApi> CreateApiAsync(PasswordlessApiOptions options)
     {
-        var api = new PasswordlessApi(
-            _dbContainer.GetConnectionString(),
-            settings,
-            testOutput
-        );
+        var api = new PasswordlessApi(new PasswordlessApiOptions
+        {
+            TestOutput = options.TestOutput,
+            // Add the connection string to the settings
+            Settings = new Dictionary<string, string?>(options.Settings)
+            {
+                ["ConnectionStrings:sqlite:api"] = null,
+                ["ConnectionStrings:mssql:api"] = _dbContainer.GetConnectionString()
+            }
+        });
 
         // Perform migrations and make sure the API is ready to receive requests
         using var httpClient = api.CreateClient();

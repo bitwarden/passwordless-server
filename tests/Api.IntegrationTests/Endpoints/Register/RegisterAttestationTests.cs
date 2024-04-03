@@ -39,7 +39,11 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
     public async Task I_can_use_supported_attestation_methods_to_register_a_new_user_when_attestation_is_allowed(string attestation, AttestationConveyancePreference expectedAttestation)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+{
+
+    TestOutput = testOutput
+});
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator
@@ -87,7 +91,11 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
     public async Task I_can_use_supported_none_attestation_method_to_register_a_new_user_when_attestation_is_disallowed(string attestation, AttestationConveyancePreference expectedAttestation)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+{
+
+    TestOutput = testOutput
+});
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator
@@ -135,7 +143,11 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
     public async Task I_cannot_use_other_than_none_attestation_method_to_register_a_new_user_when_attestation_is_disallowed(string attestation)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+{
+
+    TestOutput = testOutput
+});
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator

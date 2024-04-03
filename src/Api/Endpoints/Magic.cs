@@ -35,8 +35,8 @@ public static class MagicEndpoints
             var isRateLimitBypassed = context.RequestServices
                 .GetRequiredService<IConfiguration>()
                 .GetSection("ApplicationOverrides")
-                .TryGetApplicationOverrides(tenant)
-                ?.IsRateLimitBypassEnabled == true;
+                .GetApplicationOverrides(tenant)
+                .IsRateLimitBypassEnabled;
 
             if (isRateLimitBypassed)
                 return RateLimitPartition.GetNoLimiter(tenant);

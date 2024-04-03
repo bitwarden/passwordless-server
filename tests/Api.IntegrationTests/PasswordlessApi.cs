@@ -21,24 +21,13 @@ public class PasswordlessApi : ITestOutputHelperAccessor, IDisposable, IAsyncDis
 
     private readonly WebApplicationFactory<Program> _factory;
 
-    public PasswordlessApi(
-        string databaseConnectionString,
-        IReadOnlyDictionary<string, string?>? settings,
-        ITestOutputHelper? testOutput)
+    public PasswordlessApi(PasswordlessApiOptions options)
     {
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(host =>
             {
-                host
-                    .UseSetting("ConnectionStrings:sqlite:api", string.Empty)
-                    .UseSetting("ConnectionStrings:mssql:api", databaseConnectionString)
-                    .UseSetting("Flags:IsRateLimitBypassEnabled", "true");
-
-                if (settings is not null)
-                {
-                    foreach (var (key, value) in settings)
-                        host.UseSetting(key, value);
-                }
+                foreach (var (key, value) in options.Settings)
+                    host.UseSetting(key, value);
 
                 host
                     .ConfigureLogging(logging => logging.ClearProviders().AddXUnit(this))
@@ -57,7 +46,7 @@ public class PasswordlessApi : ITestOutputHelperAccessor, IDisposable, IAsyncDis
                     });
             });
 
-        TestOutput = testOutput;
+        TestOutput = options.TestOutput;
         Services = _factory.Services;
     }
 

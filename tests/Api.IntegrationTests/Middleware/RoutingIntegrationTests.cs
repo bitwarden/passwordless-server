@@ -15,7 +15,11 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
     public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_secret_with_a_non_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+{
+
+    TestOutput = testOutput
+});
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -34,7 +38,11 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
     public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_key_with_a_non_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+{
+
+    TestOutput = testOutput
+});
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();

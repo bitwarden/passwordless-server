@@ -24,22 +24,32 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_can_view_a_list_of_registered_users_credentials()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         const string originUrl = PasswordlessApi.OriginUrl;
         const string rpId = PasswordlessApi.RpId;
         var tokenRequest = _tokenGenerator.Generate();
         using var tokenResponse = await client.PostAsJsonAsync("register/token", tokenRequest);
-        var registerTokenResponse = await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
-        var registrationBeginRequest = new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
+        var registerTokenResponse =
+            await tokenResponse.Content.ReadFromJsonAsync<RegisterEndpoints.RegisterTokenResponse>();
+        var registrationBeginRequest =
+            new FidoRegistrationBeginDTO { Token = registerTokenResponse!.Token, Origin = originUrl, RPID = rpId };
         using var registrationBeginResponse = await client.PostAsJsonAsync("register/begin", registrationBeginRequest);
-        var sessionResponse = await registrationBeginResponse.Content.ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
+        var sessionResponse = await registrationBeginResponse.Content
+            .ReadFromJsonAsync<SessionResponse<CredentialCreateOptions>>();
 
-        var authenticatorAttestationRawResponse = await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
+        var authenticatorAttestationRawResponse =
+            await BrowserCredentialsHelper.CreateCredentialsAsync(sessionResponse!.Data, originUrl);
 
         _ = await client.PostAsJsonAsync("register/complete",
-            new RegistrationCompleteDTO { Origin = originUrl, RPID = rpId, Session = sessionResponse.Session, Response = authenticatorAttestationRawResponse });
+            new RegistrationCompleteDTO
+            {
+                Origin = originUrl,
+                RPID = rpId,
+                Session = sessionResponse.Session,
+                Response = authenticatorAttestationRawResponse
+            });
 
         // Act
         using var credentialsResponse = await client.GetAsync($"credentials/list?userId={tokenRequest.UserId}");
@@ -57,7 +67,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_get_with_secret_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         // Act
@@ -76,7 +86,7 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_post_with_secret_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(testOutput: testOutput);
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var request = new GetCredentialsRequest(null!);
