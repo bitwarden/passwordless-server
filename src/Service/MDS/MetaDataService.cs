@@ -77,7 +77,7 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
         return result;
     }
 
-    public async Task<bool> IsExistsAsync(IReadOnlyCollection<Guid> aaGuids)
+    public async Task<bool> ExistsAsync(IReadOnlyCollection<Guid> aaGuids)
     {
         var blob = await GetDistributedCachedBlob(base._repositories.First());
         var result = blob.Entries

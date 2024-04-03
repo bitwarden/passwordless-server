@@ -58,7 +58,7 @@ public class ApplicationServiceTests
         var payload = new AddAuthenticatorsRequest(new List<Guid> { Guid.NewGuid() }, isAllowed);
 
         _metaDataServiceMock.Setup(x =>
-                x.IsExistsAsync(
+                x.ExistsAsync(
                     It.Is<IReadOnlyCollection<Guid>>(p => p == payload.AaGuids)))
             .ReturnsAsync(false);
 
@@ -70,7 +70,7 @@ public class ApplicationServiceTests
         Assert.Equal("One or more authenticators do not exist in the FIDO2 MDS.", actual.Message);
 
         _metaDataServiceMock.Verify(x =>
-                x.IsExistsAsync(
+                x.ExistsAsync(
                     It.Is<IReadOnlyCollection<Guid>>(p => p == payload.AaGuids)),
             Times.Once);
 
@@ -88,7 +88,7 @@ public class ApplicationServiceTests
         var payload = new AddAuthenticatorsRequest(new List<Guid> { Guid.NewGuid() }, true);
 
         _metaDataServiceMock.Setup(x =>
-                x.IsExistsAsync(
+                x.ExistsAsync(
                     It.Is<IReadOnlyCollection<Guid>>(p => p == payload.AaGuids)))
             .ReturnsAsync(true);
 
@@ -97,7 +97,7 @@ public class ApplicationServiceTests
 
         // Assert
         _metaDataServiceMock.Verify(x =>
-                x.IsExistsAsync(
+                x.ExistsAsync(
                     It.Is<IReadOnlyCollection<Guid>>(p => p == payload.AaGuids)),
             Times.Once);
 

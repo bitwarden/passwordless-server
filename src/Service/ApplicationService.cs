@@ -48,7 +48,7 @@ public class ApplicationService : IApplicationService
 
     public async Task AddAuthenticatorsAsync(AddAuthenticatorsRequest request)
     {
-        if (!(await _metaDataService.IsExistsAsync(request.AaGuids)))
+        if (!(await _metaDataService.ExistsAsync(request.AaGuids)))
         {
             throw new ApiException("One or more authenticators do not exist in the FIDO2 MDS.", 400);
         }

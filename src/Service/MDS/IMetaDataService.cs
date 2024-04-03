@@ -13,5 +13,5 @@ public interface IMetaDataService
     /// </summary>
     /// <param name="aaGuids"></param>
     /// <returns>Returns `true` if all the authenticators exist in the FIDO2 MDS; otherwise, `false`.</returns>
-    Task<bool> IsExistsAsync(IReadOnlyCollection<Guid> aaGuids);
+    Task<bool> ExistsAsync(IReadOnlyCollection<Guid> aaGuids);
 }
