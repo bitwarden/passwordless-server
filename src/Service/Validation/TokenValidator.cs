@@ -42,11 +42,11 @@ public static class TokenValidator
 
         throw new ApiException("expired_token", $"The token expired {drift.Humanize()} ago.", StatusCodes.Status403Forbidden);
     }
-    
+
     public static void Validate(this VerifySignInToken token, DateTimeOffset now, SignInPurpose purpose)
     {
         token.Validate(now);
-        
+
         // Validate the purpose against the token
         if (purpose.Value == token.Purpose) return;
 
