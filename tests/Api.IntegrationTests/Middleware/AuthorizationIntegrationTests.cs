@@ -17,10 +17,10 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -40,10 +40,10 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -63,10 +63,10 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -86,10 +86,10 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();

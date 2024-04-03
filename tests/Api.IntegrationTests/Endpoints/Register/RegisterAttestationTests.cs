@@ -40,10 +40,10 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator
@@ -92,10 +92,10 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator
@@ -144,10 +144,10 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator

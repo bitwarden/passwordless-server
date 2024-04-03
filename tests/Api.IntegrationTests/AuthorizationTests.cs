@@ -31,10 +31,10 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         // Act
@@ -69,10 +69,10 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         // Act
@@ -97,10 +97,10 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         // Act
@@ -134,10 +134,10 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         using var request = new HttpRequestMessage(HttpMethod.Get, "/credentials/list?userId=1");
@@ -180,10 +180,10 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");

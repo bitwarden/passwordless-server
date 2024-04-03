@@ -23,10 +23,10 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var request = _tokenGenerator.Generate();
@@ -46,10 +46,10 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var tokenRequest = _tokenGenerator.Generate();
@@ -79,10 +79,10 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);

@@ -20,10 +20,10 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         var payload = new { UserId = "1", Username = "test" };
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -45,10 +45,10 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         var registerToken = registerTokenGenerator.Generate();
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -78,10 +78,10 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         var registerToken = registerTokenGenerator.Generate();
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -106,10 +106,10 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddSecretKey();
 
         // Act
@@ -147,10 +147,10 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         };
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddSecretKey();
 
         // Act

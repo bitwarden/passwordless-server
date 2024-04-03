@@ -23,10 +23,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var request = new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId };
@@ -49,10 +49,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
@@ -83,10 +83,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
@@ -121,10 +121,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var _httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
@@ -174,10 +174,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var applicationName = $"test{Guid.NewGuid():N}";
@@ -206,10 +206,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var client = api.CreateClient().AddManagementKey();
@@ -244,10 +244,10 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         // Arrange
         const int timeToLive = 120;
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
-{
+        {
 
-    TestOutput = testOutput
-});
+            TestOutput = testOutput
+        });
         using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var client = api.CreateClient().AddManagementKey();

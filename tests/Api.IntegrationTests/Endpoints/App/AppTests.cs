@@ -107,7 +107,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features",
             new SetFeaturesRequest
             {
-                PerformedBy = "a_user", EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod
+                PerformedBy = "a_user",
+                EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod
             });
 
         // Assert
@@ -157,7 +158,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         _ = await client.CreateApplicationAsync(name);
         var manageFeatureRequest = new ManageFeaturesRequest
         {
-            EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true
+            EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod,
+            EventLoggingIsEnabled = true
         };
 
         // Act
@@ -187,7 +189,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         _ = await client.CreateApplicationAsync(name);
         var manageAppFeatureRequest = new ManageFeaturesRequest
         {
-            EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod, EventLoggingIsEnabled = true
+            EventLoggingRetentionPeriod = expectedEventLoggingRetentionPeriod,
+            EventLoggingIsEnabled = true
         };
         _ = await client.PostAsJsonAsync($"/admin/apps/{name}/features", manageAppFeatureRequest);
 
@@ -301,7 +304,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
             .PostAsJsonAsync($"register/begin",
                 new FidoRegistrationBeginDTO
                 {
-                    Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId, Token = "a_bad_token"
+                    Origin = PasswordlessApi.OriginUrl,
+                    RPID = PasswordlessApi.RpId,
+                    Token = "a_bad_token"
                 });
 
         unauthorizedResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -331,7 +336,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
             .PostAsJsonAsync($"signin/begin",
                 new SignInBeginDTO
                 {
-                    Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId, UserId = "a_user"
+                    Origin = PasswordlessApi.OriginUrl,
+                    RPID = PasswordlessApi.RpId,
+                    UserId = "a_user"
                 });
 
         authorizedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -385,7 +392,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token",
             new SigninTokenRequest
             {
-                UserId = "some_user", Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId
+                UserId = "some_user",
+                Origin = PasswordlessApi.OriginUrl,
+                RPID = PasswordlessApi.RpId
             });
         signInGenerateTokenResponse.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
     }
@@ -412,7 +421,9 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token",
             new SigninTokenRequest
             {
-                UserId = "some_user", Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId
+                UserId = "some_user",
+                Origin = PasswordlessApi.OriginUrl,
+                RPID = PasswordlessApi.RpId
             });
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
