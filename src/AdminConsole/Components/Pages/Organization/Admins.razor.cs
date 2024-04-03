@@ -46,7 +46,6 @@ public partial class Admins : ComponentBase
     private async Task DeleteAdminAsync()
     {
         var users = await DataService.GetConsoleAdminsAsync();
-
         if (users is not { Count: > 1 })
         {
             DeleteAdminModelState = new ModelState("At least one admin is required in an organization.");
@@ -60,14 +59,11 @@ public partial class Admins : ComponentBase
             return;
         }
 
-        // Delete Credentials + aliases
         await PasswordlessClient.DeleteUserAsync(user.Id);
-        // Delete from admin consoles
         await UserManager.DeleteAsync(user);
 
-        var performedBy = users.FirstOrDefault(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
-        if (performedBy is not null)
-            EventLogger.LogDeleteAdminEvent(performedBy, user, TimeProvider.GetUtcNow().UtcDateTime);
+        var performedBy = users.First(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
+        EventLogger.LogDeleteAdminEvent(performedBy, user, TimeProvider.GetUtcNow().UtcDateTime);
 
         // if user is self
         if (user.Email == HttpContextAccessor.HttpContext!.User.GetEmail())
@@ -93,24 +89,21 @@ public partial class Admins : ComponentBase
             return;
         }
 
-        var existingInvites = await InvitationService.GetInvitesAsync(CurrentContext.OrgId!.Value);
-
-        if (existingInvites.Count >= 10)
+        var invites = await InvitationService.GetInvitesAsync(CurrentContext.OrgId!.Value);
+        if (invites.Count >= 10)
         {
             InviteAdminModelState = new ModelState("You can only have 10 pending invites at a time.");
             return;
         }
 
-        if (existingInvites.Any(x => string.Equals(x.ToEmail, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
+        if (invites.Any(x => string.Equals(x.ToEmail, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
         {
             InviteAdminModelState = new ModelState("There is a pending invite already for this address. Please cancel before resending.");
             return;
         }
 
         var user = await DataService.GetUserAsync();
-
         await InvitationService.SendInviteAsync(InviteForm.Email, CurrentContext.Organization!.Id, CurrentContext.Organization!.Name, user.Email!, user.Name);
-
         EventLogger.LogInviteAdminEvent(user, InviteForm.Email, TimeProvider.GetUtcNow().UtcDateTime);
 
         NavigationManager.Refresh();
