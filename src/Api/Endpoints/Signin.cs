@@ -41,6 +41,10 @@ public static class SigninEndpoints
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
     }
 
+    /// <summary>
+    /// Manually generates an authentication token for the specified user, side-stepping the usual authentication flow.
+    /// This approach can be used to implement a "magic link"-style login and other similar scenarios.
+    /// </summary>
     [ProducesResponseType(typeof(SigninTokenRequest), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> GenerateTokenAsync(
