@@ -46,9 +46,7 @@ void RunTheApp()
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    bool isSelfHosted = builder.Configuration.GetValue<bool>("SelfHosted");
-
-    if (isSelfHosted)
+    if (builder.Configuration.IsSelfHosted())
     {
         builder.AddSelfHostingConfiguration();
     }
@@ -157,9 +155,11 @@ void RunTheApp()
     builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
     builder.Services.AddAntiforgery();
-
     builder.Services.AddRateLimiting();
+
     builder.AddPasswordlessHealthChecks();
+
+    services.AddScoped<ISetupService, SetupService>();
 
     WebApplication app;
     try
@@ -186,7 +186,7 @@ void RunTheApp()
         app.UseHsts();
     }
 
-    if (isSelfHosted)
+    if (builder.Configuration.IsSelfHosted())
     {
         app.UseMiddleware<HttpOverridesMiddleware>();
         app.ExecuteMigration();
@@ -216,6 +216,7 @@ void RunTheApp()
 
     app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
+    app.MapBillingEndpoints();
 
     app.MapPasswordlessHealthChecks();
 

@@ -14,7 +14,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.0" />
     <PackageReference Include="Datadog.Trace" Version="2.41.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -32,5 +32,9 @@
     <None Update="mds.jwt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="OpenApi\swagger.html" />
   </ItemGroup>
 </Project>

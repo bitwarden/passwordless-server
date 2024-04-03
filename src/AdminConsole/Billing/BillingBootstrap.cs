@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Passwordless.AdminConsole.Billing.BackgroundServices;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Services;
+using Passwordless.Common.Configuration;
 using Stripe;
 
 namespace Passwordless.AdminConsole.Billing;
@@ -16,13 +18,13 @@ public static class BillingBootstrap
         builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();
 
         // Todo: Improve this self-hosting story.
-        if (builder.Configuration.GetValue("SelfHosted", false))
+        if (builder.Configuration.IsSelfHosted())
         {
             builder.Services.AddScoped<ISharedBillingService, NoOpBillingService>();
         }
         else
         {
-            StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
+            builder.Services.AddHostedService<StripeConfigurationUpdaterBackgroundService>();
             builder.Services.AddScoped<ISharedBillingService, SharedStripeBillingService>();
             builder.Services.AddHostedService<MeteredBillingBackgroundService>();
         }

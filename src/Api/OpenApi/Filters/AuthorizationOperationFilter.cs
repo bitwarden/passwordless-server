@@ -26,8 +26,10 @@ public class AuthorizationOperationFilter : IOperationFilter
                     Required = true,
                     Schema = new OpenApiSchema
                     {
-                        Type = "string",
-                        Default = new OpenApiString($"yourappid:public:{Guid.Empty:N}")
+                        Description = "Your public API key",
+                        Example = new OpenApiString("yourappid:public:00000000000000000000000000000000"),
+                        Nullable = false,
+                        Type = "string"
                     }
                 });
                 break;
@@ -39,8 +41,10 @@ public class AuthorizationOperationFilter : IOperationFilter
                     Required = true,
                     Schema = new OpenApiSchema
                     {
-                        Type = "string",
-                        Default = new OpenApiString($"yourappid:secret:{Guid.Empty:N}")
+                        Description = "Your private API key",
+                        Example = new OpenApiString("yourappid:secret:00000000000000000000000000000000"),
+                        Nullable = false,
+                        Type = "string"
                     }
                 });
                 break;

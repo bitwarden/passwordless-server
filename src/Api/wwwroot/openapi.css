@@ -1,0 +1,341 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("./DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+}
+
+.swagger-ui html {
+    box-sizing: border-box
+}
+
+.swagger-ui *, .swagger-ui :after, .swagger-ui :before {
+    box-sizing: inherit
+}
+
+.swagger-ui body {
+    background: #ffffff;
+}
+
+.swagger-ui .info .title small.version-stamp {
+    background-color: #ffbf00;
+}
+
+.swagger-ui .opblock-tag {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock-tag small {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock .opblock-section-header label {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+
+.swagger-ui .opblock .opblock-section-header h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+    background: #000;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #fff
+}
+
+.swagger-ui .opblock .opblock-summary-operation-id, .swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
+    color: #000000;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock.opblock-delete,
+.swagger-ui .opblock.opblock-get,
+.swagger-ui .opblock.opblock-head,
+.swagger-ui .opblock.opblock-options,
+.swagger-ui .opblock.opblock-patch,
+.swagger-ui .opblock.opblock-post,
+.swagger-ui .opblock.opblock-put {
+    border-color: #175ddc;
+    background: #f3f6f9;
+}
+
+.swagger-ui .opblock.opblock-deprecated {
+    border-color: #f3f6f9;
+    background: #f3f6f9;
+    opacity: 0.6;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method,
+.swagger-ui .opblock.opblock-get .opblock-summary-method,
+.swagger-ui .opblock.opblock-head .opblock-summary-method,
+.swagger-ui .opblock.opblock-options .opblock-summary-method,
+.swagger-ui .opblock.opblock-patch .opblock-summary-method,
+.swagger-ui .opblock.opblock-post .opblock-summary-method,
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+    background: #175ddc;
+}
+
+.swagger-ui .opblock.opblock-deprecated .opblock-summary-method {
+    background: #f3f6f9;
+    color: #3b4151;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary,
+.swagger-ui .opblock.opblock-get .opblock-summary,
+.swagger-ui .opblock.opblock-head .opblock-summary,
+.swagger-ui .opblock.opblock-options .opblock-summary,
+.swagger-ui .opblock.opblock-patch .opblock-summary,
+.swagger-ui .opblock.opblock-post .opblock-summary,
+.swagger-ui .opblock.opblock-put .opblock-summary {
+    border-color: #175ddc;
+}
+
+.swagger-ui .opblock.opblock-deprecated .opblock-summary {
+    border-color: #ebebeb;
+}
+
+.swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus, .swagger-ui .opblock-summary-control:focus {
+    outline: 0;
+}
+
+.swagger-ui .opblock.opblock-delete .tab-header .tab-item.active h4 span:after,
+.swagger-ui .opblock.opblock-get .tab-header .tab-item.active h4 span:after,
+.swagger-ui .opblock.opblock-post .tab-header .tab-item.active h4 span:after,
+.swagger-ui .opblock.opblock-put .tab-header .tab-item.active h4 span:after{
+    background-color: #175ddc;
+}
+
+.swagger-ui .opblock-description-wrapper, .swagger-ui .opblock-description-wrapper h4, .swagger-ui .opblock-title_normal, .swagger-ui .opblock-title_normal h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .opblock-description-wrapper p, .swagger-ui .opblock-title_normal p {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .responses-inner h4, .swagger-ui .responses-inner h5 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .response-col_status {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .scheme-container .schemes>label {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .btn,
+.swagger-ui .btn.execute,
+.swagger-ui .btn.authorize {
+    background: #ffffff;
+    color: black;
+    border-color: #175ddc;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: #175ddc;
+}
+
+@-webkit-keyframes pulse {
+    0% {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, .8)
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(73, 144, 226, 0)
+    }
+    to {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, 0)
+    }
+}
+
+@keyframes pulse {
+    0% {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, .8)
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(73, 144, 226, 0)
+    }
+    to {
+        color: #fff;
+        background: #4990e2;
+        box-shadow: 0 0 0 0 rgba(73, 144, 226, 0)
+    }
+}
+
+.swagger-ui button {
+    cursor: pointer;
+}
+
+.swagger-ui select {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui label {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui input[type=email].invalid, .swagger-ui input[type=password].invalid, .swagger-ui input[type=search].invalid, .swagger-ui input[type=text].invalid {
+    border-color: #ff4e63;
+}
+
+.swagger-ui textarea:focus {
+    border: 2px solid #175ddc;
+}
+
+.swagger-ui .dialog-ux .modal-ux-content p {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .dialog-ux .modal-ux-content h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui section.models h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui section.models h5 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .model-title {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .prop-type {
+    color: #1A41AC;
+}
+
+.swagger-ui .prop-format {
+    color: #999
+}
+
+.swagger-ui table thead tr td, .swagger-ui table thead tr th {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .parameters-col_description p {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .parameter__name {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .parameter__name.required span {
+    color: #ff4e63;
+}
+
+.swagger-ui .parameter__name.required:after {
+    content: "required";
+    color: #ff4e63;
+}
+
+.swagger-ui .parameter__in {
+    color: #888
+}
+
+.swagger-ui .topbar a {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .topbar .download-url-wrapper input[type=text] {
+    border: 2px solid #175ddc;
+}
+
+.swagger-ui .topbar .download-url-wrapper .download-url-button {
+    background: #175ddc;
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .info p {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .info a {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+    color: #175ddc;
+}
+
+.swagger-ui .info a:hover {
+    color: #175ddc;
+}
+
+.swagger-ui .info > div {
+    margin: 0;
+}
+
+.swagger-ui .info .title {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .info .title small pre {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .scopes h2 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui .errors-wrapper {
+    margin: 20px;
+    padding: 10px 20px;
+    -webkit-animation: scaleUp .5s;
+    animation: scaleUp .5s;
+    border: 2px solid #ff4e63;
+    border-radius: 4px;
+    background: rgba(249, 62, 62, .1)
+}
+
+.swagger-ui .errors-wrapper hgroup h4 {
+    font-family: DM Sans,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,sans-serif;
+}
+
+.swagger-ui table.model tr.property-row .star {
+    color: #ff4e63;
+}
+
+.swagger-ui .topbar {
+    padding: 8px 30px;
+    background-color: #175ddc;
+}
+
+.swagger-ui .topbar .download-url-wrapper .select-label select {
+    border: 2px solid white;
+}
+
+img[alt="Swagger UI"] {
+    display: block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    content: url('./passwordless-light.svg');
+    max-width: 100%;
+    max-height: 100%;
+}
+
+th, td {
+    border: none;
+}
+
+tr {
+    border-top: none;
+}

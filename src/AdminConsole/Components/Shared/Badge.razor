@@ -10,7 +10,7 @@
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
     
     [Parameter]
-    public ColorVariant? Variant { get; set; }
+    public ContextualStyles? Variant { get; set; }
     
     [Parameter]
     public string? Message { get; set; }
@@ -24,9 +24,9 @@
     private string ClassVariant =>
         Variant switch
         {
-            ColorVariant.Danger => "bg-red-600 text-white",
-            ColorVariant.Success => "bg-green-600 text-white",
-            ColorVariant.Warning => "bg-yellow-600 text-white",
+            ContextualStyles.Danger => "bg-red-600 text-white",
+            ContextualStyles.Success => "bg-green-600 text-white",
+            ContextualStyles.Warning => "bg-yellow-600 text-white",
             _ => "bg-blue-600 text-white"
         };
 }
