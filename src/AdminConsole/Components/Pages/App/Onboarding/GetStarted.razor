@@ -24,7 +24,7 @@
                     <div class="mt-3 sm:ml-4 sm:mt-0">
                         <CopyInputField Value="@PasswordlessOptions.Value.ApiUrl" Title="API Url"/>
                         <CopyInputField Value="@PublicApiKey" Title="Public API Key"/>
-                        <CopyInputField Value="@PrivateApiKey" Title="Private API Key"/>
+                        <CopyInputField Value="@PrivateApiKey" Title="Private API Key" Type="password" />
 
                         <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
                     </div>
@@ -74,7 +74,7 @@
 
         <Panel Header="4. Let's start coding!">
             <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Please take a look at our Getting Started guide to learn how register your first credential. Or you can use the <a class="link-blue" href="/app/playground/client">Playground</a> here in the admin console to experiment.</p>
+                <p>Please take a look at our Getting Started guide to learn how register your first credential. Or you can use the <a class="link-blue" href="/app/@AppId/playground/new-account">Playground</a> here in the admin console to experiment.</p>
             </div>
             <PanelFooter>
                 <a target="_blank" href="https://docs.passwordless.dev/guide/get-started.html" class="link-blue">View the Getting Started guide <span aria-hidden="true">&rarr;</span></a>

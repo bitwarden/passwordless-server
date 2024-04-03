@@ -4,6 +4,6 @@ namespace Passwordless.Common.Models.Authenticators;
 
 public record AddAuthenticatorsRequest(
     [Required, MinLength(1)]
-    IEnumerable<Guid> AaGuids,
+    IReadOnlyCollection<Guid> AaGuids,
 
     bool IsAllowed);

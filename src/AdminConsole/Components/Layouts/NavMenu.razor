@@ -13,75 +13,49 @@
         <AuthorizeView>
             <Authorized>
                 <div class="sidebar-content">
-                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/Organization/Overview">
-                        <CodeBracketSquareIcon Class="nav-link-icon"/> Applications
-                    </NavLink>
+                    <NavMenuItem Href="@OrganizationOverviewUrl" Icon="@typeof(CodeBracketSquareIcon)" Label="Applications" />
                     @if (CurrentContext.InAppContext)
                     {
                         <div id="app-submenu" class="nav-link-submenu">
                             <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
                             @if (!CurrentContext.IsPendingDelete)
                             {
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="@OnboardingUrl">
-                                    <StartIcon Class="nav-link-icon"/> Getting Started
-                                </NavLink>
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="@PlaygroundUrl">
-                                    <BeakerIcon Class="nav-link-icon"/> Playground
-                                </NavLink>
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="@UsersUrl">
-                                    <UsersIcon Class="nav-link-icon"/> Users
-                                </NavLink>
+                                <NavMenuItem Href="@OnboardingUrl" Icon="typeof(StartIcon)" Label="Getting Started" />
+                                <NavMenuItem Href="@PlaygroundUrl" Icon="typeof(BeakerIcon)" Label="Playground" />
+                                <NavMenuItem Href="@UsersUrl" Icon="typeof(UsersIcon)" Label="Users" />
                                 @if (Environment.IsDevelopment())
                                 {
-                                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="@ReportingUrl">
-                                        <StackedBarChartIcon Class="nav-link-icon" /> Reporting
-                                    </NavLink>
+                                    <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
                                 }
                             }
-                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="@SettingsUrl">
-                                <CogIcon Class="nav-link-icon"/> Settings
-                            </NavLink>
+                            <NavMenuItem Href="@SettingsUrl" Icon="typeof(CogIcon)" Label="Settings" />
                             @if (CurrentContext.Features.EventLoggingIsEnabled)
                             {
-                                <NavLink class="nav-link" ActiveClass="nav-link-active" href="@AppLogsUrl">
-                                    <CodeBracketSquareIcon Class="nav-link-icon"/> App Logs
-                                </NavLink>
+                                <NavMenuItem Href="@AppLogsUrl" Icon="typeof(CodeBracketSquareIcon)" Label="App Logs" />
                             }
                         </div>
                     }
-                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/default">
-                        <DollarIcon Class="nav-link-icon"/> Billing
-                    </NavLink>
+                    <NavMenuItem Href="/billing/default" Icon="@typeof(DollarIcon)" Label="Billing" />
                     @if (HttpContextAccessor.HttpContext!.Request.Path.StartsWithSegments("/billing"))
                     {
                         <div class="nav-link-submenu">
-                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/manage">
-                                <CogIcon Class="nav-link-icon"/> Manage
-                            </NavLink>
-                            <NavLink class="nav-link" ActiveClass="nav-link-active" href="/billing/invoices">
-                                <DocumentTextIcon Class="nav-link-icon"/> Invoices
-                            </NavLink>
+                            <NavMenuItem Href="/billing/manage" Icon="@typeof(CogIcon)" Label="Manage" />
+                            <NavMenuItem Href="/billing/invoices" Icon="@typeof(DocumentTextIcon)" Label="Invoices" />
                         </div>
                     }
-                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/admins">
-                        <UsersIcon Class="nav-link-icon"/> Admins
-                    </NavLink>
-                    <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/settings">
-                        <CogIcon Class="nav-link-icon"/> Settings
-                    </NavLink>
+                    <NavMenuItem Href="/organization/admins" Icon="@typeof(UsersIcon)" Label="Admins" />
+                    <NavMenuItem Href="/organization/settings" Icon="@typeof(CogIcon)" Label="Settings" />
                     @if (CurrentContext.OrganizationFeatures.EventLoggingIsEnabled)
                     {
-                        <NavLink class="nav-link" ActiveClass="nav-link-active" href="/organization/log">
-                            <CodeBracketSquareIcon Class="nav-link-icon"/> Organization Logs
-                        </NavLink>
+                        <NavMenuItem Href="/organization/log" Icon="@typeof(CodeBracketSquareIcon)" Label="Organization Logs" />
                     }
-        
+
                 </div>
                 <div class="sidebar-footer">
                     @if (!CurrentContext.Organization!.HasSubscription)
                     {
                         <NavLink href="/billing/manage" class="block">
-                            <Badge Variant="ColorVariant.Warning" Message="Free organization"></Badge>
+                            <Badge Variant="ContextualStyles.Warning" Message="Free organization"></Badge>
                         </NavLink>
                     }
                     <div class="space-y-2">

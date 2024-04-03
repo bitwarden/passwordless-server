@@ -1,6 +1,5 @@
 @page "/app/{AppId}/logs"
 @using System.Collections.Immutable
-@using Passwordless.AdminConsole.Pages.Components
 @using Passwordless.AdminConsole.EventLog.DTOs
 @inherits BaseApplicationPage
 
@@ -47,7 +46,7 @@
                 <div class="flex justify-center space-x-4">
                     @if (PageList.HasPreviousPage)
                     {
-                        <a class="btn-primary" href="@($"/app/{AppId}/logs?pageNumber={PageList.CurrentIndex - 1}")">Prev</a>
+                        <a class="btn-primary" href="@($"/app/{AppId}/logs?pageNumber={PageList.CurrentPage - 1}")">Prev</a>
 
                     }
 
@@ -58,7 +57,7 @@
 
                     @if (PageList.HasNextPage)
                     {
-                        <a class="btn-primary" href="@($"/app/{AppId}/logs?pageNumber={PageList.CurrentIndex + 1}")">Next</a>
+                        <a class="btn-primary" href="@($"/app/{AppId}/logs?pageNumber={PageList.CurrentPage + 1}")">Next</a>
                     }
                 </div>
             }
@@ -98,7 +97,7 @@
         try
         {
             var eventsResponse = await EventLogService.GetEventLogs(PageNumber.Value, NumberOfResults.Value);
-            PageList = new PagedList(eventsResponse.TotalEventCount, PageNumber.Value, NumberOfResults.Value);
+            PageList = new PagedTable(eventsResponse.TotalEventCount, PageNumber.Value, NumberOfResults.Value);
             Events = eventsResponse.Events;
         }
         catch (Exception ex)
@@ -110,7 +109,7 @@
     
     public IEnumerable<EventLogEvent>? Events { get; private set; }
     
-    public PagedList? PageList { get; private set; }
+    public PagedTable? PageList { get; private set; }
     
     public string EmptyMessage => $"This application has no events from the past {CurrentContext.Features.EventLoggingRetentionPeriod} days.";
 
