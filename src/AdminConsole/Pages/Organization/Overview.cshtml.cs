@@ -38,7 +38,7 @@ public class OverviewModel : PageModel
     public string GetApplicationUrl(Models.Application application)
     {
         string url = application.DeleteAt.HasValue
-            ? "/app/Settings/Settings"
+            ? $"/app/{application.Id}/Settings"
             : $"/app/{application.Id}/credentials/list";
         return url;
     }
