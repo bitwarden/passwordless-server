@@ -1,12 +1,11 @@
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.AdminConsole.EventLog.Loggers
-
 @inject IPasswordlessManagementClient ManagementClient;
-@inject  ICurrentContext CurrentContext;
-@inject  IHttpContextAccessor HttpContextAccessor;
-@inject  IEventLogger EventLogger;
-@inject  NavigationManager NavigationManager;
-@inject  ILogger<ApiKeysSection> Logger;
+@inject ICurrentContext CurrentContext;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject IEventLogger EventLogger;
+@inject NavigationManager NavigationManager;
+@inject ILogger<ApiKeysSection> Logger;
 
 @if (!CurrentContext.IsPendingDelete)
 {
@@ -83,7 +82,7 @@
                                         value="delete">
                                         <DeleteIcon Class="h-6 w-6"/> Delete
                                     </ConfirmButton>
-                                }                   
+                                }
                                 <input type="hidden" value="@apiKey.Id" name="ConfirmedSelectedForm.ApiKeyId"/>
                             </ConfirmEditForm>
                         </td>
