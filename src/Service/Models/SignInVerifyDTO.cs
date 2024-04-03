@@ -1,4 +1,6 @@
-﻿namespace Passwordless.Service.Models;
+﻿using Passwordless.Common.Models.Apps;
+
+namespace Passwordless.Service.Models;
 
 public class SignInVerifyDTO : RequestBase
 {

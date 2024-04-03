@@ -1,5 +1,6 @@
 using Humanizer;
 using Microsoft.AspNetCore.Http;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;

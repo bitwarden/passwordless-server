@@ -1,4 +1,6 @@
-﻿namespace Passwordless.Service.Models;
+﻿using Passwordless.Common.Models.Apps;
+
+namespace Passwordless.Service.Models;
 
 public class SignInBeginDTO : RequestBase
 {
@@ -6,5 +8,3 @@ public class SignInBeginDTO : RequestBase
     public string UserId { get; init; }
     public SignInPurpose Purpose { get; set; } = SignInPurposes.SignIn;
 }
-
-public record SignInPurpose(string Value);

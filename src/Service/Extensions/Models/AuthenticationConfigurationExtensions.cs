@@ -1,4 +1,6 @@
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
+using AuthenticationConfiguration = Passwordless.Service.Models.AuthenticationConfiguration;
 
 namespace Passwordless.Service.Extensions.Models;
 

@@ -1,4 +1,5 @@
 using Fido2NetLib.Objects;
+using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.Service.Models;
 
