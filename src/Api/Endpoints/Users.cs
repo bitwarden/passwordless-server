@@ -58,7 +58,7 @@ public static class UsersEndpoints
     /// <summary>
     /// Deletes a user.
     /// </summary>
-    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     public static async Task<IResult> DeleteUserAsync(
         [FromBody] UserDeletePayload payload,
@@ -69,7 +69,7 @@ public static class UsersEndpoints
 
         eventLogger.LogDeletedUserEvent(payload.UserId);
 
-        return NoContent();
+        return Ok();
     }
 
     public record CountRecord(int Count);
