@@ -61,6 +61,6 @@
 }
 else
 {
-    <Feedback name="_error" LinkUrl="@Url.PageLink("/Billing/Manage")" LinkText="Upgrade" asp-if="!Model.CanCreateApplication"
+    <Feedback name="_error" LinkUrl="/Billing/Manage" LinkText="Upgrade" asp-if="!Model.CanCreateApplication"
           message="You need to upgrade to a paid organization to create more applications" />
 }
