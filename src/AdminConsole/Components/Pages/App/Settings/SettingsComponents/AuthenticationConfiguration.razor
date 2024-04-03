@@ -1,0 +1,89 @@
+@using Humanizer
+@using Passwordless.AdminConsole.Helpers
+@using System.Collections.Immutable
+@using Passwordless.Service.Models
+@using Fido2NetLib.Objects
+@inject ICurrentContext CurrentContext;
+@inject NavigationManager NavigationManager;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject IScopedPasswordlessClient Passwordless;
+
+@if (!CurrentContext.IsPendingDelete)
+{
+    <Panel Header="Authentication Configuration">
+        <p>List of configurations for your authentication tokens. Read more in the <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#authentiation-scopes">docs</a></p>
+
+        <NavLink class="btn btn-primary nav-link">Add New Authentication Configuration</NavLink>
+        
+        <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Actions" })">
+            @if (Configurations.Any())
+            {
+                @foreach (var config in Configurations)
+                {
+                    <tr>
+                        <td>@config.Purpose</td>
+                        <td>@config.UserVerification</td>
+                        <td>@config.TimeToLive</td>
+                        <td>
+                            <NavLink>
+                                <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
+                            </NavLink>
+                            
+                            @if (config.CanDelete)
+                            {
+                                <ConfirmButton
+                                    ConfirmTitle="Delete Authentication Configuration"
+                                    ConfirmDescription="Are you sure you want to delete this configuration?"
+                                    ConfirmButtonText="Delete"
+                                    class="btn-danger flex items-center"
+                                    name="ConfirmSelectedForm.Action"
+                                    type="submit"
+                                    value="delete">
+                                    <DeleteIcon Class="h-6 w-6"></DeleteIcon>
+                                </ConfirmButton>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </Table>
+    </Panel>
+}
+
+@code {
+    public string AppId => CurrentContext.AppId!;
+
+    public IReadOnlyCollection<string> RequiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
+
+    public CreatePurposeForm Form { get; set; }
+
+    public IReadOnlyCollection<AuthenticationConfigurationEntry> Configurations { get; set; } = Array.Empty<AuthenticationConfigurationEntry>();
+
+    public sealed class CreatePurposeForm
+    {
+        public string Purpose { get; set; } = string.Empty;
+        public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
+        public TimeSpan TimeToLive { get; set; } = TimeSpan.FromMinutes(2);
+    }
+
+    public record AuthenticationConfigurationEntry(string Purpose, string UserVerification, string TimeToLive, bool CanDelete);
+
+    private AuthenticationConfigurationEntry GetEntry(Common.Models.Apps.AuthenticationConfiguration configuration) =>
+        new(configuration.Purpose,
+            configuration.UserVerificationRequirement,
+            TimeSpan.FromSeconds(configuration.TimeToLive).Humanize(),
+            RequiredAuthenticationConfigurationNames.All(x => !string.Equals(x, configuration.Purpose, StringComparison.OrdinalIgnoreCase)));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CurrentContext.IsPendingDelete) return;
+
+        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
+        {
+        }
+
+        Configurations = (await Passwordless.GetAuthenticationConfigurations()).Scopes.Select(GetEntry).ToImmutableArray();
+    }
+
+    protected void OnCreateNewPurposeSubmitted() => NavigationManager.NavigateTo($"app/{AppId}/settings/create-authentication-purpose");
+}

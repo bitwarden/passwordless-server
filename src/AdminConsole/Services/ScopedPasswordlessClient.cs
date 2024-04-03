@@ -37,6 +37,9 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task RemoveAuthenticatorsAsync(RemoveAuthenticatorsRequest request);
 
     Task SetFeaturesAsync(SetFeaturesRequest request);
+
+    Task<GetAuthenticationScopesResult> GetAuthenticationConfigurations();
+    Task SaveAuthenticationConfiguration(AuthenticationConfiguration configuration);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -130,6 +133,15 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     public async Task SetFeaturesAsync(SetFeaturesRequest request)
     {
         using var response = await _client.PostAsJsonAsync($"/apps/features", request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public Task<GetAuthenticationScopesResult> GetAuthenticationConfigurations() =>
+        _client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/scopes")!;
+
+    public async Task SaveAuthenticationConfiguration(AuthenticationConfiguration configuration)
+    {
+        using var response = await _client.PostAsJsonAsync("signin/scopes", configuration);
         response.EnsureSuccessStatusCode();
     }
 }

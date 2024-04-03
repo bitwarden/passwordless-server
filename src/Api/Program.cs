@@ -151,6 +151,8 @@ services.AddMemoryCache();
 services.AddDistributedMemoryCache();
 builder.AddMetaDataService();
 
+builder.Services.AddTransient<IAuthenticationScopeService, AuthenticationScopeService>();
+
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
