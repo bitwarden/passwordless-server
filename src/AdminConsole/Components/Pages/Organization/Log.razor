@@ -1,6 +1,5 @@
 @page "/organization/log"
 @using Passwordless.AdminConsole.EventLog.DTOs
-@using Passwordless.AdminConsole.Pages.Components
 @using System.Collections.Immutable
 @using Passwordless.AdminConsole.Models
 
@@ -44,7 +43,7 @@
                 <div class="flex justify-center space-x-4">
                     @if (PageList.HasPreviousPage)
                     {
-                        <a class="btn-primary" href="organization/log?pageNumber=@(PageList!.CurrentIndex - 1)">Prev</a>
+                        <a class="btn-primary" href="organization/log?pageNumber=@(PageList!.CurrentPage - 1)">Prev</a>
 
                     }
 
@@ -55,7 +54,7 @@
 
                     @if (PageList.HasNextPage)
                     {
-                        <a class="btn-primary" href="organization/log?pageNumber=@(PageList.CurrentIndex + 1)">Next</a>
+                        <a class="btn-primary" href="organization/log?pageNumber=@(PageList.CurrentPage + 1)">Next</a>
                     }
                 </div>
             }
@@ -100,14 +99,14 @@
         Events = result.Events;
         var itemCount = await EventLogService.GetOrganizationEventLogCountAsync();
 
-        PageList = new PagedList(itemCount, PageNumber.Value, NumberOfResults.Value);
+        PageList = new PagedTable(itemCount, PageNumber.Value, NumberOfResults.Value);
     }
     
     public Organization? Organization { get; set; }
     
     public IEnumerable<EventLogEvent>? Events { get; set; }
     
-    public PagedList? PageList { get; set; }
+    public PagedTable? PageList { get; set; }
     
     public int RetentionPeriod { get; private set; }
 
