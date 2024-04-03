@@ -39,7 +39,7 @@ public class OverviewModel : PageModel
     {
         string url = application.DeleteAt.HasValue
             ? "/app/Settings/Settings"
-            : "/app/credentials/list";
+            : $"/app/{application.Id}/credentials/list";
         return url;
     }
 }
