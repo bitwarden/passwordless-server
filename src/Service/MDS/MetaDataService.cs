@@ -76,4 +76,13 @@ public sealed class MetaDataService : DistributedCacheMetadataService, IMetaData
             .ToList();
         return result;
     }
+
+    public async Task<bool> IsExistsAsync(IReadOnlyCollection<Guid> aaGuids)
+    {
+        var blob = await GetDistributedCachedBlob(base._repositories.First());
+        var result = blob.Entries
+            .Count(x => x.MetadataStatement.ProtocolFamily == "fido2" &&
+                        aaGuids.Contains(x.AaGuid!.Value));
+        return result == aaGuids.Count;
+    }
 }
