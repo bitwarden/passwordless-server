@@ -7,22 +7,40 @@
 @inject IScopedPasswordlessClient Passwordless
 
 <EditForm Model="Form"
-          OnValidSubmit="OnSubmitFunction.InvokeAsync">
+          OnValidSubmit="OnSubmitFunction.InvokeAsync"
+          class="flex flex-col">
     <DataAnnotationsValidator/>
-    <label for="purpose">
-        Purpose: <InputText id="purpose" @bind-Value="Form.Purpose"/>
+    <label for="purpose" class="">
+        Purpose: <InputText id="purpose" class="" @bind-Value="Form.Purpose"/>
     </label>
-    <label for="userVerification">
-        Purpose:
-        <InputSelect id="userVerification" @bind-Value="Form.UserVerificationRequirement" TValue="UserVerificationRequirement">
+    <label for="userVerification" class="">
+        User Verification:
+        <InputSelect id="userVerification" @bind-Value="Form.UserVerificationRequirement" TValue="UserVerificationRequirement" class="single-select">
             @foreach (var uv in Enum.GetValues(typeof(UserVerificationRequirement)))
             {
                 <option value="@uv">@uv</option>
             }
         </InputSelect>
     </label>
-
-    <button class="btn btn-primary">Save</button>
+    
+    <p>Time To Live:</p>
+    <label for="seconds" class="">
+        Seconds:
+        <InputNumber id="seconds" @bind-Value="Form.Seconds" min="0" class="" />
+    </label>
+    <label for="minutes" class="">
+        Minutes:
+        <InputNumber id="minutes" @bind-Value="Form.Minutes" min="0" class="" />
+    </label>
+    <label for="hours" class="">
+        Hours:
+        <InputNumber id="hours" @bind-Value="Form.Hours" min="0" class="" />
+    </label>
+    <label for="days" class="">
+        Days:
+        <InputNumber id="days" @bind-Value="Form.Days" min="0" class="" />
+    </label>
+    <button class="btn-primary">Save</button>
 </EditForm>
 
 @code {
