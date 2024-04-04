@@ -42,11 +42,15 @@ public static class SigninEndpoints
         group.MapPost("/verify", VerifyAsync)
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
 
-        group.MapGet("/scopes", GetAuthenticationScopesAsync).RequireSecretKey();
+        group.MapGet("/authentication-configurations", GetAuthenticationConfigurationsAsync).RequireSecretKey();
 
-        group.MapPost("/scopes", CreateAuthenticationScopeAsync).RequireSecretKey();
+        group.MapPost("/authentication-configuration", CreateAuthenticationScopeAsync).RequireSecretKey();
 
-        group.MapPut("/scopes", SetAuthenticationScopeAsync).RequireSecretKey();
+        group.MapPut("/authentication-configuration", SetAuthenticationScopeAsync).RequireSecretKey();
+        
+        group.MapGet("/authentication-configuration/{purpose}", GetAuthenticationConfigurationAsync).RequireSecretKey();
+        
+        group.MapDelete("/authentication-configuration", DeleteAuthenticationConfigurationAsync).RequireSecretKey();
 
     }
 
@@ -120,10 +124,10 @@ public static class SigninEndpoints
     /// </summary>
     /// <returns>Result containing a list of AuthenticationConfigurations</returns>
     [ProducesResponseType(typeof(GetAuthenticationScopesResult), StatusCodes.Status200OK)]
-    public static async Task<IResult> GetAuthenticationScopesAsync(
-        [FromServices] IAuthenticationScopeService authenticationScopeService)
+    public static async Task<IResult> GetAuthenticationConfigurationsAsync(
+        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
     {
-        var configurations = await authenticationScopeService.GetAuthenticationScopesAsync();
+        var configurations = await authenticationConfigurationService.GetAuthenticationConfigurationsAsync();
 
         return Ok(new GetAuthenticationScopesResult
         {
@@ -136,17 +140,40 @@ public static class SigninEndpoints
         });
     }
 
+    /// <summary>
+    /// Authentication configuration for the specified purpose.
+    /// </summary>
+    /// <returns>The configuration matching the specified purpose.</returns>
+    [ProducesResponseType(typeof(AuthenticationConfigurationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public static async Task<IResult> GetAuthenticationConfigurationAsync(
+        [FromRoute] string purpose,
+        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
+    {
+        var configuration = await authenticationConfigurationService.GetAuthenticationConfiguration(purpose);
+        return configuration is null
+            ? NotFound()
+            : Ok(configuration);
+    }
 
-    public static Task CreateAuthenticationScopeAsync(
+
+    public static Task<IResult> CreateAuthenticationScopeAsync(
         [FromBody] SetAuthenticationScopeRequest request,
-        [FromServices] IAuthenticationScopeService authenticationScopeService)
+        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
     {
         throw new NotImplementedException();
     }
 
-    public static Task SetAuthenticationScopeAsync(
+    public static Task<IResult> SetAuthenticationScopeAsync(
         [FromBody] SetAuthenticationScopeRequest request,
-        [FromServices] IAuthenticationScopeService authenticationScopeService)
+        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static Task<IResult> DeleteAuthenticationConfigurationAsync(
+        [FromBody] DeleteAuthenticationConfigurationRequest request,
+        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
     {
         throw new NotImplementedException();
     }

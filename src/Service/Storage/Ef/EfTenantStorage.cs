@@ -341,20 +341,11 @@ public class EfTenantStorage(
         return email;
     }
 
-    public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose)
+    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose)
     {
         var configuration = await db.AuthenticationConfigurations.FirstOrDefaultAsync(c => c.Purpose == requestPurpose.Value);
 
-        return configuration == null
-            ? GetDefault(requestPurpose)
-            : configuration.ToDto();
-    }
-
-    private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose)
-    {
-        return purpose == SignInPurposes.StepUp
-            ? AuthenticationConfigurationDto.StepUp(Tenant)
-            : AuthenticationConfigurationDto.SignIn(Tenant);
+        return configuration?.ToDto();
     }
 
     public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync()

@@ -147,7 +147,7 @@ services.AddMemoryCache();
 services.AddDistributedMemoryCache();
 builder.AddMetaDataService();
 
-builder.Services.AddTransient<IAuthenticationScopeService, AuthenticationScopeService>();
+builder.Services.AddTransient<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
 
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>

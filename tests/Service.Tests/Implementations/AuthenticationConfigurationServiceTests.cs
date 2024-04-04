@@ -1,26 +1,27 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service.Tests.Implementations;
 
-public class AuthenticationScopeServiceTests
+public class AuthenticationConfigurationServiceTests
 {
     private readonly Fixture _fixture = new();
     private readonly Mock<ITenantStorage> _mockTenantStorage;
     private const string Tenant = "app";
 
-    private readonly AuthenticationScopeService _sut;
+    private readonly AuthenticationConfigurationService _sut;
 
-    public AuthenticationScopeServiceTests()
+    public AuthenticationConfigurationServiceTests()
     {
         _mockTenantStorage = new Mock<ITenantStorage>();
         _mockTenantStorage.SetupGet(x => x.Tenant)
             .Returns(Tenant);
 
-        _sut = new AuthenticationScopeService(_mockTenantStorage.Object);
+        _sut = new AuthenticationConfigurationService(_mockTenantStorage.Object);
     }
 
     [Fact]
@@ -37,7 +38,7 @@ public class AuthenticationScopeServiceTests
         };
 
         // Act
-        var actual = await _sut.GetAuthenticationScopesAsync();
+        var actual = await _sut.GetAuthenticationConfigurationsAsync();
 
         // Assert
         actual.Should().BeEquivalentTo(defaultConfigurations);
@@ -54,7 +55,7 @@ public class AuthenticationScopeServiceTests
                 .CreateMany(1));
 
         // Act
-        var actual = await _sut.GetAuthenticationScopesAsync();
+        var actual = await _sut.GetAuthenticationConfigurationsAsync();
 
         // Assert
         var actualList = actual.ToList();
@@ -74,7 +75,7 @@ public class AuthenticationScopeServiceTests
                 .CreateMany(1));
 
         // Act
-        var actual = await _sut.GetAuthenticationScopesAsync();
+        var actual = await _sut.GetAuthenticationConfigurationsAsync();
 
         // Assert
         var actualList = actual.ToList();
@@ -96,7 +97,7 @@ public class AuthenticationScopeServiceTests
             .ReturnsAsync(savedConfigurations);
 
         // Act
-        var actual = await _sut.GetAuthenticationScopesAsync();
+        var actual = await _sut.GetAuthenticationConfigurationsAsync();
 
         // Assert
         var actualList = actual.ToList();

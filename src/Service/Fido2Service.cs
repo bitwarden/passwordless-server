@@ -25,6 +25,7 @@ public class Fido2Service : IFido2Service
     private readonly IEventLogger _eventLogger;
     private readonly IFeatureContextProvider _featureContextProvider;
     private readonly IMetadataService _metadataService;
+    private readonly IAuthenticationConfigurationService _authenticationConfigurationService;
     private readonly TimeProvider _timeProvider;
 
     public Fido2Service(ITenantProvider tenantProvider,
@@ -34,7 +35,8 @@ public class Fido2Service : IFido2Service
         IEventLogger eventLogger,
         IFeatureContextProvider featureContextProvider,
         IMetadataService metadataService,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IAuthenticationConfigurationService authenticationConfigurationService)
     {
         _storage = storage;
         _tenantProvider = tenantProvider;
@@ -43,6 +45,7 @@ public class Fido2Service : IFido2Service
         _eventLogger = eventLogger;
         _featureContextProvider = featureContextProvider;
         _metadataService = metadataService;
+        _authenticationConfigurationService = authenticationConfigurationService;
         _timeProvider = timeProvider;
     }
 
@@ -269,7 +272,8 @@ public class Fido2Service : IFido2Service
             TokenId = Guid.NewGuid(),
             Type = "generated_signin",
             RpId = request.RPID,
-            Origin = request.Origin
+            Origin = request.Origin,
+            Purpose = request.Purpose
         };
 
         return await _tokenService.EncodeTokenAsync(tokenProps, "verify_");
@@ -298,7 +302,7 @@ public class Fido2Service : IFido2Service
 
         var existingCredentials = await GetExistingCredentialsAsync(request);
 
-        var signInConfiguration = await _storage.GetAuthenticationConfigurationAsync(request.Purpose);
+        var signInConfiguration = await _authenticationConfigurationService.GetAuthenticationConfigurationOrDefaultAsync(request.Purpose);
 
         var options = fido2.GetAssertionOptions(
             existingCredentials.ToList(),
@@ -367,7 +371,7 @@ public class Fido2Service : IFido2Service
         // Store the updated counter
         await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
 
-        var config = await _storage.GetAuthenticationConfigurationAsync(authenticationSessionConfiguration.Purpose);
+        var config = await _authenticationConfigurationService.GetAuthenticationConfigurationOrDefaultAsync(authenticationSessionConfiguration.Purpose);
 
         var userId = Encoding.UTF8.GetString(credential.UserHandle);
 

@@ -57,6 +57,6 @@ public interface ITenantStorage
     Task<IReadOnlyList<DispatchedEmail>> GetDispatchedEmailsAsync(TimeSpan window);
     Task<int> GetDispatchedEmailCountAsync(TimeSpan window);
     Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress, string linkTemplate);
-    Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose);
+    Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose);
     Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync();
 }

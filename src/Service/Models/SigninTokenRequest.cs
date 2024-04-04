@@ -21,4 +21,6 @@ public class SigninTokenRequest : RequestBase
 
     [JsonIgnore]
     public TimeSpan TimeToLive => TimeToLiveSeconds?.ToTimeSpanFromSeconds() ?? DefaultTimeToLive;
+
+    public string Purpose { get; set; } = SignInPurposes.SignInName;
 };
