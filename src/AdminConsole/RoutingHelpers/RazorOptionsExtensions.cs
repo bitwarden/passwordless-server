@@ -4,7 +4,7 @@ using Passwordless.AdminConsole.Middleware;
 
 namespace Passwordless.AdminConsole.RoutingHelpers;
 
-public static class RazorOptionsExtentions
+public static class RazorOptionsExtensions
 {
     public static RazorPagesOptions AddTenantRouting(this RazorPagesOptions options)
     {
