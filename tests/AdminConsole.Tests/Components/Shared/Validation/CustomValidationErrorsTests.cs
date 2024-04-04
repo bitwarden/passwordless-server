@@ -16,11 +16,11 @@ public class CustomValidationErrorsTests : TestContext
         // Act
         var cut = RenderComponent<CustomValidationErrors>(parameters => parameters
             .Add(p => p.EditContext, editContext));
-        
+
         // Assert
         Assert.Empty(cut.Markup);
     }
-    
+
     [Fact]
     public void CustomValidationErrors_RendersValidationMessages_WhenValidationMessagesExist()
     {
@@ -32,7 +32,7 @@ public class CustomValidationErrorsTests : TestContext
         // Act
         var cut = RenderComponent<CustomValidationErrors>(parameters => parameters
             .Add(p => p.EditContext, editContext));
-        
+
         // Assert
         cut.MarkupMatches("<ul class=\"validation-errors\"><li class=\"validation-message\">My error message.</li></ul>");
     }
