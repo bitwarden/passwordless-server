@@ -12,7 +12,12 @@
 
 <body class="h-full bg-gray-50">
     <Routes/>
-    <script src="_framework/blazor.web.js"></script>
+    <script src="_framework/blazor.web.js" autostart="false"></script>
     <SecureScript type="text/javascript" src="js/core.js" />
+    <SecureScript>
+        Blazor.start({
+        ssr: { disableDomPreservation: true }
+        });
+    </SecureScript>
 </body>
 </html>
