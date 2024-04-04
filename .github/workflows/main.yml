@@ -201,7 +201,7 @@ jobs:
           # Deploy to QA on pre-releases and stable releases
           - environment: ${{ !(github.event_name == 'release') && 'qa' }}
           # Deploy to PROD on stable release only
-          - environment: ${{ !(github.event_name == 'release' && github.event.action != 'released') && 'prod' }}
+          - environment: ${{ !(github.event_name == 'release' && github.event.action == 'released') && 'prod' }}
           # Deploy to DEVTEST every time
 
     runs-on: ubuntu-latest
