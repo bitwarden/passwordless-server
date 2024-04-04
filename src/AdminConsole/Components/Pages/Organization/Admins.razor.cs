@@ -66,13 +66,13 @@ public partial class Admins : ComponentBase
     {
         if (ConsoleAdmins is not { Count: > 1 })
         {
-            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId, "At least one admin is required in an organization.");
+            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId!, "At least one admin is required in an organization.");
         }
 
         var user = ConsoleAdmins!.FirstOrDefault(u => u.Id == DeleteActiveForm.UserId);
         if (user is null)
         {
-            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId, "User not found.");
+            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId!, "User not found.");
         }
 
         if (DeleteActiveFormEditContext!.GetValidationMessages().Any())
@@ -100,25 +100,25 @@ public partial class Admins : ComponentBase
     {
         if (CanInvite is false)
         {
-            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "You need to upgrade to a paid organization to invite more admins.");
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email!, "You need to upgrade to a paid organization to invite more admins.");
             InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
         if (ConsoleAdmins!.Any(x => string.Equals(x.Email, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
         {
-            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "This e-mail is already an admin.");
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email!, "This e-mail is already an admin.");
             InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
         if (Invites!.Count >= 10)
         {
-            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "You can only have 10 pending invites at a time.");
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email!, "You can only have 10 simultaneous invites.");
             InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
         if (Invites.Any(x => string.Equals(x.ToEmail, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
         {
-            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "There is a pending invite already for this address. Please cancel before resending.");
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email!, "There is a pending invite already for this e-mail. Please cancel it first before attempting to send again.");
             InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
@@ -128,8 +128,8 @@ public partial class Admins : ComponentBase
         }
 
         var user = await DataService.GetUserAsync();
-        await InvitationService.SendInviteAsync(InviteForm.Email, CurrentContext.Organization!.Id, CurrentContext.Organization!.Name, user.Email!, user.Name);
-        EventLogger.LogInviteAdminEvent(user, InviteForm.Email, TimeProvider.GetUtcNow().UtcDateTime);
+        await InvitationService.SendInviteAsync(InviteForm.Email!, CurrentContext.Organization!.Id, CurrentContext.Organization!.Name, user.Email!, user.Name);
+        EventLogger.LogInviteAdminEvent(user, InviteForm.Email!, TimeProvider.GetUtcNow().UtcDateTime);
 
         NavigationManager.Refresh();
     }
@@ -142,7 +142,7 @@ public partial class Admins : ComponentBase
 
         if (invite is null)
         {
-            CancelInviteFormValidationMessageStore!.Add(() => CancelInviteForm.HashedCode, "Failed to find an invite to cancel.");
+            CancelInviteFormValidationMessageStore!.Add(() => CancelInviteForm.HashedCode!, "Failed to find an invite to cancel.");
             return;
         }
 
@@ -157,17 +157,19 @@ public partial class Admins : ComponentBase
 
     public class DeleteActiveFormModel
     {
-        public string UserId { get; set; }
+        [Required]
+        public string? UserId { get; set; }
     }
 
     public class InviteFormModel
     {
         [Required, EmailAddress, MaxLength(50)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
     }
 
     public class CancelInviteFormModel
     {
-        public string HashedCode { get; set; }
+        [Required, MaxLength(50)]
+        public string? HashedCode { get; set; }
     }
 }
