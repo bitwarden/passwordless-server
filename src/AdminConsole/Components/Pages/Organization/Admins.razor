@@ -22,7 +22,8 @@
     <Panel Header="Active Admins">
         @if (ConsoleAdmins != null)
         {
-            <EditForm FormName="@DeleteActiveFormName" Model="DeleteActiveForm" OnSubmit="@DeleteAdminAsync">
+            <EditForm class="space-y-4" FormName="@DeleteActiveFormName" Model="DeleteActiveForm" OnSubmit="@DeleteAdminAsync">
+                <CustomValidationErrors EditContext="DeleteActiveFormEditContext" />
                 <Table ColumnHeaders="@_activeColumnHeaders" EmptyMessage="@ActiveEmptyMessage">
                     @foreach (var user in ConsoleAdmins)
                     {
@@ -37,10 +38,6 @@
                 </Table>
             </EditForm>
         }
-        @if (DeleteAdminModelState != null)
-        {
-            <Alert Style="@ContextualStyles.Danger">@DeleteAdminModelState.Message</Alert>
-        }
     </Panel>
     
     <Panel Header="Invitations">
@@ -52,19 +49,23 @@
         }
         else
         {
-            <EditForm FormName="@InviteFormName" Model="InviteForm" OnSubmit="@InviteAsync">
+            <EditForm class="space-y-4" FormName="@InviteFormName" Model="InviteForm" OnValidSubmit="@OnValidInviteAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <CustomValidationErrors EditContext="InviteFormEditContext" />
                 <div class="mb-4 flex">
                     <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
-                        <InputText @bind-Value="InviteForm.Email" placeholder="recipient@OpenApiExample.com" class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" />
+                        <InputText @bind-Value="InviteForm.Email" placeholder="recipient@OpenApiExample.com" class="block w-full rounded-none rounded-l-md border-0 py-2 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"/>
                     </div>
                     <button type="submit" class="btn-primary inline rounded-l-none">
                         Send invite
                     </button>
                 </div>
-                <div asp-validation-summary="All"></div>
             </EditForm>
         }
-        <EditForm FormName="@CancelInviteFormName" Model="CancelInviteForm" OnSubmit="@CancelInviteAsync">
+        <EditForm class="space-y-4" FormName="@CancelInviteFormName" Model="CancelInviteForm" OnSubmit="@CancelInviteAsync">
+            <DataAnnotationsValidator />
+            <CustomValidationErrors EditContext="CancelInviteFormEditContext" />
             <Table EmptyMessage="@InvitationsEmptyMessage" ColumnHeaders="_invitationColumnHeaders">
                 @if (Invites != null)
                 {
@@ -72,7 +73,7 @@
                     {
                         <tr>
                             <td class="whitespace-nowrap">@inv.ToEmail</td>
-                            <td class="whitespace-nowrap"><LocalDateTime Value="@inv.CreatedAt" /></td>
+                            <td class="whitespace-nowrap"><LocalDateTime Value="@inv.CreatedAt"/></td>
                             <td class="whitespace-nowrap">Sent</td>
                             <td class="whitespace-nowrap">@inv.FromName</td>
                             <td class="whitespace-nowrap">

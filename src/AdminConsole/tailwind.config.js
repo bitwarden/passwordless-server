@@ -11,9 +11,11 @@ module.exports = {
         "./Components/**/*.razor"
     ],
     safelist: [
-        'validation-summary-errors',
-        'input-validation-error',
         'field-validation-error',
+        'input-validation-error',
+        'validation-errors',
+        'validation-message',
+        'validation-summary-errors'
     ],
     theme: {
         extend: {

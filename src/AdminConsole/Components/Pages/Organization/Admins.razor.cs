@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -18,17 +19,26 @@ public partial class Admins : ComponentBase
     private const string InviteFormName = "invite-form";
     private const string CancelInviteFormName = "cancel-invite-form";
 
-    private ModelState? DeleteAdminModelState { get; set; }
-    private ModelState? InviteAdminModelState { get; set; }
-
     [SupplyParameterFromForm(FormName = DeleteActiveFormName)]
     public DeleteActiveFormModel DeleteActiveForm { get; set; } = new();
+
+    public EditContext? DeleteActiveFormEditContext { get; set; }
+
+    public ValidationMessageStore? DeleteActiveFormValidationMessageStore { get; set; }
 
     [SupplyParameterFromForm(FormName = InviteFormName)]
     public InviteFormModel InviteForm { get; set; } = new();
 
+    public EditContext? InviteFormEditContext { get; set; }
+
+    public ValidationMessageStore? InviteFormValidationMessageStore { get; set; }
+
     [SupplyParameterFromForm(FormName = CancelInviteFormName)]
     public CancelInviteFormModel CancelInviteForm { get; set; } = new();
+
+    public EditContext? CancelInviteFormEditContext { get; set; }
+
+    public ValidationMessageStore? CancelInviteFormValidationMessageStore { get; set; }
 
     public bool CanInvite { get; set; }
 
@@ -38,6 +48,15 @@ public partial class Admins : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        DeleteActiveFormEditContext = new EditContext(DeleteActiveForm);
+        DeleteActiveFormValidationMessageStore = new ValidationMessageStore(DeleteActiveFormEditContext);
+
+        InviteFormEditContext = new EditContext(InviteForm);
+        InviteFormValidationMessageStore = new ValidationMessageStore(InviteFormEditContext);
+
+        CancelInviteFormEditContext = new EditContext(CancelInviteForm);
+        CancelInviteFormValidationMessageStore = new ValidationMessageStore(CancelInviteFormEditContext);
+
         ConsoleAdmins = await DataService.GetConsoleAdminsAsync();
         Invites = await InvitationService.GetInvitesAsync(CurrentContext.OrgId!.Value);
         CanInvite = await DataService.CanInviteAdminAsync();
@@ -45,25 +64,27 @@ public partial class Admins : ComponentBase
 
     private async Task DeleteAdminAsync()
     {
-        var users = await DataService.GetConsoleAdminsAsync();
-        if (users is not { Count: > 1 })
+        if (ConsoleAdmins is not { Count: > 1 })
         {
-            DeleteAdminModelState = new ModelState("At least one admin is required in an organization.");
-            return;
+            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId, "At least one admin is required in an organization.");
         }
 
-        var user = users.FirstOrDefault(u => u.Id == DeleteActiveForm.UserId);
+        var user = ConsoleAdmins!.FirstOrDefault(u => u.Id == DeleteActiveForm.UserId);
         if (user is null)
         {
-            DeleteAdminModelState = new ModelState("User not found.");
+            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId, "User not found.");
+        }
+
+        if (DeleteActiveFormEditContext!.GetValidationMessages().Any())
+        {
             return;
         }
 
-        await PasswordlessClient.DeleteUserAsync(user.Id);
-        await UserManager.DeleteAsync(user);
+        var performedBy = ConsoleAdmins!.First(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
+        EventLogger.LogDeleteAdminEvent(performedBy, user!, TimeProvider.GetUtcNow().UtcDateTime);
 
-        var performedBy = users.First(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
-        EventLogger.LogDeleteAdminEvent(performedBy, user, TimeProvider.GetUtcNow().UtcDateTime);
+        await PasswordlessClient.DeleteUserAsync(user!.Id);
+        await UserManager.DeleteAsync(user);
 
         // if user is self
         if (user.Email == HttpContextAccessor.HttpContext!.User.GetEmail())
@@ -75,30 +96,34 @@ public partial class Admins : ComponentBase
         NavigationManager.Refresh();
     }
 
-    private async Task InviteAsync()
+    private async Task OnValidInviteAsync()
     {
         if (CanInvite is false)
         {
-            InviteAdminModelState = new ModelState("You need to upgrade to a paid organization to invite more admins.");
-            return;
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "You need to upgrade to a paid organization to invite more admins.");
+            InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
         if (ConsoleAdmins!.Any(x => string.Equals(x.Email, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
         {
-            InviteAdminModelState = new ModelState("This e-mail is already an admin.");
-            return;
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "This e-mail is already an admin.");
+            InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
-        var invites = await InvitationService.GetInvitesAsync(CurrentContext.OrgId!.Value);
-        if (invites.Count >= 10)
+        if (Invites!.Count >= 10)
         {
-            InviteAdminModelState = new ModelState("You can only have 10 pending invites at a time.");
-            return;
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "You can only have 10 pending invites at a time.");
+            InviteFormEditContext!.NotifyValidationStateChanged();
         }
 
-        if (invites.Any(x => string.Equals(x.ToEmail, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
+        if (Invites.Any(x => string.Equals(x.ToEmail, InviteForm.Email, StringComparison.OrdinalIgnoreCase)))
         {
-            InviteAdminModelState = new ModelState("There is a pending invite already for this address. Please cancel before resending.");
+            InviteFormValidationMessageStore!.Add(() => InviteForm.Email, "There is a pending invite already for this address. Please cancel before resending.");
+            InviteFormEditContext!.NotifyValidationStateChanged();
+        }
+
+        if (InviteFormEditContext!.GetValidationMessages().Any())
+        {
             return;
         }
 
@@ -117,7 +142,7 @@ public partial class Admins : ComponentBase
 
         if (invite is null)
         {
-            InviteAdminModelState = new ModelState("Failed to find an invite to cancel.");
+            CancelInviteFormValidationMessageStore!.Add(() => CancelInviteForm.HashedCode, "Failed to find an invite to cancel.");
             return;
         }
 
@@ -145,6 +170,4 @@ public partial class Admins : ComponentBase
     {
         public string HashedCode { get; set; }
     }
-
-    public record ModelState(string Message);
 }
