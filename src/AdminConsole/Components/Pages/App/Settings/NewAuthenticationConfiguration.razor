@@ -1,0 +1,25 @@
+@page "/app/{AppId}/settings/authentication-configuration/new"
+
+@using Passwordless.Common.Models.Apps
+@using Fido2NetLib.Objects
+@inherits BaseApplicationPage
+
+@inject IScopedPasswordlessClient Passwordless
+@inject ICurrentContext CurrentContext
+
+<AuthenticationConfigurationForm
+    OnSubmitFunction="SaveNewAuthenticationConfiguration"
+    ></AuthenticationConfigurationForm>
+
+@code {
+    private async Task SaveNewAuthenticationConfiguration(AuthenticationConfigurationForm.AuthenticationConfigurationFormModel formModel)
+    {
+        await Passwordless.CreateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+        {
+            Purpose = new SignInPurpose(formModel.Purpose),
+            UserVerificationRequirement = UserVerificationRequirement.Required,
+            TimeToLive = formModel.TimeToLive,
+            Tenant = CurrentContext.AppId!
+        });
+    }
+}

@@ -38,8 +38,9 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 
     Task SetFeaturesAsync(SetFeaturesRequest request);
 
-    Task<GetAuthenticationScopesResult> GetAuthenticationConfigurations();
-    Task SaveAuthenticationConfiguration(AuthenticationConfiguration configuration);
+    Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync();
+
+    Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -136,12 +137,12 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         response.EnsureSuccessStatusCode();
     }
 
-    public Task<GetAuthenticationScopesResult> GetAuthenticationConfigurations() =>
-        _client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/scopes")!;
+    public async Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync() =>
+        (await _client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/authentication-configurations"))!;
 
-    public async Task SaveAuthenticationConfiguration(AuthenticationConfiguration configuration)
+    public async Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
     {
-        using var response = await _client.PostAsJsonAsync("signin/scopes", configuration);
+        using var response = await _client.PostAsJsonAsync("signin/authentication-configuration", configuration);
         response.EnsureSuccessStatusCode();
     }
 }

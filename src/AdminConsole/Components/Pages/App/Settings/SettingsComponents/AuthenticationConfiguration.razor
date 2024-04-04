@@ -11,10 +11,10 @@
 @if (!CurrentContext.IsPendingDelete)
 {
     <Panel Header="Authentication Configuration">
-        <p>List of configurations for your authentication tokens. Read more in the <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#authentiation-scopes">docs</a></p>
+        <p>List of configurations for your authentication tokens. Read more in the <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#authentiation-configurations">docs</a></p>
 
-        <NavLink class="btn btn-primary nav-link">Add New Authentication Configuration</NavLink>
-        
+        <a class="btn-primary" href="/app/@(AppId)/settings/authentication-configuration/new">Add New Authentication Configuration</a>
+
         <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Actions" })">
             @if (Configurations.Any())
             {
@@ -28,7 +28,7 @@
                             <NavLink>
                                 <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
                             </NavLink>
-                            
+
                             @if (config.CanDelete)
                             {
                                 <ConfirmButton
@@ -53,7 +53,7 @@
 @code {
     public string AppId => CurrentContext.AppId!;
 
-    public IReadOnlyCollection<string> RequiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
+    public readonly IReadOnlyCollection<string> RequiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
 
     public CreatePurposeForm Form { get; set; }
 
@@ -82,8 +82,13 @@
         {
         }
 
-        Configurations = (await Passwordless.GetAuthenticationConfigurations()).Scopes.Select(GetEntry).ToImmutableArray();
+        Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Scopes.Select(GetEntry).ToImmutableArray();
     }
 
-    protected void OnCreateNewPurposeSubmitted() => NavigationManager.NavigateTo($"app/{AppId}/settings/create-authentication-purpose");
+    public void NavigateToNewAuthenticationConfig()
+    {
+        NavigationManager.NavigateTo($"/app/{AppId}/settings/authentication-configuration/new");
+    }
+    
+    private void NavigateToEditAuthenticationConfig() => NavigationManager.NavigateTo("authentication-configuration/edit");
 }

@@ -1,20 +1,20 @@
 @using Passwordless.AdminConsole.Helpers
-@using Passwordless.Helpers.Extensions
+@using Passwordless.Common.Models.Apps
 @using Fido2NetLib.Objects
 @using System.ComponentModel.DataAnnotations
-@using Passwordless.Common.Models.Apps
 @inherits BaseRazorComponent
+
 @inject IScopedPasswordlessClient Passwordless
 
 <EditForm Model="Form"
-          OnValidSubmit="OnValidSubmitAsync">
+          OnValidSubmit="OnSubmitFunction.InvokeAsync">
     <DataAnnotationsValidator/>
     <label for="purpose">
-        Purpose: <InputText id="purpose" @bind-value="Form.Purpose"/>
+        Purpose: <InputText id="purpose" @bind-Value="Form.Purpose"/>
     </label>
     <label for="userVerification">
         Purpose:
-        <InputSelect id="userVerification" @bind-value="Form.UserVerificationRequirement">
+        <InputSelect id="userVerification" @bind-Value="Form.UserVerificationRequirement" TValue="UserVerificationRequirement">
             @foreach (var uv in Enum.GetValues(typeof(UserVerificationRequirement)))
             {
                 <option value="@uv">@uv</option>
@@ -26,11 +26,32 @@
 </EditForm>
 
 @code {
+    [Parameter]
+    public EventCallback<AuthenticationConfigurationFormModel> OnSubmitFunction { get; set; }
+    
+    [Parameter]
+    public AuthenticationConfigurationDto? Configuration { get; set; }
+    
     public AuthenticationConfigurationFormModel Form { get; set; }
 
     public class AuthenticationConfigurationFormModel
     {
-        [Required, MinLength(1)] public required string Purpose { get; set; }
+        public AuthenticationConfigurationFormModel()
+        {
+            
+        }
+        
+        public AuthenticationConfigurationFormModel(AuthenticationConfigurationDto dto)
+        {
+            Purpose = dto.Purpose.Value;
+            UserVerificationRequirement = dto.UserVerificationRequirement;
+            Seconds = dto.TimeToLive.Seconds;
+            Minutes = dto.TimeToLive.Minutes;
+            Hours = dto.TimeToLive.Hours;
+            Days = dto.TimeToLive.Days;
+        }
+        
+        [Required, MinLength(1)] public string Purpose { get; set; }
 
         [Required] public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
 
@@ -46,18 +67,10 @@
             .AddDays(Days);
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
+        Form = Configuration is null
+            ? new AuthenticationConfigurationFormModel()
+            : new AuthenticationConfigurationFormModel(Configuration);
     }
-
-    public Task OnValidSubmitAsync()
-    {
-        return Passwordless.SaveAuthenticationConfiguration(
-            new AuthenticationConfiguration(    
-                Form.Purpose, 
-                Form.TimeToLive.TotalSeconds.Pipe(Convert.ToInt32), 
-                nameof(Form.UserVerificationRequirement)));
-    }
-
 }
