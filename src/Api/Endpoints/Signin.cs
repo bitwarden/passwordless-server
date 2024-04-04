@@ -47,9 +47,9 @@ public static class SigninEndpoints
         group.MapPost("/authentication-configuration", CreateAuthenticationScopeAsync).RequireSecretKey();
 
         group.MapPut("/authentication-configuration", SetAuthenticationScopeAsync).RequireSecretKey();
-        
+
         group.MapGet("/authentication-configuration/{purpose}", GetAuthenticationConfigurationAsync).RequireSecretKey();
-        
+
         group.MapDelete("/authentication-configuration", DeleteAuthenticationConfigurationAsync).RequireSecretKey();
 
     }

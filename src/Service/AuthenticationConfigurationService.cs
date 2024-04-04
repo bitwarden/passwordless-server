@@ -44,7 +44,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
         return result;
     }
 
-    public Task<AuthenticationConfigurationDto?> GetAuthenticationConfiguration(string purpose) => 
+    public Task<AuthenticationConfigurationDto?> GetAuthenticationConfiguration(string purpose) =>
         storage.GetAuthenticationConfigurationAsync(new SignInPurpose(purpose));
 
     public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose)
@@ -53,7 +53,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
 
         return configuration ?? GetDefault(purpose);
     }
-    
+
     private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose) =>
         purpose == SignInPurposes.StepUp
             ? AuthenticationConfigurationDto.StepUp(storage.Tenant)
