@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
+using Passwordless.Api.Overrides;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
@@ -26,11 +27,19 @@ public static class MagicEndpoints
     /// <summary>
     /// Adds a rate limiter policy for the MagicEndpoints. Each tenant will have its own partition.
     /// </summary>
-    /// <param name="builder">The RateLimiterOptions builder.</param>
     public static void AddMagicRateLimiterPolicy(this RateLimiterOptions builder) =>
         builder.AddPolicy(RateLimiterPolicy, context =>
         {
             var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
+
+            var isRateLimitBypassed = context.RequestServices
+                .GetRequiredService<IConfiguration>()
+                .GetSection("ApplicationOverrides")
+                .GetApplicationOverrides(tenant)
+                .IsRateLimitBypassEnabled;
+
+            if (isRateLimitBypassed)
+                return RateLimitPartition.GetNoLimiter(tenant);
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>
                 new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(5), PermitLimit = 10, QueueLimit = 0, AutoReplenishment = true }
@@ -40,7 +49,6 @@ public static class MagicEndpoints
     /// <summary>
     /// Maps the magic link endpoints.
     /// </summary>
-    /// <param name="app">The <see cref="IEndpointRouteBuilder"/> object.</param>
     public static void MapMagicEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/magic-links")
@@ -55,8 +63,6 @@ public static class MagicEndpoints
 
     /// <summary>
     /// Sends an e-mail containing a magic link template allowing users to login.
-    ///
-    /// Warning: Verify the e-mail address matches the user identifier in your backend.
     /// </summary>
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]

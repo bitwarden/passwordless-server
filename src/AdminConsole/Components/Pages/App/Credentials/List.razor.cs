@@ -30,7 +30,7 @@ public partial class List : BaseApplicationPage
         public static UserViewModel FromDto(PasswordlessUserSummary dto)
         {
             var aliasesBuilder = new StringBuilder();
-            aliasesBuilder.Append($"(${dto.Aliases.Count}) ");
+            aliasesBuilder.Append($"({dto.Aliases.Count}) ");
             if (dto.AliasCount > 0)
             {
                 aliasesBuilder.Append(' ');
