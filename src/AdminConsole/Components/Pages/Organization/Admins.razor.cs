@@ -80,7 +80,7 @@ public partial class Admins : ComponentBase
             return;
         }
 
-        var performedBy = ConsoleAdmins!.First(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
+        var performedBy = ConsoleAdmins!.Single(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
         EventLogger.LogDeleteAdminEvent(performedBy, user!, TimeProvider.GetUtcNow().UtcDateTime);
 
         await PasswordlessClient.DeleteUserAsync(user!.Id);
@@ -127,7 +127,8 @@ public partial class Admins : ComponentBase
             return;
         }
 
-        var user = await DataService.GetUserAsync();
+        var user = ConsoleAdmins!.Single(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
+
         await InvitationService.SendInviteAsync(InviteForm.Email!, CurrentContext.Organization!.Id, CurrentContext.Organization!.Name, user.Email!, user.Name);
         EventLogger.LogInviteAdminEvent(user, InviteForm.Email!, TimeProvider.GetUtcNow().UtcDateTime);
 
@@ -148,7 +149,7 @@ public partial class Admins : ComponentBase
 
         await InvitationService.CancelInviteAsync(invite);
 
-        var performedBy = await DataService.GetUserAsync();
+        var performedBy = ConsoleAdmins!.Single(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
 
         EventLogger.LogCancelAdminInviteEvent(performedBy, invite.ToEmail, TimeProvider.GetUtcNow().UtcDateTime);
 
