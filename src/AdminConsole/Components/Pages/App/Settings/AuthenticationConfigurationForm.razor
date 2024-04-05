@@ -1,81 +1,76 @@
 @using Passwordless.AdminConsole.Helpers
-@using Passwordless.Common.Models.Apps
 @using Fido2NetLib.Objects
 @using System.ComponentModel.DataAnnotations
 @inherits BaseRazorComponent
 
+@inject ILogger<AuthenticationConfigurationForm> Logger
 @inject IScopedPasswordlessClient Passwordless
+@inject ICurrentContext CurrentContext
 
-<EditForm Model="Form"
-          OnValidSubmit="OnSubmitFunction.InvokeAsync"
-          class="flex flex-col">
+<EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="@FormName">
     <DataAnnotationsValidator/>
-    <label for="purpose" class="">
-        Purpose: <InputText id="purpose" class="" @bind-Value="Form.Purpose"/>
-    </label>
-    <label for="userVerification" class="">
-        User Verification:
-        <InputSelect id="userVerification" @bind-Value="Form.UserVerificationRequirement" TValue="UserVerificationRequirement" class="single-select">
+    <ValidationSummary/>
+    <div>
+        <label class="">Purpose:</label>
+        <InputText @bind-Value="Model!.Purpose" class=""/>
+    </div>
+    <div>
+        <label class="">User Verification:</label>
+        <InputSelect id="userVerification" @bind-Value="Model.UserVerificationRequirement" TValue="UserVerificationRequirement" class="single-select">
             @foreach (var uv in Enum.GetValues(typeof(UserVerificationRequirement)))
             {
                 <option value="@uv">@uv</option>
             }
         </InputSelect>
-    </label>
-    
-    <p>Time To Live:</p>
-    <label for="seconds" class="">
-        Seconds:
-        <InputNumber id="seconds" @bind-Value="Form.Seconds" min="0" class="" />
-    </label>
-    <label for="minutes" class="">
-        Minutes:
-        <InputNumber id="minutes" @bind-Value="Form.Minutes" min="0" class="" />
-    </label>
-    <label for="hours" class="">
-        Hours:
-        <InputNumber id="hours" @bind-Value="Form.Hours" min="0" class="" />
-    </label>
-    <label for="days" class="">
-        Days:
-        <InputNumber id="days" @bind-Value="Form.Days" min="0" class="" />
-    </label>
-    <button class="btn-primary">Save</button>
+    </div>
+    <div>
+        <label class="">Seconds:</label>
+        <InputNumber id="seconds" @bind-Value="Model.Seconds" min="0" class=""/>
+    </div>
+    <div>
+        <label class="">Minutes:</label>
+        <InputNumber id="minutes" @bind-Value="Model.Minutes" min="0" class=""/>
+    </div>
+    <div>
+        <label class="">Hours:</label>
+        <InputNumber id="hours" @bind-Value="Model.Hours" min="0" class=""/>
+    </div>
+    <div>
+        <label class="">Days:</label>
+        <InputNumber id="days" @bind-Value="Model.Days" min="0" class=""/>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
 </EditForm>
 
 @code {
-    [Parameter]
-    public EventCallback<AuthenticationConfigurationFormModel> OnSubmitFunction { get; set; }
+    [Parameter] public EventCallback<AuthenticationConfigurationFormModel> OnSubmitFunction { get; set; }
     
-    [Parameter]
-    public AuthenticationConfigurationDto? Configuration { get; set; }
-    
-    public AuthenticationConfigurationFormModel Form { get; set; }
+    private const string FormName = "AuthenticationConfigurationForm";
+
+    [SupplyParameterFromForm] public AuthenticationConfigurationFormModel? Model { get; set; }
+
+    protected override void OnInitialized() => Model ??= new();
+
+    private async Task SubmitAsync()
+    {
+        await OnSubmitFunction.InvokeAsync(Model);
+    }
 
     public class AuthenticationConfigurationFormModel
     {
-        public AuthenticationConfigurationFormModel()
-        {
-            
-        }
-        
-        public AuthenticationConfigurationFormModel(AuthenticationConfigurationDto dto)
-        {
-            Purpose = dto.Purpose.Value;
-            UserVerificationRequirement = dto.UserVerificationRequirement;
-            Seconds = dto.TimeToLive.Seconds;
-            Minutes = dto.TimeToLive.Minutes;
-            Hours = dto.TimeToLive.Hours;
-            Days = dto.TimeToLive.Days;
-        }
-        
-        [Required, MinLength(1)] public string Purpose { get; set; }
+        [Required, MinLength(1), RegularExpression(@"^\S*$", ErrorMessage = "No whitespace allowed")]
+        public string Purpose { get; set; } = string.Empty;
 
         [Required] public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
 
         [Required, Range(0, int.MaxValue)] public int Seconds { get; set; }
+
         [Required, Range(0, int.MaxValue)] public int Minutes { get; set; }
+
         [Required, Range(0, int.MaxValue)] public int Hours { get; set; }
+
         [Required, Range(0, int.MaxValue)] public int Days { get; set; }
 
         public TimeSpan TimeToLive => new TimeSpan()
@@ -85,10 +80,9 @@
             .AddDays(Days);
     }
 
-    protected override void OnInitialized()
-    {
-        Form = Configuration is null
-            ? new AuthenticationConfigurationFormModel()
-            : new AuthenticationConfigurationFormModel(Configuration);
-    }
 }
+@* @code { *@
+@* *@
+@*     [Parameter]  *@
+@*     public AuthenticationConfigurationDto? Configuration { get; set; } *@
+@* *@

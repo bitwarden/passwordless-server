@@ -2,7 +2,6 @@
 @using Passwordless.AdminConsole.Helpers
 @using System.Collections.Immutable
 @using Passwordless.Service.Models
-@using Fido2NetLib.Objects
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor HttpContextAccessor;
@@ -25,9 +24,9 @@
                         <td>@config.UserVerification</td>
                         <td>@config.TimeToLive</td>
                         <td>
-                            <NavLink>
+                            <a href="/app/@(AppId)/setting/authentication-configuration/@(config.Purpose)/edit">
                                 <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
-                            </NavLink>
+                            </a>
 
                             @if (config.CanDelete)
                             {
@@ -55,16 +54,7 @@
 
     public readonly IReadOnlyCollection<string> RequiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
 
-    public CreatePurposeForm Form { get; set; }
-
     public IReadOnlyCollection<AuthenticationConfigurationEntry> Configurations { get; set; } = Array.Empty<AuthenticationConfigurationEntry>();
-
-    public sealed class CreatePurposeForm
-    {
-        public string Purpose { get; set; } = string.Empty;
-        public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
-        public TimeSpan TimeToLive { get; set; } = TimeSpan.FromMinutes(2);
-    }
 
     public record AuthenticationConfigurationEntry(string Purpose, string UserVerification, string TimeToLive, bool CanDelete);
 
@@ -84,11 +74,4 @@
 
         Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Scopes.Select(GetEntry).ToImmutableArray();
     }
-
-    public void NavigateToNewAuthenticationConfig()
-    {
-        NavigationManager.NavigateTo($"/app/{AppId}/settings/authentication-configuration/new");
-    }
-    
-    private void NavigateToEditAuthenticationConfig() => NavigationManager.NavigateTo("authentication-configuration/edit");
 }
