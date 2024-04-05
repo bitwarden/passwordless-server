@@ -9,7 +9,8 @@ on:
       - main
   release:
     types:
-      - published
+      - prereleased
+      - released
   workflow_dispatch:
     inputs:
       version:
@@ -197,10 +198,11 @@ jobs:
           - qa
           - prod
         exclude:
-          # Exclude QA and PROD if not triggered by a release event
-          # https://stackoverflow.com/questions/65384420/how-do-i-make-a-github-action-matrix-element-conditional
-          - environment: ${{ github.event_name != 'release' && 'qa' }}
-          - environment: ${{ github.event_name != 'release' && 'prod' }}
+          # Deploy to QA on pre-releases and stable releases
+          - environment: ${{ !(github.event_name == 'release') && 'qa' }}
+          # Deploy to PROD on stable release only
+          - environment: ${{ !(github.event_name == 'release' && github.event.action == 'released') && 'prod' }}
+          # Deploy to DEVTEST every time
 
     runs-on: ubuntu-latest
     permissions: {} # no permissions required
