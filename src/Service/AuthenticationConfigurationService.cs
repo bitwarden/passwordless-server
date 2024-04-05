@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -7,10 +9,10 @@ namespace Passwordless.Service;
 public interface IAuthenticationConfigurationService
 {
     Task CreateAuthenticationConfigurationAsync();
-    Task SetAuthenticationConfigurationAsync();
+    Task SetAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
     Task DeleteAuthenticationConfigurationAsync();
     Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync();
-    Task<AuthenticationConfigurationDto?> GetAuthenticationConfiguration(string purpose);
+    Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
     Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose);
 }
 
@@ -21,9 +23,14 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
         throw new NotImplementedException();
     }
 
-    public Task SetAuthenticationConfigurationAsync()
+    public async Task SetAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
     {
-        throw new NotImplementedException();
+        var configurations = await GetAuthenticationConfigurationsAsync();
+
+        if (configurations.Select(x => x.Purpose.Value).Contains(configuration.Purpose.Value, StringComparer.OrdinalIgnoreCase))
+            throw new ApiException($"The configuration {configuration.Purpose.Value} already exists.", StatusCodes.Status400BadRequest);
+
+        await storage.CreateAuthenticationConfigurationAsync(configuration);
     }
 
     public Task DeleteAuthenticationConfigurationAsync()
@@ -44,7 +51,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
         return result;
     }
 
-    public Task<AuthenticationConfigurationDto?> GetAuthenticationConfiguration(string purpose) =>
+    public Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose) =>
         storage.GetAuthenticationConfigurationAsync(new SignInPurpose(purpose));
 
     public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose)

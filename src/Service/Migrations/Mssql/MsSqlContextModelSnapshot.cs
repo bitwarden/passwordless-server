@@ -188,8 +188,8 @@ namespace Passwordless.Service.Migrations.Mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeSpan>("TimeToLive")
-                        .HasColumnType("time");
+                    b.Property<long>("TimeToLive")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("UserVerificationRequirement")
                         .HasColumnType("int");

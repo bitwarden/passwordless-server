@@ -2,6 +2,7 @@ using AutoFixture;
 using FluentAssertions;
 using Moq;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
@@ -31,11 +32,7 @@ public class AuthenticationConfigurationServiceTests
         _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync())
             .ReturnsAsync(Array.Empty<AuthenticationConfigurationDto>());
 
-        var defaultConfigurations = new List<AuthenticationConfigurationDto>
-        {
-            AuthenticationConfigurationDto.SignIn(Tenant),
-            AuthenticationConfigurationDto.StepUp(Tenant)
-        };
+        var defaultConfigurations = new List<AuthenticationConfigurationDto> { AuthenticationConfigurationDto.SignIn(Tenant), AuthenticationConfigurationDto.StepUp(Tenant) };
 
         // Act
         var actual = await _sut.GetAuthenticationConfigurationsAsync();
@@ -104,5 +101,47 @@ public class AuthenticationConfigurationServiceTests
         actualList.Should().ContainSingle(x => x.Purpose.Value == SignInPurposes.StepUp.Value);
         actualList.Should().ContainSingle(x => x.Purpose.Value == SignInPurposes.SignIn.Value);
         actualList.Should().Contain(savedConfigurations);
+    }
+
+    [Fact]
+    public async Task SetAuthenticationConfigurationAsync_GivenConfiguration_WhenNoMatchingConfigurationExists_ThenConfigurationSaves()
+    {
+        // Arrange
+        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
+            .With(x => x.Tenant, Tenant)
+            .Create();
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync()).ReturnsAsync(Array.Empty<AuthenticationConfigurationDto>());
+
+        // Act
+        await _sut.SetAuthenticationConfigurationAsync(configuration);
+
+        // Assert
+        _mockTenantStorage.Verify(x => x.CreateAuthenticationConfigurationAsync(configuration), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(SignInPurposes.SignInName)]
+    [InlineData(SignInPurposes.StepUpName)]
+    [InlineData("randomPurpose")]
+    public async Task SetAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenThrowsApiExceptionAboutPurposeAlreadyExists(string existingPurpose)
+    {
+        // Arrange
+        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
+            .With(x => x.Tenant, Tenant)
+            .With(x => x.Purpose, new SignInPurpose(existingPurpose))
+            .Create();
+
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync())
+            .ReturnsAsync(_fixture.Build<AuthenticationConfigurationDto>()
+                .With(x => x.Purpose, new SignInPurpose(existingPurpose))
+                .With(x => x.Tenant, Tenant)
+                .CreateMany(1));
+
+        // Act
+        var action = () => _sut.SetAuthenticationConfigurationAsync(configuration);
+
+        // Assert
+        await action.Should().ThrowAsync<ApiException>()
+            .WithMessage($"The configuration {existingPurpose} already exists.");
     }
 }

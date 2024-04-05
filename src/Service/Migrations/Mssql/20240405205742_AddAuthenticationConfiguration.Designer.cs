@@ -12,7 +12,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240329200950_AddAuthenticationConfiguration")]
+    [Migration("20240405205742_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />
@@ -191,8 +191,8 @@ namespace Passwordless.Service.Migrations.Mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeSpan>("TimeToLive")
-                        .HasColumnType("time");
+                    b.Property<long>("TimeToLive")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("UserVerificationRequirement")
                         .HasColumnType("int");

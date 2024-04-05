@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Passwordless.Service.Migrations.Mssql;
+namespace Passwordless.Service.Migrations.Sqlite;
 
 /// <inheritdoc />
 public partial class AddAuthenticationConfiguration : Migration
@@ -14,10 +14,10 @@ public partial class AddAuthenticationConfiguration : Migration
             name: "AuthenticationConfigurations",
             columns: table => new
             {
-                Purpose = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                UserVerificationRequirement = table.Column<int>(type: "int", nullable: false),
-                TimeToLive = table.Column<TimeSpan>(type: "time", nullable: false),
-                Tenant = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                Purpose = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                UserVerificationRequirement = table.Column<int>(type: "INTEGER", nullable: false),
+                TimeToLive = table.Column<double>(type: "REAL", nullable: false),
+                Tenant = table.Column<string>(type: "TEXT", nullable: false)
             },
             constraints: table =>
             {

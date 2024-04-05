@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20240329200918_AddAuthenticationConfiguration")]
+    [Migration("20240405205754_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />
@@ -186,8 +186,8 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<TimeSpan>("TimeToLive")
-                        .HasColumnType("TEXT");
+                    b.Property<double>("TimeToLive")
+                        .HasColumnType("REAL");
 
                     b.Property<int>("UserVerificationRequirement")
                         .HasColumnType("INTEGER");

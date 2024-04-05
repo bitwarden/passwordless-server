@@ -5,6 +5,7 @@ using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Utils;
 using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Models;
+using AuthenticationConfiguration = Passwordless.Service.Models.AuthenticationConfiguration;
 
 namespace Passwordless.Service.Storage.Ef;
 
@@ -353,6 +354,19 @@ public class EfTenantStorage(
         var configurations = await db.AuthenticationConfigurations.ToListAsync();
 
         return configurations.Select(x => x.ToDto());
+    }
+
+    public async Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        db.AuthenticationConfigurations.Add(new AuthenticationConfiguration
+        {
+            Purpose = configuration.Purpose.Value,
+            UserVerificationRequirement = configuration.UserVerificationRequirement,
+            TimeToLive = configuration.TimeToLive,
+            Tenant = Tenant
+        });
+
+        await db.SaveChangesAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

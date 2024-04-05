@@ -24,6 +24,7 @@ public static class SigninEndpoints
     {
         var group = app.MapGroup("/signin")
             .RequireCors("default")
+            .WithOpenApi()
             .WithTags(OpenApiTags.SignIn);
 
         group.MapPost("/generate-token", GenerateTokenAsync)
@@ -42,16 +43,49 @@ public static class SigninEndpoints
         group.MapPost("/verify", VerifyAsync)
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
 
-        group.MapGet("/authentication-configurations", GetAuthenticationConfigurationsAsync).RequireSecretKey();
+        group.MapGet("/authentication-configurations", async (
+                [FromServices] IAuthenticationConfigurationService service) =>
+            {
+                var configurations = await service.GetAuthenticationConfigurationsAsync();
 
-        group.MapPost("/authentication-configuration", CreateAuthenticationScopeAsync).RequireSecretKey();
+                return Ok(new GetAuthenticationScopesResult
+                {
+                    Scopes = configurations
+                        .Select(x =>
+                            new AuthenticationConfiguration(
+                                x.Purpose.Value,
+                                Convert.ToInt32(x.TimeToLive.TotalSeconds),
+                                x.UserVerificationRequirement.ToEnumMemberValue()))
+                });
+            })
+            .WithSummary("A list of authentication scope configurations for your application. This will include the two default scopes of SignIn and StepUp.")
+            .Produces<GetAuthenticationScopesResult>()
+            .RequireSecretKey();
+
+        group.MapPost("/authentication-configuration", async (
+            [FromBody] SetAuthenticationScopeRequest request,
+            [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
+            HttpRequest httpRequest) =>
+        {
+            await authenticationConfigurationService.SetAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+            {
+                Purpose = new SignInPurpose(request.Purpose),
+                UserVerificationRequirement = request.UserVerificationRequirement,
+                TimeToLive = request.TimeToLive,
+                Tenant = httpRequest.GetTenantName()!
+            });
+
+            return Created();
+        })
+        .WithSummary("Creates a new authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
+        .WithParameterValidation()
+        .RequireSecretKey();
 
         group.MapPut("/authentication-configuration", SetAuthenticationScopeAsync).RequireSecretKey();
 
         group.MapGet("/authentication-configuration/{purpose}", GetAuthenticationConfigurationAsync).RequireSecretKey();
 
         group.MapDelete("/authentication-configuration", DeleteAuthenticationConfigurationAsync).RequireSecretKey();
-
     }
 
     /// <summary>
@@ -74,7 +108,6 @@ public static class SigninEndpoints
 
         return Ok(new SigninTokenResponse(result));
     }
-
 
     /// <summary>
     /// Signin (Step 1 - Client)
@@ -120,27 +153,6 @@ public static class SigninEndpoints
     }
 
     /// <summary>
-    /// A list of authentication scope configurations for your application. This will include the two default scopes of SignIn and StepUp.
-    /// </summary>
-    /// <returns>Result containing a list of AuthenticationConfigurations</returns>
-    [ProducesResponseType(typeof(GetAuthenticationScopesResult), StatusCodes.Status200OK)]
-    public static async Task<IResult> GetAuthenticationConfigurationsAsync(
-        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
-    {
-        var configurations = await authenticationConfigurationService.GetAuthenticationConfigurationsAsync();
-
-        return Ok(new GetAuthenticationScopesResult
-        {
-            Scopes = configurations
-                .Select(x =>
-                    new AuthenticationConfiguration(
-                        x.Purpose.Value,
-                        Convert.ToInt32(x.TimeToLive.TotalSeconds),
-                        x.UserVerificationRequirement.ToEnumMemberValue()))
-        });
-    }
-
-    /// <summary>
     /// Authentication configuration for the specified purpose.
     /// </summary>
     /// <returns>The configuration matching the specified purpose.</returns>
@@ -150,7 +162,7 @@ public static class SigninEndpoints
         [FromRoute] string purpose,
         [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
     {
-        var configuration = await authenticationConfigurationService.GetAuthenticationConfiguration(purpose);
+        var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(purpose);
         return configuration is null
             ? NotFound()
             : Ok(configuration);

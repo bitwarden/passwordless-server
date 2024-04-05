@@ -183,8 +183,8 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<TimeSpan>("TimeToLive")
-                        .HasColumnType("TEXT");
+                    b.Property<double>("TimeToLive")
+                        .HasColumnType("REAL");
 
                     b.Property<int>("UserVerificationRequirement")
                         .HasColumnType("INTEGER");

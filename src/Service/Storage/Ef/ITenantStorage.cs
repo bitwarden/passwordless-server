@@ -59,4 +59,5 @@ public interface ITenantStorage
     Task<DispatchedEmail> AddDispatchedEmailAsync(string userId, string emailAddress, string linkTemplate);
     Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose);
     Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync();
+    Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
 }

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -280,5 +281,41 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         problemDetails!.Extensions["errorCode"]!.ToString().Should().Be("expired_token");
         problemDetails.Status.Should().Be(403);
         problemDetails.Title.Should().Be("The token expired 10 seconds ago.");
+    }
+
+    [Fact]
+    public async Task I_can_create_an_authentication_configuration()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/authentication-configuration");
+        request.Content = new StringContent(
+            // lang=json
+            """
+            {
+              "timeToLive": "1.01:01:01",
+              "purpose": "purpose1",
+              "userVerificationRequirement": "Discouraged"
+            }
+            """,
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        using var enableResponse = await client.SendAsync(request);
+
+        // Assert
+        enableResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/authentication-configurations");
+        getConfigResponse.Should().NotBeNull();
+        getConfigResponse!.Scopes.Should().Contain(x => x.Purpose == "purpose1");
     }
 }
