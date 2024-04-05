@@ -58,6 +58,8 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
+        Logger.LogInformation("Stopping {BackgroundService}.", GetType().Name);
+
         // Prevent from spawning new workers
         _timer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
@@ -84,5 +86,6 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
 
         _timer?.Dispose();
         CancellationToken.Dispose();
+        Logger.LogInformation("Stopped {BackgroundService}.", GetType().Name);
     }
 }
