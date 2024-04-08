@@ -9,7 +9,7 @@ public class DbGlobalSqliteContext : DbGlobalContext
         : base(options)
     {
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

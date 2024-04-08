@@ -9,7 +9,7 @@ public class DbTenantSqliteContext : DbTenantContext
         : base(options, tenantProvider)
     {
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
