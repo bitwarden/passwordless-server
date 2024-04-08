@@ -8,9 +8,9 @@ namespace Passwordless.Service;
 
 public interface IAuthenticationConfigurationService
 {
-    Task CreateAuthenticationConfigurationAsync();
-    Task SetAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
-    Task DeleteAuthenticationConfigurationAsync();
+    Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
+    Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
+    Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
     Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync();
     Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
     Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose);
@@ -18,25 +18,26 @@ public interface IAuthenticationConfigurationService
 
 public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthenticationConfigurationService
 {
-    public Task CreateAuthenticationConfigurationAsync()
+    public async Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
     {
-        throw new NotImplementedException();
-    }
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(configuration.Purpose.Value);
 
-    public async Task SetAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
-    {
-        var configurations = await GetAuthenticationConfigurationsAsync();
-
-        if (configurations.Select(x => x.Purpose.Value).Contains(configuration.Purpose.Value, StringComparer.OrdinalIgnoreCase))
-            throw new ApiException($"The configuration {configuration.Purpose.Value} already exists.", StatusCodes.Status400BadRequest);
+        if (existingConfiguration is not null) throw new ApiException($"The configuration {configuration.Purpose.Value} already exists.", StatusCodes.Status400BadRequest);
 
         await storage.CreateAuthenticationConfigurationAsync(configuration);
     }
 
-    public Task DeleteAuthenticationConfigurationAsync()
+    public async Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
     {
-        throw new NotImplementedException();
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(configuration.Purpose.Value);
+
+        if (existingConfiguration is null) throw new ApiException($"The configuration {configuration.Purpose.Value} does not exist.", StatusCodes.Status404NotFound);
+
+        await storage.UpdateAuthenticationConfigurationAsync(configuration);
     }
+
+    public Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration) =>
+        storage.DeleteAuthenticationConfigurationAsync(configuration);
 
     public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync()
     {
@@ -51,8 +52,12 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
         return result;
     }
 
-    public Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose) =>
-        storage.GetAuthenticationConfigurationAsync(new SignInPurpose(purpose));
+    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
+    {
+        var configuration = await storage.GetAuthenticationConfigurationAsync(new SignInPurpose(purpose)) ?? GetPresetDefaults(purpose);
+
+        return configuration;
+    }
 
     public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose)
     {
@@ -61,10 +66,18 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
         return configuration ?? GetDefault(purpose);
     }
 
-    private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose) =>
-        purpose == SignInPurposes.StepUp
-            ? AuthenticationConfigurationDto.StepUp(storage.Tenant)
-            : AuthenticationConfigurationDto.SignIn(storage.Tenant);
+    private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose) => purpose.Value switch
+    {
+        SignInPurposes.StepUpName or SignInPurposes.SignInName => GetPresetDefaults(purpose.Value)!,
+        _ => AuthenticationConfigurationDto.SignIn(storage.Tenant)
+    };
+
+    private AuthenticationConfigurationDto? GetPresetDefaults(string purpose) => purpose switch
+    {
+        SignInPurposes.StepUpName => AuthenticationConfigurationDto.StepUp(storage.Tenant),
+        SignInPurposes.SignInName => AuthenticationConfigurationDto.SignIn(storage.Tenant),
+        _ => null
+    };
 
     private static bool IsNotStepUpConfiguration(AuthenticationConfigurationDto configuration) => configuration.Purpose != SignInPurposes.StepUp;
     private static bool IsNotSignInConfiguration(AuthenticationConfigurationDto configuration) => configuration.Purpose != SignInPurposes.SignIn;

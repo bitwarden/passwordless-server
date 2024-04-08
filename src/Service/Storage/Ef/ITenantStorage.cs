@@ -60,4 +60,6 @@ public interface ITenantStorage
     Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose);
     Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync();
     Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
+    Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
+    Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
 }

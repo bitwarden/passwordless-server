@@ -369,6 +369,21 @@ public class EfTenantStorage(
         await db.SaveChangesAsync();
     }
 
+    public async Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        await db.AuthenticationConfigurations
+            .Where(x => x.Purpose == configuration.Purpose.Value)
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(c => c.TimeToLive, configuration.TimeToLive)
+                .SetProperty(c => c.UserVerificationRequirement, configuration.UserVerificationRequirement));
+    }
+
+    public async Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        await db.AuthenticationConfigurations.Where(x => x.Purpose == configuration.Purpose.Value)
+            .ExecuteDeleteAsync();
+    }
+
     public async Task LockAllApiKeys(bool isLocked)
     {
         await db.ApiKeys.ExecuteUpdateAsync(x => x

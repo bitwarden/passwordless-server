@@ -62,30 +62,78 @@ public static class SigninEndpoints
             .Produces<GetAuthenticationScopesResult>()
             .RequireSecretKey();
 
-        group.MapPost("/authentication-configuration", async (
-            [FromBody] SetAuthenticationScopeRequest request,
-            [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
-            HttpRequest httpRequest) =>
-        {
-            await authenticationConfigurationService.SetAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+        group.MapPost("/authentication-configuration/new", async (
+                [FromBody] SetAuthenticationScopeRequest request,
+                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
+                HttpRequest httpRequest) =>
             {
-                Purpose = new SignInPurpose(request.Purpose),
-                UserVerificationRequirement = request.UserVerificationRequirement,
-                TimeToLive = request.TimeToLive,
-                Tenant = httpRequest.GetTenantName()!
-            });
+                await authenticationConfigurationService.CreateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+                {
+                    Purpose = new SignInPurpose(request.Purpose),
+                    UserVerificationRequirement = request.UserVerificationRequirement,
+                    TimeToLive = request.TimeToLive,
+                    Tenant = httpRequest.GetTenantName()!
+                });
 
-            return Created();
-        })
-        .WithSummary("Creates a new authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
-        .WithParameterValidation()
-        .RequireSecretKey();
+                return Created();
+            })
+            .WithSummary(
+                "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
+            .Produces(StatusCodes.Status201Created)
+            .WithParameterValidation()
+            .RequireSecretKey();
 
-        group.MapPut("/authentication-configuration", SetAuthenticationScopeAsync).RequireSecretKey();
+        group.MapPost("/authentication-configuration", async (
+                [FromBody] SetAuthenticationScopeRequest request,
+                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
+                HttpRequest httpRequest) =>
+            {
+                await authenticationConfigurationService.UpdateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+                {
+                    Purpose = new SignInPurpose(request.Purpose),
+                    UserVerificationRequirement = request.UserVerificationRequirement,
+                    TimeToLive = request.TimeToLive,
+                    Tenant = httpRequest.GetTenantName()!
+                });
 
-        group.MapGet("/authentication-configuration/{purpose}", GetAuthenticationConfigurationAsync).RequireSecretKey();
+                return Ok();
+            })
+            .WithSummary(
+                "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
+            .Produces(StatusCodes.Status200OK)
+            .WithParameterValidation()
+            .RequireSecretKey();
 
-        group.MapDelete("/authentication-configuration", DeleteAuthenticationConfigurationAsync).RequireSecretKey();
+        group.MapGet("/authentication-configuration/{purpose}", async (
+                [FromRoute] string purpose,
+                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
+            {
+                var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(purpose);
+                return configuration is null
+                    ? NotFound()
+                    : Ok(configuration);
+            })
+            .WithSummary("Authentication configuration for the specified purpose.")
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces<AuthenticationConfigurationDto>()
+            .WithParameterValidation()
+            .RequireSecretKey();
+
+        group.MapDelete("/authentication-configuration", async (
+                [FromBody] DeleteAuthenticationConfigurationRequest request,
+                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
+            {
+                var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(request.Purpose);
+
+                if (configuration == null) return NotFound();
+
+                await authenticationConfigurationService.DeleteAuthenticationConfigurationAsync(configuration);
+
+                return Ok();
+            })
+            .Produces(StatusCodes.Status200OK)
+            .WithParameterValidation()
+            .RequireSecretKey();
     }
 
     /// <summary>
@@ -150,37 +198,6 @@ public static class SigninEndpoints
     {
         var result = await fido2Service.SignInVerifyAsync(payload);
         return Ok(result);
-    }
-
-    /// <summary>
-    /// Authentication configuration for the specified purpose.
-    /// </summary>
-    /// <returns>The configuration matching the specified purpose.</returns>
-    [ProducesResponseType(typeof(AuthenticationConfigurationDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public static async Task<IResult> GetAuthenticationConfigurationAsync(
-        [FromRoute] string purpose,
-        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
-    {
-        var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(purpose);
-        return configuration is null
-            ? NotFound()
-            : Ok(configuration);
-    }
-
-
-    public static Task<IResult> CreateAuthenticationScopeAsync(
-        [FromBody] SetAuthenticationScopeRequest request,
-        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
-    {
-        throw new NotImplementedException();
-    }
-
-    public static Task<IResult> SetAuthenticationScopeAsync(
-        [FromBody] SetAuthenticationScopeRequest request,
-        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
-    {
-        throw new NotImplementedException();
     }
 
     public static Task<IResult> DeleteAuthenticationConfigurationAsync(

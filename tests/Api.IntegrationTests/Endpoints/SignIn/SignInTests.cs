@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.Mime;
 using System.Text;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -296,7 +297,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
         // Act
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/authentication-configuration");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/authentication-configuration/new");
         request.Content = new StringContent(
             // lang=json
             """
@@ -307,7 +308,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
             }
             """,
             Encoding.UTF8,
-            "application/json"
+            MediaTypeNames.Application.Json
         );
 
         using var enableResponse = await client.SendAsync(request);
@@ -317,5 +318,111 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/authentication-configurations");
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Scopes.Should().Contain(x => x.Purpose == "purpose1");
+    }
+
+    [Fact]
+    public async Task I_can_get_the_default_sign_in_authentication_configuration_without_changing_anything()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        // Act
+        var getConfigResponse = await client.GetFromJsonAsync<AuthenticationConfigurationDto>("signin/authentication-configuration/sign-in");
+
+        // Assert
+        getConfigResponse.Should().NotBeNull();
+        getConfigResponse!.Should().BeEquivalentTo(AuthenticationConfigurationDto.SignIn(applicationName));
+    }
+
+    [Fact]
+    public async Task I_can_get_the_default_step_up_authentication_configuration_without_changing_anything()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        // Act
+        var getConfigResponse = await client.GetFromJsonAsync<AuthenticationConfigurationDto>("signin/authentication-configuration/step-up");
+
+        // Assert
+        getConfigResponse.Should().NotBeNull();
+        getConfigResponse!.Should().BeEquivalentTo(AuthenticationConfigurationDto.StepUp(applicationName));
+    }
+
+    [Fact]
+    public async Task I_can_get_a_not_found_for_a_non_preset_and_nonexistent_configuration()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        // Act
+        var getConfigResponse = await client.GetAsync($"signin/authentication-configuration/random");
+
+        // Assert
+        getConfigResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task I_can_delete_a_configuration_I_created()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        const string purpose = "purpose1";
+
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/signin/authentication-configuration/new");
+        createRequest.Content = new StringContent(
+            // lang=json
+            $$"""
+            {
+              "timeToLive": "1.01:01:01",
+              "purpose": "{{purpose}}",
+              "userVerificationRequirement": "Discouraged"
+            }
+            """,
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json
+        );
+        await client.SendAsync(createRequest);
+
+        // Act
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "signin/authentication-configuration");
+        deleteRequest.Content = new StringContent(
+            // lang=json
+            $$"""
+              {
+                "purpose": "{{purpose}}"
+              }
+              """,
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json
+        );
+        using var deleteResponse = await client.SendAsync(deleteRequest);
+
+        // Assert
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
