@@ -80,6 +80,7 @@ public static class SigninEndpoints
             .WithSummary(
                 "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
             .Produces(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
             .WithParameterValidation()
             .RequireSecretKey();
 
@@ -101,6 +102,7 @@ public static class SigninEndpoints
             .WithSummary(
                 "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
             .WithParameterValidation()
             .RequireSecretKey();
 
@@ -114,8 +116,8 @@ public static class SigninEndpoints
                     : Ok(configuration);
             })
             .WithSummary("Authentication configuration for the specified purpose.")
-            .Produces(StatusCodes.Status404NotFound)
             .Produces<AuthenticationConfigurationDto>()
+            .Produces(StatusCodes.Status404NotFound)
             .WithParameterValidation()
             .RequireSecretKey();
 
@@ -132,6 +134,8 @@ public static class SigninEndpoints
                 return Ok();
             })
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound)
             .WithParameterValidation()
             .RequireSecretKey();
     }
@@ -198,12 +202,5 @@ public static class SigninEndpoints
     {
         var result = await fido2Service.SignInVerifyAsync(payload);
         return Ok(result);
-    }
-
-    public static Task<IResult> DeleteAuthenticationConfigurationAsync(
-        [FromBody] DeleteAuthenticationConfigurationRequest request,
-        [FromServices] IAuthenticationConfigurationService authenticationConfigurationService)
-    {
-        throw new NotImplementedException();
     }
 }

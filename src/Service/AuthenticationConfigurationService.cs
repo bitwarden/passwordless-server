@@ -36,8 +36,13 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
         await storage.UpdateAuthenticationConfigurationAsync(configuration);
     }
 
-    public Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration) =>
-        storage.DeleteAuthenticationConfigurationAsync(configuration);
+    public Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        if (IsNotSignInConfiguration(configuration) && IsNotStepUpConfiguration(configuration))
+            return storage.DeleteAuthenticationConfigurationAsync(configuration);
+
+        throw new ApiException($"The {configuration.Purpose.Value} configuration cannot be deleted.", 400);
+    }
 
     public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync()
     {

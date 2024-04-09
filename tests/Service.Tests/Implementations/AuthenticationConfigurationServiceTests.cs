@@ -188,4 +188,46 @@ public class AuthenticationConfigurationServiceTests
         // Assert
         _mockTenantStorage.Verify(x => x.UpdateAuthenticationConfigurationAsync(configuration), Times.Once);
     }
+
+    [Fact]
+    public async Task DeleteAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenTheConfigurationIsDeleted()
+    {
+        // Arrange
+        var existingSignInPurpose = new SignInPurpose("randomPurpose");
+
+        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
+            .With(x => x.Tenant, Tenant)
+            .With(x => x.Purpose, existingSignInPurpose)
+            .Create();
+
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationAsync(existingSignInPurpose))
+            .ReturnsAsync(configuration);
+
+        // Act
+        await _sut.DeleteAuthenticationConfigurationAsync(configuration);
+
+        // Assert
+        _mockTenantStorage.Verify(x => x.DeleteAuthenticationConfigurationAsync(configuration), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(SignInPurposes.SignInName)]
+    [InlineData(SignInPurposes.StepUpName)]
+    public async Task DeleteAuthenticationConfigurationAsync_GivenPresetConfiguration_WhenDeleteAttempted_ThenThrowsApiExceptionAboutDeletingPresetConfigurations(string existingPurpose)
+    {
+        // Arrange
+        var existingSignInPurpose = new SignInPurpose(existingPurpose);
+
+        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
+            .With(x => x.Tenant, Tenant)
+            .With(x => x.Purpose, existingSignInPurpose)
+            .Create();
+
+        // Act
+        var action = () => _sut.DeleteAuthenticationConfigurationAsync(configuration);
+
+        // Assert
+        await action.Should().ThrowAsync<ApiException>()
+            .WithMessage($"The {configuration.Purpose.Value} configuration cannot be deleted.");
+    }
 }
