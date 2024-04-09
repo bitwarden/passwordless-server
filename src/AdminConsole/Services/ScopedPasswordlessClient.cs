@@ -1,3 +1,5 @@
+using System.Net.Mime;
+using System.Text;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
@@ -40,7 +42,8 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 
     Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync();
 
-    Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
+    Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
+    Task DeleteAuthenticationConfigurationAsync(string purpose);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -140,9 +143,26 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     public async Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync() =>
         (await _client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/authentication-configurations"))!;
 
-    public async Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
     {
-        using var response = await _client.PostAsJsonAsync("signin/authentication-configuration", configuration);
+        using var response = await _client.PostAsJsonAsync("signin/authentication-configuration/new", configuration);
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteAuthenticationConfigurationAsync(string purpose)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, "signin/authentication-configuration");
+        request.Content = new StringContent(
+            // lang=json
+            $$"""
+              {
+                "purpose": "{{purpose}}"
+              }
+              """,
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json
+        );
+        using var deleteResponse = await _client.SendAsync(request);
+        deleteResponse.EnsureSuccessStatusCode();
     }
 }

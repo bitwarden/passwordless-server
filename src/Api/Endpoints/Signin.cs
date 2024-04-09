@@ -63,7 +63,7 @@ public static class SigninEndpoints
             .RequireSecretKey();
 
         group.MapPost("/authentication-configuration/new", async (
-                [FromBody] SetAuthenticationScopeRequest request,
+                [FromBody] SetAuthenticationConfigurationRequest request,
                 [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
                 HttpRequest httpRequest) =>
             {
@@ -85,7 +85,7 @@ public static class SigninEndpoints
             .RequireSecretKey();
 
         group.MapPost("/authentication-configuration", async (
-                [FromBody] SetAuthenticationScopeRequest request,
+                [FromBody] SetAuthenticationConfigurationRequest request,
                 [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
                 HttpRequest httpRequest) =>
             {

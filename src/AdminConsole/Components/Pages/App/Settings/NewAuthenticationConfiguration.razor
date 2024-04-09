@@ -13,12 +13,11 @@
 @code {
     private async Task SaveNewAuthenticationConfiguration(AuthenticationConfigurationForm.AuthenticationConfigurationFormModel formModel)
     {
-        await Passwordless.CreateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+        await Passwordless.CreateAuthenticationConfigurationAsync(new SetAuthenticationConfigurationRequest
         {
-            Purpose = new SignInPurpose(formModel.Purpose),
+            Purpose = formModel.Purpose,
             UserVerificationRequirement = UserVerificationRequirement.Required,
-            TimeToLive = formModel.TimeToLive,
-            Tenant = CurrentContext.AppId!
+            TimeToLive = formModel.TimeToLive
         });
     }
 }

@@ -4,7 +4,7 @@ using Fido2NetLib.Objects;
 
 namespace Passwordless.Common.Models.Apps;
 
-public class SetAuthenticationScopeRequest
+public class SetAuthenticationConfigurationRequest
 {
     [Required] public string Purpose { get; set; } = string.Empty;
     public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;

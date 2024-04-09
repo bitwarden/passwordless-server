@@ -461,7 +461,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await client.SendAsync(createRequest);
 
         // Act
-        using var editResponse = await client.PostAsJsonAsync("signin/authentication-configuration", new SetAuthenticationScopeRequest
+        using var editResponse = await client.PostAsJsonAsync("signin/authentication-configuration", new SetAuthenticationConfigurationRequest
         {
             Purpose = purpose,
             TimeToLive = timeToLive.Add(TimeSpan.FromDays(1)),
