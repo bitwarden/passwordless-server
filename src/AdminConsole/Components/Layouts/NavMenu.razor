@@ -23,10 +23,7 @@
                                 <NavMenuItem Href="@OnboardingUrl" Icon="typeof(StartIcon)" Label="Getting Started" />
                                 <NavMenuItem Href="@PlaygroundUrl" Icon="typeof(BeakerIcon)" Label="Playground" />
                                 <NavMenuItem Href="@UsersUrl" Icon="typeof(UsersIcon)" Label="Users" />
-                                @if (Environment.IsDevelopment())
-                                {
-                                    <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
-                                }
+                                <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
                             }
                             <NavMenuItem Href="@SettingsUrl" Icon="typeof(CogIcon)" Label="Settings" />
                             @if (CurrentContext.Features.EventLoggingIsEnabled)
