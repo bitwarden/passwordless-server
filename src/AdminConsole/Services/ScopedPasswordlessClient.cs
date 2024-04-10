@@ -151,8 +151,8 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
 
     public async Task DeleteAuthenticationConfigurationAsync(string purpose)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Delete, "signin/authentication-configuration");
-        request.Content = new StringContent(
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "signin/authentication-configuration");
+        deleteRequest.Content = new StringContent(
             // lang=json
             $$"""
               {
@@ -162,7 +162,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
             Encoding.UTF8,
             MediaTypeNames.Application.Json
         );
-        using var deleteResponse = await _client.SendAsync(request);
+        using var deleteResponse = await _client.SendAsync(deleteRequest);
         deleteResponse.EnsureSuccessStatusCode();
     }
 }

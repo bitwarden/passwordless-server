@@ -23,23 +23,26 @@
                         <td>@config.Purpose</td>
                         <td>@config.UserVerification</td>
                         <td>@config.TimeToLive</td>
-                        <td>
+                        <td class="flex space-x-2 ml-0">
                             <a href="/app/@(AppId)/setting/authentication-configuration/@(config.Purpose)/edit">
                                 <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
                             </a>
 
                             @if (config.CanDelete)
                             {
-                                <ConfirmButton
-                                    ConfirmTitle="Delete Authentication Configuration"
-                                    ConfirmDescription="Are you sure you want to delete this configuration?"
-                                    ConfirmButtonText="Delete"
-                                    class="btn-danger flex items-center"
-                                    name="ConfirmSelectedForm.Action"
-                                    type="submit"
-                                    value="delete">
-                                    <DeleteIcon Class="h-6 w-6"></DeleteIcon>
-                                </ConfirmButton>
+                                <ConfirmEditForm Model="ConfirmSelectedForm" FormName="@nameof(ConfirmSelectedForm)" name="@nameof(ConfirmSelectedForm)" OnSubmit="OnSelectedFormConfirmed">
+                                    <ConfirmButton
+                                        ConfirmTitle="Delete Authentication Configuration"
+                                        ConfirmDescription="Are you sure you want to delete this configuration?"
+                                        ConfirmButtonText="Delete"
+                                        class="btn-danger flex items-center"
+                                        name="ConfirmSelectedForm.Action"
+                                        type="submit"
+                                        value="delete">
+                                        <DeleteIcon Class="h-6 w-6"></DeleteIcon>
+                                    </ConfirmButton>
+                                    <input type="hidden" value="@config.Purpose" name="ConfirmSelectedForm.Purpose"/>
+                                </ConfirmEditForm>
                             }
                         </td>
                     </tr>
@@ -51,6 +54,8 @@
 
 @code {
     public string AppId => CurrentContext.AppId!;
+
+    public ConfirmSelectedFormModel ConfirmSelectedForm { get; set; } = new();
 
     public readonly IReadOnlyCollection<string> RequiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
 
@@ -70,8 +75,39 @@
 
         if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
         {
+            var request = HttpContextAccessor.HttpContext!.Request;
+            switch (request.Form["_handler"])
+            {
+                case nameof(ConfirmSelectedForm):
+                    ConfirmSelectedForm.Purpose = request.Form["ConfirmSelectedForm.Purpose"].ToString();
+                    ConfirmSelectedForm.Action = request.Form["ConfirmSelectedForm.Action"].ToString();
+                    await OnSelectedFormConfirmed();
+                    break;
+            }
         }
 
         Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Scopes.Select(GetEntry).ToImmutableArray();
     }
+
+    public async Task OnSelectedFormConfirmed()
+    {
+        if (string.IsNullOrEmpty(ConfirmSelectedForm.Purpose))
+        {
+            throw new ArgumentNullException(nameof(ConfirmSelectedForm.Purpose));
+        }
+
+        switch (ConfirmSelectedForm.Action)
+        {
+            case "delete":
+                await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmSelectedForm.Purpose);
+                break;
+        }
+    }
+
+    public class ConfirmSelectedFormModel
+    {
+        public string Purpose { get; set; } = string.Empty;
+        public string Action { get; set; } = string.Empty;
+    }
+
 }
