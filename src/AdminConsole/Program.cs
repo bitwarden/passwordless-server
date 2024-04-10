@@ -21,6 +21,7 @@ using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.HealthChecks;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
@@ -200,7 +201,7 @@ void RunTheApp()
     app.UseRouting();
     app.UseAuthentication();
     app.UseWhen(
-        context => !context.Request.Path.StartsWithSegments("/health"),
+        context => !context.Request.Path.StartsWithSegments(HealthCheckEndpoints.Path),
         appBuilder =>
         {
             appBuilder.UseMiddleware<CurrentContextMiddleware>();

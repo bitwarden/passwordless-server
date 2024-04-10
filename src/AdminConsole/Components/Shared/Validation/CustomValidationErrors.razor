@@ -1,0 +1,15 @@
+@if (EditContext.GetValidationMessages().Any())
+{
+    <ul class="validation-errors">
+    
+        @foreach (var error in EditContext.GetValidationMessages())
+        {
+            <li class="validation-message">@error</li>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public required EditContext EditContext { get; set; }
+}
