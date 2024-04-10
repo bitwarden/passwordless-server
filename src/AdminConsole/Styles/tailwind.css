@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-    ul {
+    ul.validation-errors {
         @apply list-disc ml-4;
     }
     
