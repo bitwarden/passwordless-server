@@ -102,6 +102,8 @@
                 await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmSelectedForm.Purpose);
                 break;
         }
+        
+        NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
     }
 
     public class ConfirmSelectedFormModel

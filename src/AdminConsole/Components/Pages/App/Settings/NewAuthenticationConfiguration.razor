@@ -3,6 +3,7 @@
 @inherits BaseApplicationPage
 
 @inject IScopedPasswordlessClient Passwordless
+@inject ICurrentContext CurrentContext
 @inject NavigationManager NavigationManager
 
 <p>Create a new authentication configuration</p>
@@ -19,6 +20,6 @@
             TimeToLive = formModel.TimeToLive
         });
         
-        NavigationManager.NavigateTo("app/settings");
+        NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
     }
 }
