@@ -24,7 +24,7 @@
                         <td>@config.UserVerification</td>
                         <td>@config.TimeToLive</td>
                         <td class="flex space-x-2 ml-0">
-                            <a href="/app/@(AppId)/setting/authentication-configuration/@(config.Purpose)/edit">
+                            <a href="/app/@(AppId)/settings/authentication-configuration/@(config.Purpose)/edit">
                                 <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
                             </a>
 
@@ -36,7 +36,7 @@
                                         ConfirmDescription="Are you sure you want to delete this configuration?"
                                         ConfirmButtonText="Delete"
                                         class="btn-danger flex items-center"
-                                        name="ConfirmSelectedForm.Action"
+                                        name="delete"
                                         type="submit"
                                         value="delete">
                                         <DeleteIcon Class="h-6 w-6"></DeleteIcon>
@@ -53,13 +53,13 @@
 }
 
 @code {
-    public string AppId => CurrentContext.AppId!;
+    private string AppId => CurrentContext.AppId!;
 
     public ConfirmSelectedFormModel ConfirmSelectedForm { get; set; } = new();
 
-    public readonly IReadOnlyCollection<string> RequiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
+    private readonly IReadOnlyCollection<string> _requiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
 
-    public IReadOnlyCollection<AuthenticationConfigurationEntry> Configurations { get; set; } = Array.Empty<AuthenticationConfigurationEntry>();
+    private IReadOnlyCollection<AuthenticationConfigurationEntry> Configurations { get; set; } = Array.Empty<AuthenticationConfigurationEntry>();
 
     public record AuthenticationConfigurationEntry(string Purpose, string UserVerification, string TimeToLive, bool CanDelete);
 
@@ -67,7 +67,7 @@
         new(configuration.Purpose,
             configuration.UserVerificationRequirement,
             TimeSpan.FromSeconds(configuration.TimeToLive).Humanize(),
-            RequiredAuthenticationConfigurationNames.All(x => !string.Equals(x, configuration.Purpose, StringComparison.OrdinalIgnoreCase)));
+            _requiredAuthenticationConfigurationNames.All(x => !string.Equals(x, configuration.Purpose, StringComparison.OrdinalIgnoreCase)));
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,7 +80,6 @@
             {
                 case nameof(ConfirmSelectedForm):
                     ConfirmSelectedForm.Purpose = request.Form["ConfirmSelectedForm.Purpose"].ToString();
-                    ConfirmSelectedForm.Action = request.Form["ConfirmSelectedForm.Action"].ToString();
                     await OnSelectedFormConfirmed();
                     break;
             }
@@ -91,17 +90,7 @@
 
     public async Task OnSelectedFormConfirmed()
     {
-        if (string.IsNullOrEmpty(ConfirmSelectedForm.Purpose))
-        {
-            throw new ArgumentNullException(nameof(ConfirmSelectedForm.Purpose));
-        }
-
-        switch (ConfirmSelectedForm.Action)
-        {
-            case "delete":
-                await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmSelectedForm.Purpose);
-                break;
-        }
+        await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmSelectedForm.Purpose);
         
         NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
     }
@@ -109,7 +98,6 @@
     public class ConfirmSelectedFormModel
     {
         public string Purpose { get; set; } = string.Empty;
-        public string Action { get; set; } = string.Empty;
     }
 
 }

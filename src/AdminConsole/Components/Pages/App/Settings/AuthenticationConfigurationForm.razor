@@ -1,22 +1,20 @@
-@using Passwordless.AdminConsole.Helpers
 @using Fido2NetLib.Objects
-@using System.ComponentModel.DataAnnotations
 @inherits BaseRazorComponent
 
 @inject ILogger<AuthenticationConfigurationForm> Logger
 @inject IScopedPasswordlessClient Passwordless
 @inject ICurrentContext CurrentContext
 
-<EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="@FormName">
+<EditForm Model="FormModel" OnValidSubmit="SubmitAsync" FormName="@FormName">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div>
         <label class="">Purpose:</label>
-        <InputText @bind-Value="Model!.Purpose" class=""/>
+        <InputText @bind-Value="@FormModel!.Purpose" class=""/>
     </div>
     <div>
         <label class="">User Verification:</label>
-        <InputSelect id="userVerification" @bind-Value="Model.UserVerificationRequirement" TValue="UserVerificationRequirement" class="single-select">
+        <InputSelect id="userVerification" @bind-Value="@FormModel.UserVerificationRequirement" TValue="UserVerificationRequirement" class="single-select">
             @foreach (var uv in Enum.GetValues(typeof(UserVerificationRequirement)))
             {
                 <option value="@uv">@uv</option>
@@ -25,19 +23,19 @@
     </div>
     <div>
         <label class="">Seconds:</label>
-        <InputNumber id="seconds" @bind-Value="Model.Seconds" min="0" class=""/>
+        <InputNumber id="seconds" @bind-Value="@FormModel.Seconds" min="0" class=""/>
     </div>
     <div>
         <label class="">Minutes:</label>
-        <InputNumber id="minutes" @bind-Value="Model.Minutes" min="0" class=""/>
+        <InputNumber id="minutes" @bind-Value="@FormModel.Minutes" min="0" class=""/>
     </div>
     <div>
         <label class="">Hours:</label>
-        <InputNumber id="hours" @bind-Value="Model.Hours" min="0" class=""/>
+        <InputNumber id="hours" @bind-Value="@FormModel.Hours" min="0" class=""/>
     </div>
     <div>
         <label class="">Days:</label>
-        <InputNumber id="days" @bind-Value="Model.Days" min="0" class=""/>
+        <InputNumber id="days" @bind-Value="@FormModel.Days" min="0" class=""/>
     </div>
     <div>
         <button type="submit">Submit</button>
@@ -45,44 +43,28 @@
 </EditForm>
 
 @code {
-    [Parameter] public EventCallback<AuthenticationConfigurationFormModel> OnSubmitFunction { get; set; }
+    [Parameter] 
+    public EventCallback<AuthenticationConfigurationFormModel> OnSubmitFunction { get; set; }
     
+    [Parameter]
+    public AuthenticationConfigurationFormModel? Model { get; set; }
+    
+    [SupplyParameterFromForm]
+    public AuthenticationConfigurationFormModel? FormModel { get; set; }
+
     private const string FormName = "AuthenticationConfigurationForm";
+    
+    protected override void OnInitialized()
+    {
+        if (Model is not null && FormModel is null) FormModel = Model;
 
-    [SupplyParameterFromForm] public AuthenticationConfigurationFormModel? Model { get; set; }
+        if (FormModel is not null) return;
 
-    protected override void OnInitialized() => Model ??= new();
+        FormModel = new();
+    }
 
     private async Task SubmitAsync()
     {
-        await OnSubmitFunction.InvokeAsync(Model);
+        await OnSubmitFunction.InvokeAsync(FormModel);
     }
-
-    public class AuthenticationConfigurationFormModel
-    {
-        [Required, MinLength(1), RegularExpression(@"^[\w\-\.]*$", ErrorMessage = "Characters are limited to A-z, 0-9, -, ., or _.")]
-        public string Purpose { get; set; } = string.Empty;
-
-        [Required] public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
-
-        [Required, Range(0, int.MaxValue)] public int Seconds { get; set; }
-
-        [Required, Range(0, int.MaxValue)] public int Minutes { get; set; }
-
-        [Required, Range(0, int.MaxValue)] public int Hours { get; set; }
-
-        [Required, Range(0, int.MaxValue)] public int Days { get; set; }
-
-        public TimeSpan TimeToLive => new TimeSpan()
-            .AddSeconds(Seconds)
-            .AddMinutes(Minutes)
-            .AddHours(Hours)
-            .AddDays(Days);
-    }
-
 }
-@* @code { *@
-@* *@
-@*     [Parameter]  *@
-@*     public AuthenticationConfigurationDto? Configuration { get; set; } *@
-@* *@

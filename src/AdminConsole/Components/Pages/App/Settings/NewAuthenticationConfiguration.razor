@@ -1,4 +1,5 @@
 @page "/app/{AppId}/settings/authentication-configuration/new"
+
 @using Passwordless.Common.Models.Apps
 @inherits BaseApplicationPage
 
@@ -7,11 +8,11 @@
 @inject NavigationManager NavigationManager
 
 <p>Create a new authentication configuration</p>
-<AuthenticationConfigurationForm OnSubmitFunction="SaveNewAuthenticationConfiguration">
+<AuthenticationConfigurationForm OnSubmitFunction="SaveNewAuthenticationConfigurationAsync">
 </AuthenticationConfigurationForm>
 
 @code {
-    private async Task SaveNewAuthenticationConfiguration(AuthenticationConfigurationForm.AuthenticationConfigurationFormModel formModel)
+    private async Task SaveNewAuthenticationConfigurationAsync(AuthenticationConfigurationFormModel formModel)
     {
         await Passwordless.CreateAuthenticationConfigurationAsync(new SetAuthenticationConfigurationRequest
         {

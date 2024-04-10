@@ -41,8 +41,9 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task SetFeaturesAsync(SetFeaturesRequest request);
 
     Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync();
-
+    Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
     Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
+    Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
     Task DeleteAuthenticationConfigurationAsync(string purpose);
 }
 
@@ -143,9 +144,20 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     public async Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync() =>
         (await _client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/authentication-configurations"))!;
 
+    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
+    {
+        return await _client.GetFromJsonAsync<AuthenticationConfigurationDto?>($"signin/authentication-configuration/{Uri.EscapeDataString(purpose)}");
+    }
+
     public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
     {
         using var response = await _client.PostAsJsonAsync("signin/authentication-configuration/new", configuration);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
+    {
+        using var response = await _client.PostAsJsonAsync("signin/authentication-configuration", configuration);
         response.EnsureSuccessStatusCode();
     }
 
