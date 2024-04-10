@@ -10,8 +10,8 @@ public sealed class UserCountUpdaterBackgroundService(
     IServiceProvider serviceProvider,
     TimeProvider timeProvider,
     ILogger<UserCountUpdaterBackgroundService> logger)
-    : BasePeriodicBackgroundService(
-        new TimeOnly(0),
+    : BaseDelayedPeriodicBackgroundService(
+        new TimeOnly(0, 5),
         TimeSpan.FromHours(1),
         timeProvider,
         logger)
