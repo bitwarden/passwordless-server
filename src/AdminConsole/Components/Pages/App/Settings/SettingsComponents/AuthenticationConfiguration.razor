@@ -30,7 +30,7 @@
 
                             @if (config.CanDelete)
                             {
-                                <ConfirmEditForm Model="ConfirmSelectedForm" FormName="@nameof(ConfirmSelectedForm)" name="@nameof(ConfirmSelectedForm)" OnSubmit="OnSelectedFormConfirmed">
+                                <ConfirmEditForm Model="ConfirmDeleteAuthenticationConfigurationModel" FormName="@nameof(ConfirmDeleteAuthenticationConfigurationModel)" name="@nameof(ConfirmDeleteAuthenticationConfigurationModel)" OnSubmit="OnSelectedFormConfirmed">
                                     <ConfirmButton
                                         ConfirmTitle="Delete Authentication Configuration"
                                         ConfirmDescription="Are you sure you want to delete this configuration?"
@@ -41,7 +41,7 @@
                                         value="delete">
                                         <DeleteIcon Class="h-6 w-6"></DeleteIcon>
                                     </ConfirmButton>
-                                    <input type="hidden" value="@config.Purpose" name="ConfirmSelectedForm.Purpose"/>
+                                    <input type="hidden" value="@config.Purpose" name="ConfirmDeleteAuthenticationConfigurationModel.Purpose"/>
                                 </ConfirmEditForm>
                             }
                         </td>
@@ -55,7 +55,8 @@
 @code {
     private string AppId => CurrentContext.AppId!;
 
-    public ConfirmSelectedFormModel ConfirmSelectedForm { get; set; } = new();
+    [SupplyParameterFromForm(FormName = nameof(ConfirmDeleteAuthenticationConfigurationModel))]
+    public ConfirmSelectedFormModel ConfirmDeleteAuthenticationConfigurationModel { get; set; } = new();
 
     private readonly IReadOnlyCollection<string> _requiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
 
@@ -78,8 +79,8 @@
             var request = HttpContextAccessor.HttpContext!.Request;
             switch (request.Form["_handler"])
             {
-                case nameof(ConfirmSelectedForm):
-                    ConfirmSelectedForm.Purpose = request.Form["ConfirmSelectedForm.Purpose"].ToString();
+                case nameof(ConfirmDeleteAuthenticationConfigurationModel):
+                    ConfirmDeleteAuthenticationConfigurationModel.Purpose = request.Form["ConfirmDeleteAuthenticationConfigurationModel.Purpose"].ToString();
                     await OnSelectedFormConfirmed();
                     break;
             }
@@ -90,7 +91,7 @@
 
     public async Task OnSelectedFormConfirmed()
     {
-        await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmSelectedForm.Purpose);
+        await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmDeleteAuthenticationConfigurationModel.Purpose);
         
         NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
     }
