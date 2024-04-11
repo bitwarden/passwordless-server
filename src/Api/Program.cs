@@ -15,6 +15,7 @@ using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.RateLimiting;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
+using Passwordless.Common.HealthChecks;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service;
@@ -217,7 +218,7 @@ app.UseWhen(o =>
     {
         return false;
     }
-    return !o.Request.Path.StartsWithSegments("/health");
+    return !o.Request.Path.StartsWithSegments(HealthCheckEndpoints.Path);
 }, c =>
 {
     c.UseMiddleware<EventLogStorageCommitMiddleware>();
@@ -233,7 +234,7 @@ app.UseWhen(o =>
     {
         return false;
     }
-    return !o.Request.Path.StartsWithSegments("/health");
+    return !o.Request.Path.StartsWithSegments(HealthCheckEndpoints.Path);
 }, c =>
 {
     c.UseMiddleware<EventLogContextMiddleware>();
