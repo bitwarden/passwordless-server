@@ -142,28 +142,28 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     }
 
     public async Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationsAsync() =>
-        (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("signin/authentication-configurations"))!;
+        (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("authentication-configurations"))!;
 
     public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
     {
-        return await _client.GetFromJsonAsync<AuthenticationConfigurationDto?>($"signin/authentication-configuration/{Uri.EscapeDataString(purpose)}");
+        return await _client.GetFromJsonAsync<AuthenticationConfigurationDto?>($"authentication-configuration?purpose={Uri.EscapeDataString(purpose)}");
     }
 
     public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
     {
-        using var response = await _client.PostAsJsonAsync("signin/authentication-configuration/new", configuration);
+        using var response = await _client.PostAsJsonAsync("authentication-configuration/add", configuration);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
     {
-        using var response = await _client.PostAsJsonAsync("signin/authentication-configuration", configuration);
+        using var response = await _client.PostAsJsonAsync("authentication-configuration", configuration);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteAuthenticationConfigurationAsync(string purpose)
     {
-        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "signin/authentication-configuration");
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "authentication-configuration");
         deleteRequest.Content = new StringContent(
             // lang=json
             $$"""
