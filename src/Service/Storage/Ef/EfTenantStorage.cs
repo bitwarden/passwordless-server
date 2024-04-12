@@ -342,16 +342,17 @@ public class EfTenantStorage(
         return email;
     }
 
-    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose requestPurpose)
+    public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(
+        GetAuthenticationConfigurationsFilter filter)
     {
-        var configuration = await db.AuthenticationConfigurations.FirstOrDefaultAsync(c => c.Purpose == requestPurpose.Value);
+        var query = db.AuthenticationConfigurations.AsQueryable();
 
-        return configuration?.ToDto();
-    }
+        if (!string.IsNullOrWhiteSpace(filter.Purpose))
+        {
+            query = query.Where(x => x.Purpose == filter.Purpose);
+        }
 
-    public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync()
-    {
-        var configurations = await db.AuthenticationConfigurations.ToListAsync();
+        var configurations = await query.ToListAsync();
 
         return configurations.Select(x => x.ToDto());
     }

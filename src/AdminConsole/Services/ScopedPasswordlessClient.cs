@@ -40,7 +40,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
 
     Task SetFeaturesAsync(SetFeaturesRequest request);
 
-    Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync();
+    Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationsAsync();
     Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
     Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
     Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
@@ -141,8 +141,8 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<GetAuthenticationScopesResult> GetAuthenticationConfigurationsAsync() =>
-        (await _client.GetFromJsonAsync<GetAuthenticationScopesResult>("signin/authentication-configurations"))!;
+    public async Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationsAsync() =>
+        (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("signin/authentication-configurations"))!;
 
     public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
     {

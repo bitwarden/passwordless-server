@@ -1,3 +1,4 @@
+using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Passwordless.Service.Models;
 
@@ -27,4 +28,7 @@ public class AuthenticationConfigurationDto
             Tenant = tenant,
             TimeToLive = TimeSpan.FromMinutes(2)
         };
+
+    public AuthenticationConfiguration ToResponse() =>
+        new(Purpose.Value, Convert.ToInt32(TimeToLive.TotalSeconds), UserVerificationRequirement.ToEnumMemberValue());
 }

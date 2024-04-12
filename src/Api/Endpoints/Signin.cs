@@ -6,13 +6,11 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.Extensions;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Constants;
-using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
-using AuthenticationConfiguration = Passwordless.Common.Models.Apps.AuthenticationConfiguration;
 
 namespace Passwordless.Api.Endpoints;
 
@@ -42,102 +40,6 @@ public static class SigninEndpoints
 
         group.MapPost("/verify", VerifyAsync)
             .RequireSecretKey(SecretKeyScopes.TokenVerify);
-
-        group.MapGet("/authentication-configurations", async (
-                [FromServices] IAuthenticationConfigurationService service) =>
-            {
-                var configurations = await service.GetAuthenticationConfigurationsAsync();
-
-                return Ok(new GetAuthenticationScopesResult
-                {
-                    Scopes = configurations
-                        .Select(x =>
-                            new AuthenticationConfiguration(
-                                x.Purpose.Value,
-                                Convert.ToInt32(x.TimeToLive.TotalSeconds),
-                                x.UserVerificationRequirement.ToEnumMemberValue()))
-                });
-            })
-            .WithSummary("A list of authentication scope configurations for your application. This will include the two default scopes of SignIn and StepUp.")
-            .Produces<GetAuthenticationScopesResult>()
-            .RequireSecretKey();
-
-        group.MapPost("/authentication-configuration/new", async (
-                [FromBody] SetAuthenticationConfigurationRequest request,
-                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
-                HttpRequest httpRequest) =>
-            {
-                await authenticationConfigurationService.CreateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
-                {
-                    Purpose = new SignInPurpose(request.Purpose),
-                    UserVerificationRequirement = request.UserVerificationRequirement,
-                    TimeToLive = request.TimeToLive,
-                    Tenant = httpRequest.GetTenantName()!
-                });
-
-                return Created();
-            })
-            .WithSummary(
-                "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
-            .Produces(StatusCodes.Status201Created)
-            .Produces(StatusCodes.Status400BadRequest)
-            .WithParameterValidation()
-            .RequireSecretKey();
-
-        group.MapPost("/authentication-configuration", async (
-                [FromBody] SetAuthenticationConfigurationRequest request,
-                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
-                HttpRequest httpRequest) =>
-            {
-                await authenticationConfigurationService.UpdateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
-                {
-                    Purpose = new SignInPurpose(request.Purpose),
-                    UserVerificationRequirement = request.UserVerificationRequirement,
-                    TimeToLive = request.TimeToLive,
-                    Tenant = httpRequest.GetTenantName()!
-                });
-
-                return Ok();
-            })
-            .WithSummary(
-                "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithParameterValidation()
-            .RequireSecretKey();
-
-        group.MapGet("/authentication-configuration/{purpose}", async (
-                [FromRoute] string purpose,
-                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
-            {
-                var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(purpose);
-                return configuration is null
-                    ? NotFound()
-                    : Ok(configuration);
-            })
-            .WithSummary("Authentication configuration for the specified purpose.")
-            .Produces<AuthenticationConfigurationDto>()
-            .Produces(StatusCodes.Status404NotFound)
-            .WithParameterValidation()
-            .RequireSecretKey();
-
-        group.MapDelete("/authentication-configuration", async (
-                [FromBody] DeleteAuthenticationConfigurationRequest request,
-                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
-            {
-                var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(request.Purpose);
-
-                if (configuration == null) return NotFound();
-
-                await authenticationConfigurationService.DeleteAuthenticationConfigurationAsync(configuration);
-
-                return Ok();
-            })
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithParameterValidation()
-            .RequireSecretKey();
     }
 
     /// <summary>

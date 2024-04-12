@@ -1,6 +1,6 @@
+@using System.Collections.Immutable
 @using Humanizer
 @using Passwordless.AdminConsole.Helpers
-@using System.Collections.Immutable
 @using Passwordless.Service.Models
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
@@ -86,7 +86,7 @@
             }
         }
 
-        Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Scopes.Select(GetEntry).ToImmutableArray();
+        Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Configurations.Select(GetEntry).ToImmutableArray();
     }
 
     public async Task OnSelectedFormConfirmed()
