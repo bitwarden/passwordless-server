@@ -29,7 +29,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
         // Act
-        using var request = new HttpRequestMessage(HttpMethod.Post, "auth-configs/new");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "auth-configs/add");
         request.Content = new StringContent(
             // lang=json
             """
@@ -132,7 +132,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
         const string purpose = "purpose1";
 
-        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "auth-configs/new");
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "auth-configs/add");
         createRequest.Content = new StringContent(
             // lang=json
             $$"""
@@ -182,7 +182,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         var timeToLive = TimeSpan.Parse(timeToLiveString);
         const string uvString = "Discouraged";
 
-        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "auth-configs/new");
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "auth-configs/add");
         createRequest.Content = new StringContent(
             // lang=json
             $$"""

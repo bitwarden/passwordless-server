@@ -33,7 +33,7 @@ public static class AuthenticationConfigurationEndpoints
             .Produces<GetAuthenticationConfigurationsResult>()
             .RequireSecretKey();
 
-        group.MapPost("/new", async (
+        group.MapPost("/add", async (
                 [FromBody] SetAuthenticationConfigurationRequest request,
                 [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
                 HttpRequest httpRequest) =>
