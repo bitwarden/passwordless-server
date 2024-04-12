@@ -1,5 +1,3 @@
-using System.Net.Mime;
-using System.Text;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.DTOs;
@@ -44,7 +42,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
     Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
     Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
-    Task DeleteAuthenticationConfigurationAsync(string purpose);
+    Task DeleteAuthenticationConfigurationAsync(DeleteAuthenticationConfigurationRequest purpose);
 }
 
 public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessClient
@@ -161,20 +159,9 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DeleteAuthenticationConfigurationAsync(string purpose)
+    public async Task DeleteAuthenticationConfigurationAsync(DeleteAuthenticationConfigurationRequest configuration)
     {
-        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "authentication-configuration");
-        deleteRequest.Content = new StringContent(
-            // lang=json
-            $$"""
-              {
-                "purpose": "{{purpose}}"
-              }
-              """,
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json
-        );
-        using var deleteResponse = await _client.SendAsync(deleteRequest);
+        using var deleteResponse = await _client.PostAsJsonAsync("authentication-configuration/delete", configuration);
         deleteResponse.EnsureSuccessStatusCode();
     }
 }

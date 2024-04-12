@@ -77,7 +77,7 @@ public static class AuthenticationConfigurationEndpoints
             .WithParameterValidation()
             .RequireSecretKey();
 
-        group.MapDelete("/", async (
+        group.MapPost("/delete", async (
                 [FromBody] DeleteAuthenticationConfigurationRequest request,
                 [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
             {
@@ -87,9 +87,10 @@ public static class AuthenticationConfigurationEndpoints
 
                 await authenticationConfigurationService.DeleteAuthenticationConfigurationAsync(configuration);
 
-                return Ok();
+                return NoContent();
             })
-            .Produces(StatusCodes.Status200OK)
+            .WithSummary("Deletes an authentication configuration for the provided purpose.")
+            .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .WithParameterValidation()

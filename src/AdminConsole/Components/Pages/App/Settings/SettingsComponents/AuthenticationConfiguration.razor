@@ -1,6 +1,7 @@
 @using System.Collections.Immutable
 @using Humanizer
 @using Passwordless.AdminConsole.Helpers
+@using Passwordless.Common.Models.Apps
 @using Passwordless.Service.Models
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
@@ -91,7 +92,7 @@
 
     public async Task OnSelectedFormConfirmed()
     {
-        await Passwordless.DeleteAuthenticationConfigurationAsync(ConfirmDeleteAuthenticationConfigurationModel.Purpose);
+        await Passwordless.DeleteAuthenticationConfigurationAsync(new DeleteAuthenticationConfigurationRequest { Purpose = ConfirmDeleteAuthenticationConfigurationModel.Purpose });
         
         NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
     }
