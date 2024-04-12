@@ -47,7 +47,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
         // Assert
         enableResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == "purpose1");
     }
@@ -66,7 +66,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
 
         // Act
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs?purposes={SignInPurposes.SignInName}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurposes.SignInName}");
 
         // Assert
         getConfigResponse.Should().NotBeNull();
@@ -88,7 +88,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
         // Act
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs?purpose={SignInPurposes.StepUpName}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurposes.StepUpName}");
 
         // Assert
         getConfigResponse.Should().NotBeNull();
@@ -110,7 +110,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
         // Act
-        var getConfigResponse = await client.GetAsync($"auth-configs?purpose=random");
+        var getConfigResponse = await client.GetAsync($"auth-configs/list?purpose=random");
 
         // Assert
         getConfigResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -148,21 +148,13 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         await client.SendAsync(createRequest);
 
         // Act
-        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "auth-configs");
-        deleteRequest.Content = new StringContent(
-            // lang=json
-            $$"""
-              {
-                "purpose": "{{purpose}}"
-              }
-              """,
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json
-        );
-        using var deleteResponse = await client.SendAsync(deleteRequest);
+        using var deleteResponse = await client.PostAsJsonAsync("auth-configs/delete", new DeleteAuthenticationConfigurationRequest
+        {
+            Purpose = purpose
+        });
 
         // Assert
-        deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]

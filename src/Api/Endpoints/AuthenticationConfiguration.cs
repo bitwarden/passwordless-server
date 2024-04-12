@@ -17,7 +17,7 @@ public static class AuthenticationConfigurationEndpoints
             .WithOpenApi()
             .WithTags(OpenApiTags.AuthConfigs);
 
-        group.MapGet("/", async (
+        group.MapGet("/list", async (
                 [AsParameters] GetAuthenticationConfigurationsFilter request,
                 [FromServices] IAuthenticationConfigurationService service) =>
             {

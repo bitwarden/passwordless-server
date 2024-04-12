@@ -140,28 +140,28 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     }
 
     public async Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationsAsync() =>
-        (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("authentication-configurations"))!;
+        (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list"))!;
 
     public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
     {
-        return await _client.GetFromJsonAsync<AuthenticationConfigurationDto?>($"authentication-configuration?purpose={Uri.EscapeDataString(purpose)}");
+        return await _client.GetFromJsonAsync<AuthenticationConfigurationDto?>($"auth-configs?purpose={Uri.EscapeDataString(purpose)}");
     }
 
     public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
     {
-        using var response = await _client.PostAsJsonAsync("authentication-configuration/add", configuration);
+        using var response = await _client.PostAsJsonAsync("auth-configs/add", configuration);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)
     {
-        using var response = await _client.PostAsJsonAsync("authentication-configuration", configuration);
+        using var response = await _client.PostAsJsonAsync("auth-configs", configuration);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteAuthenticationConfigurationAsync(DeleteAuthenticationConfigurationRequest configuration)
     {
-        using var deleteResponse = await _client.PostAsJsonAsync("authentication-configuration/delete", configuration);
+        using var deleteResponse = await _client.PostAsJsonAsync("auth-configs/delete", configuration);
         deleteResponse.EnsureSuccessStatusCode();
     }
 }
