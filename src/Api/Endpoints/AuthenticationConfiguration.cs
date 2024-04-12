@@ -68,11 +68,11 @@ public static class AuthenticationConfigurationEndpoints
                     Tenant = httpRequest.GetTenantName()!
                 });
 
-                return Ok();
+                return NoContent();
             })
             .WithSummary(
                 "Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
-            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .WithParameterValidation()
             .RequireSecretKey();
