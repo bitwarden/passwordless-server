@@ -199,8 +199,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
             });
 
         // Assert
-        editResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs");
+        editResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == purpose);
         var createdPurpose = getConfigResponse.Configurations.First(x => x.Purpose == purpose);

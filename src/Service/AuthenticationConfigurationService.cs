@@ -53,17 +53,22 @@ public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthe
 
     public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(GetAuthenticationConfigurationsFilter filter)
     {
-        var configurations = await storage.GetAuthenticationConfigurationsAsync(filter);
+        var configurations = (await storage.GetAuthenticationConfigurationsAsync(filter)).ToList();
 
-        var result = configurations.ToList();
+        if (!string.IsNullOrWhiteSpace(filter.Purpose) && configurations.Count == 0)
+        {
+            var presetConfig = GetPresetDefaults(filter.Purpose);
 
-        if (!string.IsNullOrWhiteSpace(filter.Purpose)) return result;
+            if (presetConfig is not null) configurations.Add(presetConfig);
 
-        if (result.All(IsNotStepUpConfiguration)) result.Add(AuthenticationConfigurationDto.StepUp(storage.Tenant));
+            return configurations;
+        }
 
-        if (result.All(IsNotSignInConfiguration)) result.Add(AuthenticationConfigurationDto.SignIn(storage.Tenant));
+        if (configurations.All(IsNotStepUpConfiguration)) configurations.Add(AuthenticationConfigurationDto.StepUp(storage.Tenant));
 
-        return result;
+        if (configurations.All(IsNotSignInConfiguration)) configurations.Add(AuthenticationConfigurationDto.SignIn(storage.Tenant));
+
+        return configurations;
     }
 
     public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
