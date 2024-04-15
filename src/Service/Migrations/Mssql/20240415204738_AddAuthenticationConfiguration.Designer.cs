@@ -12,7 +12,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240415203346_AddAuthenticationConfiguration")]
+    [Migration("20240415204738_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />
@@ -195,17 +195,17 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime>("CreatedOn")
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("EditedBy")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime>("EditedOn")
+                    b.Property<DateTime?>("EditedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastUsedOn")
+                    b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<long>("TimeToLive")

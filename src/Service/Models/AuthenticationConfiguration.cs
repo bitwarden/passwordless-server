@@ -9,14 +9,14 @@ public class AuthenticationConfiguration : PerTenant
     public required string Purpose { get; set; }
     public UserVerificationRequirement UserVerificationRequirement { get; set; }
     public TimeSpan TimeToLive { get; set; }
-    
-    [MaxLength(255)]
+
+    [MaxLength(255)] 
     public string CreatedBy { get; set; } = string.Empty;
-    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+    public DateTime? CreatedOn { get; set; }
     
     [MaxLength(255)]
     public string? EditedBy { get; set; }
-    public DateTime EditedOn { get; set; }
+    public DateTime? EditedOn { get; set; }
     
-    public DateTime LastUsedOn { get; set; }
+    public DateTime? LastUsedOn { get; set; }
 }

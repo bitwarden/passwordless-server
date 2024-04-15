@@ -192,17 +192,17 @@ namespace Passwordless.Service.Migrations.Mssql
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime>("CreatedOn")
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("EditedBy")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime>("EditedOn")
+                    b.Property<DateTime?>("EditedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastUsedOn")
+                    b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<long>("TimeToLive")

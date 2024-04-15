@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20240415203354_AddAuthenticationConfiguration")]
+    [Migration("20240415204730_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />
@@ -190,17 +190,17 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedOn")
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("EditedBy")
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("EditedOn")
+                    b.Property<DateTime?>("EditedOn")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("LastUsedOn")
+                    b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("TEXT");
 
                     b.Property<double>("TimeToLive")

@@ -11,13 +11,22 @@ public class AuthenticationConfigurationDto
     public TimeSpan TimeToLive { get; set; }
     public required string Tenant { get; set; }
 
+    public string CreatedBy { get; set; }
+    public DateTime? CreatedOn { get; set; }
+
+    public string? EditedBy { get; set; }
+    public DateTime? EditedOn { get; set; }
+    
+    public DateTime? LastUsedOn { get; set; }
+
     public static AuthenticationConfigurationDto SignIn(string tenant) =>
         new()
         {
             Purpose = SignInPurposes.SignIn,
             UserVerificationRequirement = UserVerificationRequirement.Preferred,
             Tenant = tenant,
-            TimeToLive = TimeSpan.FromMinutes(2)
+            TimeToLive = TimeSpan.FromMinutes(2),
+            CreatedBy = "System"
         };
 
     public static AuthenticationConfigurationDto StepUp(string tenant) =>
@@ -26,7 +35,8 @@ public class AuthenticationConfigurationDto
             Purpose = SignInPurposes.StepUp,
             UserVerificationRequirement = UserVerificationRequirement.Preferred,
             Tenant = tenant,
-            TimeToLive = TimeSpan.FromMinutes(2)
+            TimeToLive = TimeSpan.FromMinutes(2),
+            CreatedBy = "System"
         };
 
     public AuthenticationConfiguration ToResponse() =>
