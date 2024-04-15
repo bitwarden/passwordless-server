@@ -8,6 +8,7 @@
 @inject IApplicationService ApplicationService;
 @inject IConfiguration Configuration;
 @inject IOptionsSnapshot<PasswordlessManagementOptions> PasswordlessOptions
+@inject ICurrentContext CurrentContext
 
 @if (_isInitialized)
 {
@@ -26,7 +27,11 @@
                         <CopyInputField Value="@PublicApiKey" Title="Public API Key"/>
                         <CopyInputField Value="@PrivateApiKey" Title="Private API Key" Type="password" />
 
-                        <div class="mt-1 text-sm font-medium text-red-900">Download and store them safely! They will be removed from this area in 7 days.</div>
+                        <div class="mt-1 text-sm font-medium text-red-900">
+                            Download and store them safely!
+                            They will be removed from this area in 7 days.
+                            You can always generate new keys in the <a class="link-blue" href="/app/@CurrentContext.AppId/settings">application settings</a>.
+                        </div>
                     </div>
                 </div>
                 <div class="mt-4 sm:ml-6 sm:mt-0 sm:flex-shrink-0">
