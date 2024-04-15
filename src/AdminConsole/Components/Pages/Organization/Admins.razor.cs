@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Passwordless.AdminConsole.Components.Shared;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -93,7 +94,7 @@ public partial class Admins : ComponentBase
             NavigationManager.NavigateTo("/Account/Login");
         }
 
-        NavigationManager.Refresh();
+        NavigationManager.RefreshCompat();
     }
 
     private async Task OnValidInviteAsync()
@@ -132,7 +133,7 @@ public partial class Admins : ComponentBase
         await InvitationService.SendInviteAsync(InviteForm.Email!, CurrentContext.Organization!.Id, CurrentContext.Organization!.Name, user.Email!, user.Name);
         EventLogger.LogInviteAdminEvent(user, InviteForm.Email!, TimeProvider.GetUtcNow().UtcDateTime);
 
-        NavigationManager.Refresh();
+        NavigationManager.RefreshCompat();
     }
 
     public async Task CancelInviteAsync()
@@ -153,7 +154,7 @@ public partial class Admins : ComponentBase
 
         EventLogger.LogCancelAdminInviteEvent(performedBy, invite.ToEmail, TimeProvider.GetUtcNow().UtcDateTime);
 
-        NavigationManager.Refresh();
+        NavigationManager.RefreshCompat();
     }
 
     public class DeleteActiveFormModel
