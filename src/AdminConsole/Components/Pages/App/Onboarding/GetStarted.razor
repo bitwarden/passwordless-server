@@ -37,9 +37,9 @@
             </div>
         </Panel>
 
-        <Panel Header="2. Backend language">
+        <Panel Header="2. Backend">
             <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Passwordless.dev works with <strong>all backend languages</strong> using a normal REST API. But for some languages, we provide official packages, SDKs and examples.</p>
+                <p>Passwordless.dev works with <strong>all backend platforms</strong> through the use of a REST API. There are also official and community-maintained SDKs available for several platforms.</p>
             </div>
 
             <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
@@ -55,13 +55,13 @@
             </PanelFooter>
         </Panel>
 
-        <Panel Header="3. Frontend framework">
+        <Panel Header="3. Frontend">
             <div class="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Passwordless.dev uses a little bit of JavaScript and HTML. It works regardless if you're using a framework or not! For some frameworks, we provide official packages, SDKs and examples.</p>
+                <p>Passwordless.dev uses a little bit of JavaScript and HTML. It works regardless if you're using a framework or not! There are also official and community-maintained SDKs available for several platforms.</p>
             </div>
 
             <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
-                @foreach (var card in _frontendCards!)
+                @foreach (var card in _frontendCards)
                 {
                     <LinkCard Model="@card"/>
                 }

@@ -34,7 +34,10 @@ public partial class GetStarted : BaseApplicationPage
             new(".NET", "Docs + Examples", typeof(DotNetIcon), new Uri("https://docs.passwordless.dev/guide/backend/dotnet.html")),
             new("Java", "Docs + Examples", typeof(JavaIcon), new Uri("https://docs.passwordless.dev/guide/backend/java.html")),
             new("Node.js", "Docs + Examples", typeof(NodeJsIcon), new Uri("https://docs.passwordless.dev/guide/backend/nodejs.html")),
-            new("Python", "Docs + Examples", typeof(PythonIcon), new Uri("https://docs.passwordless.dev/guide/backend/python3.html"))
+            new("Python", "Docs + Examples", typeof(PythonIcon), new Uri("https://docs.passwordless.dev/guide/backend/python3.html")),
+            new("Rust", "Unofficial SDK", typeof(PythonIcon), new Uri("https://github.com/davidzr/passwordless-rust")),
+            new("Go", "Unofficial SDK", typeof(PythonIcon), new Uri("https://github.com/AJAYK-01/passwordless-go")),
+            new("Spring Boot", "Unofficial SDK", typeof(JavaIcon), new Uri("https://github.com/sanjanarjn/spring-boot-starter-passwordless"))
         };
 
         var onboarding = await ApplicationService.GetOnboardingAsync(AppId);
