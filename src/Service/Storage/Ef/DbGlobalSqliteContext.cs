@@ -12,10 +12,10 @@ public class DbGlobalSqliteContext : DbGlobalContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<AuthenticationConfiguration>()
             .Property(c => c.TimeToLive)
             .HasConversion(c => c.TotalSeconds, c => TimeSpan.FromSeconds(c));
+        
+        base.OnModelCreating(modelBuilder);
     }
 }

@@ -12,7 +12,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240405205742_AddAuthenticationConfiguration")]
+    [Migration("20240415203346_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />
@@ -183,21 +183,40 @@ namespace Passwordless.Service.Migrations.Mssql
 
             modelBuilder.Entity("Passwordless.Service.Models.AuthenticationConfiguration", b =>
                 {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Purpose")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Tenant")
+                    b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EditedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("EditedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastUsedOn")
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("TimeToLive")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("UserVerificationRequirement")
-                        .HasColumnType("int");
+                    b.Property<string>("UserVerificationRequirement")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.HasKey("Purpose");
+                    b.HasKey("Tenant", "Purpose");
 
                     b.ToTable("AuthenticationConfigurations");
                 });

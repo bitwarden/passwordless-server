@@ -12,10 +12,11 @@ public class DbGlobalMsSqlContext : DbGlobalContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<AuthenticationConfiguration>()
             .Property(c => c.TimeToLive)
             .HasConversion(c => c.Ticks, c => TimeSpan.FromTicks(c));
+        
+        base.OnModelCreating(modelBuilder);
+
     }
 }

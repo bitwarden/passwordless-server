@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Constants;
@@ -127,7 +128,12 @@ public abstract class DbGlobalContext : DbContext
 
         modelBuilder.Entity<AuthenticationConfiguration>(builder =>
         {
-            builder.HasKey(x => x.Purpose);
+            builder.HasKey(x => new { x.Tenant, x.Purpose });
+            builder.Property(x => x.UserVerificationRequirement)
+                .HasMaxLength(255)
+                .HasConversion(
+                    x => x.ToEnumMemberValue(),
+                    x => x.ToEnum<UserVerificationRequirement>());
         });
 
         base.OnModelCreating(modelBuilder);
