@@ -1,5 +1,4 @@
 @page "/app/{AppId}/settings/authentication-configuration/{Purpose}/edit"
-
 @using Passwordless.Common.Models.Apps
 @inherits BaseApplicationPage
 
@@ -17,12 +16,16 @@
     [Parameter] public required string Purpose { get; set; }
     
     private AuthenticationConfigurationFormModel ConfigurationDto { get; set; }
+    
+    private void NavigateToSettings() => NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
 
     protected override async Task OnInitializedAsync()
     {
         var config = await Passwordless.GetAuthenticationConfigurationAsync(Purpose);
         
-        ConfigurationDto = AuthenticationConfigurationFormModel.FromDto(config);
+        if(!config.Configurations.Any()) NavigateToSettings();
+        
+        ConfigurationDto = AuthenticationConfigurationFormModel.FromResult(config.Configurations.First());
     }
 
     private async Task EditAuthenticationConfigurationAsync(AuthenticationConfigurationFormModel formModel)
@@ -33,7 +36,7 @@
             UserVerificationRequirement = formModel.UserVerificationRequirement,
             TimeToLive = formModel.TimeToLive
         });
-        
-        NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
+
+        NavigateToSettings();
     }
 }

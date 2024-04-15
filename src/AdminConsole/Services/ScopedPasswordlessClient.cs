@@ -39,7 +39,7 @@ public interface IScopedPasswordlessClient : IPasswordlessClient
     Task SetFeaturesAsync(SetFeaturesRequest request);
 
     Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationsAsync();
-    Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
+    Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationAsync(string purpose);
     Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
     Task SaveAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration);
     Task DeleteAuthenticationConfigurationAsync(DeleteAuthenticationConfigurationRequest purpose);
@@ -142,9 +142,9 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
     public async Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationsAsync() =>
         (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list"))!;
 
-    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
+    public async Task<GetAuthenticationConfigurationsResult> GetAuthenticationConfigurationAsync(string purpose)
     {
-        return await _client.GetFromJsonAsync<AuthenticationConfigurationDto?>($"auth-configs?purpose={Uri.EscapeDataString(purpose)}");
+        return (await _client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={Uri.EscapeDataString(purpose)}"))!;
     }
 
     public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest configuration)

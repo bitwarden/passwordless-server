@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Fido2NetLib;
 using Fido2NetLib.Objects;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Components.Pages.App.Settings;
@@ -14,25 +14,12 @@ public class AuthenticationConfigurationFormModel
 
     [Required, Range(0, int.MaxValue)] public int Seconds { get; set; }
 
-    [Required, Range(0, int.MaxValue)] public int Minutes { get; set; }
+    public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
-    [Required, Range(0, int.MaxValue)] public int Hours { get; set; }
-
-    [Required, Range(0, int.MaxValue)] public int Days { get; set; }
-
-    public TimeSpan TimeToLive => new TimeSpan()
-        .AddSeconds(Seconds)
-        .AddMinutes(Minutes)
-        .AddHours(Hours)
-        .AddDays(Days);
-
-    public static AuthenticationConfigurationFormModel FromDto(AuthenticationConfigurationDto dto) => new()
+    public static AuthenticationConfigurationFormModel FromResult(AuthenticationConfiguration dto) => new()
     {
-        Purpose = dto.Purpose.Value,
-        UserVerificationRequirement = dto.UserVerificationRequirement,
-        Seconds = dto.TimeToLive.Seconds,
-        Minutes = dto.TimeToLive.Minutes,
-        Hours = dto.TimeToLive.Hours,
-        Days = dto.TimeToLive.Days
+        Purpose = dto.Purpose,
+        UserVerificationRequirement = dto.UserVerificationRequirement.ToEnum<UserVerificationRequirement>(),
+        Seconds = dto.TimeToLive
     };
 }
