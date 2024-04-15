@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.Models;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Passwordless.AdminConsole.Services.MagicLinks;
 
 public class MagicLinkSignInManager<TUser>(
-    MagicClient magicClient,
+    IPasswordlessClient passwordlessClient,
     IMagicLinkBuilder magicLinkBuilder,
     UserManager<TUser> userManager,
     IHttpContextAccessor contextAccessor,
@@ -27,14 +28,21 @@ public class MagicLinkSignInManager<TUser>(
         if (user is not ConsoleAdmin admin)
         {
             // naive noise against timing attacks
-            await Task.Delay(new Random().Next(100, 300));
+            await Task.Delay(Random.Shared.Next(100, 300));
             return;
-        };
+        }
 
         var urlTemplate = magicLinkBuilder.GetUrlTemplate(returnUrl);
         try
         {
-            await magicClient.SendMagicLinkAsync(admin.Id, admin.Email!, urlTemplate);
+            await passwordlessClient.SendMagicLinkAsync(
+                new SendMagicLinkRequest(
+                    admin.Email!,
+                    urlTemplate,
+                    admin.Id,
+                    null
+                )
+            );
         }
         catch (PasswordlessApiException e)
         {
@@ -49,7 +57,7 @@ public class MagicLinkSignInManager<TUser>(
     {
         try
         {
-            var verifiedUser = await magicClient.VerifyAuthenticationTokenAsync(token);
+            var verifiedUser = await passwordlessClient.VerifyAuthenticationTokenAsync(token);
 
             var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
             if (user == null)

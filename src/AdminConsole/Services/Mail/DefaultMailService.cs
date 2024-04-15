@@ -52,7 +52,7 @@ public class DefaultMailService : IMailService
         await _provider.SendAsync(message);
     }
 
-    public Task SendInviteAsync(Invite inv, string link)
+    public async Task SendInviteAsync(Invite inv, string link)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(inv.TargetOrgName);
         var invitedByDisplayName = WebUtility.HtmlEncode(inv.FromName);
@@ -71,10 +71,10 @@ public class DefaultMailService : IMailService
             Tag = "admin-invite"
         };
 
-        return _provider.SendAsync(message);
+        await _provider.SendAsync(message);
     }
 
-    public Task SendEmailIsAlreadyInUseAsync(string email)
+    public async Task SendEmailIsAlreadyInUseAsync(string email)
     {
         var message = new MailMessage
         {
@@ -90,10 +90,10 @@ public class DefaultMailService : IMailService
             Tag = "duplicate-email"
         };
 
-        return _provider.SendAsync(message);
+        await _provider.SendAsync(message);
     }
 
-    public Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
+    public async Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
 
@@ -109,7 +109,7 @@ public class DefaultMailService : IMailService
             Tag = "organization-deleted"
         };
 
-        return _provider.SendAsync(message);
+        await _provider.SendAsync(message);
     }
 
     public async Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails)

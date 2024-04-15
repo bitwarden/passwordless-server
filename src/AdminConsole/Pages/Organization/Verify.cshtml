@@ -1,5 +1,8 @@
 @page
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Options
+@using Passwordless.Common.Services.Mail
+@inject IOptions<FileMailProviderConfiguration> MailOptions
 @model Passwordless.AdminConsole.Pages.Organization.Verify
 @attribute [AllowAnonymous]
 @{
@@ -15,10 +18,14 @@
 
 <environment names="Development">
     @{
-        var mailPath = System.IO.Path.GetFullPath("../Api/mail.md");
+        var mailPath = System.IO.Path.GetFullPath(MailOptions.Value.Path ?? FileMailProvider.DefaultPath);
     }
-    <br>
-    <b>Development mode: </b> Please open the the <code>src/Api/mail.md</code> file.
-    <br>
-    <a class="link-blue" href="vscode://file/@mailPath">Open with VS Code: @mailPath</a>
+
+    <div>
+        <p>
+            <b>Development mode:</b> Email history is saved to <code>@mailPath</code> and displayed below.
+        </p>
+
+        <pre class="mt-4 text-wrap break-all"><code>@await System.IO.File.ReadAllTextAsync(mailPath)</code></pre>
+    </div>
 </environment>
