@@ -47,6 +47,7 @@ public static class SigninEndpoints
     /// </summary>
     [ProducesResponseType(typeof(SigninTokenRequest), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#signin-generate-token")]
     public static async Task<IResult> GenerateTokenAsync(
         [FromBody] SigninTokenRequest signinToken,
         [FromServices] IFeatureContextProvider provider,
@@ -98,6 +99,7 @@ public static class SigninEndpoints
     /// </summary>
     [ProducesResponseType(typeof(VerifySignInToken), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#signin-verify")]
     public static async Task<IResult> VerifyAsync(
         [FromBody] SignInVerifyDTO payload,
         [FromServices] IFido2Service fido2Service)

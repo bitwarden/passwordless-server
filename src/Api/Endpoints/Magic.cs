@@ -66,6 +66,7 @@ public static class MagicEndpoints
     /// </summary>
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#magic-links-send")]
     public static async Task<IResult> SendMagicLinkAsync(
         [FromBody] SendMagicLinkRequest request,
         [FromServices] IFeatureContextProvider provider,

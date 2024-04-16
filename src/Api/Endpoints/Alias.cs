@@ -33,6 +33,7 @@ public static class AliasEndpoints
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesErrorResponseType(typeof(ProblemDetails))]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#alias")]
     public static async Task<IResult> SetAliasAsync(
         [FromBody] AliasPayload payload,
         IFido2Service fido2Service,

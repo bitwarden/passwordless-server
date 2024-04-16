@@ -8,6 +8,7 @@ namespace Passwordless.Api.OpenApi.Filters;
 
 public class AuthorizationOperationFilter : IOperationFilter
 {
+    /// <inheritdoc />
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var policy = (AuthorizationPolicy?)context.ApiDescription.ActionDescriptor.EndpointMetadata.SingleOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
