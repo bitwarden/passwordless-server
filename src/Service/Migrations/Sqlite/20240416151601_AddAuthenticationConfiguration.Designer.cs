@@ -11,7 +11,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Sqlite
 {
     [DbContext(typeof(DbGlobalSqliteContext))]
-    [Migration("20240415204730_AddAuthenticationConfiguration")]
+    [Migration("20240416151601_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />

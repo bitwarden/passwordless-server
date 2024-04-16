@@ -8,8 +8,8 @@ namespace Passwordless.Service;
 
 public interface IAuthenticationConfigurationService
 {
-    Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
-    Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
+    Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request);
+    Task UpdateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request);
     Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
 
     Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(
@@ -19,28 +19,41 @@ public interface IAuthenticationConfigurationService
     Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose);
 }
 
-public class AuthenticationConfigurationService(ITenantStorage storage) : IAuthenticationConfigurationService
+public class AuthenticationConfigurationService(ITenantStorage storage, TimeProvider timeProvider) : IAuthenticationConfigurationService
 {
-    public async Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request)
     {
-        var existingConfiguration = await GetAuthenticationConfigurationAsync(configuration.Purpose.Value);
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(request.Purpose);
 
         if (existingConfiguration is not null)
-            throw new ApiException($"The configuration {configuration.Purpose.Value} already exists.",
+            throw new ApiException($"The configuration {request.Purpose} already exists.",
                 StatusCodes.Status400BadRequest);
 
-        await storage.CreateAuthenticationConfigurationAsync(configuration);
+        await storage.CreateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+        {
+            Purpose = new SignInPurpose(request.Purpose),
+            UserVerificationRequirement = request.UserVerificationRequirement,
+            TimeToLive = request.TimeToLive,
+            Tenant = storage.Tenant,
+            CreatedBy = request.PerformedBy,
+            CreatedOn = timeProvider.GetUtcNow()
+        });
     }
 
-    public async Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    public async Task UpdateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request)
     {
-        var existingConfiguration = await GetAuthenticationConfigurationAsync(configuration.Purpose.Value);
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(request.Purpose);
 
         if (existingConfiguration is null)
-            throw new ApiException($"The configuration {configuration.Purpose.Value} does not exist.",
+            throw new ApiException($"The configuration {request.Purpose} does not exist.",
                 StatusCodes.Status404NotFound);
 
-        await storage.UpdateAuthenticationConfigurationAsync(configuration);
+        existingConfiguration.UserVerificationRequirement = request.UserVerificationRequirement;
+        existingConfiguration.TimeToLive = request.TimeToLive;
+        existingConfiguration.EditedBy = request.PerformedBy;
+        existingConfiguration.EditedOn = timeProvider.GetUtcNow();
+
+        await storage.UpdateAuthenticationConfigurationAsync(existingConfiguration);
     }
 
     public Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)

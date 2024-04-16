@@ -30,7 +30,7 @@ public abstract class DbTenantContext : DbGlobalContext
         modelBuilder.Entity<PeriodicActiveUserReport>().HasQueryFilter(c => c.Tenant == _tenantProvider.Tenant);
         modelBuilder.Entity<Authenticator>().HasQueryFilter(c => c.Tenant == _tenantProvider.Tenant);
         modelBuilder.Entity<DispatchedEmail>().HasQueryFilter(c => c.Tenant == _tenantProvider.Tenant);
-        modelBuilder.Entity<Passwordless.Service.Models.AuthenticationConfiguration>().HasQueryFilter(c => c.Tenant == _tenantProvider.Tenant);
+        modelBuilder.Entity<AuthenticationConfiguration>().HasQueryFilter(c => c.Tenant == _tenantProvider.Tenant);
 
         base.OnModelCreating(modelBuilder);
     }

@@ -364,7 +364,9 @@ public class EfTenantStorage(
             Purpose = configuration.Purpose.Value,
             UserVerificationRequirement = configuration.UserVerificationRequirement,
             TimeToLive = configuration.TimeToLive,
-            Tenant = Tenant
+            Tenant = Tenant,
+            CreatedBy = configuration.CreatedBy ?? string.Empty,
+            CreatedOn = configuration.CreatedOn?.UtcDateTime
         });
 
         await db.SaveChangesAsync();
@@ -376,7 +378,9 @@ public class EfTenantStorage(
             .Where(x => x.Purpose == configuration.Purpose.Value)
             .ExecuteUpdateAsync(x => x
                 .SetProperty(c => c.TimeToLive, configuration.TimeToLive)
-                .SetProperty(c => c.UserVerificationRequirement, configuration.UserVerificationRequirement));
+                .SetProperty(c => c.UserVerificationRequirement, configuration.UserVerificationRequirement)
+                .SetProperty(c => c.EditedBy, configuration.EditedBy)
+                .SetProperty(c => c.EditedOn, configuration.EditedOn.HasValue ? configuration.EditedOn.Value.UtcDateTime : null));
     }
 
     public async Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)

@@ -134,6 +134,10 @@ public abstract class DbGlobalContext : DbContext
                 .HasConversion(
                     x => x.ToEnumMemberValue(),
                     x => x.ToEnum<UserVerificationRequirement>());
+            builder.Property(x => x.TimeToLive)
+                .HasConversion(
+                    x => x.TotalSeconds,
+                    x => TimeSpan.FromSeconds(x));
         });
 
         base.OnModelCreating(modelBuilder);

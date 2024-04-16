@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Net.Mime;
-using System.Text;
+using Bogus;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using FluentAssertions;
@@ -28,28 +27,22 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
-        // Act
-        using var request = new HttpRequestMessage(HttpMethod.Post, "auth-configs/add");
-        request.Content = new StringContent(
-            // lang=json
-            """
-            {
-              "timeToLive": "1.01:01:01",
-              "purpose": "purpose",
-              "userVerificationRequirement": "Discouraged"
-            }
-            """,
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json
-        );
+        var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
 
-        using var enableResponse = await client.SendAsync(request);
+        // Act
+        using var response = await client.PostAsJsonAsync("auth-configs/add", request);
 
         // Assert
-        enableResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={request.Purpose}");
         getConfigResponse.Should().NotBeNull();
-        getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == "purpose1");
+        getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
+        var config = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
+        config.Purpose.Should().Be(request.Purpose);
+        config.CreatedBy.Should().Be(request.PerformedBy);
+        config.TimeToLive.Should().Be(Convert.ToInt32(request.TimeToLive.TotalSeconds));
+        config.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
+        config.CreatedOn.Should().NotBeNull();
     }
 
     [Fact]
@@ -130,27 +123,13 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
-        const string purpose = "purpose1";
-
-        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "auth-configs/add");
-        createRequest.Content = new StringContent(
-            // lang=json
-            $$"""
-              {
-                "timeToLive": "1.01:01:01",
-                "purpose": "{{purpose}}",
-                "userVerificationRequirement": "Discouraged"
-              }
-              """,
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json
-        );
-        await client.SendAsync(createRequest);
+        var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
+        using var response = await client.PostAsJsonAsync("auth-configs/add", request);
 
         // Act
         using var deleteResponse = await client.PostAsJsonAsync("auth-configs/delete", new DeleteAuthenticationConfigurationRequest
         {
-            Purpose = purpose
+            Purpose = request.Purpose
         });
 
         // Assert
@@ -169,42 +148,28 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
-        const string purpose = "purpose1";
-        const string timeToLiveString = "1.01:01:01";
-        var timeToLive = TimeSpan.Parse(timeToLiveString);
-        const string uvString = "Discouraged";
+        var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
 
-        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "auth-configs/add");
-        createRequest.Content = new StringContent(
-            // lang=json
-            $$"""
-              {
-                "timeToLive": "{{timeToLiveString}}",
-                "purpose": "{{purpose}}",
-                "userVerificationRequirement": "{{uvString}}"
-              }
-              """,
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json
-        );
-        await client.SendAsync(createRequest);
+        using var response = await client.PostAsJsonAsync("auth-configs/add", request);
+
+        request.PerformedBy = new Faker().Person.UserName;
+        request.UserVerificationRequirement = UserVerificationRequirement.Discouraged;
+        request.TimeToLive = TimeSpan.FromSeconds(120);
 
         // Act
-        using var editResponse = await client.PostAsJsonAsync("auth-configs",
-            new SetAuthenticationConfigurationRequest
-            {
-                Purpose = purpose,
-                TimeToLive = timeToLive.Add(TimeSpan.FromDays(1)),
-                UserVerificationRequirement = UserVerificationRequirement.Preferred
-            });
+        using var editResponse = await client.PostAsJsonAsync("auth-configs", request);
 
         // Assert
         editResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
         var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
         getConfigResponse.Should().NotBeNull();
-        getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == purpose);
-        var createdPurpose = getConfigResponse.Configurations.First(x => x.Purpose == purpose);
-        createdPurpose.TimeToLive.Should().Be((int)timeToLive.Add(TimeSpan.FromDays(1)).TotalSeconds);
-        createdPurpose.UserVerificationRequirement.Should().Be(UserVerificationRequirement.Preferred.ToEnumMemberValue());
+        getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
+
+        var editedPurpose = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
+        editedPurpose.UserVerificationRequirement.Should().Be(UserVerificationRequirement.Discouraged.ToEnumMemberValue());
+        editedPurpose.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
+        editedPurpose.EditedBy.Should().Be(request.PerformedBy);
+        editedPurpose.EditedOn.Should().NotBeNull();
     }
 }

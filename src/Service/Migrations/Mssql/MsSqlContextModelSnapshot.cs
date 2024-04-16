@@ -205,8 +205,8 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("TimeToLive")
-                        .HasColumnType("bigint");
+                    b.Property<double>("TimeToLive")
+                        .HasColumnType("float");
 
                     b.Property<string>("UserVerificationRequirement")
                         .IsRequired()

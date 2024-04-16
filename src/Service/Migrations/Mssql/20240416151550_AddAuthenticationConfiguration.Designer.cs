@@ -12,7 +12,7 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    [Migration("20240415204738_AddAuthenticationConfiguration")]
+    [Migration("20240416151550_AddAuthenticationConfiguration")]
     partial class AddAuthenticationConfiguration
     {
         /// <inheritdoc />
@@ -208,8 +208,8 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("TimeToLive")
-                        .HasColumnType("bigint");
+                    b.Property<double>("TimeToLive")
+                        .HasColumnType("float");
 
                     b.Property<string>("UserVerificationRequirement")
                         .IsRequired()

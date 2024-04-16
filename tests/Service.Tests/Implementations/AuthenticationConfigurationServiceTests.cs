@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Helpers;
@@ -22,7 +23,7 @@ public class AuthenticationConfigurationServiceTests
         _mockTenantStorage.SetupGet(x => x.Tenant)
             .Returns(Tenant);
 
-        _sut = new AuthenticationConfigurationService(_mockTenantStorage.Object);
+        _sut = new AuthenticationConfigurationService(_mockTenantStorage.Object, new FakeTimeProvider());
     }
 
     [Fact]
@@ -49,8 +50,7 @@ public class AuthenticationConfigurationServiceTests
     public async Task GetAuthenticationConfigurationsAsync_GivenTenant_WhenSignInConfigurationHasChanged_ThenDoesNotReplaceConfigurationWithDefault()
     {
         // Arrange
-        _mockTenantStorage.Setup(x =>
-                x.GetAuthenticationConfigurationsAsync(It.IsAny<GetAuthenticationConfigurationsFilter>()))
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(It.IsAny<GetAuthenticationConfigurationsFilter>()))
             .ReturnsAsync(_fixture.Build<AuthenticationConfigurationDto>()
                 .With(x => x.Purpose, SignInPurposes.SignIn)
                 .With(x => x.Tenant, Tenant)
@@ -70,8 +70,7 @@ public class AuthenticationConfigurationServiceTests
     public async Task GetAuthenticationConfigurationsAsync_GivenTenant_WhenStepUpConfigurationHasChanged_ThenDoesNotReplaceConfigurationWithDefault()
     {
         // Arrange
-        _mockTenantStorage.Setup(x =>
-                x.GetAuthenticationConfigurationsAsync(It.IsAny<GetAuthenticationConfigurationsFilter>()))
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(It.IsAny<GetAuthenticationConfigurationsFilter>()))
             .ReturnsAsync(_fixture.Build<AuthenticationConfigurationDto>()
                 .With(x => x.Purpose, SignInPurposes.StepUp)
                 .With(x => x.Tenant, Tenant)
@@ -96,9 +95,9 @@ public class AuthenticationConfigurationServiceTests
             .CreateMany(3)
             .ToList();
 
-        _mockTenantStorage.Setup(x =>
-                x.GetAuthenticationConfigurationsAsync(It.IsAny<GetAuthenticationConfigurationsFilter>()))
-            .ReturnsAsync(savedConfigurations);
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
+                It.IsAny<GetAuthenticationConfigurationsFilter>())
+            ).ReturnsAsync(savedConfigurations);
 
         // Act
         var actual = await _sut.GetAuthenticationConfigurationsAsync(new GetAuthenticationConfigurationsFilter());
@@ -114,20 +113,21 @@ public class AuthenticationConfigurationServiceTests
     public async Task CreateAuthenticationConfigurationAsync_GivenConfiguration_WhenNoMatchingConfigurationExists_ThenConfigurationSaves()
     {
         // Arrange
-        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
-            .With(x => x.Tenant, Tenant)
-            .Create();
+        var configuration = _fixture.Create<SetAuthenticationConfigurationRequest>();
 
         _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
-                It.Is<GetAuthenticationConfigurationsFilter>(y =>
-                    y.Purpose == configuration.Purpose.Value)))
-            .ReturnsAsync(new List<AuthenticationConfigurationDto>());
+            It.Is<GetAuthenticationConfigurationsFilter>(y =>
+                y.Purpose == configuration.Purpose))
+        ).ReturnsAsync(new List<AuthenticationConfigurationDto>());
 
         // Act
         await _sut.CreateAuthenticationConfigurationAsync(configuration);
 
         // Assert
-        _mockTenantStorage.Verify(x => x.CreateAuthenticationConfigurationAsync(configuration), Times.Once);
+        _mockTenantStorage.Verify(
+            x => x.CreateAuthenticationConfigurationAsync(
+                It.Is<AuthenticationConfigurationDto>(dto => dto.Purpose.Value == configuration.Purpose)
+            ), Times.Once);
     }
 
     [Theory]
@@ -137,17 +137,18 @@ public class AuthenticationConfigurationServiceTests
     public async Task CreateAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenThrowsApiExceptionAboutPurposeAlreadyExists(string existingPurpose)
     {
         // Arrange
-        var existingSignInPurpose = new SignInPurpose(existingPurpose);
-
-        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
-            .With(x => x.Tenant, Tenant)
-            .With(x => x.Purpose, existingSignInPurpose)
+        var configuration = _fixture.Build<SetAuthenticationConfigurationRequest>()
+            .With(x => x.Purpose, existingPurpose)
             .Create();
 
         _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
-                It.Is<GetAuthenticationConfigurationsFilter>(y =>
-                    y.Purpose == configuration.Purpose.Value)))
-            .ReturnsAsync(new[] { configuration });
+            It.Is<GetAuthenticationConfigurationsFilter>(y => y.Purpose == configuration.Purpose)
+        )).ReturnsAsync(new[]
+        {
+            _fixture.Build<AuthenticationConfigurationDto>()
+                .With(x => x.Purpose, new SignInPurpose(existingPurpose))
+                .Create()
+        });
 
         // Act
         var action = () => _sut.CreateAuthenticationConfigurationAsync(configuration);
@@ -161,52 +162,55 @@ public class AuthenticationConfigurationServiceTests
     public async Task UpdateAuthenticationConfigurationAsync_GivenConfiguration_WhenNoMatchingConfigurationExists_ThenConfigurationSaves()
     {
         // Arrange
-        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
-            .With(x => x.Tenant, Tenant)
-            .Create();
+        var configuration = _fixture.Create<SetAuthenticationConfigurationRequest>();
 
-        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
-                It.Is<GetAuthenticationConfigurationsFilter>(y =>
-                    y.Purpose == configuration.Purpose.Value)))
-            .ReturnsAsync(new List<AuthenticationConfigurationDto>());
+        _mockTenantStorage.Setup(x =>
+            x.GetAuthenticationConfigurationsAsync(
+                It.Is<GetAuthenticationConfigurationsFilter>(y => y.Purpose == configuration.Purpose))
+        ).ReturnsAsync(new List<AuthenticationConfigurationDto>());
 
         // Act
         var action = () => _sut.UpdateAuthenticationConfigurationAsync(configuration);
 
         // Assert
         await action.Should().ThrowAsync<ApiException>()
-            .WithMessage($"The configuration {configuration.Purpose.Value} does not exist.");
+            .WithMessage($"The configuration {configuration.Purpose} does not exist.");
     }
 
     [Theory]
     [InlineData(SignInPurposes.SignInName)]
     [InlineData(SignInPurposes.StepUpName)]
     [InlineData("randomPurpose")]
-    public async Task
-        UpdateAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenThrowsApiExceptionAboutPurposeAlreadyExists(string existingPurpose)
+    public async Task UpdateAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenThrowsApiExceptionAboutPurposeAlreadyExists(string existingPurpose)
     {
         // Arrange
-        var existingSignInPurpose = new SignInPurpose(existingPurpose);
-
-        var configuration = _fixture.Build<AuthenticationConfigurationDto>()
-            .With(x => x.Tenant, Tenant)
-            .With(x => x.Purpose, existingSignInPurpose)
+        var configuration = _fixture.Build<SetAuthenticationConfigurationRequest>()
+            .With(x => x.Purpose, existingPurpose)
             .Create();
 
-        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
-                It.Is<GetAuthenticationConfigurationsFilter>(y =>
-                    y.Purpose == configuration.Purpose.Value)))
-            .ReturnsAsync(new[] { configuration });
+        _mockTenantStorage.Setup(x =>
+            x.GetAuthenticationConfigurationsAsync(
+                It.Is<GetAuthenticationConfigurationsFilter>(y => y.Purpose == configuration.Purpose)
+            )
+        ).ReturnsAsync(new[]
+        {
+            _fixture.Build<AuthenticationConfigurationDto>()
+                .With(x => x.Purpose, new SignInPurpose(existingPurpose))
+                .Create()
+        });
 
         // Act
         await _sut.UpdateAuthenticationConfigurationAsync(configuration);
 
         // Assert
-        _mockTenantStorage.Verify(x => x.UpdateAuthenticationConfigurationAsync(configuration), Times.Once);
+        _mockTenantStorage.Verify(x => x.UpdateAuthenticationConfigurationAsync(
+            It.Is<AuthenticationConfigurationDto>(dto => dto.Purpose.Value == existingPurpose)
+        ), Times.Once);
     }
 
     [Fact]
-    public async Task DeleteAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenTheConfigurationIsDeleted()
+    public async Task
+        DeleteAuthenticationConfigurationAsync_GivenConfiguration_WhenMatchesExistingPurpose_ThenTheConfigurationIsDeleted()
     {
         // Arrange
         var existingSignInPurpose = new SignInPurpose("randomPurpose");
@@ -217,9 +221,8 @@ public class AuthenticationConfigurationServiceTests
             .Create();
 
         _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
-                It.Is<GetAuthenticationConfigurationsFilter>(y =>
-                    y.Purpose == configuration.Purpose.Value)))
-            .ReturnsAsync(new[] { configuration });
+            It.Is<GetAuthenticationConfigurationsFilter>(y => y.Purpose == configuration.Purpose.Value))
+        ).ReturnsAsync(new[] { configuration });
 
         // Act
         await _sut.DeleteAuthenticationConfigurationAsync(configuration);
