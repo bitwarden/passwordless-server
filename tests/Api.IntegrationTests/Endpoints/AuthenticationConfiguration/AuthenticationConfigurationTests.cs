@@ -171,4 +171,39 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         editedPurpose.EditedBy.Should().Be(request.PerformedBy);
         editedPurpose.EditedOn.Should().NotBeNull();
     }
+    
+    [Theory]
+    [InlineData(SignInPurpose.SignInName)]
+    [InlineData(SignInPurpose.StepUpName)]
+    public async Task I_can_edit_a_preset_configuration(string presetPurpose)
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+
+        var request = RequestHelpers.GetSetAuthenticationConfigurationRequest()
+            .RuleFor(x => x.Purpose, presetPurpose)
+            .Generate();
+
+        // Act
+        using var editResponse = await client.PostAsJsonAsync("auth-configs", request);
+
+        // Assert
+        editResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
+        getConfigResponse.Should().NotBeNull();
+        getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
+
+        var editedPurpose = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
+        editedPurpose.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
+        editedPurpose.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
+        editedPurpose.EditedBy.Should().Be(request.PerformedBy);
+        editedPurpose.EditedOn.Should().NotBeNull();
+    }
 }

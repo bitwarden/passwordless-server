@@ -255,6 +255,14 @@ public class AuthenticationConfigurationServiceTests
             .With(x => x.Purpose, presetPurpose)
             .Create();
 
+        _mockTenantStorage.Setup(x => x.GetAuthenticationConfigurationsAsync(
+            It.Is<GetAuthenticationConfigurationsFilter>(y => y.Purpose == request.Purpose))
+        ).ReturnsAsync(new[] {
+            _fixture.Build<AuthenticationConfigurationDto>()
+                .With(x => x.Purpose, new SignInPurpose(request.Purpose))
+                .Create()
+        });
+        
         // Action
         await _sut.UpdateAuthenticationConfigurationAsync(request);
 

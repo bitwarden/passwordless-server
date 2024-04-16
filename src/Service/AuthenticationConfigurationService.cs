@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Helpers;
-using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 
 namespace Passwordless.Service;
@@ -47,7 +46,12 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         if (existingConfiguration is null)
             throw new ApiException($"The configuration {request.Purpose} does not exist.",
                 StatusCodes.Status404NotFound);
-
+        
+        if (IsUnsavedPresetConfiguration(existingConfiguration))
+        {
+            await storage.CreateAuthenticationConfigurationAsync(existingConfiguration);
+        }
+        
         existingConfiguration.UserVerificationRequirement = request.UserVerificationRequirement;
         existingConfiguration.TimeToLive = request.TimeToLive;
         existingConfiguration.EditedBy = request.PerformedBy;
@@ -87,8 +91,10 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
     public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
     {
         var configuration = (await storage.GetAuthenticationConfigurationsAsync(
-                                new GetAuthenticationConfigurationsFilter { Purpose = purpose }))
-                            .FirstOrDefault() ?? GetPresetDefaults(purpose);
+            new GetAuthenticationConfigurationsFilter
+            {
+                Purpose = purpose
+            })).FirstOrDefault() ?? GetPresetDefaults(purpose);
 
         return configuration;
     }
@@ -114,15 +120,19 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         SignInPurpose.SignInName => AuthenticationConfigurationDto.SignIn(storage.Tenant),
         _ => null
     };
-    private static bool IsNotStepUpConfiguration(SetAuthenticationConfigurationRequest configuration) =>
-        configuration.Purpose != SignInPurpose.StepUp.Value;
 
     private static bool IsNotStepUpConfiguration(AuthenticationConfigurationDto configuration) =>
-        configuration.Purpose != SignInPurpose.StepUp;
-
-    private static bool IsNotSignInConfiguration(SetAuthenticationConfigurationRequest configuration) =>
-        configuration.Purpose != SignInPurpose.SignIn.Value;
+        !IsStepUpConfiguration(configuration);
 
     private static bool IsNotSignInConfiguration(AuthenticationConfigurationDto configuration) =>
-        configuration.Purpose != SignInPurpose.SignIn;
+        !IsSignInConfiguration(configuration);
+
+    private static bool IsUnsavedPresetConfiguration(AuthenticationConfigurationDto request) =>
+        request.EditedOn is null && IsSignInConfiguration(request) || IsStepUpConfiguration(request);
+
+    private static bool IsSignInConfiguration(AuthenticationConfigurationDto request) =>
+        request.Purpose == SignInPurpose.SignIn;
+    
+    private static bool IsStepUpConfiguration(AuthenticationConfigurationDto request) =>
+        request.Purpose == SignInPurpose.StepUp;
 }
