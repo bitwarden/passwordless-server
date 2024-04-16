@@ -171,7 +171,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         editedPurpose.EditedBy.Should().Be(request.PerformedBy);
         editedPurpose.EditedOn.Should().NotBeNull();
     }
-    
+
     [Theory]
     [InlineData(SignInPurpose.SignInName)]
     [InlineData(SignInPurpose.StepUpName)]

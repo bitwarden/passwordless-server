@@ -262,7 +262,7 @@ public class AuthenticationConfigurationServiceTests
                 .With(x => x.Purpose, new SignInPurpose(request.Purpose))
                 .Create()
         });
-        
+
         // Action
         await _sut.UpdateAuthenticationConfigurationAsync(request);
 

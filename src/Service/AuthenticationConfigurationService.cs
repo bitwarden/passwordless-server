@@ -46,12 +46,12 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         if (existingConfiguration is null)
             throw new ApiException($"The configuration {request.Purpose} does not exist.",
                 StatusCodes.Status404NotFound);
-        
+
         if (IsUnsavedPresetConfiguration(existingConfiguration))
         {
             await storage.CreateAuthenticationConfigurationAsync(existingConfiguration);
         }
-        
+
         existingConfiguration.UserVerificationRequirement = request.UserVerificationRequirement;
         existingConfiguration.TimeToLive = request.TimeToLive;
         existingConfiguration.EditedBy = request.PerformedBy;
@@ -132,7 +132,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
 
     private static bool IsSignInConfiguration(AuthenticationConfigurationDto request) =>
         request.Purpose == SignInPurpose.SignIn;
-    
+
     private static bool IsStepUpConfiguration(AuthenticationConfigurationDto request) =>
         request.Purpose == SignInPurpose.StepUp;
 }
