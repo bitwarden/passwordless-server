@@ -1,6 +1,5 @@
 using Fido2NetLib;
 using Fido2NetLib.Objects;
-using Passwordless.Service.Models;
 
 namespace Passwordless.Common.Models.Apps;
 
@@ -22,7 +21,7 @@ public class AuthenticationConfigurationDto
     public static AuthenticationConfigurationDto SignIn(string tenant) =>
         new()
         {
-            Purpose = SignInPurposes.SignIn,
+            Purpose = SignInPurpose.SignIn,
             UserVerificationRequirement = UserVerificationRequirement.Preferred,
             Tenant = tenant,
             TimeToLive = TimeSpan.FromMinutes(2),
@@ -32,7 +31,7 @@ public class AuthenticationConfigurationDto
     public static AuthenticationConfigurationDto StepUp(string tenant) =>
         new()
         {
-            Purpose = SignInPurposes.StepUp,
+            Purpose = SignInPurpose.StepUp,
             UserVerificationRequirement = UserVerificationRequirement.Preferred,
             Tenant = tenant,
             TimeToLive = TimeSpan.FromMinutes(2),

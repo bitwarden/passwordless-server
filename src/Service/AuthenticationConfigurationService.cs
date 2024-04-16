@@ -104,20 +104,25 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
 
     private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose) => purpose.Value switch
     {
-        SignInPurposes.StepUpName or SignInPurposes.SignInName => GetPresetDefaults(purpose.Value)!,
+        SignInPurpose.StepUpName or SignInPurpose.SignInName => GetPresetDefaults(purpose.Value)!,
         _ => AuthenticationConfigurationDto.SignIn(storage.Tenant)
     };
 
     private AuthenticationConfigurationDto? GetPresetDefaults(string purpose) => purpose switch
     {
-        SignInPurposes.StepUpName => AuthenticationConfigurationDto.StepUp(storage.Tenant),
-        SignInPurposes.SignInName => AuthenticationConfigurationDto.SignIn(storage.Tenant),
+        SignInPurpose.StepUpName => AuthenticationConfigurationDto.StepUp(storage.Tenant),
+        SignInPurpose.SignInName => AuthenticationConfigurationDto.SignIn(storage.Tenant),
         _ => null
     };
+    private static bool IsNotStepUpConfiguration(SetAuthenticationConfigurationRequest configuration) =>
+        configuration.Purpose != SignInPurpose.StepUp.Value;
 
     private static bool IsNotStepUpConfiguration(AuthenticationConfigurationDto configuration) =>
-        configuration.Purpose != SignInPurposes.StepUp;
+        configuration.Purpose != SignInPurpose.StepUp;
+
+    private static bool IsNotSignInConfiguration(SetAuthenticationConfigurationRequest configuration) =>
+        configuration.Purpose != SignInPurpose.SignIn.Value;
 
     private static bool IsNotSignInConfiguration(AuthenticationConfigurationDto configuration) =>
-        configuration.Purpose != SignInPurposes.SignIn;
+        configuration.Purpose != SignInPurpose.SignIn;
 }

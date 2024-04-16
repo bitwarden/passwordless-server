@@ -7,7 +7,6 @@ using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Service.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -59,11 +58,11 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
 
         // Act
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurposes.SignInName}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurpose.SignInName}");
 
         // Assert
         getConfigResponse.Should().NotBeNull();
-        var signIn = getConfigResponse!.Configurations.FirstOrDefault(x => x.Purpose == SignInPurposes.SignInName);
+        var signIn = getConfigResponse!.Configurations.FirstOrDefault(x => x.Purpose == SignInPurpose.SignInName);
         signIn.Should().NotBeNull();
         signIn!.Should().BeEquivalentTo(AuthenticationConfigurationDto.SignIn(applicationName).ToResponse());
     }
@@ -81,11 +80,11 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
         // Act
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurposes.StepUpName}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurpose.StepUpName}");
 
         // Assert
         getConfigResponse.Should().NotBeNull();
-        var stepUp = getConfigResponse!.Configurations.FirstOrDefault(x => x.Purpose == SignInPurposes.StepUpName);
+        var stepUp = getConfigResponse!.Configurations.FirstOrDefault(x => x.Purpose == SignInPurpose.StepUpName);
         stepUp.Should().NotBeNull();
         stepUp!.Should().BeEquivalentTo(AuthenticationConfigurationDto.StepUp(applicationName).ToResponse());
     }

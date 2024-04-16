@@ -2,7 +2,6 @@
 @using Humanizer
 @using Passwordless.AdminConsole.Helpers
 @using Passwordless.Common.Models.Apps
-@using Passwordless.Service.Models
 @inject ICurrentContext CurrentContext;
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor HttpContextAccessor;
@@ -59,7 +58,7 @@
     [SupplyParameterFromForm(FormName = nameof(ConfirmDeleteAuthenticationConfigurationModel))]
     public ConfirmSelectedFormModel ConfirmDeleteAuthenticationConfigurationModel { get; set; } = new();
 
-    private readonly IReadOnlyCollection<string> _requiredAuthenticationConfigurationNames = new[] { SignInPurposes.SignInName, SignInPurposes.StepUpName };
+    private readonly IReadOnlyCollection<string> _requiredAuthenticationConfigurationNames = new[] { SignInPurpose.SignInName, SignInPurpose.StepUpName };
 
     private IReadOnlyCollection<AuthenticationConfigurationEntry> Configurations { get; set; } = Array.Empty<AuthenticationConfigurationEntry>();
 

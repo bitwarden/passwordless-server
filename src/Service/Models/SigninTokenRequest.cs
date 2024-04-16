@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Extensions;
 
 namespace Passwordless.Service.Models;
@@ -22,5 +23,5 @@ public class SigninTokenRequest : RequestBase
     [JsonIgnore]
     public TimeSpan TimeToLive => TimeToLiveSeconds?.ToTimeSpanFromSeconds() ?? DefaultTimeToLive;
 
-    public string Purpose { get; set; } = SignInPurposes.SignInName;
+    public string Purpose { get; set; } = SignInPurpose.SignInName;
 };
