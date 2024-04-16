@@ -10,4 +10,9 @@ public class ExternalDocsAttribute(string url) : Attribute
     /// External documentation URL.
     /// </summary>
     public string Url { get; } = url;
+
+    /// <summary>
+    /// Link description.
+    /// </summary>
+    public string? Description { get; init; }
 }

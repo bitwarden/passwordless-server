@@ -17,8 +17,8 @@ public class ExternalDocsOperationFilter : IOperationFilter
         {
             operation.ExternalDocs = new OpenApiExternalDocs
             {
-                Description = "External Documentation",
-                Url = new Uri(externalDocs.Url)
+                Url = new Uri(externalDocs.Url),
+                Description = externalDocs.Description ?? "External Documentation"
             };
         }
     }

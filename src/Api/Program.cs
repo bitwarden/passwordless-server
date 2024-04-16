@@ -42,6 +42,7 @@ builder.Services.AddSwaggerGen(swagger =>
         return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
     });
     swagger.OperationFilter<AuthorizationOperationFilter>();
+    swagger.OperationFilter<ExtendedStatusDescriptionsOperationFilter>();
     swagger.OperationFilter<ExternalDocsOperationFilter>();
     swagger.SupportNonNullableReferenceTypes();
     swagger.SwaggerDoc("v4", new OpenApiInfo
