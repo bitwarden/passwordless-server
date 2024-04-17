@@ -65,7 +65,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         if (IsNotSignInConfiguration(configuration) && IsNotStepUpConfiguration(configuration))
             return storage.DeleteAuthenticationConfigurationAsync(configuration);
 
-        throw new ApiException($"The {configuration.Purpose.Value} configuration cannot be deleted.", 400);
+        throw new ApiException($"The {configuration.Purpose.Value} configuration cannot be deleted.", StatusCodes.Status400BadRequest);
     }
 
     public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(GetAuthenticationConfigurationsFilter filter)

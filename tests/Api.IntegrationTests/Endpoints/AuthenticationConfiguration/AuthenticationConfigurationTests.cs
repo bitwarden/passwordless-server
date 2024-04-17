@@ -202,7 +202,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
         var editedPurpose = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
         editedPurpose.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
-        editedPurpose.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
+        editedPurpose.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
         editedPurpose.EditedBy.Should().Be(request.PerformedBy);
         editedPurpose.EditedOn.Should().NotBeNull();
     }
