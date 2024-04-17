@@ -380,7 +380,8 @@ public class EfTenantStorage(
                 .SetProperty(c => c.TimeToLive, configuration.TimeToLive)
                 .SetProperty(c => c.UserVerificationRequirement, configuration.UserVerificationRequirement)
                 .SetProperty(c => c.EditedBy, configuration.EditedBy)
-                .SetProperty(c => c.EditedOn, configuration.EditedOn.HasValue ? configuration.EditedOn.Value.UtcDateTime : null));
+                .SetProperty(c => c.EditedOn, configuration.EditedOn.HasValue ? configuration.EditedOn.Value.UtcDateTime : null)
+                .SetProperty(c => c.LastUsedOn, configuration.LastUsedOn.HasValue ? configuration.LastUsedOn.Value.UtcDateTime : null));
     }
 
     public async Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)

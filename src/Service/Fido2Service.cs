@@ -393,6 +393,7 @@ public class Fido2Service : IFido2Service
         };
 
         _eventLogger.LogUserSignInCompletedEvent(userId);
+        await _authenticationConfigurationService.UpdateLastUsedOnAsync(config);
 
         var token = await _tokenService.EncodeTokenAsync(tokenData, "verify_");
 

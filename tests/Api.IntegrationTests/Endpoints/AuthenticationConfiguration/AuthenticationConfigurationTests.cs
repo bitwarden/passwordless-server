@@ -6,6 +6,7 @@ using Fido2NetLib.Objects;
 using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
+using Passwordless.Api.IntegrationTests.Helpers.User;
 using Passwordless.Common.Models.Apps;
 using Xunit;
 using Xunit.Abstractions;
@@ -205,5 +206,29 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         editedPurpose.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
         editedPurpose.EditedBy.Should().Be(request.PerformedBy);
         editedPurpose.EditedOn.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task I_can_sign_in_and_the_authentication_configuration_will_have_its_last_used_on_updated()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
+        await client.RegisterNewUser(driver);
+
+        // Act
+        using var signInResponse = await client.SignInUser(driver);
+
+        // Assert
+        signInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurpose.SignInName}");
+        getConfigResponse.Should().NotBeNull();
+        getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == SignInPurpose.SignInName);
+        var config = getConfigResponse.Configurations.First(x => x.Purpose == SignInPurpose.SignInName);
+        config.Purpose.Should().Be(SignInPurpose.SignInName);
+        config.LastUsedOn.Should().NotBeNull();
     }
 }

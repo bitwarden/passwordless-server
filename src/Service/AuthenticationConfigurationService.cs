@@ -16,6 +16,7 @@ public interface IAuthenticationConfigurationService
 
     Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
     Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose);
+    Task UpdateLastUsedOnAsync(AuthenticationConfigurationDto config);
 }
 
 public class AuthenticationConfigurationService(ITenantStorage storage, TimeProvider timeProvider) : IAuthenticationConfigurationService
@@ -106,6 +107,22 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
                 new GetAuthenticationConfigurationsFilter { Purpose = purpose.Value })).FirstOrDefault();
 
         return configuration ?? GetDefault(purpose);
+    }
+
+    public async Task UpdateLastUsedOnAsync(AuthenticationConfigurationDto config)
+    {
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(config.Purpose.Value);
+        
+        if (existingConfiguration is null)
+            throw new ApiException($"The configuration {config.Purpose.Value} does not exist.",
+                StatusCodes.Status404NotFound);
+        
+        if (IsUnsavedPresetConfiguration(existingConfiguration))
+            await storage.CreateAuthenticationConfigurationAsync(existingConfiguration);
+
+        existingConfiguration.LastUsedOn = timeProvider.GetUtcNow();
+
+        await storage.UpdateAuthenticationConfigurationAsync(existingConfiguration);
     }
 
     private AuthenticationConfigurationDto GetDefault(SignInPurpose purpose) => purpose.Value switch
