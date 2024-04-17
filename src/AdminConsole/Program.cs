@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.BackgroundServices;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
 using Passwordless.AdminConsole.Db;
@@ -125,8 +126,8 @@ void RunTheApp()
         });
     });
 
-    services.AddHostedService<TimedHostedService>();
-    services.AddHostedService<ApplicationDeletionBackgroundService>();
+    services.AddHostedService<OnboardingCleanupBackgroundService>();
+    services.AddHostedService<ApplicationCleanupBackgroundService>();
 
     services.AddTransient<MagicClient, MagicClient>();
     services.AddHttpClient<MagicClient, MagicClient>();

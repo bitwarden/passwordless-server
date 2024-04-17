@@ -1,13 +1,13 @@
 namespace Passwordless.Common.Background;
 
-public abstract class BasePeriodicBackgroundService : BackgroundService
+public abstract class BaseDelayedPeriodicBackgroundService : BackgroundService
 {
     protected ILogger Logger;
 
     /// <summary>
-    /// The time of day when the service should run.
+    /// The delay before the first execution.
     /// </summary>
-    private readonly TimeOnly _executionTime;
+    private readonly TimeOnly _delay;
 
     /// <summary>
     /// The period of time between executions.
@@ -23,16 +23,17 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
     /// <summary>
     ///
     /// </summary>
-    /// <param name="executionTime">The time of day when the service should run.</param>
+    /// <param name="delay">The delay before the first execution.</param>
     /// <param name="period">The period of time between executions.</param>
     /// <param name="timeProvider"></param>
-    protected BasePeriodicBackgroundService(
-        TimeOnly executionTime,
+    /// <param name="logger"></param>
+    protected BaseDelayedPeriodicBackgroundService(
+        TimeOnly delay,
         TimeSpan period,
         TimeProvider timeProvider,
         ILogger logger)
     {
-        _executionTime = executionTime;
+        _delay = delay;
         _period = period;
         TimeProvider = timeProvider;
         Logger = logger;
@@ -42,9 +43,9 @@ public abstract class BasePeriodicBackgroundService : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var executionPlan = ExecutionPlanUtility.GetExecutionPlan(_executionTime, _period, TimeProvider);
-        Logger.LogInformation("Starting {BackgroundService} in {InitialDelay}.", GetType().Name, executionPlan.InitialDelay);
-        _timer = new Timer(DoWork, null, executionPlan.InitialDelay, _period);
+        var delay = _delay.ToTimeSpan();
+        Logger.LogInformation("Starting {BackgroundService} in {InitialDelay}.", GetType().Name, delay);
+        _timer = new Timer(DoWork, null, delay, _period);
 
         return Task.CompletedTask;
     }
