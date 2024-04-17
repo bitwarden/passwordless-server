@@ -228,7 +228,6 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == SignInPurpose.SignInName);
         var config = getConfigResponse.Configurations.First(x => x.Purpose == SignInPurpose.SignInName);
-        config.Purpose.Should().Be(SignInPurpose.SignInName);
         config.LastUsedOn.Should().NotBeNull();
     }
 }
