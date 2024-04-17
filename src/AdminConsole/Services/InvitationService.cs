@@ -44,8 +44,8 @@ public class InvitationService : IInvitationService
         // store
         _db.Invites.Add(inv);
         await _db.SaveChangesAsync();
-
-        var link = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/organization/join?code=" + Convert.ToBase64String(code);
+        
+        var link = $"{_httpContextAccessor.HttpContext!.Request.GetBaseUrl()}/organization/join?code={Uri.EscapeDataString(Convert.ToBase64String(code))}";
 
         // send email
         await _mailService.SendInviteAsync(inv, link);
