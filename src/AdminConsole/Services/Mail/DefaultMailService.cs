@@ -19,39 +19,6 @@ public class DefaultMailService : IMailService
         _fromEmail = mailOptions.GetValue<string>("From") ?? null;
     }
 
-    public async Task SendPasswordlessSignInAsync(string magicLink, string email)
-    {
-        var message = new MailMessage
-        {
-            To = [email],
-            From = _fromEmail,
-            Subject = "Verify your passwordless.dev account",
-            TextBody =
-                $"Please click the link below to verify your account: {magicLink}",
-            // lang=html
-            HtmlBody =
-                $"""
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <title>Verify your Passwordless.dev account</title>
-                  </head>
-                  <body>
-                    <p>Please click the link below to verify your account: <a href="{magicLink}">Verify</a></p>
-                    <br />
-                    <br />
-                    <p>In case the link above doesn't work, please copy and paste the link below into your browser's address bar:</p>
-                    <p>{magicLink}</p>
-                  </body>
-                </html>
-                """,
-            Tag = "verify-account"
-        };
-
-        await _provider.SendAsync(message);
-    }
-
     public async Task SendInviteAsync(Invite inv, string link)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(inv.TargetOrgName);
