@@ -129,8 +129,6 @@ void RunTheApp()
     services.AddHostedService<OnboardingCleanupBackgroundService>();
     services.AddHostedService<ApplicationCleanupBackgroundService>();
 
-    services.AddTransient<MagicClient, MagicClient>();
-    services.AddHttpClient<MagicClient, MagicClient>();
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
