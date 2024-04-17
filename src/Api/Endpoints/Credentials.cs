@@ -35,6 +35,7 @@ public static class CredentialsEndpoints
     /// </summary>
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#credentials-delete")]
     public static async Task<IResult> DeleteCredentialAsync(
         [FromBody] CredentialsDeleteDTO payload,
         [FromServices] UserCredentialsService userCredentialsService)
@@ -49,6 +50,7 @@ public static class CredentialsEndpoints
     /// </summary>
     [ProducesResponseType(typeof(ListResponse<StoredCredential>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#credentials-list")]
     public static Task<IResult> ListGetCredentialsAsync(
         [AsParameters] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)
@@ -61,6 +63,7 @@ public static class CredentialsEndpoints
     /// </summary>
     [ProducesResponseType(typeof(ListResponse<StoredCredential>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#credentials-list")]
     public static Task<IResult> ListPostCredentialsAsync(
         [FromBody] GetCredentialsRequest request,
         [FromServices] UserCredentialsService service)
