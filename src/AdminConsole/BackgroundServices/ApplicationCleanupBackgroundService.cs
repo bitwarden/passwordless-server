@@ -1,43 +1,22 @@
+using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.Common.Background;
 
-namespace Passwordless.AdminConsole.Services;
+namespace Passwordless.AdminConsole.BackgroundServices;
 
-public sealed class ApplicationDeletionBackgroundService : BackgroundService
+public sealed class ApplicationCleanupBackgroundService : BasePeriodicBackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ApplicationDeletionBackgroundService> _logger;
+    private readonly ILogger<ApplicationCleanupBackgroundService> _logger;
 
-    public ApplicationDeletionBackgroundService(
-        IServiceProvider serviceProvider,
-        ILogger<ApplicationDeletionBackgroundService> logger)
+    public ApplicationCleanupBackgroundService(IServiceProvider serviceProvider, TimeProvider timeProvider, ILogger<ApplicationCleanupBackgroundService> logger)
+        : base(new TimeOnly(0), TimeSpan.FromDays(1), timeProvider, logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation($"{nameof(ApplicationDeletionBackgroundService)} is running.");
-        using PeriodicTimer timer = new(TimeSpan.FromHours(1));
-        try
-        {
-            await DoWorkAsync();
-            while (await timer.WaitForNextTickAsync(stoppingToken))
-            {
-                await DoWorkAsync();
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation($"{nameof(ApplicationDeletionBackgroundService)} is stopping.");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, $"{nameof(ApplicationDeletionBackgroundService)} failed.");
-        }
-    }
-
-    private async Task DoWorkAsync()
+    protected override async Task DoWorkAsync(CancellationToken cancellationToken)
     {
         try
         {

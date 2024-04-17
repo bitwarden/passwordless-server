@@ -40,6 +40,7 @@ public static class RegisterEndpoints
     /// </summary>
     [ProducesResponseType(typeof(RegisterTokenResponse), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ExternalDocs("https://docs.passwordless.dev/guide/api.html#register-token")]
     public static async Task<IResult> RegisterAsync(
         [FromBody] RegisterToken request,
         [FromServices] IFido2Service fido2Service)

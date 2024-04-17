@@ -19,40 +19,7 @@ public class DefaultMailService : IMailService
         _fromEmail = mailOptions.GetValue<string>("From") ?? null;
     }
 
-    public async Task SendPasswordlessSignInAsync(string magicLink, string email)
-    {
-        var message = new MailMessage
-        {
-            To = [email],
-            From = _fromEmail,
-            Subject = "Verify your passwordless.dev account",
-            TextBody =
-                $"Please click the link below to verify your account: {magicLink}",
-            // lang=html
-            HtmlBody =
-                $"""
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <title>Verify your Passwordless.dev account</title>
-                  </head>
-                  <body>
-                    <p>Please click the link below to verify your account: <a href="{magicLink}">Verify</a></p>
-                    <br />
-                    <br />
-                    <p>In case the link above doesn't work, please copy and paste the link below into your browser's address bar:</p>
-                    <p>{magicLink}</p>
-                  </body>
-                </html>
-                """,
-            Tag = "verify-account"
-        };
-
-        await _provider.SendAsync(message);
-    }
-
-    public Task SendInviteAsync(Invite inv, string link)
+    public async Task SendInviteAsync(Invite inv, string link)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(inv.TargetOrgName);
         var invitedByDisplayName = WebUtility.HtmlEncode(inv.FromName);
@@ -71,10 +38,10 @@ public class DefaultMailService : IMailService
             Tag = "admin-invite"
         };
 
-        return _provider.SendAsync(message);
+        await _provider.SendAsync(message);
     }
 
-    public Task SendEmailIsAlreadyInUseAsync(string email)
+    public async Task SendEmailIsAlreadyInUseAsync(string email)
     {
         var message = new MailMessage
         {
@@ -90,10 +57,10 @@ public class DefaultMailService : IMailService
             Tag = "duplicate-email"
         };
 
-        return _provider.SendAsync(message);
+        await _provider.SendAsync(message);
     }
 
-    public Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
+    public async Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
 
@@ -109,7 +76,7 @@ public class DefaultMailService : IMailService
             Tag = "organization-deleted"
         };
 
-        return _provider.SendAsync(message);
+        await _provider.SendAsync(message);
     }
 
     public async Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails)

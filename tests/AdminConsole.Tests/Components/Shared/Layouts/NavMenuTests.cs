@@ -133,11 +133,12 @@ public class NavMenuTests : TestContext
         // Assert
         var submenu = cut.Find("div[id=\"app-submenu\"]");
         var links = submenu.Children.Where(x => x.ClassName == "nav-link").ToImmutableList();
-        Assert.Equal(5, links.Count);
+        Assert.Equal(6, links.Count);
         Assert.Contains("Getting Started", links[0].TextContent);
         Assert.Contains("Playground", links[1].TextContent);
         Assert.Contains("Users", links[2].TextContent);
-        Assert.Contains("Settings", links[3].TextContent);
-        Assert.Contains("App Logs", links[4].TextContent);
+        Assert.Contains("Reporting", links[3].TextContent);
+        Assert.Contains("Settings", links[4].TextContent);
+        Assert.Contains("App Logs", links[5].TextContent);
     }
 }

@@ -5,6 +5,8 @@ namespace Passwordless.Common.Services.Mail;
 // ReSharper disable once UnusedType.Global
 public class FileMailProvider : IMailProvider
 {
+    public const string DefaultPath = "mail.md";
+
     private readonly string _path;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<IMailProvider> _logger;
@@ -15,22 +17,22 @@ public class FileMailProvider : IMailProvider
         ILogger<IMailProvider> logger)
     {
         _timeProvider = timeProvider;
-        _path = string.IsNullOrEmpty(configuration.Value.Path) ? "mail.md" : $"{configuration.Value.Path}/mail.md";
+        _path = string.IsNullOrEmpty(configuration.Value.Path) ? DefaultPath : configuration.Value.Path;
         _logger = logger;
     }
 
-    public Task SendAsync(MailMessage message)
+    public async Task SendAsync(MailMessage message)
     {
-        string msg = message.TextBody;
-        msg =
-        $"""
-        # New message {_timeProvider.GetLocalNow()}
-        
-        {msg}
-        
-        """;
-        File.AppendAllText(_path, msg);
-        _logger.LogInformation("Sent email to '{Path}'", _path);
-        return Task.CompletedTask;
+        var content =
+            $"""
+            # New message {_timeProvider.GetLocalNow()}
+            
+            {message.TextBody}
+
+            """;
+
+        await File.AppendAllTextAsync(_path, content);
+
+        _logger.LogInformation("Saved email contents to '{Path}'", _path);
     }
 }
