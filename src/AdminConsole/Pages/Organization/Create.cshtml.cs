@@ -51,6 +51,12 @@ public class Create : PageModel
             return Page();
         }
 
+        if (!string.IsNullOrWhiteSpace(form.OrgPurpose) || form.UsePasskeys)
+        {
+            await Task.Delay(Random.Shared.Next(100, 300), cancellationToken);
+            return RedirectToPage("/Organization/Verify");
+        }
+
         // Check if admin email is already used? (Use UserManager)
         var existingUser = await _userManager.FindByEmailAsync(form.AdminEmail);
 
@@ -105,4 +111,7 @@ public record CreateModel
     public string AdminName { get; set; }
     [Required]
     public bool AcceptsTermsAndPrivacy { get; set; }
+    
+    public string? OrgPurpose { get; set; }
+    public bool UsePasskeys { get; set; }
 }

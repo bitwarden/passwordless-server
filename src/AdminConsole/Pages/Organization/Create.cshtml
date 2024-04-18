@@ -94,6 +94,17 @@
                     <label asp-for="Form.AcceptsTermsAndPrivacy" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
                 </div>
             </div>
+            
+            <label class="passkey-info" asp-for="Form.OrgPurpose">
+                What is the purpose of your organization?
+                <input class="passkey-info" autocomplete="off" type="text" asp-for="Form.OrgPurpose" tabindex="-1"/>
+            </label>
+            
+            <label class="passkey-info" asp-for="Form.UsePasskeys">
+                Would you like to use passkeys?
+                <input class="passkey-info" autocomplete="off" type="checkbox" asp-for="Form.UsePasskeys" tabindex="-1" />
+            </label>
+            
             <span asp-validation-for="Form.AcceptsTermsAndPrivacy"></span>
 
             <div asp-validation-summary="ModelOnly"></div>
@@ -105,3 +116,15 @@
         </form>
     </div>
 </div>
+
+<style>
+    .passkey-info {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 0;
+        width: 0;
+        z-index: -1;
+    }
+</style>
