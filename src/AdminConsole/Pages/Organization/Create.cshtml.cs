@@ -116,7 +116,7 @@ public record CreateModel
     public string AdminName { get; set; }
     [Required]
     public bool AcceptsTermsAndPrivacy { get; set; }
-    
+
     public string? OrgPurpose { get; set; }
     public bool UsePasskeys { get; set; }
 }
