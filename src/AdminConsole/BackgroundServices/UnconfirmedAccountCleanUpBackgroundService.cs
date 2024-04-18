@@ -16,7 +16,7 @@ public class UnconfirmedAccountCleanUpBackgroundService(
             using var scope = services.CreateScope();
             var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
             var results = await dataService.CleanUpUnconfirmedAccounts(cancellationToken);
-            logger.LogInformation("Cleaned up {orgCount} accounts with only unconfirmed users. Total Users Deleted: {userCount}", results.DeletedOrganizations, results.DeletedUsers);
+            logger.LogInformation("Cleaned up {orgCount} accounts with only unconfirmed users. Total users deleted: {userCount}", results.DeletedOrganizations, results.DeletedUsers);
         }
         catch (Exception ex)
         {
