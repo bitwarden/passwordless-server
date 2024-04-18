@@ -19,7 +19,7 @@ public class MagicLinkService(
 {
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
-        var now = timeProvider.GetUtcNow().DateTime;
+        var now = timeProvider.GetUtcNow().UtcDateTime;
         var account = await tenantStorage.GetAccountInformation();
         var accountAge = now - account.CreatedAt;
 
