@@ -56,7 +56,7 @@ public class Create : PageModel
 
         if (existingUser != null)
         {
-            await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
+            //await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
             return RedirectToPage("/Organization/Verify");
         }
 
