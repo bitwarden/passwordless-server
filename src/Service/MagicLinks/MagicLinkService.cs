@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Configuration;
 using Passwordless.Common.MagicLinks.Models;
+using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -9,6 +11,7 @@ namespace Passwordless.Service.MagicLinks;
 
 public class MagicLinkService(
     TimeProvider timeProvider,
+    IConfiguration configuration,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
     IMailProvider mailProvider,
@@ -16,13 +19,16 @@ public class MagicLinkService(
 {
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = timeProvider.GetUtcNow().DateTime;
         var account = await tenantStorage.GetAccountInformation();
         var accountAge = now - account.CreatedAt;
 
+        // Check bypass
+        if (configuration.GetApplicationOverrides(account.AcountName).IsMagicLinkQuotaBypassEnabled)
+            return;
+
         // Applications created less than 24 hours ago can only send magic links to the admin email address
         if (accountAge < TimeSpan.FromHours(24) &&
-            !IsAdminConsole(account) &&
             !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
@@ -62,10 +68,6 @@ public class MagicLinkService(
             );
         }
     }
-
-    private static bool IsAdminConsole(PerTenant account) =>
-        string.Equals(account.Tenant, "admin", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(account.Tenant, "adminconsole", StringComparison.OrdinalIgnoreCase);
 
     public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {

@@ -21,8 +21,11 @@ public static class DevelopmentEndpoints
             await dbContext.SeedDefaultApplicationAsync(
                 "test",
                 "test:public:2e728aa5986f4ba8b073a5b28a939795",
-                "test:secret:a679563b331846c79c20b114a4f56d02");
+                "test:secret:a679563b331846c79c20b114a4f56d02"
+            );
+
             await dbContext.SaveChangesAsync();
+
             return "Database created and seeded.";
         });
     }
