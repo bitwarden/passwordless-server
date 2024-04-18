@@ -1,3 +1,4 @@
+using Passwordless.AdminConsole.BackgroundServices;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 
@@ -17,4 +18,5 @@ public interface IDataService
     Task<bool> CanConnectAsync();
     Task CleanUpOnboardingAsync();
     Task CreateOrganizationAsync(Organization organization);
+    Task<UnconfirmedAccountCleanUpQueryResult> CleanUpUnconfirmedAccounts(CancellationToken cancellationToken);
 }

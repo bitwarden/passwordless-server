@@ -60,9 +60,13 @@ public class MagicLinkSignInManager<TUser>(
             var verifiedUser = await passwordlessClient.VerifyAuthenticationTokenAsync(token);
 
             var user = await UserManager.FindByIdAsync(verifiedUser.UserId);
-            if (user == null)
+
+            if (user is null) return SignInResult.Failed;
+
+            if (user is ConsoleAdmin { EmailConfirmed: false } admin)
             {
-                return SignInResult.Failed;
+                admin.EmailConfirmed = true;
+                await UserManager.UpdateAsync(user);
             }
 
             await SignInAsync(user, isPersistent, "magic");

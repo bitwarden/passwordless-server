@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Passwordless.AdminConsole.BackgroundServices;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -10,12 +11,14 @@ public class DataService : IDataService
 {
     private readonly IHttpContextAccessor _httpAccessor;
     private readonly ConsoleDbContext _db;
+    private readonly TimeProvider _timeProvider;
     private readonly int? _orgId;
 
-    public DataService(IHttpContextAccessor httpAccessor, ConsoleDbContext db)
+    public DataService(IHttpContextAccessor httpAccessor, ConsoleDbContext db, TimeProvider timeProvider)
     {
         _httpAccessor = httpAccessor;
         _db = db;
+        _timeProvider = timeProvider;
         _orgId = httpAccessor.HttpContext?.User?.GetOrgId();
     }
 
@@ -96,7 +99,7 @@ public class DataService : IDataService
     public async Task CleanUpOnboardingAsync()
     {
         await _db.Onboardings
-            .Where(o => !string.IsNullOrEmpty(o.ApiSecret) && o.SensitiveInfoExpireAt < DateTime.UtcNow)
+            .Where(o => !string.IsNullOrEmpty(o.ApiSecret) && o.SensitiveInfoExpireAt < _timeProvider.GetUtcNow().UtcDateTime)
             .ExecuteUpdateAsync(x => x
                 .SetProperty(p => p.ApiSecret, string.Empty));
     }
@@ -105,5 +108,29 @@ public class DataService : IDataService
     {
         _db.Organizations.Add(organization);
         await _db.SaveChangesAsync();
+    }
+
+    public async Task<UnconfirmedAccountCleanUpQueryResult> CleanUpUnconfirmedAccounts(CancellationToken cancellationToken)
+    {
+        var thirtyDaysAgo = _timeProvider.GetUtcNow().Subtract(TimeSpan.FromDays(30));
+
+        var organizationsToDelete = await _db.Organizations
+            .Where(o => o.CreatedAt <= thirtyDaysAgo.UtcDateTime // orgs created 30 days ago
+                        && !_db.Applications.Any(a => a.OrganizationId == o.Id) // no applications
+                        && !_db.Users.Any(u => u.OrganizationId == o.Id && u.EmailConfirmed)) // only has unconfirmed users
+            .ToListAsync(cancellationToken);
+
+        var usersToDelete = await _db.Users
+            .Where(u => organizationsToDelete.Any(o => o.Id == u.OrganizationId))
+            .ToListAsync(cancellationToken);
+
+        var result = new UnconfirmedAccountCleanUpQueryResult(organizationsToDelete.Count, usersToDelete.Count);
+
+        _db.Organizations.RemoveRange(organizationsToDelete);
+        _db.Users.RemoveRange(usersToDelete);
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 }
