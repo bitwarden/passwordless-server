@@ -120,8 +120,10 @@ public class DataService : IDataService
                         && !_db.Users.Any(u => u.OrganizationId == o.Id && u.EmailConfirmed)) // only has unconfirmed users
             .ToListAsync(cancellationToken);
 
+        var organizationIds = organizationsToDelete.Select(x => x.Id);
+
         var usersToDelete = await _db.Users
-            .Where(u => organizationsToDelete.Any(o => o.Id == u.OrganizationId))
+            .Where(u => organizationIds.Contains(u.OrganizationId))
             .ToListAsync(cancellationToken);
 
         var result = new UnconfirmedAccountCleanUpQueryResult(organizationsToDelete.Count, usersToDelete.Count);
