@@ -10,7 +10,7 @@
     <ValidationSummary/>
     <div>
         <label class="">Purpose:</label>
-        <InputText @bind-Value="@FormModel!.Purpose" class=""/>
+        <InputText @bind-Value="@FormModel!.Purpose" disabled="@DisablePurpose" class=""/>
     </div>
     <div>
         <label class="">User Verification:</label>
@@ -36,6 +36,10 @@
     
     [Parameter]
     public AuthenticationConfigurationFormModel? Model { get; set; }
+    
+    [Parameter]
+    public bool DisablePurpose { get; set; }
+    
     
     [SupplyParameterFromForm]
     public AuthenticationConfigurationFormModel? FormModel { get; set; }

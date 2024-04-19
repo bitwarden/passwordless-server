@@ -10,7 +10,7 @@
 <p>Edit authentication configuration</p>
 @if (ConfigurationDto != null)
 {
-    <AuthenticationConfigurationForm Model="@(ConfigurationDto)" OnSubmitFunction="EditAuthenticationConfigurationAsync" />
+    <AuthenticationConfigurationForm DisablePurpose="true" Model="@(ConfigurationDto)" OnSubmitFunction="EditAuthenticationConfigurationAsync" />
 }
 
 @code {
