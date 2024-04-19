@@ -25,7 +25,9 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         const string originUrl = PasswordlessApi.OriginUrl;
         const string rpId = PasswordlessApi.RpId;
@@ -68,7 +70,9 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         // Act
         using var credentialsResponse = await client.GetAsync("credentials/list");
@@ -87,7 +91,9 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         var request = new GetCredentialsRequest(null!);
 
