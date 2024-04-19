@@ -35,10 +35,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
         await client.EnableAttestation(applicationName);
 
         // Act
@@ -56,10 +55,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
         await client.EnableAttestation(applicationName);
         var request =
             new AddAuthenticatorsRequest(new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") }, true);
@@ -84,10 +82,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
 
         // Act
         var actual = await client.GetAsync("authenticators/list?isAllowed=true");
@@ -104,10 +101,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
         await client.EnableAttestation(applicationName);
 
         var request =
@@ -128,10 +124,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
 
         var request =
             new AddAuthenticatorsRequest(new List<Guid> { Guid.Parse("973446CA-E21C-9A9B-99F5-9B985A67AF0F") }, true);
@@ -151,10 +146,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
         await client.EnableAttestation(applicationName);
 
         var whitelistRequest =
@@ -178,10 +172,9 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
 
         var request = new RemoveAuthenticatorsRequest(new List<Guid>
         {

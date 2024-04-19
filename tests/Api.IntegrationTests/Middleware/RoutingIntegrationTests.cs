@@ -23,8 +23,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = await client.CreateApplicationAsync(applicationName);
         client.AddSecretKey("e=mc2trooper");
 
         // Act
@@ -46,8 +45,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = await client.CreateApplicationAsync(applicationName);
         client.AddPublicKey("e=mc2trooper");
 
         // Act

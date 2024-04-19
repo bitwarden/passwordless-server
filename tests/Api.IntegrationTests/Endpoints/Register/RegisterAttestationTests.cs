@@ -24,7 +24,7 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
         .RuleFor(x => x.Attestation, "None")
         .RuleFor(x => x.Discoverable, true)
         .RuleFor(x => x.UserVerification, "Preferred")
-        .RuleFor(x => x.Aliases, x => new HashSet<string> { x.Person.FirstName })
+        .RuleFor(x => x.Aliases, x => [x.Person.FirstName])
         .RuleFor(x => x.AliasHashing, false)
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
@@ -41,7 +41,6 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
         using var client = api.CreateClient();
@@ -51,10 +50,9 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
             .Generate();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
         await client.EnableAttestation(applicationName);
 
         // Act
@@ -93,9 +91,9 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
+
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator
@@ -103,10 +101,9 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
             .Generate();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
 
         // Act
         var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
@@ -145,9 +142,9 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
+
         using var client = api.CreateClient();
 
         var tokenRequest = TokenGenerator
@@ -155,10 +152,9 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
             .Generate();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(accountKeysCreation!.ApiSecret1);
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
+        client.AddPublicKey(app.ApiKey1);
 
         // Act
         var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
