@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
-using Passwordless.Common.Models.Apps;
 
-namespace Passwordless.AdminConsole.Components.Pages.App.Settings;
+namespace Passwordless.AdminConsole.Components.Pages.App.Settings.AuthenticationConfiguration;
 
 public class AuthenticationConfigurationFormModel
 {
@@ -16,7 +15,7 @@ public class AuthenticationConfigurationFormModel
 
     public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
-    public static AuthenticationConfigurationFormModel FromResult(AuthenticationConfiguration dto) => new()
+    public static AuthenticationConfigurationFormModel FromResult(Common.Models.Apps.AuthenticationConfiguration dto) => new()
     {
         Purpose = dto.Purpose,
         UserVerificationRequirement = dto.UserVerificationRequirement.ToEnum<UserVerificationRequirement>(),

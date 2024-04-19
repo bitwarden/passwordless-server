@@ -1,11 +1,11 @@
 @page "/app/{AppId}/settings/authentication-configuration/new"
-
 @using Passwordless.Common.Models.Apps
 @inherits BaseApplicationPage
 
 @inject IScopedPasswordlessClient Passwordless
 @inject ICurrentContext CurrentContext
 @inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
 
 <p>Create a new authentication configuration</p>
 <AuthenticationConfigurationForm OnSubmitFunction="SaveNewAuthenticationConfigurationAsync">
@@ -18,7 +18,8 @@
         {
             Purpose = formModel.Purpose,
             UserVerificationRequirement = formModel.UserVerificationRequirement,
-            TimeToLive = formModel.TimeToLive
+            TimeToLive = formModel.TimeToLive,
+            PerformedBy = HttpContextAccessor.HttpContext!.User.Identity!.Name!
         });
         
         NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");

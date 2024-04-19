@@ -5,6 +5,7 @@
 @inject IScopedPasswordlessClient Passwordless
 @inject ICurrentContext CurrentContext
 @inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
 
 <p>Edit authentication configuration</p>
 @if (ConfigurationDto != null)
@@ -34,7 +35,8 @@
         {
             Purpose = formModel.Purpose,
             UserVerificationRequirement = formModel.UserVerificationRequirement,
-            TimeToLive = formModel.TimeToLive
+            TimeToLive = formModel.TimeToLive,
+            PerformedBy = HttpContextAccessor.HttpContext!.User.Identity!.Name!
         });
 
         NavigateToSettings();
