@@ -10,10 +10,10 @@ namespace Passwordless.Api.IntegrationTests.Helpers.User;
 public static class UserHelpers
 {
 
-    public static Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver) =>
-        httpClient.RegisterNewUser(driver, RequestHelpers.GetRegisterTokenGeneratorRules().Generate());
+    public static Task<HttpResponseMessage> RegisterNewUserAsync(this HttpClient httpClient, WebDriver driver) =>
+        httpClient.RegisterNewUserAsync(driver, RequestHelpers.GetRegisterTokenGeneratorRules().Generate());
 
-    public static async Task<HttpResponseMessage> RegisterNewUser(this HttpClient httpClient, WebDriver driver, RegisterToken registerToken)
+    public static async Task<HttpResponseMessage> RegisterNewUserAsync(this HttpClient httpClient, WebDriver driver, RegisterToken registerToken)
     {
         if (!httpClient.HasPublicKey()) throw new Exception("ApiKey was not provided. Please add ApiKey to headers.");
         if (!httpClient.HasSecretKey()) throw new Exception("ApiSecret was not provided. Please add ApiSecret to headers.");

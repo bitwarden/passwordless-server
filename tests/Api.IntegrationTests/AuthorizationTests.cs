@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -101,12 +102,13 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
             TestOutput = testOutput
         });
+
         using var client = api.CreateClient().AddAcceptApplicationJson();
+        var app = await client.CreateApplicationAsync();
+        client.AddSecretKey(app.ApiSecret1 + "invalid");
 
         // Act
-        using var response = await client
-            .AddSecretKey(HttpClientTestExtensions.ApiSecret + "invalid")
-            .GetAsync("/credentials/list?userId=1");
+        using var response = await client.GetAsync("/credentials/list?userId=1");
 
         // Assert
         var body = await response.Content.ReadAsStringAsync();

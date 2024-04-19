@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
+using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Service.Models;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,7 +13,6 @@ namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
     : IClassFixture<PasswordlessApiFixture>
 {
-
     [Fact]
     public async Task UserIdAndDisplayNameIsTheOnlyRequiredProperties()
     {
@@ -24,7 +24,10 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddSecretKey();
+
+        using var client = api.CreateClient();
+        var app = await client.CreateApplicationAsync();
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var response = await client.PostAsJsonAsync("register/token", payload);
@@ -46,10 +49,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddSecretKey();
+
+        using var client = api.CreateClient();
+        var app = await client.CreateApplicationAsync();
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var response = await client.PostAsJsonAsync("register/token", registerToken);
@@ -79,10 +84,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddSecretKey();
+
+        using var client = api.CreateClient();
+        var app = await client.CreateApplicationAsync();
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var response = await client.PostAsJsonAsync("register/token", registerToken);
@@ -107,10 +114,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddSecretKey();
+
+        using var client = api.CreateClient();
+        var app = await client.CreateApplicationAsync();
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var response = await client.PostAsJsonAsync("register/token", payload);
@@ -148,10 +157,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddSecretKey();
+
+        using var client = api.CreateClient();
+        var app = await client.CreateApplicationAsync();
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var response = await client.PostAsJsonAsync("register/token", payload);
