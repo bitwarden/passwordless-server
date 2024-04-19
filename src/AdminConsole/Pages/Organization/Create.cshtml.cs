@@ -19,6 +19,7 @@ public class Create : PageModel
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IEventLogger _eventLogger;
     private readonly ILogger<Create> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CreateModel Form { get; set; }
 
@@ -27,7 +28,8 @@ public class Create : PageModel
         IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IEventLogger eventLogger,
-        ILogger<Create> logger)
+        ILogger<Create> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
         _dataService = dataService;
         _userManager = userManager;
@@ -35,6 +37,7 @@ public class Create : PageModel
         _magicLinkSignInManager = magicLinkSignInManager;
         _eventLogger = eventLogger;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public IActionResult OnGet()
@@ -57,7 +60,7 @@ public class Create : PageModel
         if (!string.IsNullOrWhiteSpace(form.OrgPurpose) || form.UsePasskeys)
         {
             await Task.Delay(Random.Shared.Next(100, 300), cancellationToken);
-            _logger.LogInformation("Hidden field submitted from Create");
+            _logger.LogInformation("Hidden field submitted from Create. Form: {@form}", form);
             return RedirectToPage("/Organization/Verify");
         }
 
@@ -67,7 +70,7 @@ public class Create : PageModel
         if (existingUser != null)
         {
             //await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
-            _logger.LogInformation("Duplicate user ({email}) submission from Create", form.AdminEmail);
+            _logger.LogInformation("Duplicate user submission from Create. Form: {@form}", form);
             return RedirectToPage("/Organization/Verify");
         }
 
