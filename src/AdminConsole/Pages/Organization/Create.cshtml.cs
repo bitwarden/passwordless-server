@@ -19,7 +19,6 @@ public class Create : PageModel
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IEventLogger _eventLogger;
     private readonly ILogger<Create> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CreateModel Form { get; set; }
 
@@ -28,8 +27,7 @@ public class Create : PageModel
         IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IEventLogger eventLogger,
-        ILogger<Create> logger,
-        IHttpContextAccessor httpContextAccessor)
+        ILogger<Create> logger)
     {
         _dataService = dataService;
         _userManager = userManager;
@@ -37,7 +35,6 @@ public class Create : PageModel
         _magicLinkSignInManager = magicLinkSignInManager;
         _eventLogger = eventLogger;
         _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
     }
 
     public IActionResult OnGet()
