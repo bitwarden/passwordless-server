@@ -145,7 +145,8 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         !IsSignInConfiguration(configuration);
 
     private static bool IsUnsavedPresetConfiguration(AuthenticationConfigurationDto request) =>
-        request.EditedOn is null && IsSignInConfiguration(request) || IsStepUpConfiguration(request);
+        request.EditedOn is null && request.LastUsedOn is null 
+                                 && IsSignInConfiguration(request) || IsStepUpConfiguration(request);
 
     private static bool IsSignInConfiguration(AuthenticationConfigurationDto request) =>
         request.Purpose == SignInPurpose.SignIn;
