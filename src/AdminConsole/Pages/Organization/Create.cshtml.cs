@@ -57,7 +57,7 @@ public class Create : PageModel
         if (!string.IsNullOrWhiteSpace(form.OrgPurpose) || form.UsePasskeys)
         {
             await Task.Delay(Random.Shared.Next(100, 300), cancellationToken);
-            _logger.LogInformation("Hidden field submitted from Create");
+            _logger.LogInformation("Hidden field submitted from Create. Form: {@form}", form);
             return RedirectToPage("/Organization/Verify");
         }
 
@@ -67,7 +67,7 @@ public class Create : PageModel
         if (existingUser != null)
         {
             //await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
-            _logger.LogInformation("Duplicate user ({email}) submission from Create", form.AdminEmail);
+            _logger.LogInformation("Duplicate user submission from Create. Form: {@form}", form);
             return RedirectToPage("/Organization/Verify");
         }
 

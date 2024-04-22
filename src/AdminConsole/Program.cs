@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -195,7 +196,15 @@ void RunTheApp()
     app.UseMiddleware<SecurityHeadersMiddleware>();
     app.UseHttpsRedirection();
     app.UseStaticFiles();
-    app.UseSerilogRequestLogging();
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.EnrichDiagnosticContext = (context, httpContext) =>
+        {
+            context.Set("UserEmail", httpContext.User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty);
+            context.Set("ClientIp", httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty);
+            context.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
+        };
+    });
     app.UseRouting();
     app.UseAuthentication();
     app.UseWhen(
