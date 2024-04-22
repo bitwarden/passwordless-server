@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
 
@@ -22,7 +23,7 @@ public class AuthenticationConfigurationServiceTests
         _mockTenantStorage.SetupGet(x => x.Tenant)
             .Returns(Tenant);
 
-        _sut = new AuthenticationConfigurationService(_mockTenantStorage.Object, new FakeTimeProvider());
+        _sut = new AuthenticationConfigurationService(_mockTenantStorage.Object, new FakeTimeProvider(), new NoOpEventLogger());
     }
 
     [Fact]

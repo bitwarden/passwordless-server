@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Storage.Ef;
 
@@ -19,7 +20,7 @@ public interface IAuthenticationConfigurationService
     Task UpdateLastUsedOnAsync(AuthenticationConfigurationDto config);
 }
 
-public class AuthenticationConfigurationService(ITenantStorage storage, TimeProvider timeProvider) : IAuthenticationConfigurationService
+public class AuthenticationConfigurationService(ITenantStorage storage, TimeProvider timeProvider, IEventLogger eventLogger) : IAuthenticationConfigurationService
 {
     public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request)
     {
@@ -29,7 +30,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
             throw new ApiException($"The configuration {request.Purpose} already exists.",
                 StatusCodes.Status400BadRequest);
 
-        await storage.CreateAuthenticationConfigurationAsync(new AuthenticationConfigurationDto
+        var configuration = new AuthenticationConfigurationDto
         {
             Purpose = new SignInPurpose(request.Purpose),
             UserVerificationRequirement = request.UserVerificationRequirement,
@@ -37,7 +38,11 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
             Tenant = storage.Tenant,
             CreatedBy = request.PerformedBy,
             CreatedOn = timeProvider.GetUtcNow()
-        });
+        };
+
+        await storage.CreateAuthenticationConfigurationAsync(configuration);
+
+        eventLogger.LogAuthenticationConfigurationCreated(configuration);
     }
 
     public async Task UpdateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request)
@@ -59,6 +64,8 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         existingConfiguration.EditedOn = timeProvider.GetUtcNow();
 
         await storage.UpdateAuthenticationConfigurationAsync(existingConfiguration);
+
+        eventLogger.LogAuthenticationConfigurationUpdated(existingConfiguration);
     }
 
     public Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)

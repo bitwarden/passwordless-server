@@ -3,6 +3,7 @@ using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Service;
+using Passwordless.Service.EventLog.Loggers;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -48,7 +49,8 @@ public static class AuthenticationConfigurationEndpoints
 
         group.MapPost("/", async (
                 [FromBody] SetAuthenticationConfigurationRequest request,
-                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
+                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
+                [FromServices] IEventLogger eventLogger) =>
             {
                 await authenticationConfigurationService.UpdateAuthenticationConfigurationAsync(request);
 
@@ -62,13 +64,16 @@ public static class AuthenticationConfigurationEndpoints
 
         group.MapPost("/delete", async (
                 [FromBody] DeleteAuthenticationConfigurationRequest request,
-                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService) =>
+                [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
+                [FromServices] IEventLogger eventLogger) =>
             {
                 var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(request.Purpose);
 
                 if (configuration == null) return NotFound();
 
                 await authenticationConfigurationService.DeleteAuthenticationConfigurationAsync(configuration);
+
+                eventLogger.LogAuthenticationConfigurationDeleted(configuration, request.PerformedBy);
 
                 return NoContent();
             })

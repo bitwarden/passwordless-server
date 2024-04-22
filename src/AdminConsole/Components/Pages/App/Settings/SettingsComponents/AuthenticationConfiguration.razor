@@ -106,7 +106,11 @@
 
     public async Task OnSelectedFormConfirmed()
     {
-        await Passwordless.DeleteAuthenticationConfigurationAsync(new DeleteAuthenticationConfigurationRequest { Purpose = ConfirmDeleteAuthenticationConfigurationModel.Purpose });
+        await Passwordless.DeleteAuthenticationConfigurationAsync(new DeleteAuthenticationConfigurationRequest
+        {
+            Purpose = ConfirmDeleteAuthenticationConfigurationModel.Purpose,
+            PerformedBy = HttpContextAccessor.HttpContext!.User.GetName()
+        });
         
         NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
     }

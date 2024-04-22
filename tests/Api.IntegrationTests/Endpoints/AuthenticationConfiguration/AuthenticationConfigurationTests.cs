@@ -126,7 +126,11 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
         // Act
         using var deleteResponse = await client.PostAsJsonAsync("auth-configs/delete",
-            new DeleteAuthenticationConfigurationRequest { Purpose = request.Purpose });
+            new DeleteAuthenticationConfigurationRequest
+            {
+                Purpose = request.Purpose,
+                PerformedBy = new Faker().Person.UserName
+            });
 
         // Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
