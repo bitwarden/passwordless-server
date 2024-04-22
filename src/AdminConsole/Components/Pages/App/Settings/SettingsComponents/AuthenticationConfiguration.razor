@@ -66,11 +66,7 @@
     public record AuthenticationConfigurationEntry(
         string Purpose, 
         string UserVerification, 
-        string TimeToLive, 
-        string CreatedBy, 
-        DateTimeOffset? CreatedOn, 
-        string EditedBy, 
-        DateTimeOffset? EditedOn, 
+        string TimeToLive,
         DateTimeOffset? LastUsedOn, 
         bool CanDelete);
 
@@ -78,10 +74,6 @@
         new(configuration.Purpose,
             configuration.UserVerificationRequirement.Humanize(LetterCasing.Title),
             TimeSpan.FromSeconds(configuration.TimeToLive).Humanize(),
-            configuration.CreatedBy,
-            configuration.CreatedOn,
-            configuration.EditedBy ?? string.Empty,
-            configuration.EditedOn,
             configuration.LastUsedOn,
             _requiredAuthenticationConfigurationNames.All(x => !string.Equals(x, configuration.Purpose, StringComparison.OrdinalIgnoreCase)));
 
