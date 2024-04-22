@@ -13,7 +13,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.AuthenticationConfiguration;
 
-public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture) : IClassFixture<PasswordlessApiFixture>
+public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
+    : IClassFixture<PasswordlessApiFixture>
 {
     [Fact]
     public async Task I_can_create_an_authentication_configuration()
@@ -23,11 +24,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
 
@@ -36,7 +34,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={request.Purpose}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>(
+                $"auth-configs/list?purpose={request.Purpose}");
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
         var config = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
@@ -55,13 +54,12 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
-
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         // Act
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurpose.SignInName}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>(
+                $"auth-configs/list?purpose={SignInPurpose.SignInName}");
 
         // Assert
         getConfigResponse.Should().NotBeNull();
@@ -78,12 +76,12 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         // Act
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>($"auth-configs/list?purpose={SignInPurpose.StepUpName}");
+        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>(
+                $"auth-configs/list?purpose={SignInPurpose.StepUpName}");
 
         // Assert
         getConfigResponse.Should().NotBeNull();
@@ -100,9 +98,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         // Act
         var getConfigResponse = await client.GetAsync($"auth-configs/list?purpose=random");
@@ -121,18 +118,15 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
         using var response = await client.PostAsJsonAsync("auth-configs/add", request);
 
         // Act
-        using var deleteResponse = await client.PostAsJsonAsync("auth-configs/delete", new DeleteAuthenticationConfigurationRequest
-        {
-            Purpose = request.Purpose
-        });
+        using var deleteResponse = await client.PostAsJsonAsync("auth-configs/delete",
+            new DeleteAuthenticationConfigurationRequest { Purpose = request.Purpose });
 
         // Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -146,9 +140,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
 
@@ -164,12 +157,14 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Assert
         editResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
+        var getConfigResponse =
+            await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
 
         var editedPurpose = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
-        editedPurpose.UserVerificationRequirement.Should().Be(UserVerificationRequirement.Discouraged.ToEnumMemberValue());
+        editedPurpose.UserVerificationRequirement.Should()
+            .Be(UserVerificationRequirement.Discouraged.ToEnumMemberValue());
         editedPurpose.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
         editedPurpose.EditedBy.Should().Be(request.PerformedBy);
         editedPurpose.EditedOn.Should().NotBeNull();
@@ -185,9 +180,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest()
             .RuleFor(x => x.Purpose, presetPurpose)
@@ -199,7 +193,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Assert
         editResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var getConfigResponse = await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
+        var getConfigResponse =
+            await client.GetFromJsonAsync<GetAuthenticationConfigurationsResult>("auth-configs/list");
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
 
@@ -215,10 +210,18 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     {
         // Arrange
         await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddManagementKey();
+        var applicationName = CreateAppHelpers.GetApplicationName();
+
+        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        _ = client
+            .AddSecretKey(appCreationResponse.ApiSecret1)
+            .AddPublicKey(appCreationResponse.ApiKey1)
+            .AddUserAgent();
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
-        await client.RegisterNewUser(driver);
+        await client.RegisterNewUserAsync(driver);
 
         // Act
         using var signInResponse = await client.SignInUser(driver);
