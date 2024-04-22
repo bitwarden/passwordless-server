@@ -112,11 +112,11 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
     public async Task UpdateLastUsedOnAsync(AuthenticationConfigurationDto config)
     {
         var existingConfiguration = await GetAuthenticationConfigurationAsync(config.Purpose.Value);
-        
+
         if (existingConfiguration is null)
             throw new ApiException($"The configuration {config.Purpose.Value} does not exist.",
                 StatusCodes.Status404NotFound);
-        
+
         if (IsUnsavedPresetConfiguration(existingConfiguration))
             await storage.CreateAuthenticationConfigurationAsync(existingConfiguration);
 
