@@ -405,7 +405,7 @@ public class Fido2Service : IFido2Service
     {
         var token = await _tokenService.DecodeTokenAsync<VerifySignInToken>(payload.Token, "verify_");
 
-        token.Validate(_timeProvider.GetUtcNow(), payload.Purpose);
+        token.Validate(_timeProvider.GetUtcNow());
 
         _eventLogger.LogUserSignInTokenVerifiedEvent(token.UserId);
 
