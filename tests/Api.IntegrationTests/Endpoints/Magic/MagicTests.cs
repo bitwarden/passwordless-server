@@ -174,6 +174,39 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
+    [Fact]
+    public async Task I_can_send_a_magic_link_email_to_a_non_admin_address_if_the_application_is_old_enough()
+    {
+        // Arrange
+        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        {
+            TestOutput = testOutput,
+            Settings = new Dictionary<string, string?>
+            {
+                // 1 day 13 hours = 37 hours
+                ["MagicLinks:NewAccountTimeout"] = "1.13:00:00"
+            }
+        });
+
+        using var client = api.CreateClient();
+
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        using var appCreateResponse =
+            await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = "admin@email.com" });
+        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        client.AddSecretKey(appCreated!.ApiSecret1);
+        await client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        api.Time.Advance(TimeSpan.FromHours(37.1));
+
+        // Act
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
     // Test assumes that the quota will eventually be exhausted.
     // Timeout is used as fallback in case that assumption fails.
     [Fact(Timeout = 60_000)]
