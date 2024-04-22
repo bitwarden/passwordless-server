@@ -191,10 +191,8 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse =
-            await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = "admin@email.com" });
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = "admin@email.com" });
+        client.AddSecretKey(app!.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
