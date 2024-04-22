@@ -17,6 +17,10 @@ public class MagicLinkService(
     IMailProvider mailProvider,
     IEventLogger eventLogger)
 {
+    private TimeSpan NewAccountTimeout { get; } =
+        configuration.GetSection("MagicLinks").GetValue<TimeSpan?>(nameof(NewAccountTimeout)) ??
+        TimeSpan.FromHours(24);
+
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow().UtcDateTime;
@@ -27,13 +31,13 @@ public class MagicLinkService(
         if (configuration.GetApplicationOverrides(account.AcountName).IsMagicLinkQuotaBypassEnabled)
             return;
 
-        // Applications created less than 24 hours ago can only send magic links to the admin email address
-        if (accountAge < TimeSpan.FromHours(24) &&
+        // Newly created accounts can only send magic links to the admin email address
+        if (accountAge < NewAccountTimeout &&
             !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
                 "magic_link_email_admin_address_only",
-                "Because your application has been created less than 24 hours ago, " +
+                $"Because your application has been created less than {(int)NewAccountTimeout.TotalHours} hours ago, " +
                 "you can only request magic links to the admin email address.",
                 403
             );
@@ -57,7 +61,6 @@ public class MagicLinkService(
         var quota = (int)(maxQuota * quotaModifier);
 
         var emailsDispatchedIn30Days = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
-
         if (emailsDispatchedIn30Days >= quota)
         {
             throw new ApiException(
@@ -82,7 +85,7 @@ public class MagicLinkService(
             Subject = $"Sign in to {link.Host}",
             TextBody = $"Please click the link or copy into your browser of choice to log in to {link.Host}: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
-                //lang=html
+                // lang=html
                 $"""
                  <!DOCTYPE html5>
                  <html lang="en">
