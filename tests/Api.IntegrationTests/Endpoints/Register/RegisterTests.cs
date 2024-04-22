@@ -22,7 +22,7 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_retrieve_token_to_start_registration()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -47,7 +47,7 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_retrieve_the_credential_create_options_and_session_token_for_creating_a_new_user()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -82,7 +82,7 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });

@@ -10,9 +10,8 @@ public class PasswordlessApiFixture : IAsyncDisposable, IAsyncLifetime
 
     public async Task InitializeAsync() => await _dbContainer.StartAsync();
 
-    public async Task<PasswordlessApi> CreateApiAsync(PasswordlessApiOptions options)
-    {
-        var api = new PasswordlessApi(new PasswordlessApiOptions
+    public PasswordlessApi CreateApi(PasswordlessApiOptions options) =>
+        new(new PasswordlessApiOptions
         {
             TestOutput = options.TestOutput,
             // Add the connection string to the settings
@@ -22,14 +21,6 @@ public class PasswordlessApiFixture : IAsyncDisposable, IAsyncLifetime
                 ["ConnectionStrings:mssql:api"] = _dbContainer.GetConnectionString()
             }
         });
-
-        // Perform migrations and make sure the API is ready to receive requests
-        using var httpClient = api.CreateClient();
-        using var response = await httpClient.GetAsync("/");
-        response.EnsureSuccessStatusCode();
-
-        return api;
-    }
 
     public async ValueTask DisposeAsync() => await _dbContainer.DisposeAsync();
 
