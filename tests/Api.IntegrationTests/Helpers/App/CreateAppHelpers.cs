@@ -7,7 +7,7 @@ public static class CreateAppHelpers
 {
     public static string GetApplicationName() => $"test{Guid.NewGuid():N}";
 
-    public static Task<HttpResponseMessage> CreateApplicationAsync(
+    public static async Task<HttpResponseMessage> CreateApplicationRawAsync(
         this HttpClient client,
         string applicationName,
         CreateAppDto? options = null)
@@ -25,9 +25,21 @@ public static class CreateAppHelpers
         if (actualOptions.MagicLinkEmailMonthlyQuota == 0)
             actualOptions.MagicLinkEmailMonthlyQuota = 1000;
 
-        return client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", actualOptions);
+        return await client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", actualOptions);
     }
 
-    public static Task<HttpResponseMessage> CreateApplicationAsync(this HttpClient client)
-        => client.CreateApplicationAsync(GetApplicationName());
+    public static async Task<CreateAppResultDto> CreateApplicationAsync(
+        this HttpClient client,
+        string applicationName,
+        CreateAppDto? options = null)
+    {
+        using var response = await client.CreateApplicationRawAsync(applicationName, options);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<CreateAppResultDto>() ??
+               throw new InvalidOperationException("Empty response");
+    }
+
+    public static async Task<CreateAppResultDto> CreateApplicationAsync(this HttpClient client) =>
+        await client.CreateApplicationAsync(GetApplicationName());
 }

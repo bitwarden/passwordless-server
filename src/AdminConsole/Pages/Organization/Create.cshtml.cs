@@ -18,6 +18,7 @@ public class Create : PageModel
     private readonly IMailService _mailService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IEventLogger _eventLogger;
+    private readonly ILogger<Create> _logger;
 
     public CreateModel Form { get; set; }
 
@@ -25,13 +26,15 @@ public class Create : PageModel
         UserManager<ConsoleAdmin> userManager,
         IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
-        IEventLogger eventLogger)
+        IEventLogger eventLogger,
+        ILogger<Create> logger)
     {
         _dataService = dataService;
         _userManager = userManager;
         _mailService = mailService;
         _magicLinkSignInManager = magicLinkSignInManager;
         _eventLogger = eventLogger;
+        _logger = logger;
     }
 
     public IActionResult OnGet()
@@ -51,12 +54,20 @@ public class Create : PageModel
             return Page();
         }
 
+        if (!string.IsNullOrWhiteSpace(form.OrgPurpose) || form.UsePasskeys)
+        {
+            await Task.Delay(Random.Shared.Next(100, 300), cancellationToken);
+            _logger.LogInformation("Hidden field submitted from Create. Form: {@form}", form);
+            return RedirectToPage("/Organization/Verify");
+        }
+
         // Check if admin email is already used? (Use UserManager)
         var existingUser = await _userManager.FindByEmailAsync(form.AdminEmail);
 
         if (existingUser != null)
         {
-            await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
+            //await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
+            _logger.LogInformation("Duplicate user submission from Create. Form: {@form}", form);
             return RedirectToPage("/Organization/Verify");
         }
 
@@ -105,4 +116,7 @@ public record CreateModel
     public string AdminName { get; set; }
     [Required]
     public bool AcceptsTermsAndPrivacy { get; set; }
+
+    public string? OrgPurpose { get; set; }
+    public bool UsePasskeys { get; set; }
 }

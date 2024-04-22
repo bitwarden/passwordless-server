@@ -30,7 +30,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var client = api.CreateClient().AddManagementKey();
 
         // Act
-        using var response = await client.CreateApplicationAsync(name);
+        using var response = await client.CreateApplicationRawAsync(name);
 
         // Assert
         response.Should().NotBeNull();
@@ -50,7 +50,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         const string accountName = "anders";
 
         // Act
-        using var response = await client.CreateApplicationAsync(accountName);
+        using var response = await client.CreateApplicationRawAsync(accountName);
 
         // Assert
         response.Should().NotBeNull();
@@ -73,10 +73,10 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         var name = GetApplicationName();
 
         // Act
-        using var res = await client.CreateApplicationAsync(name);
+        using var response = await client.CreateApplicationRawAsync(name);
 
         // Assert
-        res.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         using var scope = api.Services.CreateScope();
 
@@ -99,9 +99,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         const int expectedEventLoggingRetentionPeriod = 30;
 
         var name = GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(name);
-        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        using var appHttpClient = api.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(name);
+        using var appHttpClient = api.CreateClient().AddSecretKey(app.ApiSecret1);
 
         // Act
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features",
@@ -131,9 +130,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var client = api.CreateClient().AddManagementKey();
 
         var name = GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(name);
-        var appCreateDto = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        using var appHttpClient = api.CreateClient().AddSecretKey(appCreateDto!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(name);
+        using var appHttpClient = api.CreateClient().AddSecretKey(app.ApiSecret1);
 
         // Act
         using var setFeatureResponse = await appHttpClient.PostAsJsonAsync("/apps/features",
@@ -378,9 +376,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var enableResponse = await client.PostAsJsonAsync("apps/features",
@@ -407,9 +404,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var enableResponse = await client.PostAsJsonAsync("apps/features",
@@ -436,9 +432,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var enableResponse = await client.PostAsJsonAsync("apps/features",
@@ -463,9 +458,8 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = GetApplicationName();
 
-        using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
-        var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        _ = client.AddSecretKey(keysCreation!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
 
         // Act
         using var enableResponse = await client.PostAsJsonAsync("apps/features",
