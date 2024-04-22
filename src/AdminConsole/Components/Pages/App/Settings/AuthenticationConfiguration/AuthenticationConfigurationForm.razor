@@ -5,28 +5,22 @@
 @inject IScopedPasswordlessClient Passwordless
 @inject ICurrentContext CurrentContext
 
-<EditForm Model="FormModel" OnValidSubmit="SubmitAsync" FormName="@FormName">
+<EditForm Model="FormModel" OnValidSubmit="SubmitAsync" FormName="@FormName" class="space-y-6">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-    <div>
-        <label class="">Purpose:</label>
-        <InputText @bind-Value="@FormModel!.Purpose" disabled="@DisablePurpose" class=""/>
-    </div>
-    <div>
-        <label class="">User Verification:</label>
-        <InputSelect id="userVerification" @bind-Value="@FormModel.UserVerificationRequirement" TValue="UserVerificationRequirement" class="single-select">
+    <div class="sm:w-full sm:max-w-md">
+        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Purpose">Purpose:</label>
+        <InputText @bind-Value="@FormModel!.Purpose" id="Purpose" disabled="@DisablePurpose" class="text-input"/>
+        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="UserVerification">User Verification:</label>
+        <InputSelect id="UserVerification" @bind-Value="@FormModel.UserVerificationRequirement" TValue="UserVerificationRequirement" class="form-select">
             @foreach (var uv in Enum.GetValues(typeof(UserVerificationRequirement)))
             {
                 <option value="@uv">@uv</option>
             }
         </InputSelect>
-    </div>
-    <div>
-        <label class="">Seconds:</label>
-        <InputNumber id="seconds" @bind-Value="@FormModel.Seconds" min="0" class=""/>
-    </div>
-    <div>
-        <button type="submit">Submit</button>
+        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Seconds">Seconds:</label>
+        <InputNumber id="Seconds" @bind-Value="@FormModel.Seconds" min="0" class="text-input"/>
+        <button class="btn-primary mt-3" type="submit">Submit</button>
     </div>
 </EditForm>
 

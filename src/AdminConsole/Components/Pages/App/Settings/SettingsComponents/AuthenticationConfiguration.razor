@@ -24,7 +24,7 @@
                         <td>@config.UserVerification</td>
                         <td>@config.TimeToLive</td>
                         <td>@config.LastUsedOn?.ToString("g")</td>
-                        <td class="flex space-x-2 ml-0">
+                        <td class="flex items-center space-x-2">
                             <a href="/app/@(AppId)/settings/authentication-configuration/@(config.Purpose)/edit">
                                 <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
                             </a>
@@ -76,7 +76,7 @@
 
     private AuthenticationConfigurationEntry GetEntry(Common.Models.Apps.AuthenticationConfiguration configuration) =>
         new(configuration.Purpose,
-            configuration.UserVerificationRequirement,
+            configuration.UserVerificationRequirement.Humanize(LetterCasing.Title),
             TimeSpan.FromSeconds(configuration.TimeToLive).Humanize(),
             configuration.CreatedBy,
             configuration.CreatedOn,

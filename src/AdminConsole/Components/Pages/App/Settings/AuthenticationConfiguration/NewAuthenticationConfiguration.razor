@@ -7,9 +7,10 @@
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 
-<p>Create a new authentication configuration</p>
-<AuthenticationConfigurationForm OnSubmitFunction="SaveNewAuthenticationConfigurationAsync">
-</AuthenticationConfigurationForm>
+<Panel>
+    <h3>Create a new authentication configuration</h3>
+    <AuthenticationConfigurationForm OnSubmitFunction="SaveNewAuthenticationConfigurationAsync" />
+</Panel>
 
 @code {
     private async Task SaveNewAuthenticationConfigurationAsync(AuthenticationConfigurationFormModel formModel)
