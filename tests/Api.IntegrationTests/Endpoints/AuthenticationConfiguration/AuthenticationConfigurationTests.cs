@@ -24,7 +24,9 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         var applicationName = CreateAppHelpers.GetApplicationName();
 
         using var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+
         var keysCreation = await appCreationResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
+
         _ = client.AddSecretKey(keysCreation!.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
