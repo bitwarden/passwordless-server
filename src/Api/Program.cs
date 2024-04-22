@@ -172,7 +172,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
-    app.UseDevelopmentEndpoints();
 }
 else
 {
@@ -255,6 +254,26 @@ app.MapAuthenticatorsEndpoints();
 
 app.MapPasswordlessHealthChecks();
 
+// Apply migrations and seed data
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
+
+    await dbContext.Database.MigrateAsync();
+
+    await dbContext.SeedDefaultApplicationAsync(
+        "test",
+        "test:public:2e728aa5986f4ba8b073a5b28a939795",
+        "test:secret:a679563b331846c79c20b114a4f56d02"
+    );
+
+    await dbContext.SaveChangesAsync();
+}
+
 app.Run();
 
+/// <summary>
+/// Application entrypoint.
+/// </summary>
 public partial class Program;
