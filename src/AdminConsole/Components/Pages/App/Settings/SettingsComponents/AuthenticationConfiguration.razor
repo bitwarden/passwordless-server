@@ -12,7 +12,9 @@
     <Panel Header="Authentication Configuration">
         <p>List of configurations for your authentication tokens. Read more in the <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#authentiation-configurations">docs</a></p>
 
-        <a class="btn-primary" href="/app/@(AppId)/settings/authentication-configuration/new">Add New Authentication Configuration</a>
+        <div>
+            <a class="btn-primary" href="/app/@(AppId)/settings/authentication-configuration/new">Add New Authentication Configuration</a>
+        </div>
 
         <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Last Used", "Actions" })">
             @if (Configurations.Any())
