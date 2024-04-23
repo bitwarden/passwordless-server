@@ -6,6 +6,7 @@ namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 public interface IPasswordlessManagementClient
 {
     Task<CreateAppResultDto> CreateApplicationAsync(string appId, CreateAppDto options);
+    Task<bool> CanDeleteApplicationImmediatelyAsync(string appId);
     Task<MarkDeleteApplicationResponse> MarkDeleteApplicationAsync(MarkDeleteApplicationRequest request);
     Task<bool> DeleteApplicationAsync(string appId);
     Task<CancelApplicationDeletionResponse> CancelApplicationDeletionAsync(string appId);

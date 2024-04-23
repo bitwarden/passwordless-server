@@ -96,6 +96,10 @@ public static class AppsEndpoints
             .RequireManagementKey()
             .RequireCors("default");
 
+        app.MapGet("/admin/apps/{appId}/can-delete-immediately", CanDeleteApplicationImmediatelyAsync)
+            .RequireManagementKey()
+            .RequireCors("default");
+
         app.MapPost("/admin/apps/{appId}/mark-delete", MarkDeleteApplicationAsync)
             .RequireManagementKey()
             .RequireCors("default");
@@ -258,6 +262,14 @@ public static class AppsEndpoints
         var result = await service.DeleteApplicationAsync(appId);
         logger.LogWarning("account/delete was issued {@Res}", result);
         return Ok(result);
+    }
+
+    public static async Task<IResult> CanDeleteApplicationImmediatelyAsync(
+        [FromRoute] string appId,
+        ISharedManagementService service)
+    {
+        var result = await service.CanDeleteApplicationImmediatelyAsync(appId);
+        return Ok(false);
     }
 
     public static async Task<IResult> MarkDeleteApplicationAsync(
