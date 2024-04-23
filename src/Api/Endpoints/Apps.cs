@@ -269,7 +269,7 @@ public static class AppsEndpoints
         ISharedManagementService service)
     {
         var result = await service.CanDeleteApplicationImmediatelyAsync(appId);
-        return Ok(false);
+        return Ok(result);
     }
 
     public static async Task<IResult> MarkDeleteApplicationAsync(
