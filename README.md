@@ -30,7 +30,6 @@ You can use Passwordless in conjunction with a variety of different backend plat
 services.AddPasswordlessSdk(options =>
 {
     options.ApiSecret = "your_api_secret";
-    options.ApiKey = "your_api_key";
 });
 
 // ...
