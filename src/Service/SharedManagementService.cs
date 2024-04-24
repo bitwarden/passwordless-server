@@ -221,7 +221,7 @@ public class SharedManagementService : ISharedManagementService
         // Application can be deleted immediately if...
         return
             // It's less than 3 days old, or...
-            (accountInformation.CreatedAt - _systemClock.UtcNow) < TimeSpan.FromDays(3) ||
+            (_systemClock.UtcNow - accountInformation.CreatedAt) < TimeSpan.FromDays(3) ||
             // It has no users
             !(await storage.HasUsersAsync());
     }
