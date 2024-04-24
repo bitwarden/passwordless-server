@@ -243,7 +243,8 @@ public class SharedManagementService : ISharedManagementService
 
         if (accountInformation.DeleteAt > _systemClock.UtcNow)
         {
-            throw new ApiException("app_pending_deletion", "App cannot be deleted yet.", 400);
+            // Maybe this should have a different error code?
+            throw new ApiException("app_not_pending_deletion", "App cannot be deleted yet.", 400);
         }
 
         await storage.DeleteAccount();
