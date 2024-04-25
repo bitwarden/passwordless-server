@@ -18,6 +18,11 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
         return await response.Content.ReadFromJsonAsync<CreateAppResultDto>();
     }
 
+    public async Task<bool> CanDeleteApplicationImmediatelyAsync(string appId) =>
+        await http.GetFromJsonAsync<bool>(
+            $"admin/apps/{Uri.EscapeDataString(appId)}/can-delete-immediately"
+        );
+
     public async Task<MarkDeleteApplicationResponse> MarkDeleteApplicationAsync(MarkDeleteApplicationRequest request)
     {
         using var response = await http.PostAsJsonAsync(
