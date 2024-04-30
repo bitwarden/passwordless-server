@@ -92,11 +92,15 @@ public class MagicLinkService(
                                     font-size: 16px;
                                     text-align: center;
                                     ">
-                        <h3>Hello</h3>
-                        <p style="padding-bottom: 4px">Please click the button below to sign in to {link.Host}</p>
+                        <h3 style="margin-bottom: 40px;">Your Login Link</h3>
+                        <h4 style="font-weight: normal;">Please click the button below to sign into {link.Host}</h4>
                         <a href="{link}" style="width: auto; margin: auto; padding: 10px 25px; background-color: #1252A3; border-radius: 999px; color: white; text-decoration: none;">Click here to sign in</a>
-                        <p style="padding-top: 4px">Having trouble? Copy this link to your browser: {link}</p>
-                        <p>If you did not request this email, it is safe to ignore.</p>
+                        <div style="max-width: 600px; margin: auto; margin-top: 70px;">
+                        <p style="font-size: 14px; margin-bottom: 0px;"">Or sign in using this link:</p>
+                        <a href="{link}" style="font-size: 12px; color: #949393; text-decoration: none; line-height: 8px;">{link}</a>
+                        </div>
+                        <hr style="margin-top: 50px">
+                        <p style="margin-top:0px;font-size:10px">If you did not request this email, it is safe to ignore.</p>
                     </body>
                  </html>
                  """,
