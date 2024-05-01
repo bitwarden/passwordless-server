@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
@@ -18,16 +17,14 @@ public class NoOpBillingService : BaseBillingService, ISharedBillingService
         IPasswordlessManagementClient passwordlessClient,
         ILogger<SharedStripeBillingService> logger,
         IOptions<BillingOptions> billingOptions,
-        IHttpContextAccessor httpContextAccessor,
-        IUrlHelperFactory urlHelperFactory
-    ) : base(db, dataService, passwordlessClient, logger, billingOptions, httpContextAccessor, urlHelperFactory)
+        IHttpContextAccessor httpContextAccessor
+    ) : base(db, dataService, passwordlessClient, logger, billingOptions, httpContextAccessor)
     {
     }
 
-    public Task UpdateUsageAsync()
+    public Task<IReadOnlyCollection<Organization>> GetPayingOrganizationsAsync()
     {
-        // This can be a no-op.
-        return Task.CompletedTask;
+        return Task.FromResult<IReadOnlyCollection<Organization>>(Array.Empty<Organization>().ToImmutableList());
     }
 
     public Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId)
