@@ -7,13 +7,14 @@
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 
-<Panel>
-    <h3>Edit authentication configuration</h3>
-    @if (ConfigurationDto != null)
-    {
+<Page Title="Edit Authentication Configuration">
+    <Panel>
+        @if (ConfigurationDto != null)
+        {
         <AuthenticationConfigurationForm DisablePurpose="true" Model="@(ConfigurationDto)" OnSubmitFunction="EditAuthenticationConfigurationAsync" />
-    }
-</Panel>
+        }
+    </Panel>
+</Page>
 
 @code {
     [Parameter] public required string Purpose { get; set; }
