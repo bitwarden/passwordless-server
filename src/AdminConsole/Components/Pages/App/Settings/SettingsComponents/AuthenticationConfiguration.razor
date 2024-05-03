@@ -17,7 +17,7 @@
             <a class="btn-primary" href="/app/@(AppId)/settings/authentication-configuration/new">Add New Authentication Configuration</a>
         </div>
 
-        <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Last Used", "Actions" })">
+        <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Last Used", "Actions" })" EmptyMessage="Something has failed. Please try refreshing.">
             @if (Configurations.Any())
             {
                 @foreach (var config in Configurations)
