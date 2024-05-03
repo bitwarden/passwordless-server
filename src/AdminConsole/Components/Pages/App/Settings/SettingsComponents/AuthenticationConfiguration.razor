@@ -91,8 +91,8 @@
             var request = HttpContextAccessor.HttpContext!.Request;
             switch (request.Form["_handler"])
             {
-                case nameof(ConfirmDeleteAuthenticationConfigurationModel):
-                    ConfirmDeleteAuthenticationConfigurationModel.Purpose = request.Form["ConfirmDeleteAuthenticationConfigurationModel.Purpose"].ToString();
+                case var deleteFormName when deleteFormName.ToString().EndsWith("-delete"):
+                    ConfirmDeleteAuthenticationConfigurationModel.Purpose = request.Form[deleteFormName.ToString()].ToString();
                     await OnSelectedFormConfirmed();
                     break;
             }
