@@ -53,6 +53,8 @@ public class SettingsModel : BaseExtendedPageModel
 
     public Application? Application { get; private set; }
 
+    public bool CanDeleteImmediately { get; private set; }
+
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
     [BindProperty]
@@ -64,11 +66,12 @@ public class SettingsModel : BaseExtendedPageModel
     private async Task InitializeAsync()
     {
         Organization = await _dataService.GetOrganizationWithDataAsync();
-        ApplicationId = _currentContext.AppId ?? String.Empty;
+        ApplicationId = _currentContext.AppId ?? string.Empty;
 
         var application = Organization.Applications.FirstOrDefault(x => x.Id == ApplicationId);
 
         Application = application ?? throw new InvalidOperationException("Application not found.");
+        CanDeleteImmediately = await _appService.CanDeleteApplicationImmediatelyAsync(ApplicationId);
 
         IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
         IsMagicLinksEnabled = _currentContext.Features.IsMagicLinksEnabled;
@@ -106,7 +109,7 @@ public class SettingsModel : BaseExtendedPageModel
 
         try
         {
-            var response = await _appService.MarkApplicationForDeletionAsync(applicationId, userName);
+            var response = await _appService.MarkDeleteApplicationAsync(applicationId, userName);
 
             return response.IsDeleted ? RedirectToPage("/Organization/Overview") : RedirectToPage();
         }

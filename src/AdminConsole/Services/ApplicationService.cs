@@ -30,7 +30,10 @@ public class ApplicationService : IApplicationService
         _magicLinkBuilder = magicLinkBuilder;
     }
 
-    public async Task<MarkDeleteApplicationResponse> MarkApplicationForDeletionAsync(string applicationId, string userName)
+    public async Task<bool> CanDeleteApplicationImmediatelyAsync(string applicationId) =>
+        await _client.CanDeleteApplicationImmediatelyAsync(applicationId);
+
+    public async Task<MarkDeleteApplicationResponse> MarkDeleteApplicationAsync(string applicationId, string userName)
     {
         var response = await _client.MarkDeleteApplicationAsync(new MarkDeleteApplicationRequest(applicationId, userName));
 
