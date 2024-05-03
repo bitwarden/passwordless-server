@@ -34,7 +34,7 @@
 
                             @if (config.CanDelete)
                             {
-                                <ConfirmEditForm Model="ConfirmDeleteAuthenticationConfigurationModel" FormName="@nameof(ConfirmDeleteAuthenticationConfigurationModel)" name="@nameof(ConfirmDeleteAuthenticationConfigurationModel)" OnSubmit="OnSelectedFormConfirmed">
+                                <ConfirmEditForm Model="ConfirmDeleteAuthenticationConfigurationModel" FormName="@(config.Purpose)-delete" name="@(config.Purpose)-delete" OnSubmit="OnSelectedFormConfirmed">
                                     <ConfirmButton
                                         ConfirmTitle="Delete Authentication Configuration"
                                         ConfirmDescription="Are you sure you want to delete this configuration?"
