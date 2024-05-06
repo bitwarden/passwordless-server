@@ -39,21 +39,21 @@ public static class HealthCheckBootstrap
     public static void MapPasswordlessHealthChecks(this WebApplication app)
     {
         var group = app.MapGroup(HealthCheckEndpoints.Path);
-        group.MapHealthChecks("/health/http", new HealthCheckOptions
+        group.MapHealthChecks("/http", new HealthCheckOptions
         {
             Predicate = registration => registration.Tags.Contains(TagSimple)
         });
-        group.MapHealthChecks("/health/storage", new HealthCheckOptions
+        group.MapHealthChecks("/storage", new HealthCheckOptions
         {
             ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync,
             Predicate = registration => registration.Tags.Contains(TagDatabase)
         });
-        group.MapHealthChecks("/health/version", new HealthCheckOptions
+        group.MapHealthChecks("/version", new HealthCheckOptions
         {
             ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync,
             Predicate = registration => registration.Tags.Contains(TagVersion)
         });
-        group.MapHealthChecks("/health/mail", new HealthCheckOptions
+        group.MapHealthChecks("/mail", new HealthCheckOptions
         {
             ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync,
             Predicate = registration => registration.Tags.Contains(TagMail)
