@@ -14,7 +14,13 @@
     <meta http-equiv="refresh" content="15" />
 }
 
-<p>We've sent a confirmation link to the email address you provided. Click on the link in the email to verify your account</p>
+<div class="flex flex-col items-center py-10 sm:max-w-xl mx-auto">
+    <span class="p-4 text-white rounded-full bg-primary-700">
+        <component type="typeof(MailIcon)" render-mode="Static" param-Class="@("text-white w-8 h-8")" />
+    </span>
+    <h2 class="mt-6 mb-8 text-center">Check your email to verify your account</h2>
+    <p class="mt-4 text-center">We've sent a confirmation link to the email address you provided. Click on the link in the email to verify your account.</p>
+</div>
 
 <environment names="Development">
     @{
