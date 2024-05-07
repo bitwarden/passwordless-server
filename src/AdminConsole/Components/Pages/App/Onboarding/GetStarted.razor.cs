@@ -24,7 +24,7 @@ public partial class GetStarted : BaseApplicationPage
 
     public string? PublicApiKey { get; private set; }
 
-    public string? PrivateApiKey { get; private set; }
+    public string? SecretApiKey { get; private set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -41,7 +41,7 @@ public partial class GetStarted : BaseApplicationPage
         if (onboarding == null) throw new Exception("Onboarding not found");
 
         PublicApiKey = onboarding.ApiKey;
-        PrivateApiKey = onboarding.ApiSecret;
+        SecretApiKey = onboarding.ApiSecret;
 
         _isInitialized = true;
     }
