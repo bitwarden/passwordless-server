@@ -42,7 +42,7 @@
         public string GetValue() => Format(Value, Type);
         
         public string GetSubValue() => Format(SubValue, SubType);
-        
+
         private string Format(double value, ValueTypes type)
         {
             switch (type)
@@ -52,7 +52,7 @@
                 case ValueTypes.Integer:
                     return value.ToString("N0", CultureInfo.InvariantCulture);
                 case ValueTypes.Percentage:
-                    return value.ToString("P2", CultureInfo.InvariantCulture);
+                    return value.ToString("P2", CultureInfo.InvariantCulture).Replace(" ", string.Empty);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
