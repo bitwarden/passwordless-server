@@ -56,9 +56,9 @@ public class TrendingCardsStatsTests : TestContext
 
         // Assert
         var cards = cut.Nodes[0].ChildNodes;
-        cards[0].MarkupMatches("<div diff:ignoreAttributes><dt diff:ignoreAttributes>Title 1</dt><dd diff:ignoreAttributes>Sub 4.00 %</dd><dd diff:ignoreAttributes>1</dd></div>");
-        cards[1].MarkupMatches("<div diff:ignoreAttributes><dt diff:ignoreAttributes>Title 2</dt><dd diff:ignoreAttributes>Sub 2.00 %</dd><dd diff:ignoreAttributes>2.00</dd></div>");
-        cards[2].MarkupMatches("<div diff:ignoreAttributes><dt diff:ignoreAttributes>Title 3</dt><dd diff:ignoreAttributes>Sub 1</dd><dd diff:ignoreAttributes>300.00 %</dd></div>");
+        cards[0].MarkupMatches("<div diff:ignoreAttributes><div diff:ignoreAttributes><div diff:ignoreAttributes><dt diff:ignoreAttributes>Title 1</dt><dd diff:ignoreAttributes>Sub 4.00%</dd><dd diff:ignoreAttributes>1</dd></div></div></div>");
+        cards[1].MarkupMatches("<div diff:ignoreAttributes><div diff:ignoreAttributes><div diff:ignoreAttributes><dt diff:ignoreAttributes>Title 2</dt><dd diff:ignoreAttributes>Sub 2.00%</dd><dd diff:ignoreAttributes>2.00</dd></div></div></div>");
+        cards[2].MarkupMatches("<div diff:ignoreAttributes><div diff:ignoreAttributes><div diff:ignoreAttributes><dt diff:ignoreAttributes>Title 3</dt><dd diff:ignoreAttributes>Sub 1</dd><dd diff:ignoreAttributes>300.00%</dd></div></div></div>");
     }
 
     [Fact]
