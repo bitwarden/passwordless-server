@@ -76,11 +76,6 @@ builder.Host.UseSerilog((ctx, sp, config) =>
             .Enrich.WithEnvironmentName()
             .WriteTo.Console();
 
-        if (builder.Environment.IsDevelopment())
-        {
-            config.WriteTo.Seq("http://localhost:5341");
-        }
-
         var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
         if (!string.IsNullOrEmpty(ddApiKey))
         {
@@ -95,11 +90,7 @@ builder.Host.UseSerilog((ctx, sp, config) =>
                     configuration: ddConfig);
             }
         }
-    },
-    false,
-    // Pass log events down to other logging providers (e.g. Microsoft) after Serilog, so
-    // that they can be processed in a uniform way in tests.
-    true
+    }
 );
 
 var services = builder.Services;

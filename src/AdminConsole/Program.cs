@@ -65,11 +65,6 @@ void RunTheApp()
             .Enrich.WithEnvironmentName()
             .WriteTo.Console();
 
-        if (builder.Environment.IsDevelopment())
-        {
-            config.WriteTo.Seq("http://localhost:5341");
-        }
-
         var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
         if (!string.IsNullOrEmpty(ddApiKey))
         {
