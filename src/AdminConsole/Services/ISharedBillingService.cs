@@ -5,11 +5,7 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface ISharedBillingService
 {
-    /// <summary>
-    /// Updates the seats used for every app in the organization which are relevant for metered subscriptions.
-    /// </summary>
-    /// <returns></returns>
-    Task UpdateUsageAsync();
+    Task<IReadOnlyCollection<Organization>> GetPayingOrganizationsAsync();
 
     Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId);
 

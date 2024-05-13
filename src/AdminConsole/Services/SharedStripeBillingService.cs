@@ -1,7 +1,5 @@
 using System.Collections.Immutable;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
@@ -16,6 +14,7 @@ namespace Passwordless.AdminConsole.Services;
 
 public class SharedStripeBillingService : BaseBillingService, ISharedBillingService
 {
+    private readonly IScopedPasswordlessClient _api;
     public SharedStripeBillingService(
         ConsoleDbContext db,
         IDataService dataService,
@@ -23,9 +22,15 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
         ILogger<SharedStripeBillingService> logger,
         IOptions<BillingOptions> billingOptions,
         IHttpContextAccessor httpContextAccessor,
-        IUrlHelperFactory urlHelperFactory
-        ) : base(db, dataService, passwordlessClient, logger, billingOptions, httpContextAccessor, urlHelperFactory)
+        IScopedPasswordlessClient api) : base(
+        db,
+        dataService,
+        passwordlessClient,
+        logger,
+        billingOptions,
+        httpContextAccessor)
     {
+        _api = api;
     }
 
     public async Task<(string subscriptionItemId, string priceId)> CreateSubscriptionItem(Organization org, string planSKU)
@@ -164,38 +169,17 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
         return Array.Empty<PaymentMethodModel>().ToImmutableList();
     }
 
-    /// <inheritdoc />
-    public async Task UpdateUsageAsync()
+    public async Task<IReadOnlyCollection<Organization>> GetPayingOrganizationsAsync()
     {
-        List<UsageItem> items = await GetUsageItems();
-
-        foreach (var item in items)
-        {
-            var idempotencyKey = Guid.NewGuid().ToString();
-            var service = new UsageRecordService();
-            try
-            {
-                await service.CreateAsync(
-                    item.BillingSubscriptionItemId,
-                    new UsageRecordCreateOptions
-                    {
-                        Quantity = item.Users,
-                        Timestamp = DateTime.UtcNow,
-                        Action = "set"
-                    },
-                    new RequestOptions
-                    {
-                        IdempotencyKey = idempotencyKey
-                    }
-                );
-            }
-            catch (StripeException e)
-            {
-                _logger.LogError("Usage report failed for item {BillingSubscriptionItemId}:", item.BillingSubscriptionItemId);
-                _logger.LogError(e, "Idempotency key: {IdempotencyKey}.", idempotencyKey);
-            }
-        }
+        var organizations = await Db.Organizations
+            .AsNoTracking()
+            .Include(x => x.Applications)
+            .Where(x => x.BillingCustomerId != null)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
+        return organizations;
     }
+
 
     /// <inheritdoc />
     public async Task OnSubscriptionCreatedAsync(string customerId, string clientReferenceId, string subscriptionId)
