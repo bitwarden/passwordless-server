@@ -22,10 +22,10 @@ using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.HealthChecks;
+using Passwordless.Common.Logging;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
-using Serilog.Sinks.Datadog.Logs;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -55,31 +55,7 @@ void RunTheApp()
 
     builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 
-    builder.Host.UseSerilog((ctx, sp, config) =>
-    {
-        config
-            .ReadFrom.Configuration(ctx.Configuration)
-            .ReadFrom.Services(sp)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .WriteTo.Console();
-
-        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
-        if (!string.IsNullOrEmpty(ddApiKey))
-        {
-            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
-            var ddUrl = $"https://http-intake.logs.{ddSite}";
-            var ddConfig = new DatadogConfiguration(ddUrl);
-
-            if (!string.IsNullOrEmpty(ddApiKey))
-            {
-                config.WriteTo.DatadogLogs(
-                    ddApiKey,
-                    configuration: ddConfig);
-            }
-        }
-    });
+    builder.AddSerilog();
 
     IServiceCollection services = builder.Services;
 
@@ -190,13 +166,7 @@ void RunTheApp()
     app.UseMiddleware<SecurityHeadersMiddleware>();
     app.UseHttpsRedirection();
     app.UseStaticFiles();
-    app.UseSerilogRequestLogging(options =>
-    {
-        options.EnrichDiagnosticContext = (context, httpContext) =>
-        {
-            context.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
-        };
-    });
+    app.UseSerilog(withUserAgent: true);
     app.UseRouting();
     app.UseAuthentication();
     app.UseWhen(

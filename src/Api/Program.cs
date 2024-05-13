@@ -16,6 +16,7 @@ using Passwordless.Api.RateLimiting;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.HealthChecks;
+using Passwordless.Common.Logging;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service;
@@ -23,8 +24,6 @@ using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
 using Passwordless.Service.MDS;
 using Passwordless.Service.Storage.Ef;
-using Serilog;
-using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -66,32 +65,8 @@ if (builder.Configuration.IsSelfHosted())
 }
 
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
-builder.Host.UseSerilog((ctx, sp, config) =>
-    {
-        config
-            .ReadFrom.Configuration(ctx.Configuration)
-            .ReadFrom.Services(sp)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .WriteTo.Console();
 
-        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
-        if (!string.IsNullOrEmpty(ddApiKey))
-        {
-            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
-            var ddUrl = $"https://http-intake.logs.{ddSite}";
-            var ddConfig = new DatadogConfiguration(ddUrl);
-
-            if (!string.IsNullOrEmpty(ddApiKey))
-            {
-                config.WriteTo.DatadogLogs(
-                    ddApiKey,
-                    configuration: ddConfig);
-            }
-        }
-    }
-);
+builder.AddSerilog();
 
 var services = builder.Services;
 
@@ -218,7 +193,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.UseMiddleware<LoggingMiddleware>();
-app.UseSerilogRequestLogging();
+app.UseSerilog();
 app.UseWhen(o =>
 {
     if (o.Request.Path == "/")
