@@ -57,7 +57,7 @@ public static class ApplicationEndpoints
         var contentBuilder = new StringBuilder();
         contentBuilder.AppendLine($"API Url: {options.Value.ApiUrl}");
         contentBuilder.AppendLine($"Public ApiKey: {onboarding.ApiKey}");
-        contentBuilder.AppendLine($"Private ApiSecret: {onboarding.ApiSecret}");
+        contentBuilder.AppendLine($"Secret ApiKey: {onboarding.ApiSecret}");
 
         var byteArray = Encoding.UTF8.GetBytes(contentBuilder.ToString());
         return File(byteArray, "application/octet-stream", $"passwordless-onboarding-{appId}.txt");
