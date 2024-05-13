@@ -7,7 +7,7 @@ public static class SerilogBootstrap
 {
     public static void AddSerilog(this WebApplicationBuilder builder)
     {
-        var passthrough = !builder.Environment.IsProduction();
+        var passthrough = builder.Environment.IsDevelopment();
         builder.Host.UseSerilog((ctx, sp, config) =>
         {
             config
