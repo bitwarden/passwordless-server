@@ -41,6 +41,10 @@ public static class SerilogBootstrap
             writeToProviders: passthrough);
     }
 
+    /// <summary>
+    /// Configuring the Serilog middleware for request logging.
+    /// </summary>
+    /// <param name="withUserAgent">The 'UserAgent' property will contain the value of the 'User-Agent' header when set to `true`.</param>
     public static void UseSerilog(this WebApplication app, bool withUserAgent = false)
     {
         app.UseSerilogRequestLogging(options =>
