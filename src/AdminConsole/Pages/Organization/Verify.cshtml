@@ -32,6 +32,13 @@
             <b>Development mode:</b> Email history is saved to <code>@mailPath</code> and displayed below.
         </p>
 
-        <pre class="mt-4 text-wrap break-all"><code>@await System.IO.File.ReadAllTextAsync(mailPath)</code></pre>
+        @if (System.IO.File.Exists(mailPath))
+        {
+            <pre class="mt-4 text-wrap break-all"><code>@await System.IO.File.ReadAllTextAsync(mailPath)</code></pre>
+        }
+        else
+        {
+            <p class="mt-4">No emails have been sent yet.</p>
+        }
     </div>
 </environment>
