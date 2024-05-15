@@ -125,6 +125,8 @@ jobs:
           --
           RunConfiguration.CollectSourceInformation=true
           DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        env:
+          ASPNETCORE_ENVIRONMENT: Development # For Serilog passthrough
 
       - name: Report test results
         uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5 # v1.9.1
