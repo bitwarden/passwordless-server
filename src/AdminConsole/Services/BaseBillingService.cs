@@ -1,7 +1,4 @@
 using System.Globalization;
-using System.Text;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
@@ -12,8 +9,6 @@ using Passwordless.Common.Models.Apps;
 
 namespace Passwordless.AdminConsole.Services;
 
-public record UsageItem(string BillingSubscriptionItemId, int Users);
-
 public class BaseBillingService
 {
     protected readonly ConsoleDbContext Db;
@@ -22,7 +17,6 @@ public class BaseBillingService
     protected readonly ILogger<BaseBillingService> _logger;
     protected readonly BillingOptions _billingOptions;
     protected readonly IDataService _dataService;
-    protected readonly IUrlHelperFactory _urlHelperFactory;
     protected readonly IHttpContextAccessor _httpContextAccessor;
 
     public BaseBillingService(
@@ -31,17 +25,13 @@ public class BaseBillingService
         IPasswordlessManagementClient passwordlessClient,
         ILogger<BaseBillingService> logger,
         IOptions<BillingOptions> billingOptions,
-        IHttpContextAccessor httpContextAccessor,
-        IUrlHelperFactory urlHelperFactory
-
-        )
+        IHttpContextAccessor httpContextAccessor)
     {
         Db = db;
         _dataService = dataService;
         _passwordlessClient = passwordlessClient;
         _logger = logger;
         _billingOptions = billingOptions.Value;
-        _urlHelperFactory = urlHelperFactory;
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -116,21 +106,6 @@ public class BaseBillingService
         }
 
         await Db.SaveChangesAsync();
-    }
-
-    protected async Task<List<UsageItem>> GetUsageItems()
-    {
-        var items = await Db.Applications
-            .Where(a => a.BillingSubscriptionItemId != null)
-            .GroupBy(a => new
-            {
-                a.OrganizationId,
-                a.BillingSubscriptionItemId
-            })
-            .Select(g => new
-                UsageItem(g.Key.BillingSubscriptionItemId, g.Sum(x => x.CurrentUserCount)))
-            .ToListAsync();
-        return items;
     }
 
     /// <inheritdoc />
