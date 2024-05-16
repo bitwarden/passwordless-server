@@ -45,7 +45,7 @@
                                         value="delete">
                                         <DeleteIcon Class="h-6 w-6"></DeleteIcon>
                                     </ConfirmButton>
-                                    <input type="hidden" value="@config.Purpose" name="ConfirmDeleteAuthenticationConfigurationModel.Purpose"/>
+                                    <input type="hidden" value="@config.Purpose" name="@GetDeleteFormName(config.Purpose)"/>
                                 </ConfirmEditForm>
                             }
                         </td>

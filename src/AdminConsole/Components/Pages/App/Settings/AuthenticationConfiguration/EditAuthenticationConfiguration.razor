@@ -11,7 +11,7 @@
     <Panel>
         @if (ConfigurationDto != null)
         {
-        <AuthenticationConfigurationForm DisablePurpose="true" Model="@(ConfigurationDto)" OnSubmitFunction="EditAuthenticationConfigurationAsync" />
+        <AuthenticationConfigurationForm IsPurposeReadOnly="true" Model="@(ConfigurationDto)" OnSubmitFunction="EditAuthenticationConfigurationAsync" />
         }
     </Panel>
 </Page>
