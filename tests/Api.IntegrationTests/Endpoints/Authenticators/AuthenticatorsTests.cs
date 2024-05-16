@@ -31,7 +31,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_retrieve_configured_authenticators_when_attestation_is_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -51,7 +51,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_retrieve_configured_authenticators_with_expected_result()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -78,7 +78,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_receive_forbidden_when_retrieving_configured_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -97,7 +97,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_whitelist_authenticators_when_attestation_is_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -120,7 +120,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_receive_forbidden_when_whitelisting_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -142,7 +142,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_can_delist_authenticators_when_attestation_is_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -168,7 +168,7 @@ public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFi
     public async Task I_receive_forbidden_when_delisting_authenticators_when_attestation_is_not_allowed()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
         var applicationName = CreateAppHelpers.GetApplicationName();
 

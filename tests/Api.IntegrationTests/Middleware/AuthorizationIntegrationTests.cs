@@ -16,7 +16,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     public async Task I_receive_a_403_when_i_use_a_invalid_api_key_with_an_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -38,7 +38,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     public async Task I_receive_a_403_when_i_use_a_badly_formatted_api_key_with_an_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -60,7 +60,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     public async Task I_receive_a_403_when_i_use_a_invalid_api_secret_with_an_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -82,7 +82,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
     public async Task I_receive_a_403_when_i_use_a_badly_formatted_api_secret_with_an_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput

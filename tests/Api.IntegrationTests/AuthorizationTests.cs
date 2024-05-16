@@ -31,7 +31,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ValidateThatEndpointsHaveProtectionAsync()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -69,7 +69,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ValidateThatMissingApiSecretThrowsAsync()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -97,7 +97,7 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ValidateThatInvalidApiSecretThrowsAsync()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -135,9 +135,8 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ApiSecretGivesHelpfulAdviceAsync(string input, string details)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
         using var client = api.CreateClient().AddAcceptApplicationJson();
@@ -181,11 +180,11 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
     public async Task ApiPublicGivesHelpfulAdviceAsync(string input, string details)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
+
         using var client = api.CreateClient().AddAcceptApplicationJson();
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/signin/begin");
