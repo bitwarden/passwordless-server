@@ -9,21 +9,25 @@ namespace Passwordless.AdminConsole.Services;
 public class PostSignInHandlerService : IPostSignInHandlerService
 {
     private readonly ConsoleDbContext _db;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<PostSignInHandlerService> _logger;
 
     public PostSignInHandlerService(
         ConsoleDbContext db,
+        IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         ILogger<PostSignInHandlerService> logger)
     {
         _db = db;
+        _httpContextAccessor = httpContextAccessor;
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
-    public async Task HandleAsync(ClaimsPrincipal user)
+    public async Task HandleAsync()
     {
+        var user = _httpContextAccessor.HttpContext.User;
         var organizationIdValue = user.FindFirstValue(CustomClaimTypes.OrgId);
         if (organizationIdValue == null) return;
         var organizationId = int.Parse(organizationIdValue);

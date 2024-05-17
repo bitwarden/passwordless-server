@@ -4,5 +4,5 @@ namespace Passwordless.AdminConsole.Services;
 
 public interface IPostSignInHandlerService
 {
-    Task HandleAsync(ClaimsPrincipal user);
+    Task HandleAsync();
 }
