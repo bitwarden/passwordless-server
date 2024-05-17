@@ -1,14 +1,9 @@
-using System.Diagnostics;
 using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Middleware;
 
 public class CurrentContext : ICurrentContext
 {
-#if DEBUG
-    private bool _contextSet;
-#endif
-
     public bool InAppContext { get; private set; }
 
     public string? AppId { get; private set; }
@@ -24,10 +19,6 @@ public class CurrentContext : ICurrentContext
 
     public void SetApp(Application application)
     {
-#if DEBUG
-        Debug.Assert(!_contextSet, "Context should only be set one time per lifetime.");
-        _contextSet = true;
-#endif
         InAppContext = true;
         AppId = application.Id;
         ApiSecret = application.ApiSecret;
