@@ -10,6 +10,12 @@ Using Passwordless.dev means there's no need to read extensive W3C specification
 
 The `passwordless-server` project contains the APIs, database, and other core infrastructure items needed for the backend of all passwordless clients.
 
+## Demo
+
+You can try a demo web app, powered by Passwordless.dev over at [demo.passwordless.dev](https://demo.passwordless.dev). You can also watch the video below:
+
+[Demo Video](https://github.com/bitwarden/passwordless-server/assets/1935960/71dbaeeb-d7f6-47c4-b2cf-4fd7a6951e32)
+
 ## Using Passwordless.dev
 
 ### Create an application
