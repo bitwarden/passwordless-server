@@ -9,5 +9,5 @@
       "matchUpdateTypes": ["minor", "patch"]
     }
   ],
-  "ignoreDeps": ["Datadog.Trace"]
+  "ignoreDeps": ["Datadog.Trace", "dotnet-sdk"]
 }
