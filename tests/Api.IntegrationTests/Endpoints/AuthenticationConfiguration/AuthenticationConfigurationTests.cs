@@ -20,7 +20,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_create_an_authentication_configuration()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -50,7 +50,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_get_the_default_sign_in_authentication_configuration_without_changing_anything()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -72,7 +72,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_get_the_default_step_up_authentication_configuration_without_changing_anything()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -94,7 +94,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_should_get_an_empty_list_for_a_non_preset_and_nonexistent_configuration()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -114,7 +114,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_delete_a_configuration_I_created()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -140,7 +140,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_edit_a_configuration_I_created()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -180,7 +180,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_edit_a_preset_configuration(string presetPurpose)
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
 
@@ -213,7 +213,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
     public async Task I_can_sign_in_and_the_authentication_configuration_will_have_its_last_used_on_updated()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
 
         using var client = api.CreateClient().AddManagementKey();
         var applicationName = CreateAppHelpers.GetApplicationName();
