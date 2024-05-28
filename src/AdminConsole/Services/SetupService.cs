@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Db;
 using Passwordless.Common.Configuration;
-using Passwordless.Common.Extensions;
 
 namespace Passwordless.AdminConsole.Services;
 
@@ -9,27 +7,30 @@ public class SetupService : ISetupService
 {
     private readonly PasswordlessOptions _options;
     private readonly bool _isSelfHosted;
-    private readonly ConsoleDbContext _dbContext;
 
     public SetupService(
         IOptions<PasswordlessOptions> options,
-        IConfiguration configuration,
-        ConsoleDbContext dbContext)
+        IConfiguration configuration)
     {
         _options = options.Value;
         _isSelfHosted = configuration.IsSelfHosted();
-        _dbContext = dbContext;
     }
 
-    public async Task<bool> HasSetupCompletedAsync()
+    public Task<bool> HasSetupCompletedAsync()
     {
+        // Self-host -> check if API key and secret have been replaced
         if (_isSelfHosted)
         {
-            return !(_options.ApiKey!.Contains("replaceme") || _options.ApiSecret.Contains("replaceme"));
+            return Task.FromResult(
+                !(_options.ApiKey!.Contains("replaceme") || _options.ApiSecret.Contains("replaceme"))
+            );
         }
+        // Local and cloud -> check if API Secret has been set
         else
         {
-            return await _dbContext.HasAppliedMigrationsAsync();
+            return Task.FromResult(
+                !string.IsNullOrWhiteSpace(_options.ApiSecret)
+            );
         }
     }
 }

@@ -11,6 +11,7 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.OpenApi;
 using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.RateLimiting;
 using Passwordless.Api.Reporting.Background;
@@ -28,36 +29,7 @@ using Passwordless.Service.Storage.Ef;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(swagger =>
-{
-    swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
-    swagger.DocInclusionPredicate((docName, apiDesc) =>
-    {
-        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.FirstOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
-        if (policy == null)
-        {
-            return false;
-        }
-        return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
-    });
-    swagger.OperationFilter<AuthorizationOperationFilter>();
-    swagger.OperationFilter<ExtendedStatusDescriptionsOperationFilter>();
-    swagger.OperationFilter<ExternalDocsOperationFilter>();
-    swagger.SupportNonNullableReferenceTypes();
-    swagger.SwaggerDoc("v4", new OpenApiInfo
-    {
-        Version = "v4",
-        Title = "Passwordless.dev API",
-        TermsOfService = new Uri("https://bitwarden.com/terms/"),
-        Contact = new OpenApiContact
-        {
-            Email = "support@passwordless.dev",
-            Name = "Support",
-            Url = new Uri("https://bitwarden.com/contact/")
-        }
-    });
-    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
-});
+builder.Services.AddOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
@@ -140,7 +112,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
-    app.UseDevelopmentEndpoints();
 }
 else
 {
@@ -150,21 +121,7 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-{
-    httpReq.HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-}));
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v4/swagger.json", "v4");
-    c.ConfigObject.ShowExtensions = true;
-    c.ConfigObject.ShowCommonExtensions = true;
-    c.DefaultModelsExpandDepth(-1);
-    c.IndexStream = () => typeof(Program).Assembly.GetManifestResourceStream("Passwordless.Api.OpenApi.swagger.html");
-    c.InjectStylesheet("/openapi.css");
-    c.SupportedSubmitMethods();
-});
+app.UseOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
@@ -224,6 +181,26 @@ app.MapAuthenticationConfigurationEndpoints();
 
 app.MapPasswordlessHealthChecks();
 
+// Apply migrations and seed data
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
+
+    await dbContext.Database.MigrateAsync();
+
+    await dbContext.SeedDefaultApplicationAsync(
+        "test",
+        "test:public:2e728aa5986f4ba8b073a5b28a939795",
+        "test:secret:a679563b331846c79c20b114a4f56d02"
+    );
+
+    await dbContext.SaveChangesAsync();
+}
+
 app.Run();
 
+/// <summary>
+/// Application entrypoint.
+/// </summary>
 public partial class Program;

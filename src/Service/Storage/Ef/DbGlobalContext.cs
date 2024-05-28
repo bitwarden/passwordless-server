@@ -143,9 +143,15 @@ public abstract class DbGlobalContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
+    // TODO: probably makes sense to replace this with modelBuilder.Entity<...>(builder => builder.HasData(...))
+    public async Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
     {
-        ApiKeys.Add(new ApiKeyDesc
+        if (await AccountInfo.AnyAsync(x => x.Tenant == appName))
+        {
+            return;
+        }
+
+        await ApiKeys.AddAsync(new ApiKeyDesc
         {
             Tenant = appName,
             Id = publicKey[^4..],
@@ -153,7 +159,7 @@ public abstract class DbGlobalContext : DbContext
             Scopes = [PublicKeyScopes.Register.GetValue(), PublicKeyScopes.Login.GetValue()]
         });
 
-        ApiKeys.Add(new ApiKeyDesc
+        await ApiKeys.AddAsync(new ApiKeyDesc
         {
             Tenant = appName,
             Id = privateKey[^4..],
@@ -161,7 +167,7 @@ public abstract class DbGlobalContext : DbContext
             Scopes = [SecretKeyScopes.TokenRegister.GetValue(), SecretKeyScopes.TokenVerify.GetValue()]
         });
 
-        var application = new AccountMetaInformation
+        await AccountInfo.AddAsync(new AccountMetaInformation
         {
             Tenant = appName,
             AcountName = appName,
@@ -174,12 +180,8 @@ public abstract class DbGlobalContext : DbContext
                 IsMagicLinksEnabled = true,
                 MagicLinkEmailMonthlyQuota = 2000,
                 MaxUsers = null,
-                Tenant = appName,
+                Tenant = appName
             }
-        };
-
-        AccountInfo.Add(application);
-
-        return Task.CompletedTask;
+        });
     }
 }

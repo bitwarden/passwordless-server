@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Passwordless.Common.MagicLinks.Models;
+using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -26,9 +27,12 @@ public class MagicLinkService(
         var account = await tenantStorage.GetAccountInformation();
         var accountAge = now - account.CreatedAt;
 
+        // Check bypass
+        if (configuration.GetApplicationOverrides(account.AcountName).IsMagicLinkQuotaBypassEnabled)
+            return;
+
         // Newly created accounts can only send magic links to the admin email address
         if (accountAge < NewAccountTimeout &&
-            !IsAdminConsole(account) &&
             !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
@@ -67,10 +71,6 @@ public class MagicLinkService(
             );
         }
     }
-
-    private static bool IsAdminConsole(PerTenant account) =>
-        string.Equals(account.Tenant, "admin", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(account.Tenant, "adminconsole", StringComparison.OrdinalIgnoreCase);
 
     public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {

@@ -1,4 +1,4 @@
-namespace Passwordless.Api.Overrides;
+namespace Passwordless.Common.Overrides;
 
 /// <summary>
 /// Extensions for <see cref="ApplicationOverrides" />.

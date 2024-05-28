@@ -22,7 +22,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_retrieve_assertion_options_to_begin_sign_in()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -50,7 +50,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -86,7 +86,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -126,7 +126,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_receive_an_error_message_when_sending_an_unrecognized_passkey()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -181,7 +181,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task An_expired_apps_token_keys_should_be_removed_when_a_request_is_made()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -210,7 +210,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_receive_a_sign_in_token_for_a_valid_user_id()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });
@@ -245,7 +245,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         const int timeToLive = 120;
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             TestOutput = testOutput
         });

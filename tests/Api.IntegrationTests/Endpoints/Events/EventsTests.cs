@@ -21,7 +21,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_a_user_retrieving_the_api_keys()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -46,7 +46,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_a_user_creating_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -73,7 +73,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_locking_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -101,7 +101,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_unlocking_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -130,7 +130,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_deleting_an_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -158,7 +158,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_enabling_the_generate_sign_in_token_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -187,7 +187,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_disabling_the_generate_sign_in_token_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -216,7 +216,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_enabling_magic_links()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -245,7 +245,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_disabling_magic_links()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -274,7 +274,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_using_a_disabled_api_secret()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -304,7 +304,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_using_a_disabled_public_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -337,7 +337,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_using_a_non_existent_api_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
@@ -364,7 +364,7 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_view_the_event_for_using_a_non_existent_api_secret()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();

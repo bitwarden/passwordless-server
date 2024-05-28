@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.BackgroundServices;
@@ -33,7 +34,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    RunTheApp();
+    await RunAppAsync();
 }
 catch (Exception e)
 {
@@ -44,7 +45,7 @@ finally
     Log.CloseAndFlush();
 }
 
-void RunTheApp()
+async Task RunAppAsync()
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -81,8 +82,14 @@ void RunTheApp()
 
     builder.AddDatabase();
 
+    builder.Services.AddScoped<IPostSignInHandlerService, PostSignInHandlerService>();
     services.ConfigureApplicationCookie(o =>
     {
+        o.Events.OnSignedIn = async context =>
+        {
+            var handler = context.HttpContext.RequestServices.GetRequiredService<IPostSignInHandlerService>();
+            await handler.HandleAsync();
+        };
         o.Cookie.Name = "AdminConsoleSignIn";
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
     });
@@ -148,7 +155,6 @@ void RunTheApp()
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
-        app.UseMigrationsEndPoint();
     }
     else
     {
@@ -190,6 +196,15 @@ void RunTheApp()
     app.MapBillingEndpoints();
 
     app.MapPasswordlessHealthChecks();
+
+    // Apply migrations
+    if (app.Environment.IsDevelopment())
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
+
+        await dbContext.Database.MigrateAsync();
+    }
 
     app.Run();
 }
