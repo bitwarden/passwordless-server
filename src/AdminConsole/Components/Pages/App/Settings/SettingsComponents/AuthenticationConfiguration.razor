@@ -26,7 +26,12 @@
                         <td>@config.Purpose</td>
                         <td>@config.UserVerification</td>
                         <td>@config.TimeToLive</td>
-                        <td>@config.LastUsedOn?.ToString("g")</td>
+                        <td>
+                            @if (config.LastUsedOn.HasValue)
+                            {
+                                <LocalDateTime Value="config.LastUsedOn.Value.UtcDateTime" DateFormat="g"/>
+                            }
+                        </td>
                         <td class="flex items-center space-x-2">
                             <a href="/app/@(AppId)/settings/authentication-configuration/@(config.Purpose)/edit">
                                 <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>

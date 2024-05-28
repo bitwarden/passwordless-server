@@ -32,7 +32,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
             CreatedBy = request.PerformedBy,
             CreatedOn = timeProvider.GetUtcNow()
         };
-        
+
         var existingConfiguration = await GetAuthenticationConfigurationAsync(configuration.Purpose);
 
         if (existingConfiguration is not null)
