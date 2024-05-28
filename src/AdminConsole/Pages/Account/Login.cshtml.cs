@@ -7,17 +7,12 @@ namespace Passwordless.AdminConsole.Pages.Account;
 
 public class LoginModel : PageModel
 {
-    private readonly IConfiguration _configuration;
-    private readonly IWebHostEnvironment _env;
     private readonly MagicLinkSignInManager<ConsoleAdmin> signInManager;
     public bool EmailSent { get; set; }
 
-    public LoginModel(MagicLinkSignInManager<ConsoleAdmin> signInManager, IWebHostEnvironment env,
-        IConfiguration configuration)
+    public LoginModel(MagicLinkSignInManager<ConsoleAdmin> signInManager)
     {
         this.signInManager = signInManager;
-        _env = env;
-        _configuration = configuration;
     }
 
     public IActionResult OnGet(string? returnUrl = null)

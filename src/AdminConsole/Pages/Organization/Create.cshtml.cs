@@ -6,7 +6,6 @@ using Passwordless.AdminConsole.EventLog.Loggers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.MagicLinks;
-using Passwordless.AdminConsole.Services.Mail;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
 
@@ -15,7 +14,6 @@ public class Create : PageModel
     private readonly IDataService _dataService;
 
     private readonly UserManager<ConsoleAdmin> _userManager;
-    private readonly IMailService _mailService;
     private readonly MagicLinkSignInManager<ConsoleAdmin> _magicLinkSignInManager;
     private readonly IEventLogger _eventLogger;
     private readonly ILogger<Create> _logger;
@@ -24,14 +22,12 @@ public class Create : PageModel
 
     public Create(IDataService dataService,
         UserManager<ConsoleAdmin> userManager,
-        IMailService mailService,
         MagicLinkSignInManager<ConsoleAdmin> magicLinkSignInManager,
         IEventLogger eventLogger,
         ILogger<Create> logger)
     {
         _dataService = dataService;
         _userManager = userManager;
-        _mailService = mailService;
         _magicLinkSignInManager = magicLinkSignInManager;
         _eventLogger = eventLogger;
         _logger = logger;
