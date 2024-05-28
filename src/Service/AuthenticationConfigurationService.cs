@@ -12,10 +12,9 @@ public interface IAuthenticationConfigurationService
     Task UpdateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request);
     Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration);
 
-    Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(
-        GetAuthenticationConfigurationsFilter filter);
+    Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(GetAuthenticationConfigurationsFilter filter);
 
-    Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose);
+    Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose purpose);
     Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose);
     Task UpdateLastUsedOnAsync(AuthenticationConfigurationDto config);
 }
@@ -24,12 +23,6 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
 {
     public async Task CreateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request)
     {
-        var existingConfiguration = await GetAuthenticationConfigurationAsync(request.Purpose);
-
-        if (existingConfiguration is not null)
-            throw new ApiException($"The configuration {request.Purpose} already exists.",
-                StatusCodes.Status400BadRequest);
-
         var configuration = new AuthenticationConfigurationDto
         {
             Purpose = new SignInPurpose(request.Purpose),
@@ -39,6 +32,12 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
             CreatedBy = request.PerformedBy,
             CreatedOn = timeProvider.GetUtcNow()
         };
+        
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(configuration.Purpose);
+
+        if (existingConfiguration is not null)
+            throw new ApiException($"The configuration {configuration.Purpose.Value} already exists.",
+                StatusCodes.Status400BadRequest);
 
         await storage.CreateAuthenticationConfigurationAsync(configuration);
 
@@ -47,7 +46,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
 
     public async Task UpdateAuthenticationConfigurationAsync(SetAuthenticationConfigurationRequest request)
     {
-        var existingConfiguration = await GetAuthenticationConfigurationAsync(request.Purpose);
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(new SignInPurpose(request.Purpose));
 
         if (existingConfiguration is null)
             throw new ApiException($"The configuration {request.Purpose} does not exist.",
@@ -96,19 +95,18 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
         return configurations;
     }
 
-    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(string purpose)
+    public async Task<AuthenticationConfigurationDto?> GetAuthenticationConfigurationAsync(SignInPurpose purpose)
     {
         var configuration = (await storage.GetAuthenticationConfigurationsAsync(
             new GetAuthenticationConfigurationsFilter
             {
-                Purpose = purpose
-            })).FirstOrDefault() ?? GetPresetDefaults(purpose);
+                Purpose = purpose.Value
+            })).FirstOrDefault() ?? GetPresetDefaults(purpose.Value);
 
         return configuration;
     }
 
-    public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(
-        SignInPurpose purpose)
+    public async Task<AuthenticationConfigurationDto> GetAuthenticationConfigurationOrDefaultAsync(SignInPurpose purpose)
     {
         var configuration = (await storage.GetAuthenticationConfigurationsAsync(
                 new GetAuthenticationConfigurationsFilter { Purpose = purpose.Value })).FirstOrDefault();
@@ -118,7 +116,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
 
     public async Task UpdateLastUsedOnAsync(AuthenticationConfigurationDto config)
     {
-        var existingConfiguration = await GetAuthenticationConfigurationAsync(config.Purpose.Value);
+        var existingConfiguration = await GetAuthenticationConfigurationAsync(config.Purpose);
 
         if (existingConfiguration is null)
             throw new ApiException($"The configuration {config.Purpose.Value} does not exist.",

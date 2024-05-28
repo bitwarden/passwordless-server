@@ -67,7 +67,7 @@ public static class AuthenticationConfigurationEndpoints
                 [FromServices] IAuthenticationConfigurationService authenticationConfigurationService,
                 [FromServices] IEventLogger eventLogger) =>
             {
-                var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(request.Purpose);
+                var configuration = await authenticationConfigurationService.GetAuthenticationConfigurationAsync(new SignInPurpose(request.Purpose));
 
                 if (configuration == null) return NotFound();
 
