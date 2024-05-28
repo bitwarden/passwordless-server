@@ -32,10 +32,9 @@ public static class RequestHelpers
             .RuleFor(x => x.TimeToLive, faker => faker.Date.Timespan())
             .RuleFor(x => x.PerformedBy, faker => faker.Person.UserName);
 
-    public static T GetRandomEnumValue<T>() where T : struct, Enum
+    private static T GetRandomEnumValue<T>() where T : struct, Enum
     {
-        var random = new Random();
         var values = Enum.GetValues<T>();
-        return values[random.Next(values.Length)];
+        return values[Random.Shared.Next(values.Length)];
     }
 }
