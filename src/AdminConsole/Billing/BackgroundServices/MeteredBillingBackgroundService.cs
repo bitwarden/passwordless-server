@@ -21,7 +21,6 @@ public sealed class MeteredBillingBackgroundService(
         try
         {
             using IServiceScope scope = services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
             var timeProvider = scope.ServiceProvider.GetRequiredService<TimeProvider>();
 
             // 1. Retrieve all paid organizations.
