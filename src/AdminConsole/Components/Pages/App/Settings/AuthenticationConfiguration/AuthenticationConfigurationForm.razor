@@ -13,7 +13,7 @@
         <InputText @bind-Value="@FormModel!.Purpose" id="Purpose" disabled="@IsPurposeReadOnly" class="text-input"/>
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="UserVerification">User Verification:</label>
         <InputSelect id="UserVerification" @bind-Value="@FormModel.UserVerificationRequirement" TValue="UserVerificationRequirement" class="form-select">
-            @foreach (var uv in Enum.GetValues(typeof(UserVerificationRequirement)))
+            @foreach (var uv in Enum.GetValues<UserVerificationRequirement>())
             {
                 <option value="@uv">@uv</option>
             }
