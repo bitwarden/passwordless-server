@@ -3,7 +3,6 @@
 @inherits BaseApplicationPage
 
 @inject IScopedPasswordlessClient Passwordless
-@inject ICurrentContext CurrentContext
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -23,6 +22,6 @@
             PerformedBy = HttpContextAccessor.HttpContext!.User.Identity!.Name!
         });
         
-        NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
+        NavigationManager.NavigateTo($"app/{AppId}/settings");
     }
 }

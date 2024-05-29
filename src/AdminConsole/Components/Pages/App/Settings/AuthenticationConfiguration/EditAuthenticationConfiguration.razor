@@ -3,7 +3,6 @@
 @inherits BaseApplicationPage
 
 @inject IScopedPasswordlessClient Passwordless
-@inject ICurrentContext CurrentContext
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -21,7 +20,7 @@
     
     private AuthenticationConfigurationFormModel ConfigurationDto { get; set; }
     
-    private void NavigateToSettings() => NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
+    private void NavigateToSettings() => NavigationManager.NavigateTo($"app/{AppId}/settings");
 
     protected override async Task OnInitializedAsync()
     {

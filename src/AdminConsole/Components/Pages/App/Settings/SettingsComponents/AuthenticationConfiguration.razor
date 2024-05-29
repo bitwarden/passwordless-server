@@ -17,67 +17,66 @@
             <a class="btn-primary" href="/app/@(AppId)/settings/authentication-configuration/new">Add New Authentication Configuration</a>
         </div>
 
-        <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Last Used", "Actions" })" EmptyMessage="Something has failed. Please try refreshing.">
-            @if (Configurations.Any())
-            {
-                @foreach (var config in Configurations)
+        <ConfirmEditForm FormName="@DeleteFormName" Model="ConfirmDeleteAuthenticationConfigurationModel" OnSubmit="@OnSelectedFormConfirmed">
+            <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Last Used", "Actions" })" EmptyMessage="Something has failed. Please try refreshing.">
+                @if (Configurations.Any())
                 {
-                    <tr>
-                        <td>@config.Purpose</td>
-                        <td>@config.UserVerification</td>
-                        <td>@config.TimeToLive</td>
-                        <td>
-                            @if (config.LastUsedOn.HasValue)
-                            {
-                                <LocalDateTime Value="config.LastUsedOn.Value.UtcDateTime" DateFormat="g"/>
-                            }
-                        </td>
-                        <td class="flex items-center space-x-2">
-                            <a href="/app/@(AppId)/settings/authentication-configuration/@(config.Purpose)/edit">
-                                <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
-                            </a>
+                    @foreach (var config in Configurations)
+                    {
+                        <tr>
+                            <td>@config.Purpose</td>
+                            <td>@config.UserVerification</td>
+                            <td>@config.TimeToLive</td>
+                            <td>
+                                @if (config.LastUsedOn.HasValue)
+                                {
+                                    <LocalDateTime Value="config.LastUsedOn.Value.UtcDateTime" DateFormat="g"/>
+                                }
+                            </td>
+                            <td class="flex items-center space-x-2">
+                                <a href="/app/@(AppId)/settings/authentication-configuration/@(config.Purpose)/edit">
+                                    <PencilSquareIcon Class="h-6 w-6"></PencilSquareIcon>
+                                </a>
 
-                            @if (config.CanDelete)
-                            {
-                                <ConfirmEditForm Model="ConfirmDeleteAuthenticationConfigurationModel" FormName="@GetDeleteFormName(config.Purpose)" name="@GetDeleteFormName(config.Purpose)" OnSubmit="OnSelectedFormConfirmed">
+                                @if (config.CanDelete)
+                                {
                                     <ConfirmButton
                                         ConfirmTitle="Delete Authentication Configuration"
                                         ConfirmDescription="Are you sure you want to delete this configuration?"
                                         ConfirmButtonText="Delete"
                                         class="btn-danger flex items-center"
-                                        name="delete"
+                                        name="ConfirmDeleteAuthenticationConfigurationModel.Purpose"
                                         type="submit"
-                                        value="delete">
+                                        value="@config.Purpose">
                                         <DeleteIcon Class="h-6 w-6"></DeleteIcon>
                                     </ConfirmButton>
-                                    <input type="hidden" value="@config.Purpose" name="@GetDeleteFormName(config.Purpose)"/>
-                                </ConfirmEditForm>
-                            }
-                        </td>
-                    </tr>
+                                }
+                            </td>
+                        </tr>
+                    }
                 }
-            }
-        </Table>
+            </Table>
+        </ConfirmEditForm>
     </Panel>
 }
 
 @code {
     private string AppId => CurrentContext.AppId!;
 
-    [SupplyParameterFromForm(FormName = nameof(ConfirmDeleteAuthenticationConfigurationModel))]
+    public const string DeleteFormName = "delete-purpose-form";
+
+    [SupplyParameterFromForm(FormName = DeleteFormName)]
     public ConfirmSelectedFormModel ConfirmDeleteAuthenticationConfigurationModel { get; set; } = new();
 
     private readonly IReadOnlyCollection<string> _requiredAuthenticationConfigurationNames = new[] { SignInPurpose.SignInName, SignInPurpose.StepUpName };
 
     private IReadOnlyCollection<AuthenticationConfigurationEntry> Configurations { get; set; } = Array.Empty<AuthenticationConfigurationEntry>();
-    
-    private static string GetDeleteFormName(string purpose) => $"{purpose}-delete";
 
     public record AuthenticationConfigurationEntry(
-        string Purpose, 
-        string UserVerification, 
+        string Purpose,
+        string UserVerification,
         string TimeToLive,
-        DateTimeOffset? LastUsedOn, 
+        DateTimeOffset? LastUsedOn,
         bool CanDelete);
 
     private AuthenticationConfigurationEntry GetEntry(Common.Models.Apps.AuthenticationConfiguration configuration) =>
@@ -96,8 +95,8 @@
             var request = HttpContextAccessor.HttpContext!.Request;
             switch (request.Form["_handler"])
             {
-                case var deleteFormName when deleteFormName.ToString().EndsWith("-delete"):
-                    ConfirmDeleteAuthenticationConfigurationModel.Purpose = request.Form[deleteFormName.ToString()].ToString();
+                case var deleteFormName when deleteFormName.ToString() == DeleteFormName:
+                    ConfirmDeleteAuthenticationConfigurationModel.Purpose = request.Form["ConfirmDeleteAuthenticationConfigurationModel.Purpose"].ToString();
                     await OnSelectedFormConfirmed();
                     break;
             }
@@ -113,8 +112,8 @@
             Purpose = ConfirmDeleteAuthenticationConfigurationModel.Purpose,
             PerformedBy = HttpContextAccessor.HttpContext!.User.GetName()
         });
-        
-        NavigationManager.NavigateTo($"app/{CurrentContext.AppId}/settings");
+
+        NavigationManager.NavigateTo($"app/{AppId}/settings");
     }
 
     public class ConfirmSelectedFormModel
@@ -122,5 +121,4 @@
         [Required, MinLength(1), RegularExpression(@"^[\w\-\.]*$", ErrorMessage = "Characters are limited to A-z, 0-9, -, ., or _.")]
         public string Purpose { get; set; } = string.Empty;
     }
-
 }
