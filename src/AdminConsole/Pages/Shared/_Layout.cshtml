@@ -5,7 +5,6 @@
 @using Passwordless.AdminConsole.Identity
 @inject SignInManager<ConsoleAdmin> signinManager
 @inject IFileVersionProvider FileVersionProvider
-@inject IHttpContextAccessor HttpContextAccessor
 
 @{
     var signedIn = signinManager.IsSignedIn(User);
