@@ -30,12 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Pages\App\Settings\SecretKeyCreated.cshtml.cs">
-      <DependentUpon>SecretKeyCreated.cshtml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="Services\AuthenticatorData\authenticator-data.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
