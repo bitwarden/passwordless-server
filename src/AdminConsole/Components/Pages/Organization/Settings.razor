@@ -1,15 +1,14 @@
-@page "/Settings"
+@page "/org-settings"
 @using System.ComponentModel.DataAnnotations
 
 @inject IDataService DataService
+@inject ILogger<Settings> Logger
 
 <Page Title="Organization Settings">
     <Panel Header="Delete Organization">
         @if (CanDelete)
         {
-            <ConfirmEditForm EditContext="_deleteOrgEditContext" FormName="@DeleteOrgFormName" Model="@FormModel" OnSubmit="@OnSubmitAsync">
-                <DataAnnotationsValidator/>
-                <CustomValidationErrors EditContext="_deleteOrgEditContext" />
+            <ConfirmEditForm FormName="@DeleteOrgFormName" EditContext="@_deleteOrgEditContext" OnValidSubmit="@OnSubmitAsync">
                 <p>Unexpected bad things will happen if you don’t read this:</p>
                 <ul role="list" class="list-disc list-inside">
                     <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
@@ -18,13 +17,14 @@
                 </ul>
                 <div class="flex rounded-md">
                     <InputText @bind-Value="@FormModel.OrganizationName" type="text" class="text-input rounded-r-none font-mono"/>
-                    <ConfirmButton 
+                    <ConfirmButton
                         ConfirmTitle="Delete Organization"
                         ConfirmDescription="Are you sure you would like to delete your organization? There's no going back."
                         ConfirmButtonText="I'm Sure"
                         class="btn-danger rounded-l-none"
                         type="submit">Delete</ConfirmButton>
                 </div>
+                <ValidationMessage For="() => FormModel.OrganizationName"></ValidationMessage>
                 <p class="italic">Type the name of the organization and click "Delete".</p>
             </ConfirmEditForm>
         }
@@ -37,12 +37,12 @@
 </Page>
 
 @code {
-    private string OrganizationName { get; set; }
-    private bool CanDelete { get; set; }
+    private string OrganizationName { get; set; } = string.Empty;
     private int ApplicationCount { get; set; }
+    private bool CanDelete => true;
 
     private const string DeleteOrgFormName = "delete-org-form";
-
+    
     public class DeleteOrgModel
     {
         [Required]
@@ -54,36 +54,32 @@
 
     private EditContext _deleteOrgEditContext = null!;
     private ValidationMessageStore _deleteOrgValidationStore = null!;
-    
+
     protected override async Task OnInitializedAsync()
     {
-        _deleteOrgEditContext = new EditContext(FormModel);
-        _deleteOrgValidationStore = new ValidationMessageStore(_deleteOrgEditContext);
+        _deleteOrgEditContext = new (FormModel);
+        _deleteOrgEditContext.OnValidationRequested += HandleValidationRequest;
+        _deleteOrgValidationStore = new (_deleteOrgEditContext);
         
         var organization = await DataService.GetOrganizationWithDataAsync();
 
         OrganizationName = organization.Name;
         ApplicationCount = organization.Applications.Count;
-        CanDelete = ApplicationCount == 0;
     }
 
-    private void Validate(EditContext editContext)
+    private void HandleValidationRequest(object? sender, ValidationRequestedEventArgs e)
     {
+        _deleteOrgValidationStore.Clear();
+
         if (!string.Equals(FormModel.OrganizationName, OrganizationName, StringComparison.Ordinal))
         {
-            _deleteOrgValidationStore.Add(() => FormModel.OrganizationName, "Please type the name of your organization.");
+            _deleteOrgValidationStore.Add(() => FormModel.OrganizationName, "Please enter organization name exactly if you would like to delete it.");
         }
     }
 
-    public async Task OnSubmitAsync()
+    private Task OnSubmitAsync()
     {
-        if (!_deleteOrgEditContext.Validate())
-        {
-        }
-        
-        if (!string.Equals(OrganizationName, FormModel.OrganizationName, StringComparison.Ordinal))
-        {
-            
-        }
+        Logger.LogInformation("Submitted value successfully");
+        return Task.CompletedTask;
     }
 }
