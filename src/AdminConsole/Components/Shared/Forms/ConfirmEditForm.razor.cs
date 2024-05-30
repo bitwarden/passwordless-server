@@ -22,4 +22,7 @@ public partial class ConfirmEditForm : ComponentBase
 
     [Parameter]
     public EventCallback<EditContext> OnSubmit { get; set; }
+    
+    [Parameter]
+    public EditContext? EditContext { get; set; }
 }
