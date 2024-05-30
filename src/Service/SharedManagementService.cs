@@ -44,18 +44,16 @@ public class SharedManagementService : ISharedManagementService
     private readonly ILogger _logger;
     private readonly IEventLogger _eventLogger;
     private readonly ISystemClock _systemClock;
-    private readonly ITenantStorage _tenantStorage;
     private readonly ITenantStorageFactory tenantFactory;
     private readonly IGlobalStorage _storage;
 
-    public SharedManagementService(ITenantStorage tenantStorage,
+    public SharedManagementService(
         ITenantStorageFactory tenantFactory,
         IGlobalStorage storage,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
         IEventLogger eventLogger)
     {
-        _tenantStorage = tenantStorage;
         this.tenantFactory = tenantFactory;
         _storage = storage;
         _systemClock = systemClock;

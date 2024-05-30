@@ -13,7 +13,6 @@ namespace Passwordless.Service.Tests.Implementations;
 
 public class SharedManagementServiceTests
 {
-    private readonly Mock<ITenantStorage> _tenantStorageMock = new();
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
     private readonly Mock<IGlobalStorage> _storageMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
@@ -27,7 +26,6 @@ public class SharedManagementServiceTests
     public SharedManagementServiceTests()
     {
         _sut = new SharedManagementService(
-            _tenantStorageMock.Object,
             _tenantStorageFactoryMock.Object,
             _storageMock.Object,
             _systemClockMock.Object,
