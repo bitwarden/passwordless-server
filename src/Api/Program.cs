@@ -68,7 +68,7 @@ services.ConfigureHttpJsonOptions(options =>
 });
 
 services.AddDatabase(builder.Configuration);
-services.AddTransient<ISharedManagementService, SharedManagementService>();
+services.AddScoped<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
 services.AddScoped<IReportingService, ReportingService>();
 services.AddScoped<IApplicationService, ApplicationService>();
