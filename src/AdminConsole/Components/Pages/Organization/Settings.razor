@@ -1,7 +1,16 @@
-@page "/org-settings"
+@page "/Organization/Settings"
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.Identity
+@using Passwordless.AdminConsole.Services.Mail
 
 @inject IDataService DataService
+@inject NavigationManager NavigationManager
+@inject ISharedBillingService BillingService
+@inject SignInManager<ConsoleAdmin> SignInManager
+@inject IMailService MailService
+@inject TimeProvider TimeProvider
+@inject IHttpContextAccessor HttpContextAccessor
 @inject ILogger<Settings> Logger
 
 <Page Title="Organization Settings">
@@ -39,7 +48,7 @@
 @code {
     private string OrganizationName { get; set; } = string.Empty;
     private int ApplicationCount { get; set; }
-    private bool CanDelete => true;
+    private bool CanDelete => ApplicationCount == 0;
 
     private const string DeleteOrgFormName = "delete-org-form";
     
@@ -77,9 +86,33 @@
         }
     }
 
-    private Task OnSubmitAsync()
+    private async Task OnSubmitAsync()
     {
-        Logger.LogInformation("Submitted value successfully");
-        return Task.CompletedTask;
+        var username = HttpContextAccessor.HttpContext!.User.Identity?.Name ?? throw new InvalidOperationException();
+
+        var organization = await DataService.GetOrganizationWithDataAsync();
+        var emails = organization.Admins.Select(x => x.Email).Where(x => x is not null)!.ToList<string>();
+        await MailService.SendOrganizationDeletedAsync(organization.Name, emails, username, TimeProvider.GetUtcNow().UtcDateTime);
+
+        if (organization.HasSubscription)
+        {
+            var isSubscriptionDeleted = await BillingService.CancelSubscriptionAsync(organization.BillingSubscriptionId!);
+            if (!isSubscriptionDeleted)
+            {
+                Logger.LogError(
+                    "Organization {orgId} tried to cancel subscription {subscriptionId}, but failed.",
+                    organization.Name,
+                    organization.BillingSubscriptionId);
+                throw new Exception("Failed to cancel subscription.");
+            }
+        }
+
+        var isDeleted = await DataService.DeleteOrganizationAsync();
+        if (isDeleted)
+        {
+            await SignInManager.SignOutAsync();
+        }
+
+        NavigationManager.Refresh();
     }
 }
