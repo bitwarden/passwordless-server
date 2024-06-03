@@ -1,0 +1,54 @@
+@page
+@using Microsoft.Extensions.Options
+@using Passwordless.AspNetCore
+@model StepUp
+
+@inject IOptions<PasswordlessAspNetCoreOptions> PasswordlessOptions;
+
+@{
+    ViewData["Title"] = "Step Up";
+}
+
+@section Scripts
+{
+    <script type="module">
+        import { Client } from '@Url.Content("~/js/client.js")';
+        async function stepup() {
+            const p = new Client(
+                {
+                    apiKey: "@PasswordlessOptions.Value.ApiKey",
+                    apiUrl: "@PasswordlessOptions.Value.ApiUrl"
+                });
+
+            // sign in begin
+            await p.stepup({ userId: '@Model.Admin.Id', purpose: '@Model.RequestedPurpose'}, async (token) => {
+                const stepUpResponse = await fetch('/stepup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stepUpToken: token,
+                        returnUrl: '@Model.ReturnUrl',
+                        purpose: '@Model.RequestedPurpose'
+                    })
+                });
+
+                if (stepUpResponse.ok) {
+                    location.href = stepUpResponse.url;
+                }
+            });
+        }
+        window.stepup = stepup;
+    </script>
+}
+
+<div class="block">
+    <p>Please re-authenticate to perform action.</p>
+
+    <input type="hidden" asp-for="StepUpVerifyToken"/>
+
+    <button type="button" class="btn-primary" onclick="stepup()">Proceed</button>
+
+    <p>This page requires an elevated authorization using the "@Model.RequestedPurpose" context from step-up.</p>
+</div>

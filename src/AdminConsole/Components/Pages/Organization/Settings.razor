@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Passwordless.AdminConsole.Identity
 @using Passwordless.AdminConsole.Services.Mail
+@attribute [Authorize(Policy = CustomPolicy.StepUp)]
 
 @inject IDataService DataService
 @inject NavigationManager NavigationManager
@@ -88,7 +89,9 @@
 
     private async Task OnSubmitAsync()
     {
-        var username = HttpContextAccessor.HttpContext!.User.Identity?.Name ?? throw new InvalidOperationException();
+        var user = HttpContextAccessor.HttpContext!.User;
+        
+        var username = user.Identity?.Name ?? throw new InvalidOperationException();
 
         var organization = await DataService.GetOrganizationWithDataAsync();
         var emails = organization.Admins.Select(x => x.Email).Where(x => x is not null)!.ToList<string>();

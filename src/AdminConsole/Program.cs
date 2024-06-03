@@ -95,6 +95,7 @@ async Task RunAppAsync()
     });
 
     services.AddTransient<IAuthorizationHandler, HasAppHandler>();
+    services.AddTransient<IAuthorizationHandler, StepUpHandler>();
     services.AddAuthorization(c =>
     {
         c.AddPolicy(CustomPolicy.HasAppRole, b =>
@@ -102,7 +103,15 @@ async Task RunAppAsync()
             b.RequireAuthenticatedUser();
             b.AddRequirements(new HasAppRoleRequirement());
         });
+        
+        c.AddPolicy(CustomPolicy.StepUp, b =>
+        {
+            b.RequireAuthenticatedUser();
+            b.AddRequirements(new StepUpRequirement(CustomClaimTypes.StepUp));
+        });
     });
+
+    services.AddSingleton<StepUpPurpose>();
 
     services.AddHostedService<OnboardingCleanupBackgroundService>();
     services.AddHostedService<ApplicationCleanupBackgroundService>();

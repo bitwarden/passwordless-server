@@ -1,4 +1,10 @@
+using System.Globalization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Identity;
 
 namespace Passwordless.AdminConsole.Endpoints;
@@ -15,6 +21,44 @@ public static class AccountEndpoints
             await signInManager.SignOutAsync();
             return TypedResults.LocalRedirect($"~/");
         }).RequireAuthorization();
+
+        group.MapPost("/StepUp",
+            async (
+                IOptions<PasswordlessOptions> options,
+                HttpContext context,
+                StepUpPurpose purpose,
+                [FromBody] StepUpRequest request) =>
+            {
+                var http = new HttpClient
+                {
+                    BaseAddress = new Uri(options.Value.ApiUrl),
+                    DefaultRequestHeaders = { { "ApiSecret", options.Value.ApiSecret } }
+                };
+
+                using var response = await http.PostAsJsonAsync("/signin/verify", new
+                {
+                    Token = request.StepUpToken,
+                    Purpose = request.Purpose
+                });
+
+                var identity = (ClaimsIdentity)context.User.Identity!;
+                var existingStepUpClaim = identity.FindFirst(request.Purpose);
+
+                if (existingStepUpClaim != null)
+                {
+                    identity.RemoveClaim(existingStepUpClaim);
+                }
+                identity.AddClaim(new Claim(request.Purpose, DateTime.UtcNow.Add(TimeSpan.FromMinutes(5)).ToString(CultureInfo.CurrentCulture)));
+
+                purpose.Purpose = string.Empty;
+
+                await context.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
+
+                return Results.Redirect(request.ReturnUrl);
+            }).RequireAuthorization();
+        
         return endpoints;
     }
+    
+    record StepUpRequest(string StepUpToken, string ReturnUrl, string Purpose);
 }
