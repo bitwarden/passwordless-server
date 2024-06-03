@@ -18,10 +18,8 @@
     }
 </style>
 
-<div class="sm:w-full sm:max-w-xl">
+<div class="sm:w-full sm:flex items-center space-x-4">
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        <p>Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.</p>
-        <br/>
         <form class="space-y-6" action="" method="POST">
             <div>
                 <label for="orgName" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
@@ -105,25 +103,78 @@
                     <label asp-for="Form.AcceptsTermsAndPrivacy" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
                 </div>
             </div>
-            
+
             <label class="passkey-info" asp-for="Form.OrgPurpose">
                 What is the purpose of your organization?
                 <input class="passkey-info" autocomplete="off" type="text" asp-for="Form.OrgPurpose" tabindex="-1"/>
             </label>
-            
+
             <label class="passkey-info" asp-for="Form.UsePasskeys">
                 Would you like to use passkeys?
                 <input class="passkey-info" autocomplete="off" type="checkbox" asp-for="Form.UsePasskeys" tabindex="-1" />
             </label>
-            
+
             <span asp-validation-for="Form.AcceptsTermsAndPrivacy"></span>
 
             <div asp-validation-summary="ModelOnly"></div>
 
-            <p>After creating your account, we will send an email with a magic link that will sign you in.</p>
             <div>
                 <button type="submit" class="btn-form">Create</button>
             </div>
+
+            <p class="text-sm">After creating your account, we will send an email with a magic link to sign you in.</p>
         </form>
+    </div>
+
+    <div class="p-8">
+        <img class="max-w-64" src="/img/bumper.png" alt="Passwordless" />
+
+        <div class="mt-8 text-2xl font-medium">Try out Passwordless.dev with a free account</div>
+
+        <div class="mt-2 text-lg font-light">
+            Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+        </div>
+
+        <div class="flex mt-6">
+            <div>
+                <div class="font-medium">Standards-based, and phishing-resistant</div>
+                <p>Use open source and modern browser standards to create FIDO2 WebAuthn applications such as Face ID, fingerprint, and Windows Hello for your customers, end users, and teams.</p>
+            </div>
+            <div class="self-center">
+                <img class="w-24" src="/img/tag1.svg" />
+            </div>
+        </div>
+
+        <div class="flex mt-4">
+            <div>
+                <div class="font-medium">Add passkeys to existing authentication platforms</div>
+                <p>Bitwarden Passwordless.dev works well with common authentication solutions, allowing you to adopt passkey features without the need to recode or replace.</p>
+            </div>
+            <div class="self-center">
+                <img class="w-24" src="/img/tag2.svg" />
+            </div>
+        </div>
+
+        <div class="flex mt-4">
+            <div>
+                <div class="font-medium">Centralized passkey management</div>
+                <p>Bitwarden Passwordless.dev offers a dedicated admin console to help you easily manage your passkeys, applications, users, and more, all in one place.</p>
+            </div>
+            <div class="self-center">
+                <img class="w-24" src="/img/tag3.svg" />
+            </div>
+        </div>
+
+        <div class="flex mt-4">
+            <div>
+                <div class="font-medium">Security that’s tested and validated</div>
+                <p>Thorough, third party assessments of the Bitwarden Passwordless.dev open source code, documentation, and processes help ensure your data is always secure.</p>
+            </div>
+            <div class="self-center">
+                <img class="w-24" src="/img/tag4.svg" />
+            </div>
+        </div>
+
+        <div class="mt-6 font-sm">Many of Passwordless.dev's features are available for free. Check out <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">our pricing page</a> for more information about our paid offerings.</div>
     </div>
 </div>
