@@ -103,7 +103,7 @@ async Task RunAppAsync()
             b.RequireAuthenticatedUser();
             b.AddRequirements(new HasAppRoleRequirement());
         });
-        
+
         c.AddPolicy(CustomPolicy.StepUp, b =>
         {
             b.RequireAuthenticatedUser();

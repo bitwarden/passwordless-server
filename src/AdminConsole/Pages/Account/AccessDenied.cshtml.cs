@@ -26,11 +26,11 @@ public class AccessDenied : PageModel
         {
             return RedirectToPage("/Account/StepUp", new { returnUrl = url, purpose = _stepUpPurpose.Purpose });
         }
-        
+
         var user = await _signInManager.UserManager.GetUserAsync(User);
-        
+
         await _signInManager.RefreshSignInAsync(user!);
-        
+
         if (Url.IsLocalUrl(url))
         {
             ReturnUrl = url;

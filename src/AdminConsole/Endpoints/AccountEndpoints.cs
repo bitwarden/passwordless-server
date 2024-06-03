@@ -56,9 +56,9 @@ public static class AccountEndpoints
 
                 return Results.Redirect(request.ReturnUrl);
             }).RequireAuthorization();
-        
+
         return endpoints;
     }
-    
+
     record StepUpRequest(string StepUpToken, string ReturnUrl, string Purpose);
 }

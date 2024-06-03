@@ -39,6 +39,6 @@ public class StepUpHandler(StepUpPurpose purpose, TimeProvider timeProvider) : A
 
     private bool IsNotExpired(DateTime expiration) => expiration > timeProvider.GetUtcNow().UtcDateTime;
 
-    private static DateTime GetExpiration(Claim claim) => 
+    private static DateTime GetExpiration(Claim claim) =>
         DateTime.Parse(claim.Value, null, DateTimeStyles.RoundtripKind);
 }
