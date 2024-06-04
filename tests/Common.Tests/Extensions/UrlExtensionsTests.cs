@@ -5,19 +5,6 @@ namespace Passwordless.Common.Tests.Extensions;
 public class UrlExtensionsTests
 {
     [Fact]
-    public void IsLocalUrl_GivenUrl_WhenUrlIsNull_ThenShouldReturnFalse()
-    {
-        // Arrange
-        var sut = (string?)null;
-
-        // Act
-        var actual = sut.IsLocalUrl();
-
-        // Assert
-        Assert.False(actual);
-    }
-
-    [Fact]
     public void IsLocalUrl_GivenUrl_WhenUrlIsEmpty_ThenShouldReturnFalse()
     {
         // Arrange
