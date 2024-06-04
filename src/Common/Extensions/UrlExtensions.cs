@@ -2,13 +2,12 @@ namespace Passwordless.Common.Extensions;
 
 public static class UrlExtensions
 {
-    public static bool IsLocalUrl(this string? url)
+    public static bool IsLocalUrl(this string url)
     {
-        if (string.IsNullOrEmpty(url))
+        if (url.Length == 0)
         {
             return false;
         }
-
         // Allows "/" or "/foo" but not "//" or "/\".
         if (url[0] == '/')
         {

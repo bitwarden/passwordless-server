@@ -13,17 +13,29 @@
 </Page>
 
 @code {
+    private string? _returnUrl;
+    
     [SupplyParameterFromQuery(Name = "ReturnUrl")]
-    public string? ReturnUrl { get; set; }
+    public string? ReturnUrl
+    {
+        get => _returnUrl;
+        set
+        {
+            if (value != null && !value.IsLocalUrl())
+            {
+                _returnUrl = null;
+            }
+            else
+            {
+                _returnUrl = value;
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         var claimsPrincipal = HttpContextAccessor.HttpContext!.User;
         var user = await SignInManager.UserManager.GetUserAsync(claimsPrincipal);
         await SignInManager.RefreshSignInAsync(user);
-        if (!ReturnUrl.IsLocalUrl())
-        {
-            ReturnUrl = null;
-        }
     }
 }
