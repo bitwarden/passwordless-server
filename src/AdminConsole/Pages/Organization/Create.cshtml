@@ -18,7 +18,57 @@
     }
 </style>
 
-<div class="sm:w-full sm:flex items-start space-x-4">
+<div class="sm:w-full md:flex items-start space-x-4">
+    <div class="p-8">
+        <div class="text-2xl font-medium">Try out Passwordless.dev with a free account</div>
+
+        <div class="mt-2 text-lg font-light">
+            Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+        </div>
+
+        <div class="flex mt-6 space-x-6">
+            <div class="self-center grow">
+                <img class="w-24" src="/img/tag1.svg" />
+            </div>
+            <div class="basis-full">
+                <div class="font-medium">Standards-based, and phishing-resistant</div>
+                <p>Use open source and modern browser standards to create FIDO2 WebAuthn applications such as Face ID, fingerprint, and Windows Hello for your customers, end users, and teams.</p>
+            </div>
+        </div>
+
+        <div class="flex mt-4 space-x-6">
+            <div class="self-center grow">
+                <img class="w-24" src="/img/tag2.svg" />
+            </div>
+            <div class="basis-full">
+                <div class="font-medium">Add passkeys to existing authentication platforms</div>
+                <p>Bitwarden Passwordless.dev works well with common authentication solutions, allowing you to adopt passkey features without the need to recode or replace.</p>
+            </div>
+        </div>
+
+        <div class="flex mt-4 space-x-6">
+            <div class="self-center grow">
+                <img class="w-24" src="/img/tag3.svg" />
+            </div>
+            <div class="basis-full">
+                <div class="font-medium">Centralized passkey management</div>
+                <p>Bitwarden Passwordless.dev offers a dedicated admin console to help you easily manage your passkeys, applications, users, and more, all in one place.</p>
+            </div>
+        </div>
+
+        <div class="flex mt-4 space-x-6">
+            <div class="self-center grow">
+                <img class="w-24" src="/img/tag4.svg" />
+            </div>
+            <div class="basis-full">
+                <div class="font-medium">Security that’s tested and validated</div>
+                <p>Thorough, third party assessments of the Bitwarden Passwordless.dev open source code, documentation, and processes help ensure your data is always secure.</p>
+            </div>
+        </div>
+
+        <div class="mt-6 font-sm">Many of Passwordless.dev's features are available for free. Check out <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">the pricing page</a> for more information about our paid offerings.</div>
+    </div>
+
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
         <form class="space-y-6" action="" method="POST">
             <div>
@@ -110,7 +160,7 @@
 
             <label class="passkey-info" asp-for="Form.UsePasskeys">
                 Would you like to use passkeys?
-                <input class="passkey-info" autocomplete="off" type="checkbox" asp-for="Form.UsePasskeys" tabindex="-1" />
+                <input class="passkey-info" autocomplete="off" type="checkbox" asp-for="Form.UsePasskeys" tabindex="-1"/>
             </label>
 
             <span asp-validation-for="Form.AcceptsTermsAndPrivacy"></span>
@@ -123,55 +173,5 @@
 
             <p class="text-sm">After creating your account, we will send an email with a magic link to sign you in.</p>
         </form>
-    </div>
-
-    <div class="p-8">
-        <div class="text-2xl font-medium">Try out Passwordless.dev with a free account</div>
-
-        <div class="mt-2 text-lg font-light">
-            Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
-        </div>
-
-        <div class="flex mt-6 space-x-6">
-            <div class="self-center grow">
-                <img class="w-24" src="/img/tag1.svg" />
-            </div>
-            <div class="basis-full">
-                <div class="font-medium">Standards-based, and phishing-resistant</div>
-                <p>Use open source and modern browser standards to create FIDO2 WebAuthn applications such as Face ID, fingerprint, and Windows Hello for your customers, end users, and teams.</p>
-            </div>
-        </div>
-
-        <div class="flex mt-4 space-x-6">
-            <div class="self-center grow">
-                <img class="w-24" src="/img/tag2.svg" />
-            </div>
-            <div class="basis-full">
-                <div class="font-medium">Add passkeys to existing authentication platforms</div>
-                <p>Bitwarden Passwordless.dev works well with common authentication solutions, allowing you to adopt passkey features without the need to recode or replace.</p>
-            </div>
-        </div>
-
-        <div class="flex mt-4 space-x-6">
-            <div class="self-center grow">
-                <img class="w-24" src="/img/tag3.svg" />
-            </div>
-            <div class="basis-full">
-                <div class="font-medium">Centralized passkey management</div>
-                <p>Bitwarden Passwordless.dev offers a dedicated admin console to help you easily manage your passkeys, applications, users, and more, all in one place.</p>
-            </div>
-        </div>
-
-        <div class="flex mt-4 space-x-6">
-            <div class="self-center grow">
-                <img class="w-24" src="/img/tag4.svg" />
-            </div>
-            <div class="basis-full">
-                <div class="font-medium">Security that’s tested and validated</div>
-                <p>Thorough, third party assessments of the Bitwarden Passwordless.dev open source code, documentation, and processes help ensure your data is always secure.</p>
-            </div>
-        </div>
-
-        <div class="mt-6 font-sm">Many of Passwordless.dev's features are available for free. Check out <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">the pricing page</a> for more information about our paid offerings.</div>
     </div>
 </div>
