@@ -1,10 +1,10 @@
 <Panel>
-    <EditForm FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmit">
+    <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmit">
         <h3>Scopes</h3>
         @foreach (var scope in Scopes)
         {
             <div>
-                <input type="checkbox" id="@scope" name="SelectedScopes" value="@scope">
+                <input type="checkbox" id="@scope" name="FormModel.SelectedScopes" value="@scope">
                 <label for="@scope">@scope</label>
             </div>
         }
@@ -27,7 +27,7 @@
     public required EventCallback<List<string>> OnCreateClicked { get; set; }
     
     [SupplyParameterFromForm(FormName = FormName)]
-    public CreateApiKeyFormModel FormModel { get; set; }
+    public CreateApiKeyFormModel? FormModel { get; set; }
 
     public EditContext? FormContext { get; set; }
     
