@@ -12,6 +12,7 @@ public class StepUp(SignInManager<ConsoleAdmin> signInManager, IHttpContextAcces
     {
         Admin = (await signInManager.UserManager.GetUserAsync(User))!;
         RequestedPurpose = purpose;
+        ReturnUrl = returnUrl;
         CspNonce = accessor.HttpContext!.Items["csp-nonce"]!.ToString()!;
 
         if (string.IsNullOrWhiteSpace(Request.Query["returnUrl"].ToString()))

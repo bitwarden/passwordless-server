@@ -21,8 +21,8 @@
                 });
 
             // sign in begin
-            await p.stepup({ userId: '@Model.Admin.Id', purpose: '@Model.RequestedPurpose'}, async (token) => {
-                const stepUpResponse = await fetch('/stepup', {
+            await p.stepup({ signinMethod: { userId: '@Model.Admin.Id' }, purpose: '@Model.RequestedPurpose'}, async (token) => {
+                const stepUpResponse = await fetch('/account/stepup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -39,16 +39,18 @@
                 }
             });
         }
-        window.stepup = stepup;
+        document.getElementById("magic").addEventListener('click', () => {
+            stepup();
+        });
     </script>
 }
 
 <div class="block">
-    <p>Please re-authenticate to perform action.</p>
+    <p>In order to access the organization settings, please re-authenticate.</p>
 
     <input type="hidden" asp-for="StepUpVerifyToken"/>
 
-    <button type="button" class="btn-primary" onclick="stepup()">Proceed</button>
+    <button id="magic" type="button" class="btn-primary">Proceed</button>
 
     <p>This page requires an elevated authorization using the "@Model.RequestedPurpose" context from step-up.</p>
 </div>
