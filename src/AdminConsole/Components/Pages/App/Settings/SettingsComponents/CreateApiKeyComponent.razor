@@ -1,0 +1,57 @@
+<Panel>
+    <EditForm FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmit">
+        <h3>Scopes</h3>
+        @foreach (var scope in Scopes)
+        {
+            <div>
+                <input type="checkbox" id="@scope" name="SelectedScopes" value="@scope">
+                <label for="@scope">@scope</label>
+            </div>
+        }
+        <div id="create-api-key-actions">
+            <button id="create-api-key-btn" class="btn-primary" type="submit">Create</button>
+        </div>
+        <ValidationSummary />
+        <CustomValidationErrors EditContext="FormContext" />
+
+    </EditForm>
+</Panel>
+
+@code {
+    private const string FormName = "create-api-key-form";
+    
+    [Parameter]
+    public required IReadOnlyCollection<string> Scopes { get; set; }
+    
+    [Parameter]
+    public required EventCallback<List<string>> OnCreateClicked { get; set; }
+    
+    [SupplyParameterFromForm(FormName = FormName)]
+    public CreateApiKeyFormModel FormModel { get; set; }
+
+    public EditContext? FormContext { get; set; }
+    
+    public ValidationMessageStore? FormValidationMessageStore { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        FormModel ??= new();
+        FormContext = new EditContext(FormModel);
+        FormValidationMessageStore = new ValidationMessageStore(FormContext);
+    }
+    
+    private void OnValidSubmit()
+    {
+        if (!FormModel.SelectedScopes.Any())
+        {
+            FormValidationMessageStore!.Add(() => FormModel.SelectedScopes, "Please select at least one scope.");
+            return;
+        }
+        OnCreateClicked.InvokeAsync(FormModel.SelectedScopes);
+    }
+    
+    public class CreateApiKeyFormModel
+    {
+        public List<string> SelectedScopes { get; set; } = new();
+    }
+}
