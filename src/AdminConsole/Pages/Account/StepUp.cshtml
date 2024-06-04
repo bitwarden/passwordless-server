@@ -21,18 +21,20 @@
                 });
 
             // sign in begin
-            await p.stepup({ signinMethod: { userId: '@Model.Admin.Id' }, purpose: '@Model.RequestedPurpose'}, async (token) => {
-                const stepUpResponse = await fetch('/account/stepup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        stepUpToken: token,
-                        returnUrl: '@Model.ReturnUrl',
-                        purpose: '@Model.RequestedPurpose'
-                    })
-                });
+            await p.stepup({ signinMethod: { userId: '@Model.Admin.Id' }})
+                .catch(error => console.error(error))
+                .then(async data => {
+                    const stepUpResponse = await fetch('/account/stepup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            stepUpToken: data.token,
+                            returnUrl: '@Model.ReturnUrl',
+                            purpose: '@Model.RequestedPurpose'
+                        })
+                    });
 
                 if (stepUpResponse.ok) {
                     location.href = stepUpResponse.url;
