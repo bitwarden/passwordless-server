@@ -53,9 +53,6 @@
             Logger.LogError("Failed to create public key for application: {appId}", AppId);
         }
 
-        await InvokeAsync(() =>
-        {
-            NavigationManager.NavigateTo($"app/{AppId}/settings");
-        });
+        await InvokeAsync(() => NavigationManager.NavigateTo($"app/{AppId}/settings"));
     }
 }
