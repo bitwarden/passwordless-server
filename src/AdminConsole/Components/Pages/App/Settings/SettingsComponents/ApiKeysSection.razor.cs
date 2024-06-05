@@ -84,7 +84,7 @@ public partial class ApiKeysSection : ComponentBase
 
     private void OnCreateFormSubmitted()
     {
-        switch (CreateForm!.Type)
+        switch (CreateForm.Type)
         {
             case "public":
                 NavigationManager.NavigateTo($"app/{AppId}/settings/create-public-key");

@@ -1,0 +1,59 @@
+@typeparam TScope where TScope : struct, IConvertible
+
+<Panel>
+    <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmitAsync">
+        <h3>Scopes</h3>
+        @foreach (var scope in Scopes)
+        {
+            <div>
+                <input type="checkbox" id="@scope" name="FormModel.SelectedScopes" value="@scope">
+                <label for="@scope">@scope</label>
+            </div>
+        }
+        <div id="create-api-key-actions">
+            <button id="create-api-key-btn" class="btn-primary" type="submit">Create</button>
+        </div>
+        <ValidationSummary />
+        <CustomValidationErrors EditContext="FormContext" />
+
+    </EditForm>
+</Panel>
+
+@code {
+    private const string FormName = "create-api-key-form";
+    
+    [Parameter]
+    public required IReadOnlyCollection<TScope> Scopes { get; set; }
+    
+    [Parameter]
+    public required EventCallback<HashSet<TScope>> OnCreateClicked { get; set; }
+    
+    [SupplyParameterFromForm(FormName = FormName)]
+    public CreateApiKeyFormModel? FormModel { get; set; }
+
+    public EditContext? FormContext { get; set; }
+    
+    public ValidationMessageStore? FormValidationMessageStore { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        FormModel ??= new();
+        FormContext = new EditContext(FormModel);
+        FormValidationMessageStore = new ValidationMessageStore(FormContext);
+    }
+    
+    private async Task OnValidSubmitAsync()
+    {
+        if (!FormModel!.SelectedScopes.Any())
+        {
+            FormValidationMessageStore!.Add(() => FormModel.SelectedScopes, "Please select at least one scope.");
+            return;
+        }
+        await OnCreateClicked.InvokeAsync(FormModel.SelectedScopes.ToHashSet());
+    }
+    
+    public class CreateApiKeyFormModel
+    {
+        public List<TScope> SelectedScopes { get; set; } = new();
+    }
+}
