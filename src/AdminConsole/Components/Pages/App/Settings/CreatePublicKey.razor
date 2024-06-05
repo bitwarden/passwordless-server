@@ -52,12 +52,15 @@
                 HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentException("The organization ID is missing."),
                 DateTime.UtcNow);
             EventLogger.LogEvent(eventDto);
-
-            NavigationManager.NavigateTo($"/app/{AppId}/settings");
         }
         catch (Exception)
         {
             Logger.LogError("Failed to create public key for application: {appId}", AppId);
         }
+
+        await InvokeAsync(() =>
+        {
+            NavigationManager.NavigateTo($"app/{AppId}/settings");
+        });
     }
 }

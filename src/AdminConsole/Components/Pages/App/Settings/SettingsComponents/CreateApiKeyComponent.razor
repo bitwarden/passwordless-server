@@ -1,5 +1,5 @@
 <Panel>
-    <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmit">
+    <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmitAsync">
         <h3>Scopes</h3>
         @foreach (var scope in Scopes)
         {
@@ -40,14 +40,14 @@
         FormValidationMessageStore = new ValidationMessageStore(FormContext);
     }
     
-    private void OnValidSubmit()
+    private async Task OnValidSubmitAsync()
     {
         if (!FormModel.SelectedScopes.Any())
         {
             FormValidationMessageStore!.Add(() => FormModel.SelectedScopes, "Please select at least one scope.");
             return;
         }
-        OnCreateClicked.InvokeAsync(FormModel.SelectedScopes);
+        await OnCreateClicked.InvokeAsync(FormModel.SelectedScopes);
     }
     
     public class CreateApiKeyFormModel
