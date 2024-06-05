@@ -1,3 +1,5 @@
+@typeparam TScope where TScope : struct, IConvertible
+
 <Panel>
     <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmitAsync">
         <h3>Scopes</h3>
@@ -21,10 +23,10 @@
     private const string FormName = "create-api-key-form";
     
     [Parameter]
-    public required IReadOnlyCollection<string> Scopes { get; set; }
+    public required IReadOnlyCollection<TScope> Scopes { get; set; }
     
     [Parameter]
-    public required EventCallback<List<string>> OnCreateClicked { get; set; }
+    public required EventCallback<HashSet<TScope>> OnCreateClicked { get; set; }
     
     [SupplyParameterFromForm(FormName = FormName)]
     public CreateApiKeyFormModel? FormModel { get; set; }
@@ -42,16 +44,16 @@
     
     private async Task OnValidSubmitAsync()
     {
-        if (!FormModel.SelectedScopes.Any())
+        if (!FormModel!.SelectedScopes.Any())
         {
             FormValidationMessageStore!.Add(() => FormModel.SelectedScopes, "Please select at least one scope.");
             return;
         }
-        await OnCreateClicked.InvokeAsync(FormModel.SelectedScopes);
+        await OnCreateClicked.InvokeAsync(FormModel.SelectedScopes.ToHashSet());
     }
     
     public class CreateApiKeyFormModel
     {
-        public List<string> SelectedScopes { get; set; } = new();
+        public List<TScope> SelectedScopes { get; set; } = new();
     }
 }

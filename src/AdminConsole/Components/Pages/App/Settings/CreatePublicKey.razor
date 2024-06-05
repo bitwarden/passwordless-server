@@ -7,7 +7,6 @@
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Constants
 @using Passwordless.Common.EventLog.Enums
-@using Passwordless.Common.Extensions
 @using Passwordless.Common.Models.Apps
 
 @inherits BaseApplicationPage
@@ -19,29 +18,25 @@
 @inject ILogger<CreatePublicKey> Logger
 
 <Page Title="Create Public Key">
-    <CreateApiKeyComponent Scopes="@Scopes" OnCreateClicked="@OnCreatedAsync" />
+    <CreateApiKeyComponent Scopes="@Scopes" OnCreateClicked="@OnCreatedAsync" TScope="PublicKeyScopes" />
 </Page>
 
 @code {
-    public IReadOnlyCollection<string>? Scopes { get; private set; }
+    public IReadOnlyCollection<PublicKeyScopes>? Scopes { get; private set; }
     
     public int OrganizationId { get; private set; }
 
     protected override void OnInitialized()
     {
-        Scopes = Enum.GetValues(typeof(PublicKeyScopes)).Cast<PublicKeyScopes>().Select(x => x.GetValue()).ToArray();
+        Scopes = Enum.GetValues(typeof(PublicKeyScopes)).Cast<PublicKeyScopes>().ToArray();
         OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentNullException(nameof(OrganizationId));
     }
 
-    public async Task OnCreatedAsync(List<string> selectedScopes)
+    public async Task OnCreatedAsync(HashSet<PublicKeyScopes> selectedScopes)
     {
-        var selectedScopeValues = selectedScopes
-            .Select(x => x.AsPublicKeyScope())
-            .ToHashSet();
-
         try
         {
-            var request = new CreatePublicKeyRequest(selectedScopeValues);
+            var request = new CreatePublicKeyRequest(selectedScopes);
             await ManagementClient.CreateApiKeyAsync(AppId, request);
 
             var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
