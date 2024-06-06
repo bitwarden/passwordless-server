@@ -42,7 +42,7 @@ public static class EndpointConventionBuilderExtensions
 
         if (scope.HasValue)
         {
-            requirements.Add(new ClaimsAuthorizationRequirement(CustomClaimTypes.Scopes, new[] { scope.Value.GetValue() }));
+            requirements.Add(new ClaimsAuthorizationRequirement(CustomClaimTypes.Scopes, new[] { scope.Value.GetDescription() }));
         }
 
         var schemes = new List<string> { Constants.PublicKeyAuthenticationScheme };
@@ -67,7 +67,7 @@ public static class EndpointConventionBuilderExtensions
 
         if (scope.HasValue)
         {
-            requirements.Add(new ClaimsAuthorizationRequirement(CustomClaimTypes.Scopes, new[] { scope.Value.GetValue() }));
+            requirements.Add(new ClaimsAuthorizationRequirement(CustomClaimTypes.Scopes, new[] { scope.Value.GetDescription() }));
         }
 
         var schemes = new List<string> { Constants.SecretKeyAuthenticationScheme };
