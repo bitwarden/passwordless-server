@@ -399,8 +399,8 @@ public class SharedManagementServiceTests
         Assert.False(actualPublicKey.IsLocked);
         Assert.Equal(new DateTime(2023, 10, 1), actualPublicKey.LastLockedAt);
         Assert.Equal(2, actualPublicKey.Scopes.Count);
-        Assert.Contains(PublicKeyScopes.Register.GetValue(), actualPublicKey.Scopes);
-        Assert.Contains(PublicKeyScopes.Login.GetValue(), actualPublicKey.Scopes);
+        Assert.Contains(PublicKeyScopes.Register.GetDescription(), actualPublicKey.Scopes);
+        Assert.Contains(PublicKeyScopes.Login.GetDescription(), actualPublicKey.Scopes);
 
         var actualSecretKey = actual.Last();
         Assert.Equal("6d02", actualSecretKey.Id);
@@ -409,8 +409,8 @@ public class SharedManagementServiceTests
         Assert.True(actualSecretKey.IsLocked);
         Assert.Equal(new DateTime(2023, 11, 1), actualSecretKey.LastLockedAt);
         Assert.Equal(2, actualSecretKey.Scopes.Count);
-        Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
-        Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);
+        Assert.Contains(SecretKeyScopes.TokenRegister.GetDescription(), actualSecretKey.Scopes);
+        Assert.Contains(SecretKeyScopes.TokenVerify.GetDescription(), actualSecretKey.Scopes);
     }
     #endregion
 }

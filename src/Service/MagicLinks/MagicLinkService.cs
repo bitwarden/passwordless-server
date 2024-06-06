@@ -97,7 +97,7 @@ public class MagicLinkService(
                                     font-size: 16px;
                                     text-align: center;
                                     ">
-                        <h3 style="margin-bottom: 40px;">Your Login Link</h3>
+                        <h3 style="margin-bottom: 40px;">Let's get you logged in</h3>
                         <h4 style="font-weight: normal;">Please click the button below to sign into {link.Host}</h4>
                         <a href="{link}" style="width: auto; margin: auto; padding: 10px 25px; background-color: #1252A3; border-radius: 999px; color: white; text-decoration: none;">Click here to sign in</a>
                         <div style="max-width: 600px; margin: auto; margin-top: 70px;">
