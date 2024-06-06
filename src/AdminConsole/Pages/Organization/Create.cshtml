@@ -18,7 +18,7 @@
     }
 </style>
 
-<div class="sm:w-full lg:flex items-start space-x-4">
+<div class="sm:w-full lg:flex items-start space-x-8">
     @* Mobile promo *@
     <div class="lg:hidden mb-2 p-4">
         <h2 class="text-2xl font-medium">Try out Passwordless.dev with a free account</h2>
@@ -80,7 +80,7 @@
     </div>
 
     @* Sign up form *@
-    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-8">
+    <div class="bg-white py-8 px-4 sm:px-8 shadow sm:rounded-lg">
         <form class="space-y-6" action="" method="POST">
             <div>
                 <label for="orgName" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
@@ -89,7 +89,6 @@
                     <span asp-validation-for="Form.OrgName"></span>
                 </div>
             </div>
-
 
             <div>
                 <label asp-for="Form.AdminName" class="block text-sm font-medium leading-6 text-gray-900">Admin name</label>
