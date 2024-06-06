@@ -18,12 +18,21 @@
     }
 </style>
 
-<div class="sm:w-full sm:flex items-start space-x-4">
+<div class="sm:w-full lg:flex items-start space-x-4">
+    @* Mobile promo *@
+    <div class="lg:hidden mb-2 p-4">
+        <h2 class="text-2xl font-medium">Try out Passwordless.dev with a free account</h2>
 
-    <div class="px-8 py-7 max-w-2xl">
-        <h2 class="text-2xl sm:text-3xl font-medium">Try out Passwordless.dev with a free account</h2>
+        <p class="mt-2 font-light">
+            Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+        </p>
+    </div>
 
-        <p class="mt-2 sm:mb-8 text-sm sm:text-lg font-light">
+    @* Desktop promo *@
+    <div class="hidden lg:block p-8 max-w-2xl">
+        <h2 class="text-3xl font-medium">Try out Passwordless.dev with a free account</h2>
+
+        <p class="mt-2 mb-8 text-lg font-light">
             Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
         </p>
         <div class="hidden sm:block">
@@ -33,7 +42,7 @@
                 </div>
                 <div class="basis-full mt-1">
                     <p class="font-medium">Standards-based & phishing-resistant</p>
-                    <p>Use open source and modern browser standards to create FIDO2 WebAuthn applications.</p>
+                    <p>Create FIDO2 WebAuthn applications powered by modern web standards</p>
                 </div>
             </div>
 
@@ -43,7 +52,7 @@
                 </div>
                 <div class="basis-full mt-1">
                     <p class="font-medium">Add passkeys to existing authentication</p>
-                    <p>Easily adopt passkey features, such as biometric sign in, without the need to recode or replace.</p>
+                    <p>Adopt mobile & desktop biometric auth without the need to change existing code</p>
                 </div>
             </div>
 
@@ -53,7 +62,7 @@
                 </div>
                 <div class="basis-full mt-1">
                     <p class="font-medium">Centralized passkey management</p>
-                    <p>Privides an admin console to help you easily manage your passkeys, applications, users, and more.</p>
+                    <p>Admin console to manage passkeys, applications, users, and more</p>
                 </div>
             </div>
 
@@ -63,7 +72,7 @@
                 </div>
                 <div class="basis-full mt-1">
                     <p class="font-medium">Security that’s tested and validated</p>
-                    <p>Thorough, third party assessments of the Bitwarden Passwordless.dev open source code, documentation, and processes help ensure your data is always secure.</p>
+                    <p>Passwordless.dev's open-source code, docs, and processes are thoroughly assessed by 3rd-parties</p>
                 </div>
             </div>
             <div class="mt-6 text-sm">Many of Passwordless.dev's features are available for free. Check out <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">the pricing page</a> for more information about our paid offerings.</div>
@@ -140,7 +149,6 @@
                             <label asp-for="Form.UseCase" for="UseCaseBoth" class="radio-label">Both</label>
                         </div>
                         <span asp-validation-for="Form.UseCase"></span>
-
                     </div>
                 </fieldset>
             </div>
