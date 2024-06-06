@@ -1,4 +1,6 @@
-@typeparam TScope where TScope : struct, IConvertible
+@using Passwordless.Common.Extensions
+
+@typeparam TScope where TScope : Enum
 
 <Panel>
     <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmitAsync">
@@ -7,7 +9,7 @@
         {
             <div>
                 <input type="checkbox" id="@scope" name="FormModel.SelectedScopes" value="@scope">
-                <label for="@scope">@scope</label>
+                <label for="@scope">@scope.GetDescription()</label>
             </div>
         }
         <div id="create-api-key-actions">

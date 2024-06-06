@@ -28,7 +28,7 @@
 
     protected override void OnInitialized()
     {
-        Scopes = Enum.GetValues(typeof(PublicKeyScopes)).Cast<PublicKeyScopes>().ToArray();
+        Scopes = Enum.GetValues<PublicKeyScopes>().ToArray();
         OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentNullException(nameof(OrganizationId));
     }
 

@@ -417,7 +417,7 @@ public class SharedManagementService : ISharedManagementService
         var secretKey = ApiKeyUtils.GeneratePrivateApiKey(accountName, "secret");
         // last 4 chars
         var pk2 = secretKey.originalApiKey.Substring(secretKey.originalApiKey.Length - 4);
-        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, scopes.Select(x => x.GetValue()).ToArray());
+        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, scopes.Select(x => x.GetDescription()).ToArray());
         return secretKey;
     }
 
@@ -432,7 +432,7 @@ public class SharedManagementService : ISharedManagementService
         var publicKey = ApiKeyUtils.GeneratePublicApiKey(accountName, "public");
         // last 4 chars
         var pk = publicKey.Substring(publicKey.Length - 4);
-        await storage.StoreApiKey(pk, publicKey, scopes.Select(x => x.GetValue()).ToArray());
+        await storage.StoreApiKey(pk, publicKey, scopes.Select(x => x.GetDescription()).ToArray());
         return publicKey;
     }
 }
