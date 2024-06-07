@@ -1,8 +1,10 @@
 ﻿@page "/playground"
 @using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Middleware
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.AdminConsole.TagHelpers.AlertBoxes
 @inject ICurrentContext CurrentContext
 @inject IOptions<PasswordlessManagementOptions> Options
 @inject IAntiforgery Antiforgery
@@ -91,7 +93,6 @@
   }
 </style>
 
-<partial name="Shared/_PasswordlessClientJs" />
 @section Scripts {
     <script type="module">
         import { createApp, ref } from 'vue';

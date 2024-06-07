@@ -1,5 +1,6 @@
 @page
 @using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Passwordless.AdminConsole.Pages.Account.Profile
 @inject IAntiforgery Antiforgery
 @inject IPasswordlessClient PasswordlessClient
@@ -12,6 +13,5 @@
 <div class="panel">
     <h2>Passkeys</h2>   
     <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@false" param-PasswordlessClient="@PasswordlessClient" param-UserId="@Model.UserId" />
-    <partial name="Shared/_PasswordlessClientJs"/>
     <partial name="Shared/_AddPasskeys"/>
 </div>
