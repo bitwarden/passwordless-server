@@ -156,7 +156,7 @@ public abstract class DbGlobalContext : DbContext
             Tenant = appName,
             Id = publicKey[^4..],
             ApiKey = publicKey,
-            Scopes = [PublicKeyScopes.Register.GetValue(), PublicKeyScopes.Login.GetValue()]
+            Scopes = [PublicKeyScopes.Register.GetDescription(), PublicKeyScopes.Login.GetDescription()]
         });
 
         await ApiKeys.AddAsync(new ApiKeyDesc
@@ -164,7 +164,7 @@ public abstract class DbGlobalContext : DbContext
             Tenant = appName,
             Id = privateKey[^4..],
             ApiKey = ApiKeyUtils.HashPrivateApiKey(privateKey),
-            Scopes = [SecretKeyScopes.TokenRegister.GetValue(), SecretKeyScopes.TokenVerify.GetValue()]
+            Scopes = [SecretKeyScopes.TokenRegister.GetDescription(), SecretKeyScopes.TokenVerify.GetDescription()]
         });
 
         await AccountInfo.AddAsync(new AccountMetaInformation

@@ -150,7 +150,6 @@ app.UseWhen(o =>
 });
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilog();
 app.UseWhen(o =>
