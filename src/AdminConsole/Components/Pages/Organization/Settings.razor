@@ -1,24 +1,65 @@
 @page "/Organization/Settings"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Identity
-@using Passwordless.AdminConsole.Identity
-@using Passwordless.AdminConsole.Services.Mail
-@attribute [Authorize(Policy = CustomPolicy.StepUp)]
-
+@using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Helpers
 @inject IDataService DataService
-@inject NavigationManager NavigationManager
-@inject ISharedBillingService BillingService
-@inject SignInManager<ConsoleAdmin> SignInManager
-@inject IMailService MailService
-@inject TimeProvider TimeProvider
-@inject IHttpContextAccessor HttpContextAccessor
 @inject ILogger<Settings> Logger
+@inject IHttpContextAccessor Accessor
+
+@inject IAuthorizationService AuthService
+@inject IOptions<PasswordlessOptions> Options
+
+<SecureScript type="module">
+    async function stepup(callback) {
+        const p = new Passwordless.Client(
+        {
+            apiKey: "@Options.Value.ApiKey",
+            apiUrl: "@Options.Value.ApiUrl"
+        });
+
+        // sign in begin
+        await p.stepup({ signinMethod: { userId: "@UserId" }})
+            .catch(error => console.error(error))
+            .then(async data => {
+                const stepUpResponse = await fetch('/account/stepup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stepUpToken: data.token,
+                        purpose: "@Purpose"
+                    })
+                });
+
+                if(stepUpResponse.ok)
+                {
+                    callback();
+                }
+            });
+    }
+
+    document.getElementById("delete-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        @{
+            if (!UserHasClaim)
+            {
+                @:stepup(() => { e.target.submit();} );
+            }
+        else
+            {
+                @:e.target.submit();
+            }
+        }
+    });
+</SecureScript>
 
 <Page Title="Organization Settings">
     <Panel Header="Delete Organization">
         @if (CanDelete)
         {
-            <ConfirmEditForm FormName="@DeleteOrgFormName" EditContext="@_deleteOrgEditContext" OnValidSubmit="@OnSubmitAsync">
+            <ConfirmEditForm id="delete-form" EditContext="@_deleteOrgEditContext" FormName="@DeleteOrgFormName" OnValidSubmit="@OnSubmitAsync">
+                <p class="font-bold">In order to perform this action, you will have to re-authenticate.</p>
                 <p>Unexpected bad things will happen if you don’t read this:</p>
                 <ul role="list" class="list-disc list-inside">
                     <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
@@ -49,7 +90,11 @@
 @code {
     private string OrganizationName { get; set; } = string.Empty;
     private int ApplicationCount { get; set; }
-    private bool CanDelete => ApplicationCount == 0;
+    private bool CanDelete => true;
+
+    private string Purpose { get; set; } = "step-up";
+    private string UserId { get; set; }
+    private bool UserHasClaim { get; set; }
 
     private const string DeleteOrgFormName = "delete-org-form";
     
@@ -75,8 +120,13 @@
 
         OrganizationName = organization.Name;
         ApplicationCount = organization.Applications.Count;
-    }
 
+        var user = Accessor.HttpContext!.User;
+
+        UserId = user.GetId();
+        UserHasClaim = (await AuthService.AuthorizeAsync(user, CustomPolicy.StepUp)).Succeeded;
+    }
+    
     private void HandleValidationRequest(object? sender, ValidationRequestedEventArgs e)
     {
         _deleteOrgValidationStore.Clear();
@@ -86,36 +136,38 @@
             _deleteOrgValidationStore.Add(() => FormModel.OrganizationName, "Please enter organization name exactly if you would like to delete it.");
         }
     }
-
+    
     private async Task OnSubmitAsync()
     {
-        var user = HttpContextAccessor.HttpContext!.User;
+        Logger.LogInformation("Org Deleted");
         
-        var username = user.Identity?.Name ?? throw new InvalidOperationException();
-
-        var organization = await DataService.GetOrganizationWithDataAsync();
-        var emails = organization.Admins.Select(x => x.Email).Where(x => x is not null)!.ToList<string>();
-        await MailService.SendOrganizationDeletedAsync(organization.Name, emails, username, TimeProvider.GetUtcNow().UtcDateTime);
-
-        if (organization.HasSubscription)
-        {
-            var isSubscriptionDeleted = await BillingService.CancelSubscriptionAsync(organization.BillingSubscriptionId!);
-            if (!isSubscriptionDeleted)
-            {
-                Logger.LogError(
-                    "Organization {orgId} tried to cancel subscription {subscriptionId}, but failed.",
-                    organization.Name,
-                    organization.BillingSubscriptionId);
-                throw new Exception("Failed to cancel subscription.");
-            }
-        }
-
-        var isDeleted = await DataService.DeleteOrganizationAsync();
-        if (isDeleted)
-        {
-            await SignInManager.SignOutAsync();
-        }
-
-        NavigationManager.Refresh();
+        // var user = HttpContextAccessor.HttpContext!.User;
+        //
+        // var username = user.Identity?.Name ?? throw new InvalidOperationException();
+        //
+        // var organization = await DataService.GetOrganizationWithDataAsync();
+        // var emails = organization.Admins.Select(x => x.Email).Where(x => x is not null)!.ToList<string>();
+        // await MailService.SendOrganizationDeletedAsync(organization.Name, emails, username, TimeProvider.GetUtcNow().UtcDateTime);
+        //
+        // if (organization.HasSubscription)
+        // {
+        //     var isSubscriptionDeleted = await BillingService.CancelSubscriptionAsync(organization.BillingSubscriptionId!);
+        //     if (!isSubscriptionDeleted)
+        //     {
+        //         Logger.LogError(
+        //             "Organization {orgId} tried to cancel subscription {subscriptionId}, but failed.",
+        //             organization.Name,
+        //             organization.BillingSubscriptionId);
+        //         throw new Exception("Failed to cancel subscription.");
+        //     }
+        // }
+        //
+        // var isDeleted = await DataService.DeleteOrganizationAsync();
+        // if (isDeleted)
+        // {
+        //     await SignInManager.SignOutAsync();
+        // }
+        //
+        // NavigationManager.Refresh();
     }
 }
