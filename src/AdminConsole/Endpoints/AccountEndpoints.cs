@@ -3,7 +3,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Identity;
 
@@ -24,23 +23,13 @@ public static class AccountEndpoints
 
         group.MapPost("/StepUp",
             async (
-                IOptions<PasswordlessOptions> options,
+                IPasswordlessClient client,
                 HttpContext context,
                 StepUpPurpose purpose,
                 [FromBody] StepUpRequest request) =>
             {
-                var http = new HttpClient
-                {
-                    BaseAddress = new Uri(options.Value.ApiUrl),
-                    DefaultRequestHeaders = { { "ApiSecret", options.Value.ApiSecret } }
-                };
-
-                using var response = await http.PostAsJsonAsync("/signin/verify", new
-                {
-                    Token = request.StepUpToken,
-                    Purpose = request.Purpose
-                });
-
+                _ = await client.VerifyAuthenticationTokenAsync(request.StepUpToken);
+                
                 var identity = (ClaimsIdentity)context.User.Identity!;
                 var existingStepUpClaim = identity.FindFirst(request.Purpose);
 
@@ -54,11 +43,11 @@ public static class AccountEndpoints
 
                 await context.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
 
-                return Results.Redirect(request.ReturnUrl);
+                return TypedResults.Ok();
             }).RequireAuthorization();
 
         return endpoints;
     }
 
-    record StepUpRequest(string StepUpToken, string ReturnUrl, string Purpose);
+    record StepUpRequest(string StepUpToken, string Purpose);
 }
