@@ -13,7 +13,6 @@
     <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
     
     <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@(true)" param-PasswordlessClient="@(PasswordlessClient)" param-UserId="@Model.UserId" />
-    <partial name="Shared/_PasswordlessClientJs" />
     <partial name="Shared/_AddPasskeys" />
 </div>
 
