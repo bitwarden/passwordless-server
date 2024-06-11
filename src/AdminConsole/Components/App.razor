@@ -8,7 +8,14 @@
     <SecureStylesheet href="css/site.css" />
     <SecureStylesheet href="css/tailwind.css" />
     <HeadOutlet/>
-    <SecureScript type="module" src="lib/vue/vue.mjs" />
+    <SecureScript type="importmap">
+        {
+            "imports": {
+                "vue": "/lib/vue/vue.mjs"
+            }
+        }
+    </SecureScript>
+    <SecureScript async src="./lib/es-module-shims/es-module-shims.js" />
     <SecureScript type="text/javascript" src="js/passwordless.umd.min.js" />
 </head>
 
