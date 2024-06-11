@@ -8,8 +8,6 @@
     <SecureStylesheet href="css/site.css" />
     <SecureStylesheet href="css/tailwind.css" />
     <HeadOutlet/>
-    <SecureScript type="module" src="lib/vue/vue.mjs"></SecureScript>
-    <SecureScript type="module" src="js/confirm-form.mjs"></SecureScript>
     <SecureScript src="js/passwordless.umd.min.js" />
 </head>
 
@@ -22,5 +20,7 @@
         ssr: { disableDomPreservation: true }
         });
     </SecureScript>
+    <SecureScript type="module" src="js/confirm-form.mjs" />
+
 </body>
 </html>

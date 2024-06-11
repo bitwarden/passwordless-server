@@ -121,6 +121,6 @@ public class SettingsModel : PageModel
     public string ApiKey => _options.Value.ApiKey!;
     public string UserId => User.GetId();
     public string Purpose => "step-up";
-    
+
     public bool UserHasClaim { get; set; }
 }

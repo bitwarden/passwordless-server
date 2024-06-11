@@ -29,7 +29,7 @@ public static class AccountEndpoints
                 [FromBody] StepUpRequest request) =>
             {
                 _ = await client.VerifyAuthenticationTokenAsync(request.StepUpToken);
-                
+
                 var identity = (ClaimsIdentity)context.User.Identity!;
                 var existingStepUpClaim = identity.FindFirst(request.Purpose);
 
