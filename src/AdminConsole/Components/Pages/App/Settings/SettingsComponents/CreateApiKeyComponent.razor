@@ -1,0 +1,69 @@
+@using Passwordless.Common.Extensions
+
+@typeparam TScope where TScope : Enum
+
+<Panel>
+    <EditForm class="flex flex-col space-y-4" FormName="@FormName" Model="FormModel" OnValidSubmit="@OnValidSubmitAsync">
+        <h3>Scopes</h3>
+        @foreach (var scope in Scopes)
+        {
+            <div>
+                <input type="checkbox" id="@scope.GetDescription()" name="FormModel.SelectedScopes" value="@scope">
+                <label for="@scope.GetDescription()">@scope.GetDescription()</label>
+            </div>
+        }
+        <div id="create-api-key-actions">
+            <button id="create-api-key-btn" class="btn-primary" type="submit">Create</button>
+        </div>
+        <ValidationSummary />
+        <CustomValidationErrors EditContext="FormContext" />
+
+    </EditForm>
+</Panel>
+
+@code {
+    private const string FormName = "create-api-key-form";
+    
+    /// <summary>
+    /// The scopes that the user can select from.
+    /// </summary>
+    [Parameter]
+    public required IReadOnlyCollection<TScope> Scopes { get; set; }
+    
+    /// <summary>
+    /// Event that is triggered when the user clicks the create button.
+    /// </summary>
+    [Parameter]
+    public required EventCallback<HashSet<TScope>> OnCreateClicked { get; set; }
+    
+    [SupplyParameterFromForm(FormName = FormName)]
+    public CreateApiKeyFormModel? FormModel { get; set; }
+
+    public EditContext? FormContext { get; set; }
+    
+    public ValidationMessageStore? FormValidationMessageStore { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        FormModel ??= new();
+        FormContext = new EditContext(FormModel);
+        FormValidationMessageStore = new ValidationMessageStore(FormContext);
+    }
+    
+    private async Task OnValidSubmitAsync()
+    {
+        if (!FormModel!.SelectedScopes.Any())
+        {
+            FormValidationMessageStore!.Add(() => FormModel.SelectedScopes, "Please select at least one scope.");
+            return;
+        }
+        
+        // Notify the parent component that the user has clicked the create button.
+        await OnCreateClicked.InvokeAsync(FormModel.SelectedScopes.ToHashSet());
+    }
+    
+    public class CreateApiKeyFormModel
+    {
+        public List<TScope> SelectedScopes { get; set; } = new();
+    }
+}

@@ -26,6 +26,7 @@
     @await RenderSectionAsync("Head", false)
     @Html.RenderPartialSectionScripts()
     <script async src="@Url.Content("~/lib/es-module-shims/es-module-shims.js")" asp-append-version="true"></script>
+    <script src="@Url.Content("~/lib/passwordless/passwordless.umd.min.js")" asp-append-version="true"></script>
 </head>
 
 <body class="h-full bg-gray-50">

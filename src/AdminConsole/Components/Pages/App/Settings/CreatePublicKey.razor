@@ -1,0 +1,58 @@
+@page "/app/{AppId}/settings/create-public-key"
+
+@using Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsComponents
+@using Passwordless.AdminConsole.EventLog.DTOs
+@using Passwordless.AdminConsole.EventLog.Loggers
+@using Passwordless.AdminConsole.Helpers
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.Common.Constants
+@using Passwordless.Common.EventLog.Enums
+@using Passwordless.Common.Models.Apps
+
+@inherits BaseApplicationPage
+
+@inject IPasswordlessManagementClient ManagementClient
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject IEventLogger EventLogger
+@inject ILogger<CreatePublicKey> Logger
+
+<Page Title="Create Public Key">
+    <CreateApiKeyComponent Scopes="@Scopes" OnCreateClicked="@OnCreatedAsync" TScope="PublicKeyScopes" />
+</Page>
+
+@code {
+    public IReadOnlyCollection<PublicKeyScopes>? Scopes { get; private set; }
+    
+    public int OrganizationId { get; private set; }
+
+    protected override void OnInitialized()
+    {
+        Scopes = Enum.GetValues<PublicKeyScopes>().ToArray();
+        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentNullException(nameof(OrganizationId));
+    }
+
+    public async Task OnCreatedAsync(HashSet<PublicKeyScopes> selectedScopes)
+    {
+        try
+        {
+            var request = new CreatePublicKeyRequest(selectedScopes);
+            await ManagementClient.CreateApiKeyAsync(AppId, request);
+
+            var eventDto = new OrganizationEventDto(HttpContextAccessor.HttpContext!.Request.HttpContext.User.GetId(),
+                EventType.AdminApiKeyCreated,
+                $"Created public key for application {AppId}.",
+                Severity.Informational,
+                AppId,
+                HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentException("The organization ID is missing."),
+                DateTime.UtcNow);
+            EventLogger.LogEvent(eventDto);
+        }
+        catch (Exception)
+        {
+            Logger.LogError("Failed to create public key for application: {appId}", AppId);
+        }
+
+        await InvokeAsync(() => NavigationManager.NavigateTo($"app/{AppId}/settings"));
+    }
+}
