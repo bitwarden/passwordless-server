@@ -14,6 +14,4 @@ public partial class LocalDateTime : ComponentBase
 
     [Parameter]
     public string? DateFormat { get; set; } = "s";
-
-    public string CspNonce => HttpContextAccessor.HttpContext!.Items["csp-nonce"]!.ToString()!;
 }
