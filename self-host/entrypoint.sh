@@ -154,8 +154,11 @@ if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key
   mv "$mounted_temp" "$mounted_config"
 fi
 
+# Magic Links
+export MagicLinks__NewAccountTimeout="0.00:00:00"
+
 # Configure overrides for the admin console app
-jq '.ApplicationOverrides.adminconsole.IsRateLimitBypassEnabled = true | .ApplicationOverrides.adminconsole.IsMagicLinkQuotaBypassEnabled = true' \
+jq '.ApplicationOverrides.admin.IsRateLimitBypassEnabled = true | .ApplicationOverrides.admin.IsMagicLinkQuotaBypassEnabled = true' \
   "$mounted_config" > "$mounted_temp"
 mv "$mounted_temp" "$mounted_config"
 
