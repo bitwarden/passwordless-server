@@ -19,6 +19,7 @@ using Passwordless.Common.Configuration;
 using Passwordless.Common.HealthChecks;
 using Passwordless.Common.Logging;
 using Passwordless.Common.Middleware.SelfHosting;
+using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
@@ -102,7 +103,8 @@ if (builder.Environment.IsDevelopment())
 
 builder.AddPasswordlessHealthChecks();
 
-builder.Services.AddMagicLinks();
+builder.Services.AddOptions<ApplicationOverridesOptions>().BindConfiguration("ApplicationOverrides");
+builder.AddMagicLinks();
 
 WebApplication app = builder.Build();
 

@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using Passwordless.Api.Authorization;
 using Passwordless.Api.OpenApi;
 using Passwordless.Common.MagicLinks.Models;
@@ -12,7 +13,6 @@ using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.MagicLinks;
 using Passwordless.Service.MagicLinks.Extensions;
-using Passwordless.Service.Models;
 using static Microsoft.AspNetCore.Http.Results;
 
 namespace Passwordless.Api.Endpoints;
@@ -32,13 +32,11 @@ public static class MagicEndpoints
         {
             var tenant = context.User.FindFirstValue(CustomClaimTypes.AccountName) ?? "<global>";
 
-            var isRateLimitBypassed = context.RequestServices
-                .GetRequiredService<IConfiguration>()
-                .GetSection("ApplicationOverrides")
-                .GetApplicationOverrides(tenant)
-                .IsRateLimitBypassEnabled;
+            var applicationOverridesOptions = context.RequestServices
+                .GetRequiredService<IOptionsSnapshot<ApplicationOverridesOptions>>();
 
-            if (isRateLimitBypassed)
+            var applicationOverrides = applicationOverridesOptions.Value.GetApplication(tenant);
+            if (applicationOverrides.IsRateLimitBypassEnabled)
                 return RateLimitPartition.GetNoLimiter(tenant);
 
             return RateLimitPartition.GetFixedWindowLimiter(tenant, _ =>

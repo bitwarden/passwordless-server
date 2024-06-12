@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
@@ -11,16 +11,13 @@ namespace Passwordless.Service.MagicLinks;
 
 public class MagicLinkService(
     TimeProvider timeProvider,
-    IConfiguration configuration,
+    IOptionsSnapshot<MagicLinksOptions> magicLinksOptions,
+    IOptionsSnapshot<ApplicationOverridesOptions> applicationOverridesOptions,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
     IMailProvider mailProvider,
     IEventLogger eventLogger)
 {
-    private TimeSpan NewAccountTimeout { get; } =
-        configuration.GetSection("MagicLinks").GetValue<TimeSpan?>(nameof(NewAccountTimeout)) ??
-        TimeSpan.FromHours(24);
-
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
         var now = timeProvider.GetUtcNow().UtcDateTime;
@@ -28,16 +25,17 @@ public class MagicLinkService(
         var accountAge = now - account.CreatedAt;
 
         // Check bypass
-        if (configuration.GetApplicationOverrides(account.AcountName).IsMagicLinkQuotaBypassEnabled)
+        var applicationOverrides = applicationOverridesOptions.Value.GetApplication(account.AcountName);
+        if (applicationOverrides.IsMagicLinkQuotaBypassEnabled)
             return;
 
         // Newly created accounts can only send magic links to the admin email address
-        if (accountAge < NewAccountTimeout &&
+        if (accountAge < magicLinksOptions.Value.NewAccountTimeout &&
             !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
                 "magic_link_email_admin_address_only",
-                $"Because your application has been created less than {(int)NewAccountTimeout.TotalHours} hours ago, " +
+                $"Because your application has been created less than {(int)magicLinksOptions.Value.NewAccountTimeout.TotalHours} hours ago, " +
                 "you can only request magic links to the admin email address.",
                 403
             );
