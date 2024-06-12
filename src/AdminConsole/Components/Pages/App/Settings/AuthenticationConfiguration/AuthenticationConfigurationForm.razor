@@ -10,7 +10,7 @@
     <ValidationSummary/>
     <div class="sm:w-full sm:max-w-md">
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Purpose">Purpose:</label>
-        <InputText @bind-Value="@FormModel!.Purpose" id="Purpose" disabled="@IsPurposeReadOnly" class="text-input"/>
+        <InputText @bind-Value="@FormModel!.Purpose" id="Purpose" readonly="@IsPurposeReadOnly" class="text-input"/>
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="UserVerification">User Verification:</label>
         <InputSelect id="UserVerification" @bind-Value="@FormModel.UserVerificationRequirement" TValue="UserVerificationRequirement" class="form-select">
             @foreach (var uv in Enum.GetValues<UserVerificationRequirement>())
