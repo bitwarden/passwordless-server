@@ -1,5 +1,7 @@
 using Bogus;
+using Fido2NetLib.Objects;
 using Passwordless.Common.MagicLinks.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers.App;
@@ -22,4 +24,17 @@ public static class RequestHelpers
         .RuleFor(x => x.AliasHashing, false)
         .RuleFor(x => x.ExpiresAt, DateTime.UtcNow.AddDays(1))
         .RuleFor(x => x.TokenId, Guid.Empty);
+
+    public static Faker<SetAuthenticationConfigurationRequest> GetSetAuthenticationConfigurationRequest() =>
+        new Faker<SetAuthenticationConfigurationRequest>()
+            .RuleFor(x => x.Purpose, faker => faker.Lorem.Word())
+            .RuleFor(x => x.UserVerificationRequirement, GetRandomEnumValue<UserVerificationRequirement>())
+            .RuleFor(x => x.TimeToLive, faker => faker.Date.Timespan())
+            .RuleFor(x => x.PerformedBy, faker => faker.Person.UserName);
+
+    private static T GetRandomEnumValue<T>() where T : struct, Enum
+    {
+        var values = Enum.GetValues<T>();
+        return values[Random.Shared.Next(values.Length)];
+    }
 }

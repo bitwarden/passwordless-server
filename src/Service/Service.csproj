@@ -36,4 +36,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\Mssql\20240415202649_AddAuthenticationConfiguration.cs" />
+    <Compile Remove="Migrations\Mssql\20240415202649_AddAuthenticationConfiguration.Designer.cs" />
+    <Compile Remove="Migrations\Sqlite\20240415202629_AddAuthenticationConfiguration.Designer.cs" />
+    <Compile Remove="Migrations\Sqlite\20240415202629_AddAuthenticationConfiguration.cs" />
+  </ItemGroup>
 </Project>

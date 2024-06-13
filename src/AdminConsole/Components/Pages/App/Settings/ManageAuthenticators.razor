@@ -1,8 +1,8 @@
 @page "/app/{AppId}/settings/authenticators/manage"
+
+@using Passwordless.Common.Models.MDS
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.Authenticators
-@using Passwordless.Common.Models.MDS
-
 @inherits BaseApplicationPage
 
 @inject IPasswordlessManagementClient ManagementClient
@@ -144,8 +144,6 @@
             NavigationManager.NavigateTo($"app/{AppId}/settings");
             return;
         }
-
-
 
         AttestationTypes = await ManagementClient.GetAttestationTypesAsync();
         CertificationLevels = await ManagementClient.GetCertificationStatusesAsync();

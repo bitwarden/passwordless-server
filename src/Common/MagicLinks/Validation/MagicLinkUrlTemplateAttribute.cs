@@ -6,7 +6,7 @@ namespace Passwordless.Common.MagicLinks.Validation;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class MagicLinkTemplateUrlAttribute : ValidationAttribute
 {
-    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
         if (value is not string stringValue || string.IsNullOrWhiteSpace(stringValue))
             return new ValidationResult($"You have provided a null or empty value for {validationContext.MemberName}.");

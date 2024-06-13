@@ -1,6 +1,7 @@
 ﻿@page "/settings"
 @using Badge = Passwordless.AdminConsole.Components.Shared.Badge
 @using Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsComponents
+@using Passwordless.AdminConsole.Components.Pages.App.Settings
 @model SettingsModel
 @inject IWebHostEnvironment Environment
 
@@ -103,6 +104,8 @@
         </div>
     </panel>
 }
+
+<component type="typeof(AuthenticationConfiguration)" render-mode="Static" />
 
 <panel header="Delete Application">
     @if (Model.PendingDelete)

@@ -1,11 +1,12 @@
 using Humanizer;
+using Microsoft.AspNetCore.Http;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
 
 namespace Passwordless.Service.Validation;
 
-public static class RegisterTokenValidator
+public static class TokenValidator
 {
     /// <summary>
     /// Validates the register token request.
@@ -34,13 +35,10 @@ public static class RegisterTokenValidator
 
     public static void Validate(this Token token, DateTimeOffset now)
     {
-        if (token.ExpiresAt >= now)
-        {
-            return;
-        }
+        if (token.ExpiresAt >= now) return;
 
         var drift = now - token.ExpiresAt;
 
-        throw new ApiException("expired_token", $"The token expired {drift.Humanize()} ago.", 403);
+        throw new ApiException("expired_token", $"The token expired {drift.Humanize()} ago.", StatusCodes.Status403Forbidden);
     }
 }

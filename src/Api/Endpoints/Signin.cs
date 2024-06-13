@@ -22,6 +22,7 @@ public static class SigninEndpoints
     {
         var group = app.MapGroup("/signin")
             .RequireCors("default")
+            .WithOpenApi()
             .WithTags(OpenApiTags.SignIn);
 
         group.MapPost("/generate-token", GenerateTokenAsync)
@@ -62,7 +63,6 @@ public static class SigninEndpoints
 
         return Ok(new SigninTokenResponse(result));
     }
-
 
     /// <summary>
     /// Signin (Step 1 - Client)

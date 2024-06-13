@@ -15,7 +15,7 @@ namespace Passwordless.Service.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
 
             modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
                 {
@@ -171,6 +171,46 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.HasKey("Tenant");
 
                     b.ToTable("AppFeatures");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AuthenticationConfiguration", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Purpose")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EditedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("EditedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUsedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("TimeToLive")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("UserVerificationRequirement")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Tenant", "Purpose");
+
+                    b.ToTable("AuthenticationConfigurations");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>

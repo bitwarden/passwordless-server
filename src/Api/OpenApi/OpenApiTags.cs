@@ -5,6 +5,7 @@ public static class OpenApiTags
     public const string Aliases = "Aliases";
     public const string Applications = "Applications";
     public const string Authenticators = "Authenticators";
+    public const string AuthConfigs = "Authenication Configurations";
     public const string Credentials = "Credentials";
     public const string EventLogging = "Event Logging";
     public const string MagicLinks = "Magic Links";

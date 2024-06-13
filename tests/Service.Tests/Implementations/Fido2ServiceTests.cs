@@ -18,6 +18,7 @@ public class Fido2ServiceTests
     private readonly Mock<IFeatureContextProvider> _mockFeatureContextProvider;
     private readonly Mock<IMetadataService> _mockMetadataService;
     private readonly FakeTimeProvider _fakeTimeProvider;
+    private readonly Mock<IAuthenticationConfigurationService> _mockAuthenticationConfigurationService;
 
     private readonly Fido2Service _sut;
 
@@ -29,6 +30,7 @@ public class Fido2ServiceTests
         _mockFeatureContextProvider = new Mock<IFeatureContextProvider>();
         _mockMetadataService = new Mock<IMetadataService>();
         _fakeTimeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        _mockAuthenticationConfigurationService = new Mock<IAuthenticationConfigurationService>();
 
         _sut = new Fido2Service(new ManualTenantProvider("test"),
             NullLogger.Instance,
@@ -37,8 +39,8 @@ public class Fido2ServiceTests
             _mockEventLogger.Object,
             _mockFeatureContextProvider.Object,
             _mockMetadataService.Object,
-            _fakeTimeProvider
-            );
+            _fakeTimeProvider,
+            _mockAuthenticationConfigurationService.Object);
     }
 
     [Fact]

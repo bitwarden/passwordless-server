@@ -33,7 +33,6 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
         using var client = api.CreateClient().AddAcceptApplicationJson();
