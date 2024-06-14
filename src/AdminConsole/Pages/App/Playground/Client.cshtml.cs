@@ -17,11 +17,21 @@ public class ClientModel : PageModel
 
     public async Task OnGet()
     {
+        await InitializeAsync();
     }
 
     public async Task<IActionResult> OnPost(string token)
     {
+        await InitializeAsync();
+
         var res = await _passwordlessClient.VerifyAuthenticationTokenAsync(token);
         return new JsonResult(res);
     }
+
+    private async Task InitializeAsync()
+    {
+        Purposes = (await _passwordlessClient.GetAuthenticationConfigurationsAsync()).Configurations.Select(x => x.Purpose);
+    }
+
+    public IEnumerable<string> Purposes { get; private set; }
 }

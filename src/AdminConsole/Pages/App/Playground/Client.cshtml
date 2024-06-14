@@ -1,11 +1,11 @@
 ﻿@page "/playground"
+@inject ICurrentContext CurrentContext
+@inject IOptions<PasswordlessManagementOptions> Options
+@inject IAntiforgery Antiforgery
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Middleware
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessManagementOptions> Options
-@inject IAntiforgery Antiforgery
 @model ClientModel
 
 @{
@@ -34,7 +34,21 @@
                                     <input id="alias" name="alias" type="text" autocomplete="webauthn" required class="text-input">
                                 </div>
                             </div>
-
+                            
+                            <div class="flex flex-col">
+                                <p class="inline-flex items-center" v-on:click="setShowOptions">
+                                    <svg class="w-6 h-6 fill-current" :class="{ 'rotate-90': showOptions }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>Sign-in options:
+                                </p>
+                                <div v-if="showOptions">
+                                    @foreach (var purpose in Model.Purposes)
+                                    {
+                                        <label class="block"><input class="mr-1" name="selectedPurpose" v-model="selectedPurpose" value="@purpose" type="radio"/>@purpose</label>
+                                    }
+                                </div>
+                            </div>
+                            
                             <div>
                                 <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
                             </div>
@@ -97,6 +111,8 @@
         createApp({
             setup() {
                 const signins = ref([]);
+                const showOptions = ref(false);
+                const selectedPurpose = ref("sign-in");
 
                 const p = new Passwordless.Client({
                     apiUrl: "@Options.Value.ApiUrl",
@@ -120,19 +136,34 @@
                 };
                 autoFill(10);
 
-
                 const loginSubmit = async (e) => {
-                    // on form submit
-                    const alias = e.target.alias.value;
-                    const {token, error} = await p.signinWithAlias(alias);
-                    if (token) {
-                        await signin(token);
+                    if (selectedPurpose === 'sign-in') {
+                        // on form submit
+                        const alias = e.target.alias.value;
+                        const {token, error} = await p.signinWithAlias(alias);
+                        if (token) {
+                            await signin(token);
+                        } else {
+                            if (error.errorCode !== "unknown") {
+                                signins.value.push(error);
+                            }
+                        }
                     } else {
-                        if (error.errorCode !== "unknown") {
-                            signins.value.push(error);
+                        const {token, error} = await p.stepup({ signinMethod: { alias: alias }, purpose: selectedPurpose });
+                        
+                        if (token) {
+                            await signin(token);
+                        } else {
+                            if (error.errorCode !== "unknown") {
+                                signins.value.push(error);
+                            }
                         }
                     }
-                  }
+                }
+                
+                const setShowOptions = (_) => {
+                    showOptions.value = !showOptions.value;
+                }
 
                 async function signin(verify_token) {
                     if (!verify_token) return;
@@ -141,10 +172,13 @@
                     signins.value.push(result);
                     console.log(signins.value);
                 }
-
+                
                 return {
                     loginSubmit,
-                    signins
+                    signins,
+                    setShowOptions,
+                    showOptions,
+                    selectedPurpose
                 }
             }
     }).mount('#xapp');

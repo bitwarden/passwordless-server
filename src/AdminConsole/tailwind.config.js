@@ -19,6 +19,12 @@ module.exports = {
     ],
     theme: {
         extend: {
+            rotate: {
+                '90': '90deg'
+            },
+            transitionProperty: {
+                'rotate': 'transform'
+            },
             colors: {
                 primary: {
                     300: rgba("--color-primary-300"),
