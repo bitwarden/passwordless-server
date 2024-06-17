@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Note: it's CRUCIAL that this file has Unix line endings (LF) and not Windows line endings (CRLF).
+# Otherwise, the Docker container will fail to start with a confusing error message (file not found).
+
 # Set up user group
 PGID="${PGID:-1000}"
 addgroup --gid $PGID bitwarden

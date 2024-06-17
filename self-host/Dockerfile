@@ -2,7 +2,7 @@
 ###############################################
 #                 Build stage                 #
 ###############################################
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
 
 # Docker buildx supplies the value for this arg
 ARG TARGETPLATFORM
@@ -10,18 +10,18 @@ ARG TARGETPLATFORM
 # Determine proper runtime value for .NET
 # We put the value in a file to be read by later layers.
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-      RID=linux-x64 ; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-      RID=linux-arm64 ; \
-    elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-      RID=linux-arm ; \
-    fi \
-    && echo "RID=$RID" > /tmp/rid.txt
+  RID=linux-x64 ; \
+  elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+  RID=linux-arm64 ; \
+  elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+  RID=linux-arm ; \
+  fi \
+  && echo "RID=$RID" > /tmp/rid.txt
 
 # Add packages
 RUN apt-get update && apt-get install -y \
-    npm jq \
-    && rm -rf /var/lib/apt/lists/*
+  npm jq \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj files as distinct layers
 WORKDIR /source
@@ -77,14 +77,14 @@ ENV RP_PORT=5701
 
 # Add packages
 RUN apt-get update && apt-get install -y \
-    curl \
-    nginx \
-    openssl \
-    supervisor \
-    tzdata \
-    unzip \
-    jq \
-    && rm -rf /var/lib/apt/lists/*
+  curl \
+  nginx \
+  openssl \
+  supervisor \
+  tzdata \
+  unzip \
+  jq \
+  && rm -rf /var/lib/apt/lists/*
 
 # Create required directories
 RUN mkdir -p /etc/bitwarden_passwordless/data-protection
@@ -102,7 +102,7 @@ RUN mkdir -p /app
 
 # Copy all apps from dotnet-build stage
 WORKDIR /app
-COPY --from=dotnet-build /app ./
+COPY --from=build /app ./
 
 # Set up supervisord
 COPY self-host/supervisord/*.ini /etc/supervisor.d/
