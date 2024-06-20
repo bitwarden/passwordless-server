@@ -68,10 +68,10 @@ public class DefaultMailService : IMailService
         {
             To = emails,
             From = _fromEmail,
-            Subject = $"Your organization '{organizationDisplayName}' was deleted.",
+            Subject = $"Your organization '{organizationDisplayName}' has been deleted.",
             TextBody =
                 $"""
-                Your organization '{organizationDisplayName}' was deleted by '{deletedBy}' on {deletedAt:D} at {deletedAt:T} UTC.
+                Your organization '{organizationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.
                 """,
             Tag = "organization-deleted"
         };
@@ -91,7 +91,7 @@ public class DefaultMailService : IMailService
             Subject = $"Your app '{applicationDisplayName}' has been deleted.",
             TextBody =
                 $"""
-                Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.
+                Your app '{applicationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.
                 """,
             HtmlBody =
                 // lang=html
