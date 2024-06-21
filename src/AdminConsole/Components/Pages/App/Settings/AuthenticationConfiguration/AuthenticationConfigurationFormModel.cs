@@ -6,7 +6,7 @@ namespace Passwordless.AdminConsole.Components.Pages.App.Settings.Authentication
 
 public class AuthenticationConfigurationFormModel
 {
-    [Required, MinLength(1), RegularExpression(@"^[\w\-\.]*$", ErrorMessage = "Characters are limited to A-z, 0-9, -, ., or _.")]
+    [Required, MinLength(1), RegularExpression(@"^[\w\-]*$", ErrorMessage = "Characters are limited to A-z, 0-9, -, or _.")]
     public string Purpose { get; set; } = string.Empty;
 
     [Required] public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
