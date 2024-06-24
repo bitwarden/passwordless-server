@@ -10,22 +10,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="8.0.0" />
-    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
     <PackageReference Include="Datadog.Trace" Version="2.41.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="MinimalApis.Extensions" Version="0.11.0" />
-      <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-      <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
-      <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
-      <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.5.2" />
-      <PackageReference Include="Serilog.Sinks.Seq" Version="6.0.0" />
-      <PackageReference Include="UAParser" Version="3.1.47" />
+    <PackageReference Include="UAParser" Version="3.1.47" />
   </ItemGroup>
 
   <ItemGroup>

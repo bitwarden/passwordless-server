@@ -94,7 +94,7 @@ public partial class Admins : ComponentBase
             NavigationManager.NavigateTo("/Account/Login");
         }
 
-        NavigationManager.RefreshCompat();
+        NavigationManager.Refresh();
     }
 
     private async Task OnValidInviteAsync()
@@ -133,7 +133,7 @@ public partial class Admins : ComponentBase
         await InvitationService.SendInviteAsync(InviteForm.Email!, CurrentContext.Organization!.Id, CurrentContext.Organization!.Name, user.Email!, user.Name);
         EventLogger.LogInviteAdminEvent(user, InviteForm.Email!, TimeProvider.GetUtcNow().UtcDateTime);
 
-        NavigationManager.RefreshCompat();
+        NavigationManager.Refresh();
     }
 
     public async Task CancelInviteAsync()
@@ -154,7 +154,7 @@ public partial class Admins : ComponentBase
 
         EventLogger.LogCancelAdminInviteEvent(performedBy, invite.ToEmail, TimeProvider.GetUtcNow().UtcDateTime);
 
-        NavigationManager.RefreshCompat();
+        NavigationManager.Refresh();
     }
 
     public class DeleteActiveFormModel

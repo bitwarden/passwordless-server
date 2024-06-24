@@ -6,11 +6,81 @@
     ViewData["Title"] = "Create an organization";
 }
 
+<style>
+    .passkey-info {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 0;
+        width: 0;
+        z-index: -1;
+    }
+</style>
 
-<div class="sm:w-full sm:max-w-xl">
-    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        <p>Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.</p>
-        <br/>
+<div class="w-full lg:flex lg:items-start lg:space-x-8">
+    @* Mobile promo *@
+    <div class="lg:hidden mb-2 p-4">
+        <h2 class="text-2xl font-medium">Try out Passwordless.dev with a free account</h2>
+
+        <p class="mt-2 font-light">
+            Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+        </p>
+    </div>
+
+    @* Desktop promo *@
+    <div class="hidden lg:block p-8 max-w-2xl">
+        <h2 class="text-3xl font-medium">Try out Passwordless.dev with a free account</h2>
+
+        <p class="mt-2 mb-8 text-lg font-light">
+            Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+        </p>
+        <div class="hidden sm:block">
+            <div class="flex mt-6 space-x-4">
+                <div>
+                    <img class="w-10" src="/img/tag1.svg" />
+                </div>
+                <div class="basis-full mt-1">
+                    <p class="font-medium">Standards-based & phishing-resistant</p>
+                    <p>Create FIDO2 WebAuthn applications powered by modern web standards</p>
+                </div>
+            </div>
+
+            <div class="flex mt-4 space-x-4">
+                <div>
+                    <img class="w-10" src="/img/tag2.svg" />
+                </div>
+                <div class="basis-full mt-1">
+                    <p class="font-medium">Add passkeys to existing authentication</p>
+                    <p>Adopt mobile & desktop biometric auth without the need to change existing code</p>
+                </div>
+            </div>
+
+            <div class="flex mt-4 space-x-4">
+                <div>
+                    <img class="w-10 pt-1" src="/img/tag3.svg" />
+                </div>
+                <div class="basis-full mt-1">
+                    <p class="font-medium">Centralized passkey management</p>
+                    <p>Admin console to manage passkeys, applications, users, and more</p>
+                </div>
+            </div>
+
+            <div class="flex mt-4 space-x-4">
+                <div>
+                    <img class="w-10" src="/img/tag4.svg" />
+                </div>
+                <div class="basis-full mt-1">
+                    <p class="font-medium">Security that’s tested and validated</p>
+                    <p>Passwordless.dev's open-source code, docs, and processes are thoroughly assessed by 3rd-parties</p>
+                </div>
+            </div>
+            <div class="mt-6 text-sm">Many of Passwordless.dev's features are available for free. Check out <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">the pricing page</a> for more information about our paid offerings.</div>
+        </div>
+    </div>
+
+    @* Sign up form *@
+    <div class="bg-white py-8 px-4 sm:px-8 shadow sm:rounded-lg">
         <form class="space-y-6" action="" method="POST">
             <div>
                 <label for="orgName" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
@@ -19,7 +89,6 @@
                     <span asp-validation-for="Form.OrgName"></span>
                 </div>
             </div>
-
 
             <div>
                 <label asp-for="Form.AdminName" class="block text-sm font-medium leading-6 text-gray-900">Admin name</label>
@@ -80,11 +149,9 @@
                             <label asp-for="Form.UseCase" for="UseCaseBoth" class="radio-label">Both</label>
                         </div>
                         <span asp-validation-for="Form.UseCase"></span>
-
                     </div>
                 </fieldset>
             </div>
-
 
             <div class="relative flex items-start">
                 <div class="h-6 items-center">
@@ -94,14 +161,26 @@
                     <label asp-for="Form.AcceptsTermsAndPrivacy" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
                 </div>
             </div>
+
+            <label class="passkey-info" asp-for="Form.OrgPurpose">
+                What is the purpose of your organization?
+                <input class="passkey-info" autocomplete="off" type="text" asp-for="Form.OrgPurpose" tabindex="-1"/>
+            </label>
+
+            <label class="passkey-info" asp-for="Form.UsePasskeys">
+                Would you like to use passkeys?
+                <input class="passkey-info" autocomplete="off" type="checkbox" asp-for="Form.UsePasskeys" tabindex="-1"/>
+            </label>
+
             <span asp-validation-for="Form.AcceptsTermsAndPrivacy"></span>
 
             <div asp-validation-summary="ModelOnly"></div>
 
-            <p>After creating your account, we will send an email with a magic link that will sign you in.</p>
             <div>
                 <button type="submit" class="btn-form">Create</button>
             </div>
+
+            <p class="text-sm">After creating your account, we will send an email with a magic link to sign you in.</p>
         </form>
     </div>
 </div>

@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "8.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -176,6 +176,46 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.HasKey("Tenant");
 
                     b.ToTable("AppFeatures");
+                });
+
+            modelBuilder.Entity("Passwordless.Service.Models.AuthenticationConfiguration", b =>
+                {
+                    b.Property<string>("Tenant")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Purpose")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EditedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("EditedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastUsedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("TimeToLive")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UserVerificationRequirement")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Tenant", "Purpose");
+
+                    b.ToTable("AuthenticationConfigurations");
                 });
 
             modelBuilder.Entity("Passwordless.Service.Models.Authenticator", b =>

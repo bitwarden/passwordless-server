@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Options;
 using Passwordless.Common.MagicLinks.Models;
+using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
@@ -9,6 +11,8 @@ namespace Passwordless.Service.MagicLinks;
 
 public class MagicLinkService(
     TimeProvider timeProvider,
+    IOptionsSnapshot<MagicLinksOptions> magicLinksOptions,
+    IOptionsSnapshot<ApplicationOverridesOptions> applicationOverridesOptions,
     ITenantStorage tenantStorage,
     IFido2Service fido2Service,
     IMailProvider mailProvider,
@@ -16,18 +20,22 @@ public class MagicLinkService(
 {
     private async Task EnforceQuotaAsync(MagicLinkTokenRequest request)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = timeProvider.GetUtcNow().UtcDateTime;
         var account = await tenantStorage.GetAccountInformation();
         var accountAge = now - account.CreatedAt;
 
-        // Applications created less than 24 hours ago can only send magic links to the admin email address
-        if (accountAge < TimeSpan.FromHours(24) &&
-            !IsAdminConsole(account) &&
+        // Check bypass
+        var applicationOverrides = applicationOverridesOptions.Value.GetApplication(account.AcountName);
+        if (applicationOverrides.IsMagicLinkQuotaBypassEnabled)
+            return;
+
+        // Newly created accounts can only send magic links to the admin email address
+        if (accountAge < magicLinksOptions.Value.NewAccountTimeout &&
             !account.AdminEmails.Contains(request.EmailAddress.Address, StringComparer.OrdinalIgnoreCase))
         {
             throw new ApiException(
                 "magic_link_email_admin_address_only",
-                "Because your application has been created less than 24 hours ago, " +
+                $"Because your application has been created less than {(int)magicLinksOptions.Value.NewAccountTimeout.TotalHours} hours ago, " +
                 "you can only request magic links to the admin email address.",
                 403
             );
@@ -51,7 +59,6 @@ public class MagicLinkService(
         var quota = (int)(maxQuota * quotaModifier);
 
         var emailsDispatchedIn30Days = await tenantStorage.GetDispatchedEmailCountAsync(TimeSpan.FromDays(30));
-
         if (emailsDispatchedIn30Days >= quota)
         {
             throw new ApiException(
@@ -62,10 +69,6 @@ public class MagicLinkService(
             );
         }
     }
-
-    private static bool IsAdminConsole(PerTenant account) =>
-        string.Equals(account.Tenant, "admin", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(account.Tenant, "adminconsole", StringComparison.OrdinalIgnoreCase);
 
     public async Task SendMagicLinkAsync(MagicLinkTokenRequest request)
     {
@@ -80,7 +83,7 @@ public class MagicLinkService(
             Subject = $"Sign in to {link.Host}",
             TextBody = $"Please click the link or copy into your browser of choice to log in to {link.Host}: {link}. If you did not request this email, it is safe to ignore.",
             HtmlBody =
-                //lang=html
+                // lang=html
                 $"""
                  <!DOCTYPE html5>
                  <html lang="en">
@@ -92,11 +95,15 @@ public class MagicLinkService(
                                     font-size: 16px;
                                     text-align: center;
                                     ">
-                        <h3>Hello</h3>
-                        <p style="padding-bottom: 4px">Please click the button below to sign in to {link.Host}</p>
+                        <h3 style="margin-bottom: 40px;">Let's get you logged in</h3>
+                        <h4 style="font-weight: normal;">Please click the button below to sign into {link.Host}</h4>
                         <a href="{link}" style="width: auto; margin: auto; padding: 10px 25px; background-color: #1252A3; border-radius: 999px; color: white; text-decoration: none;">Click here to sign in</a>
-                        <p style="padding-top: 4px">Having trouble? Copy this link to your browser: {link}</p>
-                        <p>If you did not request this email, it is safe to ignore.</p>
+                        <div style="max-width: 600px; margin: auto; margin-top: 70px;">
+                        <p style="font-size: 14px; margin-bottom: 0;">Or sign in using this link:</p>
+                        <a href="{link}" style="font-size: 12px; color: #949393; text-decoration: none; line-height: 8px;">{link}</a>
+                        </div>
+                        <hr style="margin-top: 50px">
+                        <p style="margin-top:0px;font-size:10px">If you did not request this email, it is safe to ignore.</p>
                     </body>
                  </html>
                  """,

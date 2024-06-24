@@ -68,10 +68,10 @@ public class DefaultMailService : IMailService
         {
             To = emails,
             From = _fromEmail,
-            Subject = $"Your organization '{organizationDisplayName}' was deleted.",
+            Subject = $"Your organization '{organizationDisplayName}' has been deleted.",
             TextBody =
                 $"""
-                Your organization '{organizationDisplayName}' was deleted by {deletedBy} at {deletedAt:F} UTC.
+                Your organization '{organizationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.
                 """,
             Tag = "organization-deleted"
         };
@@ -91,7 +91,7 @@ public class DefaultMailService : IMailService
             Subject = $"Your app '{applicationDisplayName}' has been deleted.",
             TextBody =
                 $"""
-                Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.
+                Your app '{applicationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.
                 """,
             HtmlBody =
                 // lang=html
@@ -103,7 +103,7 @@ public class DefaultMailService : IMailService
                     <title>Your app '{applicationDisplayName}' has been deleted.</title>
                   </head>
                   <body>
-                    <p>Your app '{applicationDisplayName}' has been deleted at {deletedAt:F} UTC by '{deletedBy}'.</p>
+                    <p>Your app '{applicationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.</p>
                   </body>
                 </html>
                 """,
@@ -125,8 +125,8 @@ public class DefaultMailService : IMailService
             Subject = $"Your app '{applicationDisplayName}' is scheduled for deletion in 30 days.",
             TextBody =
                 $"""
-                Your app '{applicationDisplayName}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.
-                If this was unintentional, please visit the your administration console: {cancellationLink}.
+                Your app '{applicationDisplayName}' is scheduled for deletion on {application.DeleteAt:D} at {application.DeleteAt:T} UTC by '{deletedBy}'.
+                If this was unintentional, please visit your administration console: {cancellationLink}.
                 """,
             HtmlBody =
                 // lang=html
@@ -138,8 +138,8 @@ public class DefaultMailService : IMailService
                     <title>Your app '{applicationDisplayName}' is scheduled for deletion in 30 days.</title>
                   </head>
                   <body>
-                    <p>Your app '{applicationDisplayName}' is scheduled for deletion at {application.DeleteAt:F} UTC by '{deletedBy}'.</p>
-                    <p>If this was unintentional, please visit the your administration console <a href="{cancellationLink}">this link</a></p>
+                    <p>Your app '{applicationDisplayName}' is scheduled for deletion on {application.DeleteAt:D} at {application.DeleteAt:T} UTC by '{deletedBy}'.</p>
+                    <p>If this was unintentional, please <a href="{cancellationLink}">visit your administration console</a></p>
                   </body>
                 </html>
                 """,

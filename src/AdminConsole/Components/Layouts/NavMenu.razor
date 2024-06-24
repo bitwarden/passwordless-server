@@ -1,12 +1,8 @@
 ﻿@using Badge = Passwordless.AdminConsole.Components.Shared.Badge
-@using Passwordless.AdminConsole.Middleware
-@using Passwordless.AdminConsole.TagHelpers
-@using Microsoft.AspNetCore.Components.Authorization
 
 @inject NavigationManager NavigationManager
 @inject ICurrentContext CurrentContext
 @inject IHttpContextAccessor HttpContextAccessor
-@inject IWebHostEnvironment Environment
 
 <nav class="space-y-1 flex flex-col h-full content-between overflow-y-auto">
     <CascadingAuthenticationState>
@@ -14,24 +10,7 @@
             <Authorized>
                 <div class="sidebar-content">
                     <NavMenuItem Href="@OrganizationOverviewUrl" Icon="@typeof(CodeBracketSquareIcon)" Label="Applications" />
-                    @if (CurrentContext.InAppContext)
-                    {
-                        <div id="app-submenu" class="nav-link-submenu">
-                            <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
-                            @if (!CurrentContext.IsPendingDelete)
-                            {
-                                <NavMenuItem Href="@OnboardingUrl" Icon="typeof(StartIcon)" Label="Getting Started" />
-                                <NavMenuItem Href="@PlaygroundUrl" Icon="typeof(BeakerIcon)" Label="Playground" />
-                                <NavMenuItem Href="@UsersUrl" Icon="typeof(UsersIcon)" Label="Users" />
-                                <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
-                            }
-                            <NavMenuItem Href="@SettingsUrl" Icon="typeof(CogIcon)" Label="Settings" />
-                            @if (CurrentContext.Features.EventLoggingIsEnabled)
-                            {
-                                <NavMenuItem Href="@AppLogsUrl" Icon="typeof(CodeBracketSquareIcon)" Label="App Logs" />
-                            }
-                        </div>
-                    }
+                    <ApplicationNavMenu />
                     <NavMenuItem Href="/billing/default" Icon="@typeof(DollarIcon)" Label="Billing" />
                     @if (HttpContextAccessor.HttpContext!.Request.Path.StartsWithSegments("/billing"))
                     {
@@ -46,7 +25,6 @@
                     {
                         <NavMenuItem Href="/organization/log" Icon="@typeof(CodeBracketSquareIcon)" Label="Organization Logs" />
                     }
-
                 </div>
                 <div class="sidebar-footer">
                     @if (!CurrentContext.Organization!.HasSubscription)
@@ -65,11 +43,7 @@
                     </div>
                     <hr class="opacity-30"/>
                     <div class="flex flex-row space-x-4">
-                        <form action="/Account/Logout" method="post">
-                            <button type="submit" class="text-white flex font-medium text-sm">
-                                <SignOutIcon Class="w-5 h-5 mr-2"/> Sign out
-                            </button>
-                        </form>
+                        <a class="text-white flex font-medium text-sm" href="/account/logout">Sign out</a>
                     </div>
                 </div>
             </Authorized>
@@ -81,11 +55,5 @@
 </nav>
 
 @code {
-    private const string OrganizationOverviewUrl = "/organization/overview";
-    private string OnboardingUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/onboarding/get-started" : OrganizationOverviewUrl;
-    private string PlaygroundUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/playground/" : OrganizationOverviewUrl;
-    private string UsersUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/credentials/list" : OrganizationOverviewUrl;
-    private string ReportingUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/reporting" : OrganizationOverviewUrl;
-    private string SettingsUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/settings" : OrganizationOverviewUrl;
-    private string AppLogsUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/logs" : OrganizationOverviewUrl;
+    public const string OrganizationOverviewUrl = "/organization/overview";
 }

@@ -1,0 +1,46 @@
+@page "/app/{AppId}/settings/authentication-configuration/{Purpose}/edit"
+@using Passwordless.Common.Models.Apps
+@inherits BaseApplicationPage
+
+@inject IScopedPasswordlessClient Passwordless
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+
+<Page Title="Edit Authentication Configuration">
+    <Panel>
+        @if (ConfigurationDto != null)
+        {
+        <AuthenticationConfigurationForm IsPurposeReadOnly="true" Model="@(ConfigurationDto)" OnSubmitFunction="EditAuthenticationConfigurationAsync" />
+        }
+    </Panel>
+</Page>
+
+@code {
+    [Parameter] public required string Purpose { get; set; }
+    
+    private AuthenticationConfigurationFormModel ConfigurationDto { get; set; }
+    
+    private void NavigateToSettings() => NavigationManager.NavigateTo($"app/{AppId}/settings");
+
+    protected override async Task OnInitializedAsync()
+    {
+        var config = await Passwordless.GetAuthenticationConfigurationAsync(Purpose);
+        
+        if(!config.Configurations.Any()) NavigateToSettings();
+        
+        ConfigurationDto = AuthenticationConfigurationFormModel.FromResult(config.Configurations.First());
+    }
+
+    private async Task EditAuthenticationConfigurationAsync(AuthenticationConfigurationFormModel formModel)
+    {
+        await Passwordless.SaveAuthenticationConfigurationAsync(new SetAuthenticationConfigurationRequest
+        {
+            Purpose = formModel.Purpose,
+            UserVerificationRequirement = formModel.UserVerificationRequirement,
+            TimeToLive = formModel.TimeToLive,
+            PerformedBy = HttpContextAccessor.HttpContext!.User.Identity!.Name!
+        });
+
+        NavigateToSettings();
+    }
+}

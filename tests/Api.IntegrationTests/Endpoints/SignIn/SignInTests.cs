@@ -22,12 +22,14 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_retrieve_assertion_options_to_begin_sign_in()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         var request = new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId };
 
@@ -48,22 +50,24 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
-        await httpClient.RegisterNewUser(driver);
+        await client.RegisterNewUserAsync(driver);
 
-        var signInBeginResponse = await httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
+        var signInBeginResponse = await client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
-        using var signInCompleteResponse = await httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
+        using var signInCompleteResponse = await client.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
             Origin = PasswordlessApi.OriginUrl,
             RPID = PasswordlessApi.RpId,
@@ -82,23 +86,25 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_valid_sign_in_token()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
-        await httpClient.RegisterNewUser(driver);
+        await client.RegisterNewUserAsync(driver);
 
-        var signInBeginResponse = await httpClient.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
+        var signInBeginResponse = await client.PostAsJsonAsync("/signin/begin", new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         var signInBegin = await signInBeginResponse.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
 
         var authenticatorAssertionRawResponse = await driver.GetCredentialsAsync(signInBegin!.Data);
 
         // Act
-        using var signInCompleteResponse = await httpClient.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
+        using var signInCompleteResponse = await client.PostAsJsonAsync("/signin/complete", new SignInCompleteDTO
         {
             Origin = PasswordlessApi.OriginUrl,
             RPID = PasswordlessApi.RpId,
@@ -112,7 +118,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         signInTokenResponse.Should().NotBeNull();
         signInTokenResponse!.Token.Should().StartWith("verify_");
 
-        var verifySignInResponse = await httpClient.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
+        var verifySignInResponse = await client.PostAsJsonAsync("/signin/verify", new SignInVerifyDTO { Token = signInTokenResponse.Token });
         verifySignInResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -120,14 +126,16 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_receive_an_error_message_when_sending_an_unrecognized_passkey()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var _httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
-        using var options = await _httpClient.PostAsJsonAsync("/signin/begin", new { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
+
+        using var options = await client.PostAsJsonAsync("/signin/begin", new { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
         var response = await options.Content.ReadFromJsonAsync<SessionResponse<Fido2NetLib.AssertionOptions>>();
         var payloadWithUnrecognizedPasskey = new
         {
@@ -151,7 +159,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         };
 
         // Act
-        using var completeResponse = await _httpClient.PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
+        using var completeResponse = await client.PostAsJsonAsync("/signin/complete", payloadWithUnrecognizedPasskey);
 
         // Assert
         completeResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -173,21 +181,18 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task An_expired_apps_token_keys_should_be_removed_when_a_request_is_made()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         var applicationName = $"test{Guid.NewGuid():N}";
         using var client = api.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddPublicKey(accountKeysCreation!.ApiKey1);
-        client.AddSecretKey(accountKeysCreation.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddPublicKey(app.ApiKey1);
+        client.AddSecretKey(app.ApiSecret1);
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
-        await client.RegisterNewUser(driver);
+        await client.RegisterNewUserAsync(driver);
         api.Time.Advance(TimeSpan.FromDays(31));
 
         // Act
@@ -205,19 +210,16 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     public async Task I_receive_a_sign_in_token_for_a_valid_user_id()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var client = api.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplicationAsync();
+        var app = await client.CreateApplicationAsync();
         var userId = $"user{Guid.NewGuid():N}";
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddPublicKey(accountKeysCreation!.ApiKey1)
-            .AddSecretKey(accountKeysCreation.ApiSecret1)
+        client.AddPublicKey(app.ApiKey1)
+            .AddSecretKey(app.ApiSecret1)
             .AddUserAgent();
 
         // Act
@@ -243,20 +245,18 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     {
         // Arrange
         const int timeToLive = 120;
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var httpClient = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
 
         using var client = api.CreateClient().AddManagementKey();
-        using var createApplicationMessage = await client.CreateApplicationAsync();
+        var app = await client.CreateApplicationAsync();
         var userId = $"user{Guid.NewGuid():N}";
-        var accountKeysCreation = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddPublicKey(accountKeysCreation!.ApiKey1)
-            .AddSecretKey(accountKeysCreation.ApiSecret1)
+        client.AddPublicKey(app.ApiKey1)
+            .AddSecretKey(app.ApiSecret1)
             .AddUserAgent();
+
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("signin/generate-token", new SigninTokenRequest
         {
             UserId = userId,

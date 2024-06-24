@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Note: it's CRUCIAL that this file has Unix line endings (LF) and not Windows line endings (CRLF).
+# Otherwise, the Docker container will fail to start with a confusing error message (file not found).
+
 # Set up user group
 PGID="${PGID:-1000}"
 addgroup --gid $PGID bitwarden
@@ -47,35 +50,35 @@ else
   if [ -n "$BWP_SMTP_FROM" ] && [ "$BWP_SMTP_FROM" != "null" ]; then
     export Mail__Smtp__From=$BWP_SMTP_FROM
   fi
-  
+
   if [ -n "$BWP_SMTP_USERNAME" ] && [ "$BWP_SMTP_USERNAME" != "null" ]; then
     export Mail__Smtp__Username=$BWP_SMTP_USERNAME
   fi
-  
+
   if [ -n "$BWP_SMTP_PASSWORD" ] && [ "$BWP_SMTP_PASSWORD" != "null" ]; then
     export Mail__Smtp__Password=$BWP_SMTP_PASSWORD
   fi
-  
+
   if [ -n "$BWP_SMTP_HOST" ] && [ "$BWP_SMTP_HOST" != "null" ]; then
     export Mail__Smtp__Host=$BWP_SMTP_HOST
   fi
-  
+
   if [ -n "$BWP_SMTP_PORT" ] && [ "$BWP_SMTP_PORT" != "null" ]; then
     export Mail__Smtp__Port=$BWP_SMTP_PORT
   fi
-  
+
   if [ -n "$BWP_SMTP_STARTTLS" ] && [ "$BWP_SMTP_STARTTLS" != "null" ]; then
     export Mail__Smtp__StartTls=$BWP_SMTP_STARTTLS
   fi
-  
+
   if [ -n "$BWP_SMTP_SSL" ] && [ "$BWP_SMTP_SSL" != "null" ]; then
     export Mail__Smtp__Ssl=$BWP_SMTP_SSL
   fi
-  
+
   if [ -n "$BWP_SMTP_SSLOVERRIDE" ] && [ "$BWP_SMTP_SSLOVERRIDE" != "null" ]; then
     export Mail__Smtp__SslOverride=$BWP_SMTP_SSLOVERRIDE
   fi
-  
+
   if [ -n "$BWP_SMTP_TRUSTSERVER" ] && [ "$BWP_SMTP_TRUSTSERVER" != "null" ]; then
     export Mail__Smtp__TrustServer=$BWP_SMTP_TRUSTSERVER
   fi
@@ -98,7 +101,7 @@ else
 fi
 if [ "$BWP_PORT" == "null" ]; then
   echo "WARNING: 'BWP_PORT' not set, defaulting to 5701.";
-  exit 1; 
+  exit 1;
 fi
 
 export Passwordless__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
@@ -146,13 +149,21 @@ if [ "$api_key" == "null" ] || [ "$api_secret" == "null" ] || [ "$management_key
   if [ "$salt_token" == "null" ]; then
       salt_token=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
   fi
-    
+
   mounted_temp="$mounted_dir/temp.json";
   jq --arg api_key "$api_key" --arg api_secret "$api_secret" --arg management_key "$management_key" --arg salt_token "$salt_token" \
     '.Passwordless.ApiKey = $api_key | .Passwordless.ApiSecret = $api_secret | .PasswordlessManagement.ManagementKey = $management_key | .SALT_TOKEN = $salt_token' \
     "$mounted_config" > "$mounted_temp"
   mv "$mounted_temp" "$mounted_config"
 fi
+
+# Magic Links
+export MagicLinks__NewAccountTimeout="0.00:00:00"
+
+# Configure overrides for the admin console app
+jq '.ApplicationOverrides.admin.IsRateLimitBypassEnabled = true | .ApplicationOverrides.admin.IsMagicLinkQuotaBypassEnabled = true' \
+  "$mounted_config" > "$mounted_temp"
+mv "$mounted_temp" "$mounted_config"
 
 # Generate SSL certificates
 if [ "$BWP_ENABLE_SSL" = "true" ] && [ ! -f /etc/bitwarden_passwordless/${BWP_SSL_KEY:-ssl.key} ]; then

@@ -1,6 +1,7 @@
 using Passwordless.Common.EventLog.Enums;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
+using Passwordless.Common.Models.Apps;
 using Passwordless.Service.EventLog.Models;
 
 namespace Passwordless.Service.EventLog.Loggers;
@@ -20,19 +21,6 @@ public static class EventLoggerExtensions
             Message = $"Created registration token for {performedBy}",
             Severity = Severity.Informational,
             EventType = EventType.ApiAuthUserRegistered,
-            PerformedAt = context.PerformedAt,
-            PerformedBy = performedBy,
-            Subject = context.TenantId,
-            TenantId = context.TenantId,
-            ApiKeyId = context.AbbreviatedKey
-        });
-
-    public static void LogSigninTokenCreatedEvent(this IEventLogger logger, string performedBy) =>
-        logger.LogEvent(context => new EventDto
-        {
-            Message = $"Created signin token for {performedBy}",
-            Severity = Severity.Informational,
-            EventType = EventType.ApiUserSigninTokenCreated,
             PerformedAt = context.PerformedAt,
             PerformedBy = performedBy,
             Subject = context.TenantId,
@@ -274,7 +262,8 @@ public static class EventLoggerExtensions
             ApiKeyId = context.AbbreviatedKey
         });
 
-    public static void LogInvalidApiSecretUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationSecretKey secretKey) =>
+    public static void LogInvalidApiSecretUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId,
+        ApplicationSecretKey secretKey) =>
         logger.LogEvent(new EventDto
         {
             PerformedAt = performedAt,
@@ -287,7 +276,8 @@ public static class EventLoggerExtensions
             ApiKeyId = secretKey.AbbreviatedValue
         });
 
-    public static void LogInvalidPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
+    public static void LogInvalidPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId,
+        ApplicationPublicKey publicKey) =>
         logger.LogEvent(new EventDto
         {
             PerformedAt = performedAt,
@@ -300,7 +290,8 @@ public static class EventLoggerExtensions
             ApiKeyId = publicKey.AbbreviatedValue
         });
 
-    public static void LogDisabledApiKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationSecretKey secretKey) =>
+    public static void LogDisabledApiKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId,
+        ApplicationSecretKey secretKey) =>
         logger.LogEvent(new EventDto
         {
             PerformedAt = performedAt,
@@ -313,7 +304,8 @@ public static class EventLoggerExtensions
             ApiKeyId = secretKey.AbbreviatedValue
         });
 
-    public static void LogDisabledPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId, ApplicationPublicKey publicKey) =>
+    public static void LogDisabledPublicKeyUsedEvent(this IEventLogger logger, DateTime performedAt, string tenantId,
+        ApplicationPublicKey publicKey) =>
         logger.LogEvent(new EventDto
         {
             PerformedAt = performedAt,
@@ -400,6 +392,45 @@ public static class EventLoggerExtensions
             TenantId = context.TenantId,
             EventType = EventType.AdminMagicLinksDisabled,
             Severity = Severity.Alert,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
+
+    public static void LogAuthenticationConfigurationCreated(this IEventLogger logger, AuthenticationConfigurationDto dto) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"{dto.Purpose} auth config created.",
+            PerformedBy = dto.CreatedBy ?? string.Empty,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiAuthenticationConfigurationCreated,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
+
+    public static void LogAuthenticationConfigurationUpdated(this IEventLogger logger, AuthenticationConfigurationDto dto) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"{dto.Purpose} auth config updated.",
+            PerformedBy = dto.EditedBy ?? string.Empty,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiAuthenticationConfigurationUpdated,
+            Severity = Severity.Informational,
+            Subject = context.TenantId,
+            ApiKeyId = string.Empty
+        });
+
+    public static void LogAuthenticationConfigurationDeleted(this IEventLogger logger, AuthenticationConfigurationDto dto, string performedBy) =>
+        logger.LogEvent(context => new EventDto
+        {
+            PerformedAt = context.PerformedAt,
+            Message = $"{dto.Purpose} auth config deleted.",
+            PerformedBy = performedBy,
+            TenantId = context.TenantId,
+            EventType = EventType.ApiAuthenticationConfigurationDeleted,
+            Severity = Severity.Informational,
             Subject = context.TenantId,
             ApiKeyId = string.Empty
         });

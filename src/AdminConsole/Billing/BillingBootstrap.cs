@@ -15,8 +15,6 @@ public static class BillingBootstrap
         builder.Services.AddOptions<BillingOptions>()
             .BindConfiguration("Stripe");
 
-        builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();
-
         // Todo: Improve this self-hosting story.
         if (builder.Configuration.IsSelfHosted())
         {

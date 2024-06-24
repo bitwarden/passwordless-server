@@ -13,7 +13,6 @@ namespace Passwordless.Service.Tests.Implementations;
 
 public class SharedManagementServiceTests
 {
-    private readonly Mock<ITenantStorage> _tenantStorageMock = new();
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
     private readonly Mock<IGlobalStorage> _storageMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
@@ -27,7 +26,6 @@ public class SharedManagementServiceTests
     public SharedManagementServiceTests()
     {
         _sut = new SharedManagementService(
-            _tenantStorageMock.Object,
             _tenantStorageFactoryMock.Object,
             _storageMock.Object,
             _systemClockMock.Object,
@@ -77,7 +75,7 @@ public class SharedManagementServiceTests
             AcountName = appId,
             CreatedAt = _now.AddDays(-1),
             Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AdminEmails = [deletedBy]
         };
 
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -110,7 +108,7 @@ public class SharedManagementServiceTests
             AcountName = appId,
             CreatedAt = _now.AddDays(-4),
             Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AdminEmails = [deletedBy]
         };
 
         tenantStorageMock.Setup(x => x.GetAccountInformation())
@@ -142,7 +140,7 @@ public class SharedManagementServiceTests
             AcountName = appId,
             CreatedAt = _now.AddDays(-365),
             Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AdminEmails = [deletedBy]
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -174,7 +172,7 @@ public class SharedManagementServiceTests
             AcountName = appId,
             CreatedAt = _now.AddDays(-365),
             Tenant = appId,
-            AdminEmails = new[] { deletedBy }
+            AdminEmails = [deletedBy]
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -227,7 +225,7 @@ public class SharedManagementServiceTests
             AcountName = appId,
             DeleteAt = _now.AddDays(-1),
             Tenant = appId,
-            AdminEmails = new[] { "admin@email.com" }
+            AdminEmails = ["admin@email.com"]
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -255,7 +253,7 @@ public class SharedManagementServiceTests
             AcountName = appId,
             DeleteAt = _now.AddDays(1),
             Tenant = appId,
-            AdminEmails = new[] { "admin@email.com" }
+            AdminEmails = ["admin@email.com"]
         };
         tenantStorageMock.Setup(x => x.GetAccountInformation())
             .ReturnsAsync(accountInformation);
@@ -268,7 +266,7 @@ public class SharedManagementServiceTests
 
         Assert.Equal("app_not_pending_deletion", actual.ErrorCode);
         Assert.Equal(400, actual.StatusCode);
-        Assert.Equal("App was not scheduled for deletion.", actual.Message);
+        Assert.Equal("App cannot be deleted yet.", actual.Message);
 
         tenantStorageMock.Verify(x => x.DeleteAccount(), Times.Never);
     }
@@ -364,29 +362,29 @@ public class SharedManagementServiceTests
         const string appId = "test";
         var storageMock = new Mock<ITenantStorage>();
         _tenantStorageFactoryMock.Setup(x => x.Create(It.Is<string>(p => p == appId))).Returns(storageMock.Object);
-        storageMock.Setup(x => x.GetAllApiKeys()).ReturnsAsync(new List<ApiKeyDesc>
-        {
+        storageMock.Setup(x => x.GetAllApiKeys()).ReturnsAsync([
             new()
             {
                 Tenant = "test",
                 ApiKey = "test:public:2e728aa5986f4ba8b073a5b28a939795",
                 Id = "9795",
-                Scopes = new[] { "register", "login" },
+                Scopes = ["register", "login"],
                 IsLocked = false,
                 LastLockedAt = new DateTime(2023, 10, 1),
                 LastUnlockedAt = new DateTime(2023, 10, 2)
             },
+
             new()
             {
                 Tenant = "test",
                 ApiKey = "Wx9XPDW1cp1Jb0LxElrh+g==:/7E93JhN30boFyNyVbCW/g==",
                 Id = "6d02",
-                Scopes = new[] { "token_register", "token_verify" },
+                Scopes = ["token_register", "token_verify"],
                 IsLocked = true,
                 LastLockedAt = new DateTime(2023, 11, 1),
                 LastUnlockedAt = null
             }
-        });
+        ]);
 
         // act
         var actual = await _sut.ListApiKeysAsync(appId);
@@ -401,8 +399,8 @@ public class SharedManagementServiceTests
         Assert.False(actualPublicKey.IsLocked);
         Assert.Equal(new DateTime(2023, 10, 1), actualPublicKey.LastLockedAt);
         Assert.Equal(2, actualPublicKey.Scopes.Count);
-        Assert.Contains(PublicKeyScopes.Register.GetValue(), actualPublicKey.Scopes);
-        Assert.Contains(PublicKeyScopes.Login.GetValue(), actualPublicKey.Scopes);
+        Assert.Contains(PublicKeyScopes.Register.GetDescription(), actualPublicKey.Scopes);
+        Assert.Contains(PublicKeyScopes.Login.GetDescription(), actualPublicKey.Scopes);
 
         var actualSecretKey = actual.Last();
         Assert.Equal("6d02", actualSecretKey.Id);
@@ -411,8 +409,8 @@ public class SharedManagementServiceTests
         Assert.True(actualSecretKey.IsLocked);
         Assert.Equal(new DateTime(2023, 11, 1), actualSecretKey.LastLockedAt);
         Assert.Equal(2, actualSecretKey.Scopes.Count);
-        Assert.Contains(SecretKeyScopes.TokenRegister.GetValue(), actualSecretKey.Scopes);
-        Assert.Contains(SecretKeyScopes.TokenVerify.GetValue(), actualSecretKey.Scopes);
+        Assert.Contains(SecretKeyScopes.TokenRegister.GetDescription(), actualSecretKey.Scopes);
+        Assert.Contains(SecretKeyScopes.TokenVerify.GetDescription(), actualSecretKey.Scopes);
     }
     #endregion
 }

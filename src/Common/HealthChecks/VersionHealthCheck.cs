@@ -15,7 +15,8 @@ public class VersionHealthCheck : IHealthCheck
             {
                 ["version"] = assembly.GetInformationalVersion() ??
                               assembly.GetName().Version?.ToString() ??
-                              "unknown version"
+                              "unknown version",
+                ["net-runtime-version"] = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription
             })
         );
     }

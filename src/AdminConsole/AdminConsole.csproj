@@ -6,38 +6,28 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.2.3" />
-    <PackageReference Include="Azure.Identity" Version="1.11.0" />
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
     <PackageReference Include="Datadog.Trace" Version="2.41.0" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.1" />
+    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Passwordless.AspNetCore" Version="2.0.0-beta8" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
-    <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
-    <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.5.2" />
-    <PackageReference Include="Serilog.Sinks.Seq" Version="6.0.0" />
     <PackageReference Include="Stripe.net" Version="41.*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Pages\App\Settings\SecretKeyCreated.cshtml.cs">
-      <DependentUpon>SecretKeyCreated.cshtml</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -47,17 +37,17 @@
   <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
     <Exec Command="npm ci" />
     <Exec Command="npm run build" />
-    
+
     <!-- Passwordless.dev Javascript Client -->
     <Copy SourceFiles="node_modules\@passwordlessdev\passwordless-client\dist\umd\passwordless.umd.min.js" DestinationFolder="wwwroot\lib\passwordless\" />
-    
+
     <!-- Apex Charts -->
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.min.js" DestinationFolder="wwwroot\lib\apexcharts\" />
     <Copy SourceFiles="node_modules\apexcharts\dist\apexcharts.css" DestinationFolder="wwwroot\lib\apexcharts\" />
 
     <!-- ES Module Shims -->
     <Copy SourceFiles="node_modules\es-module-shims\dist\es-module-shims.js" DestinationFolder="wwwroot\lib\es-module-shims\" />
-    
+
     <!-- Vue.js -->
     <Copy Condition="'$(Configuration)' == 'Debug'" SourceFiles="node_modules\vue\dist\vue.esm-browser.js" DestinationFiles="wwwroot\lib\vue\vue.mjs" />
     <Copy Condition="'$(Configuration)' == 'Release'" SourceFiles="node_modules\vue\dist\vue.esm-browser.prod.js" DestinationFiles="wwwroot\lib\vue\vue.mjs" />

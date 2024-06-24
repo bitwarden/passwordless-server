@@ -1,7 +1,7 @@
 using System.Text.Json;
+using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Utils;
@@ -28,6 +28,7 @@ public abstract class DbGlobalContext : DbContext
     public DbSet<DispatchedEmail> DispatchedEmails => Set<DispatchedEmail>();
     public DbSet<PeriodicCredentialReport> PeriodicCredentialReports => Set<PeriodicCredentialReport>();
     public DbSet<PeriodicActiveUserReport> PeriodicActiveUserReports => Set<PeriodicActiveUserReport>();
+    public DbSet<AuthenticationConfiguration> AuthenticationConfigurations => Set<AuthenticationConfiguration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -125,28 +126,48 @@ public abstract class DbGlobalContext : DbContext
                 .IsRequired();
         });
 
+        modelBuilder.Entity<AuthenticationConfiguration>(builder =>
+        {
+            builder.HasKey(x => new { x.Tenant, x.Purpose });
+            builder.Property(x => x.UserVerificationRequirement)
+                .HasMaxLength(255)
+                .HasConversion(
+                    x => x.ToEnumMemberValue(),
+                    x => x.ToEnum<UserVerificationRequirement>());
+            builder.Property(x => x.TimeToLive)
+                .HasConversion(
+                    x => x.TotalSeconds,
+                    x => TimeSpan.FromSeconds(x));
+        });
+
         base.OnModelCreating(modelBuilder);
     }
 
-    public Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
+    // TODO: probably makes sense to replace this with modelBuilder.Entity<...>(builder => builder.HasData(...))
+    public async Task SeedDefaultApplicationAsync(string appName, string publicKey, string privateKey)
     {
-        ApiKeys.Add(new ApiKeyDesc
+        if (await AccountInfo.AnyAsync(x => x.Tenant == appName))
+        {
+            return;
+        }
+
+        await ApiKeys.AddAsync(new ApiKeyDesc
         {
             Tenant = appName,
             Id = publicKey[^4..],
             ApiKey = publicKey,
-            Scopes = [PublicKeyScopes.Register.GetValue(), PublicKeyScopes.Login.GetValue()]
+            Scopes = [PublicKeyScopes.Register.GetDescription(), PublicKeyScopes.Login.GetDescription()]
         });
 
-        ApiKeys.Add(new ApiKeyDesc
+        await ApiKeys.AddAsync(new ApiKeyDesc
         {
             Tenant = appName,
             Id = privateKey[^4..],
             ApiKey = ApiKeyUtils.HashPrivateApiKey(privateKey),
-            Scopes = [SecretKeyScopes.TokenRegister.GetValue(), SecretKeyScopes.TokenVerify.GetValue()]
+            Scopes = [SecretKeyScopes.TokenRegister.GetDescription(), SecretKeyScopes.TokenVerify.GetDescription()]
         });
 
-        var application = new AccountMetaInformation
+        await AccountInfo.AddAsync(new AccountMetaInformation
         {
             Tenant = appName,
             AcountName = appName,
@@ -159,12 +180,8 @@ public abstract class DbGlobalContext : DbContext
                 IsMagicLinksEnabled = true,
                 MagicLinkEmailMonthlyQuota = 2000,
                 MaxUsers = null,
-                Tenant = appName,
+                Tenant = appName
             }
-        };
-
-        AccountInfo.Add(application);
-
-        return Task.CompletedTask;
+        });
     }
 }

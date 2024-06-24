@@ -3,7 +3,9 @@ using Fido2NetLib.Objects;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Utils;
+using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Models;
+using AuthenticationConfiguration = Passwordless.Service.Models.AuthenticationConfiguration;
 
 namespace Passwordless.Service.Storage.Ef;
 
@@ -338,6 +340,54 @@ public class EfTenantStorage(
         await db.SaveChangesAsync();
 
         return email;
+    }
+
+    public async Task<IEnumerable<AuthenticationConfigurationDto>> GetAuthenticationConfigurationsAsync(
+        GetAuthenticationConfigurationsFilter filter)
+    {
+        var query = db.AuthenticationConfigurations.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Purpose))
+        {
+            query = query.Where(x => x.Purpose == filter.Purpose);
+        }
+
+        var configurations = await query.ToListAsync();
+
+        return configurations.Select(x => x.ToDto());
+    }
+
+    public async Task CreateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        db.AuthenticationConfigurations.Add(new AuthenticationConfiguration
+        {
+            Purpose = configuration.Purpose.Value,
+            UserVerificationRequirement = configuration.UserVerificationRequirement,
+            TimeToLive = configuration.TimeToLive,
+            Tenant = Tenant,
+            CreatedBy = configuration.CreatedBy ?? string.Empty,
+            CreatedOn = configuration.CreatedOn?.UtcDateTime
+        });
+
+        await db.SaveChangesAsync();
+    }
+
+    public async Task UpdateAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        await db.AuthenticationConfigurations
+            .Where(x => x.Purpose == configuration.Purpose.Value)
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(c => c.TimeToLive, configuration.TimeToLive)
+                .SetProperty(c => c.UserVerificationRequirement, configuration.UserVerificationRequirement)
+                .SetProperty(c => c.EditedBy, configuration.EditedBy)
+                .SetProperty(c => c.EditedOn, configuration.EditedOn.HasValue ? configuration.EditedOn.Value.UtcDateTime : null)
+                .SetProperty(c => c.LastUsedOn, configuration.LastUsedOn.HasValue ? configuration.LastUsedOn.Value.UtcDateTime : null));
+    }
+
+    public async Task DeleteAuthenticationConfigurationAsync(AuthenticationConfigurationDto configuration)
+    {
+        await db.AuthenticationConfigurations.Where(x => x.Purpose == configuration.Purpose.Value)
+            .ExecuteDeleteAsync();
     }
 
     public async Task LockAllApiKeys(bool isLocked)

@@ -107,8 +107,8 @@
         if (lastActiveUserReport != null)
         {
             double totalUsers = lastActiveUserReport.TotalUsers;
-            SummaryItems.Add(new TrendingCardsStats.Item("Daily Active Users", lastActiveUserReport.DailyActiveUsers, TrendingCardsStats.ValueTypes.Integer, "({0} of total)", lastActiveUserReport.DailyActiveUsers / totalUsers, TrendingCardsStats.ValueTypes.Percentage));
-            SummaryItems.Add(new TrendingCardsStats.Item("Weekly Active Users", lastActiveUserReport.WeeklyActiveUsers, TrendingCardsStats.ValueTypes.Integer, "({0} of total)", lastActiveUserReport.WeeklyActiveUsers / totalUsers, TrendingCardsStats.ValueTypes.Percentage));
+            SummaryItems.Add(new TrendingCardsStats.Item("Daily Active Users", lastActiveUserReport.DailyActiveUsers, TrendingCardsStats.ValueTypes.Integer, "({0} of total)", totalUsers == 0 ? 0 : lastActiveUserReport.DailyActiveUsers / totalUsers, TrendingCardsStats.ValueTypes.Percentage));
+            SummaryItems.Add(new TrendingCardsStats.Item("Weekly Active Users", lastActiveUserReport.WeeklyActiveUsers, TrendingCardsStats.ValueTypes.Integer, "({0} of total)", totalUsers == 0 ? 0 : lastActiveUserReport.WeeklyActiveUsers / totalUsers, TrendingCardsStats.ValueTypes.Percentage));
         }
         return true;
     }

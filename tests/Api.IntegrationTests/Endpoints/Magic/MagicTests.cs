@@ -21,13 +21,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_can_send_a_magic_link_email()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
@@ -45,13 +44,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_cannot_send_a_magic_link_email_if_the_feature_is_disabled()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
         _ = await client.DisableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
@@ -69,13 +67,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_receive_a_validation_error_when_the_url_does_not_contain_the_token_template()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
         _ = await client.EnableMagicLinks("a_user");
         var request = _requestFaker
             .RuleFor(x => x.UrlTemplate, faker => faker.Internet.Url())
@@ -102,13 +99,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_receive_a_validation_error_when_an_invalid_url_is_sent()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker
             .RuleFor(x => x.UrlTemplate, () => SendMagicLinkRequest.TokenTemplate)
@@ -135,14 +131,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_cannot_send_a_magic_link_email_to_a_non_admin_address_if_the_application_is_too_new()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse =
-            await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = "admin@email.com" });
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = "admin@email.com" });
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
@@ -161,19 +155,48 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_can_send_a_magic_link_email_to_an_admin_address_even_if_the_application_is_too_new()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         const string emailAddress = "admin@email.com";
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse =
-            await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = emailAddress });
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = emailAddress });
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker
             .RuleFor(x => x.EmailAddress, emailAddress)
             .Generate();
+
+        // Act
+        using var response = await client.PostAsJsonAsync("magic-links/send", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task I_can_send_a_magic_link_email_to_a_non_admin_address_if_the_application_is_old_enough()
+    {
+        // Arrange
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
+        {
+            TestOutput = testOutput,
+            Settings = new Dictionary<string, string?>
+            {
+                // 1 day 13 hours = 37 hours
+                ["MagicLinks:NewAccountTimeout"] = "1.13:00:00"
+            }
+        });
+
+        using var client = api.CreateClient();
+
+        var applicationName = CreateAppHelpers.GetApplicationName();
+        var app = await client.CreateApplicationAsync(applicationName, new CreateAppDto { AdminEmail = "admin@email.com" });
+        client.AddSecretKey(app!.ApiSecret1);
+        await client.EnableMagicLinks("a_user");
+        var request = _requestFaker.Generate();
+
+        api.Time.Advance(TimeSpan.FromHours(37.1));
 
         // Act
         using var response = await client.PostAsJsonAsync("magic-links/send", request);
@@ -188,13 +211,12 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
     public async Task I_cannot_send_too_many_magic_link_emails_in_a_short_time()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
@@ -232,7 +254,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             Settings = new Dictionary<string, string?>
             {
@@ -243,11 +265,8 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
 
         using var client = api.CreateClient();
 
-        using var appCreateResponse =
-            await client.CreateApplicationAsync(applicationName,
-                new CreateAppDto { MagicLinkEmailMonthlyQuota = 1000 });
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName, new CreateAppDto { MagicLinkEmailMonthlyQuota = 1000 });
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 
@@ -292,7 +311,7 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
         // Arrange
         var applicationName = CreateAppHelpers.GetApplicationName();
 
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
             Settings = new Dictionary<string, string?>
             {
@@ -303,9 +322,8 @@ public class MagicTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
 
         using var client = api.CreateClient();
 
-        using var appCreateResponse = await client.CreateApplicationAsync(applicationName);
-        var appCreated = await appCreateResponse.Content.ReadFromJsonAsync<CreateAppResultDto>();
-        client.AddSecretKey(appCreated!.ApiSecret1);
+        var app = await client.CreateApplicationAsync(applicationName);
+        client.AddSecretKey(app.ApiSecret1);
         await client.EnableMagicLinks("a_user");
         var request = _requestFaker.Generate();
 

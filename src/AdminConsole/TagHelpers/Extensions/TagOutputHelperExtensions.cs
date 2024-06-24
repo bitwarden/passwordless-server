@@ -13,7 +13,8 @@ public static class TagHelperOutputExtensions
         {
             throw new ArgumentNullException(nameof(output));
         }
+
         var content = output.Content.GetContent();
-        return $"<{output.TagName} {output.Attributes.ToHtmlOutput()}>{output.Content.GetContent()}</{output.TagName}>";
+        return $"<{output.TagName} {output.Attributes.ToHtmlOutput()}>{content}</{output.TagName}>";
     }
 }

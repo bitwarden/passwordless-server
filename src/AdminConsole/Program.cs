@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.BackgroundServices;
@@ -22,10 +23,10 @@ using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.HealthChecks;
+using Passwordless.Common.Logging;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Services.Mail;
 using Serilog;
-using Serilog.Sinks.Datadog.Logs;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -33,7 +34,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    RunTheApp();
+    await RunAppAsync();
 }
 catch (Exception e)
 {
@@ -44,7 +45,7 @@ finally
     Log.CloseAndFlush();
 }
 
-void RunTheApp()
+async Task RunAppAsync()
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -55,36 +56,7 @@ void RunTheApp()
 
     builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 
-    builder.Host.UseSerilog((ctx, sp, config) =>
-    {
-        config
-            .ReadFrom.Configuration(ctx.Configuration)
-            .ReadFrom.Services(sp)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .WriteTo.Console();
-
-        if (builder.Environment.IsDevelopment())
-        {
-            config.WriteTo.Seq("http://localhost:5341");
-        }
-
-        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
-        if (!string.IsNullOrEmpty(ddApiKey))
-        {
-            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
-            var ddUrl = $"https://http-intake.logs.{ddSite}";
-            var ddConfig = new DatadogConfiguration(ddUrl);
-
-            if (!string.IsNullOrEmpty(ddApiKey))
-            {
-                config.WriteTo.DatadogLogs(
-                    ddApiKey,
-                    configuration: ddConfig);
-            }
-        }
-    });
+    builder.AddSerilog();
 
     IServiceCollection services = builder.Services;
 
@@ -110,8 +82,14 @@ void RunTheApp()
 
     builder.AddDatabase();
 
+    builder.Services.AddScoped<IPostSignInHandlerService, PostSignInHandlerService>();
     services.ConfigureApplicationCookie(o =>
     {
+        o.Events.OnSignedIn = async context =>
+        {
+            var handler = context.HttpContext.RequestServices.GetRequiredService<IPostSignInHandlerService>();
+            await handler.HandleAsync();
+        };
         o.Cookie.Name = "AdminConsoleSignIn";
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
     });
@@ -178,7 +156,6 @@ void RunTheApp()
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
-        app.UseMigrationsEndPoint();
     }
     else
     {
@@ -196,7 +173,7 @@ void RunTheApp()
     app.UseMiddleware<SecurityHeadersMiddleware>();
     app.UseHttpsRedirection();
     app.UseStaticFiles();
-    app.UseSerilogRequestLogging();
+    app.UseSerilog(withUserAgent: true);
     app.UseRouting();
     app.UseAuthentication();
     app.UseWhen(
@@ -215,11 +192,19 @@ void RunTheApp()
 
     app.MapRazorComponents<App>();
 
-    app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
     app.MapBillingEndpoints();
 
     app.MapPasswordlessHealthChecks();
+
+    // Apply migrations
+    if (app.Environment.IsDevelopment())
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ConsoleDbContext>();
+
+        await dbContext.Database.MigrateAsync();
+    }
 
     app.Run();
 }

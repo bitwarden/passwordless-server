@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages.Organization;
@@ -9,12 +7,10 @@ namespace Passwordless.AdminConsole.Pages.Organization;
 public class OverviewModel : PageModel
 {
     private readonly IDataService _dataService;
-    private readonly UserManager<ConsoleAdmin> userManager;
 
-    public OverviewModel(IDataService dataService, UserManager<ConsoleAdmin> userManager)
+    public OverviewModel(IDataService dataService)
     {
         _dataService = dataService;
-        this.userManager = userManager;
     }
 
     public bool CanCreateApplication { get; set; }

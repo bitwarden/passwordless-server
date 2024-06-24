@@ -11,54 +11,26 @@ using Passwordless.Api.Extensions;
 using Passwordless.Api.HealthChecks;
 using Passwordless.Api.Helpers;
 using Passwordless.Api.Middleware;
+using Passwordless.Api.OpenApi;
 using Passwordless.Api.OpenApi.Filters;
 using Passwordless.Api.RateLimiting;
 using Passwordless.Api.Reporting.Background;
 using Passwordless.Common.Configuration;
 using Passwordless.Common.HealthChecks;
+using Passwordless.Common.Logging;
 using Passwordless.Common.Middleware.SelfHosting;
+using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
 using Passwordless.Service.Features;
 using Passwordless.Service.MDS;
 using Passwordless.Service.Storage.Ef;
-using Serilog;
-using Serilog.Sinks.Datadog.Logs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(swagger =>
-{
-    swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Passwordless.Api.xml"), true);
-    swagger.DocInclusionPredicate((docName, apiDesc) =>
-    {
-        var policy = (AuthorizationPolicy?)apiDesc.ActionDescriptor.EndpointMetadata.FirstOrDefault(x => x.GetType() == typeof(AuthorizationPolicy));
-        if (policy == null)
-        {
-            return false;
-        }
-        return !policy.AuthenticationSchemes.Contains(Constants.ManagementKeyAuthenticationScheme);
-    });
-    swagger.OperationFilter<AuthorizationOperationFilter>();
-    swagger.OperationFilter<ExtendedStatusDescriptionsOperationFilter>();
-    swagger.OperationFilter<ExternalDocsOperationFilter>();
-    swagger.SupportNonNullableReferenceTypes();
-    swagger.SwaggerDoc("v4", new OpenApiInfo
-    {
-        Version = "v4",
-        Title = "Passwordless.dev API",
-        TermsOfService = new Uri("https://bitwarden.com/terms/"),
-        Contact = new OpenApiContact
-        {
-            Email = "support@passwordless.dev",
-            Name = "Support",
-            Url = new Uri("https://bitwarden.com/contact/")
-        }
-    });
-    swagger.SwaggerGeneratorOptions.IgnoreObsoleteActions = true;
-});
+builder.Services.AddOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
@@ -66,41 +38,8 @@ if (builder.Configuration.IsSelfHosted())
 }
 
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
-builder.Host.UseSerilog((ctx, sp, config) =>
-    {
-        config
-            .ReadFrom.Configuration(ctx.Configuration)
-            .ReadFrom.Services(sp)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .WriteTo.Console();
 
-        if (builder.Environment.IsDevelopment())
-        {
-            config.WriteTo.Seq("http://localhost:5341");
-        }
-
-        var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
-        if (!string.IsNullOrEmpty(ddApiKey))
-        {
-            var ddSite = Environment.GetEnvironmentVariable("DD_SITE") ?? "datadoghq.eu";
-            var ddUrl = $"https://http-intake.logs.{ddSite}";
-            var ddConfig = new DatadogConfiguration(ddUrl);
-
-            if (!string.IsNullOrEmpty(ddApiKey))
-            {
-                config.WriteTo.DatadogLogs(
-                    ddApiKey,
-                    configuration: ddConfig);
-            }
-        }
-    },
-    false,
-    // Pass log events down to other logging providers (e.g. Microsoft) after Serilog, so
-    // that they can be processed in a uniform way in tests.
-    true
-);
+builder.AddSerilog();
 
 var services = builder.Services;
 
@@ -130,7 +69,7 @@ services.ConfigureHttpJsonOptions(options =>
 });
 
 services.AddDatabase(builder.Configuration);
-services.AddTransient<ISharedManagementService, SharedManagementService>();
+services.AddScoped<ISharedManagementService, SharedManagementService>();
 services.AddScoped<UserCredentialsService>();
 services.AddScoped<IReportingService, ReportingService>();
 services.AddScoped<IApplicationService, ApplicationService>();
@@ -150,6 +89,8 @@ services.AddMemoryCache();
 services.AddDistributedMemoryCache();
 builder.AddMetaDataService();
 
+builder.Services.AddTransient<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
+
 services.AddSingleton(sp =>
     // TODO: Remove this and use proper Ilogger<YourType>
     sp.GetRequiredService<ILoggerFactory>().CreateLogger("NonTyped"));
@@ -164,7 +105,8 @@ if (builder.Environment.IsDevelopment())
 
 builder.AddPasswordlessHealthChecks();
 
-builder.Services.AddMagicLinks();
+builder.Services.AddOptions<ApplicationOverridesOptions>().BindConfiguration("ApplicationOverrides");
+builder.AddMagicLinks();
 
 WebApplication app = builder.Build();
 
@@ -172,7 +114,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
-    app.UseDevelopmentEndpoints();
 }
 else
 {
@@ -182,21 +123,7 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-{
-    httpReq.HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-}));
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v4/swagger.json", "v4");
-    c.ConfigObject.ShowExtensions = true;
-    c.ConfigObject.ShowCommonExtensions = true;
-    c.DefaultModelsExpandDepth(-1);
-    c.IndexStream = () => typeof(Program).Assembly.GetManifestResourceStream("Passwordless.Api.OpenApi.swagger.html");
-    c.InjectStylesheet("/openapi.css");
-    c.SupportedSubmitMethods();
-});
+app.UseOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
@@ -225,9 +152,8 @@ app.UseWhen(o =>
 });
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();
 app.UseMiddleware<LoggingMiddleware>();
-app.UseSerilogRequestLogging();
+app.UseSerilog();
 app.UseWhen(o =>
 {
     if (o.Request.Path == "/")
@@ -252,9 +178,30 @@ app.MapEventLogEndpoints();
 app.MapReportingEndpoints();
 app.MapMetaDataServiceEndpoints();
 app.MapAuthenticatorsEndpoints();
+app.MapAuthenticationConfigurationEndpoints();
 
 app.MapPasswordlessHealthChecks();
 
+// Apply migrations and seed data
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DbGlobalContext>();
+
+    await dbContext.Database.MigrateAsync();
+
+    await dbContext.SeedDefaultApplicationAsync(
+        "test",
+        "test:public:2e728aa5986f4ba8b073a5b28a939795",
+        "test:secret:a679563b331846c79c20b114a4f56d02"
+    );
+
+    await dbContext.SaveChangesAsync();
+}
+
 app.Run();
 
+/// <summary>
+/// Application entrypoint.
+/// </summary>
 public partial class Program;

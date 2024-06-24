@@ -24,8 +24,10 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_can_view_a_list_of_registered_users_credentials()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         const string originUrl = PasswordlessApi.OriginUrl;
         const string rpId = PasswordlessApi.RpId;
@@ -67,8 +69,10 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_get_with_secret_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         // Act
         using var credentialsResponse = await client.GetAsync("credentials/list");
@@ -86,8 +90,10 @@ public class CredentialsTests(ITestOutputHelper testOutput, PasswordlessApiFixtu
     public async Task I_am_told_to_pass_the_user_id_when_getting_credential_list_using_post_with_secret_key()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         var request = new GetCredentialsRequest(null!);
 

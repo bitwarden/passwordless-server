@@ -15,7 +15,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
     public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_secret_with_a_non_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -23,8 +23,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = await client.CreateApplicationAsync(applicationName);
         client.AddSecretKey("e=mc2trooper");
 
         // Act
@@ -38,7 +37,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
     public async Task I_receive_a_404_when_i_use_a_badly_formatted_api_key_with_a_non_existing_endpoint()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
 
             TestOutput = testOutput
@@ -46,8 +45,7 @@ public class RoutingIntegrationTests(ITestOutputHelper testOutput, PasswordlessA
         using var client = api.CreateClient();
 
         var applicationName = CreateAppHelpers.GetApplicationName();
-        using var createApplicationMessage = await client.CreateApplicationAsync(applicationName);
-        _ = await createApplicationMessage.Content.ReadFromJsonAsync<CreateAppResultDto>();
+        _ = await client.CreateApplicationAsync(applicationName);
         client.AddPublicKey("e=mc2trooper");
 
         // Act

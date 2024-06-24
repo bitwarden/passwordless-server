@@ -1,6 +1,7 @@
 ﻿@page "/settings"
 @using Badge = Passwordless.AdminConsole.Components.Shared.Badge
 @using Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsComponents
+@using Passwordless.AdminConsole.Components.Pages.App.Settings
 @model SettingsModel
 @inject IWebHostEnvironment Environment
 
@@ -97,12 +98,14 @@
 {
     <panel header="Attestation">
         <p>When attestation is enabled, you can choose to limit the authenticators used with your application.</p>
-        
+
         <div>
             <a class="btn-primary" href="/app/@Model.ApplicationId/settings/authenticators">View authenticators</a>
         </div>
     </panel>
 }
+
+<component type="typeof(AuthenticationConfiguration)" render-mode="Static" />
 
 <panel header="Delete Application">
     @if (Model.PendingDelete)
@@ -115,20 +118,21 @@
     else
     {
         <form method="post" asp-page-handler="Delete">
-            <p>
-                If your app contains no credentials or was newly created, <strong>the app will be deleted immediately</strong>.
-            </p>
-            <p class="">If your app <strong>does contain credentials</strong>, the following will happen once you choose to delete the application:</p>
-    
-            <ul role="list" class="list-decimal list-inside my-2">
-                <li class="">No data will be deleted immediately.</li>
-                <li>Your API Keys will be frozen - meaning no authentication calls can be made.</li>
-                <li>Admins can cancel the process at any time. The API will return to normal behavior.</li>
-                <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
-            </ul>
-    
+            @if (!Model.CanDeleteImmediately)
+            {
+                <p>
+                    Because your application contains credentials, <strong>you cannot delete it immediately</strong>. Instead, the following will happen once you choose to delete the application:
+                </p>
+
+                <ul role="list" class="list-decimal list-inside my-2">
+                    <li class="">No data will be deleted immediately.</li>
+                    <li>Your API Keys will be frozen - meaning no authentication calls can be made.</li>
+                    <li>Admins can cancel the process at any time. The API will return to normal behavior.</li>
+                    <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
+                </ul>
+            }
+
             <div id="deleteApplication"></div>
-    
         </form>
     }
 </panel>

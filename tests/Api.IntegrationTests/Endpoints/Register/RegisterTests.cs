@@ -22,12 +22,14 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_retrieve_token_to_start_registration()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         var request = _tokenGenerator.Generate();
 
@@ -45,12 +47,14 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_retrieve_the_credential_create_options_and_session_token_for_creating_a_new_user()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         var tokenRequest = _tokenGenerator.Generate();
         var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
@@ -78,17 +82,19 @@ public class RegisterTests(ITestOutputHelper testOutput, PasswordlessApiFixture 
     public async Task I_can_use_a_passkey_to_register_a_new_user()
     {
         // Arrange
-        await using var api = await apiFixture.CreateApiAsync(new PasswordlessApiOptions
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
         {
-
             TestOutput = testOutput
         });
-        using var client = api.CreateClient().AddPublicKey().AddSecretKey().AddUserAgent();
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
 
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
 
         // Act
-        using var registerCompleteResponse = await UserHelpers.RegisterNewUser(client, driver);
+        using var registerCompleteResponse = await client.RegisterNewUserAsync(driver);
 
         // Assert
         registerCompleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);

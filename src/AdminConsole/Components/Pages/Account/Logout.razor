@@ -1,0 +1,38 @@
+@page "/account/logout"
+@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.Identity
+
+@inject SignInManager<ConsoleAdmin> SignInManager
+@inject NavigationManager NavigationManager
+
+<Page Title="Log out">
+    <EditForm class="form-inline" FormName="logout-form" EditContext="ModelContext" OnSubmit="OnLogOutClickedAsync">
+        <p>You're about to log out from the Admin Console</p>
+        <button type="submit" class="btn-primary mt-3">Yes I'm sure</button>
+    </EditForm>
+</Page>
+
+@code {
+    public EditContext? ModelContext { get; set; }
+    
+    [SupplyParameterFromForm(FormName = "logout-form")]
+    public LogOutFormModel? Model { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model ??= new LogOutFormModel();
+        ModelContext = new EditContext(Model);
+    }
+    
+    private async Task OnLogOutClickedAsync()
+    {
+        await SignInManager.SignOutAsync();
+        NavigationManager.Refresh();
+    }
+
+    public class LogOutFormModel
+    {
+        public string? Action { get; set; }
+    }
+
+}

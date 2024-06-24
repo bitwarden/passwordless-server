@@ -25,6 +25,7 @@ public interface ISharedManagementService
     Task<ValidatePublicKeyDto> ValidatePublicKeyAsync(string publicKey);
     Task FreezeAccountAsync(string accountName);
     Task UnFreezeAccountAsync(string accountName);
+    Task<bool> CanDeleteApplicationImmediatelyAsync(string appId);
     Task<AppDeletionResult> DeleteApplicationAsync(string appId);
     Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl);
     Task<IEnumerable<string>> GetApplicationsPendingDeletionAsync();
@@ -43,18 +44,16 @@ public class SharedManagementService : ISharedManagementService
     private readonly ILogger _logger;
     private readonly IEventLogger _eventLogger;
     private readonly ISystemClock _systemClock;
-    private readonly ITenantStorage _tenantStorage;
     private readonly ITenantStorageFactory tenantFactory;
     private readonly IGlobalStorage _storage;
 
-    public SharedManagementService(ITenantStorage tenantStorage,
+    public SharedManagementService(
         ITenantStorageFactory tenantFactory,
         IGlobalStorage storage,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
         IEventLogger eventLogger)
     {
-        _tenantStorage = tenantStorage;
         this.tenantFactory = tenantFactory;
         _storage = storage;
         _systemClock = systemClock;
@@ -208,6 +207,23 @@ public class SharedManagementService : ISharedManagementService
         await storage.SetAppDeletionDate(null);
     }
 
+    public async Task<bool> CanDeleteApplicationImmediatelyAsync(string appId)
+    {
+        var storage = tenantFactory.Create(appId);
+        var accountInformation = await storage.GetAccountInformation();
+        if (accountInformation == null)
+        {
+            throw new ApiException("app_not_found", "App was not found.", 400);
+        }
+
+        // Application can be deleted immediately if...
+        return
+            // It's less than 3 days old, or...
+            (_systemClock.UtcNow - accountInformation.CreatedAt) < TimeSpan.FromDays(3) ||
+            // It has no users
+            !(await storage.HasUsersAsync());
+    }
+
     public async Task<AppDeletionResult> DeleteApplicationAsync(string appId)
     {
         var storage = tenantFactory.Create(appId);
@@ -218,9 +234,15 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_not_found", "App was not found.", 400);
         }
 
-        if (!accountInformation.DeleteAt.HasValue || accountInformation.DeleteAt > _systemClock.UtcNow)
+        if (!accountInformation.DeleteAt.HasValue)
         {
             throw new ApiException("app_not_pending_deletion", "App was not scheduled for deletion.", 400);
+        }
+
+        if (accountInformation.DeleteAt > _systemClock.UtcNow)
+        {
+            // Maybe this should have a different error code?
+            throw new ApiException("app_not_pending_deletion", "App cannot be deleted yet.", 400);
         }
 
         await storage.DeleteAccount();
@@ -229,7 +251,8 @@ public class SharedManagementService : ISharedManagementService
             $"The app '{accountInformation.AcountName}' was deleted.",
             true,
             _systemClock.UtcNow.UtcDateTime,
-            accountInformation.AdminEmails);
+            accountInformation.AdminEmails
+        );
     }
 
     public async Task<AppDeletionResult> MarkDeleteApplicationAsync(string appId, string deletedBy, string baseUrl)
@@ -246,21 +269,17 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("app_pending_deletion", "App is already pending to be deleted.", 400);
         }
 
-        bool canDeleteImmediately = accountInformation.CreatedAt > _systemClock.UtcNow.AddDays(-3);
-
-        if (!canDeleteImmediately)
-        {
-            canDeleteImmediately = !(await storage.HasUsersAsync());
-        }
-
+        var canDeleteImmediately = await CanDeleteApplicationImmediatelyAsync(appId);
         if (canDeleteImmediately)
         {
             await storage.DeleteAccount();
+
             return new AppDeletionResult(
                 $"The app '{accountInformation.AcountName}' was deleted.",
                 true,
                 _systemClock.UtcNow.UtcDateTime,
-                accountInformation.AdminEmails);
+                accountInformation.AdminEmails
+            );
         }
 
         // Lock/Freeze all API keys that have been issued.
@@ -398,7 +417,7 @@ public class SharedManagementService : ISharedManagementService
         var secretKey = ApiKeyUtils.GeneratePrivateApiKey(accountName, "secret");
         // last 4 chars
         var pk2 = secretKey.originalApiKey.Substring(secretKey.originalApiKey.Length - 4);
-        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, scopes.Select(x => x.GetValue()).ToArray());
+        await storage.StoreApiKey(pk2, secretKey.hashedApiKey, scopes.Select(x => x.GetDescription()).ToArray());
         return secretKey;
     }
 
@@ -413,7 +432,7 @@ public class SharedManagementService : ISharedManagementService
         var publicKey = ApiKeyUtils.GeneratePublicApiKey(accountName, "public");
         // last 4 chars
         var pk = publicKey.Substring(publicKey.Length - 4);
-        await storage.StoreApiKey(pk, publicKey, scopes.Select(x => x.GetValue()).ToArray());
+        await storage.StoreApiKey(pk, publicKey, scopes.Select(x => x.GetDescription()).ToArray());
         return publicKey;
     }
 }

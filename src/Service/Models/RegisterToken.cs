@@ -62,6 +62,9 @@ public class VerifySignInToken : Token
 
     [MessagePack.Key(18)]
     public byte[] CredentialId { get; set; }
+
+    [MessagePack.Key(19)]
+    public string Purpose { get; set; }
 }
 
 [MessagePackObject]
