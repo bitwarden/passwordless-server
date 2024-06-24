@@ -73,8 +73,8 @@ public class ApplicationNavMenuTests : TestContext
         Assert.Contains("Playground", links[1].TextContent);
         Assert.Contains("Users", links[2].TextContent);
         Assert.Contains("Reporting", links[3].TextContent);
-        Assert.Contains("Settings", links[4].TextContent);
-        Assert.Contains("App Logs", links[5].TextContent);
+        Assert.Contains("App Logs", links[4].TextContent);
+        Assert.Contains("Settings", links[5].TextContent);
     }
 
     [Fact]
@@ -102,16 +102,14 @@ public class ApplicationNavMenuTests : TestContext
         _authorizationContext.SetAuthorized("John Doe");
         _authorizationContext.SetPolicies(CustomPolicy.HasAppRole);
 
-
         // Act
         var cut = RenderComponent<ApplicationNavMenu>();
 
         // Assert
         var submenu = cut.Find("div[id=\"app-submenu\"]");
         var links = submenu.Children.Where(x => x.ClassName == "nav-link").ToImmutableList();
-        Assert.Equal(2, links.Count);
+        Assert.Single(links);
         Assert.Contains("Settings", links[0].TextContent);
-        Assert.Contains("App Logs", links[1].TextContent);
     }
 
     [Fact]

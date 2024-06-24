@@ -191,7 +191,6 @@ async Task RunAppAsync()
 
     app.MapRazorComponents<App>();
 
-    app.MapAccountEndpoints();
     app.MapApplicationEndpoints();
     app.MapBillingEndpoints();
 

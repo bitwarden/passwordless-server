@@ -41,7 +41,7 @@ public static class AuthenticationConfigurationEndpoints
 
                 return Created();
             })
-            .WithSummary("Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
+            .WithSummary("Creates an authentication configuration for the authentication process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .WithParameterValidation()
@@ -56,7 +56,7 @@ public static class AuthenticationConfigurationEndpoints
 
                 return NoContent();
             })
-            .WithSummary("Creates or updates an authentication configuration for the sign-in process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
+            .WithSummary("Updates an authentication configuration for the authentication process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .WithParameterValidation()

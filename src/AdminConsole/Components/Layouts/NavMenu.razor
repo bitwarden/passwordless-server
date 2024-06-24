@@ -25,7 +25,6 @@
                     {
                         <NavMenuItem Href="/organization/log" Icon="@typeof(CodeBracketSquareIcon)" Label="Organization Logs" />
                     }
-
                 </div>
                 <div class="sidebar-footer">
                     @if (!CurrentContext.Organization!.HasSubscription)
@@ -44,11 +43,7 @@
                     </div>
                     <hr class="opacity-30"/>
                     <div class="flex flex-row space-x-4">
-                        <form action="/Account/Logout" method="post">
-                            <button type="submit" class="text-white flex font-medium text-sm">
-                                <SignOutIcon Class="w-5 h-5 mr-2"/> Sign out
-                            </button>
-                        </form>
+                        <a class="text-white flex font-medium text-sm" href="/account/logout">Sign out</a>
                     </div>
                 </div>
             </Authorized>
