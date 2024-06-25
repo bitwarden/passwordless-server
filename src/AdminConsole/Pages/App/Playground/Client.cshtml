@@ -32,7 +32,7 @@
                                 <button v-for="tab in tabs" :key="tab.name" v-on:click.prevent="setTab(tab)" :class="[tab.current ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700', 'flex-grow border-b-2 px-1 py-4 text-center text-sm font-medium']" :aria-current="tab.current ? 'page' : undefined">{{ tab.name }}</button>
                             </div>
                         </div>
-                        <fieldset id="registerCredentialFields" class="space-y-6">
+                        <fieldset id="registerCredentialFields" class="space-y-6 mt-4">
                             <div>
                                 <label for="alias" class="block text-sm font-medium leading-6 text-gray-900">Email address / username</label>
                                 <div class="mt-2">
