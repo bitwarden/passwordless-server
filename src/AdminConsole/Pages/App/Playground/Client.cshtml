@@ -27,6 +27,11 @@
             <div class="mt-8">
                 <div class="mt-6">
                     <form v-on:submit.prevent="loginSubmit" href="#" name="signin" method="post">
+                        <div class="hidden sm:block">
+                            <div class="border-b border-gray-200 -mb-px flex" aria-label="Tabs">
+                                <button v-for="tab in tabs" :key="tab.name" v-on:click.prevent="setTab(tab)" :class="[tab.current ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700', 'flex-grow border-b-2 px-1 py-4 text-center text-sm font-medium']" :aria-current="tab.current ? 'page' : undefined">{{ tab.name }}</button>
+                            </div>
+                        </div>
                         <fieldset id="registerCredentialFields" class="space-y-6">
                             <div>
                                 <label for="alias" class="block text-sm font-medium leading-6 text-gray-900">Email address / username</label>
@@ -34,8 +39,8 @@
                                     <input id="alias" name="alias" type="text" autocomplete="webauthn" required class="text-input">
                                 </div>
                             </div>
-                            
-                            <div class="flex flex-col">
+
+                            <div v-if="isStepUp" class="flex flex-col">
                                 <p class="inline-flex items-center" v-on:click="setShowOptions">
                                     <svg class="w-6 h-6 fill-current" :class="{ 'rotate-90': showOptions }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -48,9 +53,9 @@
                                     }
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
+                                <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">{{submitLabel}}</button>
                             </div>
 
                             <div id="webauthn-unsupported-alert" class="hidden">
@@ -103,12 +108,36 @@
 
 @section Scripts {
     <script type="module">
-        import { createApp, ref } from 'vue';
+        import { createApp, ref, computed } from 'vue';
         createApp({
             setup() {
                 const signins = ref([]);
-                const showOptions = ref(false);
                 const selectedPurpose = ref("sign-in");
+                const showOptions = ref(false);
+
+                const setShowOptions = (_) => {
+                    showOptions.value = !showOptions.value;
+                }
+                
+                const tabs = ref([
+                    { name: 'Sign In' , current: true },
+                    { name: 'Step Up' , current: false }
+                ]);
+                
+                const setTab = (tab) => {
+                    tabs.value.forEach(x => {
+                        x.current = false;
+                    });
+                    tabs.value.find(x => x.name === tab.name).current = true;
+                };
+                
+                const submitLabel = computed(() => {
+                    return tabs.value.find(x => x.current).name;
+                });
+                
+                const isStepUp = computed(() => {
+                    return tabs.value.find(x => x.current).name === 'Step Up';
+                });
 
                 const p = new Passwordless.Client({
                     apiUrl: "@Options.Value.ApiUrl",
@@ -133,8 +162,17 @@
                 autoFill(10);
 
                 const loginSubmit = async (e) => {
-                    if (selectedPurpose === 'sign-in') {
-                        // on form submit
+                    if (isStepUp.value) {
+                        const {token, error} = await p.stepup({ signinMethod: { alias: alias }, purpose: selectedPurpose });
+
+                        if (token) {
+                            await signin(token);
+                        } else {
+                            if (error.errorCode !== "unknown") {
+                                signins.value.push(error);
+                            }
+                        }
+                    } else {
                         const alias = e.target.alias.value;
                         const {token, error} = await p.signinWithAlias(alias);
                         if (token) {
@@ -144,21 +182,7 @@
                                 signins.value.push(error);
                             }
                         }
-                    } else {
-                        const {token, error} = await p.stepup({ signinMethod: { alias: alias }, purpose: selectedPurpose });
-                        
-                        if (token) {
-                            await signin(token);
-                        } else {
-                            if (error.errorCode !== "unknown") {
-                                signins.value.push(error);
-                            }
-                        }
                     }
-                }
-                
-                const setShowOptions = (_) => {
-                    showOptions.value = !showOptions.value;
                 }
 
                 async function signin(verify_token) {
@@ -174,7 +198,11 @@
                     signins,
                     setShowOptions,
                     showOptions,
-                    selectedPurpose
+                    selectedPurpose,
+                    submitLabel,
+                    isStepUp,
+                    tabs,
+                    setTab
                 }
             }
     }).mount('#xapp');
