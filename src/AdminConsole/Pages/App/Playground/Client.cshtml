@@ -25,12 +25,12 @@
             </div>
 
             <div class="mt-8">
-                <div class="mt-6">
+                <div class="mt-4">
                     <form v-on:submit.prevent="loginSubmit" href="#" name="signin" method="post">
                         <div class="sm:hidden">
                             <label for="tabs" class="sr-only">Select a tab</label>
-                            <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option v-for="tab in tabs"  v-on:change="setTab(tab)" :key="tab.name" :selected="tab.current">{{ tab.name }}</option>
+                            <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" v-on:change.prevent="setTabSelect">
+                                <option v-for="tab in tabs" :key="tab.name" :selected="tab.current">{{ tab.name }}</option>
                             </select>
                         </div>
                         <div class="hidden sm:block">
@@ -131,11 +131,22 @@
                 ]);
                 
                 const setTab = (tab) => {
+                    clearCurrent();
+                    tabs.value.find(x => x.name === tab.name).current = true;
+                };
+                
+                const setTabSelect = (event) => {
+                    clearCurrent();
+                    
+                    tabs.value.find(x => x.name === event.target.value).current = true;
+                };
+                
+                function clearCurrent()
+                {
                     tabs.value.forEach(x => {
                         x.current = false;
                     });
-                    tabs.value.find(x => x.name === tab.name).current = true;
-                };
+                }
                 
                 const submitLabel = computed(() => {
                     return tabs.value.find(x => x.current).name;
@@ -208,7 +219,8 @@
                     submitLabel,
                     isStepUp,
                     tabs,
-                    setTab
+                    setTab,
+                    setTabSelect
                 }
             }
     }).mount('#xapp');
