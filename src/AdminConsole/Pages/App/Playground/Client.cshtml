@@ -27,6 +27,12 @@
             <div class="mt-8">
                 <div class="mt-6">
                     <form v-on:submit.prevent="loginSubmit" href="#" name="signin" method="post">
+                        <div class="sm:hidden">
+                            <label for="tabs" class="sr-only">Select a tab</label>
+                            <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                <option v-for="tab in tabs"  v-on:change="setTab(tab)" :key="tab.name" :selected="tab.current">{{ tab.name }}</option>
+                            </select>
+                        </div>
                         <div class="hidden sm:block">
                             <div class="border-b border-gray-200 -mb-px flex" aria-label="Tabs">
                                 <button v-for="tab in tabs" :key="tab.name" v-on:click.prevent="setTab(tab)" :class="[tab.current ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700', 'flex-grow border-b-2 px-1 py-4 text-center text-sm font-medium']" :aria-current="tab.current ? 'page' : undefined">{{ tab.name }}</button>
