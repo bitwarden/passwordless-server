@@ -1,11 +1,11 @@
 ﻿@page "/playground"
+@inject ICurrentContext CurrentContext
+@inject IOptions<PasswordlessManagementOptions> Options
+@inject IAntiforgery Antiforgery
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Middleware
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessManagementOptions> Options
-@inject IAntiforgery Antiforgery
 @model ClientModel
 
 @{
@@ -25,9 +25,20 @@
             </div>
 
             <div class="mt-8">
-                <div class="mt-6">
+                <div class="mt-4">
                     <form v-on:submit.prevent="loginSubmit" href="#" name="signin" method="post">
-                        <fieldset id="registerCredentialFields" class="space-y-6">
+                        <div class="sm:hidden">
+                            <label for="tabs" class="sr-only">Select a tab</label>
+                            <select id="tabs" name="tabs" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" v-on:change.prevent="setTabSelect">
+                                <option v-for="tab in tabs" :key="tab.name" :selected="tab.current">{{ tab.name }}</option>
+                            </select>
+                        </div>
+                        <div class="hidden sm:block">
+                            <div class="border-b border-gray-200 -mb-px flex" aria-label="Tabs">
+                                <button v-for="tab in tabs" :key="tab.name" v-on:click.prevent="setTab(tab)" :class="[tab.current ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700', 'flex-grow border-b-2 px-1 py-4 text-center text-sm font-medium']" :aria-current="tab.current ? 'page' : undefined">{{ tab.name }}</button>
+                            </div>
+                        </div>
+                        <fieldset id="registerCredentialFields" class="space-y-6 mt-4">
                             <div>
                                 <label for="alias" class="block text-sm font-medium leading-6 text-gray-900">Email address / username</label>
                                 <div class="mt-2">
@@ -35,8 +46,22 @@
                                 </div>
                             </div>
 
+                            <div v-if="isStepUp" class="flex flex-col">
+                                <p class="inline-flex items-center" v-on:click="setShowOptions">
+                                    <svg class="w-6 h-6 fill-current" :class="{ 'rotate-90': showOptions }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>Sign in options:
+                                </p>
+                                <div class="ml-4" v-if="showOptions">
+                                    @foreach (var purpose in Model.Purposes)
+                                    {
+                                        <label class="block"><input class="mr-2" name="selectedPurpose" v-model="selectedPurpose" value="@purpose" type="radio"/>@purpose</label>
+                                    }
+                                </div>
+                            </div>
+
                             <div>
-                                <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Sign in</button>
+                                <button type="submit" class="flex w-full justify-center rounded-md bg-primary-500 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">{{submitLabel}}</button>
                             </div>
 
                             <div id="webauthn-unsupported-alert" class="hidden">
@@ -49,7 +74,6 @@
         </div>
     </div>
     <div v-cloak>
-        @* <h2 class="mt-10 mb-4 text-2xl font-bold tracking-tight text-gray-900">Successful sign ins</h2> *@
         <div v-if="signins.length > 0" v-for="item in signins.slice().reverse()" class="overflow-hidden bg-white shadow sm:rounded-lg mb-4">
             <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
@@ -61,9 +85,6 @@
             </div>
         </div>
         <div v-if="signins.length == 0" class="relative block w-full rounded-lg border-2 border-dashed border-gray-400 p-12 text-center max-w-lg">
-            @* <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v20c0 4.418 7.163 8 16 8 1.381 0 2.721-.087 4-.252M8 14c0 4.418 7.163 8 16 8s16-3.582 16-8M8 14c0-4.418 7.163-8 16-8s16 3.582 16 8m0 0v14m0-4c0 4.418-7.163 8-16 8S8 28.418 8 24m32 10v6m0 0v6m0-6h6m-6 0h-6" />
-        </svg> *@
             <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -93,10 +114,47 @@
 
 @section Scripts {
     <script type="module">
-        import { createApp, ref } from 'vue';
+        import { createApp, ref, computed } from 'vue';
         createApp({
             setup() {
                 const signins = ref([]);
+                const selectedPurpose = ref("sign-in");
+                const showOptions = ref(false);
+
+                const setShowOptions = (_) => {
+                    showOptions.value = !showOptions.value;
+                }
+                
+                const tabs = ref([
+                    { name: 'Sign In' , current: true },
+                    { name: 'Step Up' , current: false }
+                ]);
+                
+                const setTab = (tab) => {
+                    clearCurrent();
+                    tabs.value.find(x => x.name === tab.name).current = true;
+                };
+                
+                const setTabSelect = (event) => {
+                    clearCurrent();
+                    
+                    tabs.value.find(x => x.name === event.target.value).current = true;
+                };
+                
+                function clearCurrent()
+                {
+                    tabs.value.forEach(x => {
+                        x.current = false;
+                    });
+                }
+                
+                const submitLabel = computed(() => {
+                    return tabs.value.find(x => x.current).name;
+                });
+                
+                const isStepUp = computed(() => {
+                    return tabs.value.find(x => x.current).name === 'Step Up';
+                });
 
                 const p = new Passwordless.Client({
                     apiUrl: "@Options.Value.ApiUrl",
@@ -120,19 +178,29 @@
                 };
                 autoFill(10);
 
-
                 const loginSubmit = async (e) => {
-                    // on form submit
-                    const alias = e.target.alias.value;
-                    const {token, error} = await p.signinWithAlias(alias);
-                    if (token) {
-                        await signin(token);
+                    if (isStepUp.value) {
+                        const {token, error} = await p.stepup({ signinMethod: { alias: alias }, purpose: selectedPurpose });
+
+                        if (token) {
+                            await signin(token);
+                        } else {
+                            if (error.errorCode !== "unknown") {
+                                signins.value.push(error);
+                            }
+                        }
                     } else {
-                        if (error.errorCode !== "unknown") {
-                            signins.value.push(error);
+                        const alias = e.target.alias.value;
+                        const {token, error} = await p.signinWithAlias(alias);
+                        if (token) {
+                            await signin(token);
+                        } else {
+                            if (error.errorCode !== "unknown") {
+                                signins.value.push(error);
+                            }
                         }
                     }
-                  }
+                }
 
                 async function signin(verify_token) {
                     if (!verify_token) return;
@@ -141,10 +209,17 @@
                     signins.value.push(result);
                     console.log(signins.value);
                 }
-
                 return {
                     loginSubmit,
-                    signins
+                    signins,
+                    setShowOptions,
+                    showOptions,
+                    selectedPurpose,
+                    submitLabel,
+                    isStepUp,
+                    tabs,
+                    setTab,
+                    setTabSelect
                 }
             }
     }).mount('#xapp');
