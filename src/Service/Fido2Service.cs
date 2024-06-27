@@ -235,7 +235,7 @@ public class Fido2Service : IFido2Service
             Nickname = request.Nickname,
             BackupState = success.Result.IsBackedUp,
             IsBackupEligible = success.Result.IsBackupEligible,
-            IsDiscoverable = request.Response.Extensions.CredProps?.Rk,
+            IsDiscoverable = request.Response.ClientExtensionResults?.CredProps?.Rk,
         });
 
         var tokenData = new VerifySignInToken
