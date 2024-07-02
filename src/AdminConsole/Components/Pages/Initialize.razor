@@ -29,7 +29,7 @@
         <p>The Admin Console is missing either migrations or ApiKeys for the Passwordless.dev API, proceed with the setup wizard below.</p>
 
         <p>Upon completing the form, a separate application in the Passwordless.dev API is created to hold the credentials for administrators of the Admin Console.</p>
-        
+
         <EditForm
             Model="Form"
             FormName="AdminConsoleCreateForm"
@@ -55,16 +55,16 @@
     {
         <p>@ProcessMessage</p>
     }
-    
+
     @if (PasswordlessOptions is not null)
     {
         <p><strong>Keep these values secret</strong>. Add these values to your Admin Console configuration:</p>
-        
+
         <code style="white-space: pre;" lang="json">@JsonSerializer.Serialize(PasswordlessOptions, _jsonSerializerOptions)</code>
-        
+
         <p>When self-hosting, make sure to mount a persistent volume to write your configuration. Read more <a href="https://docs.passwordless.dev/guide/self-hosting/configuration.html#volumes">here</a>.</p>
-        
-        <p>After doing this, you will need to restart the application, refresh this page and enter the Admin Email used here to receive a magic link.</p>
+
+        <p>After doing this, you will need to refresh this page and enter the Admin Email used here to receive a magic link.</p>
     }
 
 </Panel>
@@ -80,9 +80,9 @@
     public AdminConsoleCreateForm Form { get; set; } = new();
 
     public bool IsFormSubmitted { get; set; }
-    
+
     public string ProcessMessage { get; set; } = string.Empty;
-    
+
     public PasswordlessOptions? PasswordlessOptions { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -95,15 +95,14 @@
 
     private async Task OnAdminConsoleCreateFormSubmitted()
     {
-        
         IsFormSubmitted = true;
 
         Models.Organization organization;
         var now = TimeProvider.GetUtcNow().UtcDateTime;
 
-        CreateAppResultDto? appCreationResult = null;
-        
-        // create app in api
+        CreateAppResultDto? appCreationResult;
+
+        // Create app in the API
         try
         {
             using var http = new HttpClient();
@@ -117,7 +116,7 @@
             });
 
             response.EnsureSuccessStatusCode();
-            
+
             appCreationResult = (await response.Content.ReadFromJsonAsync<CreateAppResultDto>())!;
         }
         catch (Exception ex)
@@ -129,7 +128,7 @@
 
         await DbContext.Database.MigrateAsync();
 
-        // create org
+        // Create org
         try
         {
             organization = new Models.Organization
@@ -148,7 +147,7 @@
             return;
         }
 
-        // create admin
+        // Create admin
         try
         {
             var user = new ConsoleAdmin
@@ -208,7 +207,7 @@
 
         ProcessMessage = "✅ Admin Console has been initialized successfully.";
     }
-    
+
     public sealed class AdminConsoleCreateForm
     {
         [Required] public string AdminName { get; set; } = string.Empty;

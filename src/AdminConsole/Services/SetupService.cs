@@ -9,7 +9,7 @@ public class SetupService : ISetupService
     private readonly bool _isSelfHosted;
 
     public SetupService(
-        IOptions<PasswordlessOptions> options,
+        IOptionsSnapshot<PasswordlessOptions> options,
         IConfiguration configuration)
     {
         _options = options.Value;

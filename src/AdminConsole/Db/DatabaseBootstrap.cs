@@ -29,7 +29,7 @@ public static class DatabaseBootstrap
         }
 
         // if name starts with sqlite, use sqlite, else use mssql
-        if (!String.IsNullOrEmpty(sqlite))
+        if (!string.IsNullOrEmpty(sqlite))
         {
             ContextName = typeof(SqliteConsoleDbContext).FullName;
             builder.AddDatabaseContext<SqliteConsoleDbContext>((sp, o) =>
@@ -80,17 +80,25 @@ public static class DatabaseBootstrap
             {
                 var managementOptions = builder.Configuration.GetSection("PasswordlessManagement").Get<PasswordlessManagementOptions>();
                 var options = builder.Configuration.GetSection("Passwordless").Get<PasswordlessOptions>();
+                if (options is null)
+                {
+                    throw new ConfigurationErrorsException(
+                        "Missing 'Passwordless' options in application configuration."
+                    );
+                }
+
                 o.ApiSecret = options.ApiSecret;
                 o.ApiKey = options.ApiKey;
                 o.ApiUrl = options.ApiUrl;
 
                 if (builder.Configuration.GetValue("SelfHosted", false))
                 {
-                    // This will overwrite ApiUrl with the internal url for self-hosting, this is intentional.
+                    // This will overwrite ApiUrl with the internal URL for self-hosting, this is intentional.
                     if (string.IsNullOrEmpty(managementOptions.InternalApiUrl))
                     {
                         throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
                     }
+
                     o.ApiUrl = managementOptions.InternalApiUrl;
                 }
             });
