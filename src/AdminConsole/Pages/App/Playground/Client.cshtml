@@ -179,8 +179,12 @@
                 autoFill(10);
 
                 const loginSubmit = async (e) => {
+                    const alias = e.target.alias.value;
                     if (isStepUp.value) {
-                        const {token, error} = await p.stepup({ signinMethod: { alias: alias }, purpose: selectedPurpose });
+                        const {token, error} = await p.stepup({
+                            signinMethod: { alias: alias },
+                            purpose: selectedPurpose.value
+                        });
 
                         if (token) {
                             await signin(token);
@@ -190,7 +194,6 @@
                             }
                         }
                     } else {
-                        const alias = e.target.alias.value;
                         const {token, error} = await p.signinWithAlias(alias);
                         if (token) {
                             await signin(token);

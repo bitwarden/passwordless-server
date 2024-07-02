@@ -6,7 +6,7 @@ namespace Passwordless.Service.Models;
 
 public class SignInBeginDTO : RequestBase
 {
-    public string Alias { get; set; }
+    public string Alias { get; init; }
     public string UserId { get; init; }
     [JsonConverter(typeof(SignInPurposeConverter))]
     public SignInPurpose Purpose { get; set; } = SignInPurpose.SignIn;
