@@ -171,11 +171,21 @@ public class Fido2Service : IFido2Service
 
         var fido2 = GetFido2Instance(request, _metadataService);
 
-        var success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
+        MakeNewCredentialResult success;
+
+        try
         {
-            bool exists = await _storage.ExistsAsync(args.CredentialId);
-            return !exists;
-        });
+            success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
+            {
+                bool exists = await _storage.ExistsAsync(args.CredentialId);
+                return !exists;
+            });
+        }
+        catch (Fido2VerificationException e)
+        {
+            _log.LogWarning(e, "Unable to create new credential due to wrong configuration or wrong parameters.");
+            throw new ApiException("fido2_invalid_registration", e.Message, 400);
+        }
 
         // Check whether we're allowed to register credentials for this autheneticator
         var features = await _featureContextProvider.UseContext();
