@@ -9,7 +9,7 @@ namespace Passwordless.AdminConsole.Services.MagicLinks;
 
 public class MagicLinkBuilder(
     SignInManager<ConsoleAdmin> signInManager,
-    IPasswordlessClient passwordlessClient,
+    IServiceProvider services,
     IActionContextAccessor actionContextAccessor,
     IUrlHelperFactory urlHelperFactory,
     ILogger<MagicLinkBuilder> logger)
@@ -17,6 +17,11 @@ public class MagicLinkBuilder(
 {
     public async Task<string> GetLinkAsync(string email, string? returnUrl = null)
     {
+        // Passwordless client is fetched lazily because the MagicLinkBuilder may need to instantiate
+        // in a context where the API is not accessible, for example when the Admin Console has not
+        // been initialized yet. Doing this prevents it from crashing unless the client is actually used.
+        var passwordlessClient = services.GetRequiredService<IPasswordlessClient>();
+
         var user = await signInManager.UserManager.FindByEmailAsync(email);
         if (user == null)
         {
@@ -25,7 +30,12 @@ public class MagicLinkBuilder(
         }
 
         var token = await passwordlessClient.GenerateAuthenticationTokenAsync(new AuthenticationOptions(user.Id));
-        var urlBuilder = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext ?? throw new InvalidOperationException("ActionContext is null"));
+
+        var urlBuilder = urlHelperFactory.GetUrlHelper(
+            actionContextAccessor.ActionContext ??
+            throw new InvalidOperationException("ActionContext is null")
+        );
+
         var url = urlBuilder.PageLink("/Account/Magic", values: new { returnUrl, token }) ?? urlBuilder.Content("~/");
 
         return url;
@@ -33,9 +43,13 @@ public class MagicLinkBuilder(
 
     public string GetUrlTemplate(string? returnUrl = null)
     {
-        var urlBuilder = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext ?? throw new InvalidOperationException("ActionContext is null"));
+        var urlBuilder = urlHelperFactory.GetUrlHelper(
+            actionContextAccessor.ActionContext ??
+            throw new InvalidOperationException("ActionContext is null")
+        );
 
-        var url = urlBuilder.PageLink("/Account/Magic", values: new { token = "$TOKEN", returnUrl }) ?? urlBuilder.Content("~/");
+        var url = urlBuilder.PageLink("/Account/Magic", values: new { token = "$TOKEN", returnUrl }) ??
+                  urlBuilder.Content("~/");
 
         return url;
     }

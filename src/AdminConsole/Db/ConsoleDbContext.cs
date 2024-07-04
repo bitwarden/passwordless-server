@@ -9,13 +9,9 @@ using Passwordless.AdminConsole.Models;
 
 namespace Passwordless.AdminConsole.Db;
 
-public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, string>, IDataProtectionKeyContext
+public class ConsoleDbContext(DbContextOptions options)
+    : IdentityDbContext<ConsoleAdmin, IdentityRole, string>(options), IDataProtectionKeyContext
 {
-    public ConsoleDbContext(DbContextOptions options)
-        : base(options)
-    {
-    }
-
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<Application> Applications { get; set; }
     public DbSet<Onboarding> Onboardings { get; set; }
