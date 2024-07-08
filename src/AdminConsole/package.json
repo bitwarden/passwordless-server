@@ -12,10 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "@passwordlessdev/passwordless-client": "1.2.0-beta1",
-    "apexcharts": "3.49.1",
+    "apexcharts": "3.50.0",
     "es-module-shims": "1.10.0",
     "tailwindcss": "3.4.4",
-    "vue": "3.4.30"
+    "vue": "3.4.31"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "0.4.2",
