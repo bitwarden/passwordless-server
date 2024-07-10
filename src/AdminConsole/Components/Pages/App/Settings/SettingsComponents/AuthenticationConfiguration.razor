@@ -7,6 +7,7 @@
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor HttpContextAccessor;
 @inject IScopedPasswordlessClient Passwordless;
+@inject Logger<AuthenticationConfiguration> Logger;
 
 @if (!CurrentContext.IsPendingDelete)
 {
@@ -102,7 +103,21 @@
             }
         }
 
-        Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Configurations.Select(GetEntry).ToImmutableArray();
+        Configurations = await GetConfigurations();
+    }
+
+
+    private async Task<IReadOnlyCollection<AuthenticationConfigurationEntry>> GetConfigurations()
+    {
+        try
+        {
+            return (await Passwordless.GetAuthenticationConfigurationsAsync()).Configurations.Select(GetEntry).ToImmutableArray();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , "Failed to retrieve authentication configurations");
+            return Array.Empty<AuthenticationConfigurationEntry>();
+        }
     }
 
     public async Task OnSelectedFormConfirmed()
