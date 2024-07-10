@@ -7,7 +7,7 @@
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor HttpContextAccessor;
 @inject IScopedPasswordlessClient Passwordless;
-@inject Logger<AuthenticationConfiguration> Logger;
+@inject ILogger<AuthenticationConfiguration> Logger;
 
 @if (!CurrentContext.IsPendingDelete)
 {
