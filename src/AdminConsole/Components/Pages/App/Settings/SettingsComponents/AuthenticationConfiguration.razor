@@ -7,11 +7,12 @@
 @inject NavigationManager NavigationManager;
 @inject IHttpContextAccessor HttpContextAccessor;
 @inject IScopedPasswordlessClient Passwordless;
+@inject ILogger<AuthenticationConfiguration> Logger;
 
 @if (!CurrentContext.IsPendingDelete)
 {
     <Panel Header="Authentication Configuration">
-        <p>List of configurations for your authentication tokens. Read more in the <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#authentiation-configurations" target="_blank">docs</a></p>
+        <p>List of configurations for your authentication tokens. Read more in the <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#authentication-configurations" target="_blank">docs</a></p>
 
         <div>
             <a class="btn-primary" href="/app/@(AppId)/settings/authentication-configuration/new">Add New Authentication Configuration</a>
@@ -102,7 +103,21 @@
             }
         }
 
-        Configurations = (await Passwordless.GetAuthenticationConfigurationsAsync()).Configurations.Select(GetEntry).ToImmutableArray();
+        Configurations = await GetConfigurations();
+    }
+
+
+    private async Task<IReadOnlyCollection<AuthenticationConfigurationEntry>> GetConfigurations()
+    {
+        try
+        {
+            return (await Passwordless.GetAuthenticationConfigurationsAsync()).Configurations.Select(GetEntry).ToImmutableArray();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , "Failed to retrieve authentication configurations");
+            return Array.Empty<AuthenticationConfigurationEntry>();
+        }
     }
 
     public async Task OnSelectedFormConfirmed()
