@@ -37,11 +37,18 @@ The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for cre
     "ApiSecret": "myAppId:secret:123456",
     "ApiUrl": "<optional>"
   },
+  // https://docs.passwordless.dev/guide/self-hosting/configuration.html#e-mail
   "Mail": {
-    // Mail Providers are pluggable. Remove "Postmark" to use the FileProvider
-    "Postmark": {
-      "ApiKey": "",
-      "From": ""
+    "Smtp": {
+      "From": "sender@example.com",
+      "Username": "username",
+      "Password": "password",
+      "Host": "smtp.example.com",
+      "Port": 587,
+      "StartTls": true,
+      "Ssl": false,
+      "SslOverride": false,
+      "TrustServer": false
     }
   },
   "ConnectionStrings": {
@@ -52,6 +59,16 @@ The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for cre
   }
 }
 ```
+
+_fromEmail = smtpOptions.GetValue<string>("From", null!);
+_smtpUsername = smtpOptions.GetValue<string>("Username", null!);
+_smtpPassword = smtpOptions.GetValue<string>("Password", null!);
+_smtpHost = smtpOptions.GetValue<string>("Host", null!);
+_smtpPort = smtpOptions.GetValue<int>("Port");
+_smtpStartTls = smtpOptions.GetValue<bool>("StartTls");
+_smtpSsl = smtpOptions.GetValue<bool>("Ssl");
+_smtpSslOverride = smtpOptions.GetValue<bool>("SslOverride");
+_smtpTrustServer = smtpOptions.GetValue<bool>("TrustServer");
 
 ## Entity Framework (EF) migrations
 As mentioned in the `Getting Started` section, the Entity Framework migrations are automatically being handled when you run the AdminConsole project.
