@@ -1,0 +1,69 @@
+@page "/Organization/Settings"
+@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.Identity
+@using Passwordless.AdminConsole.Services.Mail
+
+@inject IDataService DataService
+@inject ISharedBillingService BillingService
+@inject SignInManager<ConsoleAdmin> SignInManager
+@inject IMailService MailService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject TimeProvider TimeProvider
+@inject ILogger<Settings> Logger
+
+<Page Title="Organization Settings">
+    <Panel Header="Security">
+        @if (SecurityForm != null)
+        {
+            <EditForm class="flex flex-col space-y-4" FormName="@SecurityFormName" Model="SecurityForm" OnValidSubmit="@OnSecurityFormSubmittedAsync">
+                <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col space-y-2">
+                        <label>
+                            <input type="hidden" name="SecurityForm.IsMagicLinksEnabled" value="false" />
+                            <InputCheckbox class="mr-1 my-4" @bind-Value="SecurityForm.IsMagicLinksEnabled" ch/>
+                            Enable Magic Links
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Update</button>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </EditForm>
+        }
+    </Panel>
+    
+    <Panel Header="Delete Organization">
+        @if (Name != null)
+        {
+            @if (CanDelete)
+            {
+                <EditForm class="flex flex-col space-y-4" FormName="@DeleteFormName" Model="DeleteForm" OnValidSubmit="@OnDeleteFormSubmittedAsync">
+                    <p>Unexpected bad things will happen if you don’t read this:</p>
+                    <ul role="list" class="list-disc list-inside">
+                        <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
+                        <li>This will permanently delete the organization <strong>'@Name'</strong>.</li>
+                        <li>All related data to the organization will be deleted: Settings, developer logs or any related event logs.</li>
+                    </ul>
+                    <div class="flex rounded-md">
+                        <InputText @bind-Value="DeleteForm.NameConfirmation" class="text-input rounded-r-none font-mono"/>
+                        <button type="submit" class="btn-danger rounded-l-none disabled:opacity-25">Delete</button>
+                    </div>
+                    <p class="italic">Type the name of the organization and click "Delete".</p>
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+                    <CustomValidationErrors EditContext="DeleteFormEditContext"/>
+                </EditForm>
+            }
+            else
+            {
+                <p>Your organization '@Name' has @ApplicationsCount application(s) that are active or pending deletion.</p>
+                <p>You can only delete an organization when you have no applications.</p>
+            }
+        }
+    </Panel>
+</Page>
+
+@code {
+    
+}

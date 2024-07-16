@@ -37,9 +37,14 @@
                         <input id="email" name="email" type="email" autocomplete="webauthn" class="block w-full p-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6">
                     </div>
                 </div>
-                @if (Model.EmailSent)
+                @switch (Model.Status)
                 {
-                    <success-alert-box message="We've sent you a magic link to automatically sign you in (if we recognized the email)"></success-alert-box>
+                    case LoginModel.LoginStatus.EmailSent:
+                        <success-alert-box message="We've sent you a magic link to automatically sign you in (if we recognized the email)"></success-alert-box>
+                        break;
+                    case LoginModel.LoginStatus.MagicLinkDisabled:
+                        <danger-alert-box message="Magic links are disabled. Please use the form below to sign in with a passkey."></danger-alert-box>
+                        break;
                 }
                 <div class="feedback__unknown_credential hidden">
                     <Feedback name="_error" message="Sorry, we don't recognize that passkey. Do you have another one?" />

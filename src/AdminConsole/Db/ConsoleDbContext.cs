@@ -41,6 +41,10 @@ public class ConsoleDbContext : IdentityDbContext<ConsoleAdmin, IdentityRole, st
         builder.Entity<OrganizationEvent>()
             .HasKey(x => x.Id);
 
+        builder.Entity<Organization>()
+            .Property(x => x.IsMagicLinksEnabled)
+            .HasDefaultValue(true);
+
         base.OnModelCreating(builder);
     }
 }

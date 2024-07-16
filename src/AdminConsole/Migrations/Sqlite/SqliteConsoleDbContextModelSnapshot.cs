@@ -15,7 +15,7 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
@@ -411,6 +411,11 @@ namespace Passwordless.AdminConsole.Migrations.Sqlite
                     b.Property<string>("InfoUseCase")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsMagicLinksEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("MaxAdmins")
                         .HasColumnType("INTEGER");
