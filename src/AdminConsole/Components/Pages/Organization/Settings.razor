@@ -7,6 +7,7 @@
 @inject ISharedBillingService BillingService
 @inject SignInManager<ConsoleAdmin> SignInManager
 @inject IMailService MailService
+@inject IAdminService AdminService
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
 @inject TimeProvider TimeProvider
@@ -31,6 +32,7 @@
                 </div>
                 <DataAnnotationsValidator />
                 <ValidationSummary />
+                <CustomValidationErrors EditContext="DeleteFormEditContext"/>
             </EditForm>
         }
     </Panel>

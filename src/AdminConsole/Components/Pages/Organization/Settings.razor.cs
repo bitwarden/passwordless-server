@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Components.Pages.Organization;
 
@@ -11,6 +12,9 @@ public partial class Settings : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        SecurityFormEditContext = new EditContext(SecurityForm);
+        SecurityFormValidationMessageStore = new ValidationMessageStore(SecurityFormEditContext);
+
         DeleteFormEditContext = new EditContext(DeleteForm);
         DeleteFormValidationMessageStore = new ValidationMessageStore(DeleteFormEditContext);
 
@@ -23,6 +27,16 @@ public partial class Settings : ComponentBase
 
     private async Task OnSecurityFormSubmittedAsync()
     {
+        if (!SecurityForm!.IsMagicLinksEnabled)
+        {
+            var canDisableMagicLinks = await AdminService.CanDisableMagicLinksAsync();
+            if (!canDisableMagicLinks)
+            {
+                SecurityFormValidationMessageStore!.Add(() => SecurityForm.IsMagicLinksEnabled, "Cannot disable magic links because there are admins without passkeys.");
+                return;
+            }
+        }
+
         await DataService.UpdateOrganizationSecurityAsync(SecurityForm!.IsMagicLinksEnabled);
     }
 
@@ -63,6 +77,10 @@ public partial class Settings : ComponentBase
 
     [SupplyParameterFromForm(FormName = SecurityFormName)]
     public SecurityFormModel? SecurityForm { get; set; }
+
+    public EditContext? SecurityFormEditContext { get; set; }
+
+    public ValidationMessageStore? SecurityFormValidationMessageStore { get; set; }
 
     [SupplyParameterFromForm(FormName = DeleteFormName)]
     public DeleteFormModel DeleteForm { get; set; } = new();
