@@ -51,9 +51,10 @@ public class LoginModel : PageModel
         {
             return RedirectToPage();
         }
-        if (!user.Organization.IsMagicLinksEnabled)
+        if (!organization.IsMagicLinksEnabled)
         {
             TempData["Status"] = LoginStatus.MagicLinkDisabled;
+            return RedirectToPage();
         }
 
         try
