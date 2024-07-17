@@ -40,11 +40,6 @@ public class AdminServiceTests
             _loggerMock.Object);
     }
 
-    public AdminServiceTests(Mock<IPasswordlessClient> passwordlessClientMock)
-    {
-        _passwordlessClientMock = passwordlessClientMock;
-    }
-
     [Fact]
     public async Task CanDisableMagicLinksAsync_ShouldReturnFalse_WhenNoCredentials()
     {
