@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Components.Pages.Organization;
 
@@ -12,17 +11,16 @@ public partial class Settings : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        SecurityFormEditContext = new EditContext(SecurityForm);
-        SecurityFormValidationMessageStore = new ValidationMessageStore(SecurityFormEditContext);
-
-        DeleteFormEditContext = new EditContext(DeleteForm);
-        DeleteFormValidationMessageStore = new ValidationMessageStore(DeleteFormEditContext);
-
         var organization = await DataService.GetOrganizationWithDataAsync();
         Name = organization.Name;
         ApplicationsCount = organization.Applications.Count;
 
         SecurityForm ??= new SecurityFormModel { IsMagicLinksEnabled = organization.IsMagicLinksEnabled };
+        SecurityFormEditContext = new EditContext(SecurityForm);
+        SecurityFormValidationMessageStore = new ValidationMessageStore(SecurityFormEditContext);
+
+        DeleteFormEditContext = new EditContext(DeleteForm);
+        DeleteFormValidationMessageStore = new ValidationMessageStore(DeleteFormEditContext);
     }
 
     private async Task OnSecurityFormSubmittedAsync()
@@ -33,6 +31,7 @@ public partial class Settings : ComponentBase
             if (!canDisableMagicLinks)
             {
                 SecurityFormValidationMessageStore!.Add(() => SecurityForm.IsMagicLinksEnabled, "Cannot disable magic links because there are admins without passkeys.");
+                SecurityFormEditContext!.NotifyValidationStateChanged();
                 return;
             }
         }
