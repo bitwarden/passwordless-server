@@ -1,17 +1,17 @@
 using System.Security.Claims;
 using AutoFixture;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
+using Passwordless.AdminConsole.Tests.Factory;
 using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Services;
 
-public class AdminServiceTests
+public class AdminServiceTests : IDisposable, IAsyncDisposable
 {
     private readonly Fixture _fixture = new();
 
@@ -28,13 +28,10 @@ public class AdminServiceTests
         _loggerMock = new Mock<ILogger<AdminService>>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
-        var options = new DbContextOptionsBuilder<ConsoleDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
-            .Options;
-        _dbContext = new ConsoleDbContext(options);
+        _dbContext = DbContextFactory.Create();
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim("orgId", "1"), }, "mock"));
-        _httpContextAccessorMock.Setup(x => x.HttpContext.User).Returns(user);
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new("orgId", "1"), }, "mock"));
+        _httpContextAccessorMock.Setup(x => x.HttpContext!.User).Returns(user);
 
         _sut = new AdminService(_passwordlessClientMock.Object, _dbContext, _httpContextAccessorMock.Object,
             _loggerMock.Object);
@@ -95,5 +92,15 @@ public class AdminServiceTests
 
         // Assert
         Assert.True(result);
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }
