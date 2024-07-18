@@ -13,7 +13,8 @@
         </p>
         <div>
             <label for="IsManualTokenGenerationEnabled">
-                <InputCheckbox id="IsManualTokenGenerationEnabled" class="mr-1 my-4" @bind-Value="Form!.IsEnabled" />
+                <input type="hidden" name="Form.IsEnabled" value="false" />
+                <InputCheckbox id="IsManualTokenGenerationEnabled" class="mr-1 my-4" @bind-Value="Form!.IsEnabled"/>
                 Enable Manually Generated Verification Tokens
             </label>
         </div>
