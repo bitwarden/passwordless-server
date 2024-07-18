@@ -152,7 +152,16 @@ public class Fido2Service : IFido2Service
                     CredProps = true
                 });
 
-            var session = await _tokenService.EncodeTokenAsync(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
+            var session = await _tokenService.EncodeTokenAsync(
+                new RegisterSession
+                {
+                    Options = options,
+                    Aliases = token.Aliases,
+                    AliasHashing = token.AliasHashing
+                },
+                "session_",
+                true
+            );
 
             _eventLogger.LogRegistrationBeganEvent(userId);
 
