@@ -1,0 +1,25 @@
+@inject IDataService DataService
+@inject IAdminService AdminService
+
+<Panel Header="Security">
+    @if (SecurityForm != null)
+    {
+    <EditForm class="flex flex-col space-y-4" FormName="@SecurityFormName" Model="SecurityForm" OnValidSubmit="@OnSecurityFormSubmittedAsync">
+        <div class="flex flex-col space-y-4">
+            <div class="flex flex-col space-y-2">
+                <label>
+                    <input type="hidden" name="SecurityForm.IsMagicLinksEnabled" value="false"/>
+                    <InputCheckbox class="mr-1 my-4" @bind-Value="SecurityForm.IsMagicLinksEnabled" ch/>
+                    Enable Magic Links
+                </label>
+            </div>
+        </div>
+        <div>
+            <button id="update-security-btn" type="submit" class="btn-primary">Update</button>
+        </div>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <CustomValidationErrors EditContext="SecurityFormEditContext"/>
+    </EditForm>
+    }
+</Panel>
