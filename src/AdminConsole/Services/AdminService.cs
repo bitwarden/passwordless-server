@@ -43,7 +43,7 @@ public class AdminService : IAdminService
             catch (PasswordlessApiException e)
             {
                 _logger.LogError(e, "Failed to list credentials for user {UserId}", adminId);
-                throw;
+                throw new InvalidOperationException("Failed to list credentials for user.");
             }
         }
 

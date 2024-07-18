@@ -85,10 +85,8 @@ public class AdminServiceTests : IDisposable, IAsyncDisposable
         _passwordlessClientMock.Setup(x => x.ListCredentialsAsync(It.Is<string>(p => p == adminId2), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Credential> { _fixture.Create<Credential>() });
 
-        var service = new AdminService(_passwordlessClientMock.Object, _dbContext, _httpContextAccessorMock.Object, _loggerMock.Object);
-
         // Act
-        var result = await service.CanDisableMagicLinksAsync();
+        var result = await _sut.CanDisableMagicLinksAsync();
 
         // Assert
         Assert.True(result);
