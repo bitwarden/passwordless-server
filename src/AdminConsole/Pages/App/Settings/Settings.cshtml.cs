@@ -1,11 +1,6 @@
-﻿using System.Collections.Immutable;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Passwordless.AdminConsole.Billing.Configuration;
-using Passwordless.AdminConsole.EventLog.Loggers;
+﻿using Microsoft.AspNetCore.Mvc;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
-using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
 using Application = Passwordless.AdminConsole.Models.Application;
 
@@ -18,29 +13,20 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
-    private readonly ISharedBillingService _billingService;
     private readonly IScopedPasswordlessClient _scopedPasswordlessClient;
-    private readonly BillingOptions _billingOptions;
 
     public SettingsModel(
         ILogger<SettingsModel> logger,
         IDataService dataService,
         ICurrentContext currentContext,
-        IHttpContextAccessor httpContextAccessor,
         IApplicationService appService,
-        ISharedBillingService billingService,
-        IPasswordlessManagementClient managementClient,
-        IOptions<BillingOptions> billingOptions,
-        IScopedPasswordlessClient scopedPasswordlessClient,
-        IEventLogger eventLogger)
+        IScopedPasswordlessClient scopedPasswordlessClient)
     {
         _logger = logger;
         _dataService = dataService;
         _currentContext = currentContext;
         _appService = appService;
-        _billingService = billingService;
         _scopedPasswordlessClient = scopedPasswordlessClient;
-        _billingOptions = billingOptions.Value;
     }
 
     public Models.Organization Organization { get; set; }
@@ -54,8 +40,6 @@ public class SettingsModel : BaseExtendedPageModel
     public Application? Application { get; private set; }
 
     public bool CanDeleteImmediately { get; private set; }
-
-    public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
     [BindProperty]
     public bool IsManualTokenGenerationEnabled { get; set; }
@@ -80,13 +64,6 @@ public class SettingsModel : BaseExtendedPageModel
     public async Task OnGet()
     {
         await InitializeAsync();
-
-        if (!Organization.HasSubscription)
-        {
-            AddPlan(_billingOptions.Store.Free);
-        }
-        AddPlan(_billingOptions.Store.Pro);
-        AddPlan(_billingOptions.Store.Enterprise);
 
         PendingDelete = Application?.DeleteAt.HasValue ?? false;
         DeleteAt = Application?.DeleteAt;
@@ -146,18 +123,6 @@ public class SettingsModel : BaseExtendedPageModel
         }
     }
 
-    /// <summary>
-    /// Handles the plan change.
-    /// </summary>
-    /// <param name="selectedPlan"></param>
-    /// <returns></returns>
-    public async Task<IActionResult> OnPostChangePlanAsync(string selectedPlan)
-    {
-        var appId = _currentContext.AppId!;
-        var redirectUrl = await _billingService.ChangePlanAsync(appId, selectedPlan);
-        return Redirect(redirectUrl!);
-    }
-
     public async Task<IActionResult> OnPostSettingsAsync()
     {
         static bool? GetFinalValue(bool originalValue, bool postedValue) =>
@@ -187,45 +152,5 @@ public class SettingsModel : BaseExtendedPageModel
         }
     }
 
-    private void AddPlan(string plan)
-    {
-        var options = _billingOptions.Plans[plan];
-        var isActive = Application!.BillingPlan == plan;
-        var isOutdated = isActive && Application!.BillingPriceId != options.PriceId;
-
-        bool canSubscribe;
-        if (plan == _billingOptions.Store.Free || Application.DeleteAt.HasValue)
-        {
-            canSubscribe = false;
-        }
-        else
-        {
-            canSubscribe = Application.BillingPriceId != options.PriceId;
-        }
-
-        var model = new PlanModel(
-            plan,
-            options.PriceId,
-            options.Ui.Label,
-            options.Ui.Price,
-            options.Ui.PriceHint,
-            options.Ui.Features.ToImmutableList(),
-            isActive,
-            canSubscribe,
-            isOutdated);
-        Plans.Add(model);
-    }
-
     public bool IsAttestationAllowed => _currentContext.Features.AllowAttestation;
-
-    public record PlanModel(
-        string Value,
-        string? PriceId,
-        string Label,
-        string Price,
-        string? PriceHint,
-        IReadOnlyCollection<string> Features,
-        bool IsActive,
-        bool CanSubscribe,
-        bool IsOutdated);
 }
