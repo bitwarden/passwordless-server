@@ -158,35 +158,6 @@ public class SettingsModel : BaseExtendedPageModel
         return Redirect(redirectUrl!);
     }
 
-    public async Task<IActionResult> OnPostSettingsAsync()
-    {
-        static bool? GetFinalValue(bool originalValue, bool postedValue) =>
-            originalValue == postedValue ? null : postedValue;
-
-        if (string.IsNullOrWhiteSpace(_currentContext.AppId) || string.IsNullOrWhiteSpace(User.Identity?.Name))
-        {
-            return RedirectToPage("/Error", new { Message = "Something unexpected happened." });
-        }
-
-        try
-        {
-            await _scopedPasswordlessClient.SetFeaturesAsync(new SetFeaturesRequest
-            {
-                PerformedBy = User.Identity!.Name,
-                EnableManuallyGeneratedAuthenticationTokens =
-                    GetFinalValue(_currentContext.Features.IsGenerateSignInTokenEndpointEnabled, IsManualTokenGenerationEnabled),
-                EnableMagicLinks = GetFinalValue(_currentContext.Features.IsMagicLinksEnabled, IsMagicLinksEnabled)
-            });
-
-            return RedirectToPage();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to save settings for {appId}", _currentContext.AppId);
-            return RedirectToPage("/Error", new { ex.Message });
-        }
-    }
-
     private void AddPlan(string plan)
     {
         var options = _billingOptions.Plans[plan];
