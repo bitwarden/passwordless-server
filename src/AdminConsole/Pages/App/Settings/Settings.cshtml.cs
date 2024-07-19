@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Passwordless.AdminConsole.Middleware;
 using Passwordless.AdminConsole.Services;
-using Passwordless.Common.Models.Apps;
 using Application = Passwordless.AdminConsole.Models.Application;
 
 namespace Passwordless.AdminConsole.Pages.App.Settings;
@@ -13,20 +12,17 @@ public class SettingsModel : BaseExtendedPageModel
     private readonly IDataService _dataService;
     private readonly ICurrentContext _currentContext;
     private readonly IApplicationService _appService;
-    private readonly IScopedPasswordlessClient _scopedPasswordlessClient;
 
     public SettingsModel(
         ILogger<SettingsModel> logger,
         IDataService dataService,
         ICurrentContext currentContext,
-        IApplicationService appService,
-        IScopedPasswordlessClient scopedPasswordlessClient)
+        IApplicationService appService)
     {
         _logger = logger;
         _dataService = dataService;
         _currentContext = currentContext;
         _appService = appService;
-        _scopedPasswordlessClient = scopedPasswordlessClient;
     }
 
     public Models.Organization Organization { get; set; }
@@ -41,12 +37,6 @@ public class SettingsModel : BaseExtendedPageModel
 
     public bool CanDeleteImmediately { get; private set; }
 
-    [BindProperty]
-    public bool IsManualTokenGenerationEnabled { get; set; }
-
-    [BindProperty]
-    public bool IsMagicLinksEnabled { get; set; }
-
     private async Task InitializeAsync()
     {
         Organization = await _dataService.GetOrganizationWithDataAsync();
@@ -56,9 +46,6 @@ public class SettingsModel : BaseExtendedPageModel
 
         Application = application ?? throw new InvalidOperationException("Application not found.");
         CanDeleteImmediately = await _appService.CanDeleteApplicationImmediatelyAsync(ApplicationId);
-
-        IsManualTokenGenerationEnabled = _currentContext.Features.IsGenerateSignInTokenEndpointEnabled;
-        IsMagicLinksEnabled = _currentContext.Features.IsMagicLinksEnabled;
     }
 
     public async Task OnGet()
