@@ -1,0 +1,157 @@
+@using System.Collections.Immutable
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Billing.Configuration
+@using Passwordless.AdminConsole.Helpers
+
+@inject ISharedBillingService BillingService;
+@inject ICurrentContext CurrentContext;
+@inject IOptionsSnapshot<BillingOptions> BillingOptions;
+@inject NavigationManager NavigationManager;
+@inject IHttpContextAccessor HttpContextAccessor;
+
+<Panel Header="Plan">
+    <p>The plan you select for this app changes the pricing and features available.</p>
+    <div class="gap-4 grid sm:grid-cols-1 md:grid-cols-3">
+        @foreach (var plan in Plans)
+        {
+            <div class="@(plan.IsActive ? "pricing-card-active" : "pricing-card")">
+                <div class="flex flex-wrap items-center justify-center">
+                    @if (plan.IsActive)
+                    {
+                        if (plan.IsOutdated)
+                        {
+                            <Badge Variant="@ContextualStyles.Warning" Message="New Available"/>
+                        }
+                        else
+                        {
+                            <Badge Variant="@ContextualStyles.Primary" Message="Active"/>
+                        }
+                    }
+                    else
+                    {
+                        <Badge Class="invisible" Message="Hidden"/>
+                    }
+                </div>
+                <h3 class="text-center">@plan.Label</h3>
+                <div class="space-y-0">
+                    <p class="text-lg font-black text-center">@plan.Price</p>
+                    <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.PriceHint) ? "*" : string.Empty)</p>
+                </div>
+                <div class="flex-1">
+                    <ul class="mt-4 space-y-2">
+                        @foreach (var feature in plan.Features)
+                        {
+                            <li class="flex items-start">
+                                <FeatureListItemIcon class="flex-shrink-0 w-5 h-5 mr-2" />
+                                @feature
+                            </li>
+                        }
+                    </ul>
+                </div>
+                @if (!string.IsNullOrEmpty(plan.PriceId))
+                {
+                    <div class="mt-auto text-center space-y-4">
+                        @if (!string.IsNullOrEmpty(plan.PriceHint))
+                        {
+                            <p class="text-xs text-gray-600 text-center">* @(plan.PriceHint)</p>
+                        }
+                        @if (plan.CanSubscribe)
+                        {
+                            <EditForm FormName="@SubscribePlanFormName" Model="@SubscribePlanForm" OnValidSubmit="@OnSubscribePlanFormSubmittedAsync">
+                                <DataAnnotationsValidator />
+                                <input type="hidden" name="SubscribePlanForm.SelectedPlan" value="@plan.Value"/>
+                                <button class="btn-primary" type="submit">Subscribe</button>
+                            </EditForm>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</Panel>
+
+@code {
+    public const string SubscribePlanFormName = "subscribe-plan-form";
+    
+    public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
+
+    [SupplyParameterFromForm(FormName = SubscribePlanFormName)]
+    public SubscribeFormModel SubscribePlanForm { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!CurrentContext.Organization!.HasSubscription)
+        {
+            AddPlan(BillingOptions.Value.Store.Free);
+        }
+
+        AddPlan(BillingOptions.Value.Store.Pro);
+        AddPlan(BillingOptions.Value.Store.Enterprise);
+        
+        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
+        {
+            var request = HttpContextAccessor.HttpContext!.Request;
+            switch (request.Form["_handler"])
+            {
+                case SubscribePlanFormName:
+                    SubscribePlanForm.SelectedPlan = request.Form[$"{nameof(SubscribePlanForm)}.{nameof(SubscribePlanForm.SelectedPlan)}"].ToString();
+                    await OnSubscribePlanFormSubmittedAsync();
+                    break;
+            }
+        }
+    }
+
+    private void AddPlan(string plan)
+    {
+        var options = BillingOptions.Value.Plans[plan];
+        var isActive = CurrentContext.BillingPlan == plan;
+        var isOutdated = isActive && CurrentContext.BillingPriceId != options.PriceId;
+
+        bool canSubscribe;
+        if (plan == BillingOptions.Value.Store.Free || CurrentContext.IsPendingDelete)
+        {
+            canSubscribe = false;
+        }
+        else
+        {
+            canSubscribe = CurrentContext.BillingPriceId != options.PriceId;
+        }
+
+        var model = new PlanModel(
+            plan,
+            options.PriceId,
+            options.Ui.Label,
+            options.Ui.Price,
+            options.Ui.PriceHint,
+            options.Ui.Features.ToImmutableList(),
+            isActive,
+            canSubscribe,
+            isOutdated);
+        Plans.Add(model);
+    }
+
+    public record PlanModel(
+        string Value,
+        string? PriceId,
+        string Label,
+        string Price,
+        string? PriceHint,
+        IReadOnlyCollection<string> Features,
+        bool IsActive,
+        bool CanSubscribe,
+        bool IsOutdated);
+
+    public class SubscribeFormModel
+    {
+        [Required]
+        public string SelectedPlan { get; set; }
+    }
+
+    private async Task OnSubscribePlanFormSubmittedAsync()
+    {
+        var appId = CurrentContext.AppId!;
+        var redirectUrl = await BillingService.ChangePlanAsync(appId, SubscribePlanForm.SelectedPlan);
+        NavigationManager.NavigateTo(redirectUrl!);
+    }
+}

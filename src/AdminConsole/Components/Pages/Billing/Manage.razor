@@ -19,7 +19,7 @@
                 <EditForm FormName="@UpgradeProFormName" Model="UpgradeProForm" OnSubmit="@OnUpgradeProFormSubmittedAsync">
                     <button name="UpgradeProForm.Action" class="btn-primary" type="submit" value="Upgrade">Upgrade to a Paid Organization</button>
                 </EditForm>
-                <p class="text-xs">Your Trial app will be upgraded to a Pro app. Estimated variable cost $@(Math.Round(Applications!.Select(a => a.Users).Sum() * 0.05, 2))/month. See <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing">Pricing page</a> for details.</p>
+                <p class="text-xs">Your Trial app will be upgraded to a Pro app. Estimated variable cost $@(Math.Round(Applications!.Select(a => a.Users).Sum() * 0.05, 2))/month. See <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">Pricing page</a> for details.</p>
             </Panel>
         }
 
