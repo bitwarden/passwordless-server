@@ -1,0 +1,9 @@
+@inject ICurrentContext CurrentContext;
+
+<Panel Header="Attestation">
+    <p>When attestation is enabled, you can choose to limit the authenticators used with your application.</p>
+
+    <div>
+        <a class="btn-primary" href="/app/@CurrentContext.AppId/settings/authenticators">View authenticators</a>
+    </div>
+</Panel>
