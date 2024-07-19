@@ -1,0 +1,24 @@
+@page "/app/{AppId}/settings"
+
+@using Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsComponents
+
+@inherits BaseApplicationPage
+
+@inject IDataService DataService
+@inject ICurrentContext CurrentContext
+
+<Page>
+    <PlanSection />
+    <ApiKeysSection />
+    <MagicLinksSection />
+    <ManuallyGeneratedAuthenticationTokensSection />
+    @if (IsAttestationAllowed)
+    {
+        <AttestationSection />
+    }
+    <AuthenticationConfiguration />
+    @if (Application != null)
+    {
+        <DeleteApplicationSection Application="@Application" />
+    }
+</Page>
