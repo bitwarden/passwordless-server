@@ -20,7 +20,18 @@ public partial class SecurityComponent : ComponentBase
 
     protected override void OnInitialized()
     {
-        SecurityForm ??= new SecurityFormModel { IsMagicLinksEnabled = IsMagicLinksEnabled };
+        // If the form is being submitted, we need to initialize the form model
+        // Else, we need to initialize the form model with the current state from the component's incoming parameter.
+        if (HttpContextAccessor.HttpContext!.Request.HasFormContentType &&
+            HttpContextAccessor.HttpContext.Request.Form["_handler"].ToString() == SecurityFormName)
+        {
+            SecurityForm ??= new();
+        }
+        else
+        {
+            SecurityForm ??= new SecurityFormModel { IsMagicLinksEnabled = IsMagicLinksEnabled };
+        }
+
         SecurityFormEditContext = new EditContext(SecurityForm);
         SecurityFormValidationMessageStore = new ValidationMessageStore(SecurityFormEditContext);
     }
