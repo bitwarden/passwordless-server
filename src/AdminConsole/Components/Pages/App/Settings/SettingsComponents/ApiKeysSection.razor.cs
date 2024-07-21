@@ -57,24 +57,6 @@ public partial class ApiKeysSection : ComponentBase
     {
         if (CurrentContext.IsPendingDelete) return;
 
-        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case CreateApiKeyFormName:
-                    CreateForm.Type = request.Form["CreateForm.Type"].ToString();
-                    OnCreateFormSubmitted();
-                    break;
-                case ConfirmedSelectedApiKeyFormName:
-                    ConfirmedSelectedForm.ApiKeyId = request.Form["ConfirmedSelectedForm.ApiKeyId"].ToString();
-                    ConfirmedSelectedForm.Action = request.Form["ConfirmedSelectedForm.Action"].ToString();
-                    await OnSelectedFormConfirmed();
-                    break;
-            }
-        }
-
         var apiKeys = await ManagementClient.GetApiKeysAsync(AppId);
         ApiKeys = apiKeys
             .Select(x => ApiKey.FromDto(x, CurrentContext))

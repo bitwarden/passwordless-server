@@ -45,21 +45,6 @@ public partial class DeleteApplicationSection : ComponentBase
         {
             CanDeleteImmediately = await AppService.CanDeleteApplicationImmediatelyAsync(Application.Id);
         }
-
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case DeleteFormName:
-                    DeleteForm.NameConfirmation = request.Form["Form.NameConfirmation"]!;
-                    await OnDeleteValidSubmittedAsync();
-                    break;
-                case CancelDeleteFormName:
-                    await OnCancelDeleteValidSubmittedAsync();
-                    break;
-            }
-        }
     }
 
     private async Task OnDeleteValidSubmittedAsync()

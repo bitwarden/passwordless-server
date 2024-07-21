@@ -88,18 +88,6 @@
 
         AddPlan(BillingOptions.Value.Store.Pro);
         AddPlan(BillingOptions.Value.Store.Enterprise);
-        
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case SubscribePlanFormName:
-                    SubscribePlanForm.SelectedPlan = request.Form[$"{nameof(SubscribePlanForm)}.{nameof(SubscribePlanForm.SelectedPlan)}"].ToString();
-                    await OnSubscribePlanFormSubmittedAsync();
-                    break;
-            }
-        }
     }
 
     private void AddPlan(string plan)

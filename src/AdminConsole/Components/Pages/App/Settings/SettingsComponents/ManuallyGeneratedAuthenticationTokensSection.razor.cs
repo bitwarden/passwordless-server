@@ -14,19 +14,6 @@ public partial class ManuallyGeneratedAuthenticationTokensSection : ComponentBas
     protected override async Task OnInitializedAsync()
     {
         Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsGenerateSignInTokenEndpointEnabled };
-
-        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case FormName:
-                    Form.IsEnabled = bool.Parse(request.Form["Form.IsEnabled"]!);
-                    await OnFormSubmittedAsync();
-                    break;
-            }
-        }
     }
 
     private async Task OnFormSubmittedAsync()
