@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.MagicLinks;
+using Passwordless.AdminConsole.Services.Mail;
 
 namespace Passwordless.AdminConsole.Pages.Account;
 
@@ -10,15 +11,18 @@ public class LoginModel : PageModel
 {
     private readonly MagicLinkSignInManager<ConsoleAdmin> _signInManager;
     private readonly IDataService _dataService;
+    private readonly IMailService _mailService;
 
     public LoginStatus? Status { get; set; }
 
     public LoginModel(
         MagicLinkSignInManager<ConsoleAdmin> signInManager,
-        IDataService dataService)
+        IDataService dataService,
+        IMailService mailService)
     {
         _signInManager = signInManager;
         _dataService = dataService;
+        _mailService = mailService;
     }
 
     public IActionResult OnGet(string? returnUrl = null)
@@ -54,6 +58,7 @@ public class LoginModel : PageModel
         if (!organization.IsMagicLinksEnabled)
         {
             TempData["Status"] = LoginStatus.MagicLinkDisabled;
+            await _mailService.SendMagicLinksDisabledAsync(email, organization.Name);
             return RedirectToPage();
         }
 

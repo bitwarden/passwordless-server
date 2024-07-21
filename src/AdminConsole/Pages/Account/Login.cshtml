@@ -40,10 +40,8 @@
                 @switch (Model.Status)
                 {
                     case LoginModel.LoginStatus.EmailSent:
-                        <success-alert-box message="We've sent you a magic link to automatically sign you in (if we recognized the email)"></success-alert-box>
-                        break;
                     case LoginModel.LoginStatus.MagicLinkDisabled:
-                        <danger-alert-box message="Magic links are disabled. Please sign in using a passkey or contact your administrator."></danger-alert-box>
+                        <success-alert-box message="We've sent you a magic link to automatically sign you in. (if we recognized the email)"></success-alert-box>
                         break;
                 }
                 <div class="feedback__unknown_credential hidden">

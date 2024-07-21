@@ -60,6 +60,26 @@ public class DefaultMailService : IMailService
         await _provider.SendAsync(message);
     }
 
+    public Task SendMagicLinksDisabledAsync(string organizationName, string email)
+    {
+        var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
+
+        var message = new MailMessage
+        {
+            To = [email],
+            From = _fromEmail,
+            Subject = $"Magic links have been disabled for '{organizationDisplayName}'",
+            TextBody =
+                $"""
+                Magic links have been disabled for '{organizationDisplayName}'.
+                Please contact your organization administrator for more information if you have lost your credentials.
+                """,
+            Tag = "magic-links-disabled"
+        };
+
+        return _provider.SendAsync(message);
+    }
+
     public async Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
