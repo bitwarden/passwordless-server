@@ -47,13 +47,15 @@ public class LoginModel : PageModel
 
         if (user == null)
         {
+            // Just say we sent email to avoid account enumeration
+            TempData["Status"] = LoginStatus.EmailSent;
             return RedirectToPage();
         }
 
         var organization = await _dataService.GetOrganizationAsync(user.OrganizationId);
         if (organization == null)
         {
-            return RedirectToPage();
+            throw new InvalidOperationException("User does not belong to an organization.");
         }
         if (!organization.IsMagicLinksEnabled)
         {
@@ -62,16 +64,8 @@ public class LoginModel : PageModel
             return RedirectToPage();
         }
 
-        try
-        {
-            await _signInManager.SendEmailForSignInAsync(email, returnUrl);
-        }
-        catch (Exception)
-        {
-            // Ignore any exceptions and just say we sent email to avoid account enumeration
-        }
-
         TempData["Status"] = LoginStatus.EmailSent;
+        await _signInManager.SendEmailForSignInAsync(email, returnUrl);
 
         return RedirectToPage();
     }
