@@ -1,68 +1,12 @@
 ﻿@page "/settings"
-@using Badge = Passwordless.AdminConsole.Components.Shared.Badge
 @using Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsComponents
-@using Passwordless.AdminConsole.Components.Pages.App.Settings
 @model SettingsModel
-@inject IWebHostEnvironment Environment
 
 @{
     ViewData["Title"] = "Settings";
 }
 
-<div class="panel">
-    <h2>Plan</h2>
-    <p>The plan you select for this app changes the pricing and features available.</p>
-    <div class="gap-4 grid sm:grid-cols-1 md:grid-cols-3">
-        @foreach (var plan in Model.Plans)
-        {
-            <div class="@(plan.IsActive ? "pricing-card-active" : "pricing-card")">
-                <div class="flex flex-wrap items-center justify-center">
-                    @if (plan.IsActive)
-                    {
-                        if (plan.IsOutdated)
-                        {
-                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ContextualStyles.Warning)" param-Message="@("New Available")" />
-                        }
-                        else
-                        {
-                            <component type="typeof(Badge)" render-mode="Static" param-Variant="@(ContextualStyles.Primary)" param-Message="@("Active")" />
-                        }
-                    }
-                    else
-                    {
-                        <component type="typeof(Badge)" render-mode="Static" param-Class="@("invisible")" param-Message="@("Hidden")" />
-                    }
-                </div>
-                <h3 class="text-center">@plan.Label</h3>
-                <div class="space-y-0">
-                    <p class="text-lg font-black text-center">@plan.Price</p>
-                    <p class="text-sm text-gray-600 text-center">per user per month@(!string.IsNullOrEmpty(plan.PriceHint) ? "*" : string.Empty)</p>
-                </div>
-                <div class="flex-1">
-                    <ul class="mt-4 space-y-2">
-                        @foreach (var feature in plan.Features)
-                        {
-                            <li class="flex items-start">
-                                <feature-list-item-icon class="flex-shrink-0 w-5 h-5 mr-2"></feature-list-item-icon>
-                                @feature
-                            </li>
-                        }
-                    </ul>
-                </div>
-                <div asp-if="!string.IsNullOrEmpty(plan.PriceId)" class="mt-auto text-center space-y-4">
-                    <p asp-if="!string.IsNullOrEmpty(plan.PriceHint)" class="text-xs text-gray-600 text-center">* @(plan.PriceHint)</p>
-                    @if (plan.CanSubscribe)
-                    {
-                        <form method="post" asp-page-handler="Cancel">
-                            <input type="hidden" name="selectedPlan" value="@plan.Value"/>
-                            <button asp-page-handler="ChangePlan" type="submit" class="btn-primary">Subscribe</button>
-                        </form>
-                    }
-                </div>
-            </div>
-        }
-    </div>
-</div>
+<component type="typeof(PlanSection)" render-mode="Static" />
 
 <component type="typeof(ApiKeysSection)" render-mode="Static" />
 
@@ -96,13 +40,7 @@
 
 @if (Model.IsAttestationAllowed)
 {
-    <panel header="Attestation">
-        <p>When attestation is enabled, you can choose to limit the authenticators used with your application.</p>
-
-        <div>
-            <a class="btn-primary" href="/app/@Model.ApplicationId/settings/authenticators">View authenticators</a>
-        </div>
-    </panel>
+    <component type="typeof(AttestationSection)" render-mode="Static" />
 }
 
 <component type="typeof(AuthenticationConfiguration)" render-mode="Static" />

@@ -14,6 +14,8 @@ public interface ICurrentContext
     string? ApiSecret { get; }
     string? ApiKey { get; }
     bool IsPendingDelete { get; }
+    string BillingPlan { get; }
+    string? BillingPriceId { get; }
     ApplicationFeatureContext Features { get; }
     Organization? Organization { get; }
     int? OrgId { get; }
