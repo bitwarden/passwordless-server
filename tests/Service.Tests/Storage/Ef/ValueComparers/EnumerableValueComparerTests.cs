@@ -2,13 +2,13 @@ using Passwordless.Service.Storage.Ef.ValueComparers;
 
 namespace Passwordless.Service.Tests.Storage.Ef.ValueComparers;
 
-public class ArrayValueComparerTests
+public class EnumerableValueComparerTests
 {
     [Fact]
-    public void NullableArrayValueComparer_ComparingSameArrays_ReturnsExpectedResult()
+    public void EnumerableValueComparer_ComparingSameArrays_ReturnsExpectedResult()
     {
         // Arrange
-        var sut = new NullableArrayValueComparer<string>();
+        var sut = new EnumerableValueComparer<string>();
 
         // Act
         var actual = sut.Equals(["a", "b"], ["a", "b"]);
@@ -18,10 +18,10 @@ public class ArrayValueComparerTests
     }
 
     [Fact]
-    public void NullableArrayValueComparer_ComparingDifferentArrays_ReturnsExpectedResult()
+    public void EnumerableValueComparer_ComparingDifferentArrays_ReturnsExpectedResult()
     {
         // Arrange
-        var sut = new NullableArrayValueComparer<string>();
+        var sut = new EnumerableValueComparer<string>();
 
         // Act
         var actual = sut.Equals(["a", "b"], ["a", "c"]);

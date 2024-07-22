@@ -40,7 +40,7 @@ public abstract class DbGlobalContext : DbContext
             b.Property(x => x.DescriptorTransports).HasConversion(
                 v => JsonSerializer.Serialize(v, jsonOptions),
                 v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions))
-                .Metadata.SetValueComparer(new NullableArrayValueComparer<AuthenticatorTransport>());
+                .Metadata.SetValueComparer(new NullableEnumerableValueComparer<AuthenticatorTransport>());
         });
 
         modelBuilder.Entity<TokenKey>()
@@ -57,7 +57,7 @@ public abstract class DbGlobalContext : DbContext
                 .HasConversion(
                     v => string.Join(',', v),
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                .Metadata.SetValueComparer(new ArrayValueComparer<string>());
+                .Metadata.SetValueComparer(new EnumerableValueComparer<string>());
         });
 
         modelBuilder.Entity<AliasPointer>()
@@ -143,7 +143,7 @@ public abstract class DbGlobalContext : DbContext
                     x => string.Join(',', x),
                     x => x.Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray())
-                .Metadata.SetValueComparer(new ArrayValueComparer<PublicKeyCredentialHint>());
+                .Metadata.SetValueComparer(new EnumerableValueComparer<PublicKeyCredentialHint>());
         });
 
         base.OnModelCreating(modelBuilder);
