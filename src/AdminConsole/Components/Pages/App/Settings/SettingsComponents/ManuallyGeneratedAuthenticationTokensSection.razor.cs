@@ -9,11 +9,20 @@ public partial class ManuallyGeneratedAuthenticationTokensSection : ComponentBas
 {
     public const string FormName = "manually-generated-authentication-tokens-form";
 
+    [SupplyParameterFromForm(FormName = FormName)]
     public SaveFormModel? Form { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsGenerateSignInTokenEndpointEnabled };
+        if (HttpContextAccessor.HttpContext!.Request.HasFormContentType &&
+            HttpContextAccessor.HttpContext.Request.Form["_handler"].ToString() == FormName)
+        {
+            Form ??= new();
+        }
+        else
+        {
+            Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsGenerateSignInTokenEndpointEnabled };
+        }
     }
 
     private async Task OnFormSubmittedAsync()
@@ -37,7 +46,7 @@ public partial class ManuallyGeneratedAuthenticationTokensSection : ComponentBas
             });
             NavigationManager.Refresh();
         }
-        catch (Exception ex)
+        catch (PasswordlessApiException ex)
         {
             Logger.LogError(ex, "Failed to save settings for {appId}", CurrentContext.AppId);
             NavigationManager.NavigateTo($"/Error?Message={HttpUtility.UrlEncode(ex.Message)}");

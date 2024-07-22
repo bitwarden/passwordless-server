@@ -19,7 +19,15 @@ public partial class MagicLinksSection : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsMagicLinksEnabled };
+        if (HttpContextAccessor.HttpContext!.Request.HasFormContentType &&
+            HttpContextAccessor.HttpContext.Request.Form["_handler"].ToString() == FormName)
+        {
+            Form ??= new();
+        }
+        else
+        {
+            Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsMagicLinksEnabled };
+        }
     }
 
     private async Task OnFormSubmittedAsync()
@@ -43,7 +51,7 @@ public partial class MagicLinksSection : ComponentBase
             });
             NavigationManager.Refresh();
         }
-        catch (Exception ex)
+        catch (PasswordlessApiException ex)
         {
             Logger.LogError(ex, "Failed to save settings for {appId}", CurrentContext.AppId);
             NavigationManager.NavigateTo($"/Error?Message={HttpUtility.UrlEncode(ex.Message)}");
