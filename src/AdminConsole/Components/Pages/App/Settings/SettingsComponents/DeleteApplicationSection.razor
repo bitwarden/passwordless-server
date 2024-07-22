@@ -35,7 +35,7 @@
                 <InputText @bind-Value="DeleteForm!.NameConfirmation" class="text-input rounded-r-none font-mono"/>
                 <button type="submit" class="btn-danger rounded-l-none disabled:opacity-25">Delete</button>
             </div>
-            <p class="italic">Type the name of the organization and click "Delete".</p>
+            <p class="italic">Type the name of the application '<strong>@(Application.Name)</strong>' and click "Delete".</p>
             <CustomValidationErrors EditContext="@DeleteFormContext"/>
         </EditForm>
     }
