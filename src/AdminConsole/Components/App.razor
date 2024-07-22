@@ -9,12 +9,14 @@
     <SecureStylesheet href="css/tailwind.css" />
     <HeadOutlet/>
     <SecureScript src="lib/passwordless/passwordless.umd.min.js" />
+    <SecureImportMapScript Value="@ImportMap" />
 </head>
 
 <body class="h-full bg-gray-50">
     <Routes/>
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <SecureScript type="text/javascript" src="js/core.js" />
+    <SecureScript type="module" src="js/confirm-form.mjs" />
     <SecureScript>
         Blazor.start({
         ssr: { disableDomPreservation: true }
@@ -22,3 +24,13 @@
     </SecureScript>
 </body>
 </html>
+
+@code {
+    private static readonly SecureImportMapScript.Model ImportMap = new()
+    {
+        Imports = new Dictionary<string, string>
+        {
+            ["vue"] = "/lib/vue/vue.mjs"
+        }
+    };
+}
