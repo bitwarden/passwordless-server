@@ -140,9 +140,10 @@ public abstract class DbGlobalContext : DbContext
                     x => TimeSpan.FromSeconds(x));
             builder.Property(x => x.Hints)
                 .HasConversion(
-                    x => string.Join(", ", x),
+                    x => string.Join(',', x),
                     x => x.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray());
+                        .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray())
+                .Metadata.SetValueComparer(new ArrayValueComparer<PublicKeyCredentialHint>());
         });
 
         base.OnModelCreating(modelBuilder);
