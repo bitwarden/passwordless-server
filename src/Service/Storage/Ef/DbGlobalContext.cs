@@ -41,6 +41,8 @@ public abstract class DbGlobalContext : DbContext
                 v => JsonSerializer.Serialize(v, jsonOptions),
                 v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions))
                 .Metadata.SetValueComparer(new NullableArrayValueComparer<AuthenticatorTransport>());
+            b.HasIndex(x => new { x.Tenant, x.UserId })
+                .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
         });
 
         modelBuilder.Entity<TokenKey>()
