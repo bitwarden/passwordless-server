@@ -11,84 +11,89 @@
 {
     <Panel Header="Api Keys">
         <p>To learn more about API key management, read more <a class="link-blue underline" href="https://docs.passwordless.dev/guide/admin-console/applications.html#api-key-management" target="_blank">here</a>. To delete an API key, first lock the API key.</p>
-    
+
         <EditForm class="flex" Model="CreateForm" FormName="@(CreateApiKeyFormName)" OnSubmit="OnCreateFormSubmitted">
             <button id="create-public-key-btn" class="btn-primary" name="CreateForm.Type" type="submit" value="public">Create Public Key</button>
             <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
         </EditForm>
-    
-        <Table ColumnHeaders="@(new []{ "Api Key", "Created At", "Type", "Locked", "Scopes", string.Empty })" EmptyMessage="This application has no API Keys or API Secrets.">
-            @if (ApiKeys != null)
-            {
-                @foreach (var apiKey in ApiKeys)
+
+        <ConfirmEditForm Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
+
+            <Table ColumnHeaders="@(new[] { "Api Key", "Created At", "Type", "Locked", "Scopes", string.Empty })" EmptyMessage="This application has no API Keys or API Secrets.">
+                @if (ApiKeys != null)
                 {
-                    <tr>
-                        <td>@apiKey.Value</td>
-                        <td><LocalDateTime Value="apiKey.CreatedAt" /></td>
-                        <td>@apiKey.Type</td>
-                        @if (apiKey.IsLocked)
-                        {
-                            <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value" /></td>
-                        }
-                        else
-                        {
-                            <td>No</td>
-                        }
-                        <td>
-                            <ul>
-                                @foreach (var scope in apiKey.Scopes)
-                                {
-                                    <li>@scope</li>
-                                }
-                            </ul>
-                        </td>
-                        <td>
-                            <ConfirmEditForm class="flex space-x-2 ml-0" Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
+                    @foreach (var apiKey in ApiKeys)
+                    {
+                        <tr>
+                            <td>@apiKey.Value</td>
+                            <td>
+                                <LocalDateTime Value="apiKey.CreatedAt"/>
+                            </td>
+                            <td>@apiKey.Type</td>
+                            @if (apiKey.IsLocked)
+                            {
+                                <td class="bg-red-50">Yes, <LocalDateTime Value="apiKey.LastLockedAt!.Value"/></td>
+                            }
+                            else
+                            {
+                                <td>No</td>
+                            }
+                            <td>
+                                <ul>
+                                    @foreach (var scope in apiKey.Scopes)
+                                    {
+                                        <li>@scope</li>
+                                    }
+                                </ul>
+                            </td>
+                            <td>
+                                <div class="flex space-x-2 ml-0">
+
+                                </div>
                                 @if (apiKey.IsLocked)
                                 {
-                                    <ConfirmButton 
+                                    <ConfirmButton
                                         ConfirmTitle="Unlock API Key"
                                         ConfirmDescription="Are you sure you want to unlock this API Key?"
                                         ConfirmButtonText="Unlock"
                                         class="btn-warning flex items-center"
-                                        name="ConfirmedSelectedForm.Action"
+                                        name="ConfirmedSelectedForm.UnlockAction"
                                         type="submit"
-                                        value="unlock">
+                                        value="@apiKey.Id">
                                         <UnlockIcon Class="h-6 w-6"/> Unlock
                                     </ConfirmButton>
                                 }
                                 else
                                 {
-                                    <ConfirmButton 
+                                    <ConfirmButton
                                         ConfirmTitle="Lock API Key"
                                         ConfirmDescription="Are you sure you want to lock this API Key?"
                                         ConfirmButtonText="Lock"
                                         class="btn-warning flex items-center"
-                                        name="ConfirmedSelectedForm.Action"
+                                        name="ConfirmedSelectedForm.LockAction"
                                         type="submit"
-                                        value="lock">
+                                        value="@apiKey.Id">
                                         <LockIcon Class="h-6 w-6"/> Lock
                                     </ConfirmButton>
                                 }
                                 @if (apiKey.CanDelete)
                                 {
-                                    <ConfirmButton 
+                                    <ConfirmButton
                                         ConfirmTitle="Delete API Key"
                                         ConfirmDescription="Are you sure you want to delete this API Key?"
                                         ConfirmButtonText="Delete"
                                         class="btn-danger flex items-center"
-                                        name="ConfirmedSelectedForm.Action"
+                                        name="ConfirmedSelectedForm.DeleteAction"
                                         type="submit"
-                                        value="delete">
+                                        value="@apiKey.Id">
                                         <DeleteIcon Class="h-6 w-6"/> Delete
                                     </ConfirmButton>
                                 }
-                                <input type="hidden" value="@apiKey.Id" name="ConfirmedSelectedForm.ApiKeyId"/>
-                            </ConfirmEditForm>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    }
                 }
-            }
-        </Table>
+            </Table>
+        </ConfirmEditForm>
     </Panel>
 }
