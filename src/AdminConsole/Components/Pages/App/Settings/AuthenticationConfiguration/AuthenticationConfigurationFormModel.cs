@@ -6,19 +6,30 @@ namespace Passwordless.AdminConsole.Components.Pages.App.Settings.Authentication
 
 public class AuthenticationConfigurationFormModel
 {
-    [Required(AllowEmptyStrings = false), RegularExpression(@"^[\w\-]*$", ErrorMessage = "Characters are limited to A-z, 0-9, -, or _."), MaxLength(255)]
+    [Required(AllowEmptyStrings = false)]
+    [RegularExpression(@"^[\w\-]*$", ErrorMessage = "Characters are limited to A-z, 0-9, -, or _.")]
+    [MaxLength(255)]
     public string Purpose { get; set; } = string.Empty;
 
-    [Required] public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
+    [Required]
+    public UserVerificationRequirement UserVerificationRequirement { get; set; } = UserVerificationRequirement.Preferred;
 
-    [Required, Range(0, int.MaxValue)] public int Seconds { get; set; }
+    [Required]
+    [Range(0, int.MaxValue)]
+    public int Seconds { get; set; }
 
     public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
-    public static AuthenticationConfigurationFormModel FromResult(Common.Models.Apps.AuthenticationConfiguration dto) => new()
-    {
-        Purpose = dto.Purpose,
-        UserVerificationRequirement = dto.UserVerificationRequirement.ToEnum<UserVerificationRequirement>(),
-        Seconds = dto.TimeToLive
-    };
+    [Required]
+    public IReadOnlyList<PublicKeyCredentialHint> Hints { get; set; } = [];
+
+    public static AuthenticationConfigurationFormModel FromResult(Common.Models.Apps.AuthenticationConfiguration dto) =>
+        new()
+        {
+            Purpose = dto.Purpose,
+            UserVerificationRequirement = dto.UserVerificationRequirement.ToEnum<UserVerificationRequirement>(),
+            Seconds = dto.TimeToLive,
+            Hints = dto.Hints.Split(',', StringSplitOptions.TrimEntries)
+                .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray()
+        };
 }

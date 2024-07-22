@@ -28,13 +28,16 @@ public static class RequestHelpers
     public static Faker<SetAuthenticationConfigurationRequest> GetSetAuthenticationConfigurationRequest() =>
         new Faker<SetAuthenticationConfigurationRequest>()
             .RuleFor(x => x.Purpose, faker => faker.Lorem.Word())
-            .RuleFor(x => x.UserVerificationRequirement, GetRandomEnumValue<UserVerificationRequirement>())
+            .RuleFor(x => x.UserVerificationRequirement, faker => faker.PickRandom<UserVerificationRequirement>())
             .RuleFor(x => x.TimeToLive, faker => faker.Date.Timespan())
+            .RuleFor(x => x.Hints,
+                faker => faker.Random.Shuffle(
+                    faker.Random.ArrayElements([
+                        PublicKeyCredentialHint.SecurityKey,
+                        PublicKeyCredentialHint.ClientDevice,
+                        PublicKeyCredentialHint.Hybrid
+                    ])
+                )
+            )
             .RuleFor(x => x.PerformedBy, faker => faker.Person.UserName);
-
-    private static T GetRandomEnumValue<T>() where T : struct, Enum
-    {
-        var values = Enum.GetValues<T>();
-        return values[Random.Shared.Next(values.Length)];
-    }
 }
