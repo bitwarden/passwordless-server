@@ -48,47 +48,46 @@
                             </td>
                             <td>
                                 <div class="flex space-x-2 ml-0">
-
+                                    @if (apiKey.IsLocked)
+                                    {
+                                        <ConfirmButton
+                                            ConfirmTitle="Unlock API Key"
+                                            ConfirmDescription="Are you sure you want to unlock this API Key?"
+                                            ConfirmButtonText="Unlock"
+                                            class="btn-warning flex items-center"
+                                            name="ConfirmedSelectedForm.UnlockAction"
+                                            type="submit"
+                                            value="@apiKey.Id">
+                                            <UnlockIcon Class="h-6 w-6"/> Unlock
+                                        </ConfirmButton>
+                                    }
+                                    else
+                                    {
+                                        <ConfirmButton
+                                            ConfirmTitle="Lock API Key"
+                                            ConfirmDescription="Are you sure you want to lock this API Key?"
+                                            ConfirmButtonText="Lock"
+                                            class="btn-warning flex items-center"
+                                            name="ConfirmedSelectedForm.LockAction"
+                                            type="submit"
+                                            value="@apiKey.Id">
+                                            <LockIcon Class="h-6 w-6"/> Lock
+                                        </ConfirmButton>
+                                    }
+                                    @if (apiKey.CanDelete)
+                                    {
+                                        <ConfirmButton
+                                            ConfirmTitle="Delete API Key"
+                                            ConfirmDescription="Are you sure you want to delete this API Key?"
+                                            ConfirmButtonText="Delete"
+                                            class="btn-danger flex items-center"
+                                            name="ConfirmedSelectedForm.DeleteAction"
+                                            type="submit"
+                                            value="@apiKey.Id">
+                                            <DeleteIcon Class="h-6 w-6"/> Delete
+                                        </ConfirmButton>
+                                    }
                                 </div>
-                                @if (apiKey.IsLocked)
-                                {
-                                    <ConfirmButton
-                                        ConfirmTitle="Unlock API Key"
-                                        ConfirmDescription="Are you sure you want to unlock this API Key?"
-                                        ConfirmButtonText="Unlock"
-                                        class="btn-warning flex items-center"
-                                        name="ConfirmedSelectedForm.UnlockAction"
-                                        type="submit"
-                                        value="@apiKey.Id">
-                                        <UnlockIcon Class="h-6 w-6"/> Unlock
-                                    </ConfirmButton>
-                                }
-                                else
-                                {
-                                    <ConfirmButton
-                                        ConfirmTitle="Lock API Key"
-                                        ConfirmDescription="Are you sure you want to lock this API Key?"
-                                        ConfirmButtonText="Lock"
-                                        class="btn-warning flex items-center"
-                                        name="ConfirmedSelectedForm.LockAction"
-                                        type="submit"
-                                        value="@apiKey.Id">
-                                        <LockIcon Class="h-6 w-6"/> Lock
-                                    </ConfirmButton>
-                                }
-                                @if (apiKey.CanDelete)
-                                {
-                                    <ConfirmButton
-                                        ConfirmTitle="Delete API Key"
-                                        ConfirmDescription="Are you sure you want to delete this API Key?"
-                                        ConfirmButtonText="Delete"
-                                        class="btn-danger flex items-center"
-                                        name="ConfirmedSelectedForm.DeleteAction"
-                                        type="submit"
-                                        value="@apiKey.Id">
-                                        <DeleteIcon Class="h-6 w-6"/> Delete
-                                    </ConfirmButton>
-                                }
                             </td>
                         </tr>
                     }
