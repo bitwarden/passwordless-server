@@ -11,7 +11,7 @@
     <PackageReference Include="MailKit" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.6" />
-    <PackageReference Include="Postmark" Version="4.7.12" />
+    <PackageReference Include="Postmark" Version="5.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
     <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
