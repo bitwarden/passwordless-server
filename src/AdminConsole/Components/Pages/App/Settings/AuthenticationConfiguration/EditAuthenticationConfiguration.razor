@@ -17,17 +17,17 @@
 
 @code {
     [Parameter] public required string Purpose { get; set; }
-    
+
     private AuthenticationConfigurationFormModel ConfigurationDto { get; set; }
-    
+
     private void NavigateToSettings() => NavigationManager.NavigateTo($"app/{AppId}/settings");
 
     protected override async Task OnInitializedAsync()
     {
         var config = await Passwordless.GetAuthenticationConfigurationAsync(Purpose);
-        
+
         if(!config.Configurations.Any()) NavigateToSettings();
-        
+
         ConfigurationDto = AuthenticationConfigurationFormModel.FromResult(config.Configurations.First());
     }
 
@@ -38,6 +38,7 @@
             Purpose = formModel.Purpose,
             UserVerificationRequirement = formModel.UserVerificationRequirement,
             TimeToLive = formModel.TimeToLive,
+            Hints = formModel.Hints,
             PerformedBy = HttpContextAccessor.HttpContext!.User.Identity!.Name!
         });
 

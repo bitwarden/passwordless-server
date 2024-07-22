@@ -24,8 +24,9 @@ public class AuthenticationConfigurationDto
         {
             Purpose = SignInPurpose.SignIn,
             UserVerificationRequirement = UserVerificationRequirement.Preferred,
-            Tenant = tenant,
             TimeToLive = TimeSpan.FromMinutes(2),
+            Hints = [],
+            Tenant = tenant,
             CreatedBy = "System"
         };
 
@@ -34,15 +35,17 @@ public class AuthenticationConfigurationDto
         {
             Purpose = SignInPurpose.StepUp,
             UserVerificationRequirement = UserVerificationRequirement.Preferred,
-            Tenant = tenant,
             TimeToLive = TimeSpan.FromMinutes(2),
+            Hints = [],
+            Tenant = tenant,
             CreatedBy = "System"
         };
 
     public AuthenticationConfiguration ToResponse() => new(
         Purpose.Value,
-        Convert.ToInt32(TimeToLive.TotalSeconds),
         UserVerificationRequirement.ToEnumMemberValue(),
+        Convert.ToInt32(TimeToLive.TotalSeconds),
+        string.Join(", ", Hints),
         CreatedBy,
         CreatedOn,
         EditedBy,

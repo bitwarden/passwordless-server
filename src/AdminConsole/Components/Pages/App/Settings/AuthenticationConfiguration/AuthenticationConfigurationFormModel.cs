@@ -21,7 +21,13 @@ public class AuthenticationConfigurationFormModel
     public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
     [Required]
-    public IReadOnlyList<PublicKeyCredentialHint> Hints { get; set; } = [];
+    [RegularExpression(@"^[\w\s,]*$")]
+    [MaxLength(255)]
+    public string HintString { get; set; } = "";
+
+    public IReadOnlyList<PublicKeyCredentialHint> Hints =>
+        HintString.Split(',', StringSplitOptions.TrimEntries)
+            .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray();
 
     public static AuthenticationConfigurationFormModel FromResult(Common.Models.Apps.AuthenticationConfiguration dto) =>
         new()
@@ -29,7 +35,6 @@ public class AuthenticationConfigurationFormModel
             Purpose = dto.Purpose,
             UserVerificationRequirement = dto.UserVerificationRequirement.ToEnum<UserVerificationRequirement>(),
             Seconds = dto.TimeToLive,
-            Hints = dto.Hints.Split(',', StringSplitOptions.TrimEntries)
-                .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray()
+            HintString = dto.Hints
         };
 }

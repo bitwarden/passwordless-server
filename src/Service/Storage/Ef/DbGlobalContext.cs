@@ -138,6 +138,11 @@ public abstract class DbGlobalContext : DbContext
                 .HasConversion(
                     x => x.TotalSeconds,
                     x => TimeSpan.FromSeconds(x));
+            builder.Property(x => x.Hints)
+                .HasConversion(
+                    x => string.Join(", ", x),
+                    x => x.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray());
         });
 
         base.OnModelCreating(modelBuilder);
