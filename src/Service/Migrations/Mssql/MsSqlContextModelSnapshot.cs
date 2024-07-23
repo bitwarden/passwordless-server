@@ -341,9 +341,12 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Tenant", "DescriptorId");
+
+                    b.HasIndex("Tenant", "UserId")
+                        .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
 
                     b.ToTable("Credentials");
                 });

@@ -94,18 +94,6 @@
     {
         if (CurrentContext.IsPendingDelete) return;
 
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case var deleteFormName when deleteFormName.ToString() == DeleteFormName:
-                    ConfirmDeleteAuthenticationConfigurationModel.Purpose = request.Form["ConfirmDeleteAuthenticationConfigurationModel.Purpose"].ToString();
-                    await OnSelectedFormConfirmed();
-                    break;
-            }
-        }
-
         Configurations = await GetConfigurations();
     }
 

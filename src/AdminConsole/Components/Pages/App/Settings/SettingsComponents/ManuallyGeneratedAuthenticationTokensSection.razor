@@ -1,0 +1,26 @@
+@inject ICurrentContext CurrentContext;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject IScopedPasswordlessClient ScopedPasswordlessClient;
+@inject NavigationManager NavigationManager;
+@inject ILogger<MagicLinksSection> Logger;
+
+<Panel Header="Manually Generated Authentication Tokens">
+    <EditForm FormName="@FormName" Model="@Form" OnSubmit="@OnFormSubmittedAsync">
+        <p>
+            Manually generated verification tokens have many uses in authentication. A primary use would be issuing a "magic link" for a
+            user to log-in to their account in the event they've misplaced their passkey. Once the identity of the user has been
+            verified, you can send them a hyperlink that contains the token issued by <code>signin/generate-token</code>.
+        </p>
+        <div>
+            <label for="IsManualTokenGenerationEnabled">
+                <InputCheckbox id="IsManualTokenGenerationEnabled" class="mr-1 my-4" @bind-Value="Form!.IsEnabled"/>
+                Enable Manually Generated Verification Tokens
+            </label>
+        </div>
+        <button id="save-manually-generated-authentication-tokens-btn" class="btn-primary" type="submit">Save</button>
+    </EditForm>
+</Panel>
+
+@code {
+    
+}

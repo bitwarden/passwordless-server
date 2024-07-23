@@ -1,0 +1,16 @@
+@page "/Organization/Settings"
+@using Passwordless.AdminConsole.Components.Pages.Organization.SettingsComponents
+
+@inject IDataService DataService
+
+<Page Title="Organization Settings">
+    @if (_organization != null)
+    {
+        <SecurityComponent
+            IsMagicLinksEnabled="@_organization.IsMagicLinksEnabled" />
+        
+        <DeleteOrganizationComponent
+            Name="@_organization.Name"
+            ApplicationsCount="@_organization.Applications.Count" />
+    }
+</Page>

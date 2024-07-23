@@ -340,6 +340,9 @@ namespace Passwordless.Service.Migrations.Sqlite
 
                     b.HasKey("Tenant", "DescriptorId");
 
+                    b.HasIndex("Tenant", "UserId")
+                        .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
+
                     b.ToTable("Credentials");
                 });
 

@@ -25,10 +25,20 @@ public class DataService : IDataService
             .Where(a => a.OrganizationId == _orgId).ToListAsync();
     }
 
-    public async Task<Organization> GetOrganizationAsync()
+    public async Task<Organization?> GetOrganizationAsync()
     {
-        return await _db.Organizations
-            .Where(o => o.Id == _orgId).FirstOrDefaultAsync();
+        return await _db.Organizations.FirstOrDefaultAsync(o => o.Id == _orgId);
+    }
+
+    public async Task<Organization?> GetOrganizationAsync(int id)
+    {
+        return await _db.Organizations.FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task UpdateOrganizationSecurityAsync(bool isMagicLinksEnabled)
+    {
+        await _db.Organizations.ExecuteUpdateAsync(x => x
+            .SetProperty(p => p.IsMagicLinksEnabled, isMagicLinksEnabled));
     }
 
     public async Task<bool> AllowedToCreateApplicationAsync()

@@ -1,18 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.MagicLinks;
+using Passwordless.AdminConsole.Services.Mail;
 
 namespace Passwordless.AdminConsole.Pages.Account;
 
 public class LoginModel : PageModel
 {
-    private readonly MagicLinkSignInManager<ConsoleAdmin> signInManager;
-    public bool EmailSent { get; set; }
+    private readonly MagicLinkSignInManager<ConsoleAdmin> _signInManager;
+    private readonly IDataService _dataService;
+    private readonly IMailService _mailService;
 
-    public LoginModel(MagicLinkSignInManager<ConsoleAdmin> signInManager)
+    public LoginStatus? Status { get; set; }
+
+    public LoginModel(
+        MagicLinkSignInManager<ConsoleAdmin> signInManager,
+        IDataService dataService,
+        IMailService mailService)
     {
-        this.signInManager = signInManager;
+        _signInManager = signInManager;
+        _dataService = dataService;
+        _mailService = mailService;
     }
 
     public IActionResult OnGet(string? returnUrl = null)
@@ -23,7 +33,8 @@ public class LoginModel : PageModel
             return LocalRedirect(returnUrl);
         }
 
-        EmailSent = TempData["EmailSent"] is not null;
+        int? status = (int?)TempData["Status"];
+        Status = status.HasValue ? (LoginStatus)status.Value : null;
 
         return Page();
     }
@@ -32,16 +43,29 @@ public class LoginModel : PageModel
     {
         returnUrl = Url.Page("/Organization/Overview");
 
-        try
+        var user = await _signInManager.UserManager.FindByEmailAsync(email);
+
+        if (user == null)
         {
-            await signInManager.SendEmailForSignInAsync(email, returnUrl);
-        }
-        catch (Exception)
-        {
-            // Ignore any exceptions and just say we sent email to avoid account enumeration
+            // Just say we sent email to avoid account enumeration
+            TempData["Status"] = LoginStatus.EmailSent;
+            return RedirectToPage();
         }
 
-        TempData["EmailSent"] = true;
+        var organization = await _dataService.GetOrganizationAsync(user.OrganizationId);
+        if (organization == null)
+        {
+            throw new InvalidOperationException("User does not belong to an organization.");
+        }
+        if (!organization.IsMagicLinksEnabled)
+        {
+            TempData["Status"] = LoginStatus.MagicLinkDisabled;
+            await _mailService.SendMagicLinksDisabledAsync(email, organization.Name);
+            return RedirectToPage();
+        }
+
+        TempData["Status"] = LoginStatus.EmailSent;
+        await _signInManager.SendEmailForSignInAsync(email, returnUrl);
 
         return RedirectToPage();
     }
@@ -49,5 +73,11 @@ public class LoginModel : PageModel
     public IActionResult OnPostSignUp()
     {
         return RedirectToPage("/Organization/Create");
+    }
+
+    public enum LoginStatus
+    {
+        EmailSent,
+        MagicLinkDisabled
     }
 }
