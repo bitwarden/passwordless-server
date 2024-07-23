@@ -19,7 +19,7 @@
         </div>
 
         <ConfirmEditForm FormName="@DeleteFormName" Model="ConfirmDeleteAuthenticationConfigurationModel" OnSubmit="@OnSelectedFormConfirmed">
-            <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Last Used", "Actions" })" EmptyMessage="Something has failed. Please try refreshing.">
+            <Table ColumnHeaders="@(new[] { "Purpose", "User Verification", "Time To Live", "Credential Hints", "Last Used", "Actions" })" EmptyMessage="Something has failed. Please try refreshing.">
                 @if (Configurations.Any())
                 {
                     @foreach (var config in Configurations)
@@ -28,7 +28,7 @@
                             <td>@config.Purpose</td>
                             <td>@config.UserVerification</td>
                             <td>@config.TimeToLive</td>
-                            <td>@config.</td>
+                            <td>@config.Hints</td>
                             <td>
                                 @if (config.LastUsedOn.HasValue)
                                 {
@@ -86,7 +86,7 @@
         new(configuration.Purpose,
             configuration.UserVerificationRequirement.Humanize(LetterCasing.Title),
             TimeSpan.FromSeconds(configuration.TimeToLive).Humanize(),
-            string.Join(configuration.Hints, ", "),
+            string.Join(", ", configuration.Hints),
             configuration.LastUsedOn,
             _requiredAuthenticationConfigurationNames.All(x => !string.Equals(x, configuration.Purpose, StringComparison.OrdinalIgnoreCase)));
 

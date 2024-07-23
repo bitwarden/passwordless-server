@@ -42,7 +42,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         config.Purpose.Should().Be(request.Purpose);
         config.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
         config.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
-        config.Hints.Should().Be(string.Join(',', request.Hints));
+        config.Hints.Split(',', StringSplitOptions.TrimEntries).Should().BeEquivalentTo(request.Hints);
         config.CreatedBy.Should().Be(request.PerformedBy);
         config.CreatedOn.Should().NotBeNull();
     }
@@ -171,7 +171,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         editedConfig.UserVerificationRequirement.Should()
             .Be(UserVerificationRequirement.Discouraged.ToEnumMemberValue());
         editedConfig.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
-        editedConfig.Hints.Should().Be(string.Join(',', request.Hints));
+        editedConfig.Hints.Split(',', StringSplitOptions.TrimEntries).Should().BeEquivalentTo(request.Hints);
         editedConfig.EditedBy.Should().Be(request.PerformedBy);
         editedConfig.EditedOn.Should().NotBeNull();
     }
@@ -207,7 +207,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         var editedConfig = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
         editedConfig.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
         editedConfig.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
-        editedConfig.Hints.Should().Be(string.Join(',', request.Hints));
+        editedConfig.Hints.Split(',', StringSplitOptions.TrimEntries).Should().BeEquivalentTo(request.Hints);
         editedConfig.EditedBy.Should().Be(request.PerformedBy);
         editedConfig.EditedOn.Should().NotBeNull();
     }

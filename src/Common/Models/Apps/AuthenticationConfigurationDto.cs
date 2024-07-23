@@ -45,7 +45,7 @@ public class AuthenticationConfigurationDto
         Purpose.Value,
         UserVerificationRequirement.ToEnumMemberValue(),
         Convert.ToInt32(TimeToLive.TotalSeconds),
-        string.Join(',', Hints),
+        string.Join(", ", Hints),
         CreatedBy,
         CreatedOn,
         EditedBy,

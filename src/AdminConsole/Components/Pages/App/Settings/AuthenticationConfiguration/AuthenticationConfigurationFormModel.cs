@@ -21,7 +21,7 @@ public class AuthenticationConfigurationFormModel
     public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
     [Required]
-    [RegularExpression(@"^[\w\s,]*$")]
+    [CredentialHintStringValidation]
     [MaxLength(255)]
     public string HintString { get; set; } = "";
 

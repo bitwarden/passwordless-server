@@ -21,8 +21,9 @@
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Seconds">Seconds:</label>
         <InputNumber id="Seconds" @bind-Value="@FormModel.Seconds" min="0" class="text-input"/>
 
-        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="HintString">Credential hints:</label>
-        <InputText id="HintString" @bind-Value="@FormModel.HintString" class="text-input"/>
+        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Hints">Credential hints:</label>
+        <InputText id="Hints" @bind-Value="@FormModel.HintString" class="text-input" />
+        <div class="text-sm text-gray-500 mt-1">Put the desired hints in the correct order and combine them in a comma-separated string. Available values: @string.Join(", ", Enum.GetNames<PublicKeyCredentialHint>()).</div>
 
         <button class="btn-primary mt-3" type="submit">Submit</button>
     </div>
