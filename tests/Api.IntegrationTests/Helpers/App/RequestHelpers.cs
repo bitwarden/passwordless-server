@@ -37,7 +37,7 @@ public static class RequestHelpers
                         PublicKeyCredentialHint.ClientDevice,
                         PublicKeyCredentialHint.Hybrid
                     ])
-                )
+                ).ToArray()
             )
             .RuleFor(x => x.PerformedBy, faker => faker.Person.UserName);
 }
