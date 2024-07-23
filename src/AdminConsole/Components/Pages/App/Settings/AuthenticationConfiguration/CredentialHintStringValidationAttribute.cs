@@ -10,7 +10,7 @@ public class CredentialHintStringValidationAttribute : ValidationAttribute
         if (value is not string str)
             return false;
 
-        var hints = str.Split(',', StringSplitOptions.TrimEntries);
+        var hints = str.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         return hints.All(hint => Enum.TryParse<PublicKeyCredentialHint>(hint, true, out _));
     }
 }
