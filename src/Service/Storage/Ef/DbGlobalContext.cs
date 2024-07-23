@@ -142,7 +142,7 @@ public abstract class DbGlobalContext : DbContext
                 .HasConversion(
                     x => string.Join(',', x),
                     x => x.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray())
+                        .Select(s => Enum.Parse<PublicKeyCredentialHint>(s, true)).ToArray())
                 .Metadata.SetValueComparer(new EnumerableValueComparer<PublicKeyCredentialHint>());
         });
 

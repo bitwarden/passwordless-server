@@ -27,7 +27,7 @@ public class AuthenticationConfigurationFormModel
 
     public IReadOnlyList<PublicKeyCredentialHint> Hints =>
         HintString.Split(',', StringSplitOptions.TrimEntries)
-            .Select(s => s.ToEnum<PublicKeyCredentialHint>()).ToArray();
+            .Select(s => Enum.Parse<PublicKeyCredentialHint>(s, true)).ToArray();
 
     public static AuthenticationConfigurationFormModel FromResult(Common.Models.Apps.AuthenticationConfiguration dto) =>
         new()

@@ -11,6 +11,6 @@ public class CredentialHintStringValidationAttribute : ValidationAttribute
             return false;
 
         var hints = str.Split(',', StringSplitOptions.TrimEntries);
-        return hints.All(hint => Enum.TryParse<PublicKeyCredentialHint>(hint, out _));
+        return hints.All(hint => Enum.TryParse<PublicKeyCredentialHint>(hint, true, out _));
     }
 }
