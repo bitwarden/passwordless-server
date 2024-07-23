@@ -2,7 +2,6 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Billing.Configuration
-@using Passwordless.AdminConsole.Helpers
 
 @inject ISharedBillingService BillingService;
 @inject ICurrentContext CurrentContext;
@@ -12,7 +11,8 @@
 
 <Panel Header="Plan">
     <p>The plan you select for this app changes the pricing and features available.</p>
-    <div class="gap-4 grid sm:grid-cols-1 md:grid-cols-3">
+    <EditForm class="gap-4 grid sm:grid-cols-1 md:grid-cols-3" FormName="@SubscribePlanFormName" Model="@SubscribePlanForm" OnValidSubmit="@OnSubscribePlanFormSubmittedAsync">
+        <DataAnnotationsValidator/>
         @foreach (var plan in Plans)
         {
             <div class="@(plan.IsActive ? "pricing-card-active" : "pricing-card")">
@@ -43,7 +43,7 @@
                         @foreach (var feature in plan.Features)
                         {
                             <li class="flex items-start">
-                                <FeatureListItemIcon class="flex-shrink-0 w-5 h-5 mr-2" />
+                                <FeatureListItemIcon class="flex-shrink-0 w-5 h-5 mr-2"/>
                                 @feature
                             </li>
                         }
@@ -58,22 +58,18 @@
                         }
                         @if (plan.CanSubscribe)
                         {
-                            <EditForm FormName="@SubscribePlanFormName" Model="@SubscribePlanForm" OnValidSubmit="@OnSubscribePlanFormSubmittedAsync">
-                                <DataAnnotationsValidator />
-                                <input type="hidden" name="SubscribePlanForm.SelectedPlan" value="@plan.Value"/>
-                                <button class="btn-primary" type="submit">Subscribe</button>
-                            </EditForm>
+                            <button class="btn-primary" name="SubscribePlanForm.SelectedPlan" value="@plan.Value" type="submit">Subscribe</button>
                         }
                     </div>
                 }
             </div>
         }
-    </div>
+    </EditForm>
 </Panel>
 
 @code {
     public const string SubscribePlanFormName = "subscribe-plan-form";
-    
+
     public ICollection<PlanModel> Plans { get; } = new List<PlanModel>();
 
     [SupplyParameterFromForm(FormName = SubscribePlanFormName)]
@@ -88,18 +84,6 @@
 
         AddPlan(BillingOptions.Value.Store.Pro);
         AddPlan(BillingOptions.Value.Store.Enterprise);
-        
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case SubscribePlanFormName:
-                    SubscribePlanForm.SelectedPlan = request.Form[$"{nameof(SubscribePlanForm)}.{nameof(SubscribePlanForm.SelectedPlan)}"].ToString();
-                    await OnSubscribePlanFormSubmittedAsync();
-                    break;
-            }
-        }
     }
 
     private void AddPlan(string plan)
@@ -144,8 +128,7 @@
 
     public class SubscribeFormModel
     {
-        [Required]
-        public string SelectedPlan { get; set; }
+        [Required] public string SelectedPlan { get; set; }
     }
 
     private async Task OnSubscribePlanFormSubmittedAsync()
@@ -154,4 +137,5 @@
         var redirectUrl = await BillingService.ChangePlanAsync(appId, SubscribePlanForm.SelectedPlan);
         NavigationManager.NavigateTo(redirectUrl!);
     }
+
 }

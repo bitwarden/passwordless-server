@@ -9,23 +9,19 @@ public partial class ManuallyGeneratedAuthenticationTokensSection : ComponentBas
 {
     public const string FormName = "manually-generated-authentication-tokens-form";
 
+    [SupplyParameterFromForm(FormName = FormName)]
     public SaveFormModel? Form { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsGenerateSignInTokenEndpointEnabled };
-
-        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
+        if (HttpContextAccessor.HttpContext!.Request.HasFormContentType &&
+            HttpContextAccessor.HttpContext.Request.Form["_handler"].ToString() == FormName)
         {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case FormName:
-                    Form.IsEnabled = bool.Parse(request.Form["Form.IsEnabled"]!);
-                    await OnFormSubmittedAsync();
-                    break;
-            }
+            Form ??= new();
+        }
+        else
+        {
+            Form ??= new SaveFormModel { IsEnabled = CurrentContext.Features.IsGenerateSignInTokenEndpointEnabled };
         }
     }
 
@@ -50,7 +46,7 @@ public partial class ManuallyGeneratedAuthenticationTokensSection : ComponentBas
             });
             NavigationManager.Refresh();
         }
-        catch (Exception ex)
+        catch (PasswordlessApiException ex)
         {
             Logger.LogError(ex, "Failed to save settings for {appId}", CurrentContext.AppId);
             NavigationManager.NavigateTo($"/Error?Message={HttpUtility.UrlEncode(ex.Message)}");

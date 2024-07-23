@@ -1,0 +1,42 @@
+@inject IApplicationService AppService;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject ILogger<DeleteApplicationSection> Logger;
+@inject NavigationManager NavigationManager;
+
+<Panel Header="Delete Application">
+    @if (Application.DeleteAt.HasValue)
+    {
+        <EditForm FormName="@CancelDeleteFormName" Model="@CancelDeleteForm" OnValidSubmit="@OnCancelDeleteValidSubmittedAsync">
+            <Alert Style="@ContextualStyles.Danger">
+                '@Application.Id' will be deleted on '@Application.DeleteAt?.ToString("g") UTC'. If you would like to cancel this action, click 'Cancel'.
+            </Alert>
+            <button id="cancel-delete-application-btn" class="btn-secondary mt-3" type="submit">Cancel</button>
+            <CustomValidationErrors EditContext="CancelDeleteFormContext" />
+        </EditForm>
+    }
+    else
+    {
+        <EditForm FormName="@DeleteFormName" Model="@DeleteForm" OnValidSubmit="@OnDeleteValidSubmittedAsync">
+            @if (CanDeleteImmediately != null && !CanDeleteImmediately.Value)
+            {
+                <p>
+                    Because your application contains credentials, <strong>you cannot delete it immediately</strong>. Instead, the following will happen once you choose to delete the application:
+                </p>
+
+                <ul role="list" class="list-decimal list-inside my-2">
+                    <li class="">No data will be deleted immediately.</li>
+                    <li>Your API Keys will be frozen - meaning no authentication calls can be made.</li>
+                    <li>Admins can cancel the process at any time. The API will return to normal behavior.</li>
+                    <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
+                </ul>
+            }
+
+            <div class="flex rounded-md">
+                <InputText @bind-Value="DeleteForm!.NameConfirmation" class="text-input rounded-r-none font-mono"/>
+                <button type="submit" class="btn-danger rounded-l-none disabled:opacity-25">Delete</button>
+            </div>
+            <p class="italic">Type the name of the application '<strong>@(Application.Name)</strong>' and click "Delete".</p>
+            <CustomValidationErrors EditContext="@DeleteFormContext"/>
+        </EditForm>
+    }
+</Panel>
