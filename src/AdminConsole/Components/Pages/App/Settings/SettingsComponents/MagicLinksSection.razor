@@ -1,0 +1,23 @@
+@inject ICurrentContext CurrentContext;
+@inject IHttpContextAccessor HttpContextAccessor;
+@inject IScopedPasswordlessClient ScopedPasswordlessClient;
+@inject NavigationManager NavigationManager;
+@inject ILogger<MagicLinksSection> Logger;
+
+<Panel Header="Magic Links">
+ <EditForm FormName="@FormName" Model="@Form" OnSubmit="@OnFormSubmittedAsync">
+     <p>
+         Magic Links provide a secure and user-friendly way to authenticate users in applications. While onboarding new
+         users into your application or in the event of account recovery, a Magic Link can be sent via email to gain access
+         to the system. This removes the friction of verifying users and resetting passkeys, enhancing the user experience.
+     </p>
+     <div>
+         <label for="IsMagicLinksEnabled">
+             <input type="hidden" name="Form.IsEnabled" value="false" />
+             <InputCheckbox id="IsMagicLinksEnabled" class="mr-1 my-4" @bind-Value="Form!.IsEnabled"/>
+             Enable Magic Links
+         </label>
+     </div>
+     <button id="save-magic-links-btn" class="btn-primary" type="submit">Save</button>
+ </EditForm>
+</Panel>

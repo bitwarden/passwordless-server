@@ -15,7 +15,7 @@ namespace Passwordless.Service.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
             modelBuilder.Entity("Passwordless.Service.EventLog.Models.ApplicationEvent", b =>
                 {
@@ -335,6 +335,9 @@ namespace Passwordless.Service.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.HasKey("Tenant", "DescriptorId");
+
+                    b.HasIndex("Tenant", "UserId")
+                        .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
 
                     b.ToTable("Credentials");
                 });
