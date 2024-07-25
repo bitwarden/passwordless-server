@@ -51,6 +51,7 @@ public class DefaultMailServiceTests
         // Assert
         _providerMock.Verify(x => x.SendAsync(It.Is<MailMessage>(m =>
             m.To.All(recipient => recipient == email) &&
+            m.From == "janedoe@example.com" &&
             m.Subject == $"Magic links have been disabled for 'Contoso'" &&
             m.TextBody.Contains(organizationName) &&
             m.Tag == "magic-links-disabled"
@@ -74,7 +75,8 @@ public class DefaultMailServiceTests
         // Assert
         _providerMock.Verify(x => x.SendAsync(It.Is<MailMessage>(m =>
             m.To.All(recipient => recipient == email) &&
-            m.Subject == $"Magic links have been disabled for 'Contoso'" &&
+            m.From == null &&
+            m.Subject == "Magic links have been disabled for 'Contoso'" &&
             m.TextBody.Contains(organizationName) &&
             m.Tag == "magic-links-disabled"
         )), Times.Once);
