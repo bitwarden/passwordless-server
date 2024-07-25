@@ -40,7 +40,33 @@ public class DefaultMailServiceTests
         // Arrange
         var organizationName = "Contoso";
         const string email = "johndoe@example.com";
-        _configurationMock.SetupGet(x => x.Value).Returns(new MailConfiguration());
+        _configurationMock.SetupGet(x => x.Value).Returns(new MailConfiguration
+        {
+            From = "janedoe@example.com"
+        });
+
+        // Act
+        await _sut.SendMagicLinksDisabledAsync(organizationName, email);
+
+        // Assert
+        _providerMock.Verify(x => x.SendAsync(It.Is<MailMessage>(m =>
+            m.To.All(recipient => recipient == email) &&
+            m.Subject == $"Magic links have been disabled for 'Contoso'" &&
+            m.TextBody.Contains(organizationName) &&
+            m.Tag == "magic-links-disabled"
+        )), Times.Once);
+    }
+
+    [Fact]
+    public async Task SendMagicLinksDisabledAsync_SendsEmail_WithFromNotSet()
+    {
+        // Arrange
+        var organizationName = "Contoso";
+        const string email = "johndoe@example.com";
+        _configurationMock.SetupGet(x => x.Value).Returns(new MailConfiguration
+        {
+            From = null
+        });
 
         // Act
         await _sut.SendMagicLinksDisabledAsync(organizationName, email);
