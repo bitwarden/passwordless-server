@@ -4,8 +4,11 @@ namespace Passwordless.Common.Tests.Validation;
 
 public class EmailAddressValidatorTests
 {
-    [InlineData("test@example.com")]
-    [InlineData("test@subdomain.example.com")]
+    [InlineData("example@example.com")]
+    [InlineData("user.name+tag+sorting@example.com")]
+    [InlineData("x@example.com")]
+    [InlineData("example-indeed@strange-example.com")]
+    [InlineData("example@sub.example.com")]
     [Theory]
     public void IsValid_ReturnsTrue_WhenEmailIsValid(string email)
     {
@@ -32,7 +35,14 @@ public class EmailAddressValidatorTests
         Assert.False(actual);
     }
 
-    [InlineData("a")]
+
+    [InlineData("invalid-email")]
+    [InlineData("example@")]
+    [InlineData("@example.com")]
+    [InlineData("example@.com")]
+    [InlineData("example@com")]
+    [InlineData("example@domain.com.")]
+    [InlineData("example@domain..com")]
     [Theory]
     public void IsValid_ReturnsFalse_WhenEmailIsInvalid(string email)
     {
