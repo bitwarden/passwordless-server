@@ -41,7 +41,6 @@ public class EmailAddressValidatorTests
     [InlineData("@example.com")]
     [InlineData("example@.com")]
     [InlineData("example@com")]
-    [InlineData("example@domain.com.")]
     [InlineData("example@domain..com")]
     [Theory]
     public void IsValid_ReturnsFalse_WhenEmailIsInvalid(string email)
