@@ -2,6 +2,7 @@ using System.Net;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Common.Validation;
 
 namespace Passwordless.AdminConsole.Services.Mail;
 
@@ -62,6 +63,11 @@ public class DefaultMailService : IMailService
 
     public Task SendMagicLinksDisabledAsync(string organizationName, string email)
     {
+        if (!EmailAddressValidator.IsValid(email))
+        {
+            throw new ArgumentException("Invalid email address", nameof(email));
+        }
+
         var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
 
         var message = new MailMessage
