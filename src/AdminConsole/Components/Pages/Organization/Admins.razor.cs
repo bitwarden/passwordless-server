@@ -81,6 +81,12 @@ public partial class Admins : ComponentBase
             return;
         }
 
+        if (!CurrentContext.Organization!.IsMagicLinksEnabled)
+        {
+            DeleteActiveFormValidationMessageStore!.Add(() => DeleteActiveForm.UserId!, "Magic links are disabled. Temporarily enable magic links, and then delete the admin.");
+            return;
+        }
+
         var performedBy = ConsoleAdmins!.Single(x => x.Email == HttpContextAccessor.HttpContext!.User.GetEmail());
         EventLogger.LogDeleteAdminEvent(performedBy, user!, TimeProvider.GetUtcNow().UtcDateTime);
 

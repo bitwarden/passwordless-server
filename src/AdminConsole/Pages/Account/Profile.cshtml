@@ -11,6 +11,7 @@
 
 <div class="panel">
     <h2>Passkeys</h2>   
-    <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@false" param-PasswordlessClient="@PasswordlessClient" param-UserId="@Model.UserId" />
+    <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@false" param-PasswordlessClient="@PasswordlessClient" param-UserId="@Model.UserId" param-CanDelete="@Model.CanDeleteCredentials" />
+    <component asp-if="!@Model.CanDeleteCredentials" type="typeof(Alert)" render-mode="Static" param-Style="@(ContextualStyles.Warning)" param-ChildContent="@(new RenderFragment(builder => { builder.AddContent(0, "Magic links are disabled for admins in this organization, you cannot delete credentials"); }))" />
     <partial name="Shared/_AddPasskeys"/>
 </div>

@@ -43,6 +43,9 @@ public partial class Credentials : ComponentBase
     public bool HideDetails { get; set; }
 
     [Parameter]
+    public bool CanDelete { get; set; } = true;
+
+    [Parameter]
     public required IPasswordlessClient PasswordlessClient { get; set; }
 
     [Parameter]
@@ -70,6 +73,10 @@ public partial class Credentials : ComponentBase
 
     public async Task DeleteCredentialAsync()
     {
+        if (!CanDelete)
+        {
+            throw new InvalidOperationException("Deleting credentials is not allowed.");
+        }
         var validationContext = new ValidationContext(DeleteCredentialForm);
         var validationResult = Validator.TryValidateObject(DeleteCredentialForm, validationContext, null, true);
         if (!validationResult)

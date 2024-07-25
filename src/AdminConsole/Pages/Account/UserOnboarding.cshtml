@@ -13,6 +13,7 @@
     <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
     
     <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@(true)" param-PasswordlessClient="@(PasswordlessClient)" param-UserId="@Model.UserId" />
+    <component asp-if="!@Model.IsMagicLinksEnabled" type="typeof(Alert)" render-mode="Static" param-Style="@(ContextualStyles.Danger)" param-ChildContent="@(new RenderFragment(builder => { builder.AddContent(0, (MarkupString)"Magic links are disabled for admins in this organization. <strong>If you do not add passkeys, you will not be able to sign in again.</strong>"); }))" />
     <partial name="Shared/_AddPasskeys" />
 </div>
 
