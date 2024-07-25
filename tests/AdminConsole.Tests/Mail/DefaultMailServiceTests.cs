@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Moq;
 using Passwordless.AdminConsole.Services.Mail;
@@ -33,5 +32,25 @@ public class DefaultMailServiceTests
         // Assert
         Assert.Equal("email", actual.ParamName);
         Assert.Equal("The e-mail address provided is invalid. (Parameter 'email')", actual.Message);
+    }
+
+    [Fact]
+    public async Task SendMagicLinksDisabledAsync_SendsEmail_WhenEmailAddressIsValid()
+    {
+        // Arrange
+        var organizationName = "Contoso";
+        const string email = "johndoe@example.com";
+        _configurationMock.SetupGet(x => x.Value).Returns(new MailConfiguration());
+
+        // Act
+        await _sut.SendMagicLinksDisabledAsync(organizationName, email);
+
+        // Assert
+        _providerMock.Verify(x => x.SendAsync(It.Is<MailMessage>(m =>
+            m.To.All(recipient => recipient == email) &&
+            m.Subject == $"Magic links have been disabled for 'Contoso'" &&
+            m.TextBody.Contains(organizationName) &&
+            m.Tag == "magic-links-disabled"
+        )), Times.Once);
     }
 }
