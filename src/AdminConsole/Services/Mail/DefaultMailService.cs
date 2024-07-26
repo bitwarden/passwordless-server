@@ -63,7 +63,7 @@ public class DefaultMailService : IMailService
 
     public Task SendMagicLinksDisabledAsync(string organizationName, string email)
     {
-        if (!EmailAddressValidator.IsValid(email))
+        if (!EmailValidator.Validate(email))
         {
             throw new ArgumentException("The e-mail address provided is invalid.", nameof(email));
         }
