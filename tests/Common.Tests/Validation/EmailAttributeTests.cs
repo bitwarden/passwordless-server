@@ -37,7 +37,8 @@ public class EmailAttributeTests
     [Theory]
     [MemberData(nameof(EmailData.Invalid), MemberType = typeof(EmailData))]
     [MemberData(nameof(EmailData.InvalidInternational), MemberType = typeof(EmailData))]
-    public void ValidationAttribute_ReturnsIsInvalid(string email, int y)
+#pragma warning disable xUnit1026
+    public void ValidationAttribute_ReturnsIsInvalid(string email, EmailValidationErrorCode errorCode, int x, int y)
     {
         // Arrange
         var target = new EmailValidationTarget { Email = email };
@@ -48,6 +49,8 @@ public class EmailAttributeTests
         // Assert
         Assert.False(actual);
     }
+#pragma warning restore xUnit1026
+
 
     [Fact]
     public void EmailAttribute_IsValid_WhenEmailIsNull()
