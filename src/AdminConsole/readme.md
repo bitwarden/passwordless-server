@@ -37,11 +37,18 @@ The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for cre
     "ApiSecret": "myAppId:secret:123456",
     "ApiUrl": "<optional>"
   },
+  // https://docs.passwordless.dev/guide/self-hosting/configuration.html#e-mail
   "Mail": {
-    // Mail Providers are pluggable. Remove "Postmark" to use the FileProvider
-    "Postmark": {
-      "ApiKey": "",
-      "From": ""
+    "Smtp": {
+      "From": "sender@example.com",
+      "Username": "username",
+      "Password": "password",
+      "Host": "smtp.example.com",
+      "Port": 587,
+      "StartTls": true,
+      "Ssl": false,
+      "SslOverride": false,
+      "TrustServer": false
     }
   },
   "ConnectionStrings": {
