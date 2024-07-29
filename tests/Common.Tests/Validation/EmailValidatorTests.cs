@@ -61,7 +61,7 @@ public class EmailValidationTests
     [Theory]
     [MemberData(nameof(EmailData.Invalid), MemberType = typeof(EmailData))]
     [MemberData(nameof(EmailData.InvalidInternational), MemberType = typeof(EmailData))]
-    public void Validate_ReturnsFalse_WhenInvalid(string email)
+    public void Validate_ReturnsFalse_WhenInvalid(string email, int y)
     {
         // Arrange
 
