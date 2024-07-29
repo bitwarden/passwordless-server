@@ -37,7 +37,7 @@ public class EmailAttributeTests
     [Theory]
     [MemberData(nameof(EmailData.Invalid), MemberType = typeof(EmailData))]
     [MemberData(nameof(EmailData.InvalidInternational), MemberType = typeof(EmailData))]
-    public void ValidationAttribute_ReturnsIsInvalid(string email, string expectedY)
+    public void ValidationAttribute_ReturnsIsInvalid(string email)
     {
         // Arrange
         var target = new EmailValidationTarget { Email = email };
