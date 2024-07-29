@@ -1,8 +1,11 @@
+using System.Text;
+using System.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Passwordless.AdminConsole.Identity;
+using Passwordless.Common.Extensions;
 using Passwordless.Models;
 
 namespace Passwordless.AdminConsole.Services.MagicLinks;
@@ -11,6 +14,7 @@ public class MagicLinkBuilder(
     SignInManager<ConsoleAdmin> signInManager,
     IPasswordlessClient passwordlessClient,
     IActionContextAccessor actionContextAccessor,
+    IHttpContextAccessor httpContextAccessor,
     IUrlHelperFactory urlHelperFactory,
     ILogger<MagicLinkBuilder> logger)
     : IMagicLinkBuilder
@@ -33,10 +37,16 @@ public class MagicLinkBuilder(
 
     public string GetUrlTemplate(string? returnUrl = null)
     {
-        var urlBuilder = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext ?? throw new InvalidOperationException("ActionContext is null"));
+        var baseUrl = httpContextAccessor.HttpContext!.Request.GetBaseUrl();
 
-        var url = urlBuilder.PageLink("/Account/Magic", values: new { token = "$TOKEN", returnUrl }) ?? urlBuilder.Content("~/");
+        var urlBuilder = new StringBuilder($"{baseUrl}/Account/Magic?token=$TOKEN");
 
-        return url;
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            var encodedReturnUrl = HttpUtility.UrlEncode(returnUrl);
+            urlBuilder.Append($"&returnUrl={encodedReturnUrl}");
+        }
+
+        return urlBuilder.ToString();
     }
 }
