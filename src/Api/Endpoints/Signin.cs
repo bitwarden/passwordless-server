@@ -22,7 +22,6 @@ public static class SigninEndpoints
     {
         var group = app.MapGroup("/signin")
             .RequireCors("default")
-            .WithOpenApi()
             .WithTags(OpenApiTags.SignIn);
 
         group.MapPost("/generate-token", GenerateTokenAsync)
