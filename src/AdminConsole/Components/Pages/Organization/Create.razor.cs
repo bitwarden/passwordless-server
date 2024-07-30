@@ -45,7 +45,7 @@ public partial class Create : ComponentBase
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(Form.OrgPurpose) || Form.UsePasskeys)
+        if (!string.IsNullOrWhiteSpace(Form.Purpose) || Form.UsePasskeys)
         {
             await Task.Delay(Random.Shared.Next(100, 300));
             Logger.LogInformation("Hidden field submitted from Create. Form: {@form}", Form);
@@ -66,8 +66,8 @@ public partial class Create : ComponentBase
         // Create org
         var org = new Models.Organization
         {
-            Name = Form.OrgName,
-            InfoOrgType = Form.OrgType!.Value,
+            Name = Form.Name,
+            InfoOrgType = Form.Type!.Value,
             InfoUseCase = Form.UseCase!.Value,
             CreatedAt = TimeProvider.GetUtcNow().UtcDateTime
         };
@@ -99,10 +99,11 @@ public partial class Create : ComponentBase
     {
         [Required(AllowEmptyStrings = false, ErrorMessage = "Organization name is required")]
         [MaxLength(50, ErrorMessage = "Organization name must be 50 characters or less")]
-        public string OrgName { get; set; }
+        [RegularExpression("^[a-zA-Z0-9 ]*$", ErrorMessage = "Organization name can only contain letters, numbers, and spaces")]
+        public string Name { get; set; }
 
         [Required(ErrorMessage = "Organization type is required")]
-        public OrganizationType? OrgType { get; set; }
+        public OrganizationType? Type { get; set; }
 
         [Required(ErrorMessage = "Use case is required")]
         public UseCaseType? UseCase { get; set; }
@@ -118,7 +119,7 @@ public partial class Create : ComponentBase
 
         public bool AcceptsTermsAndPrivacy { get; set; }
 
-        public string? OrgPurpose { get; set; }
+        public string? Purpose { get; set; }
 
         public bool UsePasskeys { get; set; }
     }

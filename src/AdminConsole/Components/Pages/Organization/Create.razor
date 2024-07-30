@@ -97,8 +97,8 @@
                 <div>
                     <label for="organization-name" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
                     <div class="mt-2">
-                        <InputText id="organization-name" placeholder="Panucci's Pizza Inc" @bind-Value="Form.OrgName" class="text-input" />
-                        <ValidationMessage For="() => Form.OrgName" />
+                        <InputText id="organization-name" placeholder="Panucci's Pizza Inc" @bind-Value="Form.Name" class="text-input" />
+                        <ValidationMessage For="() => Form.Name" />
                     </div>
                 </div>
 
@@ -124,7 +124,7 @@
                     <fieldset class="mt-2">
                         <legend class="sr-only">I’m building applications for:</legend>
                         <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
-                            <InputRadioGroup @bind-Value="Form.OrgType">
+                            <InputRadioGroup @bind-Value="Form.Type">
                                 <div class="radio-control">
                                     <InputRadio id="OrgTypePersonal" Value="@OrganizationType.Personal" class="radio-input" />
                                     <label for="OrgTypePersonal" class="radio-label">Myself</label>
@@ -137,7 +137,7 @@
                             </InputRadioGroup>
                         </div>
 
-                        <ValidationMessage For="() => Form.OrgType" />
+                        <ValidationMessage For="() => Form.Type" />
                     </fieldset>
                 </div>
 
@@ -182,7 +182,7 @@
 
                 <label class="passkey-info" asp-for="organization-purpose">
                     What is the purpose of your organization?
-                    <InputText id="organization-purpose" class="text-input" autocomplete="off" @bind-Value="Form.OrgPurpose" tabindex="-1" />
+                    <InputText id="organization-purpose" class="text-input" autocomplete="off" @bind-Value="Form.Purpose" tabindex="-1" />
                 </label>
 
                 <label class="passkey-info" asp-for="use-passkeys">
