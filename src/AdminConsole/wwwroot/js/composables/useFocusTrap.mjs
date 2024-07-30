@@ -41,8 +41,6 @@ const useFocusTrap = () => {
     }
 
     function initFocusTrap() {
-        debugger;
-        // Bail out if there is no value
         if (!trapRef.value) return;
         focusableElements = trapRef.value.querySelectorAll(
             focusableElementsSelector
