@@ -8,7 +8,8 @@
     <ValidationSummary/>
     <div class="sm:w-full sm:max-w-md">
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Purpose">Purpose:</label>
-        <InputText @bind-Value="@FormModel!.Purpose" id="Purpose" readonly="@IsPurposeReadOnly" class="text-input"/>
+        <InputText id="Purpose" @bind-Value="@FormModel!.Purpose" readonly="@IsPurposeReadOnly" class="text-input"/>
+
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="UserVerification">User Verification:</label>
         <InputSelect id="UserVerification" @bind-Value="@FormModel.UserVerificationRequirement" TValue="UserVerificationRequirement" class="form-select">
             @foreach (var uv in Enum.GetValues<UserVerificationRequirement>())
@@ -16,35 +17,40 @@
                 <option value="@uv">@uv</option>
             }
         </InputSelect>
+
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Seconds">Seconds:</label>
         <InputNumber id="Seconds" @bind-Value="@FormModel.Seconds" min="0" class="text-input"/>
+
+        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Hints">Credential hints:</label>
+        <InputText id="Hints" DisplayName="Credential hints" @bind-Value="@FormModel.HintString" class="text-input" />
+        <div class="text-sm text-gray-500 mt-1">Put the credential hints in the desired order and combine them in a comma-separated string. Available values: @string.Join(", ", Enum.GetNames<PublicKeyCredentialHint>()).</div>
+
         <button class="btn-primary mt-3" type="submit">Submit</button>
     </div>
 </EditForm>
 
 @code {
-    [Parameter] 
+    [Parameter]
     public EventCallback<AuthenticationConfigurationFormModel> OnSubmitFunction { get; set; }
-    
+
     [Parameter]
     public AuthenticationConfigurationFormModel? Model { get; set; }
-    
+
     [Parameter]
     public bool IsPurposeReadOnly { get; set; }
-    
-    
+
     [SupplyParameterFromForm]
     public AuthenticationConfigurationFormModel? FormModel { get; set; }
 
     private const string FormName = "AuthenticationConfigurationForm";
-    
+
     protected override void OnInitialized()
     {
         if (Model is not null && FormModel is null) FormModel = Model;
 
         if (FormModel is not null) return;
 
-        FormModel = new();
+        FormModel = new AuthenticationConfigurationFormModel();
     }
 
     private async Task SubmitAsync()

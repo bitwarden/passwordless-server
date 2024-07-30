@@ -40,9 +40,12 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
         var config = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
         config.Purpose.Should().Be(request.Purpose);
-        config.CreatedBy.Should().Be(request.PerformedBy);
-        config.TimeToLive.Should().Be(Convert.ToInt32(request.TimeToLive.TotalSeconds));
         config.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
+        config.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
+        config.Hints.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => Enum.Parse<PublicKeyCredentialHint>(x, true)).Should()
+            .BeEquivalentTo(request.Hints);
+        config.CreatedBy.Should().Be(request.PerformedBy);
         config.CreatedOn.Should().NotBeNull();
     }
 
@@ -166,12 +169,15 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
 
-        var editedPurpose = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
-        editedPurpose.UserVerificationRequirement.Should()
+        var editedConfig = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
+        editedConfig.UserVerificationRequirement.Should()
             .Be(UserVerificationRequirement.Discouraged.ToEnumMemberValue());
-        editedPurpose.TimeToLive.Should().Be((int)request.TimeToLive.TotalSeconds);
-        editedPurpose.EditedBy.Should().Be(request.PerformedBy);
-        editedPurpose.EditedOn.Should().NotBeNull();
+        editedConfig.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
+        editedConfig.Hints.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => Enum.Parse<PublicKeyCredentialHint>(x, true)).Should()
+            .BeEquivalentTo(request.Hints);
+        editedConfig.EditedBy.Should().Be(request.PerformedBy);
+        editedConfig.EditedOn.Should().NotBeNull();
     }
 
     [Theory]
@@ -202,11 +208,14 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         getConfigResponse.Should().NotBeNull();
         getConfigResponse!.Configurations.Should().Contain(x => x.Purpose == request.Purpose);
 
-        var editedPurpose = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
-        editedPurpose.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
-        editedPurpose.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
-        editedPurpose.EditedBy.Should().Be(request.PerformedBy);
-        editedPurpose.EditedOn.Should().NotBeNull();
+        var editedConfig = getConfigResponse.Configurations.First(x => x.Purpose == request.Purpose);
+        editedConfig.UserVerificationRequirement.Should().Be(request.UserVerificationRequirement.ToEnumMemberValue());
+        editedConfig.TimeToLive.Should().BeCloseTo((int)request.TimeToLive.TotalSeconds, 1);
+        editedConfig.Hints.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => Enum.Parse<PublicKeyCredentialHint>(x, true)).Should()
+            .BeEquivalentTo(request.Hints);
+        editedConfig.EditedBy.Should().Be(request.PerformedBy);
+        editedConfig.EditedOn.Should().NotBeNull();
     }
 
     [Fact]

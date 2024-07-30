@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Passwordless.Service.Storage.Ef;
 
@@ -11,9 +12,11 @@ using Passwordless.Service.Storage.Ef;
 namespace Passwordless.Service.Migrations.Mssql
 {
     [DbContext(typeof(DbGlobalMsSqlContext))]
-    partial class MsSqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240722200735_CredentialHints")]
+    partial class CredentialHints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -341,12 +344,9 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Tenant", "DescriptorId");
-
-                    b.HasIndex("Tenant", "UserId")
-                        .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
 
                     b.ToTable("Credentials");
                 });
