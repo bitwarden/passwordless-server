@@ -1,19 +1,14 @@
+using Microsoft.Extensions.Options;
 using Passwordless.Common.Configuration;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class SetupService : ISetupService
+public class SetupService(
+    IOptionsSnapshot<PasswordlessOptions> options,
+    IConfiguration configuration)
+    : ISetupService
 {
-    private readonly PasswordlessOptions? _options;
-    private readonly bool _isSelfHosted;
-
-    public SetupService(
-        IConfiguration configuration)
-    {
-        // Get the Passwordless options manually to skip the built-in validations in the Passwordless SDK
-        _options = configuration.GetSection("Passwordless").Get<PasswordlessOptions>();
-        _isSelfHosted = configuration.IsSelfHosted();
-    }
+    private readonly bool _isSelfHosted = configuration.IsSelfHosted();
 
     public Task<bool> HasSetupCompletedAsync()
     {
@@ -21,15 +16,15 @@ public class SetupService : ISetupService
         if (_isSelfHosted)
         {
             return Task.FromResult(
-                !(_options?.ApiKey?.Contains("replaceme") == true ||
-                  _options?.ApiSecret.Contains("replaceme") == true)
+                !(options.Value.ApiKey?.Contains("replaceme") == true ||
+                  options.Value.ApiSecret.Contains("replaceme"))
             );
         }
         // Local and cloud -> check if API Secret has been set
         else
         {
             return Task.FromResult(
-                !string.IsNullOrWhiteSpace(_options?.ApiSecret)
+                !string.IsNullOrWhiteSpace(options.Value.ApiSecret)
             );
         }
     }

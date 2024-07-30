@@ -9,7 +9,7 @@ namespace Passwordless.AdminConsole.Services.MagicLinks;
 
 public class MagicLinkBuilder(
     SignInManager<ConsoleAdmin> signInManager,
-    IServiceProvider services,
+    IPasswordlessClient passwordlessClient,
     IActionContextAccessor actionContextAccessor,
     IUrlHelperFactory urlHelperFactory,
     ILogger<MagicLinkBuilder> logger)
@@ -17,11 +17,6 @@ public class MagicLinkBuilder(
 {
     public async Task<string> GetLinkAsync(string email, string? returnUrl = null)
     {
-        // Passwordless client is fetched lazily because the MagicLinkBuilder may need to instantiate
-        // in a context where the API is not accessible, for example when the Admin Console has not
-        // been initialized yet. Doing this prevents it from crashing unless the client is actually used.
-        var passwordlessClient = services.GetRequiredService<IPasswordlessClient>();
-
         var user = await signInManager.UserManager.FindByEmailAsync(email);
         if (user == null)
         {
