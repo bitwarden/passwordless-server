@@ -45,7 +45,7 @@ public static class SigninEndpoints
     /// Manually generates an authentication token for the specified user, side-stepping the usual authentication flow.
     /// This approach can be used to implement a "magic link"-style login and other similar scenarios.
     /// </summary>
-    [ProducesResponseType(typeof(SigninTokenRequest), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(SigninTokenResponse), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ExternalDocs("https://docs.passwordless.dev/guide/api.html#signin-generate-token")]
     public static async Task<IResult> GenerateTokenAsync(
