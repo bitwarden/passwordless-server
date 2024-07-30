@@ -9,7 +9,6 @@ namespace Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsCompon
 
 public partial class DeleteApplicationSection : ComponentBase
 {
-    public const string Unknown = "unknown";
     public const string CancelDeleteFormName = "cancel-delete-application-form";
     public const string DeleteFormName = "delete-application-form";
 
@@ -57,15 +56,9 @@ public partial class DeleteApplicationSection : ComponentBase
         }
 
         var appId = Application.Id;
-        var userName = HttpContextAccessor.HttpContext!.User.Identity!.Name ?? Unknown;
 
-        if (userName == Unknown)
-        {
-            Logger.LogError("Failed to delete application with name: {appName} and by user: {username}.", appId, userName);
-            const string message = "Something unexpected happened.";
-            NavigationManager.NavigateTo($"/Error?Message={HttpUtility.UrlEncode(message)}");
-            return;
-        }
+        var userName = HttpContextAccessor.HttpContext!.User.Identity!.Name
+                       ?? throw new InvalidOperationException("User name is not available.");
 
         try
         {
