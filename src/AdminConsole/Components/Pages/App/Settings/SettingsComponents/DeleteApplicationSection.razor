@@ -6,7 +6,7 @@
 <Panel Header="Delete Application">
     @if (Application.DeleteAt.HasValue)
     {
-        <EditForm FormName="@CancelDeleteFormName" Model="@CancelDeleteForm" OnValidSubmit="@OnCancelDeleteValidSubmittedAsync">
+        <EditForm id="@CancelDeleteFormName" FormName="@CancelDeleteFormName" Model="@CancelDeleteForm" OnValidSubmit="@OnCancelDeleteValidSubmittedAsync">
             <Alert Style="@ContextualStyles.Danger">
                 '@Application.Id' will be deleted on '@Application.DeleteAt?.ToString("g") UTC'. If you would like to cancel this action, click 'Cancel'.
             </Alert>
@@ -16,14 +16,14 @@
     }
     else
     {
-        <EditForm FormName="@DeleteFormName" Model="@DeleteForm" OnValidSubmit="@OnDeleteValidSubmittedAsync">
+        <EditForm id="@DeleteFormName" FormName="@DeleteFormName" Model="@DeleteForm" OnValidSubmit="@OnDeleteValidSubmittedAsync">
             @if (CanDeleteImmediately.HasValue && !CanDeleteImmediately.Value)
             {
-                <p>
+                <p id="cannot-delete-immediately-reason">
                     Because your application contains credentials, <strong>you cannot delete it immediately</strong>. Instead, the following will happen once you choose to delete the application:
                 </p>
 
-                <ul role="list" class="list-decimal list-inside my-2">
+                <ul id="cannot-delete-immediately-impact" role="list" class="list-decimal list-inside my-2">
                     <li class="">No data will be deleted immediately.</li>
                     <li>Your API Keys will be frozen - meaning no authentication calls can be made.</li>
                     <li>Admins can cancel the process at any time. The API will return to normal behavior.</li>
