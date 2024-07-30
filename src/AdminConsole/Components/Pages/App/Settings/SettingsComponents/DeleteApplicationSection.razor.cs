@@ -1,6 +1,7 @@
 using System.Web;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
 
@@ -41,7 +42,7 @@ public partial class DeleteApplicationSection : ComponentBase
         CancelDeleteFormContext = new EditContext(CancelDeleteForm);
         CancelDeleteFormValidationMessageStore = new ValidationMessageStore(CancelDeleteFormContext);
 
-        if (Application.DeleteAt.HasValue)
+        if (!Application.DeleteAt.HasValue)
         {
             CanDeleteImmediately = await AppService.CanDeleteApplicationImmediatelyAsync(Application.Id);
         }
@@ -79,7 +80,7 @@ public partial class DeleteApplicationSection : ComponentBase
                 NavigationManager.Refresh();
             }
         }
-        catch (Exception ex)
+        catch (DbUpdateException ex)
         {
             Logger.LogError(ex, "Failed to delete application: {appName}.", appId);
             NavigationManager.NavigateTo($"/Error?Message={HttpUtility.UrlEncode(ex.Message)}");
@@ -99,7 +100,7 @@ public partial class DeleteApplicationSection : ComponentBase
             await AppService.CancelDeletionForApplicationAsync(Application.Id);
             NavigationManager.Refresh();
         }
-        catch (Exception ex)
+        catch (DbUpdateException ex)
         {
             Logger.LogError("Failed to cancel application deletion for application: {appId}", Application.Id);
             NavigationManager.NavigateTo($"/Error?Message={HttpUtility.UrlEncode(ex.Message)}");

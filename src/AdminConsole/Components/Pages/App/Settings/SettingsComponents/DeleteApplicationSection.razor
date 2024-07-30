@@ -17,7 +17,7 @@
     else
     {
         <EditForm FormName="@DeleteFormName" Model="@DeleteForm" OnValidSubmit="@OnDeleteValidSubmittedAsync">
-            @if (CanDeleteImmediately != null && !CanDeleteImmediately.Value)
+            @if (CanDeleteImmediately.HasValue && !CanDeleteImmediately.Value)
             {
                 <p>
                     Because your application contains credentials, <strong>you cannot delete it immediately</strong>. Instead, the following will happen once you choose to delete the application:
