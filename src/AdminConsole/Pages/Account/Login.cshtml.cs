@@ -60,7 +60,7 @@ public class LoginModel : PageModel
         if (!organization.IsMagicLinksEnabled)
         {
             TempData["Status"] = LoginStatus.MagicLinkDisabled;
-            await _mailService.SendMagicLinksDisabledAsync(email, organization.Name);
+            await _mailService.SendMagicLinksDisabledAsync(organization.Name, email);
             return RedirectToPage();
         }
 
