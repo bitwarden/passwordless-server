@@ -61,7 +61,7 @@ public class CreateApplicationModel : PageModel
 
         if (Organization.Applications.Count >= Organization.MaxApplications)
         {
-            return RedirectToPage("/billing/manage");
+            return Redirect("/billing/manage");
         }
 
         return Page();
