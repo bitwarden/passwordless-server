@@ -72,7 +72,7 @@ public class LoginModel : PageModel
 
     public IActionResult OnPostSignUp()
     {
-        return RedirectToPage("/Organization/Create");
+        return Redirect("/organization/create");
     }
 
     public enum LoginStatus
