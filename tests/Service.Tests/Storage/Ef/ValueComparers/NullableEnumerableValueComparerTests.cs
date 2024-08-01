@@ -2,13 +2,13 @@ using Passwordless.Service.Storage.Ef.ValueComparers;
 
 namespace Passwordless.Service.Tests.Storage.Ef.ValueComparers;
 
-public class NullableArrayValueComparerTests
+public class NullableEnumerableValueComparerTests
 {
     [Fact]
-    public void NullableArrayValueComparer_Should_Compare_Nullable_Arrays()
+    public void NullableEnumerableValueComparer_Should_Compare_Nullable_Arrays()
     {
         // Arrange
-        var sut = new NullableArrayValueComparer<string>();
+        var sut = new NullableEnumerableValueComparer<string>();
 
         // Act
         var actual = sut.Equals(null, null);
@@ -18,10 +18,10 @@ public class NullableArrayValueComparerTests
     }
 
     [Fact]
-    public void NullableArrayValueComparer_ComparingSameArrays_ReturnsExpectedResult()
+    public void NullableEnumerableValueComparer_ComparingSameArrays_ReturnsExpectedResult()
     {
         // Arrange
-        var sut = new NullableArrayValueComparer<string>();
+        var sut = new NullableEnumerableValueComparer<string>();
 
         // Act
         var actual = sut.Equals(["a", "b"], ["a", "b"]);
@@ -31,10 +31,10 @@ public class NullableArrayValueComparerTests
     }
 
     [Fact]
-    public void NullableArrayValueComparer_ComparingDifferentArrays_ReturnsExpectedResult()
+    public void NullableEnumerableValueComparer_ComparingDifferentArrays_ReturnsExpectedResult()
     {
         // Arrange
-        var sut = new NullableArrayValueComparer<string>();
+        var sut = new NullableEnumerableValueComparer<string>();
 
         // Act
         var actual = sut.Equals(["a", "b"], ["a", "c"]);

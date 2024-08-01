@@ -11,6 +11,7 @@ public static class AuthenticationConfigurationExtensions
             Purpose = new SignInPurpose(configuration.Purpose),
             UserVerificationRequirement = configuration.UserVerificationRequirement,
             TimeToLive = configuration.TimeToLive,
+            Hints = configuration.Hints,
             Tenant = configuration.Tenant,
             CreatedBy = configuration.CreatedBy,
             CreatedOn = configuration.CreatedOn,

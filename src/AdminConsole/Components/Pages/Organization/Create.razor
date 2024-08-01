@@ -1,0 +1,201 @@
+@page "/Organization/Create"
+@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.EventLog.Loggers
+@using Passwordless.AdminConsole.Identity
+@using Passwordless.AdminConsole.Models
+@using Passwordless.AdminConsole.Services.MagicLinks
+
+@attribute [AllowAnonymous]
+
+@inject IDataService DataService
+@inject UserManager<ConsoleAdmin> UserManager
+@inject MagicLinkSignInManager<ConsoleAdmin> MagicLinkSignInManager
+@inject IEventLogger EventLogger
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject TimeProvider TimeProvider
+@inject ILogger<Create> Logger
+
+<style>
+    .passkey-info {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 0;
+        width: 0;
+        z-index: -1;
+    }
+</style>
+
+<Page Title="Create an organization">
+    <div class="w-full lg:flex lg:items-start lg:space-x-8">
+        @* Mobile promo *@
+        <div class="lg:hidden mb-2 p-4">
+            <h2 class="text-2xl font-medium">Try out Passwordless.dev with a free account</h2>
+
+            <p class="mt-2 font-light">
+                Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+            </p>
+        </div>
+
+        @* Desktop promo *@
+        <div class="hidden lg:block p-8 max-w-2xl">
+            <h2 class="text-3xl font-medium">Try out Passwordless.dev with a free account</h2>
+
+            <p class="mt-2 mb-8 text-lg font-light">
+                Create an organization to start integrating Bitwarden Passwordless.dev with your apps, inviting admins, and using the API.
+            </p>
+            <div class="hidden sm:block">
+                <div class="flex mt-6 space-x-4">
+                    <div>
+                        <img class="w-10" src="/img/tag1.svg"/>
+                    </div>
+                    <div class="basis-full mt-1">
+                        <p class="font-medium">Standards-based & phishing-resistant</p>
+                        <p>Create FIDO2 WebAuthn applications powered by modern web standards</p>
+                    </div>
+                </div>
+
+                <div class="flex mt-4 space-x-4">
+                    <div>
+                        <img class="w-10" src="/img/tag2.svg"/>
+                    </div>
+                    <div class="basis-full mt-1">
+                        <p class="font-medium">Add passkeys to existing authentication</p>
+                        <p>Adopt mobile & desktop biometric auth without the need to change existing code</p>
+                    </div>
+                </div>
+
+                <div class="flex mt-4 space-x-4">
+                    <div>
+                        <img class="w-10 pt-1" src="/img/tag3.svg"/>
+                    </div>
+                    <div class="basis-full mt-1">
+                        <p class="font-medium">Centralized passkey management</p>
+                        <p>Admin console to manage passkeys, applications, users, and more</p>
+                    </div>
+                </div>
+
+                <div class="flex mt-4 space-x-4">
+                    <div>
+                        <img class="w-10" src="/img/tag4.svg"/>
+                    </div>
+                    <div class="basis-full mt-1">
+                        <p class="font-medium">Security that’s tested and validated</p>
+                        <p>Passwordless.dev's open-source code, docs, and processes are thoroughly assessed by 3rd-parties</p>
+                    </div>
+                </div>
+                <div class="mt-6 text-sm">Many of Passwordless.dev's features are available for free. Check out <a class="link-blue" href="https://bitwarden.com/products/passwordless/#pricing" target="_blank">the pricing page</a> for more information about our paid offerings.</div>
+            </div>
+        </div>
+
+        @* Sign up form *@
+        <Panel>
+            <EditForm class="flex flex-col space-y-6" FormName="@CreateFormName" EditContext="@FormEditContext" OnValidSubmit="@OnCreateValidSubmitAsync">
+                <DataAnnotationsValidator />
+                <div>
+                    <label for="organization-name" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
+                    <div class="mt-2">
+                        <InputText id="organization-name" placeholder="Panucci's Pizza Inc" @bind-Value="Form.Name" class="text-input" />
+                        <ValidationMessage For="() => Form.Name" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="admin-name" class="block text-sm font-medium leading-6 text-gray-900">Admin name</label>
+                    <div class="mt-2">
+                        <InputText id="admin-name" placeholder="Philip J. Fry" @bind-Value="Form.AdminName" class="text-input" />
+                        <ValidationMessage For="() => Form.AdminName" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="admin-email" class="block text-sm font-medium leading-6 text-gray-900">Admin email</label>
+                    <div class="mt-2">
+                        <InputText placeholder="pjfry@example.org" id="admin-email" class="text-input" @bind-Value="Form.AdminEmail" />
+                        <ValidationMessage For="() => Form.AdminEmail" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium text-gray-900">I’m building applications for:</label>
+
+                    <fieldset class="mt-2">
+                        <legend class="sr-only">I’m building applications for:</legend>
+                        <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                            <InputRadioGroup @bind-Value="Form.Type">
+                                <div class="radio-control">
+                                    <InputRadio id="OrgTypePersonal" Value="@OrganizationType.Personal" class="radio-input" />
+                                    <label for="OrgTypePersonal" class="radio-label">Myself</label>
+                                </div>
+
+                                <div class="radio-control">
+                                    <InputRadio id="OrgTypeCompany" Value="@OrganizationType.Company" class="radio-input" />
+                                    <label for="OrgTypeCompany" class="radio-label">My company</label>
+                                </div>
+                            </InputRadioGroup>
+                        </div>
+
+                        <ValidationMessage For="() => Form.Type" />
+                    </fieldset>
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium text-gray-900">I'm building passwordless authentication for:</label>
+
+                    <fieldset class="mt-2">
+                        <legend class="sr-only">How will you use passwordless.dev?</legend>
+                        <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                            <InputRadioGroup @bind-Value="Form.UseCase">
+                                <div class="radio-control">
+                                    <InputRadio id="usecase-customers-radio" Value="@UseCaseType.Customers" type="radio" class="radio-input" />
+                                    <label asp-for="Form.UseCase" for="usecase-employees-radio" class="radio-label">Users</label>
+                                </div>
+
+                                <div class="radio-control">
+                                    <InputRadio id="usecase-employees-radio" Value="@UseCaseType.Employees" type="radio" class="radio-input" />
+                                    <label asp-for="Form.UseCase" for="usecase-employees-radio" class="radio-label">Employees</label>
+                                </div>
+
+                                <div class="radio-control">
+                                    <InputRadio id="usecase-both-radio" Value="@UseCaseType.Both" type="radio" class="radio-input" />
+                                    <label asp-for="Form.UseCase" for="usecase-both-radio" class="radio-label">Both</label>
+                                </div>
+                            </InputRadioGroup>
+                        </div>
+                        <ValidationMessage For="() => Form.UseCase" />
+                    </fieldset>
+                </div>
+
+                <div>
+                    <div class="relative flex items-start">
+                        <div class="h-6 items-center">
+                            <InputCheckbox id="terms-and-privacy-checkbox" aria-describedby="tos-description" @bind-Value="Form.AcceptsTermsAndPrivacy" />
+                        </div>
+                        <div class="ml-3 text-sm leading-6">
+                            <label for="terms-and-privacy-checkbox" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
+                        </div>
+                    </div>
+                    <ValidationMessage For="() => Form.AcceptsTermsAndPrivacy" />
+                </div>
+
+                <label class="passkey-info" asp-for="organization-purpose">
+                    What is the purpose of your organization?
+                    <InputText id="organization-purpose" class="text-input" autocomplete="off" @bind-Value="Form.Purpose" tabindex="-1" />
+                </label>
+
+                <label class="passkey-info" asp-for="use-passkeys">
+                    Would you like to use passkeys?
+                    <InputCheckbox id="use-passkeys" autocomplete="off" @bind-Value="Form.UsePasskeys" tabindex="-1" />
+                </label>
+                
+                <div>
+                    <button type="submit" class="btn-form">Create</button>
+                </div>
+
+                <p class="text-sm">After creating your account, we will send an email with a magic link to sign you in.</p>
+            </EditForm>
+        </Panel>
+    </div>
+</Page>

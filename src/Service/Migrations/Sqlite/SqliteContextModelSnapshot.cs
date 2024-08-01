@@ -197,6 +197,10 @@ namespace Passwordless.Service.Migrations.Sqlite
                     b.Property<DateTime?>("EditedOn")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Hints")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("TEXT");
 

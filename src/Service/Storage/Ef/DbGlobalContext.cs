@@ -40,7 +40,7 @@ public abstract class DbGlobalContext : DbContext
             b.Property(x => x.DescriptorTransports).HasConversion(
                 v => JsonSerializer.Serialize(v, jsonOptions),
                 v => JsonSerializer.Deserialize<AuthenticatorTransport[]>(v, jsonOptions))
-                .Metadata.SetValueComparer(new NullableArrayValueComparer<AuthenticatorTransport>());
+                .Metadata.SetValueComparer(new NullableEnumerableValueComparer<AuthenticatorTransport>());
             b.HasIndex(x => new { x.Tenant, x.UserId })
                 .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
         });
@@ -59,7 +59,7 @@ public abstract class DbGlobalContext : DbContext
                 .HasConversion(
                     v => string.Join(',', v),
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                .Metadata.SetValueComparer(new ArrayValueComparer<string>());
+                .Metadata.SetValueComparer(new EnumerableValueComparer<string>());
         });
 
         modelBuilder.Entity<AliasPointer>()
@@ -140,6 +140,12 @@ public abstract class DbGlobalContext : DbContext
                 .HasConversion(
                     x => x.TotalSeconds,
                     x => TimeSpan.FromSeconds(x));
+            builder.Property(x => x.Hints)
+                .HasConversion(
+                    x => string.Join(',', x),
+                    x => x.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => Enum.Parse<PublicKeyCredentialHint>(s, true)).ToArray())
+                .Metadata.SetValueComparer(new EnumerableValueComparer<PublicKeyCredentialHint>());
         });
 
         base.OnModelCreating(modelBuilder);

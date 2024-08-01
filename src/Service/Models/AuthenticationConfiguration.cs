@@ -9,6 +9,7 @@ public class AuthenticationConfiguration : PerTenant
     public required string Purpose { get; set; }
     public UserVerificationRequirement UserVerificationRequirement { get; set; }
     public TimeSpan TimeToLive { get; set; }
+    public IReadOnlyList<PublicKeyCredentialHint> Hints { get; set; } = [];
 
     [MaxLength(255)]
     public string CreatedBy { get; set; } = string.Empty;
