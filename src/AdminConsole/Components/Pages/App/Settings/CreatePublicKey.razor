@@ -29,7 +29,7 @@
     protected override void OnInitialized()
     {
         Scopes = Enum.GetValues<PublicKeyScopes>().ToArray();
-        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentNullException(nameof(OrganizationId));
+        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrganizationId();
     }
 
     public async Task OnCreatedAsync(HashSet<PublicKeyScopes> selectedScopes)
@@ -44,7 +44,7 @@
                 $"Created public key for application {AppId}.",
                 Severity.Informational,
                 AppId,
-                HttpContextAccessor.HttpContext!.User.GetOrgId() ?? throw new ArgumentException("The organization ID is missing."),
+                HttpContextAccessor.HttpContext!.User.GetOrganizationId(),
                 DateTime.UtcNow);
             EventLogger.LogEvent(eventDto);
         }

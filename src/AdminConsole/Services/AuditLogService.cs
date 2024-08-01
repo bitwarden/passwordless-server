@@ -29,7 +29,7 @@ public class EventLogService : IEventLogService
 
     public async Task<OrganizationEventLogResponse> GetOrganizationEventLogsAsync(int pageNumber, int pageSize)
     {
-        var organizationId = _httpContextAccessor.HttpContext?.User.GetOrgId();
+        var organizationId = _httpContextAccessor.HttpContext?.User.GetOrganizationId();
 
         if (!organizationId.HasValue)
         {
@@ -46,7 +46,7 @@ public class EventLogService : IEventLogService
 
     public async Task<int> GetOrganizationEventLogCountAsync()
     {
-        var organizationId = _httpContextAccessor.HttpContext?.User.GetOrgId();
+        var organizationId = _httpContextAccessor.HttpContext?.User.GetOrganizationId();
 
         if (!organizationId.HasValue)
         {

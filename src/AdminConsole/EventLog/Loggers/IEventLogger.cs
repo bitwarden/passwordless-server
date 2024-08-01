@@ -130,8 +130,8 @@ public static class EventLoggerExtensions
                 EventType.AdminSignInTokenVerified,
                 $"{claimsPrincipal.GetName()} successfully signed-in via passkey.",
                 Severity.Informational,
-                claimsPrincipal.GetOrgId()?.ToString() ?? string.Empty,
-                claimsPrincipal.GetOrgId().GetValueOrDefault(),
+                claimsPrincipal.GetOrganizationId().ToString(),
+                claimsPrincipal.GetOrganizationId(),
                 performedAt
             )
         );

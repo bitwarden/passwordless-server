@@ -6,10 +6,21 @@ namespace Passwordless.AdminConsole.Helpers;
 
 public static class ClaimsExtension
 {
-    public static int? GetOrgId(this ClaimsPrincipal user)
+    /// <summary>
+    /// Returns the organization ID of the user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns>The organization ID</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Exception thrown when the user does not have an 'OrgId' claim.
+    /// </exception>
+    public static int GetOrganizationId(this ClaimsPrincipal user)
     {
         var orgIdStr = user.FindFirstValue(CustomClaimTypes.OrgId);
-        if (orgIdStr == null) return null;
+        if (orgIdStr == null)
+        {
+            throw new InvalidOperationException("User should have an organization ID claim.");
+        }
         var orgId = int.Parse(orgIdStr, CultureInfo.InvariantCulture);
         return orgId;
     }

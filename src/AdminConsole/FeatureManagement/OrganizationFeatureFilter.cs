@@ -1,5 +1,6 @@
 using Microsoft.FeatureManagement;
 using Passwordless.AdminConsole.Authorization;
+using Passwordless.AdminConsole.Helpers;
 
 namespace Passwordless.AdminConsole.FeatureManagement;
 
@@ -19,13 +20,9 @@ public class OrganizationFeatureFilter : IFeatureFilter
 
         if (httpContext.User.Identity is { IsAuthenticated: true })
         {
-            var organizationIdClaim = httpContext.User.FindFirst(CustomClaimTypes.OrgId);
-            if (organizationIdClaim == null)
-            {
-                throw new InvalidOperationException("User should have an organization ID claim.");
-            }
+            var organizationIdClaim = httpContext.User.GetOrganizationId();
 
-            if (context.Parameters.GetValue<int>("Organization") == Convert.ToInt32(organizationIdClaim.Value))
+            if (context.Parameters.GetValue<int>("Organization") == Convert.ToInt32(organizationIdClaim))
             {
                 return Task.FromResult(true);
             }
