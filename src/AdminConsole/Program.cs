@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.BackgroundServices;
 using Passwordless.AdminConsole.Components;
@@ -140,6 +141,8 @@ async Task RunAppAsync()
     builder.AddPasswordlessHealthChecks();
 
     services.AddScoped<ISetupService, SetupService>();
+
+    builder.Services.AddFeatureManagement();
 
     WebApplication app;
     try
