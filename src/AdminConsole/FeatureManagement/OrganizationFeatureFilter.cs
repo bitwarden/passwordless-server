@@ -19,9 +19,13 @@ public class OrganizationFeatureFilter : IFeatureFilter
 
         if (httpContext.User.Identity is { IsAuthenticated: true })
         {
-            var actualOrganizationId = Convert.ToInt32(httpContext.User.FindFirst(CustomClaimTypes.OrgId)!.Value);
+            var organizationIdClaim = httpContext.User.FindFirst(CustomClaimTypes.OrgId);
+            if (organizationIdClaim == null)
+            {
+                throw new InvalidOperationException("User should have an organization ID claim.");
+            }
 
-            if (context.Parameters.GetValue<int>("Organization") == actualOrganizationId)
+            if (context.Parameters.GetValue<int>("Organization") == Convert.ToInt32(organizationIdClaim.Value))
             {
                 return Task.FromResult(true);
             }
