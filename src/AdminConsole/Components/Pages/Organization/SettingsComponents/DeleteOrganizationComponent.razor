@@ -14,7 +14,7 @@
 <Panel Header="Delete Organization">
     @if (CanDelete)
     {
-        <EditForm class="flex flex-col space-y-4" FormName="@DeleteFormName" Model="DeleteForm" OnValidSubmit="@OnDeleteFormSubmittedAsync">
+        <EditForm id="@DeleteFormName" class="flex flex-col space-y-4" FormName="@DeleteFormName" Model="DeleteForm" OnValidSubmit="@OnDeleteFormSubmittedAsync">
             <p>Unexpected bad things will happen if you don’t read this:</p>
             <ul role="list" class="list-disc list-inside">
                 <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
