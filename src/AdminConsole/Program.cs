@@ -106,6 +106,7 @@ async Task RunAppAsync()
 
     services.AddHostedService<OnboardingCleanupBackgroundService>();
     services.AddHostedService<ApplicationCleanupBackgroundService>();
+    services.AddHostedService<UnconfirmedAccountCleanUpBackgroundService>();
 
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
