@@ -14,7 +14,7 @@ public static class AdminPageRateLimit
     public static RateLimiterOptions AddAdminPageRateLimitPolicy(this RateLimiterOptions limiter) =>
         limiter.AddPolicy(PolicyName, context =>
             RateLimitPartition.GetFixedWindowLimiter(
-                context.User.GetOrgId().ToString(),
+                context.User.GetOrgId()!.Value.ToString(),
                 factory: _ => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = PermitLimit,
