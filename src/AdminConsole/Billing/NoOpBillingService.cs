@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Models;
 using Passwordless.AdminConsole.Services;
@@ -78,7 +79,7 @@ public class NoOpBillingService : BaseBillingService, ISharedBillingService
         await UpgradeToPaidOrganization("simple", selectedPlan, organization.Id, "simple", DateTime.UtcNow, "simple", "simple");
 
         // I don't link to return these strings
-        return "/billing/manage";
+        return RoutingContants.Billing.Manage;
     }
 
     public async Task<string?> ChangePlanAsync(string app, string selectedPlan)
@@ -87,7 +88,7 @@ public class NoOpBillingService : BaseBillingService, ISharedBillingService
 
         // TODO: returning this string is a bit werid
         // It's also sending us to the wrong place!
-        return "/billing/manage";
+        return RoutingContants.Billing.Manage;
     }
 
     public Task<IReadOnlyCollection<InvoiceModel>> GetInvoicesAsync()

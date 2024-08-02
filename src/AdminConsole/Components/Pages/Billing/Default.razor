@@ -1,10 +1,13 @@
-@page "/billing/default"
+@page
+
+@attribute [Route(RoutingContants.Billing.Default)
+
 
 @inject NavigationManager NavigationManager
 
 @code {
     protected override void OnInitialized()
     {
-        NavigationManager.NavigateTo("/billing/manage");
+        NavigationManager.NavigateTo(RoutingContants.Billing.Manage);
     }
 }

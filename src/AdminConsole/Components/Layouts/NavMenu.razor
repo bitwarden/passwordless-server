@@ -11,12 +11,12 @@
                 <div class="sidebar-content">
                     <NavMenuItem Href="@OrganizationOverviewUrl" Icon="@typeof(CodeBracketSquareIcon)" Label="Applications" />
                     <ApplicationNavMenu />
-                    <NavMenuItem Href="/billing/default" Icon="@typeof(DollarIcon)" Label="Billing" />
-                    @if (HttpContextAccessor.HttpContext!.Request.Path.StartsWithSegments("/billing"))
+                    <NavMenuItem Href="@RoutingContants.Billing.Default" Icon="@typeof(DollarIcon)" Label="Billing" />
+                    @if (HttpContextAccessor.HttpContext!.Request.Path.StartsWithSegments(@RoutingContants.Billing.Root))
                     {
                         <div class="nav-link-submenu">
-                            <NavMenuItem Href="/billing/manage" Icon="@typeof(CogIcon)" Label="Manage" />
-                            <NavMenuItem Href="/billing/invoices" Icon="@typeof(DocumentTextIcon)" Label="Invoices" />
+                            <NavMenuItem Href="@RoutingContants.Billing.Manage" Icon="@typeof(CogIcon)" Label="Manage" />
+                            <NavMenuItem Href="@RoutingContants.Billing.Invoices" Icon="@typeof(DocumentTextIcon)" Label="Invoices" />
                         </div>
                     }
                     <NavMenuItem Href="/organization/admins" Icon="@typeof(UsersIcon)" Label="Admins" />
@@ -29,7 +29,7 @@
                 <div class="sidebar-footer">
                     @if (!CurrentContext.Organization!.HasSubscription)
                     {
-                        <NavLink href="/billing/manage" class="block">
+                        <NavLink href="@RoutingContants.Billing.Manage" class="block">
                             <Badge Variant="ContextualStyles.Warning" Message="Free organization"></Badge>
                         </NavLink>
                     }

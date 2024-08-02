@@ -1,8 +1,10 @@
-@page "/billing/cancelled"
+@page
+
+@attribute [Route(RoutingContants.Billing.Cancelled)
 
 <Page Title="Your checkout was cancelled">
     <Panel>
         <Alert Style="@ContextualStyles.Danger">Checkout was cancelled.</Alert>
-        <p>To try again, please visit our <a class="link-blue" href="/billing/manage">Billing page</a>.</p>
+        <p>To try again, please visit our <a class="link-blue" href="@RoutingContants.Billing.Manage">Billing page</a>.</p>
     </Panel>
 </Page>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
@@ -61,7 +62,7 @@ public class CreateApplicationModel : PageModel
 
         if (Organization.Applications.Count >= Organization.MaxApplications)
         {
-            return Redirect("/billing/manage");
+            return Redirect(RoutingContants.Billing.Manage);
         }
 
         return Page();
