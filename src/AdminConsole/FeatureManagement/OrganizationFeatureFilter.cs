@@ -21,6 +21,10 @@ public class OrganizationFeatureFilter : IFeatureFilter
         if (httpContext.User.Identity is { IsAuthenticated: true })
         {
             var organizationIdClaim = httpContext.User.GetOrgId();
+            if (!organizationIdClaim.HasValue)
+            {
+                throw new InvalidOperationException("User should have an organization ID claim.");
+            }
 
             if (context.Parameters.GetValue<int>("Organization") == Convert.ToInt32(organizationIdClaim))
             {
