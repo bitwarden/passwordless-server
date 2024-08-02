@@ -80,7 +80,7 @@
 
         @* Sign up form *@
         <Panel>
-            <EditForm id="test" class="flex flex-col space-y-6" FormName="@CreateFormName" EditContext="@FormEditContext" OnValidSubmit="@OnCreateValidSubmitAsync">
+            <EditForm class="flex flex-col space-y-6" FormName="@CreateFormName" EditContext="@FormEditContext" OnValidSubmit="@OnCreateValidSubmitAsync">
                 <DataAnnotationsValidator />
                 <div>
                     <label for="organization-name" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
