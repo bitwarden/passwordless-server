@@ -1,0 +1,23 @@
+@page "Account/UserOnboarding"
+
+@inject IPasswordlessClient PasswordlessClient
+@inject IHttpContextAccessor HttpContextAccessor
+
+<Page Title="Let's get you set up">
+    <Panel Header="Passkeys">
+        <p class="v-cloak" v-if="supportsPasskeys">We noticed your device supports passkeys, let's add one to secure your account.</p>
+        <p class="v-cloak" v-if="!supportsPasskeys.value && supportsSecurityKeys.value">We noticed your device supports security keys, so if you have a yubikey you can use it to secure your account.</p>
+
+        <Credentials HideDetails="@true" PasswordlessClient="@PasswordlessClient" UserId="@UserId" />
+        <AddPasskeysComponent />
+    </Panel>
+
+    <Panel Header="Create your first application">
+        <div class="mt-2 max-w-xl text-sm text-gray-500">
+            <p>Get your API keys and use passwordless in your own code by creating a new Passwordless application.</p>
+        </div>
+        <div class="mt-5">
+            <a href="/Organization/CreateApplication" class="btn-primary inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">Continue and create your first app</a>
+        </div>
+    </Panel>
+</Page>
