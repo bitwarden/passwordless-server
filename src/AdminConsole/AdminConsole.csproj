@@ -52,6 +52,7 @@
   navigation bar styles, will trigger the dotnet watcher to pick up the changes, execute the required MSBuild targets,
   and apply the custom logic. The automated browser reload will reflect these changes. -->
   <Target Name="ProcessScopedCssFilesWithTailwind" AfterTargets="_GenerateScopedCssFiles">
+    <Exec Command="npm ci" />
     <MSBuild Projects="$(MSBuildProjectFile)"
              Properties="CurrentScopedCssFile=%(_ScopedCssOutputs.Identity)"
              Targets="ProcessScopedCssFileWithTailwind">
