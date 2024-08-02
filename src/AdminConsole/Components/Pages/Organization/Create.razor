@@ -16,18 +16,6 @@
 @inject TimeProvider TimeProvider
 @inject ILogger<Create> Logger
 
-<style>
-    .passkey-info {
-        opacity: 0;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 0;
-        width: 0;
-        z-index: -1;
-    }
-</style>
-
 <Page Title="Create an organization">
     <div class="w-full lg:flex lg:items-start lg:space-x-8">
         @* Mobile promo *@
@@ -92,7 +80,7 @@
 
         @* Sign up form *@
         <Panel>
-            <EditForm class="flex flex-col space-y-6" FormName="@CreateFormName" EditContext="@FormEditContext" OnValidSubmit="@OnCreateValidSubmitAsync">
+            <EditForm id="test" class="flex flex-col space-y-6" FormName="@CreateFormName" EditContext="@FormEditContext" OnValidSubmit="@OnCreateValidSubmitAsync">
                 <DataAnnotationsValidator />
                 <div>
                     <label for="organization-name" class="block text-sm font-medium leading-6 text-gray-900">Organization name</label>
