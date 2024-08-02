@@ -16,7 +16,7 @@ public class DataService : IDataService
     {
         _httpAccessor = httpAccessor;
         _db = db;
-        _orgId = httpAccessor.HttpContext?.User?.GetOrganizationId();
+        _orgId = httpAccessor.HttpContext?.User?.GetOrgId();
     }
 
     public async Task<List<Application>> GetApplicationsAsync()

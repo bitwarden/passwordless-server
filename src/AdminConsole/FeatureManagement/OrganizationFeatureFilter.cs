@@ -20,7 +20,7 @@ public class OrganizationFeatureFilter : IFeatureFilter
 
         if (httpContext.User.Identity is { IsAuthenticated: true })
         {
-            var organizationIdClaim = httpContext.User.GetOrganizationId();
+            var organizationIdClaim = httpContext.User.GetOrgId();
 
             if (context.Parameters.GetValue<int>("Organization") == Convert.ToInt32(organizationIdClaim))
             {

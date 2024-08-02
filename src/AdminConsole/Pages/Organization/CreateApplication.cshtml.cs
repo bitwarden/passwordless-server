@@ -82,7 +82,7 @@ public class CreateApplicationModel : PageModel
             Name = form.Name,
             Description = form.Description,
             CreatedAt = DateTime.UtcNow,
-            OrganizationId = User.GetOrganizationId()!.Value
+            OrganizationId = User.GetOrgId()!.Value
         };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;

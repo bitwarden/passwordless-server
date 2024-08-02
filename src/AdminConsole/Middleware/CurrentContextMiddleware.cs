@@ -42,7 +42,7 @@ public class CurrentContextMiddleware
         IPasswordlessManagementClient passwordlessClient,
         IOrganizationFeatureService organizationFeatureService)
     {
-        var orgId = httpContext.User.GetOrganizationId();
+        var orgId = httpContext.User.GetOrgId()!.Value;
         var orgFeatures = organizationFeatureService.GetOrganizationFeatures(orgId);
         var organization = await dataService.GetOrganizationAsync();
 

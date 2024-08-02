@@ -29,7 +29,7 @@
     protected override void OnInitialized()
     {
         Scopes = Enum.GetValues<PublicKeyScopes>().ToArray();
-        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrganizationId()!.Value;
+        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrgId()!.Value;
     }
 
     public async Task OnCreatedAsync(HashSet<PublicKeyScopes> selectedScopes)

@@ -14,7 +14,7 @@ public static class ClaimsExtension
     /// <exception cref="InvalidOperationException">
     /// Exception thrown when the user does not have an 'OrgId' claim.
     /// </exception>
-    public static int? GetOrganizationId(this ClaimsPrincipal user)
+    public static int? GetOrgId(this ClaimsPrincipal user)
     {
         var orgIdStr = user.FindFirstValue(CustomClaimTypes.OrgId);
         if (orgIdStr == null)
