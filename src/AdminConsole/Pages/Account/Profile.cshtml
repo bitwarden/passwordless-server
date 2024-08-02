@@ -12,5 +12,5 @@
 <div class="panel">
     <h2>Passkeys</h2>   
     <component type="typeof(Credentials)" render-mode="Static" param-HideDetails="@false" param-PasswordlessClient="@PasswordlessClient" param-UserId="@Model.UserId" />
-    <partial name="Shared/_AddPasskeys"/>
+    <component type="typeof(AddPasskeysComponent)" render-mode="Static" />
 </div>
