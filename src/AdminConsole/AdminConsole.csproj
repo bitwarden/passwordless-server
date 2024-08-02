@@ -68,7 +68,6 @@
   </Target>
 
   <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
-    <Exec Command="npm ci" />
     <Exec Command="npm run build" />
 
     <!-- Passwordless.dev Javascript Client -->
