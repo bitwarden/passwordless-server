@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.MagicLinks;
@@ -72,7 +73,7 @@ public class LoginModel : PageModel
 
     public IActionResult OnPostSignUp()
     {
-        return Redirect("/organization/create");
+        return Redirect(RoutingContants.Organization.Create);
     }
 
     public enum LoginStatus
