@@ -8,11 +8,9 @@ using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
-using Passwordless.AdminConsole.RoutingHelpers;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
 using Passwordless.Common.Models.Apps;
-using Passwordless.Common.Serialization;
 using Passwordless.Common.Validation;
 using Application = Passwordless.AdminConsole.Models.Application;
 
@@ -84,7 +82,7 @@ public class CreateApplicationModel : PageModel
             Name = form.Name,
             Description = form.Description,
             CreatedAt = DateTime.UtcNow,
-            OrganizationId = User.GetOrganizationId()
+            OrganizationId = User.GetOrganizationId()!.Value
         };
 
         string email = User.Claims.First(c => c.Type == ClaimTypes.Email).Value;

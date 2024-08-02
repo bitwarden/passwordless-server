@@ -29,7 +29,7 @@
     protected override void OnInitialized()
     {
         Scopes = Enum.GetValues<PublicKeyScopes>().ToArray();
-        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrganizationId();
+        OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrganizationId()!.Value;
     }
 
     public async Task OnCreatedAsync(HashSet<PublicKeyScopes> selectedScopes)
@@ -44,7 +44,7 @@
                 $"Created public key for application {AppId}.",
                 Severity.Informational,
                 AppId,
-                HttpContextAccessor.HttpContext!.User.GetOrganizationId(),
+                OrganizationId,
                 DateTime.UtcNow);
             EventLogger.LogEvent(eventDto);
         }

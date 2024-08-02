@@ -20,7 +20,7 @@ public class AdminService : IAdminService
         _passwordlessClient = passwordlessClient;
         _db = db;
         _logger = logger;
-        _organizationId = httpContextAccessor.HttpContext!.User.GetOrganizationId();
+        _organizationId = httpContextAccessor.HttpContext!.User.GetOrganizationId()!.Value;
     }
 
     public async Task<bool> CanDisableMagicLinksAsync()
