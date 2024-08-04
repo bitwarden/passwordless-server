@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Middleware;
 
@@ -9,28 +7,21 @@ namespace Passwordless.AdminConsole.Services;
 public class PostSignInHandlerService : IPostSignInHandlerService
 {
     private readonly ConsoleDbContext _db;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<PostSignInHandlerService> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
     public PostSignInHandlerService(
         ConsoleDbContext db,
-        IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         ILogger<PostSignInHandlerService> logger)
     {
         _db = db;
-        _httpContextAccessor = httpContextAccessor;
-        _serviceProvider = serviceProvider;
         _logger = logger;
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task HandleAsync()
+    public async Task HandleAsync(int organizationId)
     {
-        var user = _httpContextAccessor.HttpContext.User;
-        var organizationIdValue = user.FindFirstValue(CustomClaimTypes.OrgId);
-        if (organizationIdValue == null) return;
-        var organizationId = int.Parse(organizationIdValue);
         var applications = await _db.Applications
             .Where(x => x.OrganizationId == organizationId && !x.DeleteAt.HasValue)
             .ToListAsync();
