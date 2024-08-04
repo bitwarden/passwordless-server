@@ -82,13 +82,18 @@ async Task RunAppAsync()
 
     builder.AddDatabase();
 
-    builder.Services.AddScoped<IPostSignInHandlerService, PostSignInHandlerService>();
+    builder.Services.AddTransient<IPostSignInHandlerService, PostSignInHandlerService>();
     services.ConfigureApplicationCookie(o =>
     {
-        o.Events.OnSignedIn = async context =>
+        o.Events.OnSignedIn = context =>
         {
-            var handler = context.HttpContext.RequestServices.GetRequiredService<IPostSignInHandlerService>();
-            await handler.HandleAsync();
+            var organizationId = context.Principal!.GetOrgId();
+            if (organizationId.HasValue)
+            {
+                var postSignInHandler = context.HttpContext.RequestServices.GetRequiredService<IPostSignInHandlerService>();
+                return postSignInHandler.HandleAsync(organizationId.Value);
+            }
+            return Task.CompletedTask;
         };
         o.Cookie.Name = "AdminConsoleSignIn";
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
