@@ -70,7 +70,7 @@ async Task RunAppAsync()
         options.AddTenantRouting();
         options.Conventions.AuthorizeFolder("/");
         options.Conventions.AuthorizeFolder("/App", CustomPolicy.HasAppRole);
-        options.Conventions.AddPageRoute("/Organization/Create", "/signup");
+        options.Conventions.AddPageRoute(RoutingContants.Organization.Create, RoutingContants.SignUp);
     });
 
     services.AddScoped<ICurrentContext, CurrentContext>();

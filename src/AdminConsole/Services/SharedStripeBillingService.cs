@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
+using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
@@ -62,7 +63,7 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
     public async Task<string> GetManagementUrl(int orgId)
     {
         var customerId = await this.GetCustomerIdAsync(orgId);
-        var returnUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/billing/manage";
+        var returnUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + RoutingContants.Billing.Manage;
 
         var options = new Stripe.BillingPortal.SessionCreateOptions
         {
@@ -83,9 +84,9 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
         var organization = await _dataService.GetOrganizationWithDataAsync();
         if (!organization.HasSubscription)
         {
-            var successUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/billing/success";
+            var successUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + RoutingContants.Billing.Success;
             successUrl += "?session_id={CHECKOUT_SESSION_ID}";
-            var cancelUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + "/billing/cancelled";
+            var cancelUrl = _httpContextAccessor.HttpContext!.Request.GetBaseUrl() + RoutingContants.Billing.Cancelled;
             var sessionUrl = await this.CreateCheckoutSessionAsync(organization.Id, organization.BillingCustomerId, _httpContextAccessor.HttpContext.User.GetEmail(), selectedPlan, successUrl, cancelUrl);
             return sessionUrl;
         }
@@ -147,7 +148,7 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
 
         await this.SetPlanOnApp(app, selectedPlan, subscriptionItem.Id, subscriptionItem.PriceId);
 
-        return "/billing/manage";
+        return RoutingContants.Billing.Manage;
     }
 
     public async Task<IReadOnlyCollection<PaymentMethodModel>> GetPaymentMethods(string? organizationBillingCustomerId)

@@ -1,8 +1,10 @@
-@page "/billing/success"
+@page
+
+@attribute [Route(RoutingContants.Billing.Success)
 
 <Page Title="Your subscription has been upgraded">
     <Panel>
         <Alert Style="@ContextualStyles.Success">Successfully upgraded your organization.</Alert>
-        <p>To make any changes your payment or retrieve your invoices, please visit our <a class="link-blue" href="/billing/manage">Billing page</a>.</p>
+        <p>To make any changes your payment or retrieve your invoices, please visit our <a class="link-blue" href="@RoutingContants.Billing.Manage">Billing page</a>.</p>
     </Panel>
 </Page>
