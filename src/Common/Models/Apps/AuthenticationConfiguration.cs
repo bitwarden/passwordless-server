@@ -2,8 +2,9 @@ namespace Passwordless.Common.Models.Apps;
 
 public record AuthenticationConfiguration(
     string Purpose,
-    int TimeToLive,
     string UserVerificationRequirement,
+    int TimeToLive,
+    string Hints,
     string CreatedBy,
     DateTimeOffset? CreatedOn,
     string? EditedBy,

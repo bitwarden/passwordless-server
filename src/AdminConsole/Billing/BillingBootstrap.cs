@@ -25,6 +25,7 @@ public static class BillingBootstrap
             builder.Services.AddHostedService<StripeConfigurationUpdaterBackgroundService>();
             builder.Services.AddScoped<ISharedBillingService, SharedStripeBillingService>();
             builder.Services.AddHostedService<MeteredBillingBackgroundService>();
+            builder.Services.AddHostedService<UserCountUpdaterBackgroundService>();
         }
     }
 }

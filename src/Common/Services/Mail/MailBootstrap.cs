@@ -4,6 +4,8 @@ public static class MailBootstrap
 {
     public static void AddMail(this WebApplicationBuilder builder)
     {
+        builder.Services.AddOptions<MailConfiguration>().BindConfiguration("Mail");
+
         if (builder.Configuration.GetSection("Mail:Postmark").Exists())
         {
             var configurationSection = builder.Configuration.GetSection("Mail:PostMark");

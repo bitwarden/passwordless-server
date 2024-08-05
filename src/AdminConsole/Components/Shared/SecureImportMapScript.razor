@@ -1,0 +1,9 @@
+@inject IFileVersionProvider Version
+@inject IHttpContextAccessor HttpContextAccessor
+
+@if (Value.Imports.Count > 0)
+{
+    <script type="importmap" nonce="@Nonce">
+        @((MarkupString)JsonSerializer.Serialize(Value, JsonSerializerOptions))
+    </script>
+}

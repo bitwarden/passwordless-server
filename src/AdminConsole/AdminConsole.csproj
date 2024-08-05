@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.6" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.5.0" />
     <PackageReference Include="Passwordless.AspNetCore" Version="2.0.0-beta9" />
     <PackageReference Include="Stripe.net" Version="41.*" />
   </ItemGroup>
@@ -34,8 +35,40 @@
     <None Include="Services\AuthenticatorData\authenticator-data.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
-  <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
+  <!-- The official documentation for scoped CSS files briefly mentions preprocessors and suggests integrating them with
+  a "Before Build" task in Visual Studio's Task Runner. This integration is basic, and an alternative approach is needed
+  for integration with dotnet watch. To understand the build process, use the verbose output of dotnet build to identify
+  suitable MSBuild targets for custom CSS preprocessing logic.
+
+  The target _GenerateScopedCssFiles has been identified. Custom build steps can be integrated after this target. This
+  code iterates over all generated scoped CSS files, invoking the Tailwind CLI for each file. Key points include:
+
+  - The output file name (-o) is identical to the input file name (-i), overwriting the source file. This is necessary
+  as subsequent build steps rely on this exact file name.
+  - An environment variable ensures Tailwind performs a one-off build, even in JIT mode, without the Node environment
+  set to production. More details are available in the official documentation.
+
+  Running dotnet watch run ensures that scoped CSS styles, including Tailwind-specific classes and directives, are
+  transformed into browser-compatible CSS during the build. Any changes to scoped CSS files, such as modifications to
+  navigation bar styles, will trigger the dotnet watcher to pick up the changes, execute the required MSBuild targets,
+  and apply the custom logic. The automated browser reload will reflect these changes. -->
+  <Target Name="ProcessScopedCssFilesWithTailwind" AfterTargets="_GenerateScopedCssFiles">
     <Exec Command="npm ci" />
+    <MSBuild Projects="$(MSBuildProjectFile)"
+             Properties="CurrentScopedCssFile=%(_ScopedCssOutputs.Identity)"
+             Targets="ProcessScopedCssFileWithTailwind">
+    </MSBuild>
+  </Target>
+
+  <Target Name="ProcessScopedCssFileWithTailwind">
+    <Message Importance="high"
+             Text="Processing with Tailwind: $(CurrentScopedCssFile)" />
+    <Exec Command="npx tailwindcss -i $(CurrentScopedCssFile) -o $(CurrentScopedCssFile)"
+          WorkingDirectory="$(MSBuildProjectDirectory)"
+          EnvironmentVariables="TAILWIND_MODE=build" />
+  </Target>
+
+  <Target Name="Run NPM Build" AfterTargets="PostBuildEvent">
     <Exec Command="npm run build" />
 
     <!-- Passwordless.dev Javascript Client -->

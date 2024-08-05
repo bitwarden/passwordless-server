@@ -28,6 +28,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
             Purpose = new SignInPurpose(request.Purpose),
             UserVerificationRequirement = request.UserVerificationRequirement,
             TimeToLive = request.TimeToLive,
+            Hints = request.Hints,
             Tenant = storage.Tenant,
             CreatedBy = request.PerformedBy,
             CreatedOn = timeProvider.GetUtcNow()
@@ -59,6 +60,7 @@ public class AuthenticationConfigurationService(ITenantStorage storage, TimeProv
 
         existingConfiguration.UserVerificationRequirement = request.UserVerificationRequirement;
         existingConfiguration.TimeToLive = request.TimeToLive;
+        existingConfiguration.Hints = request.Hints;
         existingConfiguration.EditedBy = request.PerformedBy;
         existingConfiguration.EditedOn = timeProvider.GetUtcNow();
 

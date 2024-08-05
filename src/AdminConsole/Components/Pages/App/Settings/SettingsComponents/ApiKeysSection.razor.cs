@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using Passwordless.AdminConsole.EventLog.DTOs;
 using Passwordless.AdminConsole.Helpers;
@@ -11,7 +12,6 @@ namespace Passwordless.AdminConsole.Components.Pages.App.Settings.SettingsCompon
 public partial class ApiKeysSection : ComponentBase
 {
     public const string CreateApiKeyFormName = "create-api-key-form";
-    public const string SelectedApiKeyFormName = "selected-api-key-form";
     public const string ConfirmedSelectedApiKeyFormName = "confirmed-selected-api-key-form";
 
     public string AppId => CurrentContext.AppId!;
@@ -57,24 +57,6 @@ public partial class ApiKeysSection : ComponentBase
     {
         if (CurrentContext.IsPendingDelete) return;
 
-        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case CreateApiKeyFormName:
-                    CreateForm.Type = request.Form["CreateForm.Type"].ToString();
-                    OnCreateFormSubmitted();
-                    break;
-                case ConfirmedSelectedApiKeyFormName:
-                    ConfirmedSelectedForm.ApiKeyId = request.Form["ConfirmedSelectedForm.ApiKeyId"].ToString();
-                    ConfirmedSelectedForm.Action = request.Form["ConfirmedSelectedForm.Action"].ToString();
-                    await OnSelectedFormConfirmed();
-                    break;
-            }
-        }
-
         var apiKeys = await ManagementClient.GetApiKeysAsync(AppId);
         ApiKeys = apiKeys
             .Select(x => ApiKey.FromDto(x, CurrentContext))
@@ -97,22 +79,23 @@ public partial class ApiKeysSection : ComponentBase
 
     private async Task OnSelectedFormConfirmed()
     {
-        if (string.IsNullOrEmpty(ConfirmedSelectedForm.ApiKeyId))
+        if (ConfirmedSelectedForm.DeleteAction != null)
         {
-            throw new ArgumentNullException(nameof(ConfirmedSelectedForm.ApiKeyId));
+            await DeleteSelectedAsync(ConfirmedSelectedForm.DeleteAction!);
         }
-        switch (ConfirmedSelectedForm.Action)
+        else if (ConfirmedSelectedForm.LockAction != null)
         {
-            case "lock":
-                await LockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
-                break;
-            case "unlock":
-                await UnlockSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
-                break;
-            case "delete":
-                await DeleteSelectedAsync(ConfirmedSelectedForm.ApiKeyId);
-                break;
+            await LockSelectedAsync(ConfirmedSelectedForm.LockAction!);
         }
+        else if (ConfirmedSelectedForm.UnlockAction != null)
+        {
+            await UnlockSelectedAsync(ConfirmedSelectedForm.UnlockAction!);
+        }
+        else
+        {
+            throw new ArgumentNullException(nameof(ConfirmedSelectedForm), "No action selected.");
+        }
+        NavigationManager.Refresh();
     }
 
     private async Task LockSelectedAsync(string apiKeyId)
@@ -187,7 +170,13 @@ public partial class ApiKeysSection : ComponentBase
 
     public sealed class SelectedFormModel
     {
-        public string? ApiKeyId { get; set; }
-        public string? Action { get; set; }
+        [Length(4, 4)]
+        public string? DeleteAction { get; set; }
+
+        [Length(4, 4)]
+        public string? LockAction { get; set; }
+
+        [Length(4, 4)]
+        public string? UnlockAction { get; set; }
     }
 }

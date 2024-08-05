@@ -133,8 +133,8 @@
             organization = new Models.Organization
             {
                 Name = "Admin Console",
-                InfoOrgType = "company",
-                InfoUseCase = "both",
+                InfoOrgType = OrganizationType.Company,
+                InfoUseCase = UseCaseType.Both,
                 CreatedAt = now
             };
             await DataService.CreateOrganizationAsync(organization);

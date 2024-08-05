@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
+using Microsoft.FeatureManagement.FeatureFilters;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.BackgroundServices;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Endpoints;
+using Passwordless.AdminConsole.FeatureManagement;
 using Passwordless.AdminConsole.HealthChecks;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -82,13 +85,17 @@ async Task RunAppAsync()
 
     builder.AddDatabase();
 
-    builder.Services.AddScoped<IPostSignInHandlerService, PostSignInHandlerService>();
+    builder.Services.AddTransient<IPostSignInHandlerService, PostSignInHandlerService>();
     services.ConfigureApplicationCookie(o =>
     {
         o.Events.OnSignedIn = async context =>
         {
-            var handler = context.HttpContext.RequestServices.GetRequiredService<IPostSignInHandlerService>();
-            await handler.HandleAsync();
+            var organizationId = context.Principal!.GetOrgId();
+            if (organizationId.HasValue)
+            {
+                var postSignInHandler = context.HttpContext.RequestServices.GetRequiredService<IPostSignInHandlerService>();
+                await postSignInHandler.HandleAsync(organizationId.Value);
+            }
         };
         o.Cookie.Name = "AdminConsoleSignIn";
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
@@ -119,9 +126,11 @@ async Task RunAppAsync()
     services.AddTransient<IMagicLinkBuilder, MagicLinkBuilder>();
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
+    services.AddScoped<IAdminService, AdminService>();
+
     // Setup mail service & provider
     builder.AddMail();
-    services.AddSingleton<IMailService, DefaultMailService>();
+    services.AddScoped<IMailService, DefaultMailService>();
 
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));
@@ -138,6 +147,9 @@ async Task RunAppAsync()
     builder.AddPasswordlessHealthChecks();
 
     services.AddScoped<ISetupService, SetupService>();
+
+    builder.Services.AddFeatureManagement()
+        .AddFeatureFilter<OrganizationFeatureFilter>();
 
     WebApplication app;
     try

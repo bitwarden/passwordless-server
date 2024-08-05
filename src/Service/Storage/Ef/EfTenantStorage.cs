@@ -364,6 +364,7 @@ public class EfTenantStorage(
             Purpose = configuration.Purpose.Value,
             UserVerificationRequirement = configuration.UserVerificationRequirement,
             TimeToLive = configuration.TimeToLive,
+            Hints = configuration.Hints,
             Tenant = Tenant,
             CreatedBy = configuration.CreatedBy ?? string.Empty,
             CreatedOn = configuration.CreatedOn?.UtcDateTime
@@ -377,8 +378,9 @@ public class EfTenantStorage(
         await db.AuthenticationConfigurations
             .Where(x => x.Purpose == configuration.Purpose.Value)
             .ExecuteUpdateAsync(x => x
-                .SetProperty(c => c.TimeToLive, configuration.TimeToLive)
                 .SetProperty(c => c.UserVerificationRequirement, configuration.UserVerificationRequirement)
+                .SetProperty(c => c.TimeToLive, configuration.TimeToLive)
+                .SetProperty(c => c.Hints, configuration.Hints)
                 .SetProperty(c => c.EditedBy, configuration.EditedBy)
                 .SetProperty(c => c.EditedOn, configuration.EditedOn.HasValue ? configuration.EditedOn.Value.UtcDateTime : null)
                 .SetProperty(c => c.LastUsedOn, configuration.LastUsedOn.HasValue ? configuration.LastUsedOn.Value.UtcDateTime : null));
