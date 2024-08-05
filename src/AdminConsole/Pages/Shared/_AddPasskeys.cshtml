@@ -1,8 +1,9 @@
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Helpers
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject IOptions<PasswordlessOptions> Options
-@inject IOptions<PasswordlessManagementOptions> ManagementOptions
+@using Passwordless.AspNetCore
+@inject IOptionsSnapshot<PasswordlessAspNetCoreOptions> Options
+@inject IOptionsSnapshot<PasswordlessManagementOptions> ManagementOptions
 
 <div id="addPasskeysPanel">
     <form v-on:submit="registerCredential">
@@ -26,31 +27,31 @@
 @Html.PartialSectionScripts(@<script type="module">
     import { createApp, ref, reactive } from 'vue';
     createApp({
-        setup() {            
+        setup() {
             const p = new Passwordless.Client({
                 apiUrl: "@ManagementOptions.Value.ApiUrl",
                 apiKey: "@Options.Value.ApiKey"
             });
-            
+
             const supportsPasskeys = ref(false);
             const supportsSecurityKeys = ref(false);
             Passwordless.isPlatformSupported().then(s => supportsPasskeys.value = s);
             supportsSecurityKeys.value = Passwordless.isBrowserSupported();
-            
+
             const feedback = reactive({
                 status: "",
                 message: ""
             });
-            
+
             const working = ref(false);
-                        
+
             const registerCredential = async (e) => {
                 e.preventDefault();
                 if (working.value) return;
                 working.value = true;
 
                 try {
-                    feedback.status = "started";                
+                    feedback.status = "started";
                     const data = new FormData(e.target);
                     const req = await fetch("/passwordless-add-credential", {
                         method: "POST",
@@ -59,12 +60,12 @@
                             "Content-Type": "application/json",
                         }
                     });
-                    
+
                     try {
                         if (!req.ok) throw new Error("Backend request failed");
-                        
+
                         const registerToken = await req.json();
-                        const nicknameForDevice = data.get("nickname");                    
+                        const nicknameForDevice = data.get("nickname");
                         const {token, error } = await p.register(registerToken.token, nicknameForDevice);
                         if (token) {
                             feedback.status = "completed";
@@ -83,7 +84,7 @@
                                 }
                             }
                         }
-                    } catch (e) {                    
+                    } catch (e) {
                         feedback.status = "error";
                         feedback.message = "No passkey was added. Please try again.";
                     }
@@ -91,7 +92,7 @@
                     working.value = false;
                 }
             }
-            
+
             return {
                 registerCredential,
                 feedback,

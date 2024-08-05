@@ -11,7 +11,7 @@
 @attribute [AllowAnonymous]
 
 @inject ISetupService SetupService
-@inject IOptions<PasswordlessManagementOptions> ManagementOptions
+@inject IOptionsSnapshot<PasswordlessManagementOptions> ManagementOptions
 @inject ConsoleDbContext DbContext
 @inject NavigationManager NavigationManager
 @inject IApplicationService ApplicationService

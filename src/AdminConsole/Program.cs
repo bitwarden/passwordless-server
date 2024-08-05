@@ -110,7 +110,7 @@ async Task RunAppAsync()
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
-        var options = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
+        var options = provider.GetRequiredService<IOptionsSnapshot<PasswordlessManagementOptions>>();
 
         client.BaseAddress = new Uri(options.Value.InternalApiUrl);
     });

@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Options;
+using Passwordless.AspNetCore;
 using Passwordless.Common.Configuration;
 
 namespace Passwordless.AdminConsole.Services;
 
 public class SetupService(
-    IOptionsSnapshot<PasswordlessOptions> options,
+    IOptionsSnapshot<PasswordlessAspNetCoreOptions> options,
     IConfiguration configuration)
     : ISetupService
 {

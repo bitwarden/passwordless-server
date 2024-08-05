@@ -3,7 +3,7 @@
 @using Passwordless.AdminConsole.Middleware
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessManagementOptions> Options
+@inject IOptionsSnapshot<PasswordlessManagementOptions> Options
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model NewAccountModel
 
@@ -47,7 +47,7 @@
                                     <span asp-validation-for="Nickname"></span>
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label class="block text-sm font-medium leading-6 text-gray-900">Attestation</label>
                                 <div class="mt-2 flex">
@@ -84,12 +84,12 @@
                                     <warning-alert-box message="@((MarkupString)"Attestation is only available on 'Enterprise' plans, read more <a class=\"link-blue\" href=\"https://docs.passwordless.dev/guide/concepts.html#attestation\" target=\"_blank\">here</a>.")"></warning-alert-box>
                                 }
                             </div>
-                            
+
 
                             <div>
                                 <button id="register-btn" class="btn-primary" type="button">Register</button>
                             </div>
-                            
+
                             <div id="error-message-summary-container" class="hidden">
                                 <danger-alert-box></danger-alert-box>
                             </div>
@@ -115,7 +115,7 @@ document.getElementById('register-btn').addEventListener('click', (e) => createN
 const createNewAccount = async (e) => {
     let form = document.getElementById("registration-form");
     const data = new FormData(form);
-    
+
     let req = await fetch("?handler=token", {
         method: "post",
         body: data,
@@ -123,17 +123,17 @@ const createNewAccount = async (e) => {
             RequestVerificationToken: "@requestToken"
         }
     });
-    
+
     if (req.ok) {
         const { token } = await req.json();
         const nicknameForDevice = data.get("nickname");
         const { error } = await p.register(token , nicknameForDevice);
-        
+
         if (error) {
             console.error(error);
             alert(error.title);
         }
-        
+
         window.location.href = "../playground";
     } else {
         const container = document.getElementById("error-message-summary-container");
@@ -144,12 +144,12 @@ const createNewAccount = async (e) => {
         container.classList.remove("hidden");
     }
 }
-                            
+
 const isSupported = Passwordless.isBrowserSupported();
 if (!isSupported) {
     const registerCredentialFields = document.getElementById("registerCredentialFields");
     registerCredentialFields.disabled = true;
-    
+
     const container = document.getElementById("error-message-summary-container");
     const field = container.getElementsByClassName("alert-box-message")[0];
     field.textContent = "WebAuthn is not supported in this browser.";

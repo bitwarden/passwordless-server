@@ -22,7 +22,7 @@ public static class PasswordlessManagementBootstrap
         builder.Services.AddSingleton<PasswordlessHttpHandler>();
         builder.Services.AddHttpClient<IPasswordlessManagementClient, PasswordlessManagementClient>((sp, client) =>
         {
-            var options = sp.GetRequiredService<IOptions<PasswordlessManagementOptions>>().Value;
+            var options = sp.GetRequiredService<IOptionsSnapshot<PasswordlessManagementOptions>>().Value;
 
             client.BaseAddress = new Uri(options.InternalApiUrl);
             client.DefaultRequestHeaders.Add("ManagementKey", options.ManagementKey);

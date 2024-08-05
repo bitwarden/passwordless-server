@@ -12,7 +12,7 @@ public sealed class SecurityHeadersMiddleware
 
     public SecurityHeadersMiddleware(
         RequestDelegate next,
-        IOptions<PasswordlessManagementOptions> options,
+        IOptionsSnapshot<PasswordlessManagementOptions> options,
         ILogger<SecurityHeadersMiddleware> logger)
     {
         _next = next;

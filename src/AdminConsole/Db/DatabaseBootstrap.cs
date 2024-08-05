@@ -2,11 +2,14 @@ using System.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
+using Passwordless.AspNetCore;
+using Passwordless.Common.Configuration;
 
 namespace Passwordless.AdminConsole.Db;
 
@@ -76,29 +79,26 @@ public static class DatabaseBootstrap
             .AddEntityFrameworkStores<TDbContext>()
             .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
             .AddDefaultTokenProviders()
-            .AddPasswordless(o =>
+            .AddPasswordless(_ =>
             {
-                var options = builder.Configuration
-                    .GetSection("Passwordless")
-                    .Get<PasswordlessOptions>();
+                // We configure options separately due to our complex setup
+            });
 
-                o.ApiSecret = options?.ApiSecret ?? "";
-                o.ApiKey = options?.ApiKey;
-                o.ApiUrl = options?.ApiUrl;
-
-                var managementOptions = builder.Configuration
-                    .GetSection("PasswordlessManagement")
-                    .Get<PasswordlessManagementOptions>();
-
-                if (builder.Configuration.GetValue("SelfHosted", false))
+        // Options
+        builder.Services
+            .AddOptions<PasswordlessAspNetCoreOptions>()
+            .BindConfiguration("Passwordless")
+            .Configure<IConfiguration, IOptionsSnapshot<PasswordlessManagementOptions>>((o, c, m) =>
+            {
+                // Override the API URL if we are self-hosted
+                if (c.IsSelfHosted())
                 {
-                    // This will overwrite ApiUrl with the internal URL for self-hosting, this is intentional.
-                    if (string.IsNullOrEmpty(managementOptions?.InternalApiUrl))
+                    if (string.IsNullOrWhiteSpace(m.Value.InternalApiUrl))
                     {
                         throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
                     }
 
-                    o.ApiUrl = managementOptions.InternalApiUrl;
+                    o.ApiUrl = m.Value.InternalApiUrl;
                 }
             });
 
