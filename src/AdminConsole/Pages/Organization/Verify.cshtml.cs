@@ -19,7 +19,7 @@ public class Verify : PageModel
     public IActionResult OnGet()
     {
         return _httpContextAccessor.HttpContext != null && _signInManager.IsSignedIn(_httpContextAccessor.HttpContext.User)
-            ? RedirectToPage("/Account/useronboarding")
+            ? Redirect("/Account/useronboarding")
             : Page();
     }
 }
