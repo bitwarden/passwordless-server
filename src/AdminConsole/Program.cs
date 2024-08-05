@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
+using Microsoft.FeatureManagement.FeatureFilters;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.BackgroundServices;
 using Passwordless.AdminConsole.Components;
 using Passwordless.AdminConsole.Components.Account;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Endpoints;
+using Passwordless.AdminConsole.FeatureManagement;
 using Passwordless.AdminConsole.HealthChecks;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
@@ -144,6 +147,9 @@ async Task RunAppAsync()
     builder.AddPasswordlessHealthChecks();
 
     services.AddScoped<ISetupService, SetupService>();
+
+    builder.Services.AddFeatureManagement()
+        .AddFeatureFilter<OrganizationFeatureFilter>();
 
     WebApplication app;
     try
