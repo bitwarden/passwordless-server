@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Passwordless.Common.Configuration;
 
 namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
@@ -11,8 +12,7 @@ public static class PasswordlessManagementBootstrap
             .BindConfiguration("PasswordlessManagement")
             .Configure<IConfiguration>((options, config) =>
             {
-                bool isSelfHosted = config.GetValue("SelfHosted", false);
-                if (!isSelfHosted)
+                if (!config.IsSelfHosted())
                 {
                     options.InternalApiUrl = options.ApiUrl;
                 }

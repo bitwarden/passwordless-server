@@ -3,18 +3,12 @@ using Passwordless.Common.Configuration;
 
 namespace Passwordless.AdminConsole.Services;
 
-public class SetupService : ISetupService
+public class SetupService(
+    IOptionsSnapshot<PasswordlessOptions> options,
+    IConfiguration configuration)
+    : ISetupService
 {
-    private readonly PasswordlessOptions _options;
-    private readonly bool _isSelfHosted;
-
-    public SetupService(
-        IOptions<PasswordlessOptions> options,
-        IConfiguration configuration)
-    {
-        _options = options.Value;
-        _isSelfHosted = configuration.IsSelfHosted();
-    }
+    private readonly bool _isSelfHosted = configuration.IsSelfHosted();
 
     public Task<bool> HasSetupCompletedAsync()
     {
@@ -22,14 +16,15 @@ public class SetupService : ISetupService
         if (_isSelfHosted)
         {
             return Task.FromResult(
-                !(_options.ApiKey!.Contains("replaceme") || _options.ApiSecret.Contains("replaceme"))
+                !(options.Value.ApiKey?.Contains("replaceme") == true ||
+                  options.Value.ApiSecret.Contains("replaceme"))
             );
         }
         // Local and cloud -> check if API Secret has been set
         else
         {
             return Task.FromResult(
-                !string.IsNullOrWhiteSpace(_options.ApiSecret)
+                !string.IsNullOrWhiteSpace(options.Value.ApiSecret)
             );
         }
     }

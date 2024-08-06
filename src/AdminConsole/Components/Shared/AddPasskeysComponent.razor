@@ -1,7 +1,8 @@
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@inject IOptions<PasswordlessOptions> Options
-@inject IOptions<PasswordlessManagementOptions> ManagementOptions
+@using Passwordless.AspNetCore
+@inject IOptionsSnapshot<PasswordlessOptions> Options
+@inject IOptionsSnapshot<PasswordlessManagementOptions> ManagementOptions
 
 <div id="addPasskeysPanel">
     <form v-on:submit="registerCredential">
