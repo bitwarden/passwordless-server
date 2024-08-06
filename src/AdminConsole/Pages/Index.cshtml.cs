@@ -15,6 +15,6 @@ public class IndexModel(ILogger<IndexModel> logger, ISetupService setupService) 
 
         logger.LogInformation("Database has not been initialized. Starting initialization process.");
 
-        return Redirect("/initialize");
+        return Redirect("/Initialize");
     }
 }

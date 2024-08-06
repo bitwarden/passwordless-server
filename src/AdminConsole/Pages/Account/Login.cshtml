@@ -3,8 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Options
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
-@using Passwordless.AspNetCore
-@inject IOptionsSnapshot<PasswordlessAspNetCoreOptions> PasswordlessOptions
+@inject IOptionsSnapshot<PasswordlessOptions> PasswordlessOptions
 @inject IOptionsSnapshot<PasswordlessManagementOptions> ManagementOptions
 @inject IAntiforgery Antiforgery
 @attribute [AllowAnonymous]
