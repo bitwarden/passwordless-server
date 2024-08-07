@@ -16,13 +16,14 @@ public class AuthenticationConfigurationFormModel
 
     [Required]
     [Range(0, int.MaxValue)]
+    [Display(Name = "Time to live (seconds)")]
     public int Seconds { get; set; }
 
     public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
-    [Required]
-    [CredentialHintStringValidation]
+    [CredentialHintString]
     [MaxLength(255)]
+    [Display(Name = "Credential hints")]
     public string HintString { get; set; } = "";
 
     public IReadOnlyList<PublicKeyCredentialHint> Hints =>
