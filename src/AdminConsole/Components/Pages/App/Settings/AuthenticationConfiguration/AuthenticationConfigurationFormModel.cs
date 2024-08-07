@@ -21,8 +21,7 @@ public class AuthenticationConfigurationFormModel
 
     public TimeSpan TimeToLive => TimeSpan.FromSeconds(Seconds);
 
-    [Required]
-    [CredentialHintStringValidation]
+    [CredentialHintString]
     [MaxLength(255)]
     [Display(Name = "Credential hints")]
     public string HintString { get; set; } = "";

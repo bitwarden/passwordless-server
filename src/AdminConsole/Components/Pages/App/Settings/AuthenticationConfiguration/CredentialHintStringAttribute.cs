@@ -3,7 +3,7 @@ using Fido2NetLib.Objects;
 
 namespace Passwordless.AdminConsole.Components.Pages.App.Settings.AuthenticationConfiguration;
 
-public class CredentialHintStringValidationAttribute : ValidationAttribute
+public class CredentialHintStringAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)
     {
