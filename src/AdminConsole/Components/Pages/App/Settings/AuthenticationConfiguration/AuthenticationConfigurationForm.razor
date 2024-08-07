@@ -18,8 +18,8 @@
             }
         </InputSelect>
 
-        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Seconds">Seconds:</label>
-        <InputNumber id="Seconds" @bind-Value="@FormModel.Seconds" min="0" class="text-input"/>
+        <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Seconds">Time to live (seconds):</label>
+        <InputNumber id="Seconds" DisplayName="Time to live (seconds)" @bind-Value="@FormModel.Seconds" min="0" class="text-input"/>
 
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Hints">Credential hints:</label>
         <InputText id="Hints" DisplayName="Credential hints" @bind-Value="@FormModel.HintString" class="text-input" />
