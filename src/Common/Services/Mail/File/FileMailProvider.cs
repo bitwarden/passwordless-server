@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Passwordless.Common.Services.Mail;
+namespace Passwordless.Common.Services.Mail.File;
 
 // ReSharper disable once UnusedType.Global
 public class FileMailProvider : IMailProvider
@@ -14,10 +14,17 @@ public class FileMailProvider : IMailProvider
     public FileMailProvider(
         TimeProvider timeProvider,
         IOptions<FileMailProviderConfiguration> configuration,
+        ILogger<IMailProvider> logger) : this(timeProvider, configuration.Value, logger)
+    {
+    }
+
+    public FileMailProvider(
+        TimeProvider timeProvider,
+        FileMailProviderConfiguration configuration,
         ILogger<IMailProvider> logger)
     {
         _timeProvider = timeProvider;
-        _path = string.IsNullOrEmpty(configuration.Value.Path) ? DefaultPath : configuration.Value.Path;
+        _path = string.IsNullOrEmpty(configuration.Path) ? DefaultPath : configuration.Path;
         _logger = logger;
     }
 
@@ -31,7 +38,7 @@ public class FileMailProvider : IMailProvider
 
             """;
 
-        await File.AppendAllTextAsync(_path, content);
+        await System.IO.File.AppendAllTextAsync(_path, content);
 
         _logger.LogInformation("Saved email contents to '{Path}'", _path);
     }

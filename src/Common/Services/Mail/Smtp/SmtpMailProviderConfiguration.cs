@@ -1,0 +1,26 @@
+namespace Passwordless.Common.Services.Mail.Smtp;
+
+public class SmtpMailProviderConfiguration : IMailProviderConfiguration
+{
+    public const string Name = "Smtp";
+
+    public string GetName() => Name;
+
+    public string? Host { get; set; }
+
+    public int Port { get; set; }
+
+    public string? Username { get; set; }
+
+    public string? Password { get; set; }
+
+    public string From { get; set; }
+
+    public bool StartTls { get; set; }
+
+    public bool Ssl { get; set; }
+
+    public bool SslOverride { get; set; }
+
+    public bool TrustServer { get; set; }
+}

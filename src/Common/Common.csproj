@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SimpleEmailV2" Version="3.7.400.2" />
     <PackageReference Include="Fido2" Version="4.0.0-beta.12" />
     <PackageReference Include="Fido2.Models" Version="4.0.0-beta.12" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.865" />

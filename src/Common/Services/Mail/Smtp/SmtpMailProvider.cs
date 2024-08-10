@@ -1,9 +1,9 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace Passwordless.Common.Services.Mail;
+namespace Passwordless.Common.Services.Mail.Smtp;
 
-public class MailKitSmtpMailProvider : IMailProvider
+public class SmtpMailProvider : IMailProvider
 {
     private readonly string? _fromEmail;
     private readonly string? _smtpUsername;
@@ -15,19 +15,18 @@ public class MailKitSmtpMailProvider : IMailProvider
     private readonly bool _smtpSslOverride;
     private readonly bool _smtpTrustServer;
 
-    public MailKitSmtpMailProvider(IConfiguration configuration)
+    public SmtpMailProvider(SmtpMailProviderConfiguration configuration)
     {
-        IConfigurationSection mailOptions = configuration.GetSection("Mail");
-        IConfigurationSection smtpOptions = mailOptions.GetSection("Smtp");
-        _fromEmail = smtpOptions.GetValue<string>("From", null!);
-        _smtpUsername = smtpOptions.GetValue<string>("Username", null!);
-        _smtpPassword = smtpOptions.GetValue<string>("Password", null!);
-        _smtpHost = smtpOptions.GetValue<string>("Host", null!);
-        _smtpPort = smtpOptions.GetValue<int>("Port");
-        _smtpStartTls = smtpOptions.GetValue<bool>("StartTls");
-        _smtpSsl = smtpOptions.GetValue<bool>("Ssl");
-        _smtpSslOverride = smtpOptions.GetValue<bool>("SslOverride");
-        _smtpTrustServer = smtpOptions.GetValue<bool>("TrustServer");
+
+        _fromEmail = configuration.From;
+        _smtpUsername = configuration.Username;
+        _smtpPassword = configuration.Password;
+        _smtpHost = configuration.Host;
+        _smtpPort = configuration.Port;
+        _smtpStartTls = configuration.StartTls;
+        _smtpSsl = configuration.Ssl;
+        _smtpSslOverride = configuration.SslOverride;
+        _smtpTrustServer = configuration.TrustServer;
     }
 
     public async Task SendAsync(MailMessage message)
