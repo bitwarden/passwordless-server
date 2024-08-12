@@ -1,0 +1,32 @@
+using Microsoft.AspNetCore.Components;
+using Passwordless.Common.Services.Mail.File;
+
+namespace Passwordless.AdminConsole.Components.Pages.Organization;
+
+public partial class Verify : ComponentBase
+{
+    public bool ShouldShowFileMailPath => WebHostEnvironment.IsDevelopment() && MailOptions.Value.Providers.All(p => p.Key == FileProviderOptions.Provider);
+
+    public string? FileMailPath { get; set; }
+
+    public bool FileMailPathExists { get; set; }
+
+    public string? FileMailContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false)
+        {
+            NavigationManager.NavigateTo("/account/useronboarding");
+            return;
+        }
+
+        if (ShouldShowFileMailPath)
+        {
+            var fileMailProvider = MailOptions.Value.Providers.First().Value as FileProviderOptions;
+            FileMailPath = Path.GetFullPath(fileMailProvider!.Path ?? FileMailProvider.DefaultPath);
+            FileMailPathExists = File.Exists(FileMailPath);
+            FileMailContent = await File.ReadAllTextAsync(FileMailPath);
+        }
+    }
+}
