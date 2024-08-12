@@ -13,18 +13,18 @@ public class FileMailProvider : IMailProvider
 
     public FileMailProvider(
         TimeProvider timeProvider,
-        IOptions<FileMailProviderConfiguration> configuration,
+        IOptions<FileProviderOptions> configuration,
         ILogger<IMailProvider> logger) : this(timeProvider, configuration.Value, logger)
     {
     }
 
     public FileMailProvider(
         TimeProvider timeProvider,
-        FileMailProviderConfiguration configuration,
+        FileProviderOptions options,
         ILogger<IMailProvider> logger)
     {
         _timeProvider = timeProvider;
-        _path = string.IsNullOrEmpty(configuration.Path) ? DefaultPath : configuration.Path;
+        _path = string.IsNullOrEmpty(options.Path) ? DefaultPath : options.Path;
         _logger = logger;
     }
 

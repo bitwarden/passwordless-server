@@ -1,10 +1,8 @@
 namespace Passwordless.Common.Services.Mail.Smtp;
 
-public class SmtpMailProviderConfiguration : IMailProviderConfiguration
+public class SmtpProviderOptions : IProviderOptions
 {
-    public const string Name = "Smtp";
-
-    public string GetName() => Name;
+    public const string Provider = "smtp";
 
     public string? Host { get; set; }
 

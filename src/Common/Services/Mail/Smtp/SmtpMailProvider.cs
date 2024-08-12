@@ -15,18 +15,18 @@ public class SmtpMailProvider : IMailProvider
     private readonly bool _smtpSslOverride;
     private readonly bool _smtpTrustServer;
 
-    public SmtpMailProvider(SmtpMailProviderConfiguration configuration)
+    public SmtpMailProvider(SmtpProviderOptions options)
     {
 
-        _fromEmail = configuration.From;
-        _smtpUsername = configuration.Username;
-        _smtpPassword = configuration.Password;
-        _smtpHost = configuration.Host;
-        _smtpPort = configuration.Port;
-        _smtpStartTls = configuration.StartTls;
-        _smtpSsl = configuration.Ssl;
-        _smtpSslOverride = configuration.SslOverride;
-        _smtpTrustServer = configuration.TrustServer;
+        _fromEmail = options.From;
+        _smtpUsername = options.Username;
+        _smtpPassword = options.Password;
+        _smtpHost = options.Host;
+        _smtpPort = options.Port;
+        _smtpStartTls = options.StartTls;
+        _smtpSsl = options.Ssl;
+        _smtpSslOverride = options.SslOverride;
+        _smtpTrustServer = options.TrustServer;
     }
 
     public async Task SendAsync(MailMessage message)

@@ -11,13 +11,13 @@ public class AwsMailProvider : IMailProvider
     private readonly ILogger<AwsMailProvider> _logger;
 
     public AwsMailProvider(
-        AwsMailProviderConfiguration configuration,
+        AwsProviderOptions options,
         ILogger<AwsMailProvider> logger)
     {
-        var credentials = new BasicAWSCredentials(configuration.AccessKey, configuration.SecretAccessKey);
+        var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretAccessKey);
         AmazonSimpleEmailServiceV2Config sesConfiguration = new AmazonSimpleEmailServiceV2Config
         {
-            RegionEndpoint = RegionEndpoint.GetBySystemName(configuration.Region)
+            RegionEndpoint = RegionEndpoint.GetBySystemName(options.Region)
         };
         _client = new AmazonSimpleEmailServiceV2Client(credentials, sesConfiguration);
         _logger = logger;

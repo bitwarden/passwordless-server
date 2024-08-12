@@ -1,10 +1,8 @@
 namespace Passwordless.Common.Services.Mail.Aws;
 
-public class AwsMailProviderConfiguration : IMailProviderConfiguration
+public class AwsProviderOptions : IProviderOptions
 {
-    public const string Name = "Aws";
-
-    public string GetName() => Name;
+    public const string Provider = "aws";
 
     public string AccessKey { get; set; }
 
