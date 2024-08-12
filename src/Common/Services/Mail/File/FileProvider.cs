@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 namespace Passwordless.Common.Services.Mail.File;
 
 // ReSharper disable once UnusedType.Global
-public class FileMailProvider : IMailProvider
+public class FileProvider : IMailProvider
 {
     public const string DefaultPath = "mail.md";
 
@@ -11,14 +11,14 @@ public class FileMailProvider : IMailProvider
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<IMailProvider> _logger;
 
-    public FileMailProvider(
+    public FileProvider(
         TimeProvider timeProvider,
         IOptions<FileProviderOptions> configuration,
         ILogger<IMailProvider> logger) : this(timeProvider, configuration.Value, logger)
     {
     }
 
-    public FileMailProvider(
+    public FileProvider(
         TimeProvider timeProvider,
         FileProviderOptions options,
         ILogger<IMailProvider> logger)

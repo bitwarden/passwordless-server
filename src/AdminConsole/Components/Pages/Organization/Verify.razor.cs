@@ -5,7 +5,7 @@ namespace Passwordless.AdminConsole.Components.Pages.Organization;
 
 public partial class Verify : ComponentBase
 {
-    public bool ShouldShowFileMailPath => WebHostEnvironment.IsDevelopment() && MailOptions.Value.Providers.All(p => p.Key == FileProviderOptions.Provider);
+    public bool ShouldShowFileMailPath => WebHostEnvironment.IsDevelopment() && MailOptions.Value.Providers.All(p => p.Name == FileProviderOptions.Provider);
 
     public string? FileMailPath { get; set; }
 
@@ -23,8 +23,8 @@ public partial class Verify : ComponentBase
 
         if (ShouldShowFileMailPath)
         {
-            var fileMailProvider = MailOptions.Value.Providers.First().Value as FileProviderOptions;
-            FileMailPath = Path.GetFullPath(fileMailProvider!.Path ?? FileMailProvider.DefaultPath);
+            var fileMailProvider = MailOptions.Value.Providers.First() as FileProviderOptions;
+            FileMailPath = Path.GetFullPath(fileMailProvider!.Path ?? FileProvider.DefaultPath);
             FileMailPathExists = File.Exists(FileMailPath);
             FileMailContent = await File.ReadAllTextAsync(FileMailPath);
         }

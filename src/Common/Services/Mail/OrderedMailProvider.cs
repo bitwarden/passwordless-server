@@ -1,4 +1,8 @@
 using Microsoft.Extensions.Options;
+using Passwordless.Common.Services.Mail.Aws;
+using Passwordless.Common.Services.Mail.File;
+using Passwordless.Common.Services.Mail.SendGrid;
+using Passwordless.Common.Services.Mail.Smtp;
 
 namespace Passwordless.Common.Services.Mail;
 
@@ -23,25 +27,49 @@ public class OrderedMailProvider : IMailProvider
 
     public async Task SendAsync(MailMessage message)
     {
-        for (var i = 0; i < _options.Value.Providers.Count; i++)
+        if (message.From == null)
         {
-            var providerConfiguration = _options.Value.Providers[i];
-            var provider = _serviceProvider.GetKeyedService<IMailProvider>(i);
-
-            if (provider == null)
-            {
-                _logger.LogError("No mail provider found for index {Index}", i);
-                throw new InvalidOperationException($"No mail provider found for index {i}");
-            }
-
+            message.From = _options.Value.From;
+        }
+        foreach (var providerConfiguration in _options.Value.Providers)
+        {
             try
             {
+                var name = providerConfiguration.Name;
+                _logger.LogDebug("Attempting to send message using provider '{Provider}'", name);
+                IMailProvider provider;
+                switch (name)
+                {
+                    case AwsProviderOptions.Provider:
+                        var awsOptions = (AwsProviderOptions)providerConfiguration;
+                        var awsMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<AwsProvider>>();
+                        provider = new AwsProvider(awsOptions, awsMailProviderLogger);
+                        break;
+                    case SendGridProviderOptions.Provider:
+                        var sendGridOptions = (SendGridProviderOptions)providerConfiguration;
+                        var sendGridMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<SendGridProvider>>();
+                        provider = new SendGridProvider(sendGridOptions, sendGridMailProviderLogger);
+                        break;
+                    case SmtpProviderOptions.Provider:
+                        var smtpOptions = (SmtpProviderOptions)providerConfiguration;
+                        provider = new SmtpProvider(smtpOptions);
+                        break;
+                    default:
+                        // fall back to using the file mail provider.
+                        var timeProvider = _serviceProvider.GetRequiredService<TimeProvider>();
+                        var fileOptions = (FileProviderOptions)providerConfiguration;
+                        var fileProviderLogger = _serviceProvider.GetRequiredService<ILogger<FileProvider>>();
+                        provider = new FileProvider(timeProvider, fileOptions, fileProviderLogger);
+                        break;
+                }
+
                 await provider.SendAsync(message);
+                _logger.LogInformation("Sent message using provider '{Provider}'", name);
                 return;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Failed to send message using provider '{Provider}'", providerConfiguration.Key);
+                _logger.LogError(e, "Failed to send message using provider '{Provider}'", providerConfiguration.Name);
             }
         }
 

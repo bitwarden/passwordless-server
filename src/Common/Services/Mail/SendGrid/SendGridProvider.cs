@@ -3,14 +3,14 @@ using SendGrid.Helpers.Mail;
 
 namespace Passwordless.Common.Services.Mail.SendGrid;
 
-public class SendGridMailProvider : IMailProvider
+public class SendGridProvider : IMailProvider
 {
     private readonly ISendGridClient _client;
-    private readonly ILogger<SendGridMailProvider> _logger;
+    private readonly ILogger<SendGridProvider> _logger;
 
-    public SendGridMailProvider(
+    public SendGridProvider(
         SendGridProviderOptions options,
-        ILogger<SendGridMailProvider> logger)
+        ILogger<SendGridProvider> logger)
     {
         _client = new SendGridClient(options.ApiKey);
         _logger = logger;

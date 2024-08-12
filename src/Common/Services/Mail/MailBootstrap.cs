@@ -1,5 +1,4 @@
 using System.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Passwordless.Common.Services.Mail.Aws;
 using Passwordless.Common.Services.Mail.File;
 using Passwordless.Common.Services.Mail.SendGrid;
@@ -17,22 +16,23 @@ public static class MailBootstrap
             {
                 var section = builder.Configuration.GetSection("Mail:Providers");
 
-                builder.Services.RemoveAll<IMailProvider>();
-                builder.Services.AddScoped<IMailProvider, OrderedMailProvider>();
-
                 if (!section.GetChildren().Any())
                 {
                     var fileProviderOptions = new FileProviderOptions();
-                    o.Providers.Add(new KeyValuePair<string, IProviderOptions>(FileProviderOptions.Provider, fileProviderOptions));
-                    builder.Services.AddKeyedSingleton<IMailProvider, FileMailProvider>(0);
+                    o.Providers.Add(fileProviderOptions);
                     return;
                 }
 
-                var i = 0;
                 foreach (var child in section.GetChildren())
                 {
-                    var type = child.GetValue<string>("Name")!;
-                    IProviderOptions providerOptions = type.ToLowerInvariant() switch
+                    var type = child.GetValue<string>("Name");
+
+                    if (type == null)
+                    {
+                        throw new ConfigurationErrorsException("Provider type is missing");
+                    }
+
+                    BaseProviderOptions providerOptions = type.ToLowerInvariant() switch
                     {
                         AwsProviderOptions.Provider => new AwsProviderOptions(),
                         SendGridProviderOptions.Provider => new SendGridProviderOptions(),
@@ -41,9 +41,7 @@ public static class MailBootstrap
                         _ => throw new ConfigurationErrorsException($"Unknown mail provider type '{type}'")
                     };
                     child.Bind(providerOptions);
-                    o.Providers.Add(new KeyValuePair<string, IProviderOptions>(type, providerOptions));
-                    builder.Services.AddKeyedSingleton<IMailProvider, AwsMailProvider>(i);
-                    i++;
+                    o.Providers.Add(providerOptions);
                 }
             });
     }

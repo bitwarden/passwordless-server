@@ -5,21 +5,17 @@ using Amazon.SimpleEmailV2.Model;
 
 namespace Passwordless.Common.Services.Mail.Aws;
 
-public class AwsMailProvider : IMailProvider
+public class AwsProvider : IMailProvider
 {
     private readonly IAmazonSimpleEmailServiceV2 _client;
-    private readonly ILogger<AwsMailProvider> _logger;
+    private readonly ILogger<AwsProvider> _logger;
 
-    public AwsMailProvider(
+    public AwsProvider(
         AwsProviderOptions options,
-        ILogger<AwsMailProvider> logger)
+        ILogger<AwsProvider> logger)
     {
-        var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretAccessKey);
-        AmazonSimpleEmailServiceV2Config sesConfiguration = new AmazonSimpleEmailServiceV2Config
-        {
-            RegionEndpoint = RegionEndpoint.GetBySystemName(options.Region)
-        };
-        _client = new AmazonSimpleEmailServiceV2Client(credentials, sesConfiguration);
+        var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
+        _client = new AmazonSimpleEmailServiceV2Client(credentials, RegionEndpoint.GetBySystemName(options.Region));
         _logger = logger;
     }
 
@@ -46,7 +42,7 @@ public class AwsMailProvider : IMailProvider
                 Body = new Body
                 {
                     Html = new Content { Data = message.HtmlBody },
-                    Text = new Content { Data = message.TextBody }
+                    Text = new Content { Data = message.TextBody },
                 }
             }
         };

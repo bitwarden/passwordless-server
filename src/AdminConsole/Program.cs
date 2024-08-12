@@ -121,7 +121,7 @@ async Task RunAppAsync()
 
     // Setup mail service & provider
     builder.AddMail();
-    services.AddSingleton<IMailService, DefaultMailService>();
+    services.AddScoped<IMailService, DefaultMailService>();
 
     // Work around to get LinkGeneration to work with /{app}/-links.
     var defaultLinkGeneratorDescriptor = services.Single(s => s.ServiceType == typeof(LinkGenerator));

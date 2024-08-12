@@ -1,3 +1,6 @@
 namespace Passwordless.Common.Services.Mail;
 
-public interface IProviderOptions;
+public abstract class BaseProviderOptions
+{
+    public string Name { get; set; }
+}

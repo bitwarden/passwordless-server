@@ -64,7 +64,7 @@ public class Create : PageModel
         {
             //await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
             _logger.LogInformation("Duplicate user submission from Create. Form: {@form}", form);
-            return RedirectToPage("/Organization/Verify");
+            return Redirect("/Organization/Verify");
         }
 
         // Create org
@@ -96,7 +96,7 @@ public class Create : PageModel
 
         _eventLogger.LogCreateOrganizationCreatedEvent(org, user);
 
-        return RedirectToPage("/Organization/Verify");
+        return Redirect("/Organization/Verify");
     }
 }
 
