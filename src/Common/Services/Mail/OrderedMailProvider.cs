@@ -12,16 +12,18 @@ namespace Passwordless.Common.Services.Mail;
 public class OrderedMailProvider : IMailProvider
 {
     private readonly IOptionsSnapshot<MailConfiguration> _options;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IMailProviderFactory _factory;
     private readonly ILogger<OrderedMailProvider> _logger;
+
+    public const string FallBackFailedMessage = "No registered mail provider was able to send the message";
 
     public OrderedMailProvider(
         IOptionsSnapshot<MailConfiguration> options,
-        IServiceProvider serviceProvider,
+        IMailProviderFactory factory,
         ILogger<OrderedMailProvider> logger)
     {
         _options = options;
-        _serviceProvider = serviceProvider;
+        _factory = factory;
         _logger = logger;
     }
 
@@ -35,36 +37,11 @@ public class OrderedMailProvider : IMailProvider
         {
             try
             {
-                var name = providerConfiguration.Name;
-                _logger.LogDebug("Attempting to send message using provider '{Provider}'", name);
-                IMailProvider provider;
-                switch (name)
-                {
-                    case AwsProviderOptions.Provider:
-                        var awsOptions = (AwsProviderOptions)providerConfiguration;
-                        var awsMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<AwsProvider>>();
-                        provider = new AwsProvider(awsOptions, awsMailProviderLogger);
-                        break;
-                    case SendGridProviderOptions.Provider:
-                        var sendGridOptions = (SendGridProviderOptions)providerConfiguration;
-                        var sendGridMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<SendGridProvider>>();
-                        provider = new SendGridProvider(sendGridOptions, sendGridMailProviderLogger);
-                        break;
-                    case SmtpProviderOptions.Provider:
-                        var smtpOptions = (SmtpProviderOptions)providerConfiguration;
-                        provider = new SmtpProvider(smtpOptions);
-                        break;
-                    default:
-                        // fall back to using the file mail provider.
-                        var timeProvider = _serviceProvider.GetRequiredService<TimeProvider>();
-                        var fileOptions = (FileProviderOptions)providerConfiguration;
-                        var fileProviderLogger = _serviceProvider.GetRequiredService<ILogger<FileProvider>>();
-                        provider = new FileProvider(timeProvider, fileOptions, fileProviderLogger);
-                        break;
-                }
+                _logger.LogDebug("Attempting to send message using provider '{Provider}'", providerConfiguration.Name);
+                var provider = _factory.Create(providerConfiguration.Name, providerConfiguration);
 
                 await provider.SendAsync(message);
-                _logger.LogInformation("Sent message using provider '{Provider}'", name);
+                _logger.LogInformation("Sent message using provider '{Provider}'", providerConfiguration.Name);
                 return;
             }
             catch (Exception e)
@@ -73,8 +50,7 @@ public class OrderedMailProvider : IMailProvider
             }
         }
 
-        const string fallBackMessage = "No registered mail provider was able to send the message";
-        _logger.LogCritical(fallBackMessage);
-        throw new InvalidOperationException(fallBackMessage);
+        _logger.LogCritical(FallBackFailedMessage);
+        throw new InvalidOperationException(FallBackFailedMessage);
     }
 }

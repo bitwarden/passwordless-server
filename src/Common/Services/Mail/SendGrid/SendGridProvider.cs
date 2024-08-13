@@ -29,7 +29,7 @@ public class SendGridProvider : IMailProvider
         {
             var error = await response.Body.ReadAsStringAsync();
             _logger.LogError("Failed to send email with SendGrid. Status code: {StatusCode}. Error: {Error}", response.StatusCode, error);
-            throw new Exception($"Failed to send email with SendGrid. Status code: {response.StatusCode}");
+            throw new Exception($"Failed to send email with SendGrid: {error}");
         }
     }
 }

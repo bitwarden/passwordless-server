@@ -1,4 +1,5 @@
 using System.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Passwordless.Common.Services.Mail.Aws;
 using Passwordless.Common.Services.Mail.File;
 using Passwordless.Common.Services.Mail.SendGrid;
@@ -10,6 +11,7 @@ public static class MailBootstrap
 {
     public static void AddMail(this WebApplicationBuilder builder)
     {
+        builder.Services.AddSingleton<IMailProviderFactory, MailProviderFactory>();
         builder.Services.AddScoped<IMailProvider, OrderedMailProvider>();
         builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("Mail"))
             .PostConfigure<MailConfiguration>(o =>
