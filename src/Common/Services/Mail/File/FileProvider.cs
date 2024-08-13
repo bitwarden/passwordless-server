@@ -11,13 +11,6 @@ public class FileProvider : IMailProvider
 
     public FileProvider(
         TimeProvider timeProvider,
-        IOptions<FileProviderOptions> configuration,
-        ILogger<IMailProvider> logger) : this(timeProvider, configuration.Value, logger)
-    {
-    }
-
-    public FileProvider(
-        TimeProvider timeProvider,
         FileProviderOptions options,
         ILogger<IMailProvider> logger)
     {
