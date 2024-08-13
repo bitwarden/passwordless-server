@@ -19,9 +19,10 @@
             Purpose = formModel.Purpose,
             UserVerificationRequirement = formModel.UserVerificationRequirement,
             TimeToLive = formModel.TimeToLive,
+            Hints = formModel.Hints,
             PerformedBy = HttpContextAccessor.HttpContext!.User.Identity!.Name!
         });
-        
+
         NavigationManager.NavigateTo($"app/{AppId}/settings");
     }
 }

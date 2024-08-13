@@ -10,6 +10,7 @@ public interface IMailService
 {
     Task SendInviteAsync(Invite inv, string link);
     Task SendEmailIsAlreadyInUseAsync(string email);
+    Task SendMagicLinksDisabledAsync(string organizationName, string email);
     Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt);
     Task SendApplicationDeletedAsync(Application application, DateTime deletedAt, string deletedBy, ICollection<string> emails);
     Task SendApplicationToBeDeletedAsync(Application application, string deletedBy, string cancellationLink, ICollection<string> emails);

@@ -17,7 +17,7 @@ namespace Passwordless.Service.Migrations.Mssql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.3")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -202,6 +202,10 @@ namespace Passwordless.Service.Migrations.Mssql
                     b.Property<DateTime?>("EditedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Hints")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("LastUsedOn")
                         .HasColumnType("datetime2");
 
@@ -337,9 +341,12 @@ namespace Passwordless.Service.Migrations.Mssql
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Tenant", "DescriptorId");
+
+                    b.HasIndex("Tenant", "UserId")
+                        .HasDatabaseName("IX_EFStoredCredential_Tenant_UserId");
 
                     b.ToTable("Credentials");
                 });

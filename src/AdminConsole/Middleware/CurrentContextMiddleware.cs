@@ -42,12 +42,12 @@ public class CurrentContextMiddleware
         IPasswordlessManagementClient passwordlessClient,
         IOrganizationFeatureService organizationFeatureService)
     {
-        var orgId = httpContext.User.GetOrgId();
-        var orgFeatures = organizationFeatureService.GetOrganizationFeatures(orgId.Value);
+        var orgId = httpContext.User.GetOrgId()!.Value;
+        var orgFeatures = organizationFeatureService.GetOrganizationFeatures(orgId);
         var organization = await dataService.GetOrganizationAsync();
 
 #pragma warning disable CS0618 // I am the one valid caller of this method
-        currentContext.SetOrganization(orgId.Value, orgFeatures, organization);
+        currentContext.SetOrganization(orgId, orgFeatures, organization);
 #pragma warning restore CS0618
 
         if (string.IsNullOrWhiteSpace(appId))

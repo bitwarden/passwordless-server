@@ -152,7 +152,16 @@ public class Fido2Service : IFido2Service
                     CredProps = true
                 });
 
-            var session = await _tokenService.EncodeTokenAsync(new RegisterSession { Options = options, Aliases = token.Aliases, AliasHashing = token.AliasHashing }, "session_", true);
+            var session = await _tokenService.EncodeTokenAsync(
+                new RegisterSession
+                {
+                    Options = options,
+                    Aliases = token.Aliases,
+                    AliasHashing = token.AliasHashing
+                },
+                "session_",
+                true
+            );
 
             _eventLogger.LogRegistrationBeganEvent(userId);
 
@@ -187,7 +196,7 @@ public class Fido2Service : IFido2Service
             throw new ApiException("fido2_invalid_registration", e.Message, 400);
         }
 
-        // Check whether we're allowed to register credentials for this autheneticator
+        // Check whether we're allowed to register credentials for this authenticator
         var features = await _featureContextProvider.UseContext();
         if (features.AllowAttestation)
         {
@@ -318,6 +327,8 @@ public class Fido2Service : IFido2Service
             existingCredentials.ToList(),
             signInConfiguration.UserVerificationRequirement
         );
+
+        options.Hints = signInConfiguration.Hints;
 
         var sessionOptions = new AuthenticationSessionConfiguration
         {

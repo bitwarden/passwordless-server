@@ -4,15 +4,11 @@ namespace Passwordless.AdminConsole.Models;
 
 public class Organization
 {
-    public Organization()
-    {
-    }
-
     public int Id { get; set; }
     public string Name { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string InfoOrgType { get; set; }
-    public string InfoUseCase { get; set; }
+    public OrganizationType InfoOrgType { get; set; }
+    public UseCaseType InfoUseCase { get; set; }
 
     public virtual IEnumerable<ConsoleAdmin> Admins { get; set; }
 
@@ -24,4 +20,5 @@ public class Organization
     public bool HasSubscription => !string.IsNullOrEmpty(BillingSubscriptionId);
     public int MaxApplications { get; set; } = 1;
     public int MaxAdmins { get; set; } = 1;
+    public bool IsMagicLinksEnabled { get; set; } = true;
 }

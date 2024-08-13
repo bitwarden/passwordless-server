@@ -1,4 +1,5 @@
-import {ref, computed} from "vue";
+import { ref } from "vue";
+import useFocusTrap from "./composables/useFocusTrap.mjs";
 
 const active = ref(false);
 const title = ref(null);
@@ -19,7 +20,7 @@ export const showModal = (props) => {
 
 export default {
     template: /*html*/`
-      <div id="modal-div" v-if="active" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div id="modal-div" v-if="active" aria-labelledby="modal-title" role="dialog" ref="trapRef" aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -52,6 +53,9 @@ export default {
             onConfirm && onConfirm();
             active.value = false;
         };
+
+        const { trapRef } = useFocusTrap();
+
         const deny = () => {
             active.value = false;
         };
@@ -62,6 +66,7 @@ export default {
             description,
             confirmButtonText,
             cancelButtonText,
+            trapRef,
             confirm,
             deny
         }

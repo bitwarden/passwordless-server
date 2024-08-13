@@ -1,0 +1,11 @@
+@page "/Account/Profile"
+
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IPasswordlessClient PasswordlessClient
+
+<Page Title="Profile Settings">
+    <Panel Header="Passkeys">
+        <Credentials HideDetails="@false" PasswordlessClient="@PasswordlessClient" UserId="@UserId" />
+        <AddPasskeysComponent />
+    </Panel>
+</Page>

@@ -1,0 +1,103 @@
+@using Microsoft.Extensions.Options
+@using Passwordless.AdminConsole.Services.PasswordlessManagement
+@using Passwordless.AspNetCore
+@inject IOptionsSnapshot<PasswordlessOptions> Options
+@inject IOptionsSnapshot<PasswordlessManagementOptions> ManagementOptions
+
+<div id="addPasskeysPanel">
+    <form v-on:submit="registerCredential">
+        <fieldset id="registerCredentialFields">
+            <div class="mt-2 flex">
+                <div class="relative flex flex-grow items-stretch focus-within:z-10  max-w-md">
+                    <input
+                        type="text" name="nickname" id="nickname" placeholder="Enter a nickname (e.g. My Work laptop) for this security key"
+                        class="text-input rounded-r-none">
+                </div>
+                <button type="submit" class="btn-primary rounded-l-none">Add Passkey</button>
+            </div>
+        </fieldset>
+    </form>
+
+    <div v-if="feedback.status === 'error'" class="status mt-3" v-cloak>
+        <Alert Style="@ContextualStyles.Danger">{{feedback.message}}</Alert>
+    </div>
+</div>
+
+<SecureScript type="module">
+    import { createApp, ref, reactive } from 'vue';
+    createApp({
+        setup() {
+            const p = new Passwordless.Client({
+                apiUrl: "@ManagementOptions.Value.ApiUrl",
+                apiKey: "@Options.Value.ApiKey"
+            });
+
+            const supportsPasskeys = ref(false);
+            const supportsSecurityKeys = ref(false);
+            Passwordless.isPlatformSupported().then(s => supportsPasskeys.value = s);
+            supportsSecurityKeys.value = Passwordless.isBrowserSupported();
+
+            const feedback = reactive({
+                status: "",
+                message: ""
+            });
+
+            const working = ref(false);
+
+            const registerCredential = async (e) => {
+                e.preventDefault();
+                if (working.value) return;
+                working.value = true;
+
+                try {
+                    feedback.status = "started";
+                    const data = new FormData(e.target);
+                    const req = await fetch("/passwordless-add-credential", {
+                        method: "POST",
+                        body: JSON.stringify({ displayName: data.get("nickname")}),
+                        headers: {
+                            "Content-Type": "application/json",
+                        }
+                    });
+
+                    try {
+                        if (!req.ok) throw new Error("Backend request failed");
+
+                        const registerToken = await req.json();
+                        const nicknameForDevice = data.get("nickname");
+                        const {token, error } = await p.register(registerToken.token, nicknameForDevice);
+                        if (token) {
+                            feedback.status = "completed";
+                            feedback.message = "Passkey added successfully";
+                            const url = window.location.href;
+                            window.location.href = url;
+                        } else {
+                            feedback.status = "error";
+                            if (error.from == "client" && !error.errorCode) {
+                                feedback.message = "No passkey was added. Please try again.";
+                            } else {
+                                if (error.errors && error.errors.nickname && error.errors.nickname.length > 0) {
+                                    feedback.message = error.errors.nickname[0];
+                                } else {
+                                    feedback.message = error.title;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        feedback.status = "error";
+                        feedback.message = "No passkey was added. Please try again.";
+                    }
+                } finally {
+                    working.value = false;
+                }
+            }
+
+            return {
+                registerCredential,
+                feedback,
+                supportsPasskeys,
+                supportsSecurityKeys
+            }
+        }
+    }).mount('#addPasskeysPanel');
+</SecureScript>

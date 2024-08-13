@@ -88,9 +88,9 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
-        var actualForm = actualCell.Children.First(x => x.NodeName == "FORM");
-        var actual = actualForm.Children.Single(x => x.NodeName == "BUTTON");
-        Assert.Contains(actual.Attributes, x => x.Name == "value" && x.Value == "lock");
+        var actualDiv = actualCell.Children.First(x => x.NodeName == "DIV");
+        var actual = actualDiv.Children.Single(x => x.NodeName == "BUTTON");
+        Assert.Contains(actual.Attributes, x => x.Name == "value" && x.Value == expectedApiKeys.First().Id);
         actual.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Lock</button>");
     }
 
@@ -112,12 +112,12 @@ public class ApiKeysSectionTests : TestContext
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
-        var actualForm = actualCell.Children.First(x => x.NodeName == "FORM");
-        var actualUnlockButton = actualForm.Children.First(x => x.NodeName == "BUTTON");
-        Assert.Contains(actualUnlockButton.Attributes, x => x.Name == "value" && x.Value == "unlock");
+        var actualDiv = actualCell.Children.First(x => x.NodeName == "DIV");
+        var actualUnlockButton = actualDiv.Children.First(x => x.NodeName == "BUTTON");
+        Assert.Contains(actualUnlockButton.Attributes, x => x.Name == "value" && x.Value == expectedApiKeys.First().Id);
         actualUnlockButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Unlock</button>");
-        var actualDeleteButton = actualForm.Children.Last(x => x.NodeName == "BUTTON");
-        Assert.Contains(actualDeleteButton.Attributes, x => x.Name == "value" && x.Value == "delete");
+        var actualDeleteButton = actualDiv.Children.Last(x => x.NodeName == "BUTTON");
+        Assert.Contains(actualDeleteButton.Attributes, x => x.Name == "value" && x.Value == expectedApiKeys.First().Id);
         actualDeleteButton.MarkupMatches("<button diff:ignoreAttributes><svg diff:ignore />Delete</button>");
     }
 }

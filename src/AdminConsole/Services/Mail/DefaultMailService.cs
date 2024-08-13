@@ -1,22 +1,23 @@
 using System.Net;
+using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Models;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Common.Validation;
 
 namespace Passwordless.AdminConsole.Services.Mail;
 
 public class DefaultMailService : IMailService
 {
-    private readonly string? _fromEmail;
+    private readonly IOptionsSnapshot<MailConfiguration> _configuration;
     private readonly IMailProvider _provider;
 
     public DefaultMailService(
-        IConfiguration configuration,
+        IOptionsSnapshot<MailConfiguration> configuration,
         IMailProvider provider)
     {
         _provider = provider;
-        IConfigurationSection mailOptions = configuration.GetSection("Mail");
-        _fromEmail = mailOptions.GetValue<string>("From") ?? null;
+        _configuration = configuration;
     }
 
     public async Task SendInviteAsync(Invite inv, string link)
@@ -27,7 +28,7 @@ public class DefaultMailService : IMailService
         var message = new MailMessage
         {
             To = [inv.ToEmail],
-            From = _fromEmail,
+            From = _configuration.Value.From,
             Subject = "You've been invited to join an organization in passwordless.dev",
             TextBody =
                 $"""
@@ -46,7 +47,7 @@ public class DefaultMailService : IMailService
         var message = new MailMessage
         {
             To = [email],
-            From = _fromEmail,
+            From = _configuration.Value.From,
             Subject = "Your e-mail is already connected to an organization",
             TextBody =
                 """
@@ -60,6 +61,31 @@ public class DefaultMailService : IMailService
         await _provider.SendAsync(message);
     }
 
+    public Task SendMagicLinksDisabledAsync(string organizationName, string email)
+    {
+        if (!EmailValidator.Validate(email))
+        {
+            throw new ArgumentException("The e-mail address provided is invalid.", nameof(email));
+        }
+
+        var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
+
+        var message = new MailMessage
+        {
+            To = [email],
+            From = _configuration.Value.From,
+            Subject = $"Magic links have been disabled for '{organizationDisplayName}'",
+            TextBody =
+                $"""
+                Magic links have been disabled for '{organizationDisplayName}'.
+                Please contact your organization administrator for more information if you have lost your credentials.
+                """,
+            Tag = "magic-links-disabled"
+        };
+
+        return _provider.SendAsync(message);
+    }
+
     public async Task SendOrganizationDeletedAsync(string organizationName, IEnumerable<string> emails, string deletedBy, DateTime deletedAt)
     {
         var organizationDisplayName = WebUtility.HtmlEncode(organizationName);
@@ -67,7 +93,7 @@ public class DefaultMailService : IMailService
         var message = new MailMessage
         {
             To = emails,
-            From = _fromEmail,
+            From = _configuration.Value.From,
             Subject = $"Your organization '{organizationDisplayName}' has been deleted.",
             TextBody =
                 $"""
@@ -86,7 +112,7 @@ public class DefaultMailService : IMailService
         var message = new MailMessage
         {
             To = emails,
-            From = _fromEmail,
+            From = _configuration.Value.From,
             Bcc = ["account-deletion@passwordless.dev"],
             Subject = $"Your app '{applicationDisplayName}' has been deleted.",
             TextBody =
@@ -121,7 +147,7 @@ public class DefaultMailService : IMailService
         {
             To = emails,
             Bcc = ["account-deletion@passwordless.dev"],
-            From = _fromEmail,
+            From = _configuration.Value.From,
             Subject = $"Your app '{applicationDisplayName}' is scheduled for deletion in 30 days.",
             TextBody =
                 $"""

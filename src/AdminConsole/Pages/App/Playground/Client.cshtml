@@ -1,6 +1,6 @@
 ﻿@page "/playground"
 @inject ICurrentContext CurrentContext
-@inject IOptions<PasswordlessManagementOptions> Options
+@inject IOptionsSnapshot<PasswordlessManagementOptions> Options
 @inject IAntiforgery Antiforgery
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.Extensions.Options
@@ -124,34 +124,34 @@
                 const setShowOptions = (_) => {
                     showOptions.value = !showOptions.value;
                 }
-                
+
                 const tabs = ref([
                     { name: 'Sign In' , current: true },
                     { name: 'Step Up' , current: false }
                 ]);
-                
+
                 const setTab = (tab) => {
                     clearCurrent();
                     tabs.value.find(x => x.name === tab.name).current = true;
                 };
-                
+
                 const setTabSelect = (event) => {
                     clearCurrent();
-                    
+
                     tabs.value.find(x => x.name === event.target.value).current = true;
                 };
-                
+
                 function clearCurrent()
                 {
                     tabs.value.forEach(x => {
                         x.current = false;
                     });
                 }
-                
+
                 const submitLabel = computed(() => {
                     return tabs.value.find(x => x.current).name;
                 });
-                
+
                 const isStepUp = computed(() => {
                     return tabs.value.find(x => x.current).name === 'Step Up';
                 });

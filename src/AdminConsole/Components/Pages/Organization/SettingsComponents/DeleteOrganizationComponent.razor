@@ -1,0 +1,39 @@
+@using Microsoft.AspNetCore.Identity
+@using Passwordless.AdminConsole.Identity
+@using Passwordless.AdminConsole.Services.Mail
+
+@inject ISharedBillingService BillingService
+@inject IDataService DataService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ILogger<DeleteOrganizationComponent> Logger
+@inject IMailService MailService
+@inject NavigationManager NavigationManager
+@inject SignInManager<ConsoleAdmin> SignInManager
+@inject TimeProvider TimeProvider
+
+<Panel Header="Delete Organization">
+    @if (CanDelete)
+    {
+        <EditForm id="@DeleteFormName" class="flex flex-col space-y-4" FormName="@DeleteFormName" Model="DeleteForm" OnValidSubmit="@OnDeleteFormSubmittedAsync">
+            <p>Unexpected bad things will happen if you don’t read this:</p>
+            <ul role="list" class="list-disc list-inside">
+                <li>Active subscriptions will be canceled and will not be automatically renewed.</li>
+                <li>This will permanently delete the organization <strong>'@Name'</strong>.</li>
+                <li>All related data to the organization will be deleted: Settings, developer logs or any related event logs.</li>
+            </ul>
+            <div class="flex rounded-md">
+                <InputText @bind-Value="DeleteForm.NameConfirmation" class="text-input rounded-r-none font-mono"/>
+                <button type="submit" class="btn-danger rounded-l-none disabled:opacity-25">Delete</button>
+            </div>
+            <p class="italic">Type the name of the organization and click "Delete".</p>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <CustomValidationErrors EditContext="DeleteFormEditContext"/>
+        </EditForm>
+    }
+    else
+    {
+        <p>Your organization '@Name' has @ApplicationsCount application(s) that are active or pending deletion.</p>
+        <p>You can only delete an organization when you have no applications.</p>
+    }
+</Panel>

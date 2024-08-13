@@ -27,7 +27,7 @@ public class FriendlyExceptionsMiddleware
 
     private async Task SafeNextAsync(HttpContext context)
     {
-        var env = context.RequestServices.GetService<IWebHostEnvironment>();
+        var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
 
         try
         {
