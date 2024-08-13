@@ -18,6 +18,7 @@ public static class MailBootstrap
             {
                 var section = builder.Configuration.GetSection("Mail:Providers");
 
+                // Add a default file provider if no providers are configured.
                 if (!section.GetChildren().Any())
                 {
                     var fileProviderOptions = new FileProviderOptions();
@@ -25,6 +26,7 @@ public static class MailBootstrap
                     return;
                 }
 
+                // Iterate over all configured providers and add them to the list with binding.
                 foreach (var child in section.GetChildren())
                 {
                     var type = child.GetValue<string>("Name");
@@ -42,7 +44,10 @@ public static class MailBootstrap
                         FileProviderOptions.Provider => new FileProviderOptions(),
                         _ => throw new ConfigurationErrorsException($"Unknown mail provider type '{type}'")
                     };
+
+                    // This will allow our configuration to update without having to restart the application.
                     child.Bind(providerOptions);
+
                     o.Providers.Add(providerOptions);
                 }
             });
