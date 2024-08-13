@@ -41,8 +41,8 @@ public class PasswordlessApi : ITestOutputHelperAccessor, IDisposable, IAsyncDis
                         services.AddSingleton<TimeProvider>(Time);
 
                         // Replace mail provider
-                        services.RemoveAll<IMailProvider>();
-                        services.AddSingleton<IMailProvider, NoopMailProvider>();
+                        services.RemoveAll<IMailProviderFactory>();
+                        services.AddSingleton<IMailProviderFactory, FakeMailProviderFactory>();
                     });
             });
 
