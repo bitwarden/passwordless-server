@@ -24,7 +24,7 @@ public partial class Verify : ComponentBase
         if (ShouldShowFileMailPath)
         {
             var fileMailProvider = MailOptions.Value.Providers.First() as FileProviderOptions;
-            FileMailPath = Path.GetFullPath(fileMailProvider!.Path ?? FileProvider.DefaultPath);
+            FileMailPath = Path.GetFullPath(fileMailProvider!.Path);
             FileMailPathExists = File.Exists(FileMailPath);
             if (FileMailPathExists)
             {
