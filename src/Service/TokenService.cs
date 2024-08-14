@@ -149,31 +149,25 @@ public class TokenService : ITokenService
 
     public async Task<string> EncodeTokenAsync<T>(T token, string prefix, bool contractless = false)
     {
-        byte[] msgpack;
-        if (contractless)
-        {
-            msgpack = MessagePackSerializer.Serialize(token, ContractlessStandardResolver.Options);
-        }
-        else
-        {
-            msgpack = MessagePackSerializer.Serialize(token);
-        }
+        var msgpack = contractless
+            ? MessagePackSerializer.Serialize(token, ContractlessStandardResolver.Options)
+            : MessagePackSerializer.Serialize(token);
 
-        (Key key, int keyId) = await GetRandomKeyAsync();
+        (Key key, var keyId) = await GetRandomKeyAsync();
 
         _log.LogInformation("Encoding using keyId={keyId}", keyId);
         var mac = CreateMac(key, msgpack);
 
         var envelope = new MacEnvelope { Mac = mac, Token = msgpack, KeyId = keyId };
-        var envelop_binary = MessagePackSerializer.Serialize(envelope);
-        var envelop_binary_b64 = Base64Url.Encode(envelop_binary);
+        var envelopeBinary = MessagePackSerializer.Serialize(envelope);
+        var envelopeBinaryB64 = Base64Url.Encode(envelopeBinary);
 
         if (!string.IsNullOrEmpty(prefix))
         {
-            return prefix + envelop_binary_b64;
+            return prefix + envelopeBinaryB64;
         }
 
-        return envelop_binary_b64;
+        return envelopeBinaryB64;
     }
 
     /// <summary>
