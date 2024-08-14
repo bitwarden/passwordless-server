@@ -1,6 +1,6 @@
 namespace Passwordless.Common.Services.Mail.Smtp;
 
-public class SmtpProviderOptions : BaseProviderOptions
+public class SmtpMailProviderOptions : BaseMailProviderOptions
 {
     public const string Provider = "smtp";
 

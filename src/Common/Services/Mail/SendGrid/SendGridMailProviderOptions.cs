@@ -1,6 +1,6 @@
 namespace Passwordless.Common.Services.Mail.SendGrid;
 
-public class SendGridProviderOptions : BaseProviderOptions
+public class SendGridMailProviderOptions : BaseMailProviderOptions
 {
     public const string Provider = "sendgrid";
 

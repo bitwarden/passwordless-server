@@ -1,6 +1,6 @@
 namespace Passwordless.Common.Services.Mail;
 
-public abstract class BaseProviderOptions
+public abstract class BaseMailProviderOptions
 {
     /// <summary>
     /// The name of the provider.

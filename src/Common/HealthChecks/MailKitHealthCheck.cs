@@ -6,11 +6,11 @@ namespace Passwordless.Common.HealthChecks;
 
 public class MailKitHealthCheck : IHealthCheck
 {
-    private readonly SmtpProvider _smtpProvider;
+    private readonly SmtpMailProvider _smtpMailProvider;
 
-    public MailKitHealthCheck(SmtpProvider smtpProvider)
+    public MailKitHealthCheck(SmtpMailProvider smtpMailProvider)
     {
-        _smtpProvider = smtpProvider;
+        _smtpMailProvider = smtpMailProvider;
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
@@ -19,7 +19,7 @@ public class MailKitHealthCheck : IHealthCheck
         bool hasErrors = false;
         try
         {
-            client = await _smtpProvider.GetClientAsync();
+            client = await _smtpMailProvider.GetClientAsync();
         }
         catch
         {

@@ -3,15 +3,15 @@ using Microsoft.Extensions.Options;
 namespace Passwordless.Common.Services.Mail.File;
 
 // ReSharper disable once UnusedType.Global
-public class FileProvider : IMailProvider
+public class FileMailProvider : IMailProvider
 {
     private readonly string _path;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<IMailProvider> _logger;
 
-    public FileProvider(
+    public FileMailProvider(
         TimeProvider timeProvider,
-        FileProviderOptions options,
+        FileMailProviderOptions options,
         ILogger<IMailProvider> logger)
     {
         _timeProvider = timeProvider;

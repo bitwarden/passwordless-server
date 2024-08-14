@@ -3,7 +3,7 @@ using MimeKit;
 
 namespace Passwordless.Common.Services.Mail.Smtp;
 
-public class SmtpProvider : IMailProvider
+public class SmtpMailProvider : IMailProvider
 {
     private readonly string? _fromEmail;
     private readonly string? _smtpUsername;
@@ -15,7 +15,7 @@ public class SmtpProvider : IMailProvider
     private readonly bool _smtpSslOverride;
     private readonly bool _smtpTrustServer;
 
-    public SmtpProvider(SmtpProviderOptions options)
+    public SmtpMailProvider(SmtpMailProviderOptions options)
     {
 
         _fromEmail = options.From;

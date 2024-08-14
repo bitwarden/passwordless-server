@@ -1,11 +1,11 @@
 namespace Passwordless.Common.Services.Mail.File;
 
-public class FileProviderOptions : BaseProviderOptions
+public class FileMailProviderOptions : BaseMailProviderOptions
 {
     public const string Provider = "file";
     public const string DefaultPath = "../mail.md";
 
-    public FileProviderOptions()
+    public FileMailProviderOptions()
     {
         Name = Provider;
     }

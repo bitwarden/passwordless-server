@@ -5,14 +5,14 @@ using Amazon.SimpleEmailV2.Model;
 
 namespace Passwordless.Common.Services.Mail.Aws;
 
-public class AwsProvider : IMailProvider
+public class AwsMailProvider : IMailProvider
 {
     private readonly IAmazonSimpleEmailServiceV2 _client;
-    private readonly ILogger<AwsProvider> _logger;
+    private readonly ILogger<AwsMailProvider> _logger;
 
-    public AwsProvider(
-        AwsProviderOptions options,
-        ILogger<AwsProvider> logger)
+    public AwsMailProvider(
+        AwsMailProviderOptions options,
+        ILogger<AwsMailProvider> logger)
     {
         var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
         _client = new AmazonSimpleEmailServiceV2Client(credentials, RegionEndpoint.GetBySystemName(options.Region));

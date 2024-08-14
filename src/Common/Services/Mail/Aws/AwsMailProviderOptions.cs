@@ -1,6 +1,6 @@
 namespace Passwordless.Common.Services.Mail.Aws;
 
-public class AwsProviderOptions : BaseProviderOptions
+public class AwsMailProviderOptions : BaseMailProviderOptions
 {
     public const string Provider = "aws";
 

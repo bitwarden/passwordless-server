@@ -10,5 +10,5 @@ public class MailConfiguration
     /// <summary>
     /// The ordered list of mail providers to use.
     /// </summary>
-    public List<BaseProviderOptions> Providers { get; set; } = new();
+    public List<BaseMailProviderOptions> Providers { get; set; } = new();
 }

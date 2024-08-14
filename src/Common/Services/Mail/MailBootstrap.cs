@@ -21,7 +21,7 @@ public static class MailBootstrap
                 // Add a default file provider if no providers are configured.
                 if (!section.GetChildren().Any())
                 {
-                    var fileProviderOptions = new FileProviderOptions();
+                    var fileProviderOptions = new FileMailProviderOptions();
                     o.Providers.Add(fileProviderOptions);
                     return;
                 }
@@ -36,19 +36,19 @@ public static class MailBootstrap
                         throw new ConfigurationErrorsException("Provider type is missing");
                     }
 
-                    BaseProviderOptions providerOptions = type.ToLowerInvariant() switch
+                    BaseMailProviderOptions mailProviderOptions = type.ToLowerInvariant() switch
                     {
-                        AwsProviderOptions.Provider => new AwsProviderOptions(),
-                        SendGridProviderOptions.Provider => new SendGridProviderOptions(),
-                        SmtpProviderOptions.Provider => new SmtpProviderOptions(),
-                        FileProviderOptions.Provider => new FileProviderOptions(),
+                        AwsMailProviderOptions.Provider => new AwsMailProviderOptions(),
+                        SendGridMailProviderOptions.Provider => new SendGridMailProviderOptions(),
+                        SmtpMailProviderOptions.Provider => new SmtpMailProviderOptions(),
+                        FileMailProviderOptions.Provider => new FileMailProviderOptions(),
                         _ => throw new ConfigurationErrorsException($"Unknown mail provider type '{type}'")
                     };
 
                     // This will allow our configuration to update without having to restart the application.
-                    child.Bind(providerOptions);
+                    child.Bind(mailProviderOptions);
 
-                    o.Providers.Add(providerOptions);
+                    o.Providers.Add(mailProviderOptions);
                 }
             });
     }

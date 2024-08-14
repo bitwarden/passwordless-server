@@ -36,9 +36,9 @@ public class VerifyTests : TestContext
         var mailConfiguration = new MailConfiguration()
         {
             From = "",
-            Providers = new List<BaseProviderOptions>()
+            Providers = new List<BaseMailProviderOptions>()
             {
-                new FileProviderOptions { Name = "File", Path = "/usr/local/var/mail" }
+                new FileMailProviderOptions { Name = "File", Path = "/usr/local/var/mail" }
             }
         };
         _mailOptionsMock.SetupGet(x => x.Value).Returns(mailConfiguration);
@@ -58,9 +58,9 @@ public class VerifyTests : TestContext
         var mailConfiguration = new MailConfiguration()
         {
             From = "",
-            Providers = new List<BaseProviderOptions>()
+            Providers = new List<BaseMailProviderOptions>()
             {
-                new FileProviderOptions { Name = "File", Path = "/usr/local/var/mail" }
+                new FileMailProviderOptions { Name = "File", Path = "/usr/local/var/mail" }
             }
         };
         _mailOptionsMock.SetupGet(x => x.Value).Returns(mailConfiguration);

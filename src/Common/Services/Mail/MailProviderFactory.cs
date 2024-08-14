@@ -14,27 +14,27 @@ public class MailProviderFactory : IMailProviderFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IMailProvider Create(string name, BaseProviderOptions options)
+    public IMailProvider Create(string name, BaseMailProviderOptions options)
     {
         switch (name)
         {
-            case AwsProviderOptions.Provider:
-                var awsOptions = (AwsProviderOptions)options;
-                var awsMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<AwsProvider>>();
-                return new AwsProvider(awsOptions, awsMailProviderLogger);
-            case SendGridProviderOptions.Provider:
-                var sendGridOptions = (SendGridProviderOptions)options;
-                var sendGridMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<SendGridProvider>>();
-                return new SendGridProvider(sendGridOptions, sendGridMailProviderLogger);
-            case SmtpProviderOptions.Provider:
-                var smtpOptions = (SmtpProviderOptions)options;
-                return new SmtpProvider(smtpOptions);
-            case FileProviderOptions.Provider:
+            case AwsMailProviderOptions.Provider:
+                var awsOptions = (AwsMailProviderOptions)options;
+                var awsMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<AwsMailProvider>>();
+                return new AwsMailProvider(awsOptions, awsMailProviderLogger);
+            case SendGridMailProviderOptions.Provider:
+                var sendGridOptions = (SendGridMailProviderOptions)options;
+                var sendGridMailProviderLogger = _serviceProvider.GetRequiredService<ILogger<SendGridMailProvider>>();
+                return new SendGridMailProvider(sendGridOptions, sendGridMailProviderLogger);
+            case SmtpMailProviderOptions.Provider:
+                var smtpOptions = (SmtpMailProviderOptions)options;
+                return new SmtpMailProvider(smtpOptions);
+            case FileMailProviderOptions.Provider:
                 // fall back to using the file mail provider.
                 var timeProvider = _serviceProvider.GetRequiredService<TimeProvider>();
-                var fileOptions = (FileProviderOptions)options;
-                var fileProviderLogger = _serviceProvider.GetRequiredService<ILogger<FileProvider>>();
-                return new FileProvider(timeProvider, fileOptions, fileProviderLogger);
+                var fileOptions = (FileMailProviderOptions)options;
+                var fileProviderLogger = _serviceProvider.GetRequiredService<ILogger<FileMailProvider>>();
+                return new FileMailProvider(timeProvider, fileOptions, fileProviderLogger);
             default:
                 throw new NotSupportedException($"Unknown mail provider type '{name}'");
         }

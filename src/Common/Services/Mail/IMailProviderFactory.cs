@@ -11,5 +11,5 @@ public interface IMailProviderFactory
     /// <param name="name">The name of the provider (case insensitive).</param>
     /// <param name="options">The options to use when creating the provider.</param>
     /// <returns></returns>
-    IMailProvider Create(string name, BaseProviderOptions options);
+    IMailProvider Create(string name, BaseMailProviderOptions options);
 }
