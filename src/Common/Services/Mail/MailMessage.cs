@@ -28,21 +28,21 @@ public class MailMessage
     {
     }
 
-    public IEnumerable<string> To { get; set; }
+    public IEnumerable<string> To { get; init; }
 
-    public string? From { get; set; }
+    public string? From { get; init; }
 
-    public string FromDisplayName { get; set; }
+    public string FromDisplayName { get; init; }
 
-    public string Subject { get; set; }
+    public string Subject { get; init; }
 
-    public string TextBody { get; set; }
+    public string TextBody { get; init; }
 
-    public string HtmlBody { get; set; }
+    public string HtmlBody { get; init; }
 
-    public string Tag { get; set; }
+    public string Tag { get; init; }
 
-    public string MessageType { get; set; }
+    public string MessageType { get; init; }
 
-    public ICollection<string> Bcc { get; set; } = new List<string>();
+    public ICollection<string> Bcc { get; init; } = new List<string>();
 }
