@@ -41,14 +41,13 @@ public class DeleteApplicationSectionTests : TestContext
             c.Add(p => p.Application, application));
 
         // Assert
-        var actual1 = cut.Find("#cannot-delete-immediately-reason");
-        Assert.NotNull(actual1);
-        var actual2 = cut.Find("#cannot-delete-immediately-impact");
-        Assert.NotNull(actual2);
+        Assert.NotNull(cut.Find("#cannot-delete-immediately-reason"));
+        Assert.NotNull(cut.Find("#cannot-delete-immediately-impact"));
+        Assert.Throws<ElementNotFoundException>(() => cut.Find("#can-delete-immediately-impact"));
     }
 
     [Fact]
-    public void DoesNotRender_CannotDeleteImmediatelyParagraphs_WhenCanDeleteImmediately()
+    public void DoesNotRender_ExpectedParagraphs_WhenCanDeleteImmediately()
     {
         // Arrange
         var application = new Application { Id = "app1", Name = "App1" };
@@ -63,6 +62,7 @@ public class DeleteApplicationSectionTests : TestContext
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find("#cannot-delete-immediately-reason"));
         Assert.Throws<ElementNotFoundException>(() => cut.Find("#cannot-delete-immediately-impact"));
+        Assert.NotNull(cut.Find("#can-delete-immediately-impact"));
     }
 
     [Fact]

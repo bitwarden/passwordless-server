@@ -30,6 +30,10 @@
                     <li>If the process has not been aborted within 30 days, data will be deleted permanently.</li>
                 </ul>
             }
+            else
+            {
+                <p id="can-delete-immediately-impact">You can completely delete your application, along with your user data.</p>
+            }
 
             <div class="flex rounded-md">
                 <InputText @bind-Value="DeleteForm!.NameConfirmation" class="text-input rounded-r-none font-mono"/>
