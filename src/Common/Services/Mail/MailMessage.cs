@@ -30,7 +30,7 @@ public class MailMessage
 
     public IEnumerable<string> To { get; init; }
 
-    public string? From { get; init; }
+    public string? From { get; set; }
 
     public string FromDisplayName { get; init; }
 
