@@ -1,10 +1,19 @@
 using Microsoft.AspNetCore.Authorization;
+using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
 
 namespace Passwordless.AdminConsole.Authorization;
 
 public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
 {
+    private readonly ConsoleDbContext _dbContext;
+
+    public HasAppHandler(ConsoleDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HasAppRoleRequirement requirement)
     {
         if (HasAppInTenant(context))
@@ -22,15 +31,21 @@ public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
             return false;
         }
 
-        // get app
-        var gotApp = httpContext.GetRouteData().Values.TryGetValue(RouteParameters.AppId, out var app);
-        if (!gotApp)
+        var organizationId = httpContext.User.GetOrgId();
+
+        if (!organizationId.HasValue)
         {
             return false;
         }
 
-        string appId = app.ToString();
+        var hasAppId = httpContext.GetRouteData().Values.TryGetValue(RouteParameters.AppId, out var appIdObj);
+        if (!hasAppId)
+        {
+            return false;
+        }
 
-        return context.User.HasClaim(c => c.Type == CustomClaimTypes.AppId && c.Value == appId);
+        var appId = appIdObj!.ToString();
+
+        return _dbContext.Applications.Any(x => x.OrganizationId == organizationId.Value && x.Id == appId);
     }
 }
