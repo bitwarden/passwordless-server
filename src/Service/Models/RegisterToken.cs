@@ -33,7 +33,7 @@ public class RegisterToken : Token
 
     [MessagePack.Key(17)]
     [MaxLength(10), MaxLengthCollection(250), RequiredCollection(AllowEmptyStrings = false)]
-    public HashSet<string> Aliases { get; set; } = [];
+    public HashSet<string>? Aliases { get; set; } = null;
 
     [MessagePack.Key(18)]
     public bool AliasHashing { get; set; } = true;
