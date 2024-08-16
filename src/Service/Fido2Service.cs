@@ -74,7 +74,7 @@ public class Fido2Service : IFido2Service
         if (string.IsNullOrEmpty(tokenProps.Attestation)) tokenProps.Attestation = "none";
         TokenValidator.ValidateAttestation(tokenProps, features);
 
-        // check if aliases is available
+        // Check if aliases is available
         if (tokenProps.Aliases != null)
         {
             var hashedAliases = tokenProps.Aliases.Select(alias => HashAlias(alias, _tenantProvider.Tenant));
@@ -151,6 +151,8 @@ public class Fido2Service : IFido2Service
                 {
                     CredProps = true
                 });
+
+            options.Hints = token.Hints;
 
             var session = await _tokenService.EncodeTokenAsync(
                 new RegisterSession

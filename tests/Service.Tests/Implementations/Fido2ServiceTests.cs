@@ -74,7 +74,7 @@ public class Fido2ServiceTests
             .ReturnsAsync("test_token");
         _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, false, true, true));
         _mockTenantStorage.Setup(x => x.GetUsersCount()).ReturnsAsync(10000);
-        _mockTenantStorage.Setup(x => x.GetCredentialsByUserIdAsync(It.Is<string>(p => p == "test"))).ReturnsAsync(new List<StoredCredential>(0));
+        _mockTenantStorage.Setup(x => x.GetCredentialsByUserIdAsync(It.Is<string>(p => p == "test"))).ReturnsAsync([]);
 
         // act
         var actual = await Assert.ThrowsAsync<ApiException>(async () =>
@@ -104,7 +104,19 @@ public class Fido2ServiceTests
         _mockFeatureContextProvider.Setup(x => x.UseContext()).ReturnsAsync(new FeaturesContext(false, 0, null, 10000, false, true, true));
         _mockTenantStorage.Setup(x => x.GetUsersCount()).ReturnsAsync(10000);
         _mockTenantStorage.Setup(x => x.GetCredentialsByUserIdAsync(It.Is<string>(p => p == "test"))).ReturnsAsync(
-            new List<StoredCredential>(1) { new() { UserHandle = "test"u8.ToArray(), Descriptor = null!, Origin = null!, AttestationFmt = null!, CreatedAt = DateTime.UtcNow, PublicKey = null!, SignatureCounter = 123, RPID = null! } });
+        [
+            new StoredCredential
+            {
+                UserHandle = "test"u8.ToArray(),
+                Descriptor = null!,
+                Origin = null!,
+                AttestationFmt = null!,
+                CreatedAt = DateTime.UtcNow,
+                PublicKey = null!,
+                SignatureCounter = 123,
+                RPID = null!
+            }
+        ]);
 
         // act
         var actual = await _sut.CreateRegisterTokenAsync(new RegisterToken

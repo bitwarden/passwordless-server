@@ -5,33 +5,28 @@ using Passwordless.AdminConsole.Services;
 
 namespace Passwordless.AdminConsole.Pages.App.Playground;
 
-public class NewAccountModel : PageModel
+public class NewAccountModel(IScopedPasswordlessClient passwordlessClient)
+    : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
-    private readonly IScopedPasswordlessClient _passwordlessClient;
+    [MaxLength(64)]
+    public string Nickname { get; set; } = "";
 
-    public NewAccountModel(ILogger<IndexModel> logger, IScopedPasswordlessClient passwordlessClient)
-    {
-        _logger = logger;
-        this._passwordlessClient = passwordlessClient;
-    }
+    public string Attestation { get; set; } = "none";
 
-    public void OnGet()
-    {
+    public string Hints { get; set; } = "";
 
-    }
-
-    public async Task<IActionResult> OnPostToken(string name, string email, string attestation)
+    public async Task<IActionResult> OnPostToken(string name, string email, string attestation, string hints)
     {
         try
         {
             var userId = Guid.NewGuid().ToString();
-            var token = await _passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions(userId, $"Playground: {email}")
+            var token = await passwordlessClient.CreateRegisterTokenAsync(new RegisterOptions(userId, $"Playground: {email}")
             {
                 DisplayName = name,
-                Aliases = new HashSet<string>(1) { email },
+                Aliases = [email],
                 AliasHashing = false,
-                Attestation = attestation
+                Attestation = attestation,
+                Hints = hints.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             });
 
             return new JsonResult(token);
@@ -44,12 +39,7 @@ public class NewAccountModel : PageModel
 
     public async Task<IActionResult> OnPost(string token)
     {
-        var res = await _passwordlessClient.VerifyAuthenticationTokenAsync(token);
+        var res = await passwordlessClient.VerifyAuthenticationTokenAsync(token);
         return new JsonResult(res);
     }
-
-    [MaxLength(64)]
-    public string Nickname { get; set; }
-
-    public string Attestation { get; set; } = "none";
 }
