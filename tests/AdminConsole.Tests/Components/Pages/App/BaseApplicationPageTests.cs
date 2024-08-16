@@ -53,12 +53,16 @@ public class BaseApplicationTests
         foreach (var componentType in componentTypes)
         {
             // Check if the component has a @page directive
-            var pageAttribute = componentType.GetCustomAttribute<Microsoft.AspNetCore.Components.RouteAttribute>();
-            if (pageAttribute != null && pageAttribute.Template.StartsWith("/app/{app}", StringComparison.InvariantCultureIgnoreCase))
+            var pageAttributes = componentType.GetCustomAttributes<RouteAttribute>();
+
+            foreach (var pageAttribute in pageAttributes)
             {
-                // Assert that the component inherits from BaseApplicationPage
-                Assert.True(typeof(BaseApplicationPage).IsAssignableFrom(componentType),
-                    $"{componentType.Name} should inherit from BaseApplicationPage");
+                if (pageAttribute.Template.StartsWith("/app/{app}", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // Assert that the component inherits from BaseApplicationPage
+                    Assert.True(typeof(BaseApplicationPage).IsAssignableFrom(componentType),
+                        $"{componentType.Name} should inherit from BaseApplicationPage");
+                }
             }
         }
     }
