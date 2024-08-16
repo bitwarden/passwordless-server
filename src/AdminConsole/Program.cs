@@ -114,12 +114,13 @@ async Task RunAppAsync()
     services.AddHostedService<ApplicationCleanupBackgroundService>();
 
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
+    services.AddTransient<ProblemDetailsDelegatingHandler>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
         var options = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
 
         client.BaseAddress = new Uri(options.Value.InternalApiUrl);
-    });
+    }).AddHttpMessageHandler<ProblemDetailsDelegatingHandler>();
 
     // Magic link SigninManager
     services.AddTransient<IMagicLinkBuilder, MagicLinkBuilder>();
