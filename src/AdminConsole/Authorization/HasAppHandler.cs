@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Middleware;
@@ -14,17 +15,15 @@ public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
         _dbContext = dbContext;
     }
 
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HasAppRoleRequirement requirement)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, HasAppRoleRequirement requirement)
     {
-        if (HasAppInTenant(context))
+        if (await HasAppInTenant(context))
         {
             context.Succeed(requirement);
         }
-
-        return Task.CompletedTask;
     }
 
-    private bool HasAppInTenant(AuthorizationHandlerContext context)
+    private async Task<bool> HasAppInTenant(AuthorizationHandlerContext context)
     {
         if (context.Resource is not HttpContext httpContext)
         {
@@ -46,6 +45,6 @@ public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
 
         var appId = appIdObj!.ToString();
 
-        return _dbContext.Applications.Any(x => x.OrganizationId == organizationId.Value && x.Id == appId);
+        return await _dbContext.Applications.AnyAsync(x => x.OrganizationId == organizationId.Value && x.Id == appId);
     }
 }
