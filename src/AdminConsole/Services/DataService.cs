@@ -27,7 +27,9 @@ public class DataService : IDataService
 
     public async Task<Organization?> GetOrganizationAsync()
     {
-        return await _db.Organizations.FirstOrDefaultAsync(o => o.Id == _orgId);
+        return await _db.Organizations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == _orgId);
     }
 
     public async Task<Organization?> GetOrganizationAsync(int id)
@@ -94,7 +96,9 @@ public class DataService : IDataService
 
     public async Task<Application?> GetApplicationAsync(string applicationId)
     {
-        var application = await _db.Applications.SingleOrDefaultAsync(x => x.Id == applicationId);
+        var application = await _db.Applications
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == applicationId);
         return application;
     }
 

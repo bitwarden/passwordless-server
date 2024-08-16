@@ -73,7 +73,6 @@ async Task RunAppAsync()
         options.AddTenantRouting();
         options.Conventions.AuthorizeFolder("/");
         options.Conventions.AuthorizeFolder("/App", CustomPolicy.HasAppRole);
-        options.Conventions.AddPageRoute("/Organization/Create", "/signup");
     });
 
     services.AddScoped<ICurrentContext, CurrentContext>();
@@ -101,7 +100,7 @@ async Task RunAppAsync()
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
     });
 
-    services.AddTransient<IAuthorizationHandler, HasAppHandler>();
+    services.AddScoped<IAuthorizationHandler, HasAppHandler>();
     services.AddAuthorization(c =>
     {
         c.AddPolicy(CustomPolicy.HasAppRole, b =>
