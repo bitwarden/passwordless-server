@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Components;
 using Passwordless.AdminConsole.Authorization;
 using Passwordless.AdminConsole.Components.Pages.App;
 using Xunit;
@@ -20,14 +21,15 @@ public class BaseApplicationTests
 
         var componentTypes = assembly.GetTypes()
             .Where(type =>
-                typeof(Microsoft.AspNetCore.Components.ComponentBase).IsAssignableFrom(type) &&
+                typeof(ComponentBase).IsAssignableFrom(type) &&
                 type.Namespace!.StartsWith("Passwordless.AdminConsole.Components.Pages.App"));
 
         foreach (var componentType in componentTypes)
         {
             // Check if the component has a @page directive
-            var pageAttribute = componentType.GetCustomAttribute<Microsoft.AspNetCore.Components.RouteAttribute>();
-            if (pageAttribute != null)
+            var pageAttributes = componentType.GetCustomAttributes<RouteAttribute>();
+
+            if (pageAttributes.Any())
             {
                 // Assert that the component inherits from BaseApplicationPage
                 Assert.True(typeof(BaseApplicationPage).IsAssignableFrom(componentType),
