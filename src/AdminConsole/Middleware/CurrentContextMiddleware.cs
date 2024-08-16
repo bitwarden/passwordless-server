@@ -9,10 +9,14 @@ namespace Passwordless.AdminConsole.Middleware;
 public class CurrentContextMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<CurrentContextMiddleware> _logger;
 
-    public CurrentContextMiddleware(RequestDelegate next)
+    public CurrentContextMiddleware(
+        RequestDelegate next,
+        ILogger<CurrentContextMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     // Keep method non-async for non-app calls so that we can avoid the creation of a state machine when it's not needed
@@ -23,6 +27,7 @@ public class CurrentContextMiddleware
         IPasswordlessManagementClient passwordlessClient,
         IOrganizationFeatureService organizationFeatureService)
     {
+        _logger.LogInformation("CurrentContextMiddleware - START");
         var name = httpContext.GetRouteData();
 
         var hasAppRouteValue = name.Values.TryGetValue(RouteParameters.AppId, out var appRouteValue);
@@ -82,5 +87,7 @@ public class CurrentContextMiddleware
 #pragma warning restore CS0618
 
         await _next(httpContext);
+
+        _logger.LogInformation("CurrentContextMiddleware - END");
     }
 }

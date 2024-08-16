@@ -9,18 +9,25 @@ namespace Passwordless.AdminConsole.Authorization;
 public class HasAppHandler : AuthorizationHandler<HasAppRoleRequirement>
 {
     private readonly ConsoleDbContext _dbContext;
+    private readonly ILogger<HasAppHandler> _logger;
 
-    public HasAppHandler(ConsoleDbContext dbContext)
+    public HasAppHandler(
+        ConsoleDbContext dbContext,
+        ILogger<HasAppHandler> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, HasAppRoleRequirement requirement)
     {
+        _logger.LogInformation("Checking if user has app in tenant - START");
         if (await HasAppInTenant(context))
         {
             context.Succeed(requirement);
         }
+        _logger.LogInformation("Checking if user has app in tenant - END");
+
     }
 
     private async Task<bool> HasAppInTenant(AuthorizationHandlerContext context)

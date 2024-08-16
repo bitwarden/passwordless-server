@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing.Configuration;
 using Passwordless.AdminConsole.Db;
@@ -19,6 +20,7 @@ public class OrganizationFeatureService : IOrganizationFeatureService
     public OrganizationFeaturesContext GetOrganizationFeatures(int orgId)
     {
         var billingPlans = _db.Applications
+            .AsNoTracking()
             .Where(x => x.OrganizationId == orgId)
             .GroupBy(x => x.BillingPlan)
             .Select(x => x.Key)
