@@ -72,7 +72,7 @@ async Task RunAppAsync()
     {
         options.AddTenantRouting();
         options.Conventions.AuthorizeFolder("/");
-        //options.Conventions.AuthorizeFolder("/App", CustomPolicy.HasAppRole);
+        options.Conventions.AuthorizeFolder("/App", CustomPolicy.HasAppRole);
     });
 
     services.AddScoped<ICurrentContext, CurrentContext>();
