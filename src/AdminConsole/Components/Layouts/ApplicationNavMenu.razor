@@ -12,7 +12,7 @@
                 <NavMenuItem Href="@UsersUrl" Icon="typeof(UsersIcon)" Label="Users" />
                 <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
 
-                if (CurrentContext.Features.EventLoggingIsEnabled)
+                @if (CurrentContext.Features.EventLoggingIsEnabled)
                 {
                     <NavMenuItem Href="@AppLogsUrl" Icon="typeof(CodeBracketSquareIcon)" Label="App Logs" />
                 }
