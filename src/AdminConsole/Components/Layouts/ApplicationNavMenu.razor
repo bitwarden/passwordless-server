@@ -1,29 +1,24 @@
 @inject ICurrentContext CurrentContext
-@inject IHttpContextAccessor HttpContextAccessor
 
-<AuthorizeView Resource="@HttpContextAccessor.HttpContext" Policy="@CustomPolicy.HasAppRole">
-    <Authorized>
-        <div id="app-submenu" class="nav-link-submenu">
-            <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
-            @if (!CurrentContext.IsPendingDelete)
+@if (CurrentContext.InAppContext)
+{
+    <div id="app-submenu" class="nav-link-submenu">
+        <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
+        @if (!CurrentContext.IsPendingDelete)
+        {
+            <NavMenuItem Href="@OnboardingUrl" Icon="typeof(StartIcon)" Label="Getting Started" />
+            <NavMenuItem Href="@PlaygroundUrl" Icon="typeof(BeakerIcon)" Label="Playground" />
+            <NavMenuItem Href="@UsersUrl" Icon="typeof(UsersIcon)" Label="Users" />
+            <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
+
+            @if (CurrentContext.Features.EventLoggingIsEnabled)
             {
-                <NavMenuItem Href="@OnboardingUrl" Icon="typeof(StartIcon)" Label="Getting Started" />
-                <NavMenuItem Href="@PlaygroundUrl" Icon="typeof(BeakerIcon)" Label="Playground" />
-                <NavMenuItem Href="@UsersUrl" Icon="typeof(UsersIcon)" Label="Users" />
-                <NavMenuItem Href="@ReportingUrl" Icon="typeof(StackedBarChartIcon)" Label="Reporting" />
-
-                @if (CurrentContext.Features.EventLoggingIsEnabled)
-                {
-                    <NavMenuItem Href="@AppLogsUrl" Icon="typeof(CodeBracketSquareIcon)" Label="App Logs" />
-                }
+                <NavMenuItem Href="@AppLogsUrl" Icon="typeof(CodeBracketSquareIcon)" Label="App Logs" />
             }
-            <NavMenuItem Href="@SettingsUrl" Icon="typeof(CogIcon)" Label="Settings" />
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <!-- Empty -->
-    </NotAuthorized>
-</AuthorizeView>
+        }
+        <NavMenuItem Href="@SettingsUrl" Icon="typeof(CogIcon)" Label="Settings" />
+    </div>
+}
 
 @code {
     private string OnboardingUrl => CurrentContext.InAppContext ? $"/app/{CurrentContext.AppId}/onboarding/get-started" : NavMenu.OrganizationOverviewUrl;
