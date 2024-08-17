@@ -17,7 +17,7 @@
             <button id="create-secret-key-btn" class="btn-primary ml-4" name="CreateForm.Type" type="submit" value="secret">Create Secret Key</button>
         </EditForm>
 
-        <ConfirmEditForm Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" name="@ConfirmedSelectedApiKeyFormName" OnSubmit="OnSelectedFormConfirmed">
+        <ConfirmEditForm Model="ConfirmedSelectedForm" FormName="@(ConfirmedSelectedApiKeyFormName)" OnSubmit="OnSelectedFormConfirmed">
 
             <Table ColumnHeaders="@(new[] { "Api Key", "Created At", "Type", "Locked", "Scopes", string.Empty })" EmptyMessage="This application has no API Keys or API Secrets.">
                 @if (ApiKeys != null)
