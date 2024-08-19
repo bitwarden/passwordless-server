@@ -7,10 +7,12 @@ namespace Passwordless.AdminConsole.Middleware;
 public interface ICurrentContext
 {
     [MemberNotNullWhen(true, nameof(AppId))]
+    [MemberNotNullWhen(true, nameof(ApplicationName))]
     [MemberNotNullWhen(true, nameof(ApiSecret))]
     [MemberNotNullWhen(true, nameof(ApiKey))]
     bool InAppContext { get; }
     string? AppId { get; }
+    string? ApplicationName { get; }
     string? ApiSecret { get; }
     string? ApiKey { get; }
     bool IsPendingDelete { get; }

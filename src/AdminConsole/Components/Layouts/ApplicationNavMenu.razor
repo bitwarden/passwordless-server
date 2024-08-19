@@ -3,7 +3,7 @@
 @if (CurrentContext.InAppContext)
 {
     <div id="app-submenu" class="nav-link-submenu">
-        <div class="nav-link-submenu-title">App: @CurrentContext.AppId</div>
+        <div class="nav-link-submenu-title">App: @CurrentContext.ApplicationName</div>
         @if (!CurrentContext.IsPendingDelete)
         {
             <NavMenuItem Href="@OnboardingUrl" Icon="typeof(StartIcon)" Label="Getting Started" />

@@ -121,13 +121,19 @@ public partial class CreateApplication : ComponentBase
 
     public class CreateApplicationForm
     {
-        [Required, MaxLength(60), MinLength(3), NoForbiddenContent]
+        [Required(ErrorMessage = "The 'Application name' field is required")]
+        [MaxLength(60, ErrorMessage = "The 'Application name' field must be a string with a maximum length of 60 characters")]
+        [MinLength(3, ErrorMessage = "The 'Application name' field must be a string with a minimum length of 3 characters")]
+        [NoForbiddenContent(ErrorMessage = "The 'Application name' field contains forbidden content")]
         public string Name { get; set; }
 
-        [Required, MaxLength(120), MinLength(3), NoForbiddenContent]
+        [Required(ErrorMessage = "The 'Description' field is required")]
+        [MaxLength(120, ErrorMessage = "The 'Description' field must be a string with a maximum length of 120 characters")]
+        [MinLength(3, ErrorMessage = "The 'Description' field must be a string with a minimum length of 3 characters")]
+        [NoForbiddenContent(ErrorMessage = "The 'Description' field contains forbidden content")]
         public string Description { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "You are required to select a plan.")]
         public string Plan { get; set; }
     }
 

@@ -8,6 +8,8 @@ public class CurrentContext : ICurrentContext
 
     public string? AppId { get; private set; }
 
+    public string? ApplicationName { get; private set; }
+
     public string? ApiSecret { get; private set; }
 
     public string? ApiKey { get; private set; }
@@ -23,6 +25,7 @@ public class CurrentContext : ICurrentContext
     {
         InAppContext = true;
         AppId = application.Id;
+        ApplicationName = application.Name;
         ApiSecret = application.ApiSecret;
         ApiKey = application.ApiKey;
         IsPendingDelete = application.DeleteAt.HasValue;

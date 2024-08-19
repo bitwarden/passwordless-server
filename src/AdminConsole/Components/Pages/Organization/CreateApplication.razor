@@ -15,15 +15,14 @@
 @inject ICurrentContext CurrentContext;
 
 <Page Title="New App">
-    <Panel>
-        @if (Form != null)
+    <Panel class="sm:w-full sm:max-w-md">
+        @if (FormEditContext != null)
         {
-            <EditForm class="space-y-6" FormName="@FormName" Model="Form" OnValidSubmit="@OnSubmittedAsync">
+            <EditForm class="space-y-6" EditContext="@FormEditContext" FormName="@FormName" OnValidSubmit="@OnSubmittedAsync">
             <div>
                 <label for="application-name" class="form-label">Application name</label>
                 <div class="mt-2">
                     <InputText id="application-name" class="text-input" @bind-Value="Form.Name"/>
-                    <ValidationMessage For="() => Form.Name"/>
                 </div>
             </div>
 
@@ -31,26 +30,28 @@
                 <label for="application-description" class="form-label">Description</label>
                 <div class="mt-2">
                     <InputText id="application-description" class="text-input" @bind-Value="Form.Description"/>
-                    <ValidationMessage For="() => Form.Description"/>
                 </div>
             </div>
 
             @if (CurrentContext.Organization!.HasSubscription)
             {
                 <div>
-                    <label asp-for="Form.Plan" class="form-label">Plan</label>
+                    <label class="form-label">Plan</label>
                     <ul class="radio-horizontal mt-2">
-                        @foreach (var availablePlan in AvailablePlans)
-                        {
-                            <li>
-                                <div>
-                                    <input id="@availablePlan.Id" name="Form.Plan" type="radio" value="@availablePlan.Id" checked="@(Form.Plan == availablePlan.Id)">
-                                    <label for="@availablePlan.Id">@availablePlan.Label</label>
-                                </div>
-                            </li>
-                        }
+                        <InputRadioGroup @bind-Value="Form.Plan">
+                            @foreach (var availablePlan in AvailablePlans)
+                            {
+                                <li>
+                                    <div>
+                                        <InputRadio id="@($"{availablePlan.Id}-radio")" Value="@availablePlan.Id" type="radio" class="radio-input"/>
+                                        <label for="@($"{availablePlan.Id}-radio")" class="radio-label">@availablePlan.Label</label>
+                                    </div>
+                                </li>
+                            }
+                        </InputRadioGroup>
                     </ul>
-                    <Alert Style="@ContextualStyles.Info">
+                   
+                    <Alert class="mt-4" Style="@ContextualStyles.Info">
                         The application can always be assigned to a different plan later in the 'Billing' section.
                     </Alert>
                 </div>
@@ -59,11 +60,11 @@
             {
                 <input type="hidden" name="Form.Plan"/>
             }
-
+            
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            
             <div>
-                <DataAnnotationsValidator/>
-                <ValidationSummary/>
-                <CustomValidationErrors EditContext="@FormEditContext"/>
                 <button type="submit" class="btn-primary">Create</button>
             </div>
         </EditForm>
