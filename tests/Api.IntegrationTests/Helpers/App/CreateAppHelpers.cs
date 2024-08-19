@@ -9,7 +9,6 @@ public static class CreateAppHelpers
 
     public static async Task<HttpResponseMessage> CreateApplicationRawAsync(
         this HttpClient client,
-        string applicationName,
         CreateAppDto? options = null)
     {
         if (!client.DefaultRequestHeaders.Contains("ManagementKey"))
@@ -30,16 +29,12 @@ public static class CreateAppHelpers
 
     public static async Task<CreateAppResultDto> CreateApplicationAsync(
         this HttpClient client,
-        string applicationName,
         CreateAppDto? options = null)
     {
-        using var response = await client.CreateApplicationRawAsync(applicationName, options);
+        using var response = await client.CreateApplicationRawAsync(options);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<CreateAppResultDto>() ??
                throw new InvalidOperationException("Empty response");
     }
-
-    public static async Task<CreateAppResultDto> CreateApplicationAsync(this HttpClient client) =>
-        await client.CreateApplicationAsync(GetApplicationName());
 }

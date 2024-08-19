@@ -22,9 +22,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
@@ -55,9 +54,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         // Act
@@ -68,7 +66,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         getConfigResponse.Should().NotBeNull();
         var signIn = getConfigResponse!.Configurations.FirstOrDefault(x => x.Purpose == SignInPurpose.SignInName);
         signIn.Should().NotBeNull();
-        signIn!.Should().BeEquivalentTo(AuthenticationConfigurationDto.SignIn(applicationName).ToResponse());
+        signIn!.Should().BeEquivalentTo(AuthenticationConfigurationDto.SignIn(appCreationResponse.AppId).ToResponse());
     }
 
     [Fact]
@@ -77,9 +75,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         // Act
@@ -90,7 +87,7 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         getConfigResponse.Should().NotBeNull();
         var stepUp = getConfigResponse!.Configurations.FirstOrDefault(x => x.Purpose == SignInPurpose.StepUpName);
         stepUp.Should().NotBeNull();
-        stepUp!.Should().BeEquivalentTo(AuthenticationConfigurationDto.StepUp(applicationName).ToResponse());
+        stepUp!.Should().BeEquivalentTo(AuthenticationConfigurationDto.StepUp(appCreationResponse.AppId).ToResponse());
     }
 
     [Fact]
@@ -99,9 +96,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         // Act
@@ -119,9 +115,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
@@ -145,9 +140,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest().Generate();
@@ -188,9 +182,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         // Arrange
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client.AddSecretKey(appCreationResponse.ApiSecret1);
 
         var request = RequestHelpers.GetSetAuthenticationConfigurationRequest()
@@ -225,9 +218,8 @@ public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, Pass
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
 
         using var client = api.CreateClient().AddManagementKey();
-        var applicationName = CreateAppHelpers.GetApplicationName();
 
-        var appCreationResponse = await client.CreateApplicationAsync(applicationName);
+        var appCreationResponse = await client.CreateApplicationAsync();
         _ = client
             .AddSecretKey(appCreationResponse.ApiSecret1)
             .AddPublicKey(appCreationResponse.ApiKey1)

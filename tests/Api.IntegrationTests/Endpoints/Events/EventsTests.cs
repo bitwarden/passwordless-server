@@ -24,11 +24,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        await client.EnableEventLogging(applicationName);
-        _ = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        await client.EnableEventLogging(app.AppId);
+        _ = await client.GetAsync($"/admin/apps/{app.AppId}/api-keys");
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
@@ -49,10 +48,9 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await client.CreateApplicationAsync(applicationName);
-        await client.EnableEventLogging(applicationName);
-        using var createApiKeyResponse = await client.PostAsJsonAsync($"/admin/apps/{applicationName}/secret-keys",
+        var app = await client.CreateApplicationAsync();
+        await client.EnableEventLogging(app.AppId);
+        using var createApiKeyResponse = await client.PostAsJsonAsync($"/admin/apps/{app.AppId}/secret-keys",
             new CreateSecretKeyRequest([SecretKeyScopes.TokenRegister, SecretKeyScopes.TokenVerify]));
         var createApiKey = await createApiKeyResponse.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
         client.AddSecretKey(createApiKey!.ApiKey);
@@ -76,14 +74,13 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        await client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        await client.EnableEventLogging(app.AppId);
+        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{app.AppId}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/lock", null);
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
@@ -104,15 +101,14 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        await client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        await client.EnableEventLogging(app.AppId);
+        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{app.AppId}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/unlock", null);
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
@@ -133,14 +129,13 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        _ = await client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        _ = await client.EnableEventLogging(app.AppId);
+        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{app.AppId}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToDelete = apiKeys!.First(x => x.Type == ApiKeyTypes.Public);
-        _ = await client.DeleteAsync($"/admin/apps/{applicationName}/api-keys/{keyToDelete.Id}");
+        _ = await client.DeleteAsync($"/admin/apps/{app.AppId}/api-keys/{keyToDelete.Id}");
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
@@ -161,11 +156,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        _ = await client.EnableEventLogging(applicationName);
+        _ = await client.EnableEventLogging(app.AppId);
         _ = await client.EnableManuallyGenerateAccessTokenEndpoint("a_user");
 
         // Act
@@ -190,11 +184,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        await client.EnableEventLogging(applicationName);
+        await client.EnableEventLogging(app.AppId);
         await client.DisableManuallyGenerateAccessTokenEndpoint(user);
 
         // Act
@@ -219,11 +212,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        _ = await client.EnableEventLogging(applicationName);
+        _ = await client.EnableEventLogging(app.AppId);
         _ = await client.EnableMagicLinks("a_user");
 
         // Act
@@ -248,11 +240,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
         const string user = "a_user";
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        _ = await client.EnableEventLogging(applicationName);
+        _ = await client.EnableEventLogging(app.AppId);
         _ = await client.DisableMagicLinks("a_user");
 
         // Act
@@ -277,16 +268,15 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        await client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        await client.EnableEventLogging(app.AppId);
+        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{app.AppId}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.ApiKey.EndsWith(app.ApiSecret1.GetLast(4)));
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/lock", null);
         _ = await client.GetAsync("credentials/list");
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/unlock", null);
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
@@ -307,18 +297,17 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
         client.AddPublicKey(app.ApiKey1);
-        await client.EnableEventLogging(applicationName);
-        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{applicationName}/api-keys");
+        await client.EnableEventLogging(app.AppId);
+        using var getApiKeysResponse = await client.GetAsync($"/admin/apps/{app.AppId}/api-keys");
         var apiKeys = await getApiKeysResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ApiKeyResponse>>();
         var keyToLock = apiKeys!.First(x => x.ApiKey.EndsWith(app.ApiKey1.GetLast(4)));
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/lock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/lock", null);
         _ = await client.PostAsJsonAsync("/signin/begin",
             new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
-        _ = await client.PostAsync($"/admin/apps/{applicationName}/api-keys/{keyToLock.Id}/unlock", null);
+        _ = await client.PostAsync($"/admin/apps/{app.AppId}/api-keys/{keyToLock.Id}/unlock", null);
 
         // Act
         using var getApplicationEventsResponse = await client.GetAsync("events?pageNumber=1");
@@ -340,11 +329,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        client.AddPublicKey($"{applicationName}:public:invalid-public-key");
-        await client.EnableEventLogging(applicationName);
+        client.AddPublicKey($"{app.AppId}:public:invalid-public-key");
+        await client.EnableEventLogging(app.AppId);
         _ = await client.PostAsJsonAsync("/signin/begin",
             new SignInBeginDTO { Origin = PasswordlessApi.OriginUrl, RPID = PasswordlessApi.RpId });
 
@@ -367,11 +355,10 @@ public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
-        client.AddSecretKey($"{applicationName}:secret:invalid-secret-key");
-        await client.EnableEventLogging(applicationName);
+        client.AddSecretKey($"{app.AppId}:secret:invalid-secret-key");
+        await client.EnableEventLogging(app.AppId);
         _ = await client.GetAsync("credentials/list");
         client.AddSecretKey(app.ApiSecret1);
 
