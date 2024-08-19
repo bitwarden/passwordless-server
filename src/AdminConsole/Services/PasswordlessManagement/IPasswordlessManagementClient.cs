@@ -19,7 +19,6 @@ public interface IPasswordlessManagementClient
     Task LockApiKeyAsync(string appId, string apiKeyId);
     Task UnlockApiKeyAsync(string appId, string apiKeyId);
     Task DeleteApiKeyAsync(string appId, string apiKeyId);
-    Task<GetAppIdAvailabilityResponse> IsApplicationIdAvailableAsync(GetAppIdAvailabilityRequest request);
 
     /// <summary>
     /// Retrieve a list of all attestation types in the FIDO2 MDS.
