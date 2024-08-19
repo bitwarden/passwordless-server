@@ -25,7 +25,7 @@ public static class CreateAppHelpers
         if (actualOptions.MagicLinkEmailMonthlyQuota == 0)
             actualOptions.MagicLinkEmailMonthlyQuota = 1000;
 
-        return await client.PostAsJsonAsync($"/admin/apps/{applicationName}/create", actualOptions);
+        return await client.PostAsJsonAsync($"/admin/apps/create", actualOptions);
     }
 
     public static async Task<CreateAppResultDto> CreateApplicationAsync(
