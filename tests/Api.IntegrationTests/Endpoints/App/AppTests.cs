@@ -443,7 +443,7 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         var app = await client.CreateApplicationAsync();
 
         // Act
-        using var response = await client.GetAsync($"/admin/apps/{app.AppId}/available");
+        using var response = await client.GetAsync($"/admin/apps/{Guid.NewGuid():N}/available");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
