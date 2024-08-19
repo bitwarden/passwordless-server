@@ -44,8 +44,6 @@ public partial class CreateApplication : ComponentBase
         }
     }
 
-
-
     public async Task OnSubmittedAsync()
     {
         Application app = new()
