@@ -15,7 +15,7 @@ public class NewAccountModel(IScopedPasswordlessClient passwordlessClient)
 
     public string Hints { get; set; } = "";
 
-    public async Task<IActionResult> OnPostToken(string name, string email, string attestation, string hints)
+    public async Task<IActionResult> OnPostToken(string name, string email, string attestation, string? hints = null)
     {
         try
         {
@@ -26,7 +26,7 @@ public class NewAccountModel(IScopedPasswordlessClient passwordlessClient)
                 Aliases = [email],
                 AliasHashing = false,
                 Attestation = attestation,
-                Hints = hints.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                Hints = hints?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             });
 
             return new JsonResult(token);
