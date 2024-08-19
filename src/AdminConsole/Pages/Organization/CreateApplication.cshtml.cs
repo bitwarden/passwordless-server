@@ -78,7 +78,6 @@ public class CreateApplicationModel : PageModel
 
         Application app = new()
         {
-            Id = form.Id,
             Name = form.Name,
             Description = form.Description,
             CreatedAt = DateTime.UtcNow,
@@ -118,7 +117,7 @@ public class CreateApplicationModel : PageModel
                 MaxUsers = features.MaxUsers,
                 AllowAttestation = features.AllowAttestation
             };
-            res = await _managementClient.CreateApplicationAsync(app.Id, newAppOptions);
+            res = await _managementClient.CreateApplicationAsync(newAppOptions);
         }
         catch (Exception e)
         {
@@ -133,6 +132,7 @@ public class CreateApplicationModel : PageModel
         }
 
         // TODO: Get "Admin Console Keys" and "Real Keys"
+        app.Id = res.AppId;
         app.ApiKey = res.ApiKey2;
         app.ApiSecret = res.ApiSecret2;
         app.ApiUrl = _passwordlessOptions.Value.ApiUrl;
@@ -167,9 +167,6 @@ public class CreateApplicationModel : PageModel
     {
         [Required, MaxLength(60), MinLength(3), NoForbiddenContent]
         public string Name { get; set; }
-
-        [Required, MaxLength(62), MinLength(3), RegularExpression("^[a-z]{1}[a-z0-9]{2,61}$")]
-        public string Id { get; set; }
 
         [Required, MaxLength(120), MinLength(3), NoForbiddenContent]
         public string Description { get; set; }

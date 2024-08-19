@@ -6,10 +6,10 @@ namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManagementClient
 {
-    public async Task<CreateAppResultDto> CreateApplicationAsync(string appId, CreateAppDto options)
+    public async Task<CreateAppResultDto> CreateApplicationAsync(CreateAppDto options)
     {
         using var response = await http.PostAsJsonAsync(
-            $"/admin/apps/{Uri.EscapeDataString(appId)}/create",
+            $"/admin/apps/create",
             options
         );
 

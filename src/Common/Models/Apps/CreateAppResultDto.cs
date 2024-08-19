@@ -2,6 +2,7 @@
 
 public class CreateAppResultDto
 {
+    public string AppId { get; set; }
     public string Message { get; set; }
     public string ApiKey1 { get; set; }
     public string ApiKey2 { get; set; }

@@ -4,6 +4,7 @@ using Moq;
 using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Services.IdGeneration;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -15,6 +16,7 @@ public class SharedManagementServiceTests
 {
     private readonly Mock<ITenantStorageFactory> _tenantStorageFactoryMock = new();
     private readonly Mock<IGlobalStorage> _storageMock = new();
+    private readonly Mock<IIdGeneratorFactory> _idGeneratorFactoryMock = new();
     private readonly Mock<ISystemClock> _systemClockMock = new();
     private readonly Mock<ILogger<SharedManagementService>> _loggerMock = new();
     private readonly Mock<IEventLogger> _eventLogger = new();
@@ -28,6 +30,7 @@ public class SharedManagementServiceTests
         _sut = new SharedManagementService(
             _tenantStorageFactoryMock.Object,
             _storageMock.Object,
+            _idGeneratorFactoryMock.Object,
             _systemClockMock.Object,
             _loggerMock.Object,
             _eventLogger.Object);

@@ -23,12 +23,12 @@ public static class AppsEndpoints
             .RequireCors("default")
             .WithParameterValidation();
 
-        app.MapPost("/admin/apps/{appId}/create", async (
+        app.MapPost("/admin/apps/create", async (
                 [AsParameters] CreateApplicationRequest request,
                 [FromServices] ISharedManagementService service,
                 [FromServices] IEventLogger eventLogger) =>
             {
-                var result = await service.GenerateAccountAsync(request.AppId, request.Payload);
+                var result = await service.GenerateAccountAsync(request.Payload);
 
                 eventLogger.LogApplicationCreatedEvent(request.Payload.AdminEmail);
 

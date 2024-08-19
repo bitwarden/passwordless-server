@@ -6,6 +6,7 @@ using Passwordless.Common.Constants;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Models;
 using Passwordless.Common.Models.Apps;
+using Passwordless.Common.Services.IdGeneration;
 using Passwordless.Common.Utils;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Extensions.Models;
@@ -20,7 +21,7 @@ public record AppDeletionResult(string Message, bool IsDeleted, DateTime? Delete
 public interface ISharedManagementService
 {
     Task<bool> IsAvailableAsync(string appId);
-    Task<CreateAppResultDto> GenerateAccountAsync(string appId, CreateAppDto options);
+    Task<CreateAppResultDto> GenerateAccountAsync(CreateAppDto options);
     Task<ValidateSecretKeyDto> ValidateSecretKeyAsync(string secretKey);
     Task<ValidatePublicKeyDto> ValidatePublicKeyAsync(string publicKey);
     Task FreezeAccountAsync(string accountName);
@@ -46,15 +47,18 @@ public class SharedManagementService : ISharedManagementService
     private readonly ISystemClock _systemClock;
     private readonly ITenantStorageFactory tenantFactory;
     private readonly IGlobalStorage _storage;
+    private readonly IIdGeneratorFactory _idGeneratorFactory;
 
     public SharedManagementService(
         ITenantStorageFactory tenantFactory,
         IGlobalStorage storage,
+        IIdGeneratorFactory idGeneratorFactory,
         ISystemClock systemClock,
         ILogger<SharedManagementService> logger,
         IEventLogger eventLogger)
     {
         this.tenantFactory = tenantFactory;
+        _idGeneratorFactory = idGeneratorFactory;
         _storage = storage;
         _systemClock = systemClock;
         _logger = logger;
@@ -69,18 +73,14 @@ public class SharedManagementService : ISharedManagementService
         return !await storage.TenantExists();
     }
 
-    public async Task<CreateAppResultDto> GenerateAccountAsync(string appId, CreateAppDto options)
+    public async Task<CreateAppResultDto> GenerateAccountAsync(CreateAppDto options)
     {
-        if (string.IsNullOrWhiteSpace(appId))
-        {
-            throw new ApiException($"'{nameof(appId)}' cannot be null, empty or whitespace.", 400);
-        }
         if (options == null)
         {
             throw new ApiException("No application creation options have been defined.", 400);
         }
 
-        var accountName = appId;
+        var accountName = _idGeneratorFactory.Create<string>().Generate();
         var adminEmail = options.AdminEmail;
 
         if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))
@@ -96,7 +96,7 @@ public class SharedManagementService : ISharedManagementService
             throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
         }
 
-        var storage = tenantFactory.Create(appId);
+        var storage = tenantFactory.Create(accountName);
         if (await storage.TenantExists())
         {
             throw new ApiException($"accountName '{accountName}' is not available", 409);
@@ -112,7 +112,7 @@ public class SharedManagementService : ISharedManagementService
         {
             AcountName = accountName,
             AdminEmails = [adminEmail],
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = _systemClock.UtcNow.UtcDateTime,
             Features = new AppFeature
             {
                 Tenant = accountName,
@@ -128,6 +128,7 @@ public class SharedManagementService : ISharedManagementService
         await storage.SaveAccountInformation(account);
         return new CreateAppResultDto
         {
+            AppId = accountName,
             ApiKey1 = apiKey1,
             ApiKey2 = apiKey2,
             ApiSecret1 = apiSecret1.original,

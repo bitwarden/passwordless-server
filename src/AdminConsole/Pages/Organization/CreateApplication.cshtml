@@ -13,15 +13,7 @@
             <div>
                 <label asp-for="Form.Name" class="form-label">Application name</label>
                 <div class="mt-2">
-                    <input asp-for="Form.Name" v-model="appId" type="text" class="text-input">
-                    <div v-cloak :class="{ invisible: !appId }" class=" small">
-                        <input asp-for="Form.Id" type="hidden" :value="parsedAppId"/>
-                        Your app id is:
-                        <span class="parsed_tenant_name">{{parsedAppId}}</span>
-                        <span v-if="availability == 'available'"> ✅ Available</span>
-                        <span v-if="availability == 'not-available'"> ⚠️ Unavailable</span>
-
-                    </div>
+                    <input asp-for="Form.Name" type="text" class="text-input">
                     <span asp-validation-for="Form.Name"></span>
                 </div>
             </div>
@@ -62,61 +54,4 @@
         </form>
     </div>
 </div>
-
-
-@section Scripts {
-    <script type="module">
-    import { createApp, computed, ref, watch } from 'vue';
-
-    createApp({
-        setup() {
-            const appId = ref("");
-            const availability = ref("");
-
-            const parsedAppId = computed(() => {
-                // parse string to to be alphanumeric and start with a letter. Between 3 - 50 length
-                let clean = appId.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                if (clean.length < 1)
-                    return '';
-
-                let firstChar = clean.charAt(0);
-                if (!firstChar.match(/[a-z]/i)) {
-                    firstChar = "x"
-                }
-
-                return firstChar + clean.slice(1);
-            });
-
-            const checkAvailability = async (appId) => {
-                let res = await fetch(`/Applications/${appId}/Available`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    }
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    console.error("An unexpected error occurred. Cannot verify whether appid is available.")
-                    return false;
-                }
-                return data.available === true;
-            }
-
-            watch(appId, async () => {
-                if (parsedAppId.value.length < 3) {
-                    availability.value = "not-available";
-                    return;
-                }
-                const available = await checkAvailability(parsedAppId.value);
-                availability.value = available ? "available" : "not-available";
-            })
-
-            return {
-                appId,
-                availability,
-                parsedAppId
-            }
-        }
-    }).mount("#app")
-</script>
 }

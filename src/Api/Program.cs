@@ -20,6 +20,7 @@ using Passwordless.Common.HealthChecks;
 using Passwordless.Common.Logging;
 using Passwordless.Common.Middleware.SelfHosting;
 using Passwordless.Common.Overrides;
+using Passwordless.Common.Services.IdGeneration;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Service;
 using Passwordless.Service.EventLog;
@@ -40,6 +41,8 @@ if (builder.Configuration.IsSelfHosted())
 builder.WebHost.ConfigureKestrel(c => c.AddServerHeader = false);
 
 builder.AddSerilog();
+
+builder.AddIdGeneration();
 
 var services = builder.Services;
 
