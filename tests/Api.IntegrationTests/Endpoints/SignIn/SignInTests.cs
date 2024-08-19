@@ -186,9 +186,8 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
             TestOutput = testOutput
         });
 
-        var applicationName = $"test{Guid.NewGuid():N}";
         using var client = api.CreateClient().AddManagementKey();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddPublicKey(app.ApiKey1);
         client.AddSecretKey(app.ApiSecret1);
         using var driver = WebDriverFactory.GetDriver(PasswordlessApi.OriginUrl);
@@ -200,7 +199,7 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         using var scope = api.Services.CreateScope();
-        var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(applicationName).GetTokenKeys();
+        var tokenKeys = await scope.ServiceProvider.GetRequiredService<ITenantStorageFactory>().Create(app.AppId).GetTokenKeys();
         tokenKeys.Should().NotBeNull();
         tokenKeys.Any(x => x.CreatedAt < (DateTime.UtcNow.AddDays(-30))).Should().BeFalse();
         tokenKeys.Any(x => x.CreatedAt >= (DateTime.UtcNow.AddDays(-30))).Should().BeTrue();

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
-using Passwordless.Common.Models.Apps;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,8 +22,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
         });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await client.CreateApplicationAsync(applicationName);
+        _ = await client.CreateApplicationAsync();
         client.AddPublicKey($"{Guid.NewGuid():N}:public:{Guid.NewGuid():N}");
 
         // Act
@@ -45,8 +43,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
         });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await client.CreateApplicationAsync(applicationName);
+        _ = await client.CreateApplicationAsync();
         client.AddPublicKey("e=mc2trooper");
 
         // Act
@@ -67,8 +64,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
         });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await client.CreateApplicationAsync(applicationName);
+        _ = await client.CreateApplicationAsync();
         client.AddSecretKey($"{Guid.NewGuid():N}:secret:{Guid.NewGuid():N}");
 
         // Act
@@ -89,8 +85,7 @@ public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, Passwor
         });
         using var client = api.CreateClient();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        _ = await client.CreateApplicationAsync(applicationName);
+        _ = await client.CreateApplicationAsync();
         client.AddSecretKey("e=mc2trooper");
 
         // Act

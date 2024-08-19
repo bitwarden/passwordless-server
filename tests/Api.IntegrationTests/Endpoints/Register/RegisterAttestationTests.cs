@@ -49,11 +49,10 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
             .RuleFor(x => x.Attestation, attestation)
             .Generate();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
         client.AddPublicKey(app.ApiKey1);
-        await client.EnableAttestation(applicationName);
+        await client.EnableAttestation(app.AppId);
 
         // Act
         var tokenResponse = await client.PostAsJsonAsync("/register/token", tokenRequest);
@@ -100,8 +99,7 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
             .RuleFor(x => x.Attestation, attestation)
             .Generate();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
         client.AddPublicKey(app.ApiKey1);
 
@@ -151,8 +149,7 @@ public class RegisterAttestationTests(ITestOutputHelper testOutput, Passwordless
             .RuleFor(x => x.Attestation, attestation)
             .Generate();
 
-        var applicationName = CreateAppHelpers.GetApplicationName();
-        var app = await client.CreateApplicationAsync(applicationName);
+        var app = await client.CreateApplicationAsync();
         client.AddSecretKey(app.ApiSecret1);
         client.AddPublicKey(app.ApiKey1);
 
