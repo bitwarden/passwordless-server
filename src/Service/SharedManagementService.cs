@@ -83,17 +83,9 @@ public class SharedManagementService : ISharedManagementService
         var accountName = _idGeneratorFactory.Create<string>().Generate();
         var adminEmail = options.AdminEmail;
 
-        if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountName))
+        if (string.IsNullOrWhiteSpace(accountName))
         {
-            throw new ApiException("Please set argument 'accountName' and 'adminEmail'", 400);
-        }
-
-        var regi = new Regex("^[A-Za-z][A-Za-z0-9]{2,62}$");
-        var isValid = regi.IsMatch(accountName);
-
-        if (!isValid)
-        {
-            throw new ApiException("accountName needs to be alphanumeric and start with a letter", 400);
+            throw new ApiException("Please set argument 'adminEmail'", 400);
         }
 
         var storage = tenantFactory.Create(accountName);
