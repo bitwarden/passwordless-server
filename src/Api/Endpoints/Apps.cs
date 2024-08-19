@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +17,6 @@ public static class AppsEndpoints
 {
     public static void MapAccountEndpoints(this WebApplication app)
     {
-        app.MapGet("/admin/apps/{appId}/available", IsAppIdAvailableAsync)
-            .RequireManagementKey()
-            .RequireCors("default")
-            .WithParameterValidation();
-
         app.MapPost("/admin/apps/create", async (
                 [AsParameters] CreateApplicationRequest request,
                 [FromServices] ISharedManagementService service,
@@ -123,12 +117,6 @@ public static class AppsEndpoints
             .RequireSecretKey()
             .RequireCors("default")
             .WithTags(OpenApiTags.Applications);
-    }
-
-    public static async Task<IResult> IsAppIdAvailableAsync([AsParameters] GetAppIdAvailabilityRequest payload, ISharedManagementService accountService)
-    {
-        var result = await accountService.IsAvailableAsync(payload.AppId);
-        return Ok(new GetAppIdAvailabilityResponse(result));
     }
 
     /// <summary>

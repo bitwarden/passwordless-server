@@ -414,41 +414,4 @@ public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFi
         using var signInGenerateTokenResponse = await client.PostAsJsonAsync("magic-links/send", magicLinkRequest);
         signInGenerateTokenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
-
-    [Fact]
-    public async Task I_can_check_whether_an_app_id_is_available()
-    {
-        // Arrange
-        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddManagementKey();
-        var applicationName = GetApplicationName();
-
-        // Act
-        using var response = await client.GetAsync($"/admin/apps/{applicationName}/available");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
-        result.Should().NotBeNull();
-        result!.Available.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task I_can_check_whether_an_app_id_is_unavailable()
-    {
-        // Arrange
-        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions { TestOutput = testOutput });
-        using var client = api.CreateClient().AddManagementKey();
-
-        var app = await client.CreateApplicationAsync();
-
-        // Act
-        using var response = await client.GetAsync($"/admin/apps/{app.AppId}/available");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<GetAppIdAvailabilityResponse>();
-        result.Should().NotBeNull();
-        result!.Available.Should().BeFalse();
-    }
 }
