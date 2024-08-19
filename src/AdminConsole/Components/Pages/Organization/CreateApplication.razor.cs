@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Components;
-using Passwordless.AdminConsole.Components.Pages.App.Credentials;
+using Microsoft.AspNetCore.Components.Forms;
 using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Models;
 using Passwordless.Common.Models.Apps;
@@ -12,25 +11,29 @@ namespace Passwordless.AdminConsole.Components.Pages.Organization;
 public partial class CreateApplication : ComponentBase
 {
     public const string FormName = "create-application-form";
-    
+
     [SupplyParameterFromForm(FormName = FormName)]
     public CreateApplicationForm? Form { get; set; }
-    
+
+    public EditContext? FormEditContext { get; set; }
+
+    public ValidationMessageStore? FormValidationMessageStore { get; set; }
+
     public ICollection<AvailablePlan> AvailablePlans { get; private set; } = new List<AvailablePlan>();
-    
-    public bool? CanCreateApplication { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        if (CurrentContext.Organization!.Applications.Count >= CurrentContext.Organization.MaxApplications)
+        var canCreateApplications = await DataService.AllowedToCreateApplicationAsync();
+        if (!canCreateApplications)
         {
             NavigationManager.NavigateTo("/billing/manage");
         }
-        
-        CanCreateApplication = await DataService.AllowedToCreateApplicationAsync();
-        Form ??= new CreateApplicationForm();
 
-        if (CurrentContext.Organization.HasSubscription)
+        Form ??= new CreateApplicationForm();
+        FormEditContext = new EditContext(Form);
+        FormValidationMessageStore = new ValidationMessageStore(FormEditContext);
+
+        if (CurrentContext.Organization!.HasSubscription)
         {
             AvailablePlans.Add(new AvailablePlan(BillingOptions.Value.Store.Pro, BillingOptions.Value.Plans[BillingOptions.Value.Store.Pro].Ui.Label));
             AvailablePlans.Add(new AvailablePlan(BillingOptions.Value.Store.Enterprise, BillingOptions.Value.Plans[BillingOptions.Value.Store.Enterprise].Ui.Label));
@@ -40,16 +43,14 @@ public partial class CreateApplication : ComponentBase
             Form.Plan = BillingOptions.Value.Store.Free;
         }
     }
-    
-    
-    
+
+
+
     public async Task OnSubmittedAsync()
     {
-        if (Form == null) throw new InvalidOperationException("Form is null");
-        
         Application app = new()
         {
-            Name = Form.Name,
+            Name = Form!.Name,
             Description = Form.Description,
             CreatedAt = DateTime.UtcNow,
             OrganizationId = HttpContextAccessor.HttpContext!.User.GetOrgId()!.Value
@@ -59,8 +60,8 @@ public partial class CreateApplication : ComponentBase
 
         if (!await DataService.AllowedToCreateApplicationAsync())
         {
-            ModelState.AddModelError("MaxApplications", "You have reached the maximum number of applications for your organization. Please upgrade to a paid organization");
-            return Page();
+            FormValidationMessageStore!.Add(() => Form.Plan, "You have reached the maximum number of applications for your organization. Please upgrade to a paid organization");
+            return;
         }
 
         // Attach a plan
@@ -89,16 +90,16 @@ public partial class CreateApplication : ComponentBase
             };
             res = await ManagementClient.CreateApplicationAsync(newAppOptions);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            ModelState.AddModelError("api.failure", "Failed to create your application");
-            return Page();
+            FormValidationMessageStore!.Add(() => Form.Name, "Failed to create your application");
+            return;
         }
 
         if (string.IsNullOrEmpty(res.ApiKey1))
         {
-            ModelState.AddModelError("ApiCall", res.Message);
-            return Page();
+            FormValidationMessageStore!.Add(() => Form.Name, res.Message);
+            return;
         }
 
         // TODO: Get "Admin Console Keys" and "Real Keys"

@@ -15,28 +15,23 @@
 @inject ICurrentContext CurrentContext;
 
 <Page Title="New App">
-    @if (CanCreateApplication != null && !CanCreateApplication.Value)
-    {
-        <Alert Style="@ContextualStyles.Danger">
-            You need to <a href="/billing/manage">upgrade</a> to a paid organization to create more applications.
-        </Alert>
-    }
-    
     <Panel>
-        <EditForm class="space-y-6" FormName="@FormName" OnValidSubmit="@OnSubmittedAsync">
+        @if (Form != null)
+        {
+            <EditForm class="space-y-6" FormName="@FormName" Model="Form" OnValidSubmit="@OnSubmittedAsync">
             <div>
                 <label for="application-name" class="form-label">Application name</label>
                 <div class="mt-2">
-                    <InputText id="application-name" class="text-input" @bind-Value="Form.Name" />
-                    <ValidationMessage For="() => Form.Name" /> 
+                    <InputText id="application-name" class="text-input" @bind-Value="Form.Name"/>
+                    <ValidationMessage For="() => Form.Name"/>
                 </div>
             </div>
 
             <div>
                 <label for="application-description" class="form-label">Description</label>
                 <div class="mt-2">
-                    <InputText id="application-description" class="text-input" @bind-Value="Form.Description" />
-                    <ValidationMessage For="() => Form.Description" />
+                    <InputText id="application-description" class="text-input" @bind-Value="Form.Description"/>
+                    <ValidationMessage For="() => Form.Description"/>
                 </div>
             </div>
 
@@ -64,12 +59,14 @@
             {
                 <input type="hidden" name="Form.Plan"/>
             }
-            
+
             <div>
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
+                <CustomValidationErrors EditContext="@FormEditContext"/>
                 <button type="submit" class="btn-primary">Create</button>
             </div>
         </EditForm>
+        }
     </Panel>
 </Page>
