@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import useFocusTrap from "./composables/useFocusTrap.mjs";
 
 const active = ref(false);
@@ -59,6 +59,20 @@ export default {
         const deny = () => {
             active.value = false;
         };
+
+        const handleEscape = (event) => {
+            if (event.key === "Escape" && active.value) {
+                active.value = false;
+            }
+        };
+
+        onMounted(() => {
+            window.addEventListener("keydown", handleEscape);
+        });
+
+        onUnmounted(() => {
+            window.removeEventListener("keydown", handleEscape);
+        });
         
         return {
             active,
