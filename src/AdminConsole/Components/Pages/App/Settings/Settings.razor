@@ -8,15 +8,36 @@
 @inject ICurrentContext CurrentContext
 
 <Page>
-    <PlanSection />
-    <ApiKeysSection />
-    <MagicLinksSection />
-    <ManuallyGeneratedAuthenticationTokensSection />
-    @if (IsAttestationAllowed)
+    @if (ShowPlanSection)
+    {
+        <PlanSection />
+    }
+    
+    @if (ShowApiKeysSection)
+    {
+        <ApiKeysSection />
+    }
+
+    @if (ShowMagicLinksSection)
+    {
+        <MagicLinksSection />
+    }
+    
+    @if (ShowManuallyGeneratedAuthenticationTokensSection)
+    {
+        <ManuallyGeneratedAuthenticationTokensSection />
+    }
+    
+    @if (ShowAttestationSection)
     {
         <AttestationSection />
     }
-    <AuthenticationConfiguration />
+    
+    @if (ShowAuthenticationConfigurationSection)
+    {
+        <AuthenticationConfiguration />
+    }
+    
     @if (Application != null)
     {
         <DeleteApplicationSection Application="@Application" />

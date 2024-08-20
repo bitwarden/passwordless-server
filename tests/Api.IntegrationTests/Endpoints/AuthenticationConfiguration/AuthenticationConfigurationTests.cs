@@ -13,8 +13,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.AuthenticationConfiguration;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class AuthenticationConfigurationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     [Fact]
     public async Task I_can_create_an_authentication_configuration()

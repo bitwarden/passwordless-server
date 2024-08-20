@@ -1,4 +1,6 @@
-@page "/Organization/Create"
+@page "/organization/create"
+@page "/signup"
+
 @using Microsoft.AspNetCore.Identity
 @using Passwordless.AdminConsole.EventLog.Loggers
 @using Passwordless.AdminConsole.Identity
@@ -16,7 +18,7 @@
 @inject TimeProvider TimeProvider
 @inject ILogger<Create> Logger
 
-<Page Title="Create an organization">
+<Page>
     <div class="w-full lg:flex lg:items-start lg:space-x-8">
         @* Mobile promo *@
         <div class="lg:hidden mb-2 p-4">

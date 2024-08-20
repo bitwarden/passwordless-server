@@ -9,8 +9,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     // Manual opt out for endpoints that allow anonymous access, all other endpoints are considered to require
     // some kind of authentication

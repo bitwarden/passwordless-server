@@ -12,7 +12,6 @@
     var requestToken = Antiforgery.GetAndStoreTokens(Model.HttpContext).RequestToken;
 }
 
-
 <div>
     <div class="flex flex-1 flex-col justify-center lg:flex-non bg-gray-200 rounded-md p-6 max-w-fit">
         <div class="w-full max-w-sm lg:w-96">
@@ -85,6 +84,13 @@
                                 }
                             </div>
 
+                            <div>
+                                <label for="hints" class="block text-sm font-medium leading-6 text-gray-900">Credential hints (optional)</label>
+                                <div class="mt-2">
+                                    <input asp-for="Hints" type="text" name="hints" id="hints" class="text-input">
+                                    <span asp-validation-for="Hints"></span>
+                                </div>
+                            </div>
 
                             <div>
                                 <button id="register-btn" class="btn-primary" type="button">Register</button>
@@ -127,7 +133,7 @@ const createNewAccount = async (e) => {
     if (req.ok) {
         const { token } = await req.json();
         const nicknameForDevice = data.get("nickname");
-        const { error } = await p.register(token , nicknameForDevice);
+        const { error } = await p.register(token, nicknameForDevice);
 
         if (error) {
             console.error(error);

@@ -113,27 +113,10 @@ public class ApplicationNavMenuTests : TestContext
     }
 
     [Fact]
-    public void ApplicationNavMenu_Renders_Nothing_When_HasAppRolePolicyFails()
+    public void ApplicationNavMenu_Renders_Nothing_When_NotInAppContext()
     {
         // Arrange
-        var organizationFeatures = _fixture
-            .Build<OrganizationFeaturesContext>()
-            .With(x => x.EventLoggingIsEnabled, true)
-            .Create();
-        _currentContext.SetupGet(x => x.OrganizationFeatures).Returns(organizationFeatures);
-        var features = _fixture
-            .Build<ApplicationFeatureContext>()
-            .With(x => x.EventLoggingIsEnabled, true)
-            .Create();
-        _currentContext.SetupGet(x => x.Features).Returns(features);
-
-        var organization = _fixture.Build<Organization>()
-            .Without(x => x.Applications)
-            .Without(x => x.Admins)
-            .Create();
-        _currentContext.SetupGet(x => x.Organization).Returns(organization);
-        _currentContext.SetupGet(x => x.IsPendingDelete).Returns(true);
-        _currentContext.SetupGet(x => x.InAppContext).Returns(true);
+        _currentContext.SetupGet(x => x.InAppContext).Returns(false);
         _authorizationContext.SetNotAuthorized();
 
         // Act
