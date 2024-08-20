@@ -14,8 +14,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Events;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class EventsTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     [Fact]
     public async Task I_can_view_the_event_for_a_user_retrieving_the_api_keys()
