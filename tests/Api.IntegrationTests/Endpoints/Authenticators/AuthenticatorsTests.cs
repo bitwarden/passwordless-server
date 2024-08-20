@@ -4,7 +4,6 @@ using Bogus;
 using FluentAssertions;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
-using Passwordless.Common.Models.Apps;
 using Passwordless.Common.Models.Authenticators;
 using Passwordless.Service.Models;
 using Xunit;
@@ -12,8 +11,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Authenticators;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class AuthenticatorsTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())

@@ -7,7 +7,6 @@ using Passwordless.Api.Endpoints;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Api.IntegrationTests.Helpers.User;
-using Passwordless.Common.Models.Apps;
 using Passwordless.Service.Models;
 using Passwordless.Service.Storage.Ef;
 using Xunit;
@@ -15,8 +14,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.SignIn;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     [Fact]
     public async Task I_can_retrieve_assertion_options_to_begin_sign_in()

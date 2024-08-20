@@ -10,8 +10,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     [Fact]
     public async Task UserIdAndDisplayNameIsTheOnlyRequiredProperties()

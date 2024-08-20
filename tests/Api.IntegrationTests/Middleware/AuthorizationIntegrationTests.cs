@@ -2,14 +2,13 @@ using System.Net;
 using System.Net.Http.Json;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
-using Passwordless.Common.Models.Apps;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Middleware;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class AuthorizationIntegrationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
 
     [Fact]

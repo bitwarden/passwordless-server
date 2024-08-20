@@ -14,8 +14,8 @@ using Xunit.Abstractions;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.Register;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class RegisterAttestationTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     private static readonly Faker<RegisterToken> TokenGenerator = new Faker<RegisterToken>()
         .RuleFor(x => x.UserId, Guid.NewGuid().ToString())
