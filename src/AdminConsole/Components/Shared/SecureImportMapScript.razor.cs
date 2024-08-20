@@ -6,6 +6,8 @@ namespace Passwordless.AdminConsole.Components.Shared;
 
 public partial class SecureImportMapScript
 {
+    private Model? _model;
+
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -34,9 +36,17 @@ public partial class SecureImportMapScript
 
     protected override void OnInitialized()
     {
+        if (_model != null)
+        {
+            return;
+        }
+        _model = new Model
+        {
+            Imports = new Dictionary<string, string>(Value.Imports.Count)
+        };
         foreach (var import in Value.Imports)
         {
-            Value.Imports[import.Key] = Version.Get(import.Value);
+            _model.Imports.Add(import.Key, Version.Get(import.Value));
         }
     }
 
