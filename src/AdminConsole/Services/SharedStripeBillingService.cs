@@ -105,23 +105,17 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
 
         var plan = _billingOptions.Plans[selectedPlan];
         var priceId = plan.PriceId!;
-        var subscriptionItem = organization.Applications
-            .Where(x => x.BillingPriceId == priceId)
-            .GroupBy(x => new
-            {
-                x.BillingPriceId,
-                x.BillingSubscriptionItemId
-            })
-            .Select(x => new
-            {
-                PriceId = x.Key.BillingPriceId!,
-                Id = x.Key.BillingSubscriptionItemId!
-            }).SingleOrDefault();
 
         var subscriptionItemService = new SubscriptionItemService();
+        var subscriptionItemOptions = new SubscriptionItemListOptions
+        {
+            Subscription = organization.BillingSubscriptionId
+        };
+        var subscriptionItems = await subscriptionItemService.ListAsync(subscriptionItemOptions);
 
-        // Create subscription item if it doesn't exist.
-        if (subscriptionItem == null)
+        // Create the new subscription item if it doesn't exist.
+        string? subscriptionItemId = subscriptionItems.SingleOrDefault(x => x.Price.Id == priceId)?.Id;
+        if (subscriptionItemId == null)
         {
             var createSubscriptionItemOptions = new SubscriptionItemCreateOptions
             {
@@ -130,22 +124,34 @@ public class SharedStripeBillingService : BaseBillingService, ISharedBillingServ
                 ProrationBehavior = "create_prorations",
                 Subscription = organization.BillingSubscriptionId
             };
-            var createSubscriptionItemResult = await subscriptionItemService.CreateAsync(createSubscriptionItemOptions);
-            subscriptionItem = new
+            try
             {
-                PriceId = createSubscriptionItemResult.Price.Id,
-                Id = createSubscriptionItemResult.Id
-            };
+                var createSubscriptionItemResult = await subscriptionItemService.CreateAsync(createSubscriptionItemOptions);
+                subscriptionItemId = createSubscriptionItemResult.Id;
+            }
+            catch (StripeException e)
+            {
+                _logger.LogError(e, "Failed to create subscription item for organization {OrganizationId}: {Message}", organization.Id, e.StripeError.Message);
+                throw;
+            }
         }
 
         // Delete subscription item if it's not used by any other application inside this organization.
         if (!organization.Applications.Any(x => x.Id != app && x.BillingSubscriptionItemId == existingSubscriptionItemId))
         {
             var deleteSubscriptionItemOptions = new SubscriptionItemDeleteOptions { ClearUsage = true };
-            await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
+            try
+            {
+                await subscriptionItemService.DeleteAsync(existingSubscriptionItemId, deleteSubscriptionItemOptions);
+            }
+            catch (StripeException ex)
+            {
+                _logger.LogError(ex, "Failed to delete subscription item {SubscriptionItemId}", existingSubscriptionItemId);
+                throw;
+            }
         }
 
-        await this.SetPlanOnApp(app, selectedPlan, subscriptionItem.Id, subscriptionItem.PriceId);
+        await this.SetPlanOnApp(app, selectedPlan, subscriptionItemId, priceId);
 
         return "/billing/manage";
     }
