@@ -119,10 +119,25 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('register-btn').addEventListener('click', (e) => createNewAccount(e));
 
 const createNewAccount = async (e) => {
-    let form = document.getElementById("registration-form");
+    const form = document.getElementById("registration-form");
     const data = new FormData(form);
 
-    let req = await fetch("?handler=token", {
+    // Validation
+    if (data.get("hints")) {
+        const hints = data.get("hints").split(",").map(h => h.trim().toLowerCase());
+
+        if (new Set(hints).size !== hints.length) {
+            alert("You cannot provide duplicate hints.");
+            return;
+        }
+
+        if (!hints.every(h => ["client-device", "security-key", "hybrid"].includes(h))) {
+            alert("Hint values must be either 'client-device', 'security-key', or 'hybrid'.");
+            return;
+        }
+    }
+
+    const res = await fetch("?handler=token", {
         method: "post",
         body: data,
         headers: {
@@ -130,8 +145,8 @@ const createNewAccount = async (e) => {
         }
     });
 
-    if (req.ok) {
-        const { token } = await req.json();
+    if (res.ok) {
+        const { token } = await res.json();
         const nicknameForDevice = data.get("nickname");
         const { error } = await p.register(token, nicknameForDevice);
 
@@ -144,8 +159,7 @@ const createNewAccount = async (e) => {
     } else {
         const container = document.getElementById("error-message-summary-container");
         const field = container.getElementsByClassName("alert-box-message")[0];
-        const body = await req.text();
-        const problemDetails = JSON.parse(body);
+        const problemDetails = await res.json();
         field.textContent = problemDetails.title;
         container.classList.remove("hidden");
     }
