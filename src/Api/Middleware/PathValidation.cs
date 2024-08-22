@@ -2,11 +2,17 @@ using Passwordless.Common.HealthChecks;
 
 namespace Passwordless.Api.Middleware;
 
+/// <summary>
+/// Defines the conditions under which the middleware should run.
+/// </summary>
 public static class PathValidation
 {
     private const string RootPath = "/";
 
-    public static Func<HttpContext, bool> ShouldRunEventLogMiddleware = o =>
+    /// <summary>
+    /// Defines the condition when the event logging middleware should run.
+    /// </summary>
+    public static readonly Func<HttpContext, bool> ShouldRunEventLogMiddleware = o =>
     {
         // If the incoming request is the root, we don't want to execute this middleware.
         if (o.Request.Path == RootPath)
