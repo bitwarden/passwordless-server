@@ -1,4 +1,4 @@
-<div class="@_containerClass">
+<div @attributes="AdditionalAttributes" class="@_containerClass">
     <div class="flex">
         <div class="flex-shrink-0">
             @switch (Style)
@@ -36,6 +36,9 @@
 </div>
 
 @code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
     [Parameter] public required string LinkText { get; set; }
 
     [Parameter] public required string LinkUrl { get; set; }

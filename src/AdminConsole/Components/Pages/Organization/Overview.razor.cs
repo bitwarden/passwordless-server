@@ -39,6 +39,11 @@ public partial class Overview : ComponentBase
         DateTime? DeleteAt,
         int Users)
     {
+        public string ListItemIdentifier => $"{Id}-list-item";
+        public string NameIdentifier => $"{Id}-name";
+        public string DescriptionIdentifier => $"{Id}-description";
+        public string CreatedAtIdentifier => $"{Id}-created-at";
+        public string DeleteAtIdentifier => $"{Id}-delete-at";
         public string Url => DeleteAt.HasValue ? $"/app/{Id}/settings" : $"/app/{Id}/credentials/list";
     }
 }
