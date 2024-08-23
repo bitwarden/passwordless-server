@@ -1,0 +1,87 @@
+<div class="@_containerClass">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            @switch (Style)
+            {
+                case ContextualStyles.Danger:
+                    <DangerAlertIcon class="h-5 w-5" Style="@ContextualStyles.Danger" />
+                    break;
+                case ContextualStyles.Warning:
+                    <WarningAlertIcon class="h-5 w-5" Style="@ContextualStyles.Warning" />
+                    break;
+                case ContextualStyles.Success:
+                    <SuccessAlertIcon class="h-5 w-5" Style="@ContextualStyles.Success" />
+                    break;
+                case ContextualStyles.Info:
+                    <InfoAlertIcon class="h-5 w-5" Style="@ContextualStyles.Info" />
+                    break;
+                case ContextualStyles.Primary:
+                    <InfoAlertIcon class="h-5 w-5" Style="@ContextualStyles.Primary" />
+                    break;
+                case ContextualStyles.Secondary:
+                    <InfoAlertIcon class="h-5 w-5" Style="@ContextualStyles.Secondary" />
+                    break;
+            }
+        </div>
+        <div class="@_contentClass">
+            <p class="text-sm font-medium">@Message</p>
+            <p class="mt-3 text-sm md:ml-6 md:mt-0">
+                <a href="@LinkUrl" class="@_linkClass">
+                    <span class="underline">@LinkText</span>
+                    <span aria-hidden="true"> &rarr;</span>
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public required string LinkText { get; set; }
+
+    [Parameter] public required string LinkUrl { get; set; }
+
+    [Parameter] public required string Message { get; set; }
+
+    [Parameter] public required ContextualStyles Style { get; set; }
+
+    private string? _containerClass;
+    private string? _contentClass;
+    private string? _linkClass;
+
+    protected override void OnInitialized()
+    {
+        switch (Style)
+        {
+            case ContextualStyles.Primary:
+                _containerClass = "container-primary";
+                _contentClass = "content-primary";
+                _linkClass = "link-primary";
+                break;
+            case ContextualStyles.Info:
+                _containerClass = "container-info";
+                _contentClass = "content-info";
+                _linkClass = "link-info";
+                break;
+            case ContextualStyles.Danger:
+                _containerClass = "container-danger";
+                _contentClass = "content-danger";
+                _linkClass = "link-danger";
+                break;
+            case ContextualStyles.Warning:
+                _containerClass = "container-warning";
+                _contentClass = "content-warning";
+                _linkClass = "link-warning";
+                break;
+            case ContextualStyles.Secondary:
+                _containerClass = "container-secondary";
+                _contentClass = "content-secondary";
+                _linkClass = "link-secondary";
+                break;
+            case ContextualStyles.Success:
+                _containerClass = "container-success";
+                _contentClass = "content-success";
+                _linkClass = "link-success";
+                break;
+        }
+    }
+}
