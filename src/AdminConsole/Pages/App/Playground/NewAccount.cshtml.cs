@@ -26,7 +26,7 @@ public class NewAccountModel(IScopedPasswordlessClient passwordlessClient)
                 Aliases = [email],
                 AliasHashing = false,
                 Attestation = attestation,
-                Hints = hints?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                Hints = hints?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? []
             });
 
             return new JsonResult(token);
