@@ -37,8 +37,6 @@ public class FakeMagicLinkSignInManager : MagicLinkSignInManager<ConsoleAdmin>
         {
             case SuccessToken:
                 return SignInResult.Success;
-            case FailToken:
-                return SignInResult.Failed;
             default:
                 return SignInResult.Failed;
         }
