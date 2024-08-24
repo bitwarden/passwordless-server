@@ -4,7 +4,7 @@
     <AuthorizeView>
         <Authorized>
             <div id="sidebar" class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-primary-700 w-64">
-                <LinkHome Class="flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1" IsDesktop="true" />
+                <LinkHome Class="flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1" Size="@LinkHome.Sizes.Large" />
                 <NavMenu />
             </div>
             <div id="navbar-mobile" class="navbar-mobile">
@@ -25,7 +25,7 @@
         </Authorized>
         <NotAuthorized>
             <div class="sidebar-anonymous">
-                <LinkHome IsDesktop="false" />
+                <LinkHome Size="@LinkHome.Sizes.Small" />
             </div>
             <div class="content-container-anonymous">
                 <main>

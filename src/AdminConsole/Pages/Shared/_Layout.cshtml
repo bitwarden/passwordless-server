@@ -34,7 +34,7 @@
     @if (signedIn)
     {
         <div id="sidebar" class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-primary-700 w-64">
-            <component type="typeof(LinkHome)" param-Class="@("flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1")" param-IsDesktop="true" render-mode="Static" />
+            <component type="typeof(LinkHome)" param-Class="@("flex flex-shrink-0 items-center p-5 pb-3 pr-10 gap-1")" param-Size="@LinkHome.Sizes.Large" render-mode="Static" />
             <component type="typeof(NavMenu)" render-mode="ServerPrerendered" />
         </div>
         <div id="navbar-mobile" class="navbar-mobile">
@@ -64,7 +64,7 @@
     else
     {
         <div class="sidebar-anonymous">
-            <component type="typeof(LinkHome)" param-IsDesktop="false" render-mode="Static" />
+            <component type="typeof(LinkHome)" param-Size="@LinkHome.Sizes.Small" render-mode="Static" />
         </div>
         <div class="content-container-anonymous">
             <main>

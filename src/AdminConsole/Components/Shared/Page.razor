@@ -2,7 +2,7 @@
 
 <div class="page-header-container">
     <BreadCrumb Items="@BreadCrumbItems" />
-    <h1>@Title</h1>
+    <h1 class="@TitleClass">@Title</h1>
 </div>
 <div class="page-content-container">
     @ChildContent
@@ -11,10 +11,14 @@
 @code {
     [Parameter]
     public required string Title { get; set; }
+
+    [Parameter] public bool HideTitle { get; set; } = false;
     
     [Parameter]
     public required RenderFragment ChildContent { get; set; }
     
     [Parameter]
     public IReadOnlyCollection<BreadCrumb.BreadCrumbItem>? BreadCrumbItems { get; set; }
+    
+    private string? TitleClass => HideTitle ? "sr-only" : null;
 }
