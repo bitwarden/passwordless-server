@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace Passwordless.AdminConsole.Components.Shared;
+namespace Passwordless.AdminConsole.Components.Shared.Alerts;
 
 public partial class Alert : ComponentBase
 {
