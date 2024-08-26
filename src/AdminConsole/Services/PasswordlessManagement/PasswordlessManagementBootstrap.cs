@@ -10,13 +10,6 @@ public static class PasswordlessManagementBootstrap
         builder.Services
             .AddOptions<PasswordlessManagementOptions>()
             .BindConfiguration("PasswordlessManagement")
-            .Configure<IConfiguration>((options, config) =>
-            {
-                if (!config.IsSelfHosted())
-                {
-                    options.InternalApiUrl = options.ApiUrl;
-                }
-            })
             .ValidateOnStart();
 
         builder.Services.AddSingleton<PasswordlessHttpHandler>();
@@ -24,7 +17,7 @@ public static class PasswordlessManagementBootstrap
         {
             var options = sp.GetRequiredService<IOptions<PasswordlessManagementOptions>>().Value;
 
-            client.BaseAddress = new Uri(options.InternalApiUrl);
+            client.BaseAddress = new Uri(options.ApiUrl);
             client.DefaultRequestHeaders.Add("ManagementKey", options.ManagementKey);
         }).ConfigurePrimaryHttpMessageHandler<PasswordlessHttpHandler>();
     }

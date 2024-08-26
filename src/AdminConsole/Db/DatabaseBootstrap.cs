@@ -81,39 +81,6 @@ public static class DatabaseBootstrap
             .AddDefaultTokenProviders()
             .AddPasswordless("Passwordless");
 
-        // Options
-        builder.Services
-            .AddOptions<PasswordlessAspNetCoreOptions>()
-            .Configure<IConfiguration, IOptionsSnapshot<PasswordlessManagementOptions>>((o, c, m) =>
-            {
-                // Override the API URL if we are self-hosted
-                if (c.IsSelfHosted())
-                {
-                    if (string.IsNullOrWhiteSpace(m.Value.InternalApiUrl))
-                    {
-                        throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
-                    }
-
-                    o.ApiUrl = m.Value.InternalApiUrl;
-                }
-            });
-
-        builder.Services
-            .AddOptions<PasswordlessOptions>()
-            .Configure<IConfiguration, IOptionsSnapshot<PasswordlessManagementOptions>>((o, c, m) =>
-            {
-                // Override the API URL if we are self-hosted
-                if (c.IsSelfHosted())
-                {
-                    if (string.IsNullOrWhiteSpace(m.Value.InternalApiUrl))
-                    {
-                        throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
-                    }
-
-                    o.ApiUrl = m.Value.InternalApiUrl;
-                }
-            });
-
         if (!builder.Environment.IsDevelopment())
         {
             builder.Services
