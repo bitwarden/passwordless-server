@@ -4,11 +4,6 @@ namespace Passwordless.AdminConsole.Services.PasswordlessManagement;
 
 public class PasswordlessManagementOptions
 {
-    /// <summary>
-    /// When using self-hosted Docker containers, the AdminConsole will communicate directly with the Passwordless API inside the container.
-    /// </summary>
-    public string InternalApiUrl { get; set; }
-
     [Required]
     public string ManagementKey { get; set; }
 

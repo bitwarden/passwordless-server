@@ -20,7 +20,7 @@ public class ScopedPasswordlessClient : PasswordlessClient, IScopedPasswordlessC
         : base(new PasswordlessOptions
         {
             ApiSecret = context.ApiSecret!,
-            ApiUrl = options.Value.InternalApiUrl,
+            ApiUrl = options.Value.ApiUrl,
         })
     {
         _client = httpClient;
