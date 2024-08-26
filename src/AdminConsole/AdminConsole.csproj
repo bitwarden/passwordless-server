@@ -23,7 +23,7 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.5.0" />
-    <PackageReference Include="Passwordless.AspNetCore" Version="2.1.0-beta.1" />
+    <PackageReference Include="Passwordless.AspNetCore" Version="2.1.0-beta.2" />
     <PackageReference Include="Stripe.net" Version="41.*" />
   </ItemGroup>
 
