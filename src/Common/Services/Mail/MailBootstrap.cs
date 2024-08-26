@@ -11,7 +11,7 @@ public static class MailBootstrap
     public static void AddMail(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<IMailProviderFactory, MailProviderFactory>();
-        builder.Services.AddScoped<IMailProvider, MailProviderAggregate>();
+        builder.Services.AddScoped<IMailProvider, AggregateMailProvider>();
         builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("Mail"))
             .PostConfigure<MailConfiguration>(o =>
             {

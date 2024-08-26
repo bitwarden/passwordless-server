@@ -1,26 +1,22 @@
 using Microsoft.Extensions.Options;
-using Passwordless.Common.Services.Mail.Aws;
-using Passwordless.Common.Services.Mail.File;
-using Passwordless.Common.Services.Mail.SendGrid;
-using Passwordless.Common.Services.Mail.Smtp;
 
 namespace Passwordless.Common.Services.Mail;
 
 /// <summary>
 /// Wraps multiple mail providers and tries to send the message using them in order.
 /// </summary>
-public class MailProviderAggregate : IMailProvider
+public class AggregateMailProvider : IMailProvider
 {
     private readonly IOptionsSnapshot<MailConfiguration> _options;
     private readonly IMailProviderFactory _factory;
-    private readonly ILogger<MailProviderAggregate> _logger;
+    private readonly ILogger<AggregateMailProvider> _logger;
 
     public const string FallBackFailedMessage = "No registered mail provider was able to send the message";
 
-    public MailProviderAggregate(
+    public AggregateMailProvider(
         IOptionsSnapshot<MailConfiguration> options,
         IMailProviderFactory factory,
-        ILogger<MailProviderAggregate> logger)
+        ILogger<AggregateMailProvider> logger)
     {
         _options = options;
         _factory = factory;
