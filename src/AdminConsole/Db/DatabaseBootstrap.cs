@@ -2,14 +2,11 @@ using System.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Passwordless.AdminConsole.Billing;
 using Passwordless.AdminConsole.EventLog;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.PasswordlessManagement;
-using Passwordless.AspNetCore;
-using Passwordless.Common.Configuration;
 
 namespace Passwordless.AdminConsole.Db;
 
@@ -32,7 +29,7 @@ public static class DatabaseBootstrap
         }
 
         // if name starts with sqlite, use sqlite, else use mssql
-        if (!string.IsNullOrEmpty(sqlite))
+        if (!String.IsNullOrEmpty(sqlite))
         {
             ContextName = typeof(SqliteConsoleDbContext).FullName;
             builder.AddDatabaseContext<SqliteConsoleDbContext>((sp, o) =>
@@ -79,38 +76,22 @@ public static class DatabaseBootstrap
             .AddEntityFrameworkStores<TDbContext>()
             .AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>()
             .AddDefaultTokenProviders()
-            .AddPasswordless("Passwordless");
-
-        // Options
-        builder.Services
-            .AddOptions<PasswordlessAspNetCoreOptions>()
-            .Configure<IConfiguration, IOptionsSnapshot<PasswordlessManagementOptions>>((o, c, m) =>
+            .AddPasswordless(o =>
             {
-                // Override the API URL if we are self-hosted
-                if (c.IsSelfHosted())
+                var managementOptions = builder.Configuration.GetSection("PasswordlessManagement").Get<PasswordlessManagementOptions>();
+                var options = builder.Configuration.GetSection("Passwordless").Get<PasswordlessOptions>();
+                o.ApiSecret = options.ApiSecret;
+                o.ApiKey = options.ApiKey;
+                o.ApiUrl = options.ApiUrl;
+
+                if (builder.Configuration.GetValue("SelfHosted", false))
                 {
-                    if (string.IsNullOrWhiteSpace(m.Value.InternalApiUrl))
+                    // This will overwrite ApiUrl with the internal url for self-hosting, this is intentional.
+                    if (string.IsNullOrEmpty(managementOptions.InternalApiUrl))
                     {
                         throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
                     }
-
-                    o.ApiUrl = m.Value.InternalApiUrl;
-                }
-            });
-
-        builder.Services
-            .AddOptions<PasswordlessOptions>()
-            .Configure<IConfiguration, IOptionsSnapshot<PasswordlessManagementOptions>>((o, c, m) =>
-            {
-                // Override the API URL if we are self-hosted
-                if (c.IsSelfHosted())
-                {
-                    if (string.IsNullOrWhiteSpace(m.Value.InternalApiUrl))
-                    {
-                        throw new ConfigurationErrorsException("Missing 'PasswordlessManagement:InternalApiUrl'.");
-                    }
-
-                    o.ApiUrl = m.Value.InternalApiUrl;
+                    o.ApiUrl = managementOptions.InternalApiUrl;
                 }
             });
 
