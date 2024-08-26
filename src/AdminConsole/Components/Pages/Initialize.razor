@@ -105,7 +105,7 @@
         try
         {
             using var http = new HttpClient();
-            http.BaseAddress = new Uri(ManagementOptions.Value.InternalApiUrl);
+            http.BaseAddress = new Uri(ManagementOptions.Value.ApiUrl);
             http.DefaultRequestHeaders.Add("ManagementKey", ManagementOptions.Value.ManagementKey);
 
             using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto

@@ -10,7 +10,12 @@ public class IndexModel(ILogger<IndexModel> logger, ISetupService setupService) 
     {
         if (await setupService.HasSetupCompletedAsync())
         {
-            return RedirectToPage(HttpContext.User.Identity!.IsAuthenticated ? "/account/login" : "/Organization/overview");
+            if (HttpContext.User.Identity!.IsAuthenticated)
+            {
+                return RedirectToPage("/account/login");
+            }
+
+            return Redirect("/organization/overview");
         }
 
         logger.LogInformation("Database has not been initialized. Starting initialization process.");

@@ -85,7 +85,7 @@ else
 fi
 
 #########################
-# Internal & Public Url #
+# Url #
 #########################
 if [ "$BWP_DOMAIN" != "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
   echo "[Configuration] WARNING: Set environment variable 'BWP_ENABLE_SSL' to 'true' when 'BWP_DOMAIN' is not 'localhost'.";
@@ -106,9 +106,7 @@ fi
 
 export Passwordless__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
 export PasswordlessManagement__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
-export PasswordlessManagement__InternalApiUrl="http://localhost:5000";
 echo "[Configuration] API public: $PasswordlessManagement__ApiUrl";
-echo "[Configuration] API private: $PasswordlessManagement__InternalApiUrl";
 
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #

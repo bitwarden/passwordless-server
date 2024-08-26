@@ -119,7 +119,7 @@ async Task RunAppAsync()
     {
         var options = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
 
-        client.BaseAddress = new Uri(options.Value.InternalApiUrl);
+        client.BaseAddress = new Uri(options.Value.ApiUrl);
     }).AddHttpMessageHandler<ProblemDetailsDelegatingHandler>();
 
     // Magic link SigninManager
