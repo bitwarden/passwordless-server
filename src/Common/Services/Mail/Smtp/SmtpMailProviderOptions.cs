@@ -4,6 +4,11 @@ public class SmtpMailProviderOptions : BaseMailProviderOptions
 {
     public const string Provider = "smtp";
 
+    public SmtpMailProviderOptions()
+    {
+        Name = Provider;
+    }
+
     public string? Host { get; set; }
 
     public int Port { get; set; }

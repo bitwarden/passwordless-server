@@ -4,6 +4,11 @@ public class AwsMailProviderOptions : BaseMailProviderOptions
 {
     public const string Provider = "aws";
 
+    public AwsMailProviderOptions()
+    {
+        Name = Provider;
+    }
+
     public string AccessKey { get; set; }
 
     public string SecretKey { get; set; }
