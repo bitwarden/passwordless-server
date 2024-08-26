@@ -1,0 +1,11 @@
+.summary-property {
+    @apply flex items-center space-x-2;
+}
+
+.property-label {
+    @apply text-sm font-medium text-gray-500;
+}
+
+.property-value {
+    @apply text-sm text-gray-900;
+}
