@@ -8,22 +8,22 @@ using Passwordless.Common.Services.Mail.SendGrid;
 
 namespace Passwordless.Common.Tests.Services.Mail;
 
-public class OrderedMailProviderTests
+public class MailProviderAggregateTests
 {
     private readonly Fixture _fixture = new();
 
     private readonly Mock<IOptionsSnapshot<MailConfiguration>> _optionsMock;
     private readonly Mock<IMailProviderFactory> _factoryMock;
 
-    private readonly OrderedMailProvider _sut;
+    private readonly MailProviderAggregate _sut;
 
-    public OrderedMailProviderTests()
+    public MailProviderAggregateTests()
     {
         _optionsMock = new Mock<IOptionsSnapshot<MailConfiguration>>();
         _factoryMock = new Mock<IMailProviderFactory>();
-        Mock<ILogger<OrderedMailProvider>> loggerMock = new();
+        Mock<ILogger<MailProviderAggregate>> loggerMock = new();
 
-        _sut = new OrderedMailProvider(_optionsMock.Object, _factoryMock.Object, loggerMock.Object);
+        _sut = new MailProviderAggregate(_optionsMock.Object, _factoryMock.Object, loggerMock.Object);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class OrderedMailProviderTests
             await _sut.SendAsync(mailMessage));
 
         // Assert
-        Assert.Equal(OrderedMailProvider.FallBackFailedMessage, actual.Message);
+        Assert.Equal(MailProviderAggregate.FallBackFailedMessage, actual.Message);
     }
 
     [Fact]

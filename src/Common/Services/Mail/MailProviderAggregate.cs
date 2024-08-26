@@ -9,18 +9,18 @@ namespace Passwordless.Common.Services.Mail;
 /// <summary>
 /// Wraps multiple mail providers and tries to send the message using them in order.
 /// </summary>
-public class OrderedMailProvider : IMailProvider
+public class MailProviderAggregate : IMailProvider
 {
     private readonly IOptionsSnapshot<MailConfiguration> _options;
     private readonly IMailProviderFactory _factory;
-    private readonly ILogger<OrderedMailProvider> _logger;
+    private readonly ILogger<MailProviderAggregate> _logger;
 
     public const string FallBackFailedMessage = "No registered mail provider was able to send the message";
 
-    public OrderedMailProvider(
+    public MailProviderAggregate(
         IOptionsSnapshot<MailConfiguration> options,
         IMailProviderFactory factory,
-        ILogger<OrderedMailProvider> logger)
+        ILogger<MailProviderAggregate> logger)
     {
         _options = options;
         _factory = factory;

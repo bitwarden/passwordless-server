@@ -1,5 +1,4 @@
 using System.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Passwordless.Common.Services.Mail.Aws;
 using Passwordless.Common.Services.Mail.File;
 using Passwordless.Common.Services.Mail.SendGrid;
@@ -12,21 +11,24 @@ public static class MailBootstrap
     public static void AddMail(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<IMailProviderFactory, MailProviderFactory>();
-        builder.Services.AddScoped<IMailProvider, OrderedMailProvider>();
+        builder.Services.AddScoped<IMailProvider, MailProviderAggregate>();
         builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("Mail"))
             .PostConfigure<MailConfiguration>(o =>
             {
                 var section = builder.Configuration.GetSection("Mail:Providers");
 
-                // Add a default file provider if no providers are configured.
                 if (!section.GetChildren().Any())
                 {
-                    var fileProviderOptions = new FileMailProviderOptions();
-                    o.Providers.Add(fileProviderOptions);
+                    o.Providers = new List<BaseMailProviderOptions>
+                    {
+                        new FileMailProviderOptions()
+                    };
                     return;
                 }
 
                 // Iterate over all configured providers and add them to the list with binding.
+
+                var providers = new List<BaseMailProviderOptions>();
                 foreach (var child in section.GetChildren())
                 {
                     var type = child.GetValue<string>("Name");
@@ -48,8 +50,9 @@ public static class MailBootstrap
                     // This will allow our configuration to update without having to restart the application.
                     child.Bind(mailProviderOptions);
 
-                    o.Providers.Add(mailProviderOptions);
+                    providers.Add(mailProviderOptions);
                 }
+                o.Providers = providers;
             });
     }
 }
