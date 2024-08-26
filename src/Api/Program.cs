@@ -139,14 +139,7 @@ if (builder.Configuration.IsSelfHosted())
 app.UseCors("default");
 app.UseSecurityHeaders();
 app.UseStaticFiles();
-app.UseWhen(o =>
-{
-    if (o.Request.Path == "/")
-    {
-        return false;
-    }
-    return !o.Request.Path.StartsWithSegments(HealthCheckEndpoints.Path);
-}, c =>
+app.UseWhen(PathValidation.ShouldRunEventLogMiddleware, c =>
 {
     c.UseMiddleware<EventLogStorageCommitMiddleware>();
 });
@@ -154,14 +147,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseSerilog();
-app.UseWhen(o =>
-{
-    if (o.Request.Path == "/")
-    {
-        return false;
-    }
-    return !o.Request.Path.StartsWithSegments(HealthCheckEndpoints.Path);
-}, c =>
+app.UseWhen(PathValidation.ShouldRunEventLogMiddleware, c =>
 {
     c.UseMiddleware<EventLogContextMiddleware>();
 });

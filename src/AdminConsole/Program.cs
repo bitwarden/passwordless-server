@@ -73,7 +73,6 @@ async Task RunAppAsync()
         options.AddTenantRouting();
         options.Conventions.AuthorizeFolder("/");
         options.Conventions.AuthorizeFolder("/App", CustomPolicy.HasAppRole);
-        options.Conventions.AddPageRoute("/Organization/Create", "/signup");
     });
 
     services.AddScoped<ICurrentContext, CurrentContext>();
@@ -101,7 +100,7 @@ async Task RunAppAsync()
         o.ExpireTimeSpan = TimeSpan.FromHours(2);
     });
 
-    services.AddTransient<IAuthorizationHandler, HasAppHandler>();
+    services.AddScoped<IAuthorizationHandler, HasAppHandler>();
     services.AddAuthorization(c =>
     {
         c.AddPolicy(CustomPolicy.HasAppRole, b =>
@@ -115,12 +114,13 @@ async Task RunAppAsync()
     services.AddHostedService<ApplicationCleanupBackgroundService>();
 
     services.AddTransient<IScopedPasswordlessClient, ScopedPasswordlessClient>();
+    services.AddTransient<ProblemDetailsDelegatingHandler>();
     services.AddHttpClient<IScopedPasswordlessClient, ScopedPasswordlessClient>((provider, client) =>
     {
         var options = provider.GetRequiredService<IOptions<PasswordlessManagementOptions>>();
 
-        client.BaseAddress = new Uri(options.Value.InternalApiUrl);
-    });
+        client.BaseAddress = new Uri(options.Value.ApiUrl);
+    }).AddHttpMessageHandler<ProblemDetailsDelegatingHandler>();
 
     // Magic link SigninManager
     services.AddTransient<IMagicLinkBuilder, MagicLinkBuilder>();

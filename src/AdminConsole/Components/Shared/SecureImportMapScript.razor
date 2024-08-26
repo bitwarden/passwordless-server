@@ -4,6 +4,6 @@
 @if (Value.Imports.Count > 0)
 {
     <script type="importmap" nonce="@Nonce">
-        @((MarkupString)JsonSerializer.Serialize(Value, JsonSerializerOptions))
+        @((MarkupString)JsonSerializer.Serialize(_model, JsonSerializerOptions))
     </script>
 }

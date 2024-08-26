@@ -6,6 +6,7 @@
 <EditForm Model="FormModel" OnValidSubmit="SubmitAsync" FormName="@FormName" class="space-y-6">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
+    <CustomValidationErrors EditContext="FormEditContext" />
     <div class="sm:w-full sm:max-w-md">
         <label class="block text-sm font-medium leading-6 text-gray-900 my-2" for="Purpose">Purpose:</label>
         <InputText id="Purpose" @bind-Value="@FormModel!.Purpose" readonly="@IsPurposeReadOnly" class="text-input"/>
@@ -41,20 +42,34 @@
 
     [SupplyParameterFromForm]
     public AuthenticationConfigurationFormModel? FormModel { get; set; }
+    
+    public EditContext? FormEditContext { get; set; }
+
+    public ValidationMessageStore? FormValidationMessageStore { get; set; }
 
     private const string FormName = "AuthenticationConfigurationForm";
 
     protected override void OnInitialized()
     {
         if (Model is not null && FormModel is null) FormModel = Model;
-
-        if (FormModel is not null) return;
-
-        FormModel = new AuthenticationConfigurationFormModel();
+        
+        FormModel ??= new AuthenticationConfigurationFormModel();
+        
+        FormEditContext = new EditContext(FormModel);
+        FormValidationMessageStore = new ValidationMessageStore(FormEditContext);
     }
 
     private async Task SubmitAsync()
     {
-        await OnSubmitFunction.InvokeAsync(FormModel);
+        try
+        {
+            await OnSubmitFunction.InvokeAsync(FormModel);
+        }
+        catch (PasswordlessApiException e)
+        {
+            FormValidationMessageStore!.Add(() => FormModel!.Purpose, e.Details.Title);
+            FormEditContext!.NotifyValidationStateChanged();
+            Logger.LogError(e, "Failed to save authentication configuration");
+        }
     }
 }

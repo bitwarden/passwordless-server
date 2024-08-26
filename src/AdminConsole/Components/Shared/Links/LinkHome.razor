@@ -1,30 +1,33 @@
-@inherits BaseRazorComponent
+@using Passwordless.Common.Extensions
+@inject IHttpContextAccessor HttpContextAccessor
 
-<a class="@Class" href="">
-    @if (IsDesktop.HasValue)
+<a @attributes="AdditionalAttributes" href="@HttpContextAccessor.HttpContext!.Request.GetBaseUrl()" aria-label="Home">
+    @switch (Size)
     {
-        if (IsDesktop.Value)
-        {
-            <LogoFull />
-        }
-        else
-        {
-            <LogoMobile />
-        }
-    }
-    else
-    {
-        <LogoFull Class="hidden lg:block"/>
-        <LogoMobile Class="lg:hidden"/>
+        case Sizes.Small:
+            <LogoMobile class="block" />
+            break;
+        case Sizes.Large:
+            <LogoFull class="block" />
+            break;
+        default:
+            <LogoFull class="hidden lg:block"/>
+            <LogoMobile class="lg:hidden"/>
+            break;
     }
 </a>
 
 @code
 {
-    /// <summary>
-    /// When set, it either renders the full-sized logo or the mobile-sized logo.
-    /// When not set, it renders both, but hides the one that is not appropriate for the current screen size.
-    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
     [Parameter]
-    public bool? IsDesktop { get; set; }
+    public Sizes? Size { get; set; }
+    
+    public enum Sizes
+    {
+        Small,
+        Large
+    }
 }

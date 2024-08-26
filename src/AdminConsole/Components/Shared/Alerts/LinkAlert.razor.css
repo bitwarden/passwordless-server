@@ -1,0 +1,87 @@
+.container {
+    @apply rounded-md p-4 my-3 max-w-fit;
+}
+
+.icon {
+    @apply w-5 h-5;
+}
+
+.content {
+    @apply ml-3 flex justify-between;
+}
+
+.link {
+    @apply whitespace-nowrap font-medium;
+}
+
+.container-danger {
+    @apply container bg-red-50;
+}
+
+.content-danger {
+    @apply content text-red-800;
+}
+
+.link-danger {
+    @apply link text-red-700 hover:text-red-600
+}
+
+.container-info {
+    @apply container bg-blue-50;
+}
+
+.content-info {
+    @apply content text-blue-800;
+}
+
+.link-info {
+    @apply link text-blue-700 hover:text-blue-600
+}
+
+.container-primary {
+    @apply container bg-blue-50;
+}
+
+.content-primary {
+    @apply content text-blue-800;
+}
+
+.link-primary {
+    @apply link text-blue-700 hover:text-blue-600
+}
+
+.container-secondary {
+    @apply container bg-gray-50;
+}
+
+.content-secondary {
+    @apply content text-gray-800;
+}
+
+.link-secondary {
+    @apply link text-gray-700 hover:text-gray-600
+}
+
+.container-success {
+    @apply container bg-green-50;
+}
+
+.content-success {
+    @apply content text-green-800;
+}
+
+.link-success {
+    @apply link text-green-700 hover:text-green-600
+}
+
+.container-warning {
+    @apply container bg-yellow-50;
+}
+
+.content-warning {
+    @apply content text-yellow-800;
+}
+
+.link-warning {
+    @apply link text-yellow-700 hover:text-yellow-600
+}

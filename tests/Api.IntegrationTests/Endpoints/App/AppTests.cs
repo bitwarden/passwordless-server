@@ -17,8 +17,8 @@ using SetFeaturesRequest = Passwordless.Common.Models.Apps.SetFeaturesRequest;
 
 namespace Passwordless.Api.IntegrationTests.Endpoints.App;
 
+[Collection(ApiCollectionFixture.Fixture)]
 public class AppTests(ITestOutputHelper testOutput, PasswordlessApiFixture apiFixture)
-    : IClassFixture<PasswordlessApiFixture>
 {
     [Theory]
     [InlineData("a")]

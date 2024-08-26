@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Fido2NetLib.Objects;
 using MessagePack;
 using Passwordless.Common.Validation;
 
@@ -20,17 +21,26 @@ public class RegisterToken : Token
 
     [MessagePack.Key(13)]
     public string Attestation { get; set; } = "None";
+
     [MessagePack.Key(14)]
     public string AuthenticatorType { get; set; }
+
     [MessagePack.Key(15)]
     public bool Discoverable { get; set; } = true;
+
     [MessagePack.Key(16)]
     public string UserVerification { get; set; } = "Preferred";
+
     [MessagePack.Key(17)]
     [MaxLength(10), MaxLengthCollection(250), RequiredCollection(AllowEmptyStrings = false)]
-    public HashSet<string> Aliases { get; set; }
+    public HashSet<string>? Aliases { get; set; }
 
-    [MessagePack.Key(18)] public bool AliasHashing { get; set; } = true;
+    [MessagePack.Key(18)]
+    public bool AliasHashing { get; set; } = true;
+
+    [MessagePack.Key(19)]
+    [MaxLength(3)]
+    public IReadOnlyList<PublicKeyCredentialHint> Hints { get; set; } = [];
 }
 
 [MessagePackObject]

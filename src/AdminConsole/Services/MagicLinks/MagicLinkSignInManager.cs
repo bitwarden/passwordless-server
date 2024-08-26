@@ -22,7 +22,7 @@ public class MagicLinkSignInManager<TUser>(
     : SignInManager<TUser>(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
     where TUser : class
 {
-    public async Task SendEmailForSignInAsync(string email, string? returnUrl)
+    public virtual async Task SendEmailForSignInAsync(string email, string? returnUrl)
     {
         var user = await UserManager.FindByEmailAsync(email);
         if (user is not ConsoleAdmin admin)
@@ -53,7 +53,7 @@ public class MagicLinkSignInManager<TUser>(
         eventLogger.LogCreateLoginViaMagicLinkEvent(admin);
     }
 
-    public async Task<SignInResult> PasswordlessSignInAsync(string token, bool isPersistent)
+    public virtual async Task<SignInResult> PasswordlessSignInAsync(string token, bool isPersistent)
     {
         try
         {

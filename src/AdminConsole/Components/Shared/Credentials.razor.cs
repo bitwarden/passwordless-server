@@ -54,18 +54,6 @@ public partial class Credentials : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         Items = await PasswordlessClient.ListCredentialsAsync(UserId);
-        // If we've posted a form, we need to add backwards compatibility for Razor Pages. Bind it to the model, and trigger the form submission handler.
-        if (HttpContextAccessor.IsRazorPages() && HttpContextAccessor.HttpContext!.Request.HasFormContentType)
-        {
-            var request = HttpContextAccessor.HttpContext!.Request;
-            switch (request.Form["_handler"])
-            {
-                case RemoveCredentialFormName:
-                    DeleteCredentialForm.CredentialId = request.Form["DeleteCredentialForm.CredentialId"].ToString();
-                    await DeleteCredentialAsync();
-                    break;
-            }
-        }
     }
 
     public async Task DeleteCredentialAsync()

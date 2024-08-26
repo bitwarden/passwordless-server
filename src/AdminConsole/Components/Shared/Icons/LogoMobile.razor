@@ -1,6 +1,4 @@
-@inherits BaseRazorComponent 
-
-<svg class="@Class" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+<svg class="@_class" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
      viewBox="0 0 1024 1024" xml:space="preserve">
     <path id="Background" class="fill-transparent" d="M1024,864c0,88.4-71.6,160-160,160H160C71.6,1024,0,952.4,0,864V160C0,71.6,71.6,0,160,0h704
 	c88.4,0,160,71.6,160,160V864z"/>
@@ -17,12 +15,19 @@
 {
     private static readonly string BaseClass = "h-8 w-8";
 
+    private string _class = BaseClass;
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
     protected override void OnInitialized()
     {
-        if (Class != null)
+        if (AdditionalAttributes != null)
         {
-            Class = string.Join(' ', BaseClass, Class);
+            if (AdditionalAttributes.ContainsKey("class"))
+            {
+                _class = string.Join(' ', BaseClass, _class);
+            }
         }
-        base.OnInitialized();
     }
 }

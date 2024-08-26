@@ -1,4 +1,6 @@
-@page "/Organization/Create"
+@page "/organization/create"
+@page "/signup"
+
 @using Microsoft.AspNetCore.Identity
 @using Passwordless.AdminConsole.EventLog.Loggers
 @using Passwordless.AdminConsole.Identity
@@ -16,7 +18,7 @@
 @inject TimeProvider TimeProvider
 @inject ILogger<Create> Logger
 
-<Page Title="Create an organization">
+<Page Title="Create Organization" HideTitle="@true">
     <div class="w-full lg:flex lg:items-start lg:space-x-8">
         @* Mobile promo *@
         <div class="lg:hidden mb-2 p-4">
@@ -37,7 +39,7 @@
             <div class="hidden sm:block">
                 <div class="flex mt-6 space-x-4">
                     <div>
-                        <img class="w-10" src="/img/tag1.svg"/>
+                        <img class="w-10" src="/img/tag1.svg" alt="Standards-based & phishing-resistant"/>
                     </div>
                     <div class="basis-full mt-1">
                         <p class="font-medium">Standards-based & phishing-resistant</p>
@@ -47,7 +49,7 @@
 
                 <div class="flex mt-4 space-x-4">
                     <div>
-                        <img class="w-10" src="/img/tag2.svg"/>
+                        <img class="w-10" src="/img/tag2.svg" alt="Add passkeys to existing authentication"/>
                     </div>
                     <div class="basis-full mt-1">
                         <p class="font-medium">Add passkeys to existing authentication</p>
@@ -57,7 +59,7 @@
 
                 <div class="flex mt-4 space-x-4">
                     <div>
-                        <img class="w-10 pt-1" src="/img/tag3.svg"/>
+                        <img class="w-10 pt-1" src="/img/tag3.svg" alt="Centralized passkey management" />
                     </div>
                     <div class="basis-full mt-1">
                         <p class="font-medium">Centralized passkey management</p>
@@ -67,7 +69,7 @@
 
                 <div class="flex mt-4 space-x-4">
                     <div>
-                        <img class="w-10" src="/img/tag4.svg"/>
+                        <img class="w-10" src="/img/tag4.svg" alt="Security that’s tested and validated" />
                     </div>
                     <div class="basis-full mt-1">
                         <p class="font-medium">Security that’s tested and validated</p>
@@ -107,10 +109,8 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-gray-900">I’m building applications for:</label>
-
-                    <fieldset class="mt-2">
-                        <legend class="sr-only">I’m building applications for:</legend>
+                    <fieldset class="space-y-2">
+                        <legend class="text-sm font-medium text-gray-900">I’m building applications for:</legend>
                         <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
                             <InputRadioGroup @bind-Value="Form.Type">
                                 <div class="radio-control">
@@ -130,25 +130,23 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-gray-900">I'm building passwordless authentication for:</label>
-
-                    <fieldset class="mt-2">
-                        <legend class="sr-only">How will you use passwordless.dev?</legend>
+                    <fieldset class="space-y-2">
+                        <legend class="text-sm font-medium text-gray-900">How will you use passwordless.dev?</legend>
                         <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
                             <InputRadioGroup @bind-Value="Form.UseCase">
                                 <div class="radio-control">
                                     <InputRadio id="usecase-customers-radio" Value="@UseCaseType.Customers" type="radio" class="radio-input" />
-                                    <label asp-for="Form.UseCase" for="usecase-employees-radio" class="radio-label">Users</label>
+                                    <label for="usecase-customers-radio" class="radio-label">Users</label>
                                 </div>
 
                                 <div class="radio-control">
                                     <InputRadio id="usecase-employees-radio" Value="@UseCaseType.Employees" type="radio" class="radio-input" />
-                                    <label asp-for="Form.UseCase" for="usecase-employees-radio" class="radio-label">Employees</label>
+                                    <label for="usecase-employees-radio" class="radio-label">Employees</label>
                                 </div>
 
                                 <div class="radio-control">
                                     <InputRadio id="usecase-both-radio" Value="@UseCaseType.Both" type="radio" class="radio-input" />
-                                    <label asp-for="Form.UseCase" for="usecase-both-radio" class="radio-label">Both</label>
+                                    <label for="usecase-both-radio" class="radio-label">Both</label>
                                 </div>
                             </InputRadioGroup>
                         </div>
@@ -159,10 +157,10 @@
                 <div>
                     <div class="relative flex items-start">
                         <div class="h-6 items-center">
-                            <InputCheckbox id="terms-and-privacy-checkbox" aria-describedby="tos-description" @bind-Value="Form.AcceptsTermsAndPrivacy" />
+                            <InputCheckbox id="terms-and-privacy-checkbox" aria-describedby="terms-and-privacy-label" @bind-Value="Form.AcceptsTermsAndPrivacy" />
                         </div>
                         <div class="ml-3 text-sm leading-6">
-                            <label for="terms-and-privacy-checkbox" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
+                            <label id="terms-and-privacy-label" for="terms-and-privacy-checkbox" class="font-medium text-gray-900">I agree to the <a href="https://bitwarden.com/terms/" class="link-blue" target="_blank">Terms and Conditions</a> and the <a href="https://bitwarden.com/privacy/" class="link-blue" target="_blank">Privacy Policy</a></label>
                         </div>
                     </div>
                     <ValidationMessage For="() => Form.AcceptsTermsAndPrivacy" />
