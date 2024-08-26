@@ -23,7 +23,7 @@ public class RegisterToken : Token
     public string Attestation { get; set; } = "None";
 
     [MessagePack.Key(14)]
-    public string AuthenticatorType { get; set; }
+    public string? AuthenticatorType { get; set; }
 
     [MessagePack.Key(15)]
     public bool Discoverable { get; set; } = true;
@@ -68,13 +68,16 @@ public class VerifySignInToken : Token
     public string Country { get; set; }
 
     [MessagePack.Key(17)]
-    public string Nickname { get; set; }
+    public string? Nickname { get; set; }
 
     [MessagePack.Key(18)]
     public byte[] CredentialId { get; set; }
 
     [MessagePack.Key(19)]
     public string Purpose { get; set; }
+
+    [MessagePack.Key(20)]
+    public string? AuthenticatorDisplayName { get; set; }
 }
 
 [MessagePackObject]
