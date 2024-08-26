@@ -1,0 +1,11 @@
+.card {
+    @apply overflow-hidden bg-white shadow sm:rounded-lg;
+}
+
+.card h3 {
+    @apply line-clamp-1
+}
+
+.card .subtitle {
+    @apply mt-1 max-w-2xl text-sm text-gray-500 line-clamp-1
+}
