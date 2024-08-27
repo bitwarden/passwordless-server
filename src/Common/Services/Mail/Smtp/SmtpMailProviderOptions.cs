@@ -17,8 +17,6 @@ public class SmtpMailProviderOptions : BaseMailProviderOptions
 
     public string? Password { get; set; }
 
-    public string From { get; set; }
-
     public bool StartTls { get; set; }
 
     public bool Ssl { get; set; }
