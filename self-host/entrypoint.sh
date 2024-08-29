@@ -40,50 +40,6 @@ else
   export ConnectionStrings__sqlite__admin=${ConnectionStrings__sqlite__admin:-$SQLITE_CONNECTION_STRING_ADMIN}
 fi
 
-#################
-# E-mail / SMTP #
-#################
-if [ -z "$BWP_SMTP_FROM" ] || [ "$BWP_SMTP_HOST" == "null" ]; then
-  export Mail__File__Path="$mounted_dir"
-  echo "[Configuration] SMTP E-mail configuration not set. Writing to a local file instead in '/etc/bitwarden_passwordless/mail.md' or your mounted volume. See 'https://docs.passwordless.dev/guide/self-hosting/configuration.html'.";
-else
-  if [ -n "$BWP_SMTP_FROM" ] && [ "$BWP_SMTP_FROM" != "null" ]; then
-    export Mail__Smtp__From=$BWP_SMTP_FROM
-  fi
-
-  if [ -n "$BWP_SMTP_USERNAME" ] && [ "$BWP_SMTP_USERNAME" != "null" ]; then
-    export Mail__Smtp__Username=$BWP_SMTP_USERNAME
-  fi
-
-  if [ -n "$BWP_SMTP_PASSWORD" ] && [ "$BWP_SMTP_PASSWORD" != "null" ]; then
-    export Mail__Smtp__Password=$BWP_SMTP_PASSWORD
-  fi
-
-  if [ -n "$BWP_SMTP_HOST" ] && [ "$BWP_SMTP_HOST" != "null" ]; then
-    export Mail__Smtp__Host=$BWP_SMTP_HOST
-  fi
-
-  if [ -n "$BWP_SMTP_PORT" ] && [ "$BWP_SMTP_PORT" != "null" ]; then
-    export Mail__Smtp__Port=$BWP_SMTP_PORT
-  fi
-
-  if [ -n "$BWP_SMTP_STARTTLS" ] && [ "$BWP_SMTP_STARTTLS" != "null" ]; then
-    export Mail__Smtp__StartTls=$BWP_SMTP_STARTTLS
-  fi
-
-  if [ -n "$BWP_SMTP_SSL" ] && [ "$BWP_SMTP_SSL" != "null" ]; then
-    export Mail__Smtp__Ssl=$BWP_SMTP_SSL
-  fi
-
-  if [ -n "$BWP_SMTP_SSLOVERRIDE" ] && [ "$BWP_SMTP_SSLOVERRIDE" != "null" ]; then
-    export Mail__Smtp__SslOverride=$BWP_SMTP_SSLOVERRIDE
-  fi
-
-  if [ -n "$BWP_SMTP_TRUSTSERVER" ] && [ "$BWP_SMTP_TRUSTSERVER" != "null" ]; then
-    export Mail__Smtp__TrustServer=$BWP_SMTP_TRUSTSERVER
-  fi
-fi
-
 #########################
 # Url #
 #########################
