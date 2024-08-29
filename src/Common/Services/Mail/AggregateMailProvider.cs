@@ -25,9 +25,14 @@ public class AggregateMailProvider : IMailProvider
 
     public async Task SendAsync(MailMessage message)
     {
+
         if (message.From == null)
         {
             message.From = _options.Value.From;
+        }
+        if (message.FromDisplayName == null)
+        {
+            message.FromDisplayName = _options.Value.FromName;
         }
         foreach (var providerConfiguration in _options.Value.Providers)
         {
