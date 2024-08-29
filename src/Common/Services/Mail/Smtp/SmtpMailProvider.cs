@@ -5,7 +5,6 @@ namespace Passwordless.Common.Services.Mail.Smtp;
 
 public class SmtpMailProvider : IMailProvider
 {
-    private readonly string? _fromEmail;
     private readonly string? _smtpUsername;
     private readonly string? _smtpPassword;
     private readonly int _smtpPort;
@@ -18,7 +17,6 @@ public class SmtpMailProvider : IMailProvider
     public SmtpMailProvider(SmtpMailProviderOptions options)
     {
 
-        _fromEmail = options.From;
         _smtpUsername = options.Username;
         _smtpPassword = options.Password;
         _smtpHost = options.Host;
@@ -57,7 +55,7 @@ public class SmtpMailProvider : IMailProvider
 
     private MailboxAddress GetFromAddress(MailMessage message)
     {
-        var from = (_fromEmail ?? message.From)!;
+        var from = message.From!;
 
         return string.IsNullOrEmpty(message.FromDisplayName) ? MailboxAddress.Parse(from) : new MailboxAddress(message.FromDisplayName, from);
     }
