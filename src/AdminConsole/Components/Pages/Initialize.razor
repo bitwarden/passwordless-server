@@ -19,6 +19,7 @@
 @inject TimeProvider TimeProvider
 @inject UserManager<ConsoleAdmin> UserManager
 @inject ILogger<Initialize> Logger
+@inject IPasswordlessManagementClient PasswordlessManagementClient
 
 <h3>🚀 Let's set up the Admin Console</h3>
 <Alert Style="@ContextualStyles.Warning" class="mt-5">Admin Console is configured to use the API at <strong>@ManagementOptions.Value.ApiUrl</strong></Alert>
@@ -104,19 +105,12 @@
         // Create app in the API
         try
         {
-            using var http = new HttpClient();
-            http.BaseAddress = new Uri(ManagementOptions.Value.ApiUrl);
-            http.DefaultRequestHeaders.Add("ManagementKey", ManagementOptions.Value.ManagementKey);
-
-            using var response = await http.PostAsJsonAsync("/admin/apps/adminconsole/create", new CreateAppDto
+            const string appName = "adminconsole";
+            appCreationResult = await PasswordlessManagementClient.CreateApplicationAsync(appName, new CreateAppDto
             {
                 AdminEmail = Form.AdminEmail,
                 MagicLinkEmailMonthlyQuota = 2000
             });
-
-            response.EnsureSuccessStatusCode();
-
-            appCreationResult = (await response.Content.ReadFromJsonAsync<CreateAppResultDto>())!;
         }
         catch (Exception ex)
         {

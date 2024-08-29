@@ -9,7 +9,7 @@ public class PasswordlessManagementClient(HttpClient http) : IPasswordlessManage
     public async Task<CreateAppResultDto> CreateApplicationAsync(string appId, CreateAppDto options)
     {
         using var response = await http.PostAsJsonAsync(
-            $"/admin/apps/{Uri.EscapeDataString(appId)}/create",
+            $"admin/apps/{Uri.EscapeDataString(appId)}/create",
             options
         );
 
