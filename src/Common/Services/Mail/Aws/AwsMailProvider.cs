@@ -23,7 +23,10 @@ public class AwsMailProvider : IMailProvider
     {
         var request = new SendEmailRequest
         {
-            FromEmailAddress = message.From
+            FromEmailAddress = message.FromDisplayName != null
+                ? $"{message.FromDisplayName} <{message.From}>"
+                : message.From
+
         };
 
         if (message.To.Any())
