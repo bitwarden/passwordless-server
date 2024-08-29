@@ -48,10 +48,13 @@ if [ "$BWP_DOMAIN" != "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
   echo "[Configuration] WARNING: WebAuthn requires SSL when not running on 'localhost'. This could result in unexpected behavior.";
 fi
 
-export Passwordless__ApiUrl="https://${BWP_DOMAIN}/api/"
-export PasswordlessManagement__ApiUrl="https://${BWP_DOMAIN}/api/"
-
-echo "[Configuration] API public: $PasswordlessManagement__ApiUrl";
+if [ "$BWP_PORT" == "null" ]; then
+  export Passwordless__ApiUrl="https://${BWP_DOMAIN}/api/"
+  export PasswordlessManagement__ApiUrl="https://${BWP_DOMAIN}/api/"
+else
+  export Passwordless__ApiUrl="https://${BWP_DOMAIN}:${BWP_PORT}/api/"
+  export PasswordlessManagement__ApiUrl="https://${BWP_DOMAIN}:${BWP_PORT}/api/"
+fi
 
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #
