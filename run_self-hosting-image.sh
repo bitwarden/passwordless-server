@@ -8,5 +8,5 @@ docker run \
   -p 5701:5701 \
   -e BWP_DOMAIN=yourdomain.com \
   -e BWP_ENABLE_SSL=false \
-  -v /Users/jonashendrickx/passwordless-self-hosting:/etc/bitwarden_passwordless \
+  -v /your/path/passwordless-self-hosting:/etc/bitwarden_passwordless \
   bitwarden/passwordless
