@@ -17,26 +17,12 @@ public static class MailBootstrap
             {
                 var section = builder.Configuration.GetSection("Mail:Providers");
 
-                if (!section.GetChildren().Any())
-                {
-                    o.Providers = new List<BaseMailProviderOptions>
-                    {
-                        new FileMailProviderOptions()
-                    };
-                    return;
-                }
-
                 // Iterate over all configured providers and add them to the list with binding.
-
                 var providers = new List<BaseMailProviderOptions>();
                 foreach (var child in section.GetChildren())
                 {
-                    var type = child.GetValue<string>("Name");
-
-                    if (type == null)
-                    {
-                        throw new ConfigurationErrorsException("Provider type is missing");
-                    }
+                    var type = child.GetValue<string>("Name")
+                               ?? throw new ConfigurationErrorsException("Provider type is missing");
 
                     BaseMailProviderOptions mailProviderOptions = type.ToLowerInvariant() switch
                     {
@@ -52,6 +38,7 @@ public static class MailBootstrap
 
                     providers.Add(mailProviderOptions);
                 }
+
                 o.Providers = providers;
             });
     }

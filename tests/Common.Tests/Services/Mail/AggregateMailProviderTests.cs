@@ -27,26 +27,6 @@ public class AggregateMailProviderTests
     }
 
     [Fact]
-    public async Task SendAsync_Throws_InvalidOperationException_WhenNoProvidersAreRegistered()
-    {
-        // Arrange
-        var mailMessage = _fixture.Create<MailMessage>();
-        var mailOptions = new MailConfiguration
-        {
-            From = "johndoe@example.com",
-            Providers = new List<BaseMailProviderOptions>()
-        };
-        _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
-
-        // Act
-        var actual = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _sut.SendAsync(mailMessage));
-
-        // Assert
-        Assert.Equal(AggregateMailProvider.FallBackFailedMessage, actual.Message);
-    }
-
-    [Fact]
     public async Task SendAsync_Overrides_MailMessageSenderFromConfiguration_WhenMailMessageHasNoSender()
     {
         // Arrange

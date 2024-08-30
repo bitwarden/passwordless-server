@@ -15,5 +15,5 @@ public class MailConfiguration
     /// <summary>
     /// The ordered list of mail providers to use.
     /// </summary>
-    public IReadOnlyCollection<BaseMailProviderOptions> Providers { get; set; } = new List<BaseMailProviderOptions>();
+    public IReadOnlyCollection<BaseMailProviderOptions> Providers { get; set; } = [];
 }
