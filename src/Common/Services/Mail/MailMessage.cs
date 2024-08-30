@@ -1,7 +1,19 @@
 namespace Passwordless.Common.Services.Mail;
 
-public record MailMessage(IEnumerable<string> To, string? From, string Subject, string TextBody, string HtmlBody, string Tag, string MessageType, string FromDisplayName)
+public class MailMessage
 {
+    public MailMessage(IEnumerable<string> to, string? from, string subject, string textBody, string htmlBody, string tag, string messageType, string fromDisplayName)
+    {
+        To = to;
+        From = from;
+        Subject = subject;
+        TextBody = textBody;
+        HtmlBody = htmlBody;
+        Tag = tag;
+        MessageType = messageType;
+        FromDisplayName = fromDisplayName;
+    }
+
     public MailMessage(IEnumerable<string> to, string? from, string subject, string textBody, string htmlBody, string tag, string messageType)
         : this(to, from, subject, textBody, htmlBody, tag, messageType, string.Empty)
     {
@@ -12,9 +24,25 @@ public record MailMessage(IEnumerable<string> To, string? From, string Subject, 
     {
     }
 
-    public MailMessage() : this(new List<string>(), null, null, null, null, null, string.Empty)
+    public MailMessage()
     {
     }
 
-    public ICollection<string> Bcc { get; set; } = new List<string>();
+    public IEnumerable<string> To { get; init; }
+
+    public string? From { get; set; }
+
+    public string? FromDisplayName { get; set; }
+
+    public string Subject { get; init; }
+
+    public required string TextBody { get; init; }
+
+    public required string HtmlBody { get; init; }
+
+    public string Tag { get; init; }
+
+    public string MessageType { get; init; }
+
+    public ICollection<string> Bcc { get; init; } = new List<string>();
 }

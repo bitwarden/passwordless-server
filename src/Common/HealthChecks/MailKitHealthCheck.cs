@@ -1,16 +1,16 @@
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Passwordless.Common.Services.Mail;
+using Passwordless.Common.Services.Mail.Smtp;
 
 namespace Passwordless.Common.HealthChecks;
 
 public class MailKitHealthCheck : IHealthCheck
 {
-    private readonly MailKitSmtpMailProvider _mailProvider;
+    private readonly SmtpMailProvider _smtpMailProvider;
 
-    public MailKitHealthCheck(MailKitSmtpMailProvider mailProvider)
+    public MailKitHealthCheck(SmtpMailProvider smtpMailProvider)
     {
-        _mailProvider = mailProvider;
+        _smtpMailProvider = smtpMailProvider;
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
@@ -19,7 +19,7 @@ public class MailKitHealthCheck : IHealthCheck
         bool hasErrors = false;
         try
         {
-            client = await _mailProvider.GetClientAsync();
+            client = await _smtpMailProvider.GetClientAsync();
         }
         catch
         {

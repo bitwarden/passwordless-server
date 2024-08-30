@@ -29,8 +29,7 @@ public class LoginModel : PageModel
     {
         if (HttpContext.User.Identity is { IsAuthenticated: true })
         {
-            returnUrl ??= Url.Page("/Organization/Overview");
-            return LocalRedirect(returnUrl);
+            return string.IsNullOrWhiteSpace(returnUrl) ? Redirect("/Organization/Overview") : LocalRedirect(returnUrl);
         }
 
         int? status = (int?)TempData["Status"];

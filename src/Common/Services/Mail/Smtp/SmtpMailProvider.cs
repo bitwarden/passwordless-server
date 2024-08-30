@@ -1,11 +1,10 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace Passwordless.Common.Services.Mail;
+namespace Passwordless.Common.Services.Mail.Smtp;
 
-public class MailKitSmtpMailProvider : IMailProvider
+public class SmtpMailProvider : IMailProvider
 {
-    private readonly string? _fromEmail;
     private readonly string? _smtpUsername;
     private readonly string? _smtpPassword;
     private readonly int _smtpPort;
@@ -15,19 +14,17 @@ public class MailKitSmtpMailProvider : IMailProvider
     private readonly bool _smtpSslOverride;
     private readonly bool _smtpTrustServer;
 
-    public MailKitSmtpMailProvider(IConfiguration configuration)
+    public SmtpMailProvider(SmtpMailProviderOptions options)
     {
-        IConfigurationSection mailOptions = configuration.GetSection("Mail");
-        IConfigurationSection smtpOptions = mailOptions.GetSection("Smtp");
-        _fromEmail = smtpOptions.GetValue<string>("From", null!);
-        _smtpUsername = smtpOptions.GetValue<string>("Username", null!);
-        _smtpPassword = smtpOptions.GetValue<string>("Password", null!);
-        _smtpHost = smtpOptions.GetValue<string>("Host", null!);
-        _smtpPort = smtpOptions.GetValue<int>("Port");
-        _smtpStartTls = smtpOptions.GetValue<bool>("StartTls");
-        _smtpSsl = smtpOptions.GetValue<bool>("Ssl");
-        _smtpSslOverride = smtpOptions.GetValue<bool>("SslOverride");
-        _smtpTrustServer = smtpOptions.GetValue<bool>("TrustServer");
+
+        _smtpUsername = options.Username;
+        _smtpPassword = options.Password;
+        _smtpHost = options.Host;
+        _smtpPort = options.Port;
+        _smtpStartTls = options.StartTls;
+        _smtpSsl = options.Ssl;
+        _smtpSslOverride = options.SslOverride;
+        _smtpTrustServer = options.TrustServer;
     }
 
     public async Task SendAsync(MailMessage message)
@@ -58,7 +55,7 @@ public class MailKitSmtpMailProvider : IMailProvider
 
     private MailboxAddress GetFromAddress(MailMessage message)
     {
-        var from = (_fromEmail ?? message.From)!;
+        var from = message.From!;
 
         return string.IsNullOrEmpty(message.FromDisplayName) ? MailboxAddress.Parse(from) : new MailboxAddress(message.FromDisplayName, from);
     }

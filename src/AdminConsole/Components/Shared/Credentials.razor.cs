@@ -7,7 +7,7 @@ namespace Passwordless.AdminConsole.Components.Shared;
 
 public partial class Credentials : ComponentBase
 {
-    public const string RemoveCredentialFormName = "remove-credential-form";
+    public const string ManageCredentialFormName = "manage-credential-form";
 
     public required IReadOnlyCollection<Credential>? Items { get; set; }
 
@@ -45,23 +45,23 @@ public partial class Credentials : ComponentBase
     [Parameter]
     public required string UserId { get; set; }
 
-    [SupplyParameterFromForm(FormName = RemoveCredentialFormName)]
-    public DeleteCredentialFormModel DeleteCredentialForm { get; set; } = new();
+    [SupplyParameterFromForm(FormName = ManageCredentialFormName)]
+    public ManageCredentialFormModel ManageCredentialForm { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         Items = await PasswordlessClient.ListCredentialsAsync(UserId);
     }
 
-    public async Task DeleteCredentialAsync()
+    public async Task OnManageCredentialSubmittedAsync()
     {
-        var validationContext = new ValidationContext(DeleteCredentialForm);
-        var validationResult = Validator.TryValidateObject(DeleteCredentialForm, validationContext, null, true);
+        var validationContext = new ValidationContext(ManageCredentialForm);
+        var validationResult = Validator.TryValidateObject(ManageCredentialForm, validationContext, null, true);
         if (!validationResult)
         {
             throw new ArgumentException("The request is not valid.");
         }
-        await PasswordlessClient.DeleteCredentialAsync(DeleteCredentialForm.CredentialId);
+        await PasswordlessClient.DeleteCredentialAsync(ManageCredentialForm.CredentialId);
         NavigationManager.NavigateTo(NavigationManager.Uri);
 
     }
@@ -193,7 +193,7 @@ public partial class Credentials : ComponentBase
         }
     }
 
-    public sealed class DeleteCredentialFormModel
+    public sealed class ManageCredentialFormModel
     {
         [Base64Url]
         public string CredentialId { get; set; }

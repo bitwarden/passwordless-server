@@ -40,50 +40,6 @@ else
   export ConnectionStrings__sqlite__admin=${ConnectionStrings__sqlite__admin:-$SQLITE_CONNECTION_STRING_ADMIN}
 fi
 
-#################
-# E-mail / SMTP #
-#################
-if [ -z "$BWP_SMTP_FROM" ] || [ "$BWP_SMTP_HOST" == "null" ]; then
-  export Mail__File__Path="$mounted_dir"
-  echo "[Configuration] SMTP E-mail configuration not set. Writing to a local file instead in '/etc/bitwarden_passwordless/mail.md' or your mounted volume. See 'https://docs.passwordless.dev/guide/self-hosting/configuration.html'.";
-else
-  if [ -n "$BWP_SMTP_FROM" ] && [ "$BWP_SMTP_FROM" != "null" ]; then
-    export Mail__Smtp__From=$BWP_SMTP_FROM
-  fi
-
-  if [ -n "$BWP_SMTP_USERNAME" ] && [ "$BWP_SMTP_USERNAME" != "null" ]; then
-    export Mail__Smtp__Username=$BWP_SMTP_USERNAME
-  fi
-
-  if [ -n "$BWP_SMTP_PASSWORD" ] && [ "$BWP_SMTP_PASSWORD" != "null" ]; then
-    export Mail__Smtp__Password=$BWP_SMTP_PASSWORD
-  fi
-
-  if [ -n "$BWP_SMTP_HOST" ] && [ "$BWP_SMTP_HOST" != "null" ]; then
-    export Mail__Smtp__Host=$BWP_SMTP_HOST
-  fi
-
-  if [ -n "$BWP_SMTP_PORT" ] && [ "$BWP_SMTP_PORT" != "null" ]; then
-    export Mail__Smtp__Port=$BWP_SMTP_PORT
-  fi
-
-  if [ -n "$BWP_SMTP_STARTTLS" ] && [ "$BWP_SMTP_STARTTLS" != "null" ]; then
-    export Mail__Smtp__StartTls=$BWP_SMTP_STARTTLS
-  fi
-
-  if [ -n "$BWP_SMTP_SSL" ] && [ "$BWP_SMTP_SSL" != "null" ]; then
-    export Mail__Smtp__Ssl=$BWP_SMTP_SSL
-  fi
-
-  if [ -n "$BWP_SMTP_SSLOVERRIDE" ] && [ "$BWP_SMTP_SSLOVERRIDE" != "null" ]; then
-    export Mail__Smtp__SslOverride=$BWP_SMTP_SSLOVERRIDE
-  fi
-
-  if [ -n "$BWP_SMTP_TRUSTSERVER" ] && [ "$BWP_SMTP_TRUSTSERVER" != "null" ]; then
-    export Mail__Smtp__TrustServer=$BWP_SMTP_TRUSTSERVER
-  fi
-fi
-
 #########################
 # Url #
 #########################
@@ -92,21 +48,13 @@ if [ "$BWP_DOMAIN" != "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
   echo "[Configuration] WARNING: WebAuthn requires SSL when not running on 'localhost'. This could result in unexpected behavior.";
 fi
 
-if [ "$BWP_ENABLE_SSL" = "true" ]; then
-  echo "[Configuration] SSL: Enabled";
-  scheme="https"
-else
-  echo "[Configuration] SSL: Disabled";
-  scheme="http"
-fi
 if [ "$BWP_PORT" == "null" ]; then
-  echo "WARNING: 'BWP_PORT' not set, defaulting to 5701.";
-  exit 1;
+  export Passwordless__ApiUrl="https://${BWP_DOMAIN}/api/"
+  export PasswordlessManagement__ApiUrl="https://${BWP_DOMAIN}/api/"
+else
+  export Passwordless__ApiUrl="https://${BWP_DOMAIN}:${BWP_PORT}/api/"
+  export PasswordlessManagement__ApiUrl="https://${BWP_DOMAIN}:${BWP_PORT}/api/"
 fi
-
-export Passwordless__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
-export PasswordlessManagement__ApiUrl="$scheme://${BWP_DOMAIN:-localhost}:${BWP_PORT:-5701}/api"
-echo "[Configuration] API public: $PasswordlessManagement__ApiUrl";
 
 ##############################################
 # Generate ApiKey, ApiSecret & ManagementKey #
@@ -175,8 +123,8 @@ if [ "$BWP_ENABLE_SSL" = "true" ] && [ ! -f /etc/bitwarden_passwordless/${BWP_SS
   -out /etc/bitwarden_passwordless/${BWP_SSL_CERT:-ssl.crt} \
   -reqexts SAN \
   -extensions SAN \
-  -config <(cat /usr/lib/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${BWP_DOMAIN:-localhost}\nbasicConstraints=CA:true")) \
-  -subj "/C=US/ST=California/L=Santa Barbara/O=Bitwarden Inc./OU=Bitwarden Passwordless/CN=${BWP_DOMAIN:-localhost}"
+  -config <(cat /usr/lib/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${BWP_DOMAIN}\nbasicConstraints=CA:true")) \
+  -subj "/C=US/ST=California/L=Santa Barbara/O=Bitwarden Inc./OU=Bitwarden Passwordless/CN=${BWP_DOMAIN}"
 fi
 
 # Launch a loop to rotate nginx logs on a daily basis
