@@ -199,14 +199,16 @@ public class Fido2Service(
                 {
                     throw new ApiException(
                         "attestation_required",
-                        "Attestation 'none' was used for registration, but an allowlist was configured. Please use a supported attestation method.",
+                        "Attestation 'none' was used for registration, but an allowlist was configured. " +
+                        "Please use a supported attestation method.",
                         400
                     );
                 }
 
                 throw new ApiException(
                     "authenticator_not_allowed",
-                    "An allowlist was configured. The authenticator is not found on the allowlist and is not allowed to be used for registration.",
+                    "An allowlist was configured. " +
+                    "The authenticator is not found on the allowlist and is not allowed to be used for registration.",
                     400
                 );
             }
@@ -246,7 +248,7 @@ public class Fido2Service(
             RPID = request.RPID,
             Origin = request.Origin,
             Nickname = request.Nickname,
-            AuthenticatorDisplayName = request.AuthenticatorDisplayName,
+            AuthenticatorDisplayName = request.Response.ClientExtensionResults?.CredProps?.AuthenticatorDisplayName,
             BackupState = success.Result.IsBackedUp,
             IsBackupEligible = success.Result.IsBackupEligible,
             IsDiscoverable = request.Response.ClientExtensionResults?.CredProps?.Rk
@@ -263,7 +265,7 @@ public class Fido2Service(
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
-            AuthenticatorDisplayName = request.AuthenticatorDisplayName,
+            AuthenticatorDisplayName = request.Response.ClientExtensionResults?.CredProps?.AuthenticatorDisplayName,
             ExpiresAt = timeProvider.GetUtcNow().UtcDateTime.AddSeconds(120),
             TokenId = Guid.NewGuid(),
             Type = "passkey_register"
@@ -356,7 +358,7 @@ public class Fido2Service(
         }
 
         log.LogInformation("event=signin/begin account={account} arg={arg}", tenantProvider, "empty");
-        return Array.Empty<PublicKeyCredentialDescriptor>();
+        return [];
     }
 
     public async Task<TokenResponse> SignInCompleteAsync(SignInCompleteDTO request, string device, string country)

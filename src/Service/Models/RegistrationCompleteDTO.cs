@@ -11,6 +11,4 @@ public class RegistrationCompleteDTO : RequestBase
 
     [MaxLength(64, ErrorMessage = "Nickname cannot be longer than 64 characters.")]
     public string? Nickname { get; set; }
-
-    public string? AuthenticatorDisplayName { get; set; }
 }

@@ -13,7 +13,7 @@ public class RegisterToken : Token
     public string UserId { get; set; }
 
     [MessagePack.Key(11)]
-    public string DisplayName { get; set; }
+    public string? DisplayName { get; set; }
 
     [MessagePack.Key(12)]
     [Required(AllowEmptyStrings = false)]

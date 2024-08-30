@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Validation;
 
@@ -10,11 +9,10 @@ public partial class Credentials : ComponentBase
 {
     public const string RemoveCredentialFormName = "remove-credential-form";
 
-    public required IReadOnlyCollection<Credential> Items { get; set; }
+    public required IReadOnlyCollection<Credential>? Items { get; set; }
 
-    public IReadOnlyCollection<CredentialModel> GetItems()
-    {
-        return Items.Select(x =>
+    public IReadOnlyCollection<CredentialModel> GetItems() =>
+        Items?.Select(x =>
         {
             var viewModel = new CredentialModel(
                 x.Descriptor.Id,
@@ -31,10 +29,9 @@ public partial class Credentials : ComponentBase
                 x.BackupState,
                 x.IsBackupEligible,
                 x.IsDiscoverable,
-                AuthenticatorDataProvider.GetName(x.AaGuid));
+                x.AuthenticatorDisplayName ?? AuthenticatorDataProvider.GetName(x.AaGuid));
             return viewModel;
         }).ToList();
-    }
 
     /// <summary>
     /// Determines whether the details of the credentials should be hidden.
@@ -102,7 +99,7 @@ public partial class Credentials : ComponentBase
 
         public bool? IsDiscoverable { get; }
 
-        public string AuthenticatorName { get; set; }
+        public string? AuthenticatorName { get; set; }
 
         public bool IsNew()
         {
@@ -176,7 +173,7 @@ public partial class Credentials : ComponentBase
             bool? backupState,
             bool? isBackupEligible,
             bool? isDiscoverable,
-            string authenticatorName)
+            string? authenticatorName)
         {
             DescriptorId = descriptorId.ToBase64Url();
             PublicKey = publicKey;
