@@ -27,6 +27,18 @@ public class AggregateMailProviderTests
     }
 
     [Fact]
+    public async Task SendAsync_NoOp_WhenNoProvidersAreRegistered()
+    {
+        // Arrange
+        var mailMessage = _fixture.Create<MailMessage>();
+        var mailOptions = new MailConfiguration { From = "johndoe@example.com", Providers = [] };
+        _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
+
+        // Act & assert
+        await _sut.SendAsync(mailMessage);
+    }
+
+    [Fact]
     public async Task SendAsync_Overrides_MailMessageSenderFromConfiguration_WhenMailMessageHasNoSender()
     {
         // Arrange
@@ -34,27 +46,30 @@ public class AggregateMailProviderTests
         var mailOptions = new MailConfiguration
         {
             From = "johndoe@example.com",
-            Providers = new List<BaseMailProviderOptions>
-            {
+            Providers =
+            [
                 _fixture.Build<AwsMailProviderOptions>()
                     .With(x => x.Name, AwsMailProviderOptions.Provider)
                     .Create(),
                 _fixture.Build<SendGridMailProviderOptions>()
                     .With(x => x.Name, SendGridMailProviderOptions.Provider)
                     .Create()
-            }
+            ]
         };
         _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
 
         var awsProviderMock = new Mock<IMailProvider>();
-        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<BaseMailProviderOptions>()))
+        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider),
+                It.IsAny<BaseMailProviderOptions>()))
             .Returns(awsProviderMock.Object);
 
         // Act
         await _sut.SendAsync(mailMessage);
 
         // Assert
-        _factoryMock.Verify(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()), Times.Once);
+        _factoryMock.Verify(
+            x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()),
+            Times.Once);
         awsProviderMock.Verify(x => x.SendAsync(It.Is<MailMessage>(p => p.From == mailOptions.From)), Times.Once);
     }
 
@@ -66,27 +81,30 @@ public class AggregateMailProviderTests
         var mailOptions = new MailConfiguration
         {
             From = "johndoe@example.com",
-            Providers = new List<BaseMailProviderOptions>
-            {
+            Providers =
+            [
                 _fixture.Build<AwsMailProviderOptions>()
                     .With(x => x.Name, AwsMailProviderOptions.Provider)
                     .Create(),
                 _fixture.Build<SendGridMailProviderOptions>()
                     .With(x => x.Name, SendGridMailProviderOptions.Provider)
                     .Create()
-            }
+            ]
         };
         _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
 
         var awsProviderMock = new Mock<IMailProvider>();
-        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<BaseMailProviderOptions>()))
+        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider),
+                It.IsAny<BaseMailProviderOptions>()))
             .Returns(awsProviderMock.Object);
 
         // Act
         await _sut.SendAsync(mailMessage);
 
         // Assert
-        _factoryMock.Verify(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()), Times.Once);
+        _factoryMock.Verify(
+            x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()),
+            Times.Once);
         awsProviderMock.Verify(x => x.SendAsync(It.Is<MailMessage>(p => p.From == mailOptions.From)), Times.Never);
         awsProviderMock.Verify(x => x.SendAsync(It.Is<MailMessage>(p => p.From == mailMessage.From)), Times.Once);
     }
@@ -100,27 +118,30 @@ public class AggregateMailProviderTests
         var mailOptions = new MailConfiguration
         {
             From = "johndoe@example.com",
-            Providers = new List<BaseMailProviderOptions>
-            {
+            Providers =
+            [
                 _fixture.Build<AwsMailProviderOptions>()
                     .With(x => x.Name, AwsMailProviderOptions.Provider)
                     .Create(),
                 _fixture.Build<SendGridMailProviderOptions>()
                     .With(x => x.Name, SendGridMailProviderOptions.Provider)
                     .Create()
-            }
+            ]
         };
         _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
 
         var awsProviderMock = new Mock<IMailProvider>();
-        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<BaseMailProviderOptions>()))
+        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider),
+                It.IsAny<BaseMailProviderOptions>()))
             .Returns(awsProviderMock.Object);
 
         // Act
         await _sut.SendAsync(mailMessage);
 
         // Assert
-        _factoryMock.Verify(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()), Times.Once);
+        _factoryMock.Verify(
+            x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()),
+            Times.Once);
     }
 
     [Fact]
@@ -131,34 +152,40 @@ public class AggregateMailProviderTests
         var mailOptions = new MailConfiguration
         {
             From = "johndoe@example.com",
-            Providers = new List<BaseMailProviderOptions>
-            {
+            Providers =
+            [
                 _fixture.Build<AwsMailProviderOptions>()
                     .With(x => x.Name, AwsMailProviderOptions.Provider)
                     .Create(),
                 _fixture.Build<SendGridMailProviderOptions>()
                     .With(x => x.Name, SendGridMailProviderOptions.Provider)
                     .Create()
-            }
+            ]
         };
         _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
 
         var awsProviderMock = new Mock<IMailProvider>();
         awsProviderMock.Setup(x => x.SendAsync(It.IsAny<MailMessage>()))
             .Throws<Exception>();
-        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<BaseMailProviderOptions>()))
+        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider),
+                It.IsAny<BaseMailProviderOptions>()))
             .Returns(awsProviderMock.Object);
 
         var sendGridProviderMock = new Mock<IMailProvider>();
-        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == SendGridMailProviderOptions.Provider), It.IsAny<BaseMailProviderOptions>()))
+        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == SendGridMailProviderOptions.Provider),
+                It.IsAny<BaseMailProviderOptions>()))
             .Returns(sendGridProviderMock.Object);
 
         // Act
         await _sut.SendAsync(mailMessage);
 
         // Assert
-        _factoryMock.Verify(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()), Times.Once);
-        _factoryMock.Verify(x => x.Create(It.Is<string>(y => y == SendGridMailProviderOptions.Provider), It.IsAny<SendGridMailProviderOptions>()), Times.Once);
+        _factoryMock.Verify(
+            x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()),
+            Times.Once);
+        _factoryMock.Verify(
+            x => x.Create(It.Is<string>(y => y == SendGridMailProviderOptions.Provider),
+                It.IsAny<SendGridMailProviderOptions>()), Times.Once);
 
     }
 }
