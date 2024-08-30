@@ -36,6 +36,12 @@ public class DefaultMailService : IMailService
                 The invite was sent by '{invitedByDisplayName}' ({inv.FromEmail}).
                 Please click the link to accept the invitation: {link}
                 """,
+            HtmlBody =
+                $"""
+                 You've been invited to join {organizationDisplayName} on passwordless.dev.
+                 The invite was sent by '{invitedByDisplayName}' ({inv.FromEmail}).
+                 Please click the link to accept the invitation: {link}
+                 """,
             Tag = "admin-invite"
         };
 
@@ -50,6 +56,12 @@ public class DefaultMailService : IMailService
             From = _configuration.Value.From,
             Subject = "Your e-mail is already connected to an organization",
             TextBody =
+                """
+                You recently tried to sign up or join an organization.
+                We regret to inform you that your e-mail was already connected to an organization.
+                Please use a unique e-mail address to sign up or join an organization.
+                """,
+            HtmlBody =
                 """
                 You recently tried to sign up or join an organization.
                 We regret to inform you that your e-mail was already connected to an organization.
@@ -80,6 +92,11 @@ public class DefaultMailService : IMailService
                 Magic links have been disabled for '{organizationDisplayName}'.
                 Please contact your organization administrator for more information if you have lost your credentials.
                 """,
+            HtmlBody =
+                $$"""
+                  Magic links have been disabled for '{organizationDisplayName}'.
+                  Please contact your organization administrator for more information if you have lost your credentials.
+                  """,
             Tag = "magic-links-disabled"
         };
 
@@ -99,6 +116,10 @@ public class DefaultMailService : IMailService
                 $"""
                 Your organization '{organizationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.
                 """,
+            HtmlBody =
+                $"""
+                 Your organization '{organizationDisplayName}' has been deleted on {deletedAt:D} at {deletedAt:T} UTC by '{deletedBy}'.
+                 """,
             Tag = "organization-deleted"
         };
 
