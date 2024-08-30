@@ -1,13 +1,13 @@
 @page
 @using Passwordless.AdminConsole.Components.Shared.Forms
-@model Passwordless.AdminConsole.Pages.Organization.JoinBusy
+@model JoinBusy
  
 @{
     ViewBag.Title = "It seems like you're already part of an organization";
 }
 <div class="sm:w-full sm:max-w-xl">
     <p>Hi there! We noticed that you're already logged in and part of an organization.</p>
-    <p>If you want to join a new one, please open your invite in a different browser or <a href="@Url.Page("/Account/logout")" class="link-blue">sign out</a></p>
+    <p>If you want to join a new one, please open your invite in a different browser or <a href="/Account/Logout" class="link-blue">sign out</a></p>
 
     <component type="typeof(CopyInputField)" param-Type="@("text")" param-Value="@Model.InviteLink" render-mode="Static" />
 </div>
