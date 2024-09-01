@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Components;
 
 namespace Passwordless.AdminConsole.Components.Shared;
@@ -13,5 +14,12 @@ public partial class LocalDateTime : ComponentBase
     public required DateTime Value { get; set; }
 
     [Parameter]
-    public string? DateFormat { get; set; } = "s";
+    public string? DateFormat { get; set; } = "yyyy-MM-ddTHH:mm:ss.fffZ";
+
+    private string? _isoValue;
+
+    protected override void OnInitialized()
+    {
+        _isoValue = Value.ToString(DateFormat, CultureInfo.InvariantCulture);
+    }
 }
