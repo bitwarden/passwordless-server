@@ -37,11 +37,6 @@ LABEL org.opencontainers.image.source="https://github.com/passwordless/passwordl
 
 EXPOSE $ASPNETCORE_HTTP_PORTS
 
-RUN mkdir -p /app
-ENV MAIL__FROM = "test@lesspassword.dev"
-ENV MAIL__PROVIDERS__0__NAME = "file"
-ENV MAIL__PROVIDERS__0__PATH = "/app/mail.md"
-
 # Alpine image doesn't come with the ICU libraries pre-installed, so we need to install them manually.
 # Technically, we shouldn't need globalization support in the API, but some EF queries fail without it at the moment.
 # `libsodium` is required by the `NSec.Cryptography` package.
@@ -50,9 +45,16 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Use the default non-root user for the app.
 # This instruction must appear after all other instructions that require elevated access.
+RUN mkdir -p /app
+RUN chmod 666 /app
 USER $APP_UID
 
 WORKDIR /opt/app/
 COPY --from=build /tmp/app/src/Api/bin/publish ./
+
+# TODO
+ENV MAIL__FROM = "test@lesspassword.dev"
+ENV MAIL__PROVIDERS__0__NAME = "file"
+ENV MAIL__PROVIDERS__0__PATH = "/app/mail.md"
 
 ENTRYPOINT ["./Passwordless.Api"]
