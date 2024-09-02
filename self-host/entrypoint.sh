@@ -48,7 +48,7 @@ if [ "$BWP_DOMAIN" != "localhost" ] && [ "$BWP_ENABLE_SSL" != "false" ]; then
   echo "[Configuration] WARNING: WebAuthn requires SSL when not running on 'localhost'. This could result in unexpected behavior.";
 fi
 
-if [ "$BWP_PORT" == "null" ]; then
+if [ -z "$BWP_PORT" ]; then
   export Passwordless__ApiUrl="https://${BWP_DOMAIN}/api/"
   export PasswordlessManagement__ApiUrl="https://${BWP_DOMAIN}/api/"
 else
