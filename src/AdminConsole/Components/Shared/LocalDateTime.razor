@@ -1,6 +1,4 @@
-@using System.Globalization
-
-<time id="@(Id)" datetime="@Value.ToString(DateFormat, CultureInfo.InvariantCulture)"></time>
+<time id="@(Id)" datetime="@(_isoValue!)"></time>
 <SecureScript>
-    document.getElementById(@((MarkupString)JsonSerializer.Serialize(Id))).innerText = new Date(@((MarkupString)JsonSerializer.Serialize(Value))).toLocaleString();
+    document.getElementById(@((MarkupString)JsonSerializer.Serialize(Id))).innerText = new Date(@((MarkupString)JsonSerializer.Serialize(_isoValue!))).toLocaleString();
 </SecureScript>
