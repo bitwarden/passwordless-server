@@ -69,8 +69,6 @@ ENV BWP_ENABLE_API=true
 ENV BWP_DB_FILE_API="/etc/bitwarden_passwordless/api.db"
 ENV BWP_DB_FILE_ADMIN="/etc/bitwarden_passwordless/admin.db"
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-ENV Passwordless_ApiUrl="http://localhost:5701/api"
-ENV PasswordlessManagement_ApiUrl="http://localhost:5701/api"
 ENV SelfHosted=true
 ENV RP_PORT=5701
 

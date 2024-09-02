@@ -38,8 +38,8 @@ public class LocalDateTimeTests : TestContext
         var actual = cut.Markup;
 
         // Assert
-        Assert.Contains($"<time id=\"{cut.Instance.Id}\" datetime=\"1990-01-05T18:00:00\"></time>", actual);
-        Assert.Contains($"document.getElementById(\"{cut.Instance.Id}\").innerText = new Date(\"1990-01-05T18:00:00\").toLocaleString();", actual);
+        Assert.Contains($"<time id=\"{cut.Instance.Id}\" datetime=\"1990-01-05T18:00:00.000Z\"></time>", actual);
+        Assert.Contains($"document.getElementById(\"{cut.Instance.Id}\").innerText = new Date(\"1990-01-05T18:00:00.000Z\").toLocaleString();", actual);
     }
 
     [Fact]

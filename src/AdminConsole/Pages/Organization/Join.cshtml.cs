@@ -111,7 +111,7 @@ public class Join : PageModel
             await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
         }
 
-        return RedirectToPage("/Organization/Verify");
+        return Redirect("/Organization/Verify");
         // redirect to account onboarding setup passkey
     }
 
