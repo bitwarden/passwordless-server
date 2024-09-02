@@ -46,13 +46,12 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 # Use the default non-root user for the app.
 # This instruction must appear after all other instructions that require elevated access.
 RUN mkdir -p /app
-RUN chmod 666 /app
+RUN chmod 777 /app
 USER $APP_UID
 
 WORKDIR /opt/app/
 COPY --from=build /tmp/app/src/Api/bin/publish ./
 
-# TODO
 ENV MAIL__FROM = "test@lesspassword.dev"
 ENV MAIL__PROVIDERS__0__NAME = "file"
 ENV MAIL__PROVIDERS__0__PATH = "/app/mail.md"
