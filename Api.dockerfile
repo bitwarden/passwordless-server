@@ -52,8 +52,8 @@ USER $APP_UID
 WORKDIR /opt/app/
 COPY --from=build /tmp/app/src/Api/bin/publish ./
 
-ENV MAIL__FROM = "test@lesspassword.dev"
-ENV MAIL__PROVIDERS__0__NAME = "file"
-ENV MAIL__PROVIDERS__0__PATH = "/app/mail.md"
+ENV MAIL__FROM="test@lesspassword.dev"
+ENV MAIL__PROVIDERS__0__NAME="file"
+ENV MAIL__PROVIDERS__0__PATH="/app/mail.md"
 
 ENTRYPOINT ["./Passwordless.Api"]
