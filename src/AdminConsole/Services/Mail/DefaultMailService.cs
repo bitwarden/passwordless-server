@@ -93,7 +93,7 @@ public class DefaultMailService : IMailService
                 Please contact your organization administrator for more information if you have lost your credentials.
                 """,
             HtmlBody =
-                $$"""
+                $"""
                   Magic links have been disabled for '{organizationDisplayName}'.
                   Please contact your organization administrator for more information if you have lost your credentials.
                   """,
