@@ -139,7 +139,7 @@ jobs:
           --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
           ${{ format('--tag {0}/{1}:dev', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) }}
-          ${{ github.event_name == 'release' && github.event.release.prerelease && format('--tag {0}/{1}:qa', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:qa', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
           ${{ github.event_name == 'release' && !github.event.release.prerelease && format('--tag {0}/{1}:latest', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
           ${{ github.event_name == 'release' && !github.event.release.prerelease && format('--tag {0}/{1}:stable', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
           ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.DOCKER_CONTAINER_NAMESPACE, matrix.name, github.ref_name) || '' }}
