@@ -47,7 +47,7 @@ The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for cre
         "Region": "eu-west-1",
         "Channels": {
           "MagicLinks": {
-            "From": "hello@maila.passwordless.dev",
+            "From": "noreply@maila.passwordless.dev",
             "FromName": "Bitwarden Passwordless.dev"
           },
           "Default": {
