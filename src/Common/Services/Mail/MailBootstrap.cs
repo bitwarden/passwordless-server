@@ -51,11 +51,6 @@ public static class MailBootstrap
                     // This will allow our configuration to update without having to restart the application.
                     child.Bind(mailProviderOptions);
 
-                    if (!mailProviderOptions.Channels.ContainsKey(Channel.Default))
-                    {
-                        throw new ConfigurationErrorsException("Default channel configuration is missing");
-                    }
-
                     providers.Add(mailProviderOptions);
                 }
                 o.Providers = providers;

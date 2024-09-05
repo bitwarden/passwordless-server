@@ -3,22 +3,24 @@ using SendGrid.Helpers.Mail;
 
 namespace Passwordless.Common.Services.Mail.SendGrid;
 
-public class SendGridMailProvider : BaseMailProvider
+public class SendGridMailProvider : IMailProvider
 {
     private readonly ISendGridClient _client;
+    private readonly SendGridEmailChannelStrategy _emailChannelStrategy;
     private readonly ILogger<SendGridMailProvider> _logger;
 
     public SendGridMailProvider(
         SendGridMailProviderOptions options,
-        ILogger<SendGridMailProvider> logger) : base(options)
+        ILogger<SendGridMailProvider> logger)
     {
+        _emailChannelStrategy = new SendGridEmailChannelStrategy(options);
         _client = new SendGridClient(options.ApiKey);
         _logger = logger;
     }
 
-    public async override Task SendAsync(MailMessage message)
+    public async Task SendAsync(MailMessage message)
     {
-        await base.SendAsync(message);
+        _emailChannelStrategy.SetSenderInfo(message);
 
         var from = new EmailAddress(message.From, message.FromDisplayName);
         var subject = message.Subject;

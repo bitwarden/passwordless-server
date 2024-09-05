@@ -4,7 +4,7 @@ using Passwordless.Common.Services.Mail.Strategies;
 
 namespace Passwordless.Common.Services.Mail.Aws;
 
-public class AwsEmailChannelStrategy : IAwsEmailChannelStrategy
+public class AwsEmailChannelStrategy
 {
     private readonly AwsMailProviderOptions _mailConfiguration;
 
@@ -13,19 +13,27 @@ public class AwsEmailChannelStrategy : IAwsEmailChannelStrategy
         _mailConfiguration = mailConfiguration;
     }
 
-    public void SetSenderInfo(SendEmailRequest message, Channel channel)
+    public SendEmailRequest SetSenderInfo(MailMessage message)
     {
-        var key = _mailConfiguration.Channels.ContainsKey(channel) ? channel : Channel.Default;
+        var key = _mailConfiguration.Channels.ContainsKey(message.Channel) ? message.Channel : Channel.Default;
 
         if (_mailConfiguration.Channels.TryGetValue(key, out var channelConfiguration))
         {
-            var awsChannelConfiguration = (AwsChannelOptions)channelConfiguration;
+            var awsChannelConfiguration = channelConfiguration;
+
+            var fromName = message.FromDisplayName ?? awsChannelConfiguration.FromName;
+            var from = awsChannelConfiguration.From;
+
+            var providerMessage = new SendEmailRequest
+            {
+                FromEmailAddress = $"{fromName} <{from}>"
+            };
 
             if (awsChannelConfiguration.ConfigurationSet != null)
             {
-                message.ConfigurationSetName = awsChannelConfiguration.ConfigurationSet;
+                providerMessage.ConfigurationSetName = awsChannelConfiguration.ConfigurationSet;
             }
-            return;
+            return providerMessage;
         }
 
         // 3. If there is no default channel configuration present, throw an exception.

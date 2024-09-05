@@ -3,8 +3,10 @@ using MimeKit;
 
 namespace Passwordless.Common.Services.Mail.Smtp;
 
-public class SmtpMailProvider : BaseMailProvider
+public class SmtpMailProvider : IMailProvider
 {
+    private readonly SmtpEmailChannelStrategy _emailChannelStrategy;
+
     private readonly string? _smtpUsername;
     private readonly string? _smtpPassword;
     private readonly int _smtpPort;
@@ -14,8 +16,10 @@ public class SmtpMailProvider : BaseMailProvider
     private readonly bool _smtpSslOverride;
     private readonly bool _smtpTrustServer;
 
-    public SmtpMailProvider(SmtpMailProviderOptions options) : base(options)
+    public SmtpMailProvider(SmtpMailProviderOptions options)
     {
+        _emailChannelStrategy = new SmtpEmailChannelStrategy(options);
+
         _smtpUsername = options.Username;
         _smtpPassword = options.Password;
         _smtpHost = options.Host;
@@ -26,9 +30,9 @@ public class SmtpMailProvider : BaseMailProvider
         _smtpTrustServer = options.TrustServer;
     }
 
-    public async override Task SendAsync(MailMessage message)
+    public async Task SendAsync(MailMessage message)
     {
-        await base.SendAsync(message);
+        _emailChannelStrategy.SetSenderInfo(message);
 
         var mimeMessage = new MimeMessage();
         mimeMessage.From.Add(GetFromAddress(message));
