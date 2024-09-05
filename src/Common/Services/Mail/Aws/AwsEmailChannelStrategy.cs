@@ -19,9 +19,11 @@ public class AwsEmailChannelStrategy : IAwsEmailChannelStrategy
 
         if (_mailConfiguration.Channels.TryGetValue(key, out var channelConfiguration))
         {
-            if (channelConfiguration.ConfigurationSet != null)
+            var awsChannelConfiguration = (AwsChannelOptions)channelConfiguration;
+
+            if (awsChannelConfiguration.ConfigurationSet != null)
             {
-                message.ConfigurationSetName = channelConfiguration.ConfigurationSet;
+                message.ConfigurationSetName = awsChannelConfiguration.ConfigurationSet;
             }
             return;
         }
