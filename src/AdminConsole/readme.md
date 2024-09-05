@@ -39,17 +39,38 @@ The [Admin Console](https://admin.passwordless.dev/) is your primary GUI for cre
   },
   // https://docs.passwordless.dev/guide/self-hosting/configuration.html#e-mail
   "Mail": {
-    "Smtp": {
-      "From": "sender@example.com",
-      "Username": "username",
-      "Password": "password",
-      "Host": "smtp.example.com",
-      "Port": 587,
-      "StartTls": true,
-      "Ssl": false,
-      "SslOverride": false,
-      "TrustServer": false
-    }
+    "Providers": [
+      {
+        "Name": "aws",
+        "AccessKey": "<your-access-key>",
+        "SecretKey": "<your-secret-key>",
+        "Region": "eu-west-1",
+        "Channels": {
+          "MagicLinks": {
+            "From": "hello@maila.passwordless.dev",
+            "FromName": "Bitwarden Passwordless.dev"
+          },
+          "Default": {
+            "From": "hello@passwordless.dev",
+            "FromName": "Bitwarden Passwordless.dev"
+          }
+        }
+      },
+      {
+        "Name": "sendgrid",
+        "ApiKey": "<your-api-key>",
+        "Channels": {
+          "MagicLinks": {
+            "From": "hello@maila.passwordless.dev",
+            "FromName": "Bitwarden Passwordless.dev"
+          },
+          "Default": {
+            "From": "hello@passwordless.dev",
+            "FromName": "Bitwarden Passwordless.dev"
+          }
+        }
+      }
+    ]
   },
   "ConnectionStrings": {
     // Currently mssql and sqlite are supported.
