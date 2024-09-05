@@ -4,10 +4,8 @@ namespace Passwordless.Common.Services.Mail;
 
 public class MailConfiguration
 {
-    [Obsolete]
     public string? From { get; set; }
 
-    [Obsolete]
     public string? FromName { get; set; }
 
     /// <summary>
