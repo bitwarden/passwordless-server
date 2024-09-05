@@ -1,9 +1,7 @@
-using Microsoft.Extensions.Options;
-
 namespace Passwordless.Common.Services.Mail.File;
 
 // ReSharper disable once UnusedType.Global
-public class FileMailProvider : IMailProvider
+public class FileMailProvider : BaseMailProvider
 {
     private readonly string _path;
     private readonly TimeProvider _timeProvider;
@@ -12,22 +10,24 @@ public class FileMailProvider : IMailProvider
     public FileMailProvider(
         TimeProvider timeProvider,
         FileMailProviderOptions options,
-        ILogger<IMailProvider> logger)
+        ILogger<IMailProvider> logger) : base(options)
     {
         _timeProvider = timeProvider;
         _path = options.Path;
         _logger = logger;
     }
 
-    public async Task SendAsync(MailMessage message)
+    public async override Task SendAsync(MailMessage message)
     {
+        await base.SendAsync(message);
+
         var content =
             $"""
-            # New message {_timeProvider.GetLocalNow()}
-            
-            {message.TextBody}
+             # New message {_timeProvider.GetLocalNow()}
 
-            """;
+             {message.TextBody}
+
+             """;
 
         await System.IO.File.AppendAllTextAsync(_path, content);
 

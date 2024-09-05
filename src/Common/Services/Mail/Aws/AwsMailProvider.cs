@@ -5,29 +5,43 @@ using Amazon.SimpleEmailV2.Model;
 
 namespace Passwordless.Common.Services.Mail.Aws;
 
-public class AwsMailProvider : IMailProvider
+public class AwsMailProvider : BaseMailProvider
 {
     private readonly IAmazonSimpleEmailServiceV2 _client;
+    private readonly AwsMailProviderOptions _options;
     private readonly ILogger<AwsMailProvider> _logger;
 
     public AwsMailProvider(
         AwsMailProviderOptions options,
-        ILogger<AwsMailProvider> logger)
+        ILogger<AwsMailProvider> logger) : base(options)
     {
+        _options = options;
         var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
         _client = new AmazonSimpleEmailServiceV2Client(credentials, RegionEndpoint.GetBySystemName(options.Region));
         _logger = logger;
     }
 
-    public async Task SendAsync(MailMessage message)
+    /// <summary>
+    /// Sends an e-mail using the AWS Simple Email Service.
+    /// </summary>
+    /// <param name="message"></param>
+    public async override Task SendAsync(MailMessage message)
     {
+        await base.SendAsync(message);
+
         var request = new SendEmailRequest
         {
             FromEmailAddress = message.FromDisplayName != null
                 ? $"{message.FromDisplayName} <{message.From}>"
                 : message.From
-
         };
+
+        var channelConfiguration = _options.Channels[message.Channel];
+
+        if (channelConfiguration.ConfigurationSet != null)
+        {
+            request.ConfigurationSetName = channelConfiguration.ConfigurationSet;
+        }
 
         if (message.To.Any())
         {

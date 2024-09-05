@@ -1,5 +1,4 @@
 using Bunit;
-using Bunit.TestDoubles;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,8 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Moq;
 using Passwordless.AdminConsole.Components.Pages.Organization;
-using Passwordless.AdminConsole.Components.Pages.Organization.SettingsComponents;
-using Passwordless.AdminConsole.FeatureManagement;
 using Passwordless.Common.Services.Mail;
 using Passwordless.Common.Services.Mail.File;
 using Xunit;
@@ -35,7 +32,6 @@ public class VerifyTests : TestContext
         _webHostEnvironmentMock.SetupGet(x => x.EnvironmentName).Returns(Environments.Development);
         var mailConfiguration = new MailConfiguration()
         {
-            From = "",
             Providers = new List<BaseMailProviderOptions>()
             {
                 new FileMailProviderOptions { Name = "File", Path = "/usr/local/var/mail" }
@@ -57,7 +53,6 @@ public class VerifyTests : TestContext
         _webHostEnvironmentMock.SetupGet(x => x.EnvironmentName).Returns(Environments.Production);
         var mailConfiguration = new MailConfiguration()
         {
-            From = "",
             Providers = new List<BaseMailProviderOptions>()
             {
                 new FileMailProviderOptions { Name = "File", Path = "/usr/local/var/mail" }

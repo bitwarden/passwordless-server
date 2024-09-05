@@ -3,6 +3,7 @@ using Passwordless.Common.Services.Mail.Aws;
 using Passwordless.Common.Services.Mail.File;
 using Passwordless.Common.Services.Mail.SendGrid;
 using Passwordless.Common.Services.Mail.Smtp;
+using Passwordless.Common.Services.Mail.Strategies;
 
 namespace Passwordless.Common.Services.Mail;
 
@@ -49,6 +50,11 @@ public static class MailBootstrap
 
                     // This will allow our configuration to update without having to restart the application.
                     child.Bind(mailProviderOptions);
+
+                    if (!mailProviderOptions.Channels.ContainsKey(Channel.Default))
+                    {
+                        throw new ConfigurationErrorsException("Default channel configuration is missing");
+                    }
 
                     providers.Add(mailProviderOptions);
                 }
