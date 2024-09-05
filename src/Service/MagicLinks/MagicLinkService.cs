@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using Passwordless.Common.MagicLinks.Models;
 using Passwordless.Common.Overrides;
 using Passwordless.Common.Services.Mail;
+using Passwordless.Common.Services.Mail.Strategies;
 using Passwordless.Service.EventLog.Loggers;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -107,7 +108,7 @@ public class MagicLinkService(
                     </body>
                  </html>
                  """,
-            MessageType = "magic-links",
+            Channel = Channel.MagicLinks,
             FromDisplayName = $"Sign in to {link.Host}"
         });
 

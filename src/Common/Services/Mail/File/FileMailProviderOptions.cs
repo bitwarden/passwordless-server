@@ -1,3 +1,5 @@
+using Passwordless.Common.Services.Mail.Strategies;
+
 namespace Passwordless.Common.Services.Mail.File;
 
 public class FileMailProviderOptions : BaseMailProviderOptions
@@ -11,4 +13,7 @@ public class FileMailProviderOptions : BaseMailProviderOptions
     }
 
     public string Path { get; set; } = DefaultPath;
+
+    public Dictionary<Channel, ChannelOptions> Channels { get; set; } = new();
+
 }
