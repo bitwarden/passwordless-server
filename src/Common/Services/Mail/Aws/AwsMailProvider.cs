@@ -8,14 +8,14 @@ namespace Passwordless.Common.Services.Mail.Aws;
 public class AwsMailProvider : BaseMailProvider
 {
     private readonly IAmazonSimpleEmailServiceV2 _client;
-    private readonly AwsMailProviderOptions _options;
+    private readonly IAwsEmailChannelStrategy _emailChannelStrategy;
     private readonly ILogger<AwsMailProvider> _logger;
 
     public AwsMailProvider(
         AwsMailProviderOptions options,
         ILogger<AwsMailProvider> logger) : base(options)
     {
-        _options = options;
+        _emailChannelStrategy = new AwsEmailChannelStrategy(options);
         var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
         _client = new AmazonSimpleEmailServiceV2Client(credentials, RegionEndpoint.GetBySystemName(options.Region));
         _logger = logger;
@@ -27,6 +27,7 @@ public class AwsMailProvider : BaseMailProvider
     /// <param name="message"></param>
     public async override Task SendAsync(MailMessage message)
     {
+        // Apply any common logic shared by multiple providers that should be executed before sending the message.
         await base.SendAsync(message);
 
         var request = new SendEmailRequest
@@ -36,12 +37,8 @@ public class AwsMailProvider : BaseMailProvider
                 : message.From
         };
 
-        var channelConfiguration = _options.Channels[message.Channel];
-
-        if (channelConfiguration.ConfigurationSet != null)
-        {
-            request.ConfigurationSetName = channelConfiguration.ConfigurationSet;
-        }
+        // Apply any provider-specific logic that should be executed before sending the message.
+        _emailChannelStrategy.SetSenderInfo(request, message.Channel);
 
         if (message.To.Any())
         {
