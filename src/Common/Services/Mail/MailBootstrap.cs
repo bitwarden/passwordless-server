@@ -39,20 +39,75 @@ public static class MailBootstrap
                         throw new ConfigurationErrorsException("Provider type is missing");
                     }
 
-                    BaseMailProviderOptions mailProviderOptions = type.ToLowerInvariant() switch
+                    switch (type.ToLowerInvariant())
                     {
-                        AwsMailProviderOptions.Provider => new AwsMailProviderOptions(),
-                        SendGridMailProviderOptions.Provider => new SendGridMailProviderOptions(),
-                        SmtpMailProviderOptions.Provider => new SmtpMailProviderOptions(),
-                        FileMailProviderOptions.Provider => new FileMailProviderOptions(),
-                        _ => throw new ConfigurationErrorsException($"Unknown mail provider type '{type}'")
-                    };
+                        case AwsMailProviderOptions.Provider:
+                            var awsProviderOptions = new AwsMailProviderOptions();
+                            child.Bind(awsProviderOptions);
+                            if (!awsProviderOptions.Channels.Any())
+                            {
+                                if (o.From == null)
+                                {
+                                    throw new ConfigurationErrorsException("From is missing");
+                                }
 
-                    // This will allow our configuration to update without having to restart the application.
-                    child.Bind(mailProviderOptions);
+                                awsProviderOptions.Channels.Add(Channel.Default,
+                                    new AwsChannelOptions { From = o.From, FromName = o.FromName });
+                            }
 
-                    providers.Add(mailProviderOptions);
+                            providers.Add(awsProviderOptions);
+                            break;
+                        case FileMailProviderOptions.Provider:
+                            var fileProviderOptions = new FileMailProviderOptions();
+                            child.Bind(fileProviderOptions);
+                            if (!fileProviderOptions.Channels.Any())
+                            {
+                                if (o.From == null)
+                                {
+                                    throw new ConfigurationErrorsException("From is missing");
+                                }
+
+                                fileProviderOptions.Channels.Add(Channel.Default,
+                                    new ChannelOptions { From = o.From, FromName = o.FromName });
+                            }
+
+                            providers.Add(fileProviderOptions);
+                            break;
+                        case SendGridMailProviderOptions.Provider:
+                            var sendGridProviderOptions = new SendGridMailProviderOptions();
+                            child.Bind(sendGridProviderOptions);
+                            if (!sendGridProviderOptions.Channels.Any())
+                            {
+                                if (o.From == null)
+                                {
+                                    throw new ConfigurationErrorsException("From is missing");
+                                }
+
+                                sendGridProviderOptions.Channels.Add(Channel.Default,
+                                    new ChannelOptions { From = o.From, FromName = o.FromName });
+                            }
+
+                            providers.Add(sendGridProviderOptions);
+                            break;
+                        case SmtpMailProviderOptions.Provider:
+                            var smtpProviderOptions = new SmtpMailProviderOptions();
+                            child.Bind(smtpProviderOptions);
+                            if (!smtpProviderOptions.Channels.Any())
+                            {
+                                if (o.From == null)
+                                {
+                                    throw new ConfigurationErrorsException("From is missing");
+                                }
+
+                                smtpProviderOptions.Channels.Add(Channel.Default,
+                                    new ChannelOptions { From = o.From, FromName = o.FromName });
+                            }
+
+                            providers.Add(smtpProviderOptions);
+                            break;
+                    }
                 }
+
                 o.Providers = providers;
             });
     }
