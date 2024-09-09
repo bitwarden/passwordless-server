@@ -1,3 +1,5 @@
+using Passwordless.Common.Services.Mail.Strategies;
+
 namespace Passwordless.Common.Services.Mail.Smtp;
 
 public class SmtpMailProviderOptions : BaseMailProviderOptions
@@ -24,4 +26,6 @@ public class SmtpMailProviderOptions : BaseMailProviderOptions
     public bool SslOverride { get; set; }
 
     public bool TrustServer { get; set; }
+
+    public Dictionary<Channel, ChannelOptions> Channels { get; set; } = new();
 }

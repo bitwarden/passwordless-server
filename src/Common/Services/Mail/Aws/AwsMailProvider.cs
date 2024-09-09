@@ -8,26 +8,26 @@ namespace Passwordless.Common.Services.Mail.Aws;
 public class AwsMailProvider : IMailProvider
 {
     private readonly IAmazonSimpleEmailServiceV2 _client;
+    private readonly AwsEmailChannelStrategy _emailChannelStrategy;
     private readonly ILogger<AwsMailProvider> _logger;
 
     public AwsMailProvider(
         AwsMailProviderOptions options,
         ILogger<AwsMailProvider> logger)
     {
+        _emailChannelStrategy = new AwsEmailChannelStrategy(options);
         var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
         _client = new AmazonSimpleEmailServiceV2Client(credentials, RegionEndpoint.GetBySystemName(options.Region));
         _logger = logger;
     }
 
+    /// <summary>
+    /// Sends an e-mail using the AWS Simple Email Service.
+    /// </summary>
+    /// <param name="message"></param>
     public async Task SendAsync(MailMessage message)
     {
-        var request = new SendEmailRequest
-        {
-            FromEmailAddress = message.FromDisplayName != null
-                ? $"{message.FromDisplayName} <{message.From}>"
-                : message.From
-
-        };
+        var request = _emailChannelStrategy.SetSenderInfo(message);
 
         if (message.To.Any())
         {
