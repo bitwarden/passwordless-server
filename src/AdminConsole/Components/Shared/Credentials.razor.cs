@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.Common.Extensions;
 using Passwordless.Common.Validation;
 
@@ -12,26 +13,23 @@ public partial class Credentials : ComponentBase
     public required IReadOnlyCollection<Credential>? Items { get; set; }
 
     public IReadOnlyCollection<CredentialModel> GetItems() =>
-        Items?.Select(x =>
-        {
-            var viewModel = new CredentialModel(
-                x.Descriptor.Id,
-                x.PublicKey,
-                x.SignatureCounter,
-                x.AttestationFmt,
-                x.CreatedAt,
-                x.AaGuid,
-                x.LastUsedAt,
-                x.RpId,
-                x.Origin,
-                x.Device,
-                x.Nickname,
-                x.BackupState,
-                x.IsBackupEligible,
-                x.IsDiscoverable,
-                x.AuthenticatorDisplayName ?? AuthenticatorDataProvider.GetName(x.AaGuid));
-            return viewModel;
-        }).ToList();
+        Items?.Select(x => new CredentialModel(
+            x.Descriptor.Id,
+            x.PublicKey,
+            x.SignatureCounter,
+            x.AttestationFmt,
+            x.CreatedAt,
+            x.AaGuid,
+            x.LastUsedAt,
+            x.RpId,
+            x.Origin,
+            x.Device,
+            x.Nickname,
+            x.BackupState,
+            x.IsBackupEligible,
+            x.IsDiscoverable,
+            x.AuthenticatorDisplayName ?? AuthenticatorDataProvider.GetName(x.AaGuid))
+        ).ToArray() ?? [];
 
     /// <summary>
     /// Determines whether the details of the credentials should be hidden.
@@ -109,54 +107,18 @@ public partial class Credentials : ComponentBase
         /// <summary>
         /// The title of the credential card.
         /// </summary>
-        public string Title
-        {
-            get
-            {
-                if (IsAuthenticatorKnown)
-                {
-                    return AuthenticatorName;
-                }
-                return string.IsNullOrEmpty(Device) ? "Passkey" : Device;
-            }
-        }
+        public string Title => AuthenticatorName?.NullIfEmpty() ?? Device.NullIfEmpty() ?? "Passkey";
 
         private string? _subtitle;
 
         /// <summary>
-        /// The sub title of the credential card.
+        /// The subtitle of the credential card.
         /// </summary>
-        public string? SubTitle
+        public string SubTitle => _subtitle ??= AuthenticatorName switch
         {
-            get
-            {
-                if (_subtitle != null)
-                {
-                    return _subtitle;
-                }
-
-                if (IsAuthenticatorKnown)
-                {
-                    if (string.IsNullOrEmpty(Nickname))
-                    {
-                        _subtitle = Device;
-                    }
-                    else
-                    {
-                        var nickname = string.IsNullOrEmpty(Nickname) ? "No nickname" : Nickname;
-                        _subtitle = $"{nickname} on {Device}";
-                    }
-                }
-                else
-                {
-                    _subtitle = Nickname;
-                }
-
-                return _subtitle;
-            }
-        }
-
-        public bool IsAuthenticatorKnown => AaGuid != Guid.Empty;
+            null => Nickname,
+            _ => !string.IsNullOrEmpty(Nickname) ? $"{Nickname} on {Device}" : Device
+        };
 
         public CredentialModel(
             byte[] descriptorId,
