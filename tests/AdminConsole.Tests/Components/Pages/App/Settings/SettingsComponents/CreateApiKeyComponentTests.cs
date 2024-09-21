@@ -51,7 +51,7 @@ public class CreateApiKeyComponentTests : TestContext
 
         // Assert
         var forms = cut.FindAll("form");
-        Assert.Equal(1, forms.Count);
+        Assert.Single(forms);
         var form = forms[0];
 
         var scopeDivs = form.Children.Where(controlGroup => controlGroup.NodeName == "DIV" && controlGroup.Children.Any(control => control.NodeName == "INPUT")).ToList();
