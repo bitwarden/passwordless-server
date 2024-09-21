@@ -39,7 +39,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task InvalidUserIdReturnsError(string userid)
+    public async Task InvalidUserIdReturnsError(string? userid)
     {
         // Arrange
         Faker<RegisterToken> registerTokenGenerator = new Faker<RegisterToken>();
@@ -74,7 +74,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task InvalidUsernameReturnsError(string input)
+    public async Task InvalidUsernameReturnsError(string? input)
     {
         // Arrange
         Faker<RegisterToken> registerTokenGenerator = new Faker<RegisterToken>();
