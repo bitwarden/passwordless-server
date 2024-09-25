@@ -20,6 +20,21 @@ public class AuthorizationOperationFilter : IOperationFilter
         switch (policy.AuthenticationSchemes.SingleOrDefault())
         {
             case Constants.PublicKeyAuthenticationScheme:
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = Constants.PublicKeyAuthenticationScheme
+                            }
+                        },
+                        []
+                    }
+                });
+
                 operation.Parameters.Add(new OpenApiParameter
                 {
                     Name = Constants.PublicKeyHeaderName,
@@ -35,17 +50,18 @@ public class AuthorizationOperationFilter : IOperationFilter
                 });
                 break;
             case Constants.SecretKeyAuthenticationScheme:
-                operation.Parameters.Add(new OpenApiParameter
+                operation.Security.Add(new OpenApiSecurityRequirement
                 {
-                    Name = Constants.SecretKeyHeaderName,
-                    In = ParameterLocation.Header,
-                    Required = true,
-                    Schema = new OpenApiSchema
                     {
-                        Description = "Your private API key",
-                        Example = new OpenApiString("yourappid:secret:00000000000000000000000000000000"),
-                        Nullable = false,
-                        Type = "string"
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = Constants.SecretKeyAuthenticationScheme
+                            }
+                        },
+                        []
                     }
                 });
                 break;
