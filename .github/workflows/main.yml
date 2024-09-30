@@ -92,7 +92,7 @@ jobs:
   # Run tests
   check-test-secrets:
     name: Check for test secrets
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       available: ${{ steps.check-test-secrets.outputs.available }}
     permissions:
@@ -109,7 +109,7 @@ jobs:
           fi
 
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: check-test-secrets
     permissions:
       checks: write
