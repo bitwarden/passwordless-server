@@ -28,7 +28,6 @@ public static class AuthenticationConfigurationEndpoints
                         .Select(dto => dto.ToResponse())
                 });
             })
-            .WithOpenApi()
             .WithSummary("A list of authentication scope configurations for your application. This will include the two default scopes of SignIn and StepUp.")
             .Produces<GetAuthenticationConfigurationsResult>()
             .RequireSecretKey();
@@ -41,7 +40,6 @@ public static class AuthenticationConfigurationEndpoints
 
                 return Created();
             })
-            .WithOpenApi()
             .WithSummary("Creates an authentication configuration for the authentication process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
@@ -57,7 +55,6 @@ public static class AuthenticationConfigurationEndpoints
 
                 return NoContent();
             })
-            .WithOpenApi()
             .WithSummary("Updates an authentication configuration for the authentication process. In order to use this, it will have to be provided to the `stepup` client method via the purpose field")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
@@ -79,7 +76,6 @@ public static class AuthenticationConfigurationEndpoints
 
                 return NoContent();
             })
-            .WithOpenApi()
             .WithSummary("Deletes an authentication configuration for the provided purpose.")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
