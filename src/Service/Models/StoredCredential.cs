@@ -8,6 +8,7 @@ public class StoredCredential
     public required PublicKeyCredentialDescriptor Descriptor { get; set; }
     public required byte[] PublicKey { get; set; }
     public required byte[] UserHandle { get; set; }
+    public string UserId => Encoding.UTF8.GetString(UserHandle);
     public required uint SignatureCounter { get; set; }
     public required string AttestationFmt { get; set; }
     public required DateTime CreatedAt { get; set; }
@@ -18,12 +19,8 @@ public class StoredCredential
     public string? Country { get; set; }
     public string? Device { get; set; }
     public string? Nickname { get; set; }
-
-    public string UserId => Encoding.UTF8.GetString(UserHandle);
-
+    public string? AuthenticatorDisplayName { get; set; }
     public bool? BackupState { get; set; }
-
     public bool? IsBackupEligible { get; set; }
-
     public bool? IsDiscoverable { get; set; }
 }
