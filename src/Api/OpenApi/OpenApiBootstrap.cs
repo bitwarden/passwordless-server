@@ -24,6 +24,25 @@ public static class OpenApiBootstrap
             swagger.OperationFilter<AuthorizationOperationFilter>();
             swagger.OperationFilter<ExtendedStatusDescriptionsOperationFilter>();
             swagger.OperationFilter<ExternalDocsOperationFilter>();
+
+            swagger.AddSecurityDefinition(Constants.PublicKeyAuthenticationScheme, new OpenApiSecurityScheme
+            {
+                Description = "Front-end integrations",
+                Type = SecuritySchemeType.ApiKey,
+                Name = Constants.PublicKeyHeaderName,
+                Scheme = Constants.PublicKeyAuthenticationScheme,
+                In = ParameterLocation.Header
+            });
+
+            swagger.AddSecurityDefinition(Constants.SecretKeyAuthenticationScheme, new OpenApiSecurityScheme
+            {
+                Description = "Back-end integrations",
+                Type = SecuritySchemeType.ApiKey,
+                Name = Constants.SecretKeyHeaderName,
+                Scheme = Constants.SecretKeyAuthenticationScheme,
+                In = ParameterLocation.Header
+            });
+
             swagger.SupportNonNullableReferenceTypes();
             swagger.SwaggerDoc("v4", new OpenApiInfo
             {
