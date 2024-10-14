@@ -14,7 +14,7 @@
     "@passwordlessdev/passwordless-client": "1.2.1",
     "apexcharts": "3.54.0",
     "es-module-shims": "1.10.0",
-    "vue": "3.5.10"
+    "vue": "3.5.12"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "0.4.2",
