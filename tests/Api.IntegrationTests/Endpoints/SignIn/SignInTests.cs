@@ -42,7 +42,6 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         signInResponse.Should().NotBeNull();
         signInResponse!.Session.Should().StartWith("session_");
         signInResponse.Data.RpId.Should().Be(request.RPID);
-        signInResponse.Data.Status.Should().Be("ok");
     }
 
     [Fact]

@@ -182,15 +182,21 @@ public class Fido2Service : IFido2Service
 
         var fido2 = GetFido2Instance(request, _metadataService);
 
-        MakeNewCredentialResult success;
+        RegisteredPublicKeyCredential success;
 
         try
         {
-            success = await fido2.MakeNewCredentialAsync(request.Response, session.Options, async (args, _) =>
+            var makeNewCredentialParams = new MakeNewCredentialParams
             {
-                bool exists = await _storage.ExistsAsync(args.CredentialId);
-                return !exists;
-            });
+                AttestationResponse = request.Response,
+                OriginalOptions = session.Options,
+                IsCredentialIdUniqueToUserCallback = async (args, _) =>
+                {
+                    bool exists = await _storage.ExistsAsync(args.CredentialId);
+                    return !exists;
+                }
+            };
+            success = await fido2.MakeNewCredentialAsync(makeNewCredentialParams);
         }
         catch (Fido2VerificationException e)
         {
@@ -204,13 +210,13 @@ public class Fido2Service : IFido2Service
         {
             var configuredAuthenticators = await _storage.GetAuthenticatorsAsync();
             var blacklist = configuredAuthenticators.Where(x => !x.IsAllowed).ToImmutableList();
-            if (blacklist.Any() && blacklist.Any(x => x.AaGuid == success.Result!.AaGuid))
+            if (blacklist.Any() && blacklist.Any(x => x.AaGuid == success.AaGuid))
             {
                 throw new ApiException("authenticator_not_allowed", "The authenticator is on the blocklist and is not allowed to be used for registration.", 400);
             }
 
             var whitelist = configuredAuthenticators.Where(x => x.IsAllowed).ToImmutableList();
-            if (whitelist.Any() && whitelist.All(x => x.AaGuid != success.Result!.AaGuid))
+            if (whitelist.Any() && whitelist.All(x => x.AaGuid != success.AaGuid))
             {
                 if (session.Options.Attestation == AttestationConveyancePreference.None)
                 {
@@ -220,7 +226,7 @@ public class Fido2Service : IFido2Service
             }
         }
 
-        var userId = Encoding.UTF8.GetString(success.Result.User.Id);
+        var userId = Encoding.UTF8.GetString(success.User.Id);
 
         // Add aliases
         try
@@ -237,25 +243,25 @@ public class Fido2Service : IFido2Service
         }
 
         var now = _timeProvider.GetUtcNow().UtcDateTime;
-        var descriptor = new PublicKeyCredentialDescriptor(success.Result.Id);
+        var descriptor = new PublicKeyCredentialDescriptor(success.Id);
 
         await _storage.AddCredentialToUser(session.Options.User, new StoredCredential
         {
             Descriptor = descriptor,
-            PublicKey = success.Result.PublicKey,
-            UserHandle = success.Result.User.Id,
-            SignatureCounter = success.Result.SignCount,
-            AttestationFmt = success.Result.AttestationFormat,
+            PublicKey = success.PublicKey,
+            UserHandle = success.User.Id,
+            SignatureCounter = success.SignCount,
+            AttestationFmt = success.AttestationFormat,
             CreatedAt = now,
             LastUsedAt = now,
             Device = deviceInfo,
             Country = country,
-            AaGuid = success.Result.AaGuid,
+            AaGuid = success.AaGuid,
             RPID = request.RPID,
             Origin = request.Origin,
             Nickname = request.Nickname,
-            BackupState = success.Result.IsBackedUp,
-            IsBackupEligible = success.Result.IsBackupEligible,
+            BackupState = success.IsBackedUp,
+            IsBackupEligible = success.IsBackupEligible,
             IsDiscoverable = request.Response.ClientExtensionResults?.CredProps?.Rk,
         });
 
@@ -266,7 +272,7 @@ public class Fido2Service : IFido2Service
             Origin = request.Origin,
             RpId = session.Options.Rp.Id,
             Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
-            CredentialId = success.Result.Id,
+            CredentialId = success.Id,
             Device = deviceInfo,
             Country = country,
             Nickname = request.Nickname,
@@ -383,13 +389,16 @@ public class Fido2Service : IFido2Service
 
         // Make the assertion
         var storedCredentials = (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList();
-        var res = await fido2.MakeAssertionAsync(
-            request.Response,
-            authenticationSessionConfiguration.Options,
-            credential.PublicKey,
-            storedCredentials,
-            credential.SignatureCounter,
-            callback);
+        var makeAssertionParams = new MakeAssertionParams
+        {
+            AssertionResponse = request.Response,
+            OriginalOptions = authenticationSessionConfiguration.Options,
+            StoredPublicKey = credential.PublicKey,
+            StoredDevicePublicKeys = storedCredentials,
+            StoredSignatureCounter = credential.SignatureCounter,
+            IsUserHandleOwnerOfCredentialIdCallback = callback
+        };
+        var res = await fido2.MakeAssertionAsync(makeAssertionParams);
 
         // Store the updated counter
         await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
