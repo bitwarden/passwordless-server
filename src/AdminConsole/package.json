@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@passwordlessdev/passwordless-client": "1.2.2",
-    "apexcharts": "3.54.1",
+    "apexcharts": "4.0.0",
     "es-module-shims": "1.10.1",
     "vue": "3.5.12"
   },
