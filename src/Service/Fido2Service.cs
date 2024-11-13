@@ -398,7 +398,16 @@ public class Fido2Service : IFido2Service
             StoredSignatureCounter = credential.SignatureCounter,
             IsUserHandleOwnerOfCredentialIdCallback = callback
         };
-        var res = await fido2.MakeAssertionAsync(makeAssertionParams);
+        VerifyAssertionResult res;
+
+        try
+        {
+            res = await fido2.MakeAssertionAsync(makeAssertionParams);
+        }
+        catch (Fido2VerificationException fido2VerificationException)
+        {
+            throw new ApiException("signin_complete_error", fido2VerificationException.Message, 400);
+        }
 
         // Store the updated counter
         await _storage.UpdateCredential(res.CredentialId, res.SignCount, country, device);
