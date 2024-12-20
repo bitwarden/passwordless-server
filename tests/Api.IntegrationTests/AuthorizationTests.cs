@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,17 +81,11 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
         using var response = await client.GetAsync("/credentials/list?userId=1");
 
         // Assert
-        var body = await response.Content.ReadAsStringAsync();
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("https://docs.passwordless.dev/guide/errors.html#ApiSecret", actual?.Type);
+        Assert.Equal("A valid 'ApiSecret' header is required.", actual?.Title);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-
-        AssertHelper.AssertEqualJson("""
-        {
-            "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
-            "title": "A valid 'ApiSecret' header is required.",
-            "status": 401,
-            "detail": "A valid 'ApiSecret' header is required."
-        }
-        """, body);
+        Assert.Equal("A valid 'ApiSecret' header is required.", actual?.Detail);
     }
 
     [Fact]
@@ -110,17 +106,11 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
         using var response = await client.GetAsync("/credentials/list?userId=1");
 
         // Assert
-        var body = await response.Content.ReadAsStringAsync();
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("https://docs.passwordless.dev/guide/errors.html#ApiSecret", actual?.Type);
+        Assert.Equal("A valid 'ApiSecret' header is required.", actual?.Title);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-
-        AssertHelper.AssertEqualJson("""
-        {
-            "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
-            "title": "A valid 'ApiSecret' header is required.",
-            "status": 401,
-            "detail": "The value of your 'ApiSecret' is not valid."
-        }
-        """, body);
+        Assert.Equal("The value of your 'ApiSecret' is not valid.", actual?.Detail);
     }
 
     [Theory]
@@ -155,17 +145,11 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
         using var response = await client.SendAsync(request);
 
         // Assert
-        var body = await response.Content.ReadAsStringAsync();
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("https://docs.passwordless.dev/guide/errors.html#ApiSecret", actual?.Type);
+        Assert.Equal("A valid 'ApiSecret' header is required.", actual?.Title);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-
-        AssertHelper.AssertEqualJson($$"""
-        {
-            "type": "https://docs.passwordless.dev/guide/errors.html#ApiSecret",
-            "title": "A valid 'ApiSecret' header is required.",
-            "status": 401,
-            "detail": "{{details}}"
-        }
-        """, body);
+        Assert.Equal(details, actual?.Detail);
     }
 
     [Theory]
@@ -201,17 +185,11 @@ public class AuthorizationTests(ITestOutputHelper testOutput, PasswordlessApiFix
         using var response = await client.SendAsync(request);
 
         // Assert
-        var body = await response.Content.ReadAsStringAsync();
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("https://docs.passwordless.dev/guide/errors.html#ApiKey", actual?.Type);
+        Assert.Equal("A valid 'ApiKey' header is required.", actual?.Title);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-
-        AssertHelper.AssertEqualJson($$"""
-        {
-            "type": "https://docs.passwordless.dev/guide/errors.html#ApiKey",
-            "title": "A valid 'ApiKey' header is required.",
-            "status": 401,
-            "detail": "{{details}}"
-        }
-        """, body);
+        Assert.Equal(details, actual?.Detail);
     }
 
     private static string? CreateRoute(RoutePattern pattern)

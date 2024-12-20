@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Buffers.Text;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -142,15 +143,19 @@ public class Fido2Service : IFido2Service
 
             var attestation = token.Attestation.ToEnum<AttestationConveyancePreference>();
 
-            var options = fido2.RequestNewCredential(
-                user,
-                keyIds,
-                authenticatorSelection,
-                attestation,
-                new AuthenticationExtensionsClientInputs
+            var requestNewCredentialParameters = new RequestNewCredentialParams
+            {
+                User = user,
+                AttestationPreference = attestation,
+                AuthenticatorSelection = authenticatorSelection,
+                ExcludeCredentials = keyIds,
+                Extensions = new AuthenticationExtensionsClientInputs
                 {
                     CredProps = true
-                });
+                }
+            };
+
+            var options = fido2.RequestNewCredential(requestNewCredentialParameters);
 
             options.Hints = token.Hints;
 
@@ -381,20 +386,18 @@ public class Fido2Service : IFido2Service
         var credential = await _storage.GetCredential(request.Response.Id);
         if (credential == null)
         {
-            throw new UnknownCredentialException(Base64Url.Encode(request.Response.Id));
+            throw new UnknownCredentialException(Base64Url.EncodeToString(request.Response.Id));
         }
 
         // Create callback to check if userhandle owns the credentialId
         IsUserHandleOwnerOfCredentialIdAsync callback = (args, _) => Task.FromResult(credential.UserHandle.SequenceEqual(args.UserHandle));
 
         // Make the assertion
-        var storedCredentials = (await _storage.GetCredentialsByUserIdAsync(request.Session)).Select(c => c.PublicKey).ToList();
         var makeAssertionParams = new MakeAssertionParams
         {
             AssertionResponse = request.Response,
             OriginalOptions = authenticationSessionConfiguration.Options,
             StoredPublicKey = credential.PublicKey,
-            StoredDevicePublicKeys = storedCredentials,
             StoredSignatureCounter = credential.SignatureCounter,
             IsUserHandleOwnerOfCredentialIdCallback = callback
         };
