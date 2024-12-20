@@ -7,7 +7,7 @@ namespace Passwordless.Api.OpenApi;
 
 public static class OpenApiBootstrap
 {
-    public static void AddOpenApi(this IServiceCollection services)
+    public static void AddPasswordlessOpenApi(this IServiceCollection services)
     {
         services.AddSwaggerGen(swagger =>
         {
@@ -60,7 +60,7 @@ public static class OpenApiBootstrap
         });
     }
 
-    public static void UseOpenApi(this IApplicationBuilder app)
+    public static void UsePasswordlessOpenApi(this IApplicationBuilder app)
     {
         app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
         {

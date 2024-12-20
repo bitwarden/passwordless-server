@@ -123,7 +123,7 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseOpenApi();
+app.UsePasswordlessOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
