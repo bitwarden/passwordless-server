@@ -44,8 +44,6 @@ jobs:
 
       - name: Install .NET
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.1.0
-        with:
-          dotnet-version: '9.0.x'
 
       - name: Install Entity Framework toolkit
         run: dotnet tool install dotnet-ef --global
