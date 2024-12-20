@@ -125,6 +125,9 @@ jobs:
 
       - name: Run restore
         run: dotnet restore
+        
+      - name: Add node_modules/.bin to PATH
+        run: echo "NODE_PATH=$(pwd)/node_modules/.bin" >> $GITHUB_ENV
 
       - name: Run build
         run: >
