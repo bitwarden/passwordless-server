@@ -1,6 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using System.Buffers.Text;
+using System.Security.Cryptography;
 using System.Text;
-using Fido2NetLib;
 using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.Extensions.Configuration;
@@ -80,7 +80,7 @@ public class TokenService : ITokenService
         MacEnvelope envelope;
         try
         {
-            var envelopeBytes = Base64Url.Decode(token);
+            var envelopeBytes = Base64Url.DecodeFromChars(token);
             envelope = MessagePackSerializer.Deserialize<MacEnvelope>(envelopeBytes);
         }
         // Can happen if the token starts with the right prefix, but is otherwise syntactically incorrect
@@ -160,7 +160,7 @@ public class TokenService : ITokenService
 
         var envelope = new MacEnvelope { Mac = mac, Token = msgpack, KeyId = keyId };
         var envelopeBinary = MessagePackSerializer.Serialize(envelope);
-        var envelopeBinaryB64 = Base64Url.Encode(envelopeBinary);
+        var envelopeBinaryB64 = Base64Url.EncodeToString(envelopeBinary);
 
         if (!string.IsNullOrEmpty(prefix))
         {

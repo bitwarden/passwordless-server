@@ -30,7 +30,7 @@ using Passwordless.Service.Storage.Ef;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+builder.Services.AddPasswordlessOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
