@@ -28,9 +28,22 @@ public partial class Magic : ComponentBase
         if (res.Succeeded)
         {
             ReturnUrl ??= "/Organization/Overview";
+            
+            try
+            {
+                // Only allow the url to be a relative url, to prevent open redirect attacks
+                ReturnUrl = NavigationManager.ToBaseRelativePath(ReturnUrl);
+            }
+            catch (Exception _)
+            {
+                // The url is not a relative url, so we will redirect to the default page
+                ReturnUrl = "/Organization/Overview";
+            }
+
             NavigationManager.NavigateTo(ReturnUrl);
             return;
         }
+        
         _success = false;
     }
 }
