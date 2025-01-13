@@ -28,7 +28,7 @@ public partial class Magic : ComponentBase
         if (res.Succeeded)
         {
             ReturnUrl ??= "/Organization/Overview";
-            
+
             try
             {
                 // Only allow the url to be a relative url, to prevent open redirect attacks
@@ -43,7 +43,7 @@ public partial class Magic : ComponentBase
             NavigationManager.NavigateTo(ReturnUrl);
             return;
         }
-        
+
         _success = false;
     }
 }
