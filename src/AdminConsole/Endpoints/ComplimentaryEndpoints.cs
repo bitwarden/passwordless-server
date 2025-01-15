@@ -41,9 +41,9 @@ public static class ComplimentaryEndpoints
             return Redirect("/Account/BadMagic");
         }
 
-        if(string.IsNullOrEmpty(returnUrl)) returnUrl = "/Organization/Overview";
-        
-        
+        if (string.IsNullOrEmpty(returnUrl)) returnUrl = "/Organization/Overview";
+
+
 
         // Only allow the url to be a relative url, to prevent open redirect attacks
         return LocalRedirect(returnUrl);

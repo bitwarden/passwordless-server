@@ -6,6 +6,6 @@ public partial class Magic : ComponentBase
 {
     protected override async Task OnInitializedAsync()
     {
-      
+
     }
 }
