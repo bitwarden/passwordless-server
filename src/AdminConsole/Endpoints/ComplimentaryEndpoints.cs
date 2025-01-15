@@ -41,7 +41,7 @@ public static class ComplimentaryEndpoints
             return Redirect("/Account/BadMagic");
         }
 
-        returnUrl ??= "/Organization/Overview";
+        if(string.IsNullOrEmpty(returnUrl)) returnUrl = "/Organization/Overview";
         
         
 
