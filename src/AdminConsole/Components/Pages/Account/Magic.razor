@@ -1,4 +1,4 @@
-@page "/Account/Magic"
+@page "/Account/BadMagic"
 @using Passwordless.AdminConsole.Identity
 @using Passwordless.AdminConsole.Services.MagicLinks
 
@@ -8,10 +8,7 @@
 @inject NavigationManager NavigationManager
 
 <Page>
-    @if (_success != null && !_success.Value)
-    {
         <Alert id="invalid-magic-link-token-alert" Style="@ContextualStyles.Danger">
             Sorry, something went wrong. The token was not valid.
         </Alert>
-    }
 </Page>

@@ -205,6 +205,7 @@ async Task RunAppAsync()
 
     app.MapApplicationEndpoints();
     app.MapBillingEndpoints();
+    app.MapComplimentaryEndpoints();
 
     app.MapPasswordlessHealthChecks();
 

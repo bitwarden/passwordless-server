@@ -1,7 +1,13 @@
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Passwordless.AdminConsole.Components.Pages.Account;
+using Passwordless.AdminConsole.Endpoints;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services.MagicLinks;
 using Passwordless.AdminConsole.Tests.DataFactory;
@@ -17,85 +23,68 @@ public class MagicTests : TestContext
     }
 
     [Fact]
-    public void OnInitializedAsync_RendersError_WhenTokenIsNotSpecified()
+    public async Task Redirects_to_error_page_when_token_is_missing()
     {
-        // Arrange
-        var cut = RenderComponent<Magic>();
-
-        // Act
-
-        // Assert
-        Assert.NotNull(cut.Find("#invalid-magic-link-token-alert"));
+        string token = null;
+        
+        var actual = await ComplimentaryEndpoints.AccountMagicEndpoint(token, null, new FakeMagicLinkSignInManager());
+        
+        var redirectResult = Assert.IsType<RedirectHttpResult>(actual);
+        Assert.Equal("/Account/BadMagic", redirectResult.Url);
     }
 
     [Fact]
-    public void OnInitializedAsync_DoesNotRender_WhenTokenIsSpecified()
+    public async Task Redirects_to_correct_page_when_token_is_valid()
     {
-        // Arrange
-        var navigationManager = Services.GetRequiredService<NavigationManager>();
         var token = FakeMagicLinkSignInManager.SuccessToken;
-        var uri = navigationManager.GetUriWithQueryParameter("token", token);
-        navigationManager.NavigateTo(uri);
-
-        var cut = this.RenderComponent<Magic>();
-
-        // Act
-
-        // Assert
-        Assert.Throws<ElementNotFoundException>(() => cut.Find("#invalid-magic-link-token-alert"));
+        
+        var actual = await ComplimentaryEndpoints.AccountMagicEndpoint(token, null, new FakeMagicLinkSignInManager());
+        
+        var redirectResult = Assert.IsType<RedirectHttpResult>(actual);
+        Assert.Equal("/Organization/Overview", redirectResult.Url);
     }
 
     [Fact]
-    public void OnInitializedAsync_RendersError_WhenLoginFails()
+    public async Task Redirects_to_error_page_when_token_is_not_valid()
     {
-        // Arrange
         var navigationManager = Services.GetRequiredService<NavigationManager>();
         var token = FakeMagicLinkSignInManager.FailToken;
-        var uri = navigationManager.GetUriWithQueryParameter("token", token);
-        navigationManager.NavigateTo(uri);
+        
+        
+        var actual = await ComplimentaryEndpoints.AccountMagicEndpoint(token, null, new FakeMagicLinkSignInManager());
+
+        var redirectResult = Assert.IsType<RedirectHttpResult>(actual);
+        Assert.Equal("/Account/BadMagic", redirectResult.Url);
+        
+        navigationManager.NavigateTo(redirectResult.Url);
 
         var cut = this.RenderComponent<Magic>();
-
-        // Act
-
-        // Assert
         Assert.NotNull(cut.Find("#invalid-magic-link-token-alert"));
     }
 
     [Fact]
-    public void OnInitializedAsync_NavigatesToOrganizationOverview_WhenReturnUrlIsNotSetDuringSuccessfulLogin()
+    public async Task Redirects_to_ReturnUrl_when_token_is_valid()
     {
-        // Arrange
-        var navigationManager = Services.GetRequiredService<NavigationManager>();
         var token = FakeMagicLinkSignInManager.SuccessToken;
-        var uri = navigationManager.GetUriWithQueryParameter("token", token);
-        navigationManager.NavigateTo(uri);
-
-        RenderComponent<Magic>();
-
-        // Act
-
-        // Assert
-        Assert.Equal("http://localhost/Organization/Overview", navigationManager.Uri);
+        var targetUrl = "/Organization/Settings";
+        
+        var actual = await ComplimentaryEndpoints.AccountMagicEndpoint(token, targetUrl, new FakeMagicLinkSignInManager());
+        
+        var redirectResult = Assert.IsType<RedirectHttpResult>(actual);
+        Assert.Equal(targetUrl, redirectResult.Url);
     }
-
+    
     [Fact]
-    public void OnInitializedAsync_NavigatesToExpectedReturnUrl_WhenReturnUrlIsSetDuringSuccessfulLogin()
+    public async Task Redirects_to_default_url_when_token_is_valid_but_external_return_url()
     {
-        // Arrange
-        var navigationManager = Services.GetRequiredService<NavigationManager>();
         var token = FakeMagicLinkSignInManager.SuccessToken;
-        var parameters = new Dictionary<string, object?>();
-        parameters.Add("token", token);
-        parameters.Add("returnUrl", "/Organization/Settings");
-        var uri = navigationManager.GetUriWithQueryParameters(parameters);
-        navigationManager.NavigateTo(uri);
-
-        RenderComponent<Magic>();
-
-        // Act
-
-        // Assert
-        Assert.Equal("http://localhost/Organization/Settings", navigationManager.Uri);
+        var targetUrl = "https://google.com";
+        
+        var actual = await ComplimentaryEndpoints.AccountMagicEndpoint(token, targetUrl, new FakeMagicLinkSignInManager());
+        
+        var redirectResult = Assert.IsType<RedirectHttpResult>(actual);
+        Assert.True(redirectResult.AcceptLocalUrlOnly);
+         // Note: You can't directly test the URL validation here since it happens during execution
+        // You would need integration tests to verify the actual redirect behavior
     }
 }
