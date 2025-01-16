@@ -25,8 +25,8 @@ public class FileEmailChannelStrategy
             return;
         }
 
-        // 3. If there is no default channel configuration present, throw an exception.
-        const string errorMessage = "No default channel configuration found to send e-mails.";
-        throw new ConfigurationErrorsException(errorMessage);
+        // If no special FileConfiguration is found, just use blanks since this is a file.
+        message.From = "";
+        message.FromDisplayName = "";
     }
 }
