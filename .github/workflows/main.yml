@@ -1,4 +1,4 @@
-name: main
+name: Main
 
 on:
   push:
@@ -46,7 +46,8 @@ env:
 jobs:
   # Determine version
   version:
-    runs-on: ubuntu-latest
+    name: Determine version
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
@@ -75,7 +76,8 @@ jobs:
 
   # Check formatting
   format:
-    runs-on: ubuntu-latest
+    name: Validate format
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
@@ -109,6 +111,7 @@ jobs:
           fi
 
   test:
+    name: Run tests
     runs-on: ubuntu-24.04
     needs: check-test-secrets
     permissions:
@@ -165,6 +168,7 @@ jobs:
 
   # Publish the apps
   pack:
+    name: Pack apps
     needs: version
 
     strategy:
@@ -173,7 +177,7 @@ jobs:
           - Api
           - AdminConsole
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       actions: write
       contents: read
@@ -207,6 +211,7 @@ jobs:
 
   # Dispatches a separate deployment workflow in a private repository
   deploy:
+    name: Request Deploy
     if: ${{ github.event_name != 'pull_request' }}
 
     needs:
@@ -228,7 +233,7 @@ jobs:
           - environment: ${{ !(github.event_name == 'release' && github.event.action == 'released') && 'prod' }}
           # Deploy to DEVTEST every time
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions: {} # no permissions required
 
     steps:
@@ -248,7 +253,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.retrieve-secret-pat.outputs.github-pat-bitwarden-devops-bot-repo-scope }}
         run: >
-          gh workflow run deploy-passwordless-server
+          gh workflow run "Deploy Passwordless Server"
           --repo bitwarden/passwordless-devops
           --field repository=${{ github.repository }}
           --field run-id=${{ github.run_id }}
