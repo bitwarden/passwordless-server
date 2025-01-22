@@ -1,4 +1,4 @@
-name: docker
+name: Docker
 
 on:
   push:
@@ -22,7 +22,8 @@ on:
 jobs:
   # Determine version
   version:
-    runs-on: ubuntu-latest
+    name: Determine version
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
@@ -51,6 +52,7 @@ jobs:
 
   # Build the image without deploying just to make sure the dockerfile is valid
   pack:
+    name: Build image
     needs: version
 
     strategy:
@@ -67,7 +69,7 @@ jobs:
           - app: Self-Host
             dockerfile: self-host/Dockerfile
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
@@ -88,6 +90,7 @@ jobs:
 
   # Build and deploy the image
   deploy:
+    name: Deploy image
     if: ${{ github.event_name != 'pull_request' }}
     needs: version
 
@@ -108,7 +111,7 @@ jobs:
             dockerfile: self-host/Dockerfile
             name: passwordless-self-host
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
