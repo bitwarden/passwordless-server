@@ -34,7 +34,7 @@ public class UsersTests(ITestOutputHelper testOutput, PasswordlessApiFixture api
 
         // Act
         using var userListResponse = await client.GetAsync("/users/list");
-        
+
         // Assert
         userListResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var userList = await userListResponse.Content.ReadFromJsonAsync<ListResponse<UserSummary>>();
