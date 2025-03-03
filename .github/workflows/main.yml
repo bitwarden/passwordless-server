@@ -92,28 +92,9 @@ jobs:
         run: dotnet format --verify-no-changes
 
   # Run tests
-  check-test-secrets:
-    name: Check for test secrets
-    runs-on: ubuntu-24.04
-    outputs:
-      available: ${{ steps.check-test-secrets.outputs.available }}
-    permissions:
-      contents: read
-
-    steps:
-      - name: Check
-        id: check-test-secrets
-        run: |
-          if [ "${{ secrets.CODECOV_TOKEN }}" != '' ]; then
-            echo "available=true" >> $GITHUB_OUTPUT;
-          else
-            echo "available=false" >> $GITHUB_OUTPUT;
-          fi
-
   test:
     name: Run tests
     runs-on: ubuntu-24.04
-    needs: check-test-secrets
     permissions:
       checks: write
       contents: read
@@ -153,7 +134,7 @@ jobs:
 
       - name: Report test results
         uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5 # v1.9.1
-        if: ${{ needs.check-test-secrets.outputs.available == 'true' && !cancelled() }}
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository && !cancelled() }}
         with:
           name: Test Results
           path: "**/*-test-results.trx"
@@ -162,7 +143,6 @@ jobs:
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
-        if: ${{ needs.check-test-secrets.outputs.available == 'true' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
