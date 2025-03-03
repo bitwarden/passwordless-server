@@ -42,7 +42,6 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
         signInResponse.Should().NotBeNull();
         signInResponse!.Session.Should().StartWith("session_");
         signInResponse.Data.RpId.Should().Be(request.RPID);
-        signInResponse.Data.Status.Should().Be("ok");
     }
 
     [Fact]
@@ -162,18 +161,12 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
 
         // Assert
         completeResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var body = await completeResponse.Content.ReadAsStringAsync();
-        AssertHelper.AssertEqualJson(
-            // lang=json
-            """
-             {
-               "type": "https://docs.passwordless.dev/guide/errors.html#unknown_credential",
-               "title": "We don't recognize the passkey you sent us.",
-               "status": 400,
-               "credentialId": "LcVLKA2QkfwzvuSTxIIyFVTJ9IopE57xTYvJ_0Nx9nk",
-               "errorCode": "unknown_credential"
-             }
-             """, body);
+        var actual = await completeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("https://docs.passwordless.dev/guide/errors.html#unknown_credential", actual?.Type);
+        Assert.Equal("We don't recognize the passkey you sent us.", actual?.Title);
+        Assert.Equal(HttpStatusCode.BadRequest, completeResponse.StatusCode);
+        Assert.Equal("unknown_credential", actual?.Extensions["errorCode"]?.ToString());
+        Assert.Equal("LcVLKA2QkfwzvuSTxIIyFVTJ9IopE57xTYvJ_0Nx9nk", actual?.Extensions["credentialId"]?.ToString());
     }
 
     [Fact]

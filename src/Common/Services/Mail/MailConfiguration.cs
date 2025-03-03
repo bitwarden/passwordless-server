@@ -1,15 +1,11 @@
+using Passwordless.Common.Services.Mail.Strategies;
+
 namespace Passwordless.Common.Services.Mail;
 
 public class MailConfiguration
 {
-    /// <summary>
-    /// The default email address to use as the sender.
-    /// </summary>
     public string? From { get; set; }
 
-    /// <summary>
-    /// The default name to use as the sender.
-    /// </summary>
     public string? FromName { get; set; }
 
     /// <summary>

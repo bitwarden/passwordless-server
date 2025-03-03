@@ -30,7 +30,7 @@ using Passwordless.Service.Storage.Ef;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+builder.Services.AddPasswordlessOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {
@@ -123,7 +123,7 @@ else
             "Hey, this place is for computers. Check out our human documentation instead: https://docs.passwordless.dev");
 }
 
-app.UseOpenApi();
+app.UsePasswordlessOpenApi();
 
 if (builder.Configuration.IsSelfHosted())
 {

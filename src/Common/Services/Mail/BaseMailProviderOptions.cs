@@ -6,4 +6,5 @@ public abstract class BaseMailProviderOptions
     /// The name of the provider.
     /// </summary>
     public string Name { get; set; }
+
 }

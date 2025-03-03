@@ -5,6 +5,8 @@ namespace Passwordless.Common.Services.Mail.Smtp;
 
 public class SmtpMailProvider : IMailProvider
 {
+    private readonly SmtpEmailChannelStrategy _emailChannelStrategy;
+
     private readonly string? _smtpUsername;
     private readonly string? _smtpPassword;
     private readonly int _smtpPort;
@@ -16,6 +18,7 @@ public class SmtpMailProvider : IMailProvider
 
     public SmtpMailProvider(SmtpMailProviderOptions options)
     {
+        _emailChannelStrategy = new SmtpEmailChannelStrategy(options);
 
         _smtpUsername = options.Username;
         _smtpPassword = options.Password;
@@ -29,6 +32,8 @@ public class SmtpMailProvider : IMailProvider
 
     public async Task SendAsync(MailMessage message)
     {
+        _emailChannelStrategy.SetSenderInfo(message);
+
         var mimeMessage = new MimeMessage();
         mimeMessage.From.Add(GetFromAddress(message));
         mimeMessage.Subject = message.Subject;

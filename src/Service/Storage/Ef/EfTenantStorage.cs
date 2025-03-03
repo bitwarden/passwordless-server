@@ -177,7 +177,9 @@ public class EfTenantStorage(
                 existing => features.EnableMagicLinks ?? existing.IsMagicLinksEnabled
             )
             .SetProperty(f => f.EventLoggingRetentionPeriod,
-                existing => features.EventLoggingRetentionPeriod ?? existing.EventLoggingRetentionPeriod
+                existing => features.EventLoggingRetentionPeriod.HasValue
+                    ? features.EventLoggingRetentionPeriod.Value
+                    : existing.EventLoggingRetentionPeriod
             )
         );
 

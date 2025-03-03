@@ -1,4 +1,4 @@
-name: docker
+name: Docker
 
 on:
   push:
@@ -22,7 +22,8 @@ on:
 jobs:
   # Determine version
   version:
-    runs-on: ubuntu-latest
+    name: Determine version
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
@@ -51,6 +52,7 @@ jobs:
 
   # Build the image without deploying just to make sure the dockerfile is valid
   pack:
+    name: Build image
     needs: version
 
     strategy:
@@ -67,16 +69,16 @@ jobs:
           - app: Self-Host
             dockerfile: self-host/Dockerfile
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
 
       - name: Build image
         run: >
@@ -88,6 +90,7 @@ jobs:
 
   # Build and deploy the image
   deploy:
+    name: Deploy image
     if: ${{ github.event_name != 'pull_request' }}
     needs: version
 
@@ -108,17 +111,17 @@ jobs:
             dockerfile: self-host/Dockerfile
             name: passwordless-self-host
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
 
       - name: Setup Docker Content Trust
         id: setup-dct
@@ -139,9 +142,9 @@ jobs:
           --build-arg VERSION=${{ needs.version.outputs.version }}
           --push
           ${{ format('--tag {0}/{1}:dev', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) }}
-          ${{ github.event_name == 'release' && github.event.prerelease && format('--tag {0}/{1}:qa', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:latest', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
-          ${{ github.event_name == 'release' && format('--tag {0}/{1}:stable', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && format('--tag {0}/{1}:qa', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && !github.event.release.prerelease && format('--tag {0}/{1}:latest', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
+          ${{ github.event_name == 'release' && !github.event.release.prerelease && format('--tag {0}/{1}:stable', env.DOCKER_CONTAINER_NAMESPACE, matrix.name) || '' }}
           ${{ github.event_name == 'release' && format('--tag {0}/{1}:{2}', env.DOCKER_CONTAINER_NAMESPACE, matrix.name, github.ref_name) || '' }}
           ${{ inputs.image-tag && format('--tag {0}/{1}:{2}', env.DOCKER_CONTAINER_NAMESPACE, matrix.name, inputs.image-tag) || '' }}
 

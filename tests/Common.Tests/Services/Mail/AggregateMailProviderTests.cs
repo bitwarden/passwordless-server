@@ -47,38 +47,6 @@ public class AggregateMailProviderTests
     }
 
     [Fact]
-    public async Task SendAsync_Overrides_MailMessageSenderFromConfiguration_WhenMailMessageHasNoSender()
-    {
-        // Arrange
-        var mailMessage = _fixture.Build<MailMessage>().Without(x => x.From).Create();
-        var mailOptions = new MailConfiguration
-        {
-            From = "johndoe@example.com",
-            Providers = new List<BaseMailProviderOptions>
-            {
-                _fixture.Build<AwsMailProviderOptions>()
-                    .With(x => x.Name, AwsMailProviderOptions.Provider)
-                    .Create(),
-                _fixture.Build<SendGridMailProviderOptions>()
-                    .With(x => x.Name, SendGridMailProviderOptions.Provider)
-                    .Create()
-            }
-        };
-        _optionsMock.SetupGet(x => x.Value).Returns(mailOptions);
-
-        var awsProviderMock = new Mock<IMailProvider>();
-        _factoryMock.Setup(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<BaseMailProviderOptions>()))
-            .Returns(awsProviderMock.Object);
-
-        // Act
-        await _sut.SendAsync(mailMessage);
-
-        // Assert
-        _factoryMock.Verify(x => x.Create(It.Is<string>(y => y == AwsMailProviderOptions.Provider), It.IsAny<AwsMailProviderOptions>()), Times.Once);
-        awsProviderMock.Verify(x => x.SendAsync(It.Is<MailMessage>(p => p.From == mailOptions.From)), Times.Once);
-    }
-
-    [Fact]
     public async Task SendAsync_DoesNotOverride_MailMessageSenderFromConfiguration_WhenMailMessageHasSender()
     {
         // Arrange

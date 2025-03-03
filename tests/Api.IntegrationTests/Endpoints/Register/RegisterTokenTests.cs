@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless.Api.IntegrationTests.Helpers;
 using Passwordless.Api.IntegrationTests.Helpers.App;
 using Passwordless.Service.Models;
@@ -39,7 +40,7 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task InvalidUserIdReturnsError(string userid)
+    public async Task InvalidUserIdReturnsError(string? userid)
     {
         // Arrange
         Faker<RegisterToken> registerTokenGenerator = new Faker<RegisterToken>();
@@ -64,17 +65,18 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var body = await response.Content.ReadAsStringAsync();
-
-        AssertHelper.AssertEqualJson(
-            // lang=json
-            """{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"userId":["The UserId field is required."]}}""", body);
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(actual);
+        Assert.Equal("https://tools.ietf.org/html/rfc9110#section-15.5.1", actual!.Type);
+        Assert.Equal("One or more validation errors occurred.", actual.Title);
+        Assert.Equal(400, actual.Status);
+        Assert.Equal("{\"userId\":[\"The UserId field is required.\"]}", actual.Extensions["errors"]!.ToString());
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task InvalidUsernameReturnsError(string input)
+    public async Task InvalidUsernameReturnsError(string? input)
     {
         // Arrange
         Faker<RegisterToken> registerTokenGenerator = new Faker<RegisterToken>();
@@ -97,11 +99,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        var body = await response.Content.ReadAsStringAsync();
-
-        AssertHelper.AssertEqualJson(
-            // lang=json
-            """{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"username":["The Username field is required."]}}""", body);
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(actual);
+        Assert.Equal("https://tools.ietf.org/html/rfc9110#section-15.5.1", actual!.Type);
+        Assert.Equal("One or more validation errors occurred.", actual.Title);
+        Assert.Equal(400, actual.Status);
+        Assert.Equal("{\"username\":[\"The Username field is required.\"]}", actual.Extensions["errors"]!.ToString());
     }
 
     [Theory]
@@ -127,18 +130,12 @@ public class RegisterTokenTests(ITestOutputHelper testOutput, PasswordlessApiFix
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        var body = await response.Content.ReadAsStringAsync();
-
-        AssertHelper.AssertEqualJson(
-            // lang=json
-            """
-             {
-               "type": "https://docs.passwordless.dev/guide/errors.html#invalid_attestation",
-               "title": "Attestation type not supported",
-               "status": 400,
-               "errorCode": "invalid_attestation"
-             }
-             """, body);
+        var actual = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(actual);
+        Assert.Equal("https://docs.passwordless.dev/guide/errors.html#invalid_attestation", actual!.Type);
+        Assert.Equal("Attestation type not supported", actual.Title);
+        Assert.Equal(400, actual.Status);
+        Assert.Equal("invalid_attestation", actual.Extensions["errorCode"]!.ToString());
     }
 
     [Theory]

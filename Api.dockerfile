@@ -1,6 +1,6 @@
 # ** Build
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
 
 # Expose the target architecture set by the `docker build --platform` option, so that
 # we can build the assembly for the correct platform.
@@ -27,7 +27,7 @@ RUN dotnet publish src/Api/ \
 # ** Run
 
 # Use `runtime-deps` instead of `runtime` because we have a self-contained assembly
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:8.0 AS run
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/runtime-deps:9.0 AS run
 
 LABEL org.opencontainers.image.title="Passwordless API Test Server"
 LABEL org.opencontainers.image.description="Docker image of the Passwordless API, intended solely for development and integration testing purposes."

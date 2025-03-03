@@ -16,7 +16,6 @@ public class SigninTokenRequest : RequestBase
     /// Time to live is the number of seconds the token has before it expires.
     /// </summary>
     [JsonPropertyName("timeToLive")]
-    [Obsolete("This property is only used for serialization.")]
     [Range(1, 604800)]
     public int? TimeToLiveSeconds { get; init; }
 

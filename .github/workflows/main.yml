@@ -1,4 +1,4 @@
-name: main
+name: Main
 
 on:
   push:
@@ -46,7 +46,8 @@ env:
 jobs:
   # Determine version
   version:
-    runs-on: ubuntu-latest
+    name: Determine version
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
@@ -75,16 +76,17 @@ jobs:
 
   # Check formatting
   format:
-    runs-on: ubuntu-latest
+    name: Validate format
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
 
       - name: Validate format
         run: dotnet format --verify-no-changes
@@ -92,7 +94,7 @@ jobs:
   # Run tests
   check-test-secrets:
     name: Check for test secrets
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       available: ${{ steps.check-test-secrets.outputs.available }}
     permissions:
@@ -109,7 +111,8 @@ jobs:
           fi
 
   test:
-    runs-on: ubuntu-22.04
+    name: Run tests
+    runs-on: ubuntu-24.04
     needs: check-test-secrets
     permissions:
       checks: write
@@ -118,10 +121,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
 
       - name: Run restore
         run: dotnet restore
@@ -158,13 +161,14 @@ jobs:
           fail-on-error: true
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
         if: ${{ needs.check-test-secrets.outputs.available == 'true' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # Publish the apps
   pack:
+    name: Pack apps
     needs: version
 
     strategy:
@@ -173,20 +177,20 @@ jobs:
           - Api
           - AdminConsole
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       actions: write
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
 
       - name: Install NodeJS
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: lts/*
 
@@ -200,13 +204,14 @@ jobs:
           --output src/${{ matrix.app }}/publish/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: ${{ matrix.app }}
           path: src/${{ matrix.app }}/publish/
 
   # Dispatches a separate deployment workflow in a private repository
   deploy:
+    name: Request Deploy
     if: ${{ github.event_name != 'pull_request' }}
 
     needs:
@@ -228,15 +233,24 @@ jobs:
           - environment: ${{ !(github.event_name == 'release' && github.event.action == 'released') && 'prod' }}
           # Deploy to DEVTEST every time
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions: {} # no permissions required
 
     steps:
+      - name: Generate GH App token
+        uses: actions/create-github-app-token@c1a285145b9d317df6ced56c09f525b5c2b6f755 # v1.11.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.BW_GHAPP_ID }}
+          private-key: ${{ secrets.BW_GHAPP_KEY }}
+          owner: bitwarden
+          repositories: passwordless-devops
+
       - name: Dispatch deployment
         env:
-          GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: >
-          gh workflow run deploy-passwordless-server
+          gh workflow run deploy-passwordless-server.yml
           --repo bitwarden/passwordless-devops
           --field repository=${{ github.repository }}
           --field run-id=${{ github.run_id }}

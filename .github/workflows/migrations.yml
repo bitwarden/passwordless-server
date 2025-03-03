@@ -1,4 +1,4 @@
-name: migrations
+name: Migrations
 
 on:
   push:
@@ -23,6 +23,7 @@ env:
 
 jobs:
   script:
+    name: Generate idempotent migrations
     strategy:
       matrix:
         app:
@@ -34,31 +35,31 @@ jobs:
           - app: AdminConsole
             ef-context: MssqlConsoleDbContext
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
 
       - name: Install Entity Framework toolkit
         run: dotnet tool install dotnet-ef --global
 
       - name: Generate script
         run: >
-            dotnet ef migrations script
-            --configuration Release
-            --project src/${{ matrix.app }}
-            --context ${{ matrix.ef-context }}
-            --idempotent
-            --output ${{ matrix.app }}.sql
+          dotnet ef migrations script
+          --configuration Release
+          --project src/${{ matrix.app }}
+          --context ${{ matrix.ef-context }}
+          --idempotent
+          --output ${{ matrix.app }}.sql
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: ${{ matrix.app }}-${{ matrix.ef-context }}
           path: ${{ matrix.app }}.sql
