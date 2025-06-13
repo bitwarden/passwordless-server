@@ -225,7 +225,7 @@ jobs:
           client_id: ${{ secrets.AZURE_CLIENT_ID }}
 
       - name: Get KV secrets
-        id: get-kv-secrets-ghapp
+        id: get-kv-secrets
         uses: bitwarden/gh-actions/get-keyvault-secrets@main
         with:
           keyvault: gh-org-bitwarden
