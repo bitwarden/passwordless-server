@@ -21,6 +21,12 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 # Add packages
 RUN apt-get update && apt-get install -y \
   npm jq \
+  curl \
+  nginx \
+  openssl \
+  supervisor \
+  tzdata \
+  unzip \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj files as distinct layers
@@ -56,10 +62,19 @@ RUN . /tmp/rid.txt && dotnet publish -c release -o /app/AdminConsole --no-restor
 WORKDIR /source/src/Api
 RUN . /tmp/rid.txt && dotnet publish -c release -o /app/Api --no-restore --no-self-contained -r $RID
 
+# Download hbs tool for generating final configurations
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-x64.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-armv7.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-arm64.zip; fi
+
+# Extract hbs
+RUN unzip hbs.zip -d /usr/local/bin && rm hbs.zip
+RUN chmod +x /usr/local/bin/hbs
+
 ###############################################
 #                  App stage                  #
 ###############################################
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless
 ARG TARGETPLATFORM
 LABEL com.bitwarden.product="bitwarden"
 LABEL com.bitwarden.project="passwordless"
@@ -72,16 +87,15 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV SelfHosted=true
 ENV RP_PORT=5701
 
-# Add packages
-RUN apt-get update && apt-get install -y \
-  curl \
-  nginx \
-  openssl \
-  supervisor \
-  tzdata \
-  unzip \
-  jq \
-  && rm -rf /var/lib/apt/lists/*
+# Copy required binaries and configurations from build stage
+COPY --from=build /usr/bin/curl /usr/bin/curl
+COPY --from=build /usr/sbin/nginx /usr/sbin/nginx
+COPY --from=build /usr/bin/openssl /usr/bin/openssl
+COPY --from=build /usr/bin/supervisord /usr/bin/supervisord
+COPY --from=build /usr/bin/unzip /usr/bin/unzip
+COPY --from=build /usr/bin/jq /usr/bin/jq
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /usr/local/bin/hbs /usr/local/bin/hbs
 
 # Create required directories
 RUN mkdir -p /etc/bitwarden_passwordless/data-protection
@@ -118,15 +132,6 @@ RUN chmod +x /logrotate.sh
 # Copy configuration templates
 COPY self-host/hbs/nginx-config.hbs /etc/hbs/
 COPY self-host/hbs/config.yaml /etc/hbs/
-
-# Download hbs tool for generating final configurations
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-x64.zip; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-armv7.zip; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-arm64.zip; fi
-
-# Extract hbs
-RUN unzip hbs.zip -d /usr/local/bin && rm hbs.zip
-RUN chmod +x /usr/local/bin/hbs
 
 # Copy entrypoint script and make it executable
 COPY self-host/entrypoint.sh /entrypoint.sh
