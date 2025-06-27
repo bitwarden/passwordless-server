@@ -67,10 +67,75 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip htt
 RUN unzip hbs.zip -d /app/hbs && rm hbs.zip
 RUN chmod +x /app/hbs/hbs
 
+# Download and extract packages needed for the final image
+WORKDIR /packages
+RUN apt-get update && apt-get download \
+  nginx \
+  openssl \
+  supervisor \
+  tzdata \
+  jq \
+  libc6 \
+  libssl3 \
+  libpcre2-8-0 \
+  zlib1g \
+  python3-minimal \
+  python3-setuptools \
+  libpython3.11-minimal \
+  mime-support \
+  && rm -rf /var/lib/apt/lists/*
+
+# Extract packages to a staging directory
+RUN mkdir -p /staging
+RUN for pkg in *.deb; do \
+  echo "Extracting $pkg"; \
+  dpkg-deb -x "$pkg" /staging; \
+  done
+
+# Ensure proper symlinks and paths for extracted binaries
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN find /staging -type f -executable -name "nginx" -o -name "supervisord" -o -name "jq" -o -name "openssl" | head -10
+
+# Create necessary directory structure
+RUN mkdir -p /staging/etc/bitwarden_passwordless/data-protection
+RUN mkdir -p /staging/etc/bitwarden_passwordless/logs
+RUN mkdir -p /staging/etc/supervisor
+RUN mkdir -p /staging/etc/supervisor.d
+RUN mkdir -p /staging/var/log/bitwarden
+RUN mkdir -p /staging/var/log/bitwarden_passwordless
+RUN mkdir -p /staging/var/log/nginx/logs
+RUN mkdir -p /staging/etc/nginx/http.d
+RUN mkdir -p /staging/var/run/nginx
+RUN mkdir -p /staging/var/lib/nginx/tmp
+RUN touch /staging/var/run/nginx/nginx.pid
+RUN mkdir -p /staging/app
+
+# Copy configuration files and set permissions in build stage
+COPY self-host/supervisord/*.ini /staging/etc/supervisor.d/
+COPY self-host/supervisord/supervisord.conf /staging/etc/supervisor/supervisord.conf
+# Remove default supervisord.conf to avoid conflicts
+RUN rm -f /staging/etc/supervisord.conf
+COPY self-host/nginx/nginx.conf /staging/etc/nginx/
+COPY self-host/nginx/proxy.conf /staging/etc/nginx/
+COPY self-host/nginx/mime.types /staging/etc/nginx/
+COPY self-host/nginx/security-headers.conf /staging/etc/nginx/
+COPY self-host/nginx/security-headers-ssl.conf /staging/etc/nginx/
+COPY self-host/nginx/logrotate.sh /staging/
+RUN chmod +x /staging/logrotate.sh
+
+# Copy configuration templates
+RUN mkdir -p /staging/etc/hbs
+COPY self-host/hbs/nginx-config.hbs /staging/etc/hbs/
+COPY self-host/hbs/config.yaml /staging/etc/hbs/
+
+# Copy entrypoint script and make it executable
+COPY self-host/entrypoint.sh /staging/entrypoint.sh
+RUN chmod +x /staging/entrypoint.sh
+
 ###############################################
 #                  App stage                  #
 ###############################################
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-azurelinux3.0-distroless
 ARG TARGETPLATFORM
 LABEL com.bitwarden.product="bitwarden"
 LABEL com.bitwarden.project="passwordless"
@@ -83,28 +148,8 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV SelfHosted=true
 ENV RP_PORT=5701
 
-# Add packages
-RUN apt-get update && apt-get install -y \
-  nginx \
-  openssl \
-  supervisor \
-  tzdata \
-  jq \
-  && rm -rf /var/lib/apt/lists/*
-
-# Create required directories
-RUN mkdir -p /etc/bitwarden_passwordless/data-protection
-RUN mkdir -p /etc/bitwarden_passwordless/logs
-RUN mkdir -p /etc/supervisor
-RUN mkdir -p /etc/supervisor.d
-RUN mkdir -p /var/log/bitwarden
-RUN mkdir -p /var/log/bitwarden_passwordless
-RUN mkdir -p /var/log/nginx/logs
-RUN mkdir -p /etc/nginx/http.d
-RUN mkdir -p /var/run/nginx
-RUN mkdir -p /var/lib/nginx/tmp
-RUN touch /var/run/nginx/nginx.pid
-RUN mkdir -p /app
+# Copy extracted packages and directory structure from build stage
+COPY --from=build /staging /
 
 # Copy all apps from dotnet-build stage
 WORKDIR /app
@@ -112,28 +157,6 @@ COPY --from=build /app ./
 
 # Copy hbs tool from build stage
 COPY --from=build /app/hbs/hbs /usr/local/bin/hbs
-
-# Set up supervisord
-COPY self-host/supervisord/*.ini /etc/supervisor.d/
-COPY self-host/supervisord/supervisord.conf /etc/supervisor/supervisord.conf
-RUN rm -f /etc/supervisord.conf
-
-# Set up nginx
-COPY self-host/nginx/nginx.conf /etc/nginx
-COPY self-host/nginx/proxy.conf /etc/nginx
-COPY self-host/nginx/mime.types /etc/nginx
-COPY self-host/nginx/security-headers.conf /etc/nginx
-COPY self-host/nginx/security-headers-ssl.conf /etc/nginx
-COPY self-host/nginx/logrotate.sh /
-RUN chmod +x /logrotate.sh
-
-# Copy configuration templates
-COPY self-host/hbs/nginx-config.hbs /etc/hbs/
-COPY self-host/hbs/config.yaml /etc/hbs/
-
-# Copy entrypoint script and make it executable
-COPY self-host/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 VOLUME ["/etc/bitwarden_passwordless"]
 
