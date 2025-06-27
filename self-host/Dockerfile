@@ -21,6 +21,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 # Add packages
 RUN apt-get update && apt-get install -y \
   npm jq \
+  curl unzip \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj files as distinct layers
@@ -56,6 +57,16 @@ RUN . /tmp/rid.txt && dotnet publish -c release -o /app/AdminConsole --no-restor
 WORKDIR /source/src/Api
 RUN . /tmp/rid.txt && dotnet publish -c release -o /app/Api --no-restore --no-self-contained -r $RID
 
+# Download hbs tool for generating final configurations
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-x64.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-armv7.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-arm64.zip; fi
+
+# Extract hbs
+RUN unzip hbs.zip -d /app/hbs && rm hbs.zip
+RUN chmod +x /app/hbs/hbs
+
 ###############################################
 #                  App stage                  #
 ###############################################
@@ -74,12 +85,10 @@ ENV RP_PORT=5701
 
 # Add packages
 RUN apt-get update && apt-get install -y \
-  curl \
   nginx \
   openssl \
   supervisor \
   tzdata \
-  unzip \
   jq \
   && rm -rf /var/lib/apt/lists/*
 
@@ -101,6 +110,9 @@ RUN mkdir -p /app
 WORKDIR /app
 COPY --from=build /app ./
 
+# Copy hbs tool from build stage
+COPY --from=build /app/hbs/hbs /usr/local/bin/hbs
+
 # Set up supervisord
 COPY self-host/supervisord/*.ini /etc/supervisor.d/
 COPY self-host/supervisord/supervisord.conf /etc/supervisor/supervisord.conf
@@ -118,15 +130,6 @@ RUN chmod +x /logrotate.sh
 # Copy configuration templates
 COPY self-host/hbs/nginx-config.hbs /etc/hbs/
 COPY self-host/hbs/config.yaml /etc/hbs/
-
-# Download hbs tool for generating final configurations
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-x64.zip; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-armv7.zip; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-arm64.zip; fi
-
-# Extract hbs
-RUN unzip hbs.zip -d /usr/local/bin && rm hbs.zip
-RUN chmod +x /usr/local/bin/hbs
 
 # Copy entrypoint script and make it executable
 COPY self-host/entrypoint.sh /entrypoint.sh
