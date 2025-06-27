@@ -92,20 +92,25 @@ COPY --from=build /usr/bin/curl /usr/bin/curl
 COPY --from=build /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=build /usr/bin/openssl /usr/bin/openssl
 COPY --from=build /usr/bin/supervisord /usr/bin/supervisord
+COPY --from=build /usr/bin/supervisorctl /usr/bin/supervisorctl
 COPY --from=build /usr/bin/unzip /usr/bin/unzip
 COPY --from=build /usr/bin/jq /usr/bin/jq
-COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build /usr/local/bin/hbs /usr/local/bin/hbs
+
+# Copy required nginx modules and libraries
+COPY --from=build /usr/lib/nginx /usr/lib/nginx
+COPY --from=build /etc/nginx /etc/nginx
+COPY --from=build /usr/share/nginx /usr/share/nginx
+
+# Copy supervisor configuration
+COPY --from=build /etc/supervisor /etc/supervisor
 
 # Create required directories
 RUN mkdir -p /etc/bitwarden_passwordless/data-protection
 RUN mkdir -p /etc/bitwarden_passwordless/logs
-RUN mkdir -p /etc/supervisor
-RUN mkdir -p /etc/supervisor.d
 RUN mkdir -p /var/log/bitwarden
 RUN mkdir -p /var/log/bitwarden_passwordless
 RUN mkdir -p /var/log/nginx/logs
-RUN mkdir -p /etc/nginx/http.d
 RUN mkdir -p /var/run/nginx
 RUN mkdir -p /var/lib/nginx/tmp
 RUN touch /var/run/nginx/nginx.pid
@@ -115,18 +120,18 @@ RUN mkdir -p /app
 WORKDIR /app
 COPY --from=build /app ./
 
-# Set up supervisord
+# Set up supervisord - copy custom configurations
 COPY self-host/supervisord/*.ini /etc/supervisor.d/
 COPY self-host/supervisord/supervisord.conf /etc/supervisor/supervisord.conf
 RUN rm -f /etc/supervisord.conf
 
-# Set up nginx
-COPY self-host/nginx/nginx.conf /etc/nginx
-COPY self-host/nginx/proxy.conf /etc/nginx
-COPY self-host/nginx/mime.types /etc/nginx
-COPY self-host/nginx/security-headers.conf /etc/nginx
-COPY self-host/nginx/security-headers-ssl.conf /etc/nginx
-COPY self-host/nginx/logrotate.sh /
+# Set up nginx - copy custom configurations
+COPY self-host/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY self-host/nginx/proxy.conf /etc/nginx/proxy.conf
+COPY self-host/nginx/mime.types /etc/nginx/mime.types
+COPY self-host/nginx/security-headers.conf /etc/nginx/security-headers.conf
+COPY self-host/nginx/security-headers-ssl.conf /etc/nginx/security-headers-ssl.conf
+COPY self-host/nginx/logrotate.sh /logrotate.sh
 RUN chmod +x /logrotate.sh
 
 # Copy configuration templates
