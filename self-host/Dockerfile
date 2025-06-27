@@ -97,20 +97,18 @@ COPY --from=build /usr/bin/unzip /usr/bin/unzip
 COPY --from=build /usr/bin/jq /usr/bin/jq
 COPY --from=build /usr/local/bin/hbs /usr/local/bin/hbs
 
-# Copy required nginx modules and libraries
-COPY --from=build /usr/lib/nginx /usr/lib/nginx
-COPY --from=build /etc/nginx /etc/nginx
+# Copy nginx shared libraries and modules
 COPY --from=build /usr/share/nginx /usr/share/nginx
-
-# Copy supervisor configuration
-COPY --from=build /etc/supervisor /etc/supervisor
 
 # Create required directories
 RUN mkdir -p /etc/bitwarden_passwordless/data-protection
 RUN mkdir -p /etc/bitwarden_passwordless/logs
+RUN mkdir -p /etc/supervisor
+RUN mkdir -p /etc/supervisor.d
 RUN mkdir -p /var/log/bitwarden
 RUN mkdir -p /var/log/bitwarden_passwordless
 RUN mkdir -p /var/log/nginx/logs
+RUN mkdir -p /etc/nginx/http.d
 RUN mkdir -p /var/run/nginx
 RUN mkdir -p /var/lib/nginx/tmp
 RUN touch /var/run/nginx/nginx.pid
