@@ -73,7 +73,7 @@ ENV SelfHosted=true
 ENV RP_PORT=5701
 
 # Add packages
-RUN apk add --no-cache \
+RUN apk --no-cache add \
   curl \
   nginx \
   openssl \
