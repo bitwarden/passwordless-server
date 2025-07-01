@@ -73,15 +73,14 @@ ENV SelfHosted=true
 ENV RP_PORT=5701
 
 # Add packages
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
   curl \
   nginx \
   openssl \
   supervisor \
   tzdata \
   unzip \
-  jq \
-  && rm -rf /var/lib/apt/lists/*
+  jq
 
 # Create required directories
 RUN mkdir -p /etc/bitwarden_passwordless/data-protection
