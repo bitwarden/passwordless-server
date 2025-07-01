@@ -2,7 +2,7 @@
 ###############################################
 #                 Build stage                 #
 ###############################################
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 
 # Docker buildx supplies the value for this arg
 ARG TARGETPLATFORM
@@ -19,9 +19,8 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
   && echo "RID=$RID" > /tmp/rid.txt
 
 # Add packages
-RUN apt-get update && apt-get install -y \
-  npm jq \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk --no-cache add \
+  npm jq
 
 # Copy csproj files as distinct layers
 WORKDIR /source
