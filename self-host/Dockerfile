@@ -2,7 +2,7 @@
 ###############################################
 #                 Build stage                 #
 ###############################################
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 
 # Docker buildx supplies the value for this arg
 ARG TARGETPLATFORM
@@ -19,9 +19,8 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
   && echo "RID=$RID" > /tmp/rid.txt
 
 # Add packages
-RUN apt-get update && apt-get install -y \
-  npm jq \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk --no-cache add \
+  npm jq
 
 # Copy csproj files as distinct layers
 WORKDIR /source
@@ -59,7 +58,7 @@ RUN . /tmp/rid.txt && dotnet publish -c release -o /app/Api --no-restore --no-se
 ###############################################
 #                  App stage                  #
 ###############################################
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
 ARG TARGETPLATFORM
 LABEL com.bitwarden.product="bitwarden"
 LABEL com.bitwarden.project="passwordless"
@@ -73,15 +72,14 @@ ENV SelfHosted=true
 ENV RP_PORT=5701
 
 # Add packages
-RUN apt-get update && apt-get install -y \
+RUN apk --no-cache add \
   curl \
   nginx \
   openssl \
   supervisor \
   tzdata \
   unzip \
-  jq \
-  && rm -rf /var/lib/apt/lists/*
+  jq
 
 # Create required directories
 RUN mkdir -p /etc/bitwarden_passwordless/data-protection
