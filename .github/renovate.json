@@ -17,6 +17,11 @@
       "groupName": "nuget minor",
       "matchManagers": ["nuget"],
       "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "FluentAssertions",
+      "matchPackageNames": ["FluentAssertions"],
+      "allowedVersions": "<8.0.0"
     }
   ],
   "ignoreDeps": ["Datadog.Trace", "dotnet-sdk"]
