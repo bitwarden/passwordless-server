@@ -66,17 +66,17 @@ public static class ComplimentaryEndpoints
             switch (request.Action?.ToLowerInvariant())
             {
                 case "add":
-                {
-                    var addRequest = new AddAuthenticatorsRequest(request.Selected, true);
-                    await passwordlessClient.AddAuthenticatorsAsync(addRequest);
-                    break;
-                }
+                    {
+                        var addRequest = new AddAuthenticatorsRequest(request.Selected, true);
+                        await passwordlessClient.AddAuthenticatorsAsync(addRequest);
+                        break;
+                    }
                 case "remove":
-                {
-                    var removeRequest = new RemoveAuthenticatorsRequest(request.Selected);
-                    await passwordlessClient.RemoveAuthenticatorsAsync(removeRequest);
-                    break;
-                }
+                    {
+                        var removeRequest = new RemoveAuthenticatorsRequest(request.Selected);
+                        await passwordlessClient.RemoveAuthenticatorsAsync(removeRequest);
+                        break;
+                    }
                 default:
                     return BadRequest(new { error = "Invalid action. Must be 'add' or 'remove'." });
             }
