@@ -1,5 +1,6 @@
 @page "/app/{AppId}/settings/authenticators/manage"
 
+@using Microsoft.AspNetCore.Mvc
 @using Passwordless.Common.Models.MDS
 @using Passwordless.AdminConsole.Services.PasswordlessManagement
 @using Passwordless.Common.Models.Authenticators
@@ -98,18 +99,27 @@
     document.addEventListener("change", (event) => {
         if (event.target.name === "ManageForm.Selected") {            
             let checkbox = event.target;
+            let oldValue = checkbox.checked;
             
             const formData = new FormData();
-            formData.append("ManageForm.Selected", checkbox.value);
-            formData.append("ManageForm.Action", checkbox.checked ? "add" : "remove");
-            formData.append("_handler", checkbox.form["_handler"].value);
+            formData.append("Selected", checkbox.value);
+            formData.append("Action", checkbox.checked ? "add" : "remove");
             formData.append("__RequestVerificationToken", checkbox.form["__RequestVerificationToken"].value);
             
-            fetch(checkbox.form.action, {
+            const appId = "@AppId";
+            
+            fetch(`/app/${appId}/settings/authenticators/manage/api`, {
                 method: "POST",
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
             }).catch(() => {
-               event.target.checked = !event.target.checked;
+               event.target.checked = !oldValue;
             })
         }
     });
@@ -163,7 +173,7 @@
         _isInitialized = true;
     }
 
-    private async Task OnAuthenticatorModified()
+    public async Task<IActionResult> OnAuthenticatorModified()
     {
         switch (ManageForm.Action)
         {
@@ -180,6 +190,8 @@
                 break;
             }
         }
+
+        return new OkObjectResult("hello");
     }
 
     public class FilterViewModel
