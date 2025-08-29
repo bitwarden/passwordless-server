@@ -125,12 +125,12 @@ public class CacheHandlerTests
         var jwtPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Api", "mds.jwt"));
         var jwtContent = File.ReadAllText(jwtPath);
         var jwtParts = jwtContent.Trim().Split('.');
-        
+
         // act
         var headerJson = Encoding.UTF8.GetString(Convert.FromBase64String(AddBase64Padding(jwtParts[0].Replace('-', '+').Replace('_', '/'))));
         using var headerDoc = JsonDocument.Parse(headerJson);
         var x5cProperty = headerDoc.RootElement.GetProperty("x5c");
-        
+
         var earliestExpiration = DateTime.MaxValue;
         foreach (var certElement in x5cProperty.EnumerateArray())
         {
@@ -139,12 +139,12 @@ public class CacheHandlerTests
                 earliestExpiration = cert.NotAfter;
             cert.Dispose();
         }
-        
+
         var daysUntilExpiration = (earliestExpiration - DateTime.UtcNow).TotalDays;
         _output.WriteLine($"MDS certificate expires: {earliestExpiration:yyyy-MM-dd} ({daysUntilExpiration:F0} days)");
-        
+
         // assert
-        Assert.True(daysUntilExpiration > 30, 
+        Assert.True(daysUntilExpiration > 30,
             $"Certificate expires in {daysUntilExpiration:F0} days. Should be > 30 days.\n" +
             $"To fix: Download latest MDS BLOB from https://mds3.fidoalliance.org/ and replace src/Api/mds.jwt");
     }
