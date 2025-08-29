@@ -1,9 +1,12 @@
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Passwordless.Service.MDS;
+using Xunit.Abstractions;
 
 namespace Passwordless.Service.Tests.MDS;
 
@@ -11,11 +14,13 @@ public class CacheHandlerTests
 {
     private readonly Mock<IConfiguration> _configurationMock;
     private readonly Mock<ILogger<CacheHandler>> _loggerMock;
+    private readonly ITestOutputHelper _output;
 
-    public CacheHandlerTests()
+    public CacheHandlerTests(ITestOutputHelper output)
     {
         _configurationMock = new Mock<IConfiguration>();
         _loggerMock = new Mock<ILogger<CacheHandler>>();
+        _output = output;
     }
 
     /// <summary>
@@ -102,6 +107,52 @@ public class CacheHandlerTests
         var actualContent = await actual.Content.ReadAsStringAsync();
         Assert.NotEqual("test", actualContent);
         Assert.Equal(expectedContent, actualContent);
+    }
+
+    /// <summary>
+    /// Verifies that the MDS JWT certificate chain has at least 30 days before expiration.
+    /// 
+    /// When this test fails, update the MDS JWT file:
+    /// 1. Go to https://mds3.fidoalliance.org/
+    /// 2. Download the latest MDS BLOB JWT
+    /// 3. Replace the contents of src/Api/mds.jwt with the downloaded JWT
+    /// 4. Commit and deploy the updated file
+    /// </summary>
+    [Fact]
+    public void MdsJwt_CertificatesShouldBeAtLeast30DaysFromExpiring()
+    {
+        // arrange
+        var jwtPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Api", "mds.jwt"));
+        var jwtContent = File.ReadAllText(jwtPath);
+        var jwtParts = jwtContent.Trim().Split('.');
+
+        // act
+        var headerJson = Encoding.UTF8.GetString(Convert.FromBase64String(AddBase64Padding(jwtParts[0].Replace('-', '+').Replace('_', '/'))));
+        using var headerDoc = JsonDocument.Parse(headerJson);
+        var x5cProperty = headerDoc.RootElement.GetProperty("x5c");
+
+        var earliestExpiration = DateTime.MaxValue;
+        foreach (var certElement in x5cProperty.EnumerateArray())
+        {
+            var cert = new X509Certificate2(Convert.FromBase64String(certElement.GetString()!));
+            if (cert.NotAfter < earliestExpiration)
+                earliestExpiration = cert.NotAfter;
+            cert.Dispose();
+        }
+
+        var daysUntilExpiration = (earliestExpiration - DateTime.UtcNow).TotalDays;
+        _output.WriteLine($"MDS certificate expires: {earliestExpiration:yyyy-MM-dd} ({daysUntilExpiration:F0} days)");
+
+        // assert
+        Assert.True(daysUntilExpiration > 30,
+            $"Certificate expires in {daysUntilExpiration:F0} days. Should be > 30 days.\n" +
+            $"To fix: Download latest MDS BLOB from https://mds3.fidoalliance.org/ and replace src/Api/mds.jwt");
+    }
+
+    private static string AddBase64Padding(string base64)
+    {
+        var padding = (4 - base64.Length % 4) % 4;
+        return padding > 0 ? base64 + new string('=', padding) : base64;
     }
 
     private class NotFoundResponseHandler : HttpMessageHandler
