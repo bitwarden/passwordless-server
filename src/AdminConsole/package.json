@@ -11,18 +11,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@passwordlessdev/passwordless-client": "1.2.2",
+    "@passwordlessdev/passwordless-client": "1.2.4",
     "apexcharts": "4.7.0",
-    "es-module-shims": "2.0.9",
-    "vue": "3.5.13"
+    "es-module-shims": "2.6.2",
+    "vue": "3.5.21"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "0.4.2",
     "@tailwindcss/forms": "0.5.10",
     "@tailwindcss/typography": "0.5.16",
-    "autoprefixer": "10.4.20",
-    "postcss": "8.5.1",
-    "postcss-cli": "11.0.0",
+    "autoprefixer": "10.4.21",
+    "postcss": "8.5.6",
+    "postcss-cli": "11.0.1",
     "tailwindcss": "3.4.17"
   }
 }
