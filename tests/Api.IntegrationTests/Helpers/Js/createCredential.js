@@ -8,7 +8,7 @@ async function createCredential(credentialCreateOptions) {
     const credential = await navigator.credentials.create({
         publicKey: credentialCreateOptions,
     });
-
+    
     const attestationResponse = credential.response;
 
     return JSON.stringify({
@@ -19,6 +19,7 @@ async function createCredential(credentialCreateOptions) {
         response: {
             attestationObject: arrayBufferToBase64Url(attestationResponse.attestationObject),
             clientDataJSON: arrayBufferToBase64Url(attestationResponse.clientDataJSON),
+            transports: attestationResponse.getTransports ? attestationResponse.getTransports() : [],
         }
     });
 }
