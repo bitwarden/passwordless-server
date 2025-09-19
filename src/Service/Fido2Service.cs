@@ -1,5 +1,4 @@
-﻿using System.Buffers.Text;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -146,9 +145,9 @@ public class Fido2Service : IFido2Service
             var requestNewCredentialParameters = new RequestNewCredentialParams
             {
                 User = user,
+                ExcludeCredentials = keyIds,
                 AttestationPreference = attestation,
                 AuthenticatorSelection = authenticatorSelection,
-                ExcludeCredentials = keyIds,
                 Extensions = new AuthenticationExtensionsClientInputs
                 {
                     CredProps = true
@@ -383,10 +382,10 @@ public class Fido2Service : IFido2Service
         var authenticationSessionConfiguration = await _tokenService.DecodeTokenAsync<AuthenticationSessionConfiguration>(request.Session, "session_", true);
 
         // Get registered credential from database
-        var credential = await _storage.GetCredential(request.Response.Id);
+        var credential = await _storage.GetCredential(request.Response.RawId);
         if (credential == null)
         {
-            throw new UnknownCredentialException(Base64Url.EncodeToString(request.Response.Id));
+            throw new UnknownCredentialException(request.Response.Id);
         }
 
         // Create callback to check if userhandle owns the credentialId
