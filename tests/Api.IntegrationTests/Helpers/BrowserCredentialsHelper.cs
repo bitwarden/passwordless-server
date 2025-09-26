@@ -14,7 +14,7 @@ public static class BrowserCredentialsHelper
     private static Task<string> ReadCreateCredentialFileAsync() => File.ReadAllTextAsync(CreateCredentialsFile);
     private static Task<string> ReadGetCredentialFileAsync() => File.ReadAllTextAsync(GetCredentialFile);
 
-    private async static Task<string> GetCreateCredentialFunctions()
+    private static async Task<string> GetCreateCredentialFunctions()
     {
         var tasks = new[] { ReadConvertersFileAsync(), ReadCreateCredentialFileAsync() };
         await Task.WhenAll(tasks);
@@ -23,19 +23,19 @@ public static class BrowserCredentialsHelper
         return result;
     }
 
-    public async static Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl)
+    public static async Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl)
     {
         using var driver = WebDriverFactory.GetDriver(originUrl);
 
         return await driver.CreateCredentialsAsync(options);
     }
 
-    public async static Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(this IJavaScriptExecutor webDriver, CredentialCreateOptions options) =>
+    public static async Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(this IJavaScriptExecutor webDriver, CredentialCreateOptions options) =>
         JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(
-            (webDriver.ExecuteScript($"{await GetCreateCredentialFunctions()} return await createCredential({options.ToJson()});").ToString()
-             ?? string.Empty))!;
+            webDriver.ExecuteScript($"{await GetCreateCredentialFunctions()} return await createCredential({options.ToJson()});").ToString()
+             ?? string.Empty)!;
 
-    private async static Task<string> GetGetCredentialFunctions()
+    private static async Task<string> GetGetCredentialFunctions()
     {
         var tasks = new[] { ReadConvertersFileAsync(), ReadGetCredentialFileAsync() };
         await Task.WhenAll(tasks);
@@ -43,8 +43,8 @@ public static class BrowserCredentialsHelper
         return tasks.Aggregate(string.Empty, (functions, task) => string.Concat(functions, task.Result));
     }
 
-    public async static Task<AuthenticatorAssertionRawResponse> GetCredentialsAsync(this IJavaScriptExecutor webDriver, AssertionOptions options) =>
+    public static async Task<AuthenticatorAssertionRawResponse> GetCredentialsAsync(this IJavaScriptExecutor webDriver, AssertionOptions options) =>
         JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(
-            (webDriver.ExecuteScript($"{await GetGetCredentialFunctions()} return await getCredential({options.ToJson()});").ToString()
-             ?? string.Empty))!;
+            webDriver.ExecuteScript($"{await GetGetCredentialFunctions()} return await getCredential({options.ToJson()});")?.ToString()
+            ?? string.Empty)!;
 }
