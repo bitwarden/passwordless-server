@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Passwordless.Service.EventLog.Loggers;
+using Passwordless.Service.Extensions.Models;
 using Passwordless.Service.Features;
 using Passwordless.Service.Helpers;
 using Passwordless.Service.Models;
@@ -192,7 +193,7 @@ public class Fido2Service : IFido2Service
         {
             var makeNewCredentialParams = new MakeNewCredentialParams
             {
-                AttestationResponse = request.Response,
+                AttestationResponse = request.Response.ToRawResponse(),
                 OriginalOptions = session.Options,
                 IsCredentialIdUniqueToUserCallback = async (args, _) =>
                 {

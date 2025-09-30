@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Fido2NetLib;
 using OpenQA.Selenium;
+using Passwordless.Service.Models;
 
 namespace Passwordless.Api.IntegrationTests.Helpers;
 
@@ -23,15 +24,15 @@ public static class BrowserCredentialsHelper
         return result;
     }
 
-    public static async Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl)
+    public static async Task<AuthenticatorAttestationResponseDTO> CreateCredentialsAsync(CredentialCreateOptions options, string originUrl)
     {
         using var driver = WebDriverFactory.GetDriver(originUrl);
 
         return await driver.CreateCredentialsAsync(options);
     }
 
-    public static async Task<AuthenticatorAttestationRawResponse> CreateCredentialsAsync(this IJavaScriptExecutor webDriver, CredentialCreateOptions options) =>
-        JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(
+    public static async Task<AuthenticatorAttestationResponseDTO> CreateCredentialsAsync(this IJavaScriptExecutor webDriver, CredentialCreateOptions options) =>
+        JsonSerializer.Deserialize<AuthenticatorAttestationResponseDTO>(
             webDriver.ExecuteScript($"{await GetCreateCredentialFunctions()} return await createCredential({options.ToJson()});").ToString()
              ?? string.Empty)!;
 
