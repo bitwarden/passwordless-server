@@ -10,11 +10,11 @@ public static class Fido2MappingExtensions
     {
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Id);
-        
+
         if (dto.RawId is { Length: 0 }) throw new ArgumentException("RawId was empty");
-        
+
         if (dto.Type == PublicKeyCredentialType.Invalid) throw new ArgumentException("PublicKeyCredentialType was invalid");
-        
+
         return new AuthenticatorAttestationRawResponse
         {
             Id = dto.Id,
