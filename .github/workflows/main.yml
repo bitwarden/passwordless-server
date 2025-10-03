@@ -55,21 +55,21 @@ jobs:
       - name: Determine stable version
         id: stable-version
         if: ${{ inputs.version || github.event_name == 'release' }}
+        env:
+          VERSION: ${{ inputs.version || github.event.release.tag_name }}
         run: |
-          version="${{ inputs.version || github.event.release.tag_name }}"
-
-          if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
-              echo "Invalid version: $version"
+          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
+              echo "Invalid version: $VERSION"
               exit 1
           fi
 
-          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Determine prerelease version
         id: pre-version
         run: |
           hash="${{ github.event.pull_request.head.sha || github.sha }}"
-          echo "version=0.0.0-ci-${hash:0:7}" >> $GITHUB_OUTPUT
+          echo "version=0.0.0-ci-${hash:0:7}" >> "$GITHUB_OUTPUT"
 
     outputs:
       version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
@@ -84,6 +84,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Install .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
@@ -103,6 +105,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Install .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
@@ -163,6 +167,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Install .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
@@ -173,13 +179,15 @@ jobs:
           node-version: lts/*
 
       - name: Publish app
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
         run: >
-          dotnet publish src/${{ matrix.app }}/
-          -p:Version=${{ needs.version.outputs.version }}
+          dotnet publish "src/${{ matrix.app }}/"
+          -p:Version="${VERSION}"
           --configuration Release
           --runtime win-x86
           --no-self-contained
-          --output src/${{ matrix.app }}/publish/
+          --output "src/${{ matrix.app }}/publish/"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
@@ -245,12 +253,13 @@ jobs:
       - name: Dispatch deployment
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: >
           gh workflow run deploy-passwordless-server.yml
           --repo bitwarden/passwordless-devops
-          --field repository=${{ github.repository }}
-          --field run-id=${{ github.run_id }}
-          --field api-artifact=Api
-          --field admin-console-artifact=AdminConsole
-          --field environment=${{ matrix.environment }}
-          --field version=${{ needs.version.outputs.version }}
+          --field repository="${GITHUB_REPOSITORY}"
+          --field run-id="${GITHUB_RUN_ID}"
+          --field api-artifact="Api"
+          --field admin-console-artifact="AdminConsole"
+          --field environment="${{ matrix.environment }}"
+          --field version="${VERSION}"
