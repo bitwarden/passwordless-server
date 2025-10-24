@@ -88,7 +88,7 @@ jobs:
           persist-credentials: false
 
       - name: Install .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
 
       - name: Validate format
         run: dotnet format --verify-no-changes
@@ -109,7 +109,7 @@ jobs:
           persist-credentials: false
 
       - name: Install .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
 
       - name: Run restore
         run: dotnet restore
@@ -171,7 +171,7 @@ jobs:
           persist-credentials: false
 
       - name: Install .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
 
       - name: Install NodeJS
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
