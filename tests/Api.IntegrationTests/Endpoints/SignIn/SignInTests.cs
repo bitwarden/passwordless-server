@@ -45,6 +45,31 @@ public class SignInTests(ITestOutputHelper testOutput, PasswordlessApiFixture ap
     }
 
     [Fact]
+    public async Task I_receive_an_error_when_origin_is_missing_from_begin_sign_in()
+    {
+        // Arrange
+        await using var api = apiFixture.CreateApi(new PasswordlessApiOptions
+        {
+            TestOutput = testOutput
+        });
+
+        using var client = api.CreateClient().AddUserAgent();
+        var app = await client.CreateApplicationAsync();
+        client.AddPublicKey(app.ApiKey1).AddSecretKey(app.ApiSecret1);
+
+        var request = new SignInBeginDTO { Origin = null, RPID = PasswordlessApi.RpId };
+
+        // Act
+        using var response = await client.PostAsJsonAsync("/signin/begin", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Title.Should().Be("Origin is required.");
+    }
+
+    [Fact]
     public async Task I_can_retrieve_my_passkey_after_registering_and_receive_a_sign_in_token()
     {
         // Arrange
