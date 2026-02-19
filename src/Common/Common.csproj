@@ -5,21 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fido2" Version="4.0.0" />
-    <PackageReference Include="Fido2.Models" Version="4.0.0" />
-    <PackageReference Include="HtmlSanitizer" Version="9.0.892" />
-    <PackageReference Include="MailKit" Version="4.13.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.9" />
-    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-    <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
-    <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.5.6" />
-    <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.9" />
-    <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.0.5.1" />
-    <PackageReference Include="SendGrid" Version="9.29.3" />
+    <PackageReference Include="Fido2" Version="[4.0.0]" />
+    <PackageReference Include="Fido2.Models" Version="[4.0.0]" />
+    <PackageReference Include="HtmlSanitizer" Version="[9.0.892]" />
+    <PackageReference Include="MailKit" Version="[4.13.0]" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="[9.0.9]" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[9.0.9]" />
+    <PackageReference Include="Serilog.AspNetCore" Version="[9.0.0]" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="[3.0.1]" />
+    <PackageReference Include="Serilog.Expressions" Version="[5.0.0]" />
+    <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="[0.5.6]" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="[9.0.0]" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="[9.0.4]" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="[9.0.9]" />
+    <PackageReference Include="AWSSDK.SimpleEmailV2" Version="[4.0.5.1]" />
+    <PackageReference Include="SendGrid" Version="[9.29.3]" />
   </ItemGroup>
 
   <ItemGroup>
