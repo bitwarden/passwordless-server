@@ -250,6 +250,7 @@ jobs:
           owner: bitwarden
           repositories: passwordless-devops
           permission-actions: write # for running workflows in other repos
+          permission-contents: read
 
       - name: Dispatch deployment
         env:
