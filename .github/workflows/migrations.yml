@@ -51,6 +51,9 @@ jobs:
       - name: Install Entity Framework toolkit
         run: dotnet tool install dotnet-ef --global
 
+      - name: Restore
+        run: dotnet restore src/${{ matrix.app }}
+
       - name: Generate script
         run: >
           dotnet ef migrations script
