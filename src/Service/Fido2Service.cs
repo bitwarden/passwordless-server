@@ -497,8 +497,12 @@ public class Fido2Service : IFido2Service
         return hashedUsername;
     }
 
-    private static Fido2 GetFido2Instance(RequestBase request, IMetadataService metadataService) =>
-        new(new Fido2Configuration
+    private static Fido2 GetFido2Instance(RequestBase request, IMetadataService metadataService)
+    {
+        if (string.IsNullOrEmpty(request.Origin))
+            throw new ApiException("Origin is required.", 400);
+
+        return new(new Fido2Configuration
         {
             ServerDomain = request.RPID,
             Origins = new HashSet<string> { request.Origin },
@@ -506,4 +510,5 @@ public class Fido2Service : IFido2Service
             MDSCacheDirPath = ".mds-cache"
         },
             metadataService);
+    }
 }
