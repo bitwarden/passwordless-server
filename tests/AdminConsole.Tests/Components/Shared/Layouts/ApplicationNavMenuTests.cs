@@ -14,13 +14,13 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Layouts;
 
-public class ApplicationNavMenuTests : TestContext
+public class ApplicationNavMenuTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<ICurrentContext> _currentContext = new();
     private readonly Mock<IWebHostEnvironment> _webHostEnvironment = new();
 
-    private readonly TestAuthorizationContext _authorizationContext;
+    private readonly BunitAuthorizationContext _authorizationContext;
 
     private readonly Fixture _fixture = new();
 
@@ -29,7 +29,7 @@ public class ApplicationNavMenuTests : TestContext
         Services.AddSingleton(_httpContextAccessorMock.Object);
         Services.AddSingleton(_currentContext.Object);
         Services.AddSingleton(_webHostEnvironment.Object);
-        _authorizationContext = this.AddTestAuthorization();
+        _authorizationContext = this.AddAuthorization();
         _httpContextAccessorMock.SetupGet(x => x.HttpContext).Returns(
             new DefaultHttpContext
             {
@@ -63,7 +63,7 @@ public class ApplicationNavMenuTests : TestContext
         _authorizationContext.SetPolicies(CustomPolicy.HasAppRole);
 
         // Act
-        var cut = RenderComponent<ApplicationNavMenu>();
+        var cut = Render<ApplicationNavMenu>();
 
         // Assert
         var submenu = cut.Find("div[id=\"app-submenu\"]");
@@ -103,7 +103,7 @@ public class ApplicationNavMenuTests : TestContext
         _authorizationContext.SetPolicies(CustomPolicy.HasAppRole);
 
         // Act
-        var cut = RenderComponent<ApplicationNavMenu>();
+        var cut = Render<ApplicationNavMenu>();
 
         // Assert
         var submenu = cut.Find("div[id=\"app-submenu\"]");
@@ -120,7 +120,7 @@ public class ApplicationNavMenuTests : TestContext
         _authorizationContext.SetNotAuthorized();
 
         // Act
-        var cut = RenderComponent<ApplicationNavMenu>();
+        var cut = Render<ApplicationNavMenu>();
 
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find("div[id=\"app-submenu\"]"));

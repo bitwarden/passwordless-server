@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared;
 
-public class SecureScriptTests : TestContext
+public class SecureScriptTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<IFileVersionProvider> _fileVersionProviderMock = new();
@@ -32,7 +32,7 @@ public class SecureScriptTests : TestContext
         });
 
         // Act
-        var cut = RenderComponent<SecureScript>();
+        var cut = Render<SecureScript>();
 
         // Assert
         cut.MarkupMatches("<script nonce=\"test-nonce\" diff:ignoreChildren></script>");
@@ -44,7 +44,7 @@ public class SecureScriptTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<SecureScript>();
+        var cut = Render<SecureScript>();
 
         // Assert
         cut.MarkupMatches("<script diff:ignoreChildren></script>");
@@ -56,7 +56,7 @@ public class SecureScriptTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<SecureScript>(parameters => parameters
+        var cut = Render<SecureScript>(parameters => parameters
             .Add(p => p.ChildContent, "console.log('Hello, World!');"));
 
         // Assert
@@ -75,7 +75,7 @@ public class SecureScriptTests : TestContext
         };
 
         // Act
-        var cut = RenderComponent<SecureScript>(parameters => parameters
+        var cut = Render<SecureScript>(parameters => parameters
             .Add(p => p.AdditionalAttributes, additionalAttributes));
 
         // Assert

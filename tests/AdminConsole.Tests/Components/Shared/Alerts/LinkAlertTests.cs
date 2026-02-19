@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Alerts;
 
-public class LinkAlertTests : TestContext
+public class LinkAlertTests : BunitContext
 {
     [InlineData(ContextualStyles.Danger, "container-danger")]
     [InlineData(ContextualStyles.Info, "container-info")]
@@ -17,7 +17,7 @@ public class LinkAlertTests : TestContext
     public void Renders_ExpectedContainerClass_WhenContextualStyleIsDanger(ContextualStyles style, string expectedClass)
     {
         // Arrange
-        var cut = RenderComponent<LinkAlert>(parameters => parameters
+        var cut = Render<LinkAlert>(parameters => parameters
             .Add(p => p.LinkUrl, "https://www.example.com")
             .Add(p => p.Message, "Test Message")
             .Add(p => p.LinkText, "Test Link Text")
@@ -39,7 +39,7 @@ public class LinkAlertTests : TestContext
     public void Renders_ExpectedContentClass_WhenContextualStyleIsDanger(ContextualStyles style, string expectedClass)
     {
         // Arrange
-        var cut = RenderComponent<LinkAlert>(parameters => parameters
+        var cut = Render<LinkAlert>(parameters => parameters
             .Add(p => p.LinkUrl, "https://www.example.com")
             .Add(p => p.Message, "Test Message")
             .Add(p => p.LinkText, "Test Link Text")

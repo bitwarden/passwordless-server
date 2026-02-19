@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.Organization;
 
-public class VerifyTests : TestContext
+public class VerifyTests : BunitContext
 {
     private readonly Mock<IOptionsSnapshot<MailConfiguration>> _mailOptionsMock = new();
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
@@ -40,7 +40,7 @@ public class VerifyTests : TestContext
         _mailOptionsMock.SetupGet(x => x.Value).Returns(mailConfiguration);
 
         // Act
-        var cut = RenderComponent<Verify>();
+        var cut = Render<Verify>();
 
         // Assert
         Assert.NotNull(cut.Find("#file-provider-debug-section"));
@@ -61,7 +61,7 @@ public class VerifyTests : TestContext
         _mailOptionsMock.SetupGet(x => x.Value).Returns(mailConfiguration);
 
         // Act
-        var cut = RenderComponent<Verify>();
+        var cut = Render<Verify>();
 
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find("#file-provider-debug-section"));

@@ -1,7 +1,6 @@
 using AutoFixture;
 using Bunit;
 using Bunit.TestDoubles;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Passwordless.AdminConsole.Components.Pages.App.Settings;
@@ -15,7 +14,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.Settings;
 
-public class AuthenticatorsTests : TestContext
+public class AuthenticatorsTests : BunitContext
 {
     private readonly Mock<ICurrentContext> _currentContextMock = new();
     private readonly Mock<IPasswordlessManagementClient> _passwordlessManagementClientMock = new();
@@ -54,7 +53,7 @@ public class AuthenticatorsTests : TestContext
                 new(Guid.Parse("cb69481e-8ff7-4039-93ec-0a2729a154a8"), new DateTime(2024, 01, 01)),
             });
 
-        var cut = RenderComponent<Authenticators>();
+        var cut = Render<Authenticators>();
 
         // Act
 
@@ -86,7 +85,7 @@ public class AuthenticatorsTests : TestContext
             .ReturnsAsync(new List<ConfiguredAuthenticatorResponse>());
 
         // Act
-        var cut = RenderComponent<Authenticators>();
+        var cut = Render<Authenticators>();
 
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find("div#allowlist"));
@@ -104,11 +103,11 @@ public class AuthenticatorsTests : TestContext
         _passwordlessClientMock.Setup(x =>
                 x.GetConfiguredAuthenticatorsAsync(It.Is<ConfiguredAuthenticatorRequest>(p => p.IsAllowed == true)))
             .ReturnsAsync(new List<ConfiguredAuthenticatorResponse>());
-        var nav = Services.GetRequiredService<FakeNavigationManager>();
+        var nav = Services.GetRequiredService<BunitNavigationManager>();
         var baseUriLength = nav.BaseUri.Length;
 
         // Act
-        var cut = RenderComponent<Authenticators>(parameters =>
+        var cut = Render<Authenticators>(parameters =>
             parameters.Add(p => p.AppId, "cb69481e-8ff7-4039-93ec-0a2729a154b1"));
 
         // Assert
