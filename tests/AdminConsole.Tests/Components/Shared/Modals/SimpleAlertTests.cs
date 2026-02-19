@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Modals;
 
-public class SimpleAlertTests : TestContext
+public class SimpleAlertTests : BunitContext
 {
     private readonly Fixture _fixture = new();
 
@@ -19,7 +19,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert
@@ -37,7 +37,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert
@@ -55,7 +55,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert
@@ -73,7 +73,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert
@@ -91,7 +91,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert
@@ -111,7 +111,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert
@@ -135,7 +135,7 @@ public class SimpleAlertTests : TestContext
             .Create();
 
         // Act
-        var cut = RenderComponent<SimpleAlert>(parameters => parameters
+        var cut = Render<SimpleAlert>(parameters => parameters
             .Add(p => p.Model, model));
 
         // Assert

@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Table;
 
-public class TableTests : TestContext
+public class TableTests : BunitContext
 {
     [Fact]
     public void Table_Renders_ExpectedColumnHeaders()
@@ -11,7 +11,7 @@ public class TableTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Shared.Tables.Table>(parameters =>
+        var cut = Render<AdminConsole.Components.Shared.Tables.Table>(parameters =>
             parameters.Add(p => p.ColumnHeaders, new List<string> { "Column 1", "Column 2" }));
 
         // Assert
@@ -25,7 +25,7 @@ public class TableTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Shared.Tables.Table>(parameters =>
+        var cut = Render<AdminConsole.Components.Shared.Tables.Table>(parameters =>
             parameters.Add(p => p.ColumnHeaders, new List<string> { "Column 1", "Column 2", string.Empty }));
 
         // Assert

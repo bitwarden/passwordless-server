@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.Settings.SettingsComponents;
 
-public class ApiKeysSectionTests : TestContext
+public class ApiKeysSectionTests : BunitContext
 {
     private readonly Mock<ICurrentContext> _currentContext = new();
     private readonly Mock<IPasswordlessManagementClient> _managementClientMock = new();
@@ -46,7 +46,7 @@ public class ApiKeysSectionTests : TestContext
     {
         // Arrange
         _currentContext.SetupGet(x => x.IsPendingDelete).Returns(true);
-        var cut = RenderComponent<ApiKeysSection>();
+        var cut = Render<ApiKeysSection>();
 
         // Assert
         cut.MarkupMatches("");
@@ -64,7 +64,7 @@ public class ApiKeysSectionTests : TestContext
         var expectedApiKeys = _fixture.CreateMany<ApiKeyResponse>().ToImmutableList();
         _managementClientMock.Setup(x => x.GetApiKeysAsync(It.Is<string>(p => p == _currentContext.Object.AppId!)))
             .ReturnsAsync(expectedApiKeys);
-        var cut = RenderComponent<ApiKeysSection>();
+        var cut = Render<ApiKeysSection>();
 
         // Assert
         cut.MarkupMatches("<div class=\"panel\" diff:ignoreChildren></div>");
@@ -84,7 +84,7 @@ public class ApiKeysSectionTests : TestContext
         };
         _managementClientMock.Setup(x => x.GetApiKeysAsync(It.Is<string>(p => p == _currentContext.Object.AppId!)))
             .ReturnsAsync(expectedApiKeys);
-        var cut = RenderComponent<ApiKeysSection>();
+        var cut = Render<ApiKeysSection>();
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();
@@ -108,7 +108,7 @@ public class ApiKeysSectionTests : TestContext
         };
         _managementClientMock.Setup(x => x.GetApiKeysAsync(It.Is<string>(p => p == _currentContext.Object.AppId!)))
             .ReturnsAsync(expectedApiKeys);
-        var cut = RenderComponent<ApiKeysSection>();
+        var cut = Render<ApiKeysSection>();
 
         // Assert
         var actualCell = cut.FindAll("tbody>tr").Single(x => x.Children.Length > 1).Children.Last();

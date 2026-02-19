@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared;
 
-public sealed class BreadCrumbTests : TestContext
+public sealed class BreadCrumbTests : BunitContext
 {
     private readonly Fixture _fixture = new();
 
@@ -15,7 +15,7 @@ public sealed class BreadCrumbTests : TestContext
         // Arrange
 
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(1).ToList();
-        var cut = RenderComponent<BreadCrumb>(parameters => parameters
+        var cut = Render<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -30,7 +30,7 @@ public sealed class BreadCrumbTests : TestContext
     {
         // Arrange
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(0).ToList();
-        var cut = RenderComponent<BreadCrumb>(parameters => parameters
+        var cut = Render<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -45,7 +45,7 @@ public sealed class BreadCrumbTests : TestContext
     {
         // Arrange
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(0).ToList();
-        var cut = RenderComponent<BreadCrumb>(parameters => parameters
+        var cut = Render<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -62,7 +62,7 @@ public sealed class BreadCrumbTests : TestContext
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(2).ToList();
 
         // Act
-        var cut = RenderComponent<BreadCrumb>(parameters => parameters
+        var cut = Render<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Assert
@@ -81,7 +81,7 @@ public sealed class BreadCrumbTests : TestContext
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(3).ToList();
 
         // Act
-        var cut = RenderComponent<BreadCrumb>(parameters => parameters
+        var cut = Render<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Assert
@@ -100,7 +100,7 @@ public sealed class BreadCrumbTests : TestContext
         var items = _fixture.CreateMany<BreadCrumb.BreadCrumbItem>(3).ToList();
 
         // Act
-        var cut = RenderComponent<BreadCrumb>(parameters => parameters
+        var cut = Render<BreadCrumb>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Assert

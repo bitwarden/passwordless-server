@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared;
 
-public class SecureImportMapScriptTests : TestContext
+public class SecureImportMapScriptTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<IFileVersionProvider> _fileVersionProviderMock = new();
@@ -40,7 +40,7 @@ public class SecureImportMapScriptTests : TestContext
         _fileVersionProviderMock.Setup(x => x.AddFileVersionToPath("", "/lib/vue/vue.mjs")).Returns("/lib/vue/vue.mjs?v=1");
 
         // Act
-        var cut = RenderComponent<SecureImportMapScript>(p =>
+        var cut = Render<SecureImportMapScript>(p =>
             p.Add(x => x.Value, value));
 
         // Assert
@@ -61,7 +61,7 @@ public class SecureImportMapScriptTests : TestContext
         _fileVersionProviderMock.Setup(x => x.AddFileVersionToPath("", "/lib/vue/vue.mjs")).Returns("/lib/vue/vue.mjs?v=1");
 
         // Act
-        var cut = RenderComponent<SecureImportMapScript>(p =>
+        var cut = Render<SecureImportMapScript>(p =>
             p.Add(x => x.Value, value));
 
         // Assert
@@ -82,7 +82,7 @@ public class SecureImportMapScriptTests : TestContext
         _fileVersionProviderMock.Setup(x => x.AddFileVersionToPath("", "/lib/vue/vue.mjs")).Returns("/lib/vue/vue.mjs?v=1");
 
         // Act
-        var cut = RenderComponent<SecureImportMapScript>(parameters => parameters
+        var cut = Render<SecureImportMapScript>(parameters => parameters
             .Add(p => p.Value, value));
 
         // Assert

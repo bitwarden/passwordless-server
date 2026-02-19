@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared;
 
-public class SecureStylesheetTests : TestContext
+public class SecureStylesheetTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<IFileVersionProvider> _fileVersionProviderMock = new();
@@ -37,7 +37,7 @@ public class SecureStylesheetTests : TestContext
         };
 
         // Act
-        var cut = RenderComponent<SecureStylesheet>(parameters => parameters
+        var cut = Render<SecureStylesheet>(parameters => parameters
             .Add(p => p.AdditionalAttributes, additionalAttributes));
 
         // Assert
@@ -57,7 +57,7 @@ public class SecureStylesheetTests : TestContext
         });
 
         // Act
-        var cut = RenderComponent<SecureStylesheet>(parameters => parameters
+        var cut = Render<SecureStylesheet>(parameters => parameters
             .Add(p => p.ChildContent, "body { color: red; }"));
 
 
@@ -76,7 +76,7 @@ public class SecureStylesheetTests : TestContext
         };
 
         // Act
-        var cut = RenderComponent<SecureStylesheet>(parameters => parameters
+        var cut = Render<SecureStylesheet>(parameters => parameters
             .Add(p => p.AdditionalAttributes, additionalAttributes));
 
         // Assert
@@ -89,7 +89,7 @@ public class SecureStylesheetTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<SecureStylesheet>(parameters => parameters
+        var cut = Render<SecureStylesheet>(parameters => parameters
             .Add(p => p.ChildContent, "body { color: red; }"));
 
         // Assert

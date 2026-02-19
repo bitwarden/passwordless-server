@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.Settings.SettingsComponents;
 
-public class CreateApiKeyComponentTests : TestContext
+public class CreateApiKeyComponentTests : BunitContext
 {
     private readonly Mock<ICurrentContext> _currentContext = new();
     private readonly Mock<IPasswordlessManagementClient> _managementClientMock = new();
@@ -45,7 +45,7 @@ public class CreateApiKeyComponentTests : TestContext
     {
         // Arrange
         var scopes = Enum.GetValues<SecretKeyScopes>().ToList();
-        var cut = RenderComponent<CreateApiKeyComponent<SecretKeyScopes>>(p => p
+        var cut = Render<CreateApiKeyComponent<SecretKeyScopes>>(p => p
             .Add(x => x.Scopes, scopes)
             .Add(x => x.OnCreateClicked, () => { }));
 

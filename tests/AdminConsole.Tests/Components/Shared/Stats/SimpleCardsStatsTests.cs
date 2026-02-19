@@ -4,13 +4,13 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Stats;
 
-public class SimpleCardsStatsTests : TestContext
+public class SimpleCardsStatsTests : BunitContext
 {
     [Fact]
     public void SimpleCardsStats_Renders_Nothing_WhenItemsAreEmpty()
     {
         // Arrange
-        var cut = RenderComponent<SimpleCardsStats>(parameters => parameters
+        var cut = Render<SimpleCardsStats>(parameters => parameters
             .Add(p => p.Items, new List<SimpleCardsStats.Item>(0)));
 
         // Act
@@ -30,7 +30,7 @@ public class SimpleCardsStatsTests : TestContext
             new("Title 2", 2, SimpleCardsStats.ValueTypes.Double),
             new("Title 3", 3, SimpleCardsStats.ValueTypes.Percentage),
         };
-        var cut = RenderComponent<SimpleCardsStats>(parameters => parameters
+        var cut = Render<SimpleCardsStats>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -49,7 +49,7 @@ public class SimpleCardsStatsTests : TestContext
             new("Title 2", 2, SimpleCardsStats.ValueTypes.Double),
             new("Title 3", 3, SimpleCardsStats.ValueTypes.Percentage),
         };
-        var cut = RenderComponent<SimpleCardsStats>(parameters => parameters
+        var cut = Render<SimpleCardsStats>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -71,7 +71,7 @@ public class SimpleCardsStatsTests : TestContext
             new("Title 2", 2, SimpleCardsStats.ValueTypes.Double),
             new("Title 3", 3, SimpleCardsStats.ValueTypes.Percentage),
         };
-        var cut = RenderComponent<SimpleCardsStats>(parameters => parameters
+        var cut = Render<SimpleCardsStats>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.AdditionalAttributes, new Dictionary<string, object> { { "class", "i-hate-css" } }));
 

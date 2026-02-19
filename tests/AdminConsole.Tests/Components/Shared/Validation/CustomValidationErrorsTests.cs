@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Validation;
 
-public class CustomValidationErrorsTests : TestContext
+public class CustomValidationErrorsTests : BunitContext
 {
     [Fact]
     public void CustomValidationErrors_RendersNothing_WhenNoValidationMessages()
@@ -14,7 +14,7 @@ public class CustomValidationErrorsTests : TestContext
         var editContext = new EditContext(new object());
 
         // Act
-        var cut = RenderComponent<CustomValidationErrors>(parameters => parameters
+        var cut = Render<CustomValidationErrors>(parameters => parameters
             .Add(p => p.EditContext, editContext));
 
         // Assert
@@ -30,7 +30,7 @@ public class CustomValidationErrorsTests : TestContext
         validationMessageStore.Add(new FieldIdentifier(new object(), "Field"), "My error message.");
 
         // Act
-        var cut = RenderComponent<CustomValidationErrors>(parameters => parameters
+        var cut = Render<CustomValidationErrors>(parameters => parameters
             .Add(p => p.EditContext, editContext));
 
         // Assert

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.Organization;
 
-public class OverviewTests : TestContext
+public class OverviewTests : BunitContext
 {
     private readonly Fixture _fixture = new();
 
@@ -64,7 +64,7 @@ public class OverviewTests : TestContext
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(_validOrganization);
 
         // Act
-        var cut = RenderComponent<Overview>();
+        var cut = Render<Overview>();
 
         // Assert
         var actual = cut.Find("#create-application-btn");
@@ -80,7 +80,7 @@ public class OverviewTests : TestContext
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(_validOrganization);
 
         // Act
-        var cut = RenderComponent<Overview>();
+        var cut = Render<Overview>();
 
         // Assert
         var actual = cut.Find("#upgrade-organization-alert");
@@ -96,7 +96,7 @@ public class OverviewTests : TestContext
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(_validOrganization);
 
         // Act
-        var cut = RenderComponent<Overview>();
+        var cut = Render<Overview>();
 
         // Assert
         var actual = cut.Find("h1");
@@ -111,7 +111,7 @@ public class OverviewTests : TestContext
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(_validOrganization);
 
         // Act
-        var cut = RenderComponent<Overview>();
+        var cut = Render<Overview>();
 
         // Assert
         var actualListItem1 = cut.Find("#appid1-list-item");

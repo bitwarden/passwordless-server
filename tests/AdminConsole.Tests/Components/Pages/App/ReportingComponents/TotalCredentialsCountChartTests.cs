@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.ReportingComponents;
 
-public class TotalCredentialsCountChartTests : TestContext
+public class TotalCredentialsCountChartTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<IFileVersionProvider> _fileVersionProviderMock = new();
@@ -26,7 +26,7 @@ public class TotalCredentialsCountChartTests : TestContext
     }
 
     [Fact]
-    public void RenderComponent_Renders_ExpectedId()
+    public void Render_Renders_ExpectedId()
     {
         // Arrange
         var data = new List<PeriodicCredentialReportResponse>
@@ -37,7 +37,7 @@ public class TotalCredentialsCountChartTests : TestContext
             new(new DateOnly(2024, 1, 5), 5, 10)
         }.AsEnumerable();
 
-        var cut = RenderComponent<TotalCredentialsCountChart>(parameters => parameters
+        var cut = Render<TotalCredentialsCountChart>(parameters => parameters
             .Add(p => p.Data, data));
 
         // Act

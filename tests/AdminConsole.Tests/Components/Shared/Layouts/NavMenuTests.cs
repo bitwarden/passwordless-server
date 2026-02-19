@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using AutoFixture;
 using Bunit;
 using Bunit.TestDoubles;
@@ -13,13 +12,13 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Layouts;
 
-public class NavMenuTests : TestContext
+public class NavMenuTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
     private readonly Mock<ICurrentContext> _currentContext = new();
     private readonly Mock<IWebHostEnvironment> _webHostEnvironment = new();
 
-    private readonly TestAuthorizationContext _authorizationContext;
+    private readonly BunitAuthorizationContext _authorizationContext;
 
     private readonly Fixture _fixture = new();
 
@@ -28,7 +27,7 @@ public class NavMenuTests : TestContext
         Services.AddSingleton(_httpContextAccessorMock.Object);
         Services.AddSingleton(_currentContext.Object);
         Services.AddSingleton(_webHostEnvironment.Object);
-        _authorizationContext = this.AddTestAuthorization();
+        _authorizationContext = this.AddAuthorization();
         _httpContextAccessorMock.SetupGet(x => x.HttpContext).Returns(
             new DefaultHttpContext
             {
@@ -42,7 +41,7 @@ public class NavMenuTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<NavMenu>();
+        var cut = Render<NavMenu>();
 
         // Assert
         Assert.False(cut.Find("nav").Children.Any());
@@ -62,7 +61,7 @@ public class NavMenuTests : TestContext
         _authorizationContext.SetAuthorized("jonas");
 
         // Act
-        var cut = RenderComponent<NavMenu>();
+        var cut = Render<NavMenu>();
 
         // Assert
         Assert.True(cut.Find("nav").Children.Any());
