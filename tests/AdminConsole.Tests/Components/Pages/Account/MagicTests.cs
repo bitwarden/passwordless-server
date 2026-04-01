@@ -1,11 +1,7 @@
 using Bunit;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Passwordless.AdminConsole.Components.Pages.Account;
 using Passwordless.AdminConsole.Endpoints;
 using Passwordless.AdminConsole.Identity;
@@ -15,7 +11,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.Account;
 
-public class MagicTests : TestContext
+public class MagicTests : BunitContext
 {
     public MagicTests()
     {
@@ -58,7 +54,7 @@ public class MagicTests : TestContext
 
         navigationManager.NavigateTo(redirectResult.Url);
 
-        var cut = this.RenderComponent<Magic>();
+        var cut = this.Render<Magic>();
         Assert.NotNull(cut.Find("#invalid-magic-link-token-alert"));
     }
 

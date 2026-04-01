@@ -4,13 +4,13 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared.Stats;
 
-public class TrendingCardsStatsTests : TestContext
+public class TrendingCardsStatsTests : BunitContext
 {
     [Fact]
     public void TrendingCardsStats_Renders_Nothing_WhenItemsAreEmpty()
     {
         // Arrange
-        var cut = RenderComponent<TrendingCardsStats>(parameters => parameters
+        var cut = Render<TrendingCardsStats>(parameters => parameters
             .Add(p => p.Items, new List<TrendingCardsStats.Item>(0)));
 
         // Act
@@ -30,7 +30,7 @@ public class TrendingCardsStatsTests : TestContext
             new("Title 2", 2, TrendingCardsStats.ValueTypes.Double, "Sub {0}", 0.02, TrendingCardsStats.ValueTypes.Percentage),
             new("Title 3", 3, TrendingCardsStats.ValueTypes.Percentage, "Sub {0}", 1, TrendingCardsStats.ValueTypes.Integer),
         };
-        var cut = RenderComponent<TrendingCardsStats>(parameters => parameters
+        var cut = Render<TrendingCardsStats>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -49,7 +49,7 @@ public class TrendingCardsStatsTests : TestContext
             new("Title 2", 2, TrendingCardsStats.ValueTypes.Double, "Sub {0}", 0.02, TrendingCardsStats.ValueTypes.Percentage),
             new("Title 3", 3, TrendingCardsStats.ValueTypes.Percentage, "Sub {0}", 1, TrendingCardsStats.ValueTypes.Integer),
         };
-        var cut = RenderComponent<TrendingCardsStats>(parameters => parameters
+        var cut = Render<TrendingCardsStats>(parameters => parameters
             .Add(p => p.Items, items));
 
         // Act
@@ -71,7 +71,7 @@ public class TrendingCardsStatsTests : TestContext
             new("Title 2", 2, TrendingCardsStats.ValueTypes.Double, "Sub {0}", 0.02, TrendingCardsStats.ValueTypes.Percentage),
             new("Title 3", 3, TrendingCardsStats.ValueTypes.Percentage, "Sub {0}", 1, TrendingCardsStats.ValueTypes.Integer),
         };
-        var cut = RenderComponent<TrendingCardsStats>(parameters => parameters
+        var cut = Render<TrendingCardsStats>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.AdditionalAttributes, new Dictionary<string, object> { { "class", "i-hate-css" } }));
 

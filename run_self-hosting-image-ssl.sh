@@ -6,7 +6,7 @@ docker run \
   --name passwordless \
   -p 5701:5701 \
   -e BWP_PORT=5701 \
-  -e BWP_DOMAIN=yourdomain.local \
+  -e BWP_DOMAIN=example.local \
   -e BWP_ENABLE_SSL=true \
   -e BWP_ENABLE_SSL_CA=true \
   -e BWP_SSL_CA_CERT=ssl.crt \

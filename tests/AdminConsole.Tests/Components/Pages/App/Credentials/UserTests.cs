@@ -1,7 +1,5 @@
 using Bunit;
 using Bunit.TestDoubles;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Passwordless.AdminConsole.Components.Pages.App.Credentials;
@@ -10,7 +8,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.Credentials;
 
-public class UserTests : TestContext
+public class UserTests : BunitContext
 {
     private readonly Mock<IScopedPasswordlessClient> _passwordlessClientMock = new();
 
@@ -25,7 +23,7 @@ public class UserTests : TestContext
     public void User_ShouldRender_UserIdInSummary()
     {
         // Arrange
-        var actual = RenderComponent<User>(builder =>
+        var actual = Render<User>(builder =>
             builder.Add(parameters => parameters.UserId, "123"));
 
         // Assert
@@ -37,7 +35,7 @@ public class UserTests : TestContext
     public void User_ShouldRender_CredentialsComponent()
     {
         // Arrange
-        var actual = RenderComponent<User>(builder =>
+        var actual = Render<User>(builder =>
             builder.Add(parameters => parameters.UserId, "123"));
 
         // Assert

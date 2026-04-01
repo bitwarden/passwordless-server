@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.Organization.Settings;
 
-public class SettingsTests : TestContext
+public class SettingsTests : BunitContext
 {
     private readonly Mock<IDataService> _dataServiceMock = new();
     private readonly Mock<IFeatureManager> _featureManagerMock = new();
@@ -41,7 +41,7 @@ public class SettingsTests : TestContext
             .ReturnsAsync(false);
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Pages.Organization.Settings>();
+        var cut = Render<AdminConsole.Components.Pages.Organization.Settings>();
 
         // Assert
         Assert.False(cut.HasComponent<Stub<SecurityComponent>>());
@@ -64,7 +64,7 @@ public class SettingsTests : TestContext
             .ReturnsAsync(true);
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Pages.Organization.Settings>();
+        var cut = Render<AdminConsole.Components.Pages.Organization.Settings>();
 
         // Assert
         Assert.True(cut.HasComponent<Stub<SecurityComponent>>());

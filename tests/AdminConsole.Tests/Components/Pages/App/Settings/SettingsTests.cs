@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.Settings;
 
-public class SettingsTests : TestContext
+public class SettingsTests : BunitContext
 {
     private readonly Fixture _fixture = new();
 
@@ -67,7 +67,7 @@ public class SettingsTests : TestContext
         _currentContextMock.SetupGet(x => x.IsPendingDelete).Returns(true);
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Pages.App.Settings.Settings>();
+        var cut = Render<AdminConsole.Components.Pages.App.Settings.Settings>();
 
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find($"#{expectedId}"));
@@ -89,7 +89,7 @@ public class SettingsTests : TestContext
         _currentContextMock.SetupGet(x => x.Features).Returns(expectedFeatures);
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Pages.App.Settings.Settings>();
+        var cut = Render<AdminConsole.Components.Pages.App.Settings.Settings>();
 
         // Assert
         Assert.NotNull(cut.Find($"#{DeleteApplicationSectionId}"));
@@ -106,7 +106,7 @@ public class SettingsTests : TestContext
         _currentContextMock.SetupGet(x => x.Features).Returns(expectedFeatures);
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Pages.App.Settings.Settings>();
+        var cut = Render<AdminConsole.Components.Pages.App.Settings.Settings>();
 
         // Assert
         Assert.NotNull(cut.Find($"#{AttestationSectionId}"));
@@ -123,7 +123,7 @@ public class SettingsTests : TestContext
         _currentContextMock.SetupGet(x => x.Features).Returns(expectedFeatures);
 
         // Act
-        var cut = RenderComponent<AdminConsole.Components.Pages.App.Settings.Settings>();
+        var cut = Render<AdminConsole.Components.Pages.App.Settings.Settings>();
 
         // Assert
         Assert.Throws<ElementNotFoundException>(() => cut.Find($"#{AttestationSectionId}"));

@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App.Settings.SettingsComponents;
 
-public class DeleteApplicationSectionTests : TestContext
+public class DeleteApplicationSectionTests : BunitContext
 {
     private readonly Mock<IApplicationService> _appServiceMock = new();
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new();
@@ -37,7 +37,7 @@ public class DeleteApplicationSectionTests : TestContext
             .ReturnsAsync(false);
 
         // Act
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Assert
@@ -56,7 +56,7 @@ public class DeleteApplicationSectionTests : TestContext
             .ReturnsAsync(true);
 
         // Act
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Assert
@@ -77,7 +77,7 @@ public class DeleteApplicationSectionTests : TestContext
         };
 
         // Act
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Assert
@@ -98,7 +98,7 @@ public class DeleteApplicationSectionTests : TestContext
         };
 
         // Act
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Assert
@@ -116,7 +116,7 @@ public class DeleteApplicationSectionTests : TestContext
                 x.CanDeleteApplicationImmediatelyAsync(It.Is<string>(p => p == application.Id)))
             .ReturnsAsync(true);
 
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Act
@@ -150,7 +150,7 @@ public class DeleteApplicationSectionTests : TestContext
                     It.Is<string>(p => p == username)))
             .ReturnsAsync(expectedDeleteResponse);
 
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Act
@@ -165,7 +165,7 @@ public class DeleteApplicationSectionTests : TestContext
                 It.Is<string>(p => p == application.Id),
                 It.Is<string>(p => p == username)), Times.Once);
 
-        var navMan = Services.GetRequiredService<FakeNavigationManager>();
+        var navMan = Services.GetRequiredService<BunitNavigationManager>();
         Assert.Equal("http://localhost/Organization/Overview", navMan.Uri);
     }
 
@@ -186,7 +186,7 @@ public class DeleteApplicationSectionTests : TestContext
         var principal = new ClaimsPrincipal(identity);
         _httpContextAccessorMock.SetupGet(x => x.HttpContext.User).Returns(principal);
 
-        var cut = RenderComponent<DeleteApplicationSection>(c =>
+        var cut = Render<DeleteApplicationSection>(c =>
             c.Add(p => p.Application, application));
 
         // Act
@@ -198,7 +198,7 @@ public class DeleteApplicationSectionTests : TestContext
         _appServiceMock.Verify(x =>
             x.CancelDeletionForApplicationAsync(It.Is<string>(p => p == application.Id)), Times.Once);
 
-        var navMan = Services.GetRequiredService<FakeNavigationManager>();
+        var navMan = Services.GetRequiredService<BunitNavigationManager>();
         Assert.Equal("http://localhost/", navMan.Uri);
     }
 }

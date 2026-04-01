@@ -1,12 +1,11 @@
 using Bunit;
 using Passwordless.AdminConsole.Components.Shared;
-using Passwordless.AdminConsole.TagHelpers;
 using Xunit;
 using Badge = Passwordless.AdminConsole.Components.Shared.Badge;
 
 namespace Passwordless.AdminConsole.Tests.Components;
 
-public class BadgeTests : TestContext
+public class BadgeTests : BunitContext
 {
     #region Class
     [Theory]
@@ -18,7 +17,7 @@ public class BadgeTests : TestContext
     public void Badge_Renders_WhiteText(ContextualStyles variant)
     {
         // Arrange
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = Render<Badge>(parameters => parameters
             .Add(p => p.Variant, variant));
 
         // Act
@@ -42,7 +41,7 @@ public class BadgeTests : TestContext
     public void Badge_Renders_ExpectedBackground_Variant(ContextualStyles variant, string expectedClass)
     {
         // Arrange
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = Render<Badge>(parameters => parameters
             .Add(p => p.Variant, variant));
 
         // Act
@@ -58,7 +57,7 @@ public class BadgeTests : TestContext
     public void Badge_Renders_ExpectedText()
     {
         // Arrange
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = Render<Badge>(parameters => parameters
             .Add(p => p.Message, "Active"));
         var span = cut.Find("span");
 

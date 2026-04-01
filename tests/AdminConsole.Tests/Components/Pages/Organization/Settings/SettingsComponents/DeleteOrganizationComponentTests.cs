@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.Organization.Settings.SettingsComponents;
 
-public class DeleteOrganizationComponentTests : TestContext
+public class DeleteOrganizationComponentTests : BunitContext
 {
     private readonly Mock<ISharedBillingService> _billingServiceMock = new();
     private readonly Mock<IDataService> _dataServiceMock = new();
@@ -65,7 +65,7 @@ public class DeleteOrganizationComponentTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -80,7 +80,7 @@ public class DeleteOrganizationComponentTests : TestContext
         // Arrange
 
         // Act
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 1)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -94,7 +94,7 @@ public class DeleteOrganizationComponentTests : TestContext
     public void SubmittingDeleteForm_WithoutNameConfirmation_ShowsValidationMessage()
     {
         // Arrange
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -110,7 +110,7 @@ public class DeleteOrganizationComponentTests : TestContext
     public void SubmittingDeleteForm_WithNameConfirmationTooManyCharacters_ShowsValidationMessage()
     {
         // Arrange
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -131,7 +131,7 @@ public class DeleteOrganizationComponentTests : TestContext
         var principal = ClaimsPrincipalFactory.CreateJohnDoe();
         _httpContextAccessorMock.SetupGet(x => x.HttpContext!.User).Returns(principal);
 
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -161,7 +161,7 @@ public class DeleteOrganizationComponentTests : TestContext
         };
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(organization);
 
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -195,7 +195,7 @@ public class DeleteOrganizationComponentTests : TestContext
         };
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(organization);
 
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -230,7 +230,7 @@ public class DeleteOrganizationComponentTests : TestContext
         };
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(organization);
 
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -265,7 +265,7 @@ public class DeleteOrganizationComponentTests : TestContext
         };
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(organization);
 
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 
@@ -298,7 +298,7 @@ public class DeleteOrganizationComponentTests : TestContext
         };
         _dataServiceMock.Setup(x => x.GetOrganizationWithDataAsync()).ReturnsAsync(organization);
 
-        var cut = RenderComponent<DeleteOrganizationComponent>(c =>
+        var cut = Render<DeleteOrganizationComponent>(c =>
             c.Add(p => p.ApplicationsCount, 0)
                 .Add(p => p.Name, "Bitwarden"));
 

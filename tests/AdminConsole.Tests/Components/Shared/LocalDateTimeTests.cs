@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Shared;
 
-public class LocalDateTimeTests : TestContext
+public class LocalDateTimeTests : BunitContext
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IFileVersionProvider> _fileVersionProviderMock;
@@ -31,7 +31,7 @@ public class LocalDateTimeTests : TestContext
     public void LocalDateTime_Renders_ExpectedMarkup()
     {
         // Arrange
-        var cut = RenderComponent<LocalDateTime>(parameters => parameters
+        var cut = Render<LocalDateTime>(parameters => parameters
             .Add(p => p.Value, new DateTime(1990, 01, 05, 18, 0, 0)));
 
         // Act
@@ -46,7 +46,7 @@ public class LocalDateTimeTests : TestContext
     public void LocalDateTime_Applies_Nonce_OnScriptTag()
     {
         // Arrange
-        var cut = RenderComponent<LocalDateTime>(parameters => parameters
+        var cut = Render<LocalDateTime>(parameters => parameters
             .Add(p => p.Value, new DateTime(1990, 01, 05, 18, 0, 0)));
 
         // Act

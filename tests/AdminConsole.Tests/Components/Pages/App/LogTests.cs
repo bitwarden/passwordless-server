@@ -1,7 +1,5 @@
 using AutoFixture;
 using Bunit;
-using Bunit.TestDoubles;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,7 +12,7 @@ using Xunit;
 
 namespace Passwordless.AdminConsole.Tests.Components.Pages.App;
 
-public class LogTests : TestContext
+public class LogTests : BunitContext
 {
     private readonly Mock<ICurrentContext> _currentContextMock = new();
     private readonly Mock<IEventLogService> _eventLogServiceMock = new();
@@ -48,7 +46,7 @@ public class LogTests : TestContext
             .ReturnsAsync(expectedEvents);
 
         // Act
-        var cut = RenderComponent<Log>(p => p
+        var cut = Render<Log>(p => p
             .Add(param => param.AppId, "myapp"));
 
         // Assert
