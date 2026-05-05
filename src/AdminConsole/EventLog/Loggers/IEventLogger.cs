@@ -104,7 +104,7 @@ public static class EventLoggerExtensions
                 performedAt
             )
         );
-    
+
     public static void LogAdminInvalidInviteUsedEvent(
         this IEventLogger logger,
         Invite invite,

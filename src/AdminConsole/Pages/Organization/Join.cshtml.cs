@@ -62,13 +62,13 @@ public class Join : PageModel
         {
             Invite = null;
         }
-        
+
         if (Invite is null)
         {
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
             return Page();
         }
-        
+
         // todo: We could add a check if the email is busy here and if so show a message.
 
         Form = new JoinForm { Code = code, Email = Invite.ToEmail };
@@ -112,8 +112,8 @@ public class Join : PageModel
             _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
             return Page();
-        }             
-        
+        }
+
         ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(form.Email);
 
         if (existingUser == null)
