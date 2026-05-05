@@ -1,6 +1,6 @@
 @page
 @using Microsoft.AspNetCore.Authorization
-@model Passwordless.AdminConsole.Pages.Organization.Join
+@model Join
 @attribute [AllowAnonymous]
 @{
     ViewBag.Title = "Join an organization";
@@ -30,7 +30,7 @@ else
                 <div>
                     <label asp-for="Form.Email" class="block text-sm font-medium leading-6 text-gray-900">Admin Email</label>
                     <div class="mt-2">
-                        <input placeholder="pjfry@@example.org" type="text" asp-for="Form.Email" class="text-input">
+                        <input placeholder="pjfry@@example.org" type="email" asp-for="Form.Email" class="text-input" readonly>
                         <span asp-validation-for="Form.Email"></span>
                     </div>
                 </div>

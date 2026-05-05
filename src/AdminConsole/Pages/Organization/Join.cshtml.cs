@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.EventLog.Loggers;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.MagicLinks;
@@ -33,30 +34,41 @@ public class Join : PageModel
         _timeProvider = timeProvider;
     }
 
-    public Invite Invite { get; set; }
+    public Invite? Invite { get; set; }
     public JoinForm Form { get; set; }
 
     public async Task<IActionResult> OnGet(string code)
     {
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToPage("JoinBusy", new { code = code });
         }
 
         try
         {
-            Invite = await _invitationService.GetInviteFromRawCodeAsync(code);
+            var invite = await _invitationService.GetInviteFromRawCodeAsync(code);
+
+            if (invite is not null && await _invitationService.RemoveExpiredInviteAsync(invite))
+            {
+                _eventLogger.LogAdminExpiredInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
+                Invite = null;
+            }
+            else
+            {
+                Invite = invite;
+            }
         }
         catch (Exception)
         {
             Invite = null;
         }
-
-        if (Invite == null)
+        
+        if (Invite is null)
         {
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
             return Page();
         }
+        
         // todo: We could add a check if the email is busy here and if so show a message.
 
         Form = new JoinForm { Code = code, Email = Invite.ToEmail };
@@ -77,15 +89,31 @@ public class Join : PageModel
             return Page();
         }
 
-        Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
-        var ok = await _invitationService.ConsumeInviteAsync(invite);
+        var invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
 
-        if (!ok)
+        if (invite is null)
+        {
+            ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
+            return Page();
+        }
+
+        if (invite.IsExpired(_timeProvider))
+        {
+            await _invitationService.RemoveExpiredInviteAsync(invite);
+            _eventLogger.LogAdminExpiredInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
+
+            ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
+            return Page();
+        }
+
+        if (!string.Equals(form.Email, invite.ToEmail, StringComparison.OrdinalIgnoreCase) ||
+            !await _invitationService.ConsumeInviteAsync(invite))
         {
             _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
-        }
-
+            return Page();
+        }             
+        
         ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(form.Email);
 
         if (existingUser == null)

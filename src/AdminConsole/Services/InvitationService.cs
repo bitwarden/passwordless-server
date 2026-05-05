@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Passwordless.AdminConsole.Db;
+using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services.Mail;
 using Passwordless.Common.Extensions;
@@ -12,12 +13,18 @@ public class InvitationService : IInvitationService
     private readonly ConsoleDbContext _db;
     private readonly IMailService _mailService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly TimeProvider _timeProvider;
 
-    public InvitationService(ConsoleDbContext db, IMailService mailService, IHttpContextAccessor httpContextAccessor)
+    public InvitationService(
+        ConsoleDbContext db,
+        IMailService mailService,
+        IHttpContextAccessor httpContextAccessor,
+        TimeProvider timeProvider)
     {
         _db = db;
         _mailService = mailService;
         _httpContextAccessor = httpContextAccessor;
+        _timeProvider = timeProvider;
     }
 
     public async Task SendInviteAsync(string toEmail, int targetOrgId, string targetOrgName, string fromEmail, string fromName)
@@ -38,7 +45,7 @@ public class InvitationService : IInvitationService
         var hashedCode = HashCode(code);
 
         inv.HashedCode = hashedCode;
-        inv.CreatedAt = DateTime.UtcNow;
+        inv.CreatedAt = _timeProvider.GetUtcNow().UtcDateTime;
         inv.ExpireAt = inv.CreatedAt.AddDays(7);
 
         // store
@@ -72,26 +79,33 @@ public class InvitationService : IInvitationService
         await _db.Invites.Where(i => i.HashedCode == inviteToCancel.HashedCode).ExecuteDeleteAsync();
     }
 
-    public async Task<Invite> GetInviteFromRawCodeAsync(string code)
+    public async Task<Invite?> GetInviteFromRawCodeAsync(string code)
     {
         var hashed = HashCode(code);
-        return await _db.Invites.Where(i => i.HashedCode == hashed).FirstOrDefaultAsync();
+        return await _db.Invites
+            .Where(i => i.HashedCode == hashed)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> RemoveExpiredInviteAsync(Invite invite)
+    {
+        if (!invite.IsExpired(_timeProvider))
+        {
+            return false;
+        }
+
+        _db.Invites.Remove(invite);
+        await _db.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> ConsumeInviteAsync(Invite inv)
     {
-        if (inv == null)
+        if (await RemoveExpiredInviteAsync(inv))
         {
             return false;
         }
 
-        // check if expired
-        if (inv.ExpireAt < DateTime.UtcNow)
-        {
-            return false;
-        }
-
-        // delete it
         _db.Invites.Remove(inv);
         await _db.SaveChangesAsync();
 

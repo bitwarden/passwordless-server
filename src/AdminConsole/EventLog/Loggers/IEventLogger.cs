@@ -90,6 +90,21 @@ public static class EventLoggerExtensions
             )
         );
 
+    public static void LogAdminExpiredInviteUsedEvent(
+        this IEventLogger logger,
+        Invite invite,
+        DateTime performedAt) =>
+        logger.LogEvent(
+            new(invite.ToEmail,
+                EventType.AdminExpiredInviteUsed,
+                "Expired invite used.",
+                Severity.Warning,
+                invite.ToEmail,
+                invite.TargetOrgId,
+                performedAt
+            )
+        );
+    
     public static void LogAdminInvalidInviteUsedEvent(
         this IEventLogger logger,
         Invite invite,
@@ -97,7 +112,7 @@ public static class EventLoggerExtensions
         logger.LogEvent(
             new(invite.ToEmail,
                 EventType.AdminInvalidInviteUsed,
-                "Expired invite used.",
+                "Invalid invite used.",
                 Severity.Warning,
                 invite.ToEmail,
                 invite.TargetOrgId,

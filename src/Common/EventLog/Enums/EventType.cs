@@ -46,4 +46,5 @@ public enum EventType
     AdminGenerateSignInTokenEndpointDisabled = 7014,
     AdminMagicLinksEnabled = 7015,
     AdminMagicLinksDisabled = 7016,
+    AdminExpiredInviteUsed = 7017,
 }
