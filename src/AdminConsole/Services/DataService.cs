@@ -39,8 +39,10 @@ public class DataService : IDataService
 
     public async Task UpdateOrganizationSecurityAsync(bool isMagicLinksEnabled)
     {
-        await _db.Organizations.ExecuteUpdateAsync(x => x
-            .SetProperty(p => p.IsMagicLinksEnabled, isMagicLinksEnabled));
+        await _db.Organizations
+            .Where(x => x.Id == _orgId)
+            .ExecuteUpdateAsync(x => x
+                .SetProperty(p => p.IsMagicLinksEnabled, isMagicLinksEnabled));
     }
 
     public async Task<bool> AllowedToCreateApplicationAsync()
