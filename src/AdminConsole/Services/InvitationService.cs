@@ -101,14 +101,11 @@ public class InvitationService : IInvitationService
 
     public async Task<bool> ConsumeInviteAsync(Invite inv)
     {
-        if (await RemoveExpiredInviteAsync(inv))
-        {
-            return false;
-        }
+        var isValid = !inv.IsExpired(_timeProvider);
 
         _db.Invites.Remove(inv);
         await _db.SaveChangesAsync();
 
-        return true;
+        return isValid;
     }
 }

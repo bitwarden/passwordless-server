@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Passwordless.AdminConsole.EventLog.Loggers;
-using Passwordless.AdminConsole.Helpers;
 using Passwordless.AdminConsole.Identity;
 using Passwordless.AdminConsole.Services;
 using Passwordless.AdminConsole.Services.MagicLinks;
@@ -46,17 +45,7 @@ public class Join : PageModel
 
         try
         {
-            var invite = await _invitationService.GetInviteFromRawCodeAsync(code);
-
-            if (invite is not null && await _invitationService.RemoveExpiredInviteAsync(invite))
-            {
-                _eventLogger.LogAdminExpiredInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
-                Invite = null;
-            }
-            else
-            {
-                Invite = invite;
-            }
+            Invite = await _invitationService.GetInviteFromRawCodeAsync(code);
         }
         catch (Exception)
         {
@@ -97,32 +86,22 @@ public class Join : PageModel
             return Page();
         }
 
-        if (invite.IsExpired(_timeProvider))
-        {
-            await _invitationService.RemoveExpiredInviteAsync(invite);
-            _eventLogger.LogAdminExpiredInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
-
-            ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
-            return Page();
-        }
-
-        if (!string.Equals(form.Email, invite.ToEmail, StringComparison.OrdinalIgnoreCase) ||
-            !await _invitationService.ConsumeInviteAsync(invite))
+        if (!await _invitationService.ConsumeInviteAsync(invite))
         {
             _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
             return Page();
         }
 
-        ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(form.Email);
+        ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(invite.ToEmail);
 
         if (existingUser == null)
         {
             // create account
             var user = new ConsoleAdmin
             {
-                UserName = form.Email,
-                Email = form.Email,
+                UserName = invite.ToEmail,
+                Email = invite.ToEmail,
                 OrganizationId = invite.TargetOrgId,
                 Name = form.Name
             };
@@ -136,7 +115,7 @@ public class Join : PageModel
         }
         else
         {
-            await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
+            await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email!);
         }
 
         return Redirect("/Organization/Verify");

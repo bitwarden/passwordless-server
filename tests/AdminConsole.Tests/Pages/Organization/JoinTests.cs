@@ -24,8 +24,10 @@ namespace Passwordless.AdminConsole.Tests.Pages.Organization;
 
 /// <summary>
 /// Regression tests for VULN-548 — exercises the real <see cref="Join"/> page model with the real
-/// <see cref="InvitationService"/> against an in-memory <see cref="ConsoleDbContext"/>. Each scenario
-/// is named after a step in the HackerOne PoC.
+/// <see cref="InvitationService"/> against an in-memory <see cref="ConsoleDbContext"/>. Covers the
+/// invariants the remediation has to hold: expired invites are rejected and removed, the form's
+/// email is never trusted (the invite's <c>ToEmail</c> is authoritative), and replays of a
+/// consumed/removed invite cannot create another admin.
 /// </summary>
 public class JoinTests : IDisposable, IAsyncDisposable
 {
@@ -69,7 +71,7 @@ public class JoinTests : IDisposable, IAsyncDisposable
     }
 
     [Fact]
-    public async Task OnGet_ExpiredInvite_RendersBadInvite_AndDeletesInvite()
+    public async Task OnGet_ExpiredInvite_RendersFormAndLeavesInviteForOnPostToReject()
     {
         var (rawCode, hashedCode) = GenerateCode();
         SeedInvite(hashedCode, "user@example.com", expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(-1));
@@ -78,10 +80,10 @@ public class JoinTests : IDisposable, IAsyncDisposable
         var result = await sut.OnGet(rawCode);
 
         Assert.IsType<PageResult>(result);
-        Assert.True(sut.ModelState.ContainsKey("bad-invite"));
-        Assert.Null(sut.Invite);
-        Assert.Empty(await _dbContext.Invites.AsNoTracking().ToListAsync());
-        _eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<OrganizationEventDto>()), Times.Once);
+        Assert.False(sut.ModelState.ContainsKey("bad-invite"));
+        Assert.NotNull(sut.Invite);
+        Assert.NotEmpty(await _dbContext.Invites.AsNoTracking().ToListAsync());
+        _eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<OrganizationEventDto>()), Times.Never);
     }
 
     [Fact]
@@ -99,10 +101,10 @@ public class JoinTests : IDisposable, IAsyncDisposable
     }
 
     [Fact]
-    public async Task OnPost_LiveInvite_BadInviteEmail_DoesNotCreateAdmin_AndPreservesInvite()
+    public async Task OnPost_LiveInvite_FormEmailIsIgnored_AdminCreatedFromInviteEmail()
     {
         var (rawCode, hashedCode) = GenerateCode();
-        SeedInvite(hashedCode, "otherguy@corp.example", expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(7));
+        SeedInvite(hashedCode, "pjfry@planet.express", targetOrgId: 42, expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(7));
         var sut = CreateJoin();
 
         var result = await sut.OnPost(new Join.JoinForm
@@ -113,26 +115,28 @@ public class JoinTests : IDisposable, IAsyncDisposable
             AcceptsTermsAndPrivacy = true
         });
 
-        Assert.IsType<PageResult>(result);
-        Assert.True(sut.ModelState.ContainsKey("bad-invite"));
-        Assert.Empty(_userManager.CreatedUsers);
-        Assert.Empty(_magicLinkSignInManager.SentEmails);
-        Assert.NotEmpty(await _dbContext.Invites.AsNoTracking().ToListAsync());
-        _eventLoggerMock.Verify(x => x.LogEvent(It.IsAny<OrganizationEventDto>()), Times.Once);
+        var redirect = Assert.IsType<RedirectResult>(result);
+        Assert.Equal("/Organization/Verify", redirect.Url);
+        var created = Assert.Single(_userManager.CreatedUsers);
+        Assert.Equal("pjfry@planet.express", created.Email);
+        Assert.Equal("pjfry@planet.express", created.UserName);
+        Assert.Equal(42, created.OrganizationId);
+        Assert.Equal("pjfry@planet.express", Assert.Single(_magicLinkSignInManager.SentEmails));
+        Assert.Empty(await _dbContext.Invites.AsNoTracking().ToListAsync());
     }
 
     [Fact]
-    public async Task OnPost_ExpiredInvite_AnyEmail_DoesNotCreateAdmin_AndDeletesInvite()
+    public async Task OnPost_ExpiredInvite_DoesNotCreateAdmin_AndDeletesInvite()
     {
         var (rawCode, hashedCode) = GenerateCode();
-        SeedInvite(hashedCode, "otherguy@corp.example", expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(-30));
+        SeedInvite(hashedCode, "pjfry@planet.express", expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(-30));
         var sut = CreateJoin();
 
         var result = await sut.OnPost(new Join.JoinForm
         {
             Code = rawCode,
-            Email = "flexo@other.com",
-            Name = "Flexo",
+            Email = "pjfry@planet.express",
+            Name = "Philip",
             AcceptsTermsAndPrivacy = true
         });
 
@@ -147,14 +151,14 @@ public class JoinTests : IDisposable, IAsyncDisposable
     public async Task OnPost_ExpiredInvite_Replay_FindsNoInvite()
     {
         var (rawCode, hashedCode) = GenerateCode();
-        SeedInvite(hashedCode, "otherguy@corp.example", expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(-30));
+        SeedInvite(hashedCode, "pjfry@planet.express", expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(-30));
         var firstAttempt = CreateJoin();
 
         await firstAttempt.OnPost(new Join.JoinForm
         {
             Code = rawCode,
-            Email = "flexo@other.com",
-            Name = "Flexo",
+            Email = "pjfry@planet.express",
+            Name = "Philip",
             AcceptsTermsAndPrivacy = true
         });
         Assert.Empty(await _dbContext.Invites.AsNoTracking().ToListAsync());
@@ -163,8 +167,8 @@ public class JoinTests : IDisposable, IAsyncDisposable
         var result = await secondAttempt.OnPost(new Join.JoinForm
         {
             Code = rawCode,
-            Email = "roberto@other.com",
-            Name = "Roberto",
+            Email = "pjfry@planet.express",
+            Name = "Philip",
             AcceptsTermsAndPrivacy = true
         });
 
@@ -172,50 +176,6 @@ public class JoinTests : IDisposable, IAsyncDisposable
         Assert.True(secondAttempt.ModelState.ContainsKey("bad-invite"));
         Assert.Empty(_userManager.CreatedUsers);
         Assert.Empty(_magicLinkSignInManager.SentEmails);
-    }
-
-    [Fact]
-    public async Task OnPost_LiveInvite_MatchingEmail_CreatesAdminAndSendsMagicLink()
-    {
-        var (rawCode, hashedCode) = GenerateCode();
-        SeedInvite(hashedCode, "user@example.com", targetOrgId: 42, expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(7));
-        var sut = CreateJoin();
-
-        var result = await sut.OnPost(new Join.JoinForm
-        {
-            Code = rawCode,
-            Email = "user@example.com",
-            Name = "User",
-            AcceptsTermsAndPrivacy = true
-        });
-
-        var redirect = Assert.IsType<RedirectResult>(result);
-        Assert.Equal("/Organization/Verify", redirect.Url);
-        var created = Assert.Single(_userManager.CreatedUsers);
-        Assert.Equal("user@example.com", created.Email);
-        Assert.Equal(42, created.OrganizationId);
-        Assert.Equal("user@example.com", Assert.Single(_magicLinkSignInManager.SentEmails));
-        Assert.Empty(await _dbContext.Invites.AsNoTracking().ToListAsync());
-    }
-
-    [Fact]
-    public async Task OnPost_LiveInvite_MatchingEmail_CaseInsensitive_Succeeds()
-    {
-        var (rawCode, hashedCode) = GenerateCode();
-        SeedInvite(hashedCode, "User@Example.com", targetOrgId: 7, expireAtUtc: _timeProvider.GetUtcNow().UtcDateTime.AddDays(7));
-        var sut = CreateJoin();
-
-        var result = await sut.OnPost(new Join.JoinForm
-        {
-            Code = rawCode,
-            Email = "user@example.com",
-            Name = "User",
-            AcceptsTermsAndPrivacy = true
-        });
-
-        Assert.IsType<RedirectResult>(result);
-        Assert.Single(_userManager.CreatedUsers);
-        Assert.Single(_magicLinkSignInManager.SentEmails);
     }
 
     private Join CreateJoin()
