@@ -15,11 +15,15 @@ public class FakeMagicLinkSignInManager : MagicLinkSignInManager<ConsoleAdmin>
     public const string SuccessToken = "successtoken";
     public const string FailToken = "failtoken";
 
-    public FakeMagicLinkSignInManager()
+    public List<string> SentEmails { get; } = new();
+
+    public FakeMagicLinkSignInManager() : this(new FakeUserManager()) { }
+
+    public FakeMagicLinkSignInManager(UserManager<ConsoleAdmin> userManager)
         : base(
             new Mock<IPasswordlessClient>().Object,
             new Mock<IMagicLinkBuilder>().Object,
-            new FakeUserManager(),
+            userManager,
             new Mock<IHttpContextAccessor>().Object,
             new Mock<IUserClaimsPrincipalFactory<ConsoleAdmin>>().Object,
             new Mock<IOptions<IdentityOptions>>().Object,
@@ -40,5 +44,11 @@ public class FakeMagicLinkSignInManager : MagicLinkSignInManager<ConsoleAdmin>
             default:
                 return SignInResult.Failed;
         }
+    }
+
+    public override Task SendEmailForSignInAsync(string email, string? returnUrl)
+    {
+        SentEmails.Add(email);
+        return Task.CompletedTask;
     }
 }

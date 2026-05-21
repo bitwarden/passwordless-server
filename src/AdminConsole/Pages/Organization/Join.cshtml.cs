@@ -33,12 +33,12 @@ public class Join : PageModel
         _timeProvider = timeProvider;
     }
 
-    public Invite Invite { get; set; }
+    public Invite? Invite { get; set; }
     public JoinForm Form { get; set; }
 
     public async Task<IActionResult> OnGet(string code)
     {
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToPage("JoinBusy", new { code = code });
         }
@@ -52,11 +52,12 @@ public class Join : PageModel
             Invite = null;
         }
 
-        if (Invite == null)
+        if (Invite is null)
         {
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
             return Page();
         }
+
         // todo: We could add a check if the email is busy here and if so show a message.
 
         Form = new JoinForm { Code = code, Email = Invite.ToEmail };
@@ -77,24 +78,30 @@ public class Join : PageModel
             return Page();
         }
 
-        Invite invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
-        var ok = await _invitationService.ConsumeInviteAsync(invite);
+        var invite = await _invitationService.GetInviteFromRawCodeAsync(form.Code);
 
-        if (!ok)
+        if (invite is null)
+        {
+            ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
+            return Page();
+        }
+
+        if (!await _invitationService.ConsumeInviteAsync(invite))
         {
             _eventLogger.LogAdminInvalidInviteUsedEvent(invite, _timeProvider.GetUtcNow().UtcDateTime);
             ModelState.AddModelError("bad-invite", "Invite is invalid or expired");
+            return Page();
         }
 
-        ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(form.Email);
+        ConsoleAdmin? existingUser = await _userManager.FindByEmailAsync(invite.ToEmail);
 
         if (existingUser == null)
         {
             // create account
             var user = new ConsoleAdmin
             {
-                UserName = form.Email,
-                Email = form.Email,
+                UserName = invite.ToEmail,
+                Email = invite.ToEmail,
                 OrganizationId = invite.TargetOrgId,
                 Name = form.Name
             };
@@ -108,7 +115,7 @@ public class Join : PageModel
         }
         else
         {
-            await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email);
+            await _mailService.SendEmailIsAlreadyInUseAsync(existingUser.Email!);
         }
 
         return Redirect("/Organization/Verify");

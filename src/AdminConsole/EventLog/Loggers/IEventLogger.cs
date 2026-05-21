@@ -97,7 +97,7 @@ public static class EventLoggerExtensions
         logger.LogEvent(
             new(invite.ToEmail,
                 EventType.AdminInvalidInviteUsed,
-                "Expired invite used.",
+                "Invalid/expired invite used.",
                 Severity.Warning,
                 invite.ToEmail,
                 invite.TargetOrgId,

@@ -8,6 +8,9 @@ namespace Passwordless.AdminConsole.Tests.DataFactory;
 
 public class FakeUserManager : UserManager<ConsoleAdmin>
 {
+    public List<ConsoleAdmin> CreatedUsers { get; } = new();
+    private readonly Dictionary<string, ConsoleAdmin> _byEmail = new(StringComparer.OrdinalIgnoreCase);
+
     public FakeUserManager()
         : base(new Mock<IUserStore<ConsoleAdmin>>().Object,
             new Mock<IOptions<IdentityOptions>>().Object,
@@ -19,6 +22,19 @@ public class FakeUserManager : UserManager<ConsoleAdmin>
             new Mock<IServiceProvider>().Object,
             new Mock<ILogger<UserManager<ConsoleAdmin>>>().Object)
     { }
+
+    public override Task<ConsoleAdmin?> FindByEmailAsync(string email) =>
+        Task.FromResult(_byEmail.TryGetValue(email, out var u) ? u : null);
+
+    public override Task<IdentityResult> CreateAsync(ConsoleAdmin user)
+    {
+        CreatedUsers.Add(user);
+        if (!string.IsNullOrEmpty(user.Email))
+        {
+            _byEmail[user.Email] = user;
+        }
+        return Task.FromResult(IdentityResult.Success);
+    }
 
     public override Task<IdentityResult> CreateAsync(ConsoleAdmin user, string password)
     {
