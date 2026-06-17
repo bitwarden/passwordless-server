@@ -9,9 +9,6 @@ ARG TARGETPLATFORM
 
 # Determine proper runtime value for .NET
 # We put the value in a file to be read by later layers.
-# NOTE: This is an Alpine (musl libc) image, so the musl RIDs must be used. Otherwise
-# native dependencies such as SQLitePCLRaw's e_sqlite3 are resolved as glibc builds
-# and fail to load at runtime.
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
   RID=linux-musl-x64 ; \
   elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
