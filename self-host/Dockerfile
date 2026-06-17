@@ -9,12 +9,15 @@ ARG TARGETPLATFORM
 
 # Determine proper runtime value for .NET
 # We put the value in a file to be read by later layers.
+# NOTE: This is an Alpine (musl libc) image, so the musl RIDs must be used. Otherwise
+# native dependencies such as SQLitePCLRaw's e_sqlite3 are resolved as glibc builds
+# and fail to load at runtime.
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-  RID=linux-x64 ; \
+  RID=linux-musl-x64 ; \
   elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-  RID=linux-arm64 ; \
+  RID=linux-musl-arm64 ; \
   elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-  RID=linux-arm ; \
+  RID=linux-musl-arm ; \
   fi \
   && echo "RID=$RID" > /tmp/rid.txt
 
@@ -73,9 +76,12 @@ ENV RP_PORT=5701
 
 # Add packages
 RUN apk --no-cache add \
+  bash \
   curl \
+  icu-libs \
   nginx \
   openssl \
+  setpriv \
   supervisor \
   tzdata \
   unzip \
@@ -118,9 +124,9 @@ COPY self-host/hbs/nginx-config.hbs /etc/hbs/
 COPY self-host/hbs/config.yaml /etc/hbs/
 
 # Download hbs tool for generating final configurations
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-x64.zip; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-armv7.zip; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_linux-arm64.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_alpine-x64.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_alpine-armv7.zip; fi
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then curl -L --output hbs.zip https://github.com/bitwarden/Handlebars.conf/releases/download/v1.3.0/hbs_alpine-arm64.zip; fi
 
 # Extract hbs
 RUN unzip hbs.zip -d /usr/local/bin && rm hbs.zip
