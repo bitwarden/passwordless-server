@@ -81,7 +81,7 @@ RUN apk --no-cache add \
   icu-libs \
   nginx \
   openssl \
-  setpriv \
+  su-exec \
   supervisor \
   tzdata \
   unzip \

@@ -147,4 +147,4 @@ chown -R $PUID:$PGID \
     /var/run/nginx \
     /run
 
-exec setpriv --reuid=$PUID --regid=$PGID --init-groups /usr/bin/supervisord
+exec su-exec $PUID:$PGID /usr/bin/supervisord
