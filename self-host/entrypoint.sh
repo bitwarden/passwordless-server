@@ -5,11 +5,11 @@
 
 # Set up user group
 PGID="${PGID:-1000}"
-addgroup --gid $PGID bitwarden
+addgroup -g $PGID bitwarden
 
 # Set up user
 PUID="${PUID:-1000}"
-adduser --no-create-home --shell /bin/bash --disabled-password --uid $PUID --gid $PGID --gecos "" bitwarden
+adduser -H -D -s /bin/bash -u $PUID -G bitwarden -g "" bitwarden
 
 mounted_dir='/etc/bitwarden_passwordless';
 
@@ -123,7 +123,7 @@ if [ "$BWP_ENABLE_SSL" = "true" ] && [ ! -f /etc/bitwarden_passwordless/${BWP_SS
   -out /etc/bitwarden_passwordless/${BWP_SSL_CERT:-ssl.crt} \
   -reqexts SAN \
   -extensions SAN \
-  -config <(cat /usr/lib/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${BWP_DOMAIN}\nbasicConstraints=CA:true")) \
+  -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${BWP_DOMAIN}\nbasicConstraints=CA:true")) \
   -subj "/C=US/ST=California/L=Santa Barbara/O=Bitwarden Inc./OU=Bitwarden Passwordless/CN=${BWP_DOMAIN}"
 fi
 
@@ -147,4 +147,4 @@ chown -R $PUID:$PGID \
     /var/run/nginx \
     /run
 
-exec setpriv --reuid=$PUID --regid=$PGID --init-groups /usr/bin/supervisord
+exec su-exec $PUID:$PGID /usr/bin/supervisord
