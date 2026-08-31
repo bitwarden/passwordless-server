@@ -147,7 +147,7 @@ jobs:
           fail-on-error: true
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
 
   # Publish the apps
   pack:
