@@ -195,7 +195,8 @@ jobs:
           name: ${{ matrix.app }}
           path: src/${{ matrix.app }}/publish/
 
-  # Dispatches a separate deployment workflow in a private repository
+  # Requests deployment by creating a deployment event on bitwarden/deploy, which routes the
+  # task through trigger-actions.yml to deploy-passwordless-server.yml and reports status back
   deploy:
     name: Request Deploy
     if: ${{ github.event_name != 'pull_request' }}
@@ -224,44 +225,11 @@ jobs:
       id-token: write
 
     steps:
-      - name: Log in to Azure
-        uses: bitwarden/gh-actions/azure-login@main
+      - name: Trigger deployment
+        uses: bitwarden/gh-actions/trigger-actions@main
         with:
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-
-      - name: Get Azure Key Vault secrets
-        id: get-kv-secrets
-        uses: bitwarden/gh-actions/get-keyvault-secrets@main
-        with:
-          keyvault: gh-org-bitwarden
-          secrets: "BW-GHAPP-ID,BW-GHAPP-KEY"
-
-      - name: Log out from Azure
-        uses: bitwarden/gh-actions/azure-logout@main
-      
-      - name: Generate GH App token
-        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
-        id: app-token
-        with:
-          app-id: ${{ steps.get-kv-secrets.outputs.BW-GHAPP-ID }}
-          private-key: ${{ steps.get-kv-secrets.outputs.BW-GHAPP-KEY }}
-          owner: bitwarden
-          repositories: passwordless-devops
-          permission-actions: write # for running workflows in other repos
-          permission-contents: read
-
-      - name: Dispatch deployment
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          VERSION: ${{ needs.version.outputs.version }}
-        run: >
-          gh workflow run deploy-passwordless-server.yml
-          --repo bitwarden/passwordless-devops
-          --field repository="${GITHUB_REPOSITORY}"
-          --field run-id="${GITHUB_RUN_ID}"
-          --field api-artifact="Api"
-          --field admin-console-artifact="AdminConsole"
-          --field environment="${{ matrix.environment }}"
-          --field version="${VERSION}"
+          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          task: deploy-passwordless-server
+          data: '{"environment": "${{ matrix.environment }}", "version": "${{ needs.version.outputs.version }}", "api-artifact": "Api", "admin-console-artifact": "AdminConsole"}'
