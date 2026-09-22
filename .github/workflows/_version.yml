@@ -1,0 +1,101 @@
+name: Determine Version
+
+# Single source of the version for every build in this repo. `Directory.Build.props` holds
+# the release version; the `Passwordless Server: Version Bump` workflow in bitwarden/deploy
+# moves it, and `Passwordless Server: Release` cuts the tag from it.
+#
+# - release events  -> the release tag, which must match Directory.Build.props
+# - workflow_dispatch with an override -> the override
+# - everything else -> <props version>-ci-<short sha>, so CI builds are traceable to a commit
+#   and can never be mistaken for a release build
+
+on:
+  workflow_call:
+    inputs:
+      version-override:
+        description: Explicit version to publish instead of the resolved one
+        required: false
+        type: string
+        default: ""
+    outputs:
+      version:
+        description: Version to build and publish
+        value: ${{ jobs.version.outputs.version }}
+      props_version:
+        description: Version currently declared in Directory.Build.props
+        value: ${{ jobs.version.outputs.props_version }}
+
+permissions: {}
+
+jobs:
+  version:
+    name: Determine version
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      props_version: ${{ steps.props.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read version from Directory.Build.props
+        id: props
+        run: |
+          VERSION=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' Directory.Build.props | head -n 1 | tr -d '[:space:]')
+
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::No <Version> element found in Directory.Build.props"
+            exit 1
+          fi
+
+          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid <Version> in Directory.Build.props: $VERSION"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve version
+        id: resolve
+        env:
+          PROPS_VERSION: ${{ steps.props.outputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          VERSION_OVERRIDE: ${{ inputs.version-override }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            # The release workflow cuts the tag from Directory.Build.props, so a mismatch means
+            # the tag was made by hand or the bump never merged -- either way, don't ship it.
+            if [[ "$RELEASE_TAG" != "$PROPS_VERSION" ]]; then
+              echo "::error::Release tag '$RELEASE_TAG' does not match Directory.Build.props version '$PROPS_VERSION'"
+              exit 1
+            fi
+            VERSION="$RELEASE_TAG"
+          elif [[ -n "$VERSION_OVERRIDE" ]]; then
+            if ! [[ $VERSION_OVERRIDE =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z][0-9A-Za-z.-]*)?$ ]]; then
+              echo "::error::Invalid version override: $VERSION_OVERRIDE"
+              exit 1
+            fi
+            if [[ "$VERSION_OVERRIDE" != "$PROPS_VERSION" ]]; then
+              echo "::warning::Version override '$VERSION_OVERRIDE' differs from Directory.Build.props version '$PROPS_VERSION'"
+            fi
+            VERSION="$VERSION_OVERRIDE"
+          else
+            VERSION="${PROPS_VERSION}-ci-${HEAD_SHA:0:7}"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Version | \`$VERSION\` |"
+            echo "| Directory.Build.props | \`$PROPS_VERSION\` |"
+            echo "| Event | \`$EVENT_NAME\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

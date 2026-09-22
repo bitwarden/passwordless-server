@@ -1,0 +1,107 @@
+name: Validate
+
+# Format and test gate, shared by `Main` and `Docker` so that nothing -- App Service package
+# or container image -- can publish from a commit whose tests failed.
+
+on:
+  workflow_call:
+    inputs:
+      report-results:
+        description: Publish the test report check run and upload coverage
+        required: false
+        type: boolean
+        default: true
+
+env:
+  # Setting these variables allows .NET CLI to use rich color codes in console output
+  TERM: xterm
+  DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+  # Skip boilerplate output
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions: {}
+
+jobs:
+  format:
+    name: Validate format
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+
+      - name: Validate format
+        run: dotnet format --verify-no-changes
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-24.04
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+
+      - name: Run restore
+        run: dotnet restore
+
+      - name: Run build
+        run: >
+          dotnet build
+          --no-restore
+          --configuration Release
+
+      - name: Run tests
+        id: tests
+        # Deferred so the report and coverage still publish on failure; `Fail on test failure`
+        # below re-raises it. The reporter only runs for same-repo PRs, so it cannot be the
+        # thing that enforces the gate on push and release builds.
+        continue-on-error: true
+        run: >
+          dotnet test
+          --no-restore
+          --no-build
+          --configuration Release
+          --logger "trx;LogFileName=pw-test-results.trx"
+          --collect:"XPlat Code Coverage"
+          --
+          RunConfiguration.CollectSourceInformation=true
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        env:
+          ASPNETCORE_ENVIRONMENT: Development # For Serilog passthrough
+
+      - name: Report test results
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        if: ${{ inputs.report-results && github.event.pull_request.head.repo.full_name == github.repository && !cancelled() }}
+        with:
+          name: Test Results
+          path: "**/*-test-results.trx"
+          reporter: dotnet-trx
+          fail-on-error: true
+
+      - name: Upload to codecov.io
+        if: ${{ inputs.report-results }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+
+      - name: Fail on test failure
+        if: ${{ steps.tests.outcome == 'failure' }}
+        run: |
+          echo "::error::Tests failed"
+          exit 1
