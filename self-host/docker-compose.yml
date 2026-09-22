@@ -7,7 +7,7 @@ services:
       - db
     env_file:
       - settings.env
-    image: ${REGISTRY:-bitwarden}/passwordless:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/bitwarden}/passwordless-self-host:${TAG:-latest}
     restart: always
     ports:
       - "5701:5701"

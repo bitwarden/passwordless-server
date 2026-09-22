@@ -137,6 +137,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
 
     steps:
       - name: Checkout
@@ -150,34 +151,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Log in to Azure
-        uses: bitwarden/gh-actions/azure-login@main
-        with:
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-
-      - name: Get Azure Key Vault secrets
-        id: get-kv-secrets
-        uses: bitwarden/gh-actions/get-keyvault-secrets@main
-        with:
-          keyvault: gh-org-bitwarden
-          secrets: "DOCKERHUB-OAT"
-
-      - name: Log out from Azure
-        if: ${{ always() }}
-        uses: bitwarden/gh-actions/azure-logout@main
-
-      - name: Log in to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
-          username: bitwarden
-          password: ${{ steps.get-kv-secrets.outputs.DOCKERHUB-OAT }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate image tags
         id: image-tags
         env:
-          IMAGE: docker.io/bitwarden/${{ matrix.name }}
+          IMAGE: ghcr.io/bitwarden/${{ matrix.name }}
           VERSION: ${{ needs.version.outputs.version }}
           EVENT_NAME: ${{ github.event_name }}
           IS_PRERELEASE: ${{ github.event.release.prerelease }}
@@ -225,6 +209,7 @@ jobs:
             echo "org.opencontainers.image.description=${DESCRIPTION}"
             echo "org.opencontainers.image.vendor=Bitwarden Inc."
             echo "org.opencontainers.image.url=https://bitwarden.com/products/passwordless"
+            echo "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}"
             echo "org.opencontainers.image.version=${VERSION}"
             echo "org.opencontainers.image.revision=${REVISION}"
             echo "METADATA_EOF"
@@ -263,6 +248,6 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
-      - name: Log out from Docker Hub
+      - name: Log out from GHCR
         if: ${{ always() }}
-        run: docker logout docker.io
+        run: docker logout ghcr.io

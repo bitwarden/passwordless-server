@@ -17,7 +17,7 @@ services:
 
   passwordless:
     container_name: passwordless
-    image: ghcr.io/passwordless/passwordless-self-host:latest
+    image: ghcr.io/bitwarden/passwordless-self-host:latest
     volumes:
       # change this directory to your own, or use a named volume
       - /your/directory/pwdcache:/etc/bitwarden_passwordless
