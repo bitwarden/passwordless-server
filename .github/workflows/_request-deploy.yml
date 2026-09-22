@@ -1,0 +1,45 @@
+name: Request Deploy
+
+# Requests a deployment by creating a deployment event on bitwarden/deploy, which routes the
+# task through trigger-actions.yml to deploy-passwordless-server.yml and reports status back.
+# The trigger blocks until the deployment reaches a terminal state, so a caller can chain
+# environments with `needs:` to get a real promotion gate.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment (devtest, qa, prod)
+        required: true
+        type: string
+      version:
+        description: Version being deployed
+        required: true
+        type: string
+    secrets:
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_CLIENT_ID:
+        required: true
+
+permissions: {}
+
+jobs:
+  request-deploy:
+    name: Request deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Trigger deployment
+        uses: bitwarden/gh-actions/trigger-actions@main
+        with:
+          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          task: deploy-passwordless-server
+          # Artifact names match the `pack` matrix in main.yml
+          data: '{"environment": "${{ inputs.environment }}", "version": "${{ inputs.version }}", "api-artifact": "Api", "admin-console-artifact": "AdminConsole"}'

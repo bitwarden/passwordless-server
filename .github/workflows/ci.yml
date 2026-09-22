@@ -8,6 +8,10 @@ on:
     branches:
       - main
   release:
+    # `prereleased` fires when a release is published as a pre-release, `released` when one is
+    # published as a full release *or* when an existing pre-release is promoted to a full
+    # release. Together they cover every path exactly once -- `published` would double-fire
+    # alongside `released` when publishing straight to a full release.
     types:
       - prereleased
       - released
@@ -17,14 +21,12 @@ on:
         description: Application version to use when publishing the project
         required: false
 
-env:
-  # Setting these variables allows .NET CLI to use rich color codes in console output
-  TERM: xterm
-  DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
-  # Skip boilerplate output
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  DOTNET_NOLOGO: true
-  DOTNET_CLI_TELEMETRY_OPTOUT: true
+permissions: {}
+
+# Queue, never cancel, outside of PRs: a cancelled run can leave an environment half-deployed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Note that as much as we'd love to avoid repetitive work, splitting the pipeline into separate jobs
 # makes it very difficult to share artifacts between them. Even if we succeed, we'll still end up
@@ -43,111 +45,26 @@ env:
 # - We can set permissions on a more granular (per-job) level, which allows us to expose only a few select
 #   steps to more sensitive access scopes.
 
-permissions: {}
-
 jobs:
-  # Determine version
+  # Resolve the version from Directory.Build.props (see _version.yml)
   version:
     name: Determine version
-    runs-on: ubuntu-24.04
-    permissions: {}
-
-    steps:
-      - name: Determine stable version
-        id: stable-version
-        if: ${{ inputs.version || github.event_name == 'release' }}
-        env:
-          VERSION: ${{ inputs.version || github.event.release.tag_name }}
-        run: |
-          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
-              echo "Invalid version: $VERSION"
-              exit 1
-          fi
-
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Determine prerelease version
-        id: pre-version
-        run: |
-          hash="${{ github.event.pull_request.head.sha || github.sha }}"
-          echo "version=0.0.0-ci-${hash:0:7}" >> "$GITHUB_OUTPUT"
-
-    outputs:
-      version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
-
-  # Check formatting
-  format:
-    name: Validate format
-    runs-on: ubuntu-24.04
+    uses: ./.github/workflows/_version.yml
     permissions:
       contents: read
+    with:
+      version-override: ${{ inputs.version || '' }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-
-      - name: Install .NET
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
-
-      - name: Validate format
-        run: dotnet format --verify-no-changes
-
-  # Run tests
-  test:
-    name: Run tests
-    runs-on: ubuntu-24.04
+  # Format and test gate (see _test.yml)
+  validate:
+    name: Validate
+    uses: ./.github/workflows/_test.yml
     permissions:
       checks: write
       contents: read
       pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-
-      - name: Install .NET
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
-
-      - name: Run restore
-        run: dotnet restore
-
-      - name: Run build
-        run: >
-          dotnet build
-          --no-restore
-          --configuration Release
-
-      - name: Run tests
-        # The next step will fail if any tests fail, but we still want to publish the results
-        continue-on-error: true
-        run: >
-          dotnet test
-          --no-restore
-          --no-build
-          --configuration Release
-          --logger "trx;LogFileName=pw-test-results.trx"
-          --collect:"XPlat Code Coverage"
-          --
-          RunConfiguration.CollectSourceInformation=true
-          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-        env:
-          ASPNETCORE_ENVIRONMENT: Development # For Serilog passthrough
-
-      - name: Report test results
-        uses: dorny/test-reporter@df6247429542221bc30d46a036ee47af1102c451 # v2.7.0
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository && !cancelled() }}
-        with:
-          name: Test Results
-          path: "**/*-test-results.trx"
-          reporter: dotnet-trx
-          fail-on-error: true
-
-      - name: Upload to codecov.io
-        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+    with:
+      report-results: true
 
   # Publish the apps
   pack:
@@ -166,70 +83,88 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Install .NET
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
 
       - name: Install NodeJS
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: lts/*
 
       - name: Publish app
         env:
           VERSION: ${{ needs.version.outputs.version }}
+          APP: ${{ matrix.app }}
         run: >
-          dotnet publish "src/${{ matrix.app }}/"
+          dotnet publish "src/${APP}/"
           -p:Version="${VERSION}"
           --configuration Release
           --runtime win-x86
           --no-self-contained
-          --output "src/${{ matrix.app }}/publish/"
+          --output "src/${APP}/publish/"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.app }}
           path: src/${{ matrix.app }}/publish/
 
-  # Requests deployment by creating a deployment event on bitwarden/deploy, which routes the
-  # task through trigger-actions.yml to deploy-passwordless-server.yml and reports status back
-  deploy:
-    name: Request Deploy
+  # Environments promote in order: devtest on every merge, qa on any release, prod only once
+  # qa has deployed successfully. `trigger-actions` blocks until each deployment is terminal,
+  # so `needs` is a real gate rather than just an ordering hint.
+  deploy-devtest:
+    name: Deploy to devtest
     if: ${{ github.event_name != 'pull_request' }}
-
     needs:
       - version
-      - format
-      - test
+      - validate
       - pack
-
-    strategy:
-      matrix:
-        environment:
-          - devtest
-          - qa
-          - prod
-        exclude:
-          # Deploy to QA on pre-releases and stable releases
-          - environment: ${{ !(github.event_name == 'release') && 'qa' }}
-          # Deploy to PROD on stable release only
-          - environment: ${{ !(github.event_name == 'release' && github.event.action == 'released') && 'prod' }}
-          # Deploy to DEVTEST every time
-
-    runs-on: ubuntu-24.04
+    uses: ./.github/workflows/_request-deploy.yml
     permissions:
       id-token: write
+    secrets:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+    with:
+      environment: devtest
+      version: ${{ needs.version.outputs.version }}
 
-    steps:
-      - name: Trigger deployment
-        uses: bitwarden/gh-actions/trigger-actions@main
-        with:
-          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
-          task: deploy-passwordless-server
-          data: '{"environment": "${{ matrix.environment }}", "version": "${{ needs.version.outputs.version }}", "api-artifact": "Api", "admin-console-artifact": "AdminConsole"}'
+  deploy-qa:
+    name: Deploy to QA
+    if: ${{ github.event_name == 'release' }}
+    needs:
+      - version
+      - validate
+      - pack
+    uses: ./.github/workflows/_request-deploy.yml
+    permissions:
+      id-token: write
+    secrets:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+    with:
+      environment: qa
+      version: ${{ needs.version.outputs.version }}
+
+  deploy-prod:
+    name: Deploy to production
+    if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
+    needs:
+      - version
+      - deploy-qa
+    uses: ./.github/workflows/_request-deploy.yml
+    permissions:
+      id-token: write
+    secrets:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+    with:
+      environment: prod
+      version: ${{ needs.version.outputs.version }}
