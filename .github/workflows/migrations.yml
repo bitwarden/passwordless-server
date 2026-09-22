@@ -8,8 +8,11 @@ on:
     branches:
       - main
   release:
+    # Kept in sync with main.yml and docker.yml so the scripts are regenerated on every
+    # release path, including promoting an existing pre-release to a full release.
     types:
-      - published
+      - prereleased
+      - released
   workflow_dispatch:
 
 env:
@@ -20,6 +23,12 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   script:
@@ -41,27 +50,32 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: Install .NET
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
 
       - name: Install Entity Framework toolkit
         run: dotnet tool install dotnet-ef --global
 
       - name: Restore
-        run: dotnet restore src/${{ matrix.app }}
+        env:
+          APP: ${{ matrix.app }}
+        run: dotnet restore "src/${APP}"
 
       - name: Generate script
+        env:
+          APP: ${{ matrix.app }}
+          EF_CONTEXT: ${{ matrix.ef-context }}
         run: >
           dotnet ef migrations script
           --configuration Release
-          --project src/${{ matrix.app }}
-          --context ${{ matrix.ef-context }}
+          --project "src/${APP}"
+          --context "${EF_CONTEXT}"
           --idempotent
-          --output ${{ matrix.app }}.sql
+          --output "${APP}.sql"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -70,10 +84,13 @@ jobs:
           path: ${{ matrix.app }}.sql
 
       - name: Produce summary
+        env:
+          APP: ${{ matrix.app }}
+          EF_CONTEXT: ${{ matrix.ef-context }}
         run: |
           {
-            echo "### Idempotent migrations for ${{ matrix.app }} (${{ matrix.ef-context }})" 
+            echo "### Idempotent migrations for ${APP} (${EF_CONTEXT})"
             echo "\`\`\`sql"
-            cat ${{ matrix.app }}.sql
+            cat "${APP}.sql"
             echo "\`\`\`"
           } >> "$GITHUB_STEP_SUMMARY"

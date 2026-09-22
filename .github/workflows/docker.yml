@@ -8,8 +8,12 @@ on:
     branches:
       - main
   release:
+    # Must stay in sync with main.yml -- `prereleased` covers publishing as a pre-release,
+    # `released` covers publishing as a full release and promoting an existing pre-release.
+    # Using `published` here meant a promoted pre-release never re-tagged `latest`/`stable`.
     types:
-      - published
+      - prereleased
+      - released
   workflow_dispatch:
     inputs:
       version:
@@ -19,40 +23,41 @@ on:
         description: Additional Docker image tag to apply on deployment
         required: false
 
+permissions: {}
+
+# Queue, never cancel, outside of PRs: a cancelled run can leave a tag pointing at a
+# half-pushed manifest
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  # Determine version
+  # Resolve the version from Directory.Build.props (see _version.yml)
   version:
     name: Determine version
-    runs-on: ubuntu-24.04
+    uses: ./.github/workflows/_version.yml
     permissions:
       contents: read
+    with:
+      version-override: ${{ inputs.version || '' }}
 
-    steps:
-      - name: Determine stable version
-        id: stable-version
-        if: ${{ inputs.version || github.event_name == 'release' }}
-        env:
-          VERSION: ${{ inputs.version || github.event.release.tag_name }}
-        run: |
-          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z].*)?$ ]]; then
-              echo "Invalid version: $VERSION"
-              exit 1
-          fi
+  # Format and test gate. Only on the publishing paths -- `Main` already runs this on PRs, and
+  # the report check run cannot be published twice for the same commit.
+  validate:
+    name: Validate
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/_test.yml
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+    with:
+      report-results: false
 
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Determine prerelease version
-        id: pre-version
-        run: |
-          hash="${{ github.event.pull_request.head.sha || github.sha }}"
-          echo "version=0.0.0-ci-${hash:0:7}" >> "$GITHUB_OUTPUT"
-
-    outputs:
-      version: ${{ steps.stable-version.outputs.version || steps.pre-version.outputs.version }}
-
-  # Build the image without deploying just to make sure the dockerfile is valid
+  # Build the image without pushing just to make sure the dockerfile is valid
   pack:
     name: Build image
+    if: ${{ github.event_name == 'pull_request' }}
     needs: version
 
     strategy:
@@ -75,30 +80,37 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
-      - name: Install Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - name: Set up QEMU emulators
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Build image
         env:
           VERSION: ${{ needs.version.outputs.version }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
         run: >
           docker buildx build .
-          --file ${{ matrix.dockerfile }}
+          --file "${DOCKERFILE}"
           --platform linux/amd64,linux/arm64
           --build-arg VERSION="${VERSION}"
           --output type=tar,dest=image.tar
 
-  # Build and deploy the image
+  # Build, push and sign the image
   deploy:
     name: Deploy image
     if: ${{ github.event_name != 'pull_request' }}
-    needs: version
+    needs:
+      - version
+      - validate
 
     strategy:
+      fail-fast: false
       matrix:
         app:
           - Api
@@ -108,27 +120,35 @@ jobs:
           - app: Api
             dockerfile: Api.dockerfile
             name: passwordless-test-api
+            title: Passwordless.dev API
+            description: Bitwarden Passwordless.dev API
           #- app: AdminConsole
           #  dockerfile: AdminConsole.dockerfile
-          #  repository: passwordless-test-admin-console
+          #  name: passwordless-test-admin-console
+          #  title: Passwordless.dev Admin Console
+          #  description: Bitwarden Passwordless.dev Admin Console
           - app: Self-Host
             dockerfile: self-host/Dockerfile
             name: passwordless-self-host
+            title: Passwordless.dev Self-Host
+            description: Bitwarden Passwordless.dev self-hosted server
 
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-      packages: write
       id-token: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
-      - name: Install Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - name: Set up QEMU emulators
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Log in to Azure
         uses: bitwarden/gh-actions/azure-login@main
@@ -137,59 +157,112 @@ jobs:
           tenant_id: ${{ secrets.AZURE_TENANT_ID }}
           client_id: ${{ secrets.AZURE_CLIENT_ID }}
 
-      - name: Setup Docker Content Trust
-        id: setup-dct
-        uses: bitwarden/gh-actions/setup-docker-trust@main
+      - name: Get Azure Key Vault secrets
+        id: get-kv-secrets
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
         with:
-          azure-keyvault-name: "bitwarden-ci"
+          keyvault: gh-org-bitwarden
+          secrets: "DOCKERHUB-OAT"
 
       - name: Log out from Azure
+        if: ${{ always() }}
         uses: bitwarden/gh-actions/azure-logout@main
 
-      - name: Build & push image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: bitwarden
+          password: ${{ steps.get-kv-secrets.outputs.DOCKERHUB-OAT }}
+
+      - name: Generate image tags
+        id: image-tags
         env:
-          _DOCKER_CONTAINER_NAMESPACE: bitwarden
-          _DOCKER_CONTENT_TRUST: 1
-          _DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ steps.setup-dct.outputs.dct-delegate-repo-passphrase }}
-          _VERSION: ${{ needs.version.outputs.version }}
-          _DOCKERFILE: ${{ matrix.dockerfile }}
-          _IMAGE_NAME: ${{ matrix.name }}
-          _EVENT_NAME: ${{ github.event_name }}
-          _IS_PRERELEASE: ${{ github.event.release.prerelease }}
-          _REF_NAME: ${{ github.ref_name }}
-          _INPUT_TAG: ${{ inputs.image-tag }}
+          IMAGE: docker.io/bitwarden/${{ matrix.name }}
+          VERSION: ${{ needs.version.outputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.image-tag }}
         run: |
           set -euo pipefail
 
-          args=(
-            --file "$_DOCKERFILE"
-            --platform "linux/amd64,linux/arm64"
-            --build-arg "VERSION=$_VERSION"
-            --push
-            "$PWD"
-          )
-
           # Always tag with dev
-          args+=( --tag "$_DOCKER_CONTAINER_NAMESPACE/$_IMAGE_NAME:dev" )
+          tags=("$IMAGE:dev")
 
-          if [[ "$_EVENT_NAME" == "release" ]]; then
-            args+=( --tag "$_DOCKER_CONTAINER_NAMESPACE/$_IMAGE_NAME:qa" )
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            tags+=("$IMAGE:qa")
 
-            if [[ "$_IS_PRERELEASE" != "true" ]]; then
-              args+=( --tag "$_DOCKER_CONTAINER_NAMESPACE/$_IMAGE_NAME:latest" )
-              args+=( --tag "$_DOCKER_CONTAINER_NAMESPACE/$_IMAGE_NAME:stable" )
+            if [[ "$IS_PRERELEASE" != "true" ]]; then
+              tags+=("$IMAGE:latest")
+              tags+=("$IMAGE:stable")
             fi
 
-            args+=( --tag "$_DOCKER_CONTAINER_NAMESPACE/$_IMAGE_NAME:$_REF_NAME" )
+            tags+=("$IMAGE:$REF_NAME")
           fi
 
-          if [[ -n "${_INPUT_TAG:-}" ]]; then
-            args+=( --tag "$_DOCKER_CONTAINER_NAMESPACE/$_IMAGE_NAME:$_INPUT_TAG" )
+          if [[ -n "${INPUT_TAG:-}" ]]; then
+            tags+=("$IMAGE:$INPUT_TAG")
           fi
 
-          docker buildx build "${args[@]}"
-          
-      - name: Log out of Docker and disable Docker Notary
+          {
+            echo "image=$IMAGE"
+            echo "tags=$(IFS=,; echo "${tags[*]}")"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Tagging $IMAGE with: ${tags[*]}"
+
+      - name: Build custom image metadata
+        id: custom-meta
+        env:
+          PROJECT_TITLE: ${{ matrix.title }}
+          DESCRIPTION: ${{ matrix.description }}
+          VERSION: ${{ needs.version.outputs.version }}
+          REVISION: ${{ github.sha }}
         run: |
-          docker logout
-          echo "DOCKER_CONTENT_TRUST=0" >> "$GITHUB_ENV"
+          {
+            echo "items<<METADATA_EOF"
+            echo "org.opencontainers.image.title=Bitwarden ${PROJECT_TITLE}"
+            echo "org.opencontainers.image.description=${DESCRIPTION}"
+            echo "org.opencontainers.image.vendor=Bitwarden Inc."
+            echo "org.opencontainers.image.url=https://bitwarden.com/products/passwordless"
+            echo "org.opencontainers.image.version=${VERSION}"
+            echo "org.opencontainers.image.revision=${REVISION}"
+            echo "METADATA_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Generate image metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index,manifest
+        with:
+          labels: ${{ steps.custom-meta.outputs.items }}
+          annotations: ${{ steps.custom-meta.outputs.items }}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ needs.version.outputs.version }}
+          push: true
+          tags: ${{ steps.image-tags.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+
+      # Replaces Docker Content Trust (Notary v1), which is retired. Keyless signatures are
+      # attributable to this workflow and verifiable with `cosign verify`.
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign image with Cosign
+        env:
+          IMAGE: ${{ steps.image-tags.outputs.image }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: cosign sign --yes "${IMAGE}@${DIGEST}"
+
+      - name: Log out from Docker Hub
+        if: ${{ always() }}
+        run: docker logout docker.io

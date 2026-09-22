@@ -1,5 +1,12 @@
 <Project>
   <PropertyGroup>
+    <!-- Source of truth for the release version. Bumped by the
+         `Passwordless Server: Version Bump` workflow in bitwarden/deploy, and read by
+         `Passwordless Server: Release` to cut the tag. Do not edit by hand. -->
+    <Version>1.0.101</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace Condition="$(RootNamespace) == ''">Passwordless.$(MSBuildProjectName)</RootNamespace>
     <AssemblyName Condition="$(AssemblyName) == ''">Passwordless.$(MSBuildProjectName)</AssemblyName>
