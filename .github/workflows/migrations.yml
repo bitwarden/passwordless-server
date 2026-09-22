@@ -9,8 +9,9 @@ on:
       - main
   release:
     # Kept in sync with ci.yml and docker.yml so the scripts are regenerated on every release
-    # path: `published` for a draft published as a pre-release (`prereleased` does not fire for
-    # draft publishes) and `released` for a full release or a pre-release promotion.
+    # path: `published` for a draft being published (`prereleased` does not fire for draft
+    # publishes) and `released` for promoting an existing pre-release. Publishing a full
+    # release emits both, so the guard below drops the `published` half.
     types:
       - published
       - released
@@ -34,8 +35,8 @@ concurrency:
 jobs:
   script:
     name: Generate idempotent migrations
-    # Drops the duplicate `published` run on the draft -> full release path, where
-    # `released` fires alongside it and is the type that carries the production steps.
+    # A full release publish emits both `published` and `released`; skipping the `published`
+    # half keeps every release transition resolving to exactly one executing run.
     if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     strategy:
       matrix:

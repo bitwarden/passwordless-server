@@ -8,11 +8,10 @@ on:
     branches:
       - main
   release:
-    # `published` is what fires when a draft release is published as a pre-release --
-    # `prereleased` does NOT fire for draft publishes, which is why 1.0.102 built nothing.
-    # `released` fires when a draft is published as a full release and when an existing
-    # pre-release is promoted. The two overlap only on the draft -> full release path, where
-    # the guard on `version` and `validate` below drops the duplicate `published` run.
+    # `published` covers publishing a draft; `prereleased` does not fire for draft publishes.
+    # `released` covers promoting an existing pre-release, which is not a publish. Publishing a
+    # full release emits both, so the guard on `version` and `validate` drops the `published`
+    # half and leaves the `released` run as the only one that reaches production.
     types:
       - published
       - released
@@ -50,8 +49,8 @@ jobs:
   # Resolve the version from Directory.Build.props (see _version.yml)
   version:
     name: Determine version
-    # Drops the duplicate `published` run on the draft -> full release path, where
-    # `released` fires alongside it and is the type that carries the production steps.
+    # A full release publish emits both `published` and `released`; skipping the `published`
+    # half keeps every release transition resolving to exactly one executing run.
     if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_version.yml
     permissions:
@@ -62,8 +61,8 @@ jobs:
   # Format and test gate (see _test.yml)
   validate:
     name: Validate
-    # Drops the duplicate `published` run on the draft -> full release path, where
-    # `released` fires alongside it and is the type that carries the production steps.
+    # A full release publish emits both `published` and `released`; skipping the `published`
+    # half keeps every release transition resolving to exactly one executing run.
     if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_test.yml
     permissions:
@@ -161,6 +160,8 @@ jobs:
 
   deploy-prod:
     name: Deploy to production
+    # `released` is the only type that marks a release as full, and the guard on `version`
+    # ensures it is the only run that reaches here when a full release is published.
     if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
     needs:
       - version
