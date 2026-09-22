@@ -8,11 +8,10 @@ on:
     branches:
       - main
   release:
-    # `published` is what fires when a draft release is published as a pre-release --
-    # `prereleased` does NOT fire for draft publishes, which is why 1.0.102 built nothing.
-    # `released` fires when a draft is published as a full release and when an existing
-    # pre-release is promoted. The two overlap only on the draft -> full release path, where
-    # the guard on `version` and `validate` below drops the duplicate `published` run.
+    # `published` covers publishing a draft; `prereleased` does not fire for draft publishes.
+    # `released` covers promoting an existing pre-release, which is not a publish. Job
+    # conditions key off `github.event.release.prerelease` rather than the action, so the
+    # right environments deploy whichever type a given transition emits.
     types:
       - published
       - released
@@ -50,9 +49,6 @@ jobs:
   # Resolve the version from Directory.Build.props (see _version.yml)
   version:
     name: Determine version
-    # Drops the duplicate `published` run on the draft -> full release path, where
-    # `released` fires alongside it and is the type that carries the production steps.
-    if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_version.yml
     permissions:
       contents: read
@@ -62,9 +58,6 @@ jobs:
   # Format and test gate (see _test.yml)
   validate:
     name: Validate
-    # Drops the duplicate `published` run on the draft -> full release path, where
-    # `released` fires alongside it and is the type that carries the production steps.
-    if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_test.yml
     permissions:
       checks: write
@@ -161,7 +154,9 @@ jobs:
 
   deploy-prod:
     name: Deploy to production
-    if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
+    # Keyed on the release's own state, not the event action: a draft published straight to a
+    # full release may only emit `published`, while promotion only emits `released`.
+    if: ${{ github.event_name == 'release' && github.event.release.prerelease == false }}
     needs:
       - version
       - deploy-qa

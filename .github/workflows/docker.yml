@@ -8,9 +8,10 @@ on:
     branches:
       - main
   release:
-    # Must stay in sync with ci.yml -- `published` covers publishing a draft as a pre-release
-    # (`prereleased` does not fire for draft publishes), `released` covers publishing a draft
-    # as a full release and promoting an existing pre-release so `latest`/`stable` re-tag.
+    # Must stay in sync with ci.yml -- `published` covers publishing a draft (`prereleased`
+    # does not fire for draft publishes), `released` covers promoting an existing pre-release.
+    # The tag logic below keys off `github.event.release.prerelease` rather than the action,
+    # so `latest`/`stable` land on either path.
     types:
       - published
       - released
@@ -35,9 +36,6 @@ jobs:
   # Resolve the version from Directory.Build.props (see _version.yml)
   version:
     name: Determine version
-    # Drops the duplicate `published` run on the draft -> full release path, where
-    # `released` fires alongside it and is the type that carries the production steps.
-    if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_version.yml
     permissions:
       contents: read
@@ -48,8 +46,7 @@ jobs:
   # the report check run cannot be published twice for the same commit.
   validate:
     name: Validate
-    # Second clause drops the duplicate `published` run on the draft -> full release path
-    if: ${{ github.event_name != 'pull_request' && !(github.event.action == 'published' && github.event.release.prerelease == false) }}
+    if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/_test.yml
     permissions:
       checks: write
