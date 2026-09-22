@@ -3,7 +3,7 @@
     <!-- Source of truth for the release version. Bumped by the
          `Passwordless Server: Version Bump` workflow in bitwarden/deploy, and read by
          `Passwordless Server: Release` to cut the tag. Do not edit by hand. -->
-    <Version>1.0.101</Version>
+    <Version>1.0.102</Version>
   </PropertyGroup>
 
   <PropertyGroup>
