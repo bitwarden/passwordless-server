@@ -41,5 +41,5 @@ jobs:
           azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
           task: deploy-passwordless-server
-          # Artifact names match the `pack` matrix in main.yml
+          # Artifact names match the `pack` matrix in ci.yml
           data: '{"environment": "${{ inputs.environment }}", "version": "${{ inputs.version }}", "api-artifact": "Api", "admin-console-artifact": "AdminConsole"}'

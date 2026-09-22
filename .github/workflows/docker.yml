@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    # Must stay in sync with main.yml -- `prereleased` covers publishing as a pre-release,
+    # Must stay in sync with ci.yml -- `prereleased` covers publishing as a pre-release,
     # `released` covers publishing as a full release and promoting an existing pre-release.
     # Using `published` here meant a promoted pre-release never re-tagged `latest`/`stable`.
     types:
@@ -41,7 +41,7 @@ jobs:
     with:
       version-override: ${{ inputs.version || '' }}
 
-  # Format and test gate. Only on the publishing paths -- `Main` already runs this on PRs, and
+  # Format and test gate. Only on the publishing paths -- `CI` already runs this on PRs, and
   # the report check run cannot be published twice for the same commit.
   validate:
     name: Validate
