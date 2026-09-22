@@ -9,9 +9,9 @@ on:
       - main
   release:
     # `published` covers publishing a draft; `prereleased` does not fire for draft publishes.
-    # `released` covers promoting an existing pre-release, which is not a publish. Job
-    # conditions key off `github.event.release.prerelease` rather than the action, so the
-    # right environments deploy whichever type a given transition emits.
+    # `released` covers promoting an existing pre-release, which is not a publish. Publishing a
+    # full release emits both, so the guard on `version` and `validate` drops the `published`
+    # half and leaves the `released` run as the only one that reaches production.
     types:
       - published
       - released
@@ -49,6 +49,9 @@ jobs:
   # Resolve the version from Directory.Build.props (see _version.yml)
   version:
     name: Determine version
+    # A full release publish emits both `published` and `released`; skipping the `published`
+    # half keeps every release transition resolving to exactly one executing run.
+    if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_version.yml
     permissions:
       contents: read
@@ -58,6 +61,9 @@ jobs:
   # Format and test gate (see _test.yml)
   validate:
     name: Validate
+    # A full release publish emits both `published` and `released`; skipping the `published`
+    # half keeps every release transition resolving to exactly one executing run.
+    if: ${{ !(github.event.action == 'published' && github.event.release.prerelease == false) }}
     uses: ./.github/workflows/_test.yml
     permissions:
       checks: write
@@ -154,9 +160,9 @@ jobs:
 
   deploy-prod:
     name: Deploy to production
-    # Keyed on the release's own state, not the event action: a draft published straight to a
-    # full release may only emit `published`, while promotion only emits `released`.
-    if: ${{ github.event_name == 'release' && github.event.release.prerelease == false }}
+    # `released` is the only type that marks a release as full, and the guard on `version`
+    # ensures it is the only run that reaches here when a full release is published.
+    if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
     needs:
       - version
       - deploy-qa
