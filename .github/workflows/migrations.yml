@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    # Kept in sync with main.yml and docker.yml so the scripts are regenerated on every
+    # Kept in sync with ci.yml and docker.yml so the scripts are regenerated on every
     # release path, including promoting an existing pre-release to a full release.
     types:
       - prereleased

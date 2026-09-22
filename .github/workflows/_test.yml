@@ -1,6 +1,6 @@
 name: Validate
 
-# Format and test gate, shared by `Main` and `Docker` so that nothing -- App Service package
+# Format and test gate, shared by `CI` and `Docker` so that nothing -- App Service package
 # or container image -- can publish from a commit whose tests failed.
 
 on:
