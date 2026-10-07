@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+
   </PropertyGroup>
 
   <ItemGroup>
