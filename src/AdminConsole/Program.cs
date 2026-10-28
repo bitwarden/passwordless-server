@@ -127,6 +127,7 @@ async Task RunAppAsync()
     services.AddTransient<MagicLinkSignInManager<ConsoleAdmin>>();
 
     services.AddScoped<IAdminService, AdminService>();
+    services.AddScoped<ICreatedSecretKeyStore, CreatedSecretKeyStore>();
 
     // Setup mail service & provider
     builder.AddMail();
