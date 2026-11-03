@@ -20,9 +20,6 @@ on:
       version:
         description: Application version to use when publishing the project
         required: false
-      image-tag:
-        description: Additional Docker image tag to apply on deployment
-        required: false
 
 permissions: {}
 
@@ -163,71 +160,27 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate image tags
-        id: image-tags
-        env:
-          IMAGE: ghcr.io/bitwarden/${{ matrix.name }}
-          VERSION: ${{ needs.version.outputs.version }}
-          EVENT_NAME: ${{ github.event_name }}
-          IS_PRERELEASE: ${{ github.event.release.prerelease }}
-          REF_NAME: ${{ github.ref_name }}
-          INPUT_TAG: ${{ inputs.image-tag }}
-        run: |
-          set -euo pipefail
-
-          # Always tag with dev
-          tags=("$IMAGE:dev")
-
-          if [[ "$EVENT_NAME" == "release" ]]; then
-            tags+=("$IMAGE:qa")
-
-            if [[ "$IS_PRERELEASE" != "true" ]]; then
-              tags+=("$IMAGE:latest")
-              tags+=("$IMAGE:stable")
-            fi
-
-            tags+=("$IMAGE:$REF_NAME")
-          fi
-
-          if [[ -n "${INPUT_TAG:-}" ]]; then
-            tags+=("$IMAGE:$INPUT_TAG")
-          fi
-
-          {
-            echo "image=$IMAGE"
-            echo "tags=$(IFS=,; echo "${tags[*]}")"
-          } >> "$GITHUB_OUTPUT"
-
-          echo "Tagging $IMAGE with: ${tags[*]}"
-
-      - name: Build custom image metadata
-        id: custom-meta
-        env:
-          PROJECT_TITLE: ${{ matrix.title }}
-          DESCRIPTION: ${{ matrix.description }}
-          VERSION: ${{ needs.version.outputs.version }}
-          REVISION: ${{ github.sha }}
-        run: |
-          {
-            echo "items<<METADATA_EOF"
-            echo "org.opencontainers.image.title=Bitwarden ${PROJECT_TITLE}"
-            echo "org.opencontainers.image.description=${DESCRIPTION}"
-            echo "org.opencontainers.image.vendor=Bitwarden Inc."
-            echo "org.opencontainers.image.url=https://bitwarden.com/products/passwordless"
-            echo "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}"
-            echo "org.opencontainers.image.version=${VERSION}"
-            echo "org.opencontainers.image.revision=${REVISION}"
-            echo "METADATA_EOF"
-          } >> "$GITHUB_OUTPUT"
-
+      # Each moving tag tracks the environment its ci.yml deploy job targets, under the same
+      # condition: dev -> devtest (every run), qa -> qa (any release), stable/latest -> prod
+      # (`released` only). The version tag comes from the release's git tag, and only on release
+      # events so a manual run from a tag ref cannot overwrite a release image. The multi-platform
+      # build publishes an image index, so annotations go on both levels.
       - name: Generate image metadata
         id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: index,manifest
+        uses: bitwarden/gh-actions/container-image-metadata@main
         with:
-          labels: ${{ steps.custom-meta.outputs.items }}
-          annotations: ${{ steps.custom-meta.outputs.items }}
+          images: ghcr.io/bitwarden/${{ matrix.name }}
+          flavor: latest=${{ github.event.action == 'released' }}
+          tags: |
+            type=raw,value=dev
+            type=raw,value=qa,enable=${{ github.event_name == 'release' }}
+            type=raw,value=stable,enable=${{ github.event.action == 'released' }}
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+          title: Bitwarden ${{ matrix.title }}
+          version: ${{ needs.version.outputs.version }}
+          description: ${{ matrix.description }}
+          url: https://bitwarden.com/products/passwordless
+          annotation-levels: index,manifest
 
       - name: Build and push image
         id: build
@@ -238,7 +191,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: VERSION=${{ needs.version.outputs.version }}
           push: true
-          tags: ${{ steps.image-tags.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
 
@@ -249,7 +202,7 @@ jobs:
 
       - name: Sign image with Cosign
         env:
-          IMAGE: ${{ steps.image-tags.outputs.image }}
+          IMAGE: ghcr.io/bitwarden/${{ matrix.name }}
           DIGEST: ${{ steps.build.outputs.digest }}
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
