@@ -71,6 +71,11 @@ public class CreateApplicationModel : PageModel
     {
         await InitializeAsync();
 
+        if (!IsPlanAllowed(form.Plan))
+        {
+            ModelState.AddModelError("Plan", "The selected plan is not available for your organization.");
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -161,6 +166,20 @@ public class CreateApplicationModel : PageModel
             AvailablePlans.Add(new AvailablePlan(_billingOptions.Store.Pro, _billingOptions.Plans[_billingOptions.Store.Pro].Ui.Label));
             AvailablePlans.Add(new AvailablePlan(_billingOptions.Store.Enterprise, _billingOptions.Plans[_billingOptions.Store.Enterprise].Ui.Label));
         }
+    }
+
+    /// <summary>
+    /// Subscribed organizations may only pick one of the offered paid plans, and organizations without a subscription
+    /// may only use the free plan.
+    /// </summary>
+    private bool IsPlanAllowed(string plan)
+    {
+        if (Organization.HasSubscription)
+        {
+            return AvailablePlans.Any(x => x.Id == plan);
+        }
+
+        return plan == _billingOptions.Store.Free;
     }
 
     public class CreateApplicationForm
