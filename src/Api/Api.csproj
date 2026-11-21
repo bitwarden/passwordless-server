@@ -3,6 +3,7 @@
   <PropertyGroup>
     <UserSecretsId>passwordless-api</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>
